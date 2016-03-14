@@ -208,7 +208,7 @@ def calc_risk_groups(card):
         u'Z51.3',
         mkb_from_mkb
     )
-    p2_needles = explode_needles(u'O36.0')
+    p2_needles = explode_needles(u'O36.1')
     p2 = any_thing(
         all_diagnostics,
         p2_needles,
@@ -269,7 +269,7 @@ def calc_risk_groups(card):
     p3 = any(
         (preg['pregnancyResult'].value_raw == 'delivery' and
          preg['pregnancy_week'].value >= 36 and
-         any(child['weight'].value for child in preg['newborn_inspections'].value))
+         any(child['weight'].value < 2500 for child in preg['newborn_inspections'].value))
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3 or low_hemo:
@@ -401,7 +401,7 @@ def calc_risk_groups(card):
          card.anamnesis.mother['toxic'].value or \
          card.anamnesis.mother['smoking'].value or \
          card.anamnesis.mother['drugs'].value
-    p5 = card.anamnesis.mother['professional_properties'].value_raw not in (u'no', u'psychic_tension')
+    p5 = card.anamnesis.mother['professional_properties'].value_raw not in (None, u'no', u'psychic_tension')
     p6 = any(
         child['died_at'].value_raw == '01'  # Умер при родах
         for preg in card.prev_pregs

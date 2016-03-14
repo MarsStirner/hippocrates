@@ -51,6 +51,9 @@ def api_0_pregnancies_delete(action_id):
         raise ApiException(400, 'Pregnancy already deleted')
     action.deleted = 1
     db.session.commit()
+    card = PregnancyCard.get_for_event(action.event)
+    card.reevaluate_card_attrs()
+    db.session.commit()
     return True
 
 
@@ -63,6 +66,9 @@ def api_0_pregnancies_undelete(action_id):
     if not action.deleted:
         raise ApiException(400, 'Pregnancy not deleted')
     action.deleted = 0
+    db.session.commit()
+    card = PregnancyCard.get_for_event(action.event)
+    card.reevaluate_card_attrs()
     db.session.commit()
     return True
 
@@ -116,6 +122,7 @@ def api_0_pregnancies_post(action_id=None):
     ]
 
     db.session.add(action)
+    card.reevaluate_card_attrs()
     db.session.commit()
     return represent_pregnancy(action)
 
@@ -145,6 +152,9 @@ def api_0_transfusions_delete(action_id):
         raise ApiException(400, 'Transfusion already deleted')
     action.deleted = 1
     db.session.commit()
+    card = PregnancyCard.get_for_event(action.event)
+    card.reevaluate_card_attrs()
+    db.session.commit()
     return True
 
 
@@ -157,6 +167,9 @@ def api_0_transfusions_undelete(action_id):
     if not action.deleted:
         raise ApiException(400, 'Transfusion not deleted')
     action.deleted = 0
+    db.session.commit()
+    card = PregnancyCard.get_for_event(action.event)
+    card.reevaluate_card_attrs()
     db.session.commit()
     return True
 
@@ -179,6 +192,9 @@ def api_0_transfusions_post(action_id=None):
     for key in transfusion_apt_codes:
         action.propsByCode[key].value = json.get(key)
     db.session.add(action)
+    db.session.commit()
+    card = PregnancyCard.get_for_event(action.event)
+    card.reevaluate_card_attrs()
     db.session.commit()
     return dict(
         action_apt_values(action, transfusion_apt_codes),
