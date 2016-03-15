@@ -100,7 +100,9 @@ class StatsSelecter(BaseSelecter):
         from ..models.risar import RisarRiskGroup
 
         query = self.query_main(person_id, curation_level)
-        query = query.join(RisarRiskGroup).filter(
+        query = RisarRiskGroup.query.join(
+            query.subquery()
+        ).filter(
             RisarRiskGroup.deleted == 0,
         ).group_by(
             RisarRiskGroup.riskGroup_code,
