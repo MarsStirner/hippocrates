@@ -77,7 +77,8 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         AccountingService.get_contract(undefined, {
             finance_id: finance_id,
             client_id: client_id,
-            payer_client_id: client_id
+            payer_client_id: client_id,
+            generate_number: true
         })
             .then(function (contract) {
                 return ContractModalService.openEdit(contract, client);

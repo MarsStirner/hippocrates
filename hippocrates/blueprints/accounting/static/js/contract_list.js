@@ -41,7 +41,9 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
         AccountingService.get_contract_list(args).then(setContractListData);
     };
     $scope.create = function () {
-        AccountingService.get_contract()
+        AccountingService.get_contract(undefined, {
+            generate_number: true
+        })
             .then(function (contract) {
                 return ContractModalService.openEdit(contract);
             })
