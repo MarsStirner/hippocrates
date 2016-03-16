@@ -70,6 +70,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
+            result.newborn_inspections = result.newborn_inspections.filter(function(inspection){
+                return !inspection.deleted || inspection.id
+            })
             RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
                 $scope.anamnesis.pregnancies.push(result);
             });
@@ -83,6 +86,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
+            result.newborn_inspections = result.newborn_inspections.filter(function(inspection){
+                return !inspection.deleted || inspection.id
+            })
             RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
                 angular.extend(p, result);
             });
@@ -93,12 +99,24 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     };
 
     $scope.add_child = function (pregnancy){
-        pregnancy.newborn_inspections.push({});
+        pregnancy.newborn_inspections.push({
+            id: null,
+            alive: true,
+            deleted: 0
+        });
         $timeout(function(){
             $('#childrenTabs').find('a:last').tab('show');
         }, 0);
 
     };
+
+    $scope.delete_child = function(child){
+        child.deleted = 1;
+        $timeout(function(){
+            $('#childrenTabs li.active').removeClass('active');
+            $('#childrenTabs').find('a:first').tab('show');
+        }, 0);
+    }
 
     $scope.result_change = function (pregnancy){
         if (miscarriage_codes.has(pregnancy.pregnancyResult.code)){
@@ -172,10 +190,11 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         scope.form_is_invalid = function () {
             return ! (
                 year_regexp.test(String(scope.model.year))
+                &&
+                scope.model.pregnancyResult
                 && _.all(scope.model.newborn_inspections, function (inspection) {
                     return (
                         (inspection.alive || inspection.died_at && inspection.died_at.code)
-                        && _.isFinite(inspection.weight)
                     )
                 })
             )

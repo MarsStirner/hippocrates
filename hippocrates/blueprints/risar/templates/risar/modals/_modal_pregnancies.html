@@ -12,7 +12,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <th class="text-right">Год беременности</th>
+                    <th class="text-right">Год беременности <span class="text-danger">*</span></th>
                     <td>
                         <div class="col-md-2">
                         <input class="form-control validatable" type="text" ng-model="model.year" ui-mask="9999"
@@ -21,15 +21,16 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Исход беременности</th>
+                    <th class="text-right">Исход беременности <span class="text-danger">*</span></th>
                     <td>
                         <div class="col-md-7">
-                        <rb-select ref-book="rbRisarPregnancyResult" ng-model="model.pregnancyResult" ng-change="result_change(model)"/>
+                        <rb-select ref-book="rbRisarPregnancyResult" ng-model="model.pregnancyResult"
+                                   ng-change="result_change(model)" ng-required="true" class="validatable"/>
                         </div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Срок беременности</th>
+                    <th class="text-right">Срок беременности <span class="text-danger">&nbsp;</span></th>
                     <td>
                         <div class="col-md-2">
                             <input class="form-control" type="number" ng-model="model.pregnancy_week">
@@ -37,7 +38,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Патологии беременности</th>
+                    <th class="text-right">Патологии беременности <span class="text-danger">&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <wm-mkb-multiple ng-model="model.pregnancy_pathologies"></wm-mkb-multiple>
@@ -45,7 +46,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Патологии родов/абортов</th>
+                    <th class="text-right">Патологии родов/абортов <span class="text-danger">&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <wm-mkb-multiple ng-model="model.delivery_pathologies"></wm-mkb-multiple>
@@ -53,7 +54,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Пособия, операции</th>
+                    <th class="text-right">Пособия, операции <span class="text-danger">&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <rb-select ref-book="rbRisarMaternityAid" ng-model="model.maternity_aid"></rb-select>
@@ -61,13 +62,13 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Преэклампсия</th>
+                    <th class="text-right">Преэклампсия <span class="text-danger">&nbsp;</span></th>
                     <td>
                     <div class="col-md-8"><input type="checkbox" class="checkbox" ng-model="model.preeclampsia"></div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Особенности</th>
+                    <th class="text-right">Особенности <span class="text-danger">&nbsp;</span></th>
                     <td>
                     <div class="col-md-10">
                         <wysiwyg ng-model="model.note"/>
@@ -82,15 +83,21 @@
                 <div class="col-md-3">
                     <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child(model)"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
                     <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
-                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections">
-                            <a href="#child[[$index+1]]" data-toggle="pill"> Ребенок [[$index+1]]</a>
+                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections | flt_not_deleted">
+                            <a href="#child[[$index+1]]" data-toggle="pill">
+                                Ребенок [[$index+1]]<button class="text-red close btn btn-small btn-default closeBtn"
+                                                            ng-click="delete_child(child)" type="button"
+                                                            tooltip="Удалить">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </button>
+                            </a>
                         </li>
                     </ul>
                 </div>
                 <div class="col-md-9">
                     <div class="tab-content">
                         <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index+1]]"
-                             ng-repeat="child in model.newborn_inspections">
+                             ng-repeat="child in model.newborn_inspections | flt_not_deleted">
                             <table class="table">
                                 <thead>
                                 <tr>
@@ -135,8 +142,8 @@
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-8">
-                                                    <rb-select ref-book="rbRisarDiedAt" ng-model="child.died_at"
-                                                               name="died_at_[[$index]]" ng-required="true">
+                                                    <rb-select ref-book="rbRisarDiedAt" ng-model="child.died_at" class="validatable"
+                                                               name="died_at_[[$index]]" ng-required="true"/>
                                                 </div>
                                             </div>
                                         </td>
