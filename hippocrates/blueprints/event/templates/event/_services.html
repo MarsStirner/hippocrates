@@ -1,6 +1,6 @@
 <div ng-controller="EventServicesCtrl">
 <ng-form name="eventServicesForm" role="form"toc-element="Услуги" toc-name="tocEventForm">
-    <div class="box box-info">
+    <div class="box box-info" ng-class="{'collapsed-box': formstate.is_stationary()}">
         <div class="box-header with-border">
             <h3 class="box-title">Услуги</h3>
             <div class="box-tools pull-right">
@@ -18,7 +18,9 @@
                     <button type="button" class="btn btn-success" ng-click="finishEditing()" ng-if="inEditMode()">Сохранить</button>
                     <button type="button" class="btn btn-danger" ng-click="cancelEditing()" ng-if="inEditMode()">Отменить</button>
                 </div>
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa" ng-class="{'fa-plus':formstate.is_stationary(), 'fa-minus':!formstate.is_stationary()}"></i>
+                </button>
             </div>
         </div>
         <div class="box-body">
