@@ -83,6 +83,17 @@
                                 <table class="table table-condensed" ng-if="epicrisis.pregnancy_final.code">
                                     <tbody>
                                         <tr>
+                                            <th class="text-right col-md-4">Дата поступления в роддом <span>&nbsp;</span></th>
+                                            <td class="col-md-8">
+                                                <div class="row">
+                                                <div class="col-md-2">
+                                                    <wm-date ng-model="epicrisis.arrival_date"
+                                                             style="width: 250px" name="arrival_date"></wm-date>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <th class="text-right col-md-4">[[epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
                                             <td class="col-md-8">
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
@@ -132,6 +143,32 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th class="text-right">Лечащий врач роддома<span>&nbsp;</span></th>
+                                            <td>
+                                                <div class="row">
+                                                <div class="col-md-5  col-lg-5">
+                                                    <input ng-model="epicrisis.maternity_hosp_doctor" class="form-control" name="maternity_hosp_doctor">
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
+                                            <th class="text-right">ЛПУ курации новорожденного</th>
+                                            <td>
+                                                <div class="row">
+                                                    <div class="col-md-7">
+                                                    <ui-select ng-model="epicrisis.newborn_LPU" theme="select2" class="form-control" name="newborn_LPU"
+                                                               ref-book="Organisation" autocomplete="off">
+                                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
+                                                        <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
+                                                            <span ng-bind-html="item.full_name | highlight: $select.search"></span>
+                                                        </ui-select-choices>
+                                                    </ui-select>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='abortom'">
                                             <th class="text-right">Вид аборта  <span class="text-danger">*</span></th>
                                             <td>
@@ -153,6 +190,14 @@
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.pregnancy_speciality" />
+                                                </div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-right">Особенности течения послеродового периода <span>&nbsp;</span></th>
+                                            <td>
+                                                <div class="row"><div class="col-md-12">
+                                                    <wysiwyg ng-model="epicrisis.afterbirth_features" />
                                                 </div></div>
                                             </td>
                                         </tr>
@@ -252,6 +297,12 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th class="text-right">Дородовое излитие вод (при отсутствии родовой деятельности) </th>
+                                        <td class="col-md-8">
+                                            <input type="checkbox" ng-model="epicrisis.pre_birth_delivery_waters">
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th class="text-right">Слабость родовых сил</th>
                                         <td>
                                             <div class="row">
@@ -265,20 +316,40 @@
                                         <th class="text-right">Разрыв промежностей (степень)</th>
                                         <td>
                                             <div class="row">
-                                            <div class="col-md-4">
-                                                <input ng-model="epicrisis.perineal_tear" class="form-control">
-                                            </div>
+                                                <div class="col-md-4">
+                                                    <rb-select name="state" ng-model="epicrisis.perineal_tear" ref-book="rbPerinealTear"></rb-select>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th class="text-right">Мекониальная окраска амниотических вод</th>
+                                        <td class="col-md-8">
+                                            <input type="checkbox" ng-model="epicrisis.meconium_colouring">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Патологический прелиминарный период</th>
+                                        <td class="col-md-8">
+                                            <input type="checkbox" ng-model="epicrisis.patologicsl_preliminal_period">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Аномалии родовой деятельности</th>
+                                        <td class="col-md-8">
+                                            <input type="checkbox" ng-model="epicrisis.labor_anomalies">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Хориоамнионит</th>
+                                        <td class="col-md-8">
+                                            <input type="checkbox" ng-model="epicrisis.chorioamnionit">
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th class="text-right">Анемия после родов (Hb<110 г/л)</th>
-                                        <td>
-                                            <div class="row">
-                                            <div class="col-md-4">
-                                                <input ng-model="epicrisis.poor_blood" class="form-control">
-                                            </div>
-                                            </div>
+                                        <td class="col-md-8">
+                                            <input type="checkbox" ng-model="epicrisis.poor_blood">
                                         </td>
                                     </tr>
                                     <tr>
@@ -329,14 +400,6 @@
                                                 <input ng-model="epicrisis.infections_after_birth" class="form-control">
                                             </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Другие осложнения при родах</th>
-                                        <td>
-                                            <div class="row"><div class="col-md-12">
-                                                <wysiwyg ng-model="epicrisis.other_complications" />
-                                            </div></div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -485,8 +548,8 @@
                                         <th class="text-right">Особенности операции</th>
                                         <td>
                                             <div class="row">
-                                                <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"></rb-select>
+                                                <div class="col-md-12">
+                                                <wysiwyg ng-model="epicrisis.specialities" />
                                                 </div>
                                             </div>
                                         </td>
@@ -696,14 +759,18 @@
                                                                 </div>
                                                             </td>
                                                         </tr>
-                                                        <tr ng-if="child.alive==false">
-                                                            <th class="text-right">Причина смерти <span class="text-danger">*</span></th>
+                                                        <tr>
+                                                            <th class="text-right">Заболевания новорождённого <span>&nbsp;</span></th>
                                                             <td>
-                                                                <div class="row" ng-class="{'has-error': sixthForm.death_reason_[[$index]].$invalid && sixthForm.submit_attempt}">
-                                                                <div class="col-md-3">
-                                                                    <input ng-model="child.death_reason" ng-required="true" class="form-control" name="death_reason_[[$index]]">
-                                                                </div>
-                                                                </div>
+                                                                <wm-mkb-multiple ng-model="child.diseases"></wm-mkb-multiple>
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-if="child.alive==false">
+                                                            <th class="text-right">Причины смерти <span class="text-danger">*</span></th>
+                                                            <td>
+                                                                <wm-mkb-multiple ng-model="child.death_reasons"
+                                                                                 ng-required="true"
+                                                                                 name="death_reason_[[$index]]"></wm-mkb-multiple>
                                                             </td>
                                                         </tr>
                                                     </tbody>
