@@ -79,6 +79,17 @@
                         </div>
                         <div class="col-md-1"></div>
                     </div>
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Диагнозы
+                        </div>
+                        <div class="col-md-7">
+                            <div ng-repeat="diagnosis in event.diagnoses | collapse_diagnoses:'main'">
+                                [[ diagnosis.diagnostic.mkb.code ]] - [[ diagnosis.diagnostic.mkb.name ]]
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
                 </div>
                 <div class="col-md-6 col-sm-6">
                     <div class="row vmargin10">
