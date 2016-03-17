@@ -75,11 +75,15 @@
                 </tr>
                 <tr>
                     <th class="text-right">Сведения по контрацепции <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.contraception" class="form-control"></td>
+                    <td><rb-select ref-book="rbContraception" ng-model="anamnesis_mother.contraception" class="form-control"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Способ оплодотворения <span>&nbsp;</span></th>
                     <td><rb-select ref-book="rbRisarFertilizationMethod" ng-model="anamnesis_mother.fertilization_type" class="form-control"></rb-select></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Внутриматочные вмешательства <span>&nbsp;</span></th>
+                    <td><input ng-model="anamnesis_mother.intrauterine" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Предыдущие многоплодные беременности <span>&nbsp;</span></th>
@@ -94,7 +98,7 @@
                     <td><input ng-model="anamnesis_mother.infertility_type" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Длительность, мес <span>&nbsp;</span></td>
+                    <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
                     <td><input ng-model="anamnesis_mother.infertility_period" class="form-control" type="number" valid-number ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>

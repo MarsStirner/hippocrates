@@ -25,9 +25,10 @@
                         </p>
                         <p>
                             Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
-                            Вид контрацепции: <b ng-bind-html="anamnesis.mother.contraception | underlineNoVal"></b>.
+                            Вид контрацепции: <b ng-bind-html="anamnesis.mother.contraception.name | underlineNoVal"></b>.
                         </p>
                         <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b>.</p>
+                        <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b>.</p>
                         <p>Семейное положение: <b ng-bind-html="anamnesis.mother.marital_status.name | underlineNoVal"></b></p>
                         <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income | underlineNoVal"></b></p>
                     </div>
