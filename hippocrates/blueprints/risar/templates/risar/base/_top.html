@@ -1,10 +1,10 @@
 <header class="main-header"  ng-controller="WebMisHeader" ng-cloak>
     <a class="logo" href="{{ url_for('.index_html') }}" style="padding: 0 12px;">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><span class="rlogo">1</span></span>
+      <span class="logo-mini rlogo-mini"><span class="rlogo-left">1</span></span>
       <!-- logo for regular state and mobile devices -->
 
-      <span class="logo-lg"><span class="rlogo">1</span> <b>РИСАР</b></span>
+      <div class="logo-lg rlogo-lg"><table><tr><th class="rlogo-float">1</th><th><b>Мониторинг родовспоможения</b></th></tr></table></div>
     </a>
     {%- if current_user.id and current_user.current_role -%}
     <nav class="navbar navbar-static-top" role="navigation">
