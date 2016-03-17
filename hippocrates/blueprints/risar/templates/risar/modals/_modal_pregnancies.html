@@ -54,6 +54,14 @@
                     </td>
                 </tr>
                 <tr>
+                    <th class="text-right">Осложнения после родов/абортов <span class="text-danger">&nbsp;</span></th>
+                    <td>
+                        <div class="col-md-12">
+                            <wm-mkb-multiple ng-model="model.after_birth_complications"></wm-mkb-multiple>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <th class="text-right">Пособия, операции <span class="text-danger">&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
@@ -133,6 +141,26 @@
                                             <div class="col-md-4 col-lg-3">
                                                 <input type="number" ng-model="child.weight" valid-number
                                                        class="form-control" name="__weight_[[$index]]">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Аномалии развития</th>
+                                        <td>
+                                            <div class="row">
+                                            <div class="col-md-4 col-lg-3">
+                                                <input ng-model="child.abnormal_development" class="checkbox" type="checkbox">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Неврологические нарушения</th>
+                                        <td>
+                                            <div class="row">
+                                            <div class="col-md-4 col-lg-3">
+                                                <input ng-model="child.neurological_disorders" class="checkbox" type="checkbox">
                                             </div>
                                             </div>
                                         </td>

@@ -14,7 +14,7 @@ risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
 
 pregnancy_apt_codes = [
     'year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'newborn_inspections', 'pregnancy_pathology',
-    'delivery_pathology', 'maternity_aid'
+    'delivery_pathology', 'maternity_aid', 'after_birth_complications'
 ]
 transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
 

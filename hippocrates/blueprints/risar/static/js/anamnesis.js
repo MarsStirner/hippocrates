@@ -150,6 +150,12 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         var result = [];
         result.push((child.alive)?('живой'):('мёртвый'));
         result.push('масса: ' + child.weight);
+        if(child.abnormal_development){
+            result.push('аномалии развития');
+        }
+        if(child.neurological_disorders){
+            result.push('неврологические нарушения');
+        }
         if (!child.alive && child.died_at) {
             result.push(child.died_at.name);
         }
@@ -179,6 +185,11 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         }
         if (p.preeclampsia) {
             result.push('Преэклампсия');
+        }
+        if (p.after_birth_complications){
+            result.push('Осложнения после родов/абортов: ' + _.map(p.after_birth_complications, function (pat) {
+                return pat.name;
+            }).join(', '))
         }
         return result.join('<br/>')
     };
