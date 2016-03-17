@@ -8,11 +8,26 @@
   font-weight: normal;
   font-style: normal;
 }
-.rlogo {
+.rlogo, .rlogo-left, .rlogo-float {
   display: inline-block;
   font: normal normal normal 26px/1 FontRisar;
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+.rlogo-mini {
+  text-align: left;
+  margin-top: 4px;
+}
+.rlogo-left {
+  margin-left: 15px;
+}
+.rlogo-lg {
+  font-size: 15px;
+  line-height: 21px;
+  margin-top: 4px;
+}
+.rlogo-float {
+  font: normal normal normal 26px/40px FontRisar;
+  margin-right: 14px;
+}
