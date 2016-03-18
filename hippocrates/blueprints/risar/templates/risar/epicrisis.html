@@ -37,17 +37,17 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">Диагнозы осложнения:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated'">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication'">
                                             [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication'">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated'">
                                             [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
                                         </div>
                                     </div>
