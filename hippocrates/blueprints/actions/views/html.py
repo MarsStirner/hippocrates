@@ -18,6 +18,6 @@ def html_action():
         price_list_item_id = safe_int(request.args.get('price_list_item_id'))
         service_check = check_action_service_requirements(action_type_id, price_list_item_id)
         if not service_check['result']:
-            raise abort(400, service_check['message'])
+            raise abort(400, u'Ошбика настроек услуг и прайс-листов')  # service_check['message']
 
     return render_template('actions/action.html')

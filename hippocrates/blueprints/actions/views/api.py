@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import collections
 import datetime
+import logging
 
 from flask import request, abort, url_for
 
@@ -12,7 +13,7 @@ from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action
+    get_patient_location, delete_action, ActionServiceException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
@@ -28,6 +29,9 @@ from nemesis.systemwide import db, cache
 
 
 __author__ = 'viruzzz-kun'
+
+
+logger = logging.getLogger('simple')
 
 
 prescriptionFlatCodes = (
@@ -242,8 +246,9 @@ def api_action_post(action_id=None):
             properties_desc = data.pop('properties')
             service_data = action_desc.get('service')
             action = create_new_action(at_id, event_id, properties=properties_desc, data=data, service_data=service_data)
-        except Exception, e:
-            raise ApiException(500, e.message)
+        except ActionServiceException, e:
+            logger.error(unicode(e), exc_info=True)
+            raise ApiException(500, u'Ошибка в настройках услуг и прайс-листов')
 
     diagnoses_data = action_desc.get('diagnoses')
     if diagnoses_data:

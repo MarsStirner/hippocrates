@@ -58,23 +58,23 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             ).then(function (action) {
                 $scope.action = action;
                 update_print_templates(action.action_type.context_name);
+
+                if (params.price_list_item_id && params.service_kind_id) {
+                    AccountingService.get_service(undefined, {
+                        price_list_item_id: params.price_list_item_id,
+                        service_kind_id: params.service_kind_id,
+                        event_id: params.event_id,
+                        serviced_entity_from_search: {
+                            action_type_id: params.action_type_id
+                        }
+                    }).then(function (new_service) {
+                        $scope.action.service = new_service;
+                    });
+                }
             });
             WMEventCache.get(parseInt(params.event_id)).then(function (event) {
                 $scope.event = event;
             });
-
-            if (params.price_list_item_id && params.service_kind_id) {
-                AccountingService.get_service(undefined, {
-                    price_list_item_id: params.price_list_item_id,
-                    service_kind_id: params.service_kind_id,
-                    event_id: params.event_id,
-                    serviced_entity_from_search: {
-                        action_type_id: params.action_type_id
-                    }
-                }).then(function (new_service) {
-                    $scope.action.service = new_service;
-                });
-            }
         }
     };
 
