@@ -323,13 +323,6 @@ class ClientSchema(object):
             "FIO",
             "birthday_date",
             "gender",
-            "document",
-            "residential_address",
-            "insurance_documents",
-            "blood_type_info",
-            "allergies_info",
-            "medicine_intolerance_info",
-            # "patient_external_code" # эта проверка будет проходить в ручном режиме при создании
         ]
     },
 ]
