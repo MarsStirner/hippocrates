@@ -20,17 +20,23 @@ class ClientSchema(object):
                     "middlename": {
                         "type": "string",
                         "id": "http://jsonschema.net/FIO/middlename",
-                        "description": "Отчество пациента"
+                        "description": "Отчество пациента",
+                        "minLength": 1,
+                        "maxLength": 255,
                     },
                     "name": {
                         "type": "string",
                         "id": "http://jsonschema.net/FIO/name",
-                        "description": "Имя пациента"
+                        "description": "Имя пациента",
+                        "minLength": 1,
+                        "maxLength": 255,
                     },
                     "surname": {
                         "type": "string",
                         "id": "http://jsonschema.net/FIO/surname",
-                        "description": "Фамилия пациента"
+                        "description": "Фамилия пациента",
+                        "minLength": 1,
+                        "maxLength": 255,
                     }
                 },
                 "required": [
@@ -91,12 +97,14 @@ class ClientSchema(object):
                     "document_series": {
                         "type": "string",
                         "id": "http://jsonschema.net/document/document_series",
-                        "description": "Серия документа, удостоверяющего личность пациента"
+                        "description": "Серия документа, удостоверяющего личность пациента",
+                        "maxLength": 8,
                     },
                     "document_number": {
                         "type": "string",
                         "id": "http://jsonschema.net/document/document_number",
-                        "description": "Номер документа, удостоверяющего личность пациента"
+                        "description": "Номер документа, удостоверяющего личность пациента",
+                        "maxLength": 16,
                     },
                     "document_beg_date": {
                         "type": "string",
@@ -127,18 +135,19 @@ class ClientSchema(object):
                         "insurance_document_type": {
                             "type": "string",
                             "id": "http://jsonschema.net/insurance_documents/insurance_document_type",
-                            "description": "Код ТФОМС типа полиса медицинского страхования",
-                            "enum": ["1", "2", "3", "4", "5", "vmi"],
+                            "description": "Код ТФОМС типа полиса медицинского страхования"
                         },
                         "insurance_document_series": {
                             "type": "string",
                             "id": "http://jsonschema.net/insurance_documents/insurance_document_series",
-                            "description": "Серия полиса медицинского страхования"
+                            "description": "Серия полиса медицинского страхования",
+                            "maxLength": 16
                         },
                         "insurance_document_number": {
                             "type": "string",
                             "id": "http://jsonschema.net/insurance_documents/insurance_document_number",
-                            "description": "Номер полиса медицинского страхования"
+                            "description": "Номер полиса медицинского страхования",
+                            "maxLength": 16
                         },
                         "insurance_document_beg_date": {
                             "type": "string",
@@ -157,7 +166,6 @@ class ClientSchema(object):
                         "insurance_document_beg_date",
                         "insurance_document_issuing_authority"
                     ]
-
                 }
             },
             "residential_address": {
@@ -178,17 +186,20 @@ class ClientSchema(object):
                     "house": {
                         "type": "string",
                         "id": "http://jsonschema.net/residential_address/house",
-                        "description": "Данные дома адреса проживания"
+                        "description": "Данные дома адреса проживания",
+                        "maxLength": 8
                     },
                     "building": {
                         "type": "string",
                         "id": "http://jsonschema.net/residential_address/building",
-                        "description": "Корпус дома адреса проживания"
+                        "description": "Корпус дома адреса проживания",
+                        "maxLength": 8
                     },
                     "flat": {
                         "type": "string",
                         "id": "http://jsonschema.net/residential_address/flat",
-                        "description": "Данные квартиры адреса проживания"
+                        "description": "Данные квартиры адреса проживания",
+                        "maxLength": 6
                     },
                     "locality_type": {
                         "type": "integer",
@@ -215,23 +226,20 @@ class ClientSchema(object):
                     "type": "object",
                     "description": "Сведение о группе крови и резус-факторе",
                     "properties": {
-
                         "blood_type": {
                             "type": "string",
                             "id": "http://jsonschema.net/blood_type/blood_type",
                             "description": "Код группы крови",
-                            "enum":
-                                [
-                                    "0(I)Rh-",
-                                    "0(I)Rh+",
-                                    "A(II)Rh-",
-                                    "A(II)Rh+",
-                                    "B(III)Rh-",
-                                    "B(III)Rh+",
-                                    "AB(IV)Rh-",
-                                    "AB(IV)Rh+"
-
-                                ]
+                            "enum": [
+                                "0(I)Rh-",
+                                "0(I)Rh+",
+                                "A(II)Rh-",
+                                "A(II)Rh+",
+                                "B(III)Rh-",
+                                "B(III)Rh+",
+                                "AB(IV)Rh-",
+                                "AB(IV)Rh+"
+                            ]
                         }
                     },
                     "required": [
@@ -262,7 +270,8 @@ class ClientSchema(object):
                         "allergy_substance": {
                             "type": "string",
                             "id": "http://jsonschema.net/allergies_info/substance",
-                            "description": "Вещество"
+                            "description": "Вещество",
+                            "maxLength": 128
                         }
                     },
                     "required": [
@@ -294,7 +303,8 @@ class ClientSchema(object):
                         "medicine_substance": {
                             "type": "string",
                             "id": "http://jsonschema.net/medicine_intolerance_info/medicine_substance",
-                            "description": "Вещество"
+                            "description": "Вещество",
+                            "maxLength": 128
                         }
                     },
                     "required": [
@@ -313,14 +323,6 @@ class ClientSchema(object):
             "FIO",
             "birthday_date",
             "gender",
-            "SNILS",
-            "document",
-            "residential_address",
-            "insurance_documents",
-            "blood_type_info",
-            "allergies_info",
-            "medicine_intolerance_info",
-            # "patient_external_code" # эта проверка будет проходить в ручном режиме при создании
         ]
     },
 ]
