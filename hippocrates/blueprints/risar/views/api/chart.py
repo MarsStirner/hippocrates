@@ -349,10 +349,10 @@ def api_0_mini_attach_lpu(client_id):
     now = datetime.now()
     attach_type = data['attach_type']
     attach_type_code = attach_codes.get(attach_type, str(attach_type))
-    if 'org_id' not in data:  # значит сохраняют без изменений привязки
+    org_id = data.get('org_id', None)
+    if not org_id:  # значит сохраняют без изменений привязки
         db.session.rollback()
         return False
-    org_id = data['org_id']
     attach = ClientAttach.query.join(rbAttachType).filter(
         rbAttachType.code == attach_type_code,
         ClientAttach.endDate.is_(None),
