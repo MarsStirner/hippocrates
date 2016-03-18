@@ -580,7 +580,7 @@
                                                  ng-class="{'has-error': fifthForm.pregnancy_week.$invalid && fifthForm.submit_attempt}">
                                                 <div class="col-md-2">
                                                     <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
-                                                           class="form-control" type="number" valid-number ng-required="true">
+                                                           class="form-control" type="number" min="1" max="45" valid-number ng-required="true">
                                                 </div>
                                             </div>
                                         </td>
