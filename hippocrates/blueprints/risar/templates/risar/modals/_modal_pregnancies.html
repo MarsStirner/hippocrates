@@ -30,7 +30,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Срок беременности <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Срок беременности <span>&nbsp;</span></th>
                     <td>
                         <div class="col-md-2">
                             <input class="form-control" type="number" ng-model="model.pregnancy_week">
@@ -38,7 +38,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Патологии беременности <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Патологии беременности <span>&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <wm-mkb-multiple ng-model="model.pregnancy_pathologies"></wm-mkb-multiple>
@@ -46,7 +46,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Патологии родов/абортов <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Патологии родов/абортов <span>&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <wm-mkb-multiple ng-model="model.delivery_pathologies"></wm-mkb-multiple>
@@ -54,7 +54,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Осложнения после родов/абортов <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Осложнения после родов/абортов <span>&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <wm-mkb-multiple ng-model="model.after_birth_complications"></wm-mkb-multiple>
@@ -62,7 +62,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Пособия, операции <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Пособия, операции <span>&nbsp;</span></th>
                     <td>
                         <div class="col-md-12">
                             <rb-select ref-book="rbRisarMaternityAid" ng-model="model.maternity_aid"></rb-select>
@@ -70,13 +70,13 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Преэклампсия <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Преэклампсия <span>&nbsp;</span></th>
                     <td>
                     <div class="col-md-8"><input type="checkbox" class="checkbox" ng-model="model.preeclampsia"></div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Особенности <span class="text-danger">&nbsp;</span></th>
+                    <th class="text-right">Особенности <span>&nbsp;</span></th>
                     <td>
                     <div class="col-md-10">
                         <wysiwyg ng-model="model.note"/>
@@ -115,7 +115,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Живой</th>
+                                        <th class="text-right">Живой <span>&nbsp;</span></th>
                                         <td>
                                                 <div class="radio-inline">
                                                     <label>
@@ -135,7 +135,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Масса при рождении, г</th>
+                                        <th class="text-right">Масса при рождении, г <span>&nbsp;</span></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
@@ -146,7 +146,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Аномалии развития</th>
+                                        <th class="text-right">Аномалии развития <span>&nbsp;</span></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
@@ -156,7 +156,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Неврологические нарушения</th>
+                                        <th class="text-right">Неврологические нарушения <span>&nbsp;</span></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
@@ -166,7 +166,7 @@
                                         </td>
                                     </tr>
                                     <tr ng-if="! child.alive">
-                                        <th class="text-right">Умер в срок</th>
+                                        <th class="text-right">Умер в срок <span class="text-danger">*</span></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-8">
@@ -177,7 +177,7 @@
                                         </td>
                                     </tr>
                                     <tr ng-if="! child.alive">
-                                        <th class="text-right">Причина смерти</th>
+                                        <th class="text-right">Причина смерти <span>&nbsp;</span></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-8">
