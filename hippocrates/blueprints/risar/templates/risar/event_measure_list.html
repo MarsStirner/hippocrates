@@ -79,25 +79,39 @@
                                 <th>Статус</th>
                                 <th>Дата начала</th>
                                 <th>Дата окончания</th>
-                                <th>Дата осмотра</th>
-                                <th></th>
+                                <th width="1%"></th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr ng-repeat="em in measure_list">
-                                <td><span measure-type-icon="em.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
-                                <td>[[ em.scheme_measure.measure.name ]]</td>
+                                <td><span measure-type-icon="em.data.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
+                                <td>[[ em.data.scheme_measure.measure.name ]]</td>
                                 <td>
-                                    <event-measure-status status="em.status"></event-measure-status>
+                                    <event-measure-status status="em.data.status"></event-measure-status>
                                 </td>
-                                <td>[[ em.beg_datetime | asDate ]]</td>
-                                <td>[[ em.end_datetime | asDate ]]</td>
-                                <td><a ng-href="{{ url_for('.html_inspection_edit') +
-                                    '?event_id={0}&checkup_id={1}'.format('[[ em.event_id ]]', '[[ em.source_action.id ]]') }}"
-                                    title="Перейти к осмотру, на основе которого было создано мероприятие">
-                                    [[ em.source_action.beg_date | asDate ]]</a>
+                                <td>[[ em.data.beg_datetime | asDate ]]</td>
+                                <td>[[ em.data.end_datetime | asDate ]]</td>
+                                <td class="nowrap">
+                                    <div class="btn-group" style="min-width: 125px">
+                                        <button type="button" class="btn btn-primary" ng-click="viewEventMeasure(measure_list, $index)">
+                                            Просмотр
+                                        </button>
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                            <li role="menuitem" ng-class="{'disabled': !canEditEmAppointment(em)}">
+                                                <a href="javascript:void(0);" ng-click="openEmAppointment(measure_list, $index)">Редактировать направление</a>
+                                            </li>
+                                            <li role="menuitem" ng-class="{'disabled': !canEditEmResult(em)}">
+                                                <a href="javascript:void(0);" ng-click="openEmResult(measure_list, $index)">Редактировать результат</a>
+                                            </li>
+                                            <li role="separator" class="divider"></li>
+                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm(measure_list, $index)">Выполнить</a></li>
+                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm(measure_list, $index)">Отменить</a></li>
+                                        </ul>
+                                    </div>
                                 </td>
-                                <td></td>
                             </tr>
                             </tbody>
                         </table>
@@ -131,4 +145,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/event_measure_list.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/modal_em_info.js', v=app_version) }}"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 'use strict';
 
-var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService, PrintingDialog) {
+var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService, PrintingDialog, EMModalService, EventMeasureService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     var viewMode;
@@ -59,6 +59,60 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
             end_date_to: null,
             status: []
         };
+    };
+    $scope.viewEventMeasure = function (measures, idx) {
+        var em = measures[idx];
+        EMModalService.openView(em.data);
+    };
+    $scope.executeEm = function (measures, idx) {
+        var em = measures[idx];
+        EventMeasureService.execute(em.data)
+            .then(function (upd_em) {
+                measures.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.cancelEm = function (measures, idx) {
+        var em = measures[idx];
+        EventMeasureService.cancel(em.data)
+            .then(function (upd_em) {
+                measures.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.openEmAppointment = function (measures, idx) {
+        var em = measures[idx];
+        if ($scope.canEditEmAppointment(em)) {
+            EventMeasureService.get_appointment(em)
+                .then(function (appointment) {
+                    return EMModalService.openAppointmentEdit(em, appointment);
+                })
+                .then(function (result) {
+                    return EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            measures.splice(idx, 1, upd_em);
+                        });
+                });
+        }
+    };
+    $scope.openEmResult = function (measures, idx) {
+        var em = measures[idx];
+        if ($scope.canEditEmResult(em)) {
+            EventMeasureService.get_em_result(em)
+                .then(function (em_result) {
+                    return EMModalService.openEmResultEdit(em, em_result);
+                })
+                .then(function (result) {
+                    return EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            measures.splice(idx, 1, upd_em);
+                        });
+                });
+        }
+    };
+    $scope.canEditEmAppointment = function (em) {
+        return em.access.can_edit_appointment;
+    };
+    $scope.canEditEmResult = function (em) {
+        return em.access.can_edit_result;
     };
 
     $scope.init = function () {
@@ -219,7 +273,8 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
     });
 };
 
-WebMis20.controller('EventMeasureListCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
+WebMis20.controller('EventMeasureListCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'PrintingService',
+    'PrintingDialog', 'EMModalService', 'EventMeasureService',
     EventMeasureListCtrl]);
 WebMis20.controller('EventMeasureTableViewCtrl', ['$scope', 'RisarApi', 'TimeoutCallback',
     EventMeasureTableViewCtrl]);

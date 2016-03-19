@@ -90,13 +90,13 @@ class EventMeasureRepr(object):
             'count': paginated_data.total,
             'total_pages': paginated_data.pages,
             'measures': [
-                self.represent_event_measure(event_measure) for event_measure in paginated_data.items
-            ]
+                self.represent_em_full(event_measure) for event_measure in paginated_data.items
+            ],
         }
 
     def represent_listed_event_measures(self, em_list):
         return [
-            self.represent_event_measure(event_measure) for event_measure in em_list
+            self.represent_em_full(event_measure) for event_measure in em_list
         ]
 
     def represent_listed_event_measures_in_action(self, em_list):
