@@ -15,7 +15,12 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.client_id = parseInt($scope.params.client_id);
-    var curDate = new Date();
+    var person_id = parseInt($scope.params.person_id);
+    if(person_id) {
+        $scope.user_selected.push(person_id);
+    }
+    $scope.par_start_date = moment($scope.params.start_date).toDate();
+    var curDate = $scope.par_start_date || new Date();
     var curYear = curDate.getUTCFullYear();
     $scope.years = [curYear - 1, curYear, curYear + 1];
     $scope.year = curYear;
@@ -37,7 +42,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
         var mid_date = moment({
             year: $scope.year,
             month: $scope.month,
-            day: new Date().getDate()
+            day: ($scope.par_start_date || new Date()).getDate()
         });
         var start_date = moment({
             year: $scope.year,

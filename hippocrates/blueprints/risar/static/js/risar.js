@@ -277,6 +277,15 @@ WebMis20
         get_checkups: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
         },
+        new_appointment: function (client_id, person_id, start_date) {
+            this.child_window = $window.open(
+                Config.url.url_schedule_appointment_html +
+                    '?client_id=' + client_id +
+                    '&person_id=' + person_id +
+                    '&start_date=' + start_date,
+                '_blank'
+            );
+        },
         get_appointment: function (event_measure_id, appointment_id) {
             var url = Config.url.api_event_measure_appointment_get.format(event_measure_id);
             if (appointment_id) {

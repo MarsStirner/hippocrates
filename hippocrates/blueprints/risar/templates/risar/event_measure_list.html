@@ -22,7 +22,7 @@
                     <div class="nopadding">
                         <ui-select multiple ng-model="query.checkups" theme="select2" close-on-select="false"
                                    class="form-control">
-                            <ui-select-match>[[ $item.beg_date  | asDate ]]</ui-select-match>
+                            <ui-select-match>[[ $item.beg_date | asDate ]]</ui-select-match>
                             <ui-select-choices repeat="checkup in model.checkups | orderBy:'-beg_date'| filter: $select.search | limitTo:50">
                                 <div ng-bind-html="checkup.beg_date | asDate | highlight: $select.search"></div>
                             </ui-select-choices>

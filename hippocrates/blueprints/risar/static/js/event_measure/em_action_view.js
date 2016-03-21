@@ -76,6 +76,14 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.emHasResult = function (em) {
         return Boolean(em.data.result_action_id);
     };
+    $scope.canNewAppointment = function (em) {
+        return em.data.scheme_measure.measure.measure_type.code === 'checkup';
+    };
+    $scope.newAppointment = function(em, checkup, header) {
+        if($scope.canNewAppointment(em)) {
+            EventMeasureService.new_appointment(em, checkup, header);
+        }
+    };
 };
 
 
