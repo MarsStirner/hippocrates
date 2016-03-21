@@ -43,6 +43,7 @@ WebMis20
         api_event_measure_appointment_save: '{{ url_for('.api_0_event_measure_appointment_save', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_result_get: '{{ url_for('.api_0_event_measure_result_get', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_result_save: '{{ url_for('.api_0_event_measure_result_save', event_measure_id=-90) | replace("-90", "{0}") }}',
+        api_event_measure_checkups: '{{ url_for('.api_0_event_measure_checkups') }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
         anamnesis_html: '{{ url_for('.html_anamnesis') }}',

@@ -18,6 +18,19 @@
             </div>
             <div class="box-body">
                 <div class="form-group">
+                    <label>Осмотр</label>
+                    <div class="nopadding">
+                        <ui-select multiple ng-model="query.checkups" theme="select2" close-on-select="false"
+                                   class="form-control">
+                            <ui-select-match>[[ $item.beg_date  | asDate ]]</ui-select-match>
+                            <ui-select-choices repeat="checkup in model.checkups | orderBy:'-beg_date'| filter: $select.search | limitTo:50">
+                                <div ng-bind-html="checkup.beg_date | asDate | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Тип мероприятия</label>
                     <div fs-checkbox="" items="rbMeasureType.objects" ng-model="query.measure_type" class="nopadding">
                         [[ item.name ]]
@@ -83,7 +96,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="em in measure_list">
+                            <tr ng-repeat="em in model.measure_list">
                                 <td><span measure-type-icon="em.data.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
                                 <td>[[ em.data.scheme_measure.measure.name ]]</td>
                                 <td>
@@ -93,7 +106,7 @@
                                 <td>[[ em.data.end_datetime | asDate ]]</td>
                                 <td class="nowrap">
                                     <div class="btn-group" style="min-width: 125px">
-                                        <button type="button" class="btn btn-primary" ng-click="viewEventMeasure(measure_list, $index)">
+                                        <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
                                             Просмотр
                                         </button>
                                         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -101,14 +114,14 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                             <li role="menuitem" ng-class="{'disabled': !canEditEmAppointment(em)}">
-                                                <a href="javascript:void(0);" ng-click="openEmAppointment(measure_list, $index)">Редактировать направление</a>
+                                                <a href="javascript:void(0);" ng-click="openEmAppointment($index)">Редактировать направление</a>
                                             </li>
                                             <li role="menuitem" ng-class="{'disabled': !canEditEmResult(em)}">
-                                                <a href="javascript:void(0);" ng-click="openEmResult(measure_list, $index)">Редактировать результат</a>
+                                                <a href="javascript:void(0);" ng-click="openEmResult($index)">Редактировать результат</a>
                                             </li>
                                             <li role="separator" class="divider"></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm(measure_list, $index)">Выполнить</a></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm(measure_list, $index)">Отменить</a></li>
+                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a></li>
+                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
                                         </ul>
                                     </div>
                                 </td>

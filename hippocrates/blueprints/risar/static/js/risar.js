@@ -274,6 +274,9 @@ WebMis20
         cancel: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
         },
+        get_checkups: function (event_measure_id) {
+            return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
+        },
         get_appointment: function (event_measure_id, appointment_id) {
             var url = Config.url.api_event_measure_appointment_get.format(event_measure_id);
             if (appointment_id) {

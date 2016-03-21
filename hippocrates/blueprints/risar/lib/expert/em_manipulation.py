@@ -159,6 +159,8 @@ class EventMeasureSelecter(BaseSelecter):
             self.query = self.query.filter(EventMeasure.event_id == flt['event_id'])
         if 'action_id' in flt:
             self.query = self.query.filter(EventMeasure.sourceAction_id == flt['action_id'])
+        if 'action_id_list' in flt:
+            self.query = self.query.filter(EventMeasure.sourceAction_id.in_(flt['action_id_list']))
         if 'measure_type_id_list' in flt:
             self.query = self.query.join(
                 ExpertSchemeMeasureAssoc, Measure, rbMeasureType

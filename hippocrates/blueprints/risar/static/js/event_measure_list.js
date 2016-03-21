@@ -4,6 +4,10 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     var viewMode;
+    $scope.model = {
+        measure_list: [],
+        checkups: []
+    };
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
     $scope.ps_resolve = function () {
@@ -52,6 +56,7 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
 
     $scope.resetFilters = function () {
         $scope.query = {
+            checkups: [],
             measure_type: [],
             beg_date_from: null,
             beg_date_to: null,
@@ -60,26 +65,26 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
             status: []
         };
     };
-    $scope.viewEventMeasure = function (measures, idx) {
-        var em = measures[idx];
+    $scope.viewEventMeasure = function (idx) {
+        var em = $scope.model.measure_list[idx];
         EMModalService.openView(em.data);
     };
-    $scope.executeEm = function (measures, idx) {
-        var em = measures[idx];
+    $scope.executeEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
         EventMeasureService.execute(em.data)
             .then(function (upd_em) {
-                measures.splice(idx, 1, upd_em);
+                $scope.model.measure_list.splice(idx, 1, upd_em);
             });
     };
-    $scope.cancelEm = function (measures, idx) {
-        var em = measures[idx];
+    $scope.cancelEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
         EventMeasureService.cancel(em.data)
             .then(function (upd_em) {
-                measures.splice(idx, 1, upd_em);
+                $scope.model.measure_list.splice(idx, 1, upd_em);
             });
     };
-    $scope.openEmAppointment = function (measures, idx) {
-        var em = measures[idx];
+    $scope.openEmAppointment = function (idx) {
+        var em = $scope.model.measure_list[idx];
         if ($scope.canEditEmAppointment(em)) {
             EventMeasureService.get_appointment(em)
                 .then(function (appointment) {
@@ -88,13 +93,13 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
                 .then(function (result) {
                     return EventMeasureService.get(em.data.id)
                         .then(function (upd_em) {
-                            measures.splice(idx, 1, upd_em);
+                            $scope.model.measure_list.splice(idx, 1, upd_em);
                         });
                 });
         }
     };
-    $scope.openEmResult = function (measures, idx) {
-        var em = measures[idx];
+    $scope.openEmResult = function (idx) {
+        var em = $scope.model.measure_list[idx];
         if ($scope.canEditEmResult(em)) {
             EventMeasureService.get_em_result(em)
                 .then(function (em_result) {
@@ -103,7 +108,7 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
                 .then(function (result) {
                     return EventMeasureService.get(em.data.id)
                         .then(function (upd_em) {
-                            measures.splice(idx, 1, upd_em);
+                            $scope.model.measure_list.splice(idx, 1, upd_em);
                         });
                 });
         }
@@ -124,6 +129,9 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
             then(function () {
                 $scope.setViewMode('table');
             });
+        RisarApi.measure.get_checkups($scope.event_id).then(function (data) {
+             $scope.model.checkups = data.checkups;
+        });
     };
 
     $scope.open_print_window = function () {
@@ -136,7 +144,6 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
 };
 
 var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
-    $scope.measure_list = [];
     $scope.pager = {
         current_page: 1,
         max_pages: 10,
@@ -144,7 +151,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
     };
 
     var setMeasureData = function (data) {
-        $scope.measure_list = data.measures;
+        $scope.model.measure_list = data.measures;
         $scope.pager.pages = data.total_pages;
         $scope.pager.record_count = data.count;
     };
@@ -154,6 +161,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
         }
         var query = {
             page: $scope.pager.current_page,
+            action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             beg_date_from: $scope.query.beg_date_from ? moment($scope.query.beg_date_from).startOf('day').toDate() : undefined,
             beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
@@ -171,14 +179,16 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
 
     var registered_watchers = [];
     $scope.$on('viewModeChanged', function (event, data) {
-        var w_q, w_qmt, w_qs;
+        var w_q, w_qmt, w_qs, w_qc;
         if (data.mode === 'table') {
             w_q = $scope.$watchCollection('query', function () { tc.start(); });
+            w_qc = $scope.$watchCollection('query.checkups', function () { tc.start(); });
             w_qmt = $scope.$watchCollection('query.measure_type', function () { tc.start(); });
             w_qs = $scope.$watchCollection('query.status', function () { tc.start(); });
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
+            registered_watchers.push(w_qc);
         } else {
             registered_watchers.forEach(function (unwatch) { unwatch(); });
             registered_watchers = [];
@@ -187,12 +197,12 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
 };
 
 var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, TimeoutCallback, uiCalendarConfig) {
-    function makeTask(data) {
+    function makeTask(el) {
         return {
-            title: data.scheme_measure.measure.name,
-            start: data.beg_datetime,
-            end: data.end_datetime,
-            className: 'measure-status-' + data.status.code
+            title: el.data.scheme_measure.measure.name,
+            start: el.data.beg_datetime,
+            end: el.data.end_datetime,
+            className: 'measure-status-' + el.data.status.code
         }
     }
     var refreshMeasureCalendar = function (start, end) {
@@ -200,6 +210,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             paginate: false,
             beg_date_from: start.local().startOf('day').toDate(),
             end_date_to: end.local().endOf('day').toDate(),
+            action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
         };
@@ -248,9 +259,12 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
 
     var registered_watchers = [];
     $scope.$on('viewModeChanged', function (event, data) {
-        var w_q, w_qmt, w_qs;
+        var w_q, w_qmt, w_qs, w_qc;
         if (data.mode === 'calendar') {
             w_q = $scope.$watchCollection('query', function (n, o) {
+                if (n !== o) tc.start();
+            });
+            w_qc = $scope.$watchCollection('query.checkups', function (n, o) {
                 if (n !== o) tc.start();
             });
             w_qmt = $scope.$watchCollection('query.measure_type', function (n, o) {
@@ -262,6 +276,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
+            registered_watchers.push(w_qc);
             if ($scope.chart.last_inspection_date) {
                 uiCalendarConfig.calendars.measureList.fullCalendar('gotoDate', $scope.chart.last_inspection_date);
             }
