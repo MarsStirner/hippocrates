@@ -17,4 +17,5 @@
 {% block modules_js -%}
 {{ super() }}
 <script src="{{ url_for('.static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.widgets.js') }}"></script>
 {%- endblock %}
