@@ -167,11 +167,11 @@ def prepare_action_data(action_desc):
     if 'set_person' in action_desc:
         set_person_id = safe_traverse(action_desc, 'set_person', 'id')
         data['setPerson_id'] = set_person_id
-        data['setPerson'] = Person.query.get(set_person_id)
+        data['setPerson'] = Person.query.get(set_person_id) if set_person_id else None
     if 'person' in action_desc:
         person_id = safe_traverse(action_desc, 'person', 'id')
         data['person_id'] = person_id
-        data['person'] = Person.query.get(person_id)
+        data['person'] = Person.query.get(person_id) if person_id else None
     if 'status' in action_desc:
         data['status'] = safe_traverse(action_desc, 'status', 'id')
     if 'note' in action_desc:
