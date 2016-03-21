@@ -348,7 +348,7 @@ WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$
     'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
     'WMConfig', ActionEditorCtrl]);
 
-WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, EzekielLock) {
+WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, ApiCalls, EzekielLock) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
@@ -486,7 +486,7 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
         return !this.id;
     };
     Action.prototype.save = function () {
-        return save_int(this, '/actions/api/action/{0}'.format(self.id || ''));
+        return save_int(this, '/actions/api/action/{0}'.format(this.id || ''));
     };
     Action.prototype.autosave = function () {
         if (this.id && !_.isNaN(this.id)) {

@@ -716,8 +716,18 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     }
                 }
                 $scope.editing.contract_edited = false;
-            }, function (message) {
-                MessageBox.info('Ошибка сохранения', message);
+            }, function (response) {
+                if (safe_traverse(response, ['result', 'err_code']) === 'err_existing_open_event') {
+                    MessageBox.question(
+                        'ВНИМАНИЕ!',
+                        'Пациент на данный момент находится на стационарном лечении. Все равно продолжить?'
+                    ).then(function () {
+                        $scope.event.force_create = true;
+                        $scope.save_event();
+                    });
+                } else {
+                    MessageBox.info('Ошибка сохранения', response.meta.name);
+                }
             });
         } else {
             var formelm = $('#eventForm').find('.ng-invalid:not(ng-form):first');

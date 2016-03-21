@@ -36,12 +36,13 @@ logger = logging.getLogger('simple')
 @module.errorhandler(EventSaveException)
 def handle_event_error(err):
     base_msg = u'Ошибка сохранения данных обращения'
+    obj = err.data.get('obj') if err.data else None
     code = err.data and err.data.get('code') or 500
     msg = err.message or base_msg
     ext_msg = err.data and err.data.get('ext_msg') or ''
     if ext_msg:
         msg = u'%s: %s' % (msg, ext_msg)
-    return jsonify(None, code, msg)
+    return jsonify(obj, code, msg)
 
 
 @module.route('/api/event_info.json')

@@ -4,18 +4,20 @@ import datetime
 import logging
 
 from flask.ext.login import current_user
-from sqlalchemy import func
+from sqlalchemy import func, exists, join, and_, or_
 
 from nemesis.lib.data import create_new_action, update_action, ActionException
 from nemesis.lib.user import UserUtils
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_OrgStructure
 from nemesis.models.client import Client
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
-from nemesis.models.exists import rbDocumentType, Person
+from nemesis.models.exists import rbDocumentType, Person, rbRequestType
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
+from nemesis.lib.const import (STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, STATIONARY_MOVING_CODE,
+   STATIONARY_ORG_STRUCT_TRANSFER_CODE)
 
 logger = logging.getLogger('simple')
 
@@ -26,7 +28,7 @@ class EventSaveException(Exception):
         self.data = data
 
 
-def create_new_event(event_data, local_contract_data):
+def create_new_event(event_data, local_contract_data, force_create=False):
     base_msg = u'Невозможно создать обращение: %s.'
     event = Event()
     event.setPerson_id = current_user.get_main_user().id
@@ -48,9 +50,10 @@ def create_new_event(event_data, local_contract_data):
     event.uuid = get_new_uuid()
 
     error_msg = {}
-    if not UserUtils.can_create_event(event, error_msg):
+    if not UserUtils.can_create_event(event, error_msg, force_create):
         raise EventSaveException(base_msg % error_msg['message'], {
-            'code': 403
+            'code': 403,
+            'obj': error_msg.get('obj')
         })
 
     if event.payer_required:
@@ -101,6 +104,7 @@ def save_event(event_id, data):
         raise EventSaveException(data={
             'ext_msg': u'Отсутствует основная информация об обращении'
         })
+    force_create = data.get('force_create', False)
     create_mode = not event_id
     local_contract_data = safe_traverse(data, 'payment', 'local_contract')
     services_data = data.get('services', [])
@@ -108,7 +112,7 @@ def save_event(event_id, data):
         event = update_event(event_id, event_data, local_contract_data)
         db.session.add(event)
     else:
-        event = create_new_event(event_data, local_contract_data)
+        event = create_new_event(event_data, local_contract_data, force_create)
     db.session.add(event)
 
     result = {}
@@ -382,3 +386,90 @@ def create_services(event_id, service_groups, contract_id):
                 else:
                     actions.append(action)
     return actions, errors
+
+
+def check_existing_open_events(client_id, request_type_kind):
+    """Проверить, есть для данного пациента открытые ИБ или обращения.
+
+    Для стационарных ИБ (request_type_kind = 'stationary') открытым считается Event, у которого нет
+    даты окончания + последнее движение либо не имеет даты окончания, либо имеет дату окончания,
+    но поле 'Переведен в отделение' имеет непустое значение.
+    Для поликлинических обращений (request_type_kind = 'policlinic') открытым считается Event, у которого нет
+    даты окончания.
+
+    :returns True если имеются открытые Event, иначе False
+    """
+    from_ = join(
+        Event, EventType,
+        Event.eventType_id == EventType.id
+    ).join(
+        rbRequestType, EventType.requestType_id == rbRequestType.id
+    )
+    request_type_codes = []
+    if request_type_kind == 'stationary':
+        request_type_codes = STATIONARY_EVENT_CODES
+
+        # event latest action moving
+        q_action_begdates = db.session.query(Action).join(
+            Event, EventType, rbRequestType, ActionType,
+        ).filter(
+            Event.deleted == 0, Action.deleted == 0, rbRequestType.code.in_(request_type_codes),
+            ActionType.flatCode == STATIONARY_MOVING_CODE, Event.client_id == client_id
+        ).with_entities(
+            func.max(Action.begDate).label('max_beg_date'), Event.id.label('event_id')
+        ).group_by(
+            Event.id
+        ).subquery('MaxActionBegDates')
+
+        q_latest_movings = db.session.query(Action).join(
+            q_action_begdates, and_(q_action_begdates.c.max_beg_date == Action.begDate,
+                                    q_action_begdates.c.event_id == Action.event_id)
+        ).with_entities(
+            Action.id.label('action_id')
+        ).subquery('EventLatestMovings')
+
+        q_moving_ap = db.session.query(Action).join(
+            Event, ActionProperty, ActionType, ActionPropertyType, ActionProperty_OrgStructure
+        ).filter(
+            Action.deleted == 0, ActionProperty.deleted == 0, ActionType.flatCode == STATIONARY_MOVING_CODE,
+            ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE, Event.client_id == client_id
+        ).with_entities(
+            Action.id.label('action_id'), ActionProperty_OrgStructure.value.label('os_id')
+        ).subquery('MovingTransferOs')
+
+        q_latest_moving = db.session.query(Action).join(
+            q_latest_movings, q_latest_movings.c.action_id == Action.id
+        ).outerjoin(
+            q_moving_ap, q_moving_ap.c.action_id == Action.id
+        ).with_entities(
+            Action.id.label('action_id'), Action.begDate.label('beg_date'), Action.event_id.label('event_id'),
+            Action.endDate.label('end_date'), q_moving_ap.c.os_id.label('os_id')
+        ).order_by(
+            Action.id.desc()
+        ).limit(1).subquery('EventLatestMoving')
+
+        from_ = from_.outerjoin(
+            q_latest_moving, Event.id == q_latest_moving.c.event_id
+        )
+    elif request_type_kind == 'policlinic':
+        request_type_codes = POLICLINIC_EVENT_CODES
+    else:
+        raise ValueError('unknown `request_type_kind`')
+
+    result = exists().select_from(
+        from_
+    ).where(
+        rbRequestType.code.in_(request_type_codes)
+    ).where(
+        Event.client_id == client_id
+    ).where(
+        Event.execDate.is_(None)
+    )
+    if request_type_kind == 'stationary':
+        result = result.where(
+            or_(
+                q_latest_moving.c.end_date.is_(None),
+                q_latest_moving.c.os_id.isnot(None)
+            )
+        )
+    return db.session.query(result).scalar()
