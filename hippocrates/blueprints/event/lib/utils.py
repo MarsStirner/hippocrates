@@ -469,7 +469,8 @@ def check_existing_open_events(client_id, request_type_kind):
         result = result.where(
             or_(
                 q_latest_moving.c.end_date.is_(None),
-                q_latest_moving.c.os_id.isnot(None)
+                and_(q_latest_moving.c.os_id.isnot(None),
+                     q_latest_moving.c.os_id != 0)
             )
         )
     return db.session.query(result).scalar()
