@@ -11,6 +11,7 @@ from dateutil.parser import parse as date_parse
 
 from blueprints.risar.views.api.integration.schemas import ClientSchema
 from nemesis.lib.apiutils import ApiException
+from nemesis.lib.utils import safe_date
 from nemesis.models.client import Client, ClientIdentification, ClientDocument, ClientPolicy, BloodHistory, \
     ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse
 
@@ -59,7 +60,17 @@ class ClientXForm(XForm, ClientSchema):
     new = False
     rbAccountingSystem = None
     external_system_id = None
-    external_client_id = None
+    _external_client_id = None
+
+    @property
+    def external_client_id(self):
+        if self.rbAccountingSystem:
+            return self._external_client_id
+        return self.client.id
+
+    @external_client_id.setter
+    def external_client_id(self, value):
+        self._external_client_id = value
 
     def set_external_system(self, external_system_id):
         self.external_system_id = external_system_id
@@ -69,7 +80,7 @@ class ClientXForm(XForm, ClientSchema):
 
     def _find_client_query(self, external_client_id):
         if not self.rbAccountingSystem:
-            raise Exception('rbAccountingSystem not set')
+            return Client.query.filter(Client.id == external_client_id)
         return Client.query.join(ClientIdentification).filter(
             ClientIdentification.identifier == external_client_id,
             ClientIdentification.accountingSystems == self.rbAccountingSystem,
@@ -78,24 +89,10 @@ class ClientXForm(XForm, ClientSchema):
     def find_client(self, external_client_id=None, data=None):
         self.external_client_id = external_client_id
         if external_client_id is None:
-            # Нас просят создать пациента, но мы должны убедиться, что с таким ИД пациента ещё нет
-
             # Ручная валидация
             if data is None:
                 raise Exception('ClientXForm.find_client called for creation without "data"')
 
-            if 'patient_external_code' not in data:
-                raise ApiException(406, 'Validation error', errors=[{
-                    'error': '"patient_external_code" is required',
-                    'instance': data,
-                    'path': '/',
-                }])
-
-            # Ищем клиента
-            self.external_client_id = external_client_id = data['patient_external_code']
-            if self._find_client_query(external_client_id).count():
-                raise ApiException(400, u'Client already registered')
-                # self.client = self._find_client_query(external_client_id).first()
             client = Client()
             db.session.add(client)
             self.new = True
@@ -142,14 +139,15 @@ class ClientXForm(XForm, ClientSchema):
         client.birthDate = date_parse(data['birthday_date'])
         client.sexCode = data['gender']
         client.SNILS = data['SNILS'].replace('-', '')
-        ident = client.identifications.filter(ClientIdentification.accountingSystems == self.rbAccountingSystem).first()
-        if not ident:
-            ident = ClientIdentification()
-            ident.accountingSystems = self.rbAccountingSystem
-            ident.checkDate = datetime.date.today()
-            ident.client = client
-            db.session.add(ident)
-        ident.identifier = data.get('patient_external_code', self.external_client_id)
+        if self.rbAccountingSystem:
+            ident = client.identifications.filter(ClientIdentification.accountingSystems == self.rbAccountingSystem).first()
+            if not ident:
+                ident = ClientIdentification()
+                ident.accountingSystems = self.rbAccountingSystem
+                ident.checkDate = datetime.date.today()
+                ident.client = client
+                db.session.add(ident)
+            ident.identifier = data.get('id', self.external_client_id)
 
     def _update_id_document(self, data):
         client = self.client
@@ -162,7 +160,9 @@ class ClientXForm(XForm, ClientSchema):
         document.documentType = doc_type
         document.serial = data['document_series']
         document.number = data['document_number']
-        document.date = data['document_beg_date']
+        # Есть странная бага в cymysql или SqlAlchemy, из-за которой некоторые строки не преобразуются в str, и
+        # Query в UTF-8 не может шаблонизироваться unicode-ным параметром
+        document.date = safe_date(data['document_beg_date'])
         document.origin = data['document_issuing_authority']
 
     def _update_policies(self, policies):
@@ -170,6 +170,7 @@ class ClientXForm(XForm, ClientSchema):
         rbpt_map = dict(
             (str(item.TFOMSCode) or item.code, item)
             for item in rbPolicyType.query
+            if item.TFOMSCode
         )
 
         client_policies = client.policies.all()
@@ -260,7 +261,7 @@ class ClientXForm(XForm, ClientSchema):
     def as_json(self):
         client = self.client
         return {
-            'id': client.id,
+            'id': self.external_client_id,
             'FIO': {
                 'name': client.firstName,
                 'middlename': client.patrName,
@@ -364,7 +365,10 @@ class ClientXForm(XForm, ClientSchema):
         :param client:
         :return:
         """
-        ident = client.identifications.join(rbAccountingSystem).filter(rbAccountingSystem.code == 'Mis-Bars').first()
-        if ident:
-            return ident.identifier
+        if self.rbAccountingSystem:
+            ident = client.identifications.filter(
+                ClientIdentification.accountingSystems == self.rbAccountingSystem
+            ).first()
+            if ident:
+                return ident.identifier
 

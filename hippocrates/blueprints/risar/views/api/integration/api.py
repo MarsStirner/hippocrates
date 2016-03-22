@@ -23,26 +23,24 @@ def api_client_schema(api_version):
         raise ApiException(404, u'Api version %i is not supported. Maximum is %i' % (api_version, len(ClientXForm.schema) - 1))
 
 
-@module.route('/api/integration/<int:api_version>/client/<external_system_id>/<external_client_id>', methods=['GET'])
+@module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['GET'])
 @api_method(hook=hook)
-def api_client_get(api_version, external_system_id, external_client_id):
+def api_client_get(api_version, client_id):
     xform = ClientXForm()
     xform.set_version(api_version)
-    xform.set_external_system(external_system_id)
-    xform.find_client(external_client_id)
+    xform.find_client(client_id)
     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/client/<external_system_id>/<external_client_id>', methods=['PUT'])
-@module.route('/api/integration/<int:api_version>/client/<external_system_id>/', methods=['POST'])
+@module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['PUT'])
+@module.route('/api/integration/<int:api_version>/client/', methods=['POST'])
 @api_method(hook=hook)
-def api_client_save(api_version, external_system_id, external_client_id=None):
+def api_client_save(api_version, client_id=None):
     data = request.get_json()
     xform = ClientXForm()
     xform.set_version(api_version)
     xform.validate(data)
-    xform.set_external_system(external_system_id)
-    xform.find_client(external_client_id, data)
+    xform.find_client(client_id, data)
     xform.update_client(data)
     db.session.add(xform.client)
     db.session.commit()
