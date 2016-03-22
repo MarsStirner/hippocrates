@@ -124,18 +124,24 @@ class ClientXForm(XForm, ClientSchema):
     def update_client(self, data):
         with db.session.no_autoflush:
             self._update_main_data(data)
-            self._update_id_document(data['document'])
-            self._update_policies(data['insurance_documents'])
-            self._update_address(data['residential_address'])
-            self._update_blood(data['blood_type_info'])
-            self._update_allergies(data['allergies_info'])
-            self._update_intolerances(data['medicine_intolerance_info'])
+            if 'document' in data:
+                self._update_id_document(data['document'])
+            if 'insurance_documents' in data:
+                self._update_policies(data['insurance_documents'])
+            if 'residential_address' in data:
+                self._update_address(data['residential_address'])
+            if 'blood_type_info' in data:
+                self._update_blood(data['blood_type_info'])
+            if 'allergies_info' in data:
+                self._update_allergies(data['allergies_info'])
+            if 'medicine_intolerance_info' in data:
+                self._update_intolerances(data['medicine_intolerance_info'])
 
     def _update_main_data(self, data):
         client = self.client
         client.firstName = data['FIO']['name']
         client.lastName = data['FIO']['surname']
-        client.patrName = data['FIO'].get('middlename')
+        client.patrName = data['FIO'].get('middlename') or ''
         client.birthDate = date_parse(data['birthday_date'])
         client.sexCode = data['gender']
         client.SNILS = data['SNILS'].replace('-', '')

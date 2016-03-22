@@ -2,7 +2,7 @@
 from flask import request
 
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import public_endpoint
+from nemesis.lib.utils import public_endpoint, public_api
 from nemesis.systemwide import db
 from ....app import module
 
@@ -25,6 +25,7 @@ def api_client_schema(api_version):
 
 @module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['GET'])
 @api_method(hook=hook)
+@public_api
 def api_client_get(api_version, client_id):
     xform = ClientXForm()
     xform.set_version(api_version)
@@ -35,6 +36,7 @@ def api_client_get(api_version, client_id):
 @module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/client/', methods=['POST'])
 @api_method(hook=hook)
+@public_api
 def api_client_save(api_version, client_id=None):
     data = request.get_json()
     xform = ClientXForm()
