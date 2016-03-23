@@ -9,24 +9,7 @@
         <div alert-notify></div>
         {% if debug_data %}<pre>{{ debug_data.ca }}</pre>{% endif %}
         {{ rimacros.page_title_ext_n('Карта пациентки', 'chart') }}
-        <div class="novmargin">
-            <div class="btn-group">
-                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-primary">Карта пациентки</a>
-                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
-                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" class="btn btn-default">Осмотры</a>
-                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
-                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
-                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-                <a href="#" class="btn btn-default" ng-click="create_errand()">Создать поручение</a>
-                <div class="btn-group">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-                    <ul role="menu" class="dropdown-menu">
-                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
-                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">Мероприятия случая</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        {{ rimacros.navigation('[[ chart.id ]]') }}
     </section>
     <section class="content">
         <div class="row">
@@ -74,11 +57,24 @@
                             </tr>
                             <tr>
                                 <td class="text-right">Заболевания:</td>
-                                <td>Перенесенные</br>
-                                Текущие
+                                <td>Перенесенные</td>
+                                <td>
+                                    <span ng-repeat="mkb in chart.anamnesis.mother.finished_diseases" tooltip="[[ mkb.name ]]">
+                                        <span class="bottom_dotted">[[mkb.code]]</span>[[$last ? '' : ', ']]
+                                    </span>
+                                    <span ng-if="chart.anamnesis.mother.finished_diseases.length"><br></span>[[chart.anamnesis.mother.finished_diseases_text]]
+                                    [[!chart.anamnesis.mother.finished_diseases.length && !chart.anamnesis.mother.finished_diseases_text ? 'нет' : '']]</br>
                                 </td>
-                                <td><span ng-repeat="diag in chart.anamnesis.mother.finished_diseases" tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.finished_diseases ? '' : 'нет']]</br>
-                                <span ng-repeat="diag in chart.anamnesis.mother.current_diseases" tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'нет']]
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Текущие</td>
+                                <td>
+                                    <span ng-repeat="mkb in chart.anamnesis.mother.current_diseases" tooltip="[[ mkb.name ]]">
+                                        <span class="bottom_dotted">[[mkb.code]]</span>[[$last ? '' : ', ']]
+                                    </span>
+                                    <span ng-if="chart.anamnesis.mother.current_diseases.length"><br></span>[[chart.anamnesis.mother.current_diseases_text]]
+                                    [[!chart.anamnesis.mother.current_diseases.length  && !chart.anamnesis.mother.current_diseases_text ? 'нет' : '']]
                                 </td>
                             </tr>
                             <tr>

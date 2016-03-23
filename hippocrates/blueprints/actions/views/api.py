@@ -1,31 +1,37 @@
 # -*- coding: utf-8 -*-
 import collections
 import datetime
+import logging
 
 from flask import request, abort, url_for
 
 from flask.ext.login import current_user
 
+from blueprints.actions.lib.models import ActionAutoSave
 from ..app import module
 from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action
+    get_patient_location, delete_action, ActionServiceException
+from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import rlsNomen, rlsTradeName
+from nemesis.models.enums import ActionStatus
 from nemesis.systemwide import db, cache
-from nemesis.lib.action.utils import check_at_service_requirement
 
 
 __author__ = 'viruzzz-kun'
+
+
+logger = logging.getLogger('simple')
 
 
 prescriptionFlatCodes = (
@@ -34,6 +40,10 @@ prescriptionFlatCodes = (
     u'analgesia',
     u'chemotherapy',
 )
+
+
+def delete_all_autosaves(action_id):
+    ActionAutoSave.query.filter(ActionAutoSave.action_id == action_id).delete()
 
 
 @module.route('/api/action/new/')
@@ -57,11 +67,19 @@ def api_action_new_get(action_type_id, event_id):
 @module.route('/api/action/<int:action_id>', methods=['GET'])
 @api_method
 def api_action_get(action_id):
-    action = Action.query.get(action_id)
-    v = ActionVisualizer()
-    if is_template_action(action):
-        return v.make_action_wo_sensitive_props(action)
-    return v.make_action(action)
+    with db.session.no_autoflush:
+        action = Action.query.get(action_id)
+        v = ActionVisualizer()
+        if is_template_action(action):
+            return v.make_action_wo_sensitive_props(action)
+        autosave = ActionAutoSave.query.filter(
+            ActionAutoSave.action_id == action_id,
+            ActionAutoSave.user_id == safe_current_user_id(),
+        ).first()
+        if autosave and autosave.data:
+            data = prepare_action_data(autosave.data)
+            update_action(action, **data)
+        return v.make_action(action)
 
 
 @module.route('/api/action/query/previous', methods=['GET'])
@@ -92,7 +110,6 @@ def api_find_previous():
     return ActionVisualizer().make_action_wo_sensitive_props(prev)
 
 
-
 @module.route('/api/action/', methods=['DELETE'])
 @module.route('/api/action/<int:action_id>', methods=['DELETE'])
 @api_method
@@ -106,7 +123,73 @@ def api_delete_action(action_id=None):
         delete_action(action)
     except Exception, e:
         raise ApiException(403, unicode(e))
+    delete_all_autosaves(action_id)
     db.session.commit()
+
+
+@module.route('/api/action/<int:action_id>/autosave/', methods=['POST'])
+@api_method
+def api_action_autosave(action_id):
+    autosave = ActionAutoSave.query.filter(
+        ActionAutoSave.action_id == action_id,
+        ActionAutoSave.user_id == safe_current_user_id(),
+    ).first()
+    if not autosave:
+        autosave = ActionAutoSave()
+        autosave.action_id = action_id
+        db.session.add(autosave)
+    autosave.data = request.get_json()
+    db.session.commit()
+
+
+@module.route('/api/action/<int:action_id>/autosave/', methods=['DELETE'])
+@api_method
+def api_action_autosave_delete(action_id):
+    ActionAutoSave.query.filter(
+        ActionAutoSave.action_id == action_id,
+        ActionAutoSave.user_id == safe_current_user_id(),
+    ).delete()
+    db.session.commit()
+
+
+def prepare_action_data(action_desc):
+    data = {}
+    if 'beg_date' in action_desc:
+        data['begDate'] = safe_datetime(action_desc['beg_date'])
+    if 'end_date' in action_desc:
+        data['endDate'] = safe_datetime(action_desc['end_date'])
+    if 'planned_end_date' in action_desc:
+        data['plannedEndDate'] = safe_datetime(action_desc['planned_end_date'])
+    if 'direction_date' in action_desc:
+        data['directionDate'] = safe_datetime(action_desc['direction_date'])
+    if 'is_urgent' in action_desc:
+        data['isUrgent'] = action_desc['is_urgent']
+    if 'set_person' in action_desc:
+        set_person_id = safe_traverse(action_desc, 'set_person', 'id')
+        data['setPerson_id'] = set_person_id
+        data['setPerson'] = Person.query.get(set_person_id) if set_person_id else None
+    if 'person' in action_desc:
+        person_id = safe_traverse(action_desc, 'person', 'id')
+        data['person_id'] = person_id
+        data['person'] = Person.query.get(person_id) if person_id else None
+    if 'status' in action_desc:
+        data['status'] = safe_traverse(action_desc, 'status', 'id')
+    if 'note' in action_desc:
+        data['note'] = action_desc['note']
+    if 'amount' in action_desc:
+        data['amount'] = action_desc['amount']
+    data['account'] = action_desc.get('account') or 0
+    if 'uet' in action_desc:
+        data['uet'] = action_desc['uet']
+    data['payStatus'] = action_desc.get('payStatus') or 0
+    if 'coord_date' in action_desc:
+        data['coordDate'] = safe_datetime(action_desc['coord_date'])
+    if 'office' in action_desc:
+        data['office'] = action_desc['office']
+
+    data['prescriptions'] = action_desc.get('prescriptions')
+    data['properties'] = action_desc.get('properties')
+    return data
 
 
 @module.route('/api/action/', methods=['POST'])
@@ -118,30 +201,8 @@ def api_action_post(action_id=None):
     action_desc = request.get_json()
     set_person_id = safe_traverse(action_desc, 'set_person', 'id')
     person_id = safe_traverse(action_desc, 'person', 'id')
-    data = {
-        'begDate': safe_datetime(action_desc['beg_date']),
-        'endDate': safe_datetime(action_desc['end_date']),
-        'plannedEndDate': safe_datetime(action_desc['planned_end_date']),
-        'directionDate': safe_datetime(action_desc['direction_date']),
-        'isUrgent': action_desc['is_urgent'],
-        'status': action_desc['status']['id'],
-        'setPerson_id': set_person_id,
-        'person_id':  person_id,
-        'setPerson': Person.query.get(set_person_id) if set_person_id else None,
-        'person':  Person.query.get(person_id) if person_id else None,
-        'note': action_desc['note'],
-        'amount': action_desc['amount'],
-        'account': action_desc['account'] or 0,
-        'uet': action_desc['uet'],
-        'payStatus': action_desc['pay_status'] or 0,
-        'coordDate': safe_datetime(action_desc['coord_date']),
-        'office': action_desc['office'],
-        'prescriptions': action_desc.get('prescriptions')
-    }
-    service_data = action_desc.get('service')
-    properties_desc = action_desc['properties']
+    data = prepare_action_data(action_desc)
     if action_id:
-        data['properties'] = properties_desc
         action = Action.query.get(action_id)
         if not action:
             raise ApiException(404, 'Action %s not found' % action_id)
@@ -162,6 +223,7 @@ def api_action_post(action_id=None):
         if set_person_id != action.setPerson_id:
             subscriptions.append(set_person_id)
         action = update_action(action, **data)
+        delete_all_autosaves(action_id)
     else:
         at_id = safe_traverse(action_desc, 'action_type', 'id', default=action_desc['action_type_id'])
         if not at_id:
@@ -181,10 +243,16 @@ def api_action_post(action_id=None):
                 'reason': 'exec_assigned',
             })
         try:
-            action = create_new_action(at_id, event_id, properties=properties_desc, data=data,
-                                       service_data=service_data)
-        except Exception, e:
-            raise ApiException(500, e.message)
+            properties_desc = data.pop('properties')
+            service_data = action_desc.get('service')
+            action = create_new_action(at_id, event_id, properties=properties_desc, data=data, service_data=service_data)
+        except ActionServiceException, e:
+            logger.error(unicode(e), exc_info=True)
+            raise ApiException(500, u'Ошибка в настройках услуг и прайс-листов')
+
+    diagnoses_data = action_desc.get('diagnoses')
+    if diagnoses_data:
+        create_or_update_diagnoses(action, diagnoses_data)
 
     db.session.add(action)
     db.session.commit()
@@ -439,17 +507,3 @@ def api_search_rls():
             .filter(rlsTradeName.localName.like(query_string))
 
     return base_query.limit(limit).all()
-
-
-@module.route('/api/check_service_requirement/')
-@module.route('/api/check_service_requirement/<int:action_type_id>')
-@api_method
-def api_check_action_service_requirement(action_type_id=None):
-    if not action_type_id:
-        raise ApiException(404, '`action_type_id` reuqired')
-
-    try:
-        res = check_at_service_requirement(action_type_id)
-    except Exception, e:
-        raise ApiException(500, e.message)
-    return res

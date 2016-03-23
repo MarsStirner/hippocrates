@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, PrintingService, PrintingDialog,
+var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
         RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig, AccountingService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
@@ -11,9 +11,23 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         }
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
+    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisTypeN');
+
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
+
+    // Здесь начинается хрень
+    //var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
+    //    on_user_activity = _.throttle(_autosave, 10000);
+    //function _autosave () {
+    //    $scope.action.autosave();
+    //}
+    //function _set_tracking(on) {
+    //    $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
+    //}
+    //_set_tracking(true);
+    // Здесь она типа заканчивается
 
     $scope.init = function () {
         if (params.action_id) {
@@ -44,23 +58,23 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             ).then(function (action) {
                 $scope.action = action;
                 update_print_templates(action.action_type.context_name);
+
+                if (params.price_list_item_id && params.service_kind_id) {
+                    AccountingService.get_service(undefined, {
+                        price_list_item_id: params.price_list_item_id,
+                        service_kind_id: params.service_kind_id,
+                        event_id: params.event_id,
+                        serviced_entity_from_search: {
+                            action_type_id: params.action_type_id
+                        }
+                    }).then(function (new_service) {
+                        $scope.action.service = new_service;
+                    });
+                }
             });
             WMEventCache.get(parseInt(params.event_id)).then(function (event) {
                 $scope.event = event;
             });
-
-            if (params.price_list_item_id && params.service_kind_id) {
-                AccountingService.get_service(undefined, {
-                    price_list_item_id: params.price_list_item_id,
-                    service_kind_id: params.service_kind_id,
-                    event_id: params.event_id,
-                    serviced_entity_from_search: {
-                        action_type_id: params.action_type_id
-                    }
-                }).then(function (new_service) {
-                    $scope.action.service = new_service;
-                });
-            }
         }
     };
 
@@ -137,7 +151,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             return deferred.promise;
         });
     };
-    $scope.cancel = function () { $window.close() };
+    $scope.cancel = function () {
+        $scope.action.discard().then($window.close, $window.close);
+    };
     $scope.check_can_save_action = function () {
         function check_diagnoses_conflicts(event, action) {
             var deferred = $q.defer();
@@ -167,11 +183,32 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                         diag.diagnosis_type.code === '1' &&
                         safe_traverse(diag, ['action', 'status', 'code']) === 'finished');
                 });
-            if (action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
+            if (action.status && action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
                 deferred.reject({
                     silent: false,
                     message: 'В обращении уже есть закрытые осмотры с заключительным дагнозом. ' +
                         'Нельзя указывать больше одного заключительного диагноза в обращении.'
+                });
+            }
+            deferred.resolve();
+            return deferred.promise;
+        }
+
+        function check_diagnosis (action){
+            var deferred = $q.defer();
+            var diags_without_result = action.diagnoses.filter(function(diag){
+                for (var diag_type_code in diag.diagnosis_types){
+                    var diag_type = $scope.rbDiagnosisType.get_by_code(diag_type_code);
+                    if (diag.diagnosis_types[diag_type_code].code != 'associated' && diag_type.require_result && !diag.diagnostic.ache_result){
+                        return true
+                    }
+                }
+                return false
+            })
+            if (action.status.code === 'finished' && diags_without_result.length) {
+                deferred.reject({
+                    silent: false,
+                    message: 'Необходимо указать результат для дагнозов.'
                 });
             }
             deferred.resolve();
@@ -185,7 +222,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                 message: 'Действие открыто в режиме чтения'
             });
         } else {
-            return check_diagnoses_conflicts($scope.event, $scope.action);
+            return check_diagnosis($scope.action);
         }
         return deferred.promise;
     };
@@ -208,7 +245,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                             mode: 'save'
                         }
                     }
-                }
+                },
+                backdrop : 'static'
             })
         }
         if ($scope.action.readonly) {
@@ -221,6 +259,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         $modal.open({
             templateUrl: '_action_template_load_model.html',
             controller: ActionTemplateController,
+            backdrop : 'static',
             size: 'lg',
             resolve: {
                 args: function () {
@@ -243,7 +282,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         })
     };
 
-    $scope.init();
+    $q.all([$scope.ActionStatus.loading, $scope.rbDiagnosisType.loading]).then($scope.init);
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
     $scope.model = {
@@ -343,7 +382,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     load_tree();
 };
 
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', 'WMAction', 'PrintingService',
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
     'WMConfig', 'AccountingService', ActionEditorCtrl]);
 
@@ -351,7 +390,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'service'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -402,6 +441,20 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
                 self.properties_by_code[item.type.code] = item;
             }
         });
+    }
+    function save_int (self, url) {
+        var data = {};
+        merge_fields(data, self);
+        data.diagnoses = self._get_entity_changes('diagnoses');
+        data.action_type_id = self.action_type_id || self.action_type.id;
+        merge_properties(data, self);
+        data.id = self.id;
+        return ApiCalls.wrapper('POST', url, undefined, data)
+            .then(function (result) {
+                return self.merge(result);
+            }, function (result) {
+                return $q.reject(result);
+            });
     }
     /* class methods */
     Action.get = function (id) {
@@ -479,20 +532,21 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         return !this.id;
     };
     Action.prototype.save = function () {
-        var self = this,
-            data = {},
-            url = '/actions/api/action/{0}'.format(self.id || '');
-        merge_fields(data, this);
-        data.action_type_id = this.action_type_id || this.action_type.id;
-        merge_properties(data, this);
-        data.id = self.id;
-        return ApiCalls.wrapper('POST', url, undefined, data)
-            .then(function (result) {
-                return self.merge(result);
-            }, function (result) {
-                return $q.reject(result);
-            })
-        ;
+        return save_int(this, '/actions/api/action/{0}'.format(this.id || ''));
+    };
+    Action.prototype.autosave = function () {
+        if (this.id && !_.isNaN(this.id)) {
+            return save_int(this, '/actions/api/action/{0}/autosave/'.format(this.id));
+        } else {
+            return $q.defer().resolve(null);
+        }
+    };
+    Action.prototype.discard = function () {
+        if (this.id && !_.isNaN(this.id)) {
+            return ApiCalls.wrapper('DELETE', '/actions/api/action/{0}/autosave/'.format(this.id))
+        } else {
+            return $q.defer().resolve(null);
+        }
     };
     Action.prototype.reload = function () {
         var self = this;
@@ -510,6 +564,17 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
         return prop ? prop.type.is_assignable : false;
+    };
+    Action.prototype._get_entity_changes = function(entity) {
+        var dirty_elements = this[entity].filter(function(el) {
+            return el.kind_changed || el.diagnostic_changed;
+        });
+        var deleted_elements = [];
+//        var deleted_elements = this.deleted_entities[entity] || [];
+        var changes = dirty_elements.concat(deleted_elements.filter(function(del_elmnt) {
+            return dirty_elements.indexOf(del_elmnt) === -1;
+        }));
+        return changes.length ? changes : undefined;
     };
     return Action;
 }]);

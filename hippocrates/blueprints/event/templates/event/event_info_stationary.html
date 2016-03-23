@@ -38,23 +38,24 @@
                                 <wm-client-info client="event.info.client"></wm-client-info>
                             </div>
                         </div>
-                        {% if event and event.is_stationary %}
-                            {% include "event/_stationary_info.html" %}
-                        {% endif %}
                         <ng-form name="event_maininfo_form" toc-element="Информация об госпитализации">
-                            <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Информация о госпитализации</h3>
-                                    <div class="box-tools pull-right">
-                                        <button class="btn btn-box-tool" data-widget="collapse">
-                                            <i class="fa" ng-class="{'fa-minus': event.is_new(), 'fa-plus': !event.is_new()}"></i>
-                                        </button>
+                            {% if event %}
+                                {% include "event/_stationary_info.html" %}
+                            {% else %}
+                                <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Информация о госпитализации</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse">
+                                                <i class="fa" ng-class="{'fa-minus': event.is_new(), 'fa-plus': !event.is_new()}"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        {% include "event/_main_info.html" %}
                                     </div>
                                 </div>
-                                <div class="box-body">
-                                    {% include "event/_main_info.html" %}
-                                </div>
-                            </div>
+                            {% endif %}
                         </ng-form>
                         {% if event and event.is_stationary and (event.is_vmp or event.is_oms) %}
                             {% include "event/_event_vmp_coupon.html" %}

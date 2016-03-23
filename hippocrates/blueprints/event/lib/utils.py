@@ -7,6 +7,7 @@ from flask.ext.login import current_user
 from sqlalchemy import func
 
 from nemesis.lib.data import create_new_action, update_action, ActionException, create_action
+from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
 from nemesis.models.client import Client
@@ -249,6 +250,7 @@ def save_event(event_id, data):
 def received_save(event_id, received_data):
     received_ctrl = ReceivedController()
     received_id = received_data['id']
+    diagnoses_data = received_data.get('diagnoses')
     if received_id:
         received = Action.query.get(received_id)
         if not received:
@@ -256,13 +258,17 @@ def received_save(event_id, received_data):
         received = received_ctrl.update_received_data(received, received_data)
     else:
         received = received_ctrl.create_received(event_id, received_data)
+
+    if diagnoses_data:
+        create_or_update_diagnoses(received, diagnoses_data)
     db.session.add(received)
     db.session.commit()
 
 
 def client_quota_save(event, quota_data):
     quota_id = quota_data.get('id')
-    coupon = VMPCoupon.query.get(safe_traverse(quota_data, 'coupon', 'id'))
+    coupon_id = safe_traverse(quota_data, 'coupon', 'id')
+    coupon = VMPCoupon.query.get(coupon_id) if coupon_id else None
     with db.session.no_autoflush:
         if quota_id:
             quota = ClientQuoting.query.get(quota_id)

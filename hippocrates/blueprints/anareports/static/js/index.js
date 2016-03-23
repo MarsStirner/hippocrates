@@ -64,6 +64,7 @@ var IndexCtrl = function ($scope, $modal, PrintingService) {
                         $modalInstance.dismiss('cancel');
                     };
                 },
+                backdrop : 'static',
                 size: 'lg'
             });
         } else {

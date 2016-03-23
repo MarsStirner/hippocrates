@@ -7,23 +7,7 @@
 <div ng-controller="AnamnesisCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_n('Анамнез пациентки') }}
-        <div class="novmargin">
-            <div class="btn-group">
-                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
-                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]" class="btn btn-primary">Анамнез</a>
-                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ event_id ]]" class="btn btn-default">Осмотры</a>
-                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ event_id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
-                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ event_id ]]" class="btn btn-default">Эпикриз</a>
-                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-                <div class="btn-group">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-                    <ul role="menu" class="dropdown-menu">
-                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ event_id ]]">Диагнозы случая</a></li>
-                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ event_id ]]">Мероприятия случая</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
         <tabset justified="true" class="nav-tabs-custom">
@@ -125,22 +109,26 @@
                         <td>Перенесенные заболевания</td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.mother.finished_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="!anamnesis.mother.finished_diseases.length">нет</span>
+                            <span ng-if="anamnesis.mother.finished_diseases.length"><br></span>[[anamnesis.mother.finished_diseases_text]]
+                            <span ng-if="!anamnesis.mother.finished_diseases.length && !anamnesis.mother.finished_diseases_text">нет</span>
                         </td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.father.finished_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="!anamnesis.father.finished_diseases.length">нет</span>
+                            <span ng-if="anamnesis.father.finished_diseases.length"><br></span>[[anamnesis.father.finished_diseases_text]]
+                            <span ng-if="!anamnesis.father.finished_diseases.length && !anamnesis.father.finished_diseases_text">нет</span>
                         </td>
                     </tr>
                     <tr>
                         <td>Текущие заболевания</td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.mother.current_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="!anamnesis.mother.finished_diseases.length">нет</span>
+                            <span ng-if="anamnesis.mother.current_diseases.length"><br></span>[[anamnesis.mother.current_diseases_text]]
+                            <span ng-if="!anamnesis.mother.current_diseases.length && !anamnesis.mother.current_diseases_text">нет</span>
                         </td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.father.current_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="!anamnesis.father.finished_diseases.length">нет</span>
+                            <span ng-if="anamnesis.father.current_diseases.length"><br></span>[[anamnesis.father.current_diseases_text]]
+                            <span ng-if="!anamnesis.father.current_diseases.length && !anamnesis.father.current_diseases_text">нет</span>
                         </td>
                     </tr>
                     <tr>

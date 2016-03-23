@@ -331,6 +331,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
     $scope.fill_selection = function () {
         var modalInstance = $modal.open({
             templateUrl: 'modal-DaysSetup.html',
+            backdrop : 'static',
             size: 'lg',
             controller: DaySetupModalCtrl,
             resolve: {
@@ -437,6 +438,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
     $scope.free_up_day = function (day) {
         var instance = $modal.open({
             templateUrl: 'modal-DayFree.html',
+            backdrop : 'static',
             controller: DayFreeModalCtrl,
             resolve: {
                 roa: function () {

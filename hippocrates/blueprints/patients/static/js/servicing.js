@@ -78,6 +78,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
     $scope.modal_create_event = function() {
         var modalInstance = $modal.open({
             templateUrl: 'modal-createEvent.html',
+            backdrop : 'static',
             controller: CreateEventModalCtrl
         });
         modalInstance.result.then(function (accept) {
@@ -132,6 +133,7 @@ var ClientSearch = function ($scope, WMClient, $modal, CurrentUser) {
             'modal-client.html';
         var modalInstance = $modal.open({
             templateUrl: template,
+            backdrop : 'static',
             resolve: {
                 client: function () {
                     return $scope.client;

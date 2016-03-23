@@ -141,8 +141,11 @@ angular.module('WebMis20')
                 scope.newInvoice.splice(idx, 1);
                 scope.inNewInvoice = false;
             };
-            scope.$watch('editInvoiceMode', function (newVal) {
-                if (newVal) scope.inNewInvoice = false;
+            scope.$watch('editInvoiceMode', function (newVal, oldVal) {
+                if (!scope.service.in_invoice && scope.service.ui_attrs.level === 0) {
+                    if (newVal) scope.addServiceToInvoice();
+                    else scope.removeServiceFromInvoice();
+                }
             });
             scope.invoiceControlsVisible = function () {
                 return scope.editInvoiceMode;
@@ -204,8 +207,9 @@ angular.module('WebMis20')
     };
 }])
 .directive('wmActionList', [
-    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser', 'WMConfig',
-function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig) {
+    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser',
+        'WMConfig', 'PrintingService',
+function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig, PrintingService) {
     return {
         restrict: 'E',
         scope: {
@@ -239,6 +243,17 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 );
                 $http.get(url).success(function (data) {
                     scope.actions = data.result.items;
+                    scope.actions.forEach(function(action){
+                        if(action.type.context){
+                            action.ps = new PrintingService("action");
+                            action.ps_resolve = function(){
+                                return {
+                                    action_id: action.id
+                                }
+                            }
+                        }
+
+                    })
                     scope.pager.pages = data.result.pages;
                 });
             };
@@ -282,7 +297,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     {
                         at_group: at_class,
                         event_type_id: scope.event.info.event_type.id,
-                        contract_id: scope.event.info.contract.id
+                        contract_id: scope.event.info.contract.id,
+                        instant_create: CurrentUser.current_role_in('clinicRegistrator')
                     },
                     function afterActionCreate() {
                         scope.pager.current_page = 1;
@@ -344,11 +360,13 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>\
         <td class="nowrap">\
+            <ui-print-button ps="action.ps" resolve="action.ps_resolve()" ng-if="action.type.context" \
+                             lazy-load-context="[[action.type.context]]"></ui-print-button>\
+            <button type="button" class="btn btn-sm btn-info" ng-if="actionTypeGroup === \'lab\'" title="Динамика"\
+                    ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
+            </button>\
             <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="can_delete_action(action)"\
                     ng-click="delete_action(action)"><span class="glyphicon glyphicon-trash"></span>\
-            </button>\
-            <button type="button" class="btn btn-sm btn-info lmargin20" ng-if="actionTypeGroup === \'lab\'" title="Динамика"\
-                    ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
             </button>\
         </td>\
     </tr>\
@@ -403,6 +421,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             var instance = $modal.open({
                 templateUrl: 'modal-lab-res-dynamics.html',
                 controller: LabResDynamicsCtrl,
+                backdrop : 'static',
                 size: 'lg'
             });
             return instance.result.then(function() {
