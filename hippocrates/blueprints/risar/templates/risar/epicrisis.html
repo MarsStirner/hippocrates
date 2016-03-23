@@ -280,7 +280,7 @@
                                     <div class="col-md-6">[[epicrisis.hysterectomy.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Осложнения:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">Осложнения операции:</div>
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="diag in epicrisis.operation_complication" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]
                                     <span ng-if="epicrisis.operation_complication.length>1"><br></span></span></div>
                                 </div>
@@ -308,6 +308,7 @@
                                 <th rowspan="2">Степень доношенности</th>
                                 <th colspan="3">Оценка по Апгар на минуту жизни</th>
                                 <th rowspan="2">Особенности</th>
+                                <th rowspan="2">Причина смерти</th>
                                 <th rowspan="2"></th>
                             </tr>
                             <tr>
@@ -322,7 +323,7 @@
                                 <td ng-if="inspection.deleted" colspan="10" class="text-center">
                                     Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
                                 <td ng-if="!inspection.deleted">[[inspection.alive ? 'да': 'нет']]</td>
-                                <td ng-if="!inspection.deleted">[[inspection.date |asDate ]] [[inspection.birth_time]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.date |asDateTime ]] [[inspection.birth_time]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.sex.code == 'male' ? 'Мужской': 'Женский']]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.weight]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.length]]</td>
@@ -332,6 +333,9 @@
                                 <td ng-if="!inspection.deleted">[[inspection.apgar_score_10]]</td>
                                 <td ng-if="!inspection.deleted">
                                     <div ng-repeat="mkb in inspection.diseases">[[mkb.code]] - [[mkb.-name]]</div>
+                                </td>
+                                <td ng-if="!inspection.deleted">
+                                    <div ng-if="!inspection.alive" ng-repeat="mkb in inspection.death_reasons">[[mkb.code]] - [[mkb.-name]]</div>
                                 </td>
                                 <td ng-if="!inspection.deleted" class="col-md-1 nowrap">
                                     <a class="btn btn-primary" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_child[[$index+1]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
