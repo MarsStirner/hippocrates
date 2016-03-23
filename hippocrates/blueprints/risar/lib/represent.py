@@ -567,8 +567,7 @@ def make_epicrisis_info(epicrisis):
         week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
         is_dead = bool(epicrisis['death_date'] or epicrisis['reason_of_death'])
         is_complications = bool(epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or
-                                epicrisis['eclampsia'] or epicrisis['funiculus'] or epicrisis['afterbirth'] or
-                                epicrisis['other_complications'])
+                                epicrisis['eclampsia'] or epicrisis['funiculus'] or epicrisis['afterbirth'])
         is_manipulations = bool(epicrisis['caul'] or epicrisis['calfbed'] or epicrisis['perineotomy'] or
                                 epicrisis['secundines'] or epicrisis['other_manipulations'])
         is_operations = bool(epicrisis['caesarean_section'] or epicrisis['obstetrical_forceps'] or
@@ -609,8 +608,8 @@ def make_epicrisis_info(epicrisis):
                 else:
                     children_info.append(u'<b>девочка - ' + (u'живая</b>' if child['alive'] else u'мертвая</b>'))
             info += ', '.join(children_info) + '.'
-    except:
-        info = ''
+    except Exception as exc:
+        info = u'Произошла ошибка. Свяжитесь с администратором системы'
     return info
 
 
