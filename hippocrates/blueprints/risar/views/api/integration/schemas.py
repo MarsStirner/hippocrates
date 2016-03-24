@@ -138,7 +138,7 @@ class ClientSchema(object):
                         },
                         "insurance_document_issuing_authority": {
                             "type": "string",
-                            "description": "Код ИНН органа выдачи полиса медицинского страхования"
+                            "description": "Код ТФОМС органа выдачи полиса медицинского страхования"
                         }
                     },
                     "required": [

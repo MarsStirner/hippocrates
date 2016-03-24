@@ -222,7 +222,9 @@ class ClientXForm(XForm, ClientSchema):
                 policy.deleted = 1
                 continue
             policy_type = rbpt_map.get(str(pol_data['insurance_document_type'])) or rbpt_map.get('vmi')
-            org = Organisation.query.filter(Organisation.INN == pol_data['insurance_document_issuing_authority']).first()
+            org = Organisation.query.filter(
+                Organisation.TFOMSCode == pol_data['insurance_document_issuing_authority']
+            ).first()
             if not policy:
                 policy = ClientPolicy()
                 policy.client = client
@@ -347,7 +349,7 @@ class ClientXForm(XForm, ClientSchema):
             "insurance_document_series": doc.serial or Undefined,
             "insurance_document_number": doc.number,
             "insurance_document_beg_date": doc.begDate,
-            "insurance_document_issuing_authority": doc.insurer.INN if doc.insurer else None,
+            "insurance_document_issuing_authority": doc.insurer.TFOMSCode if doc.insurer else None,
         }
 
     @none_default
