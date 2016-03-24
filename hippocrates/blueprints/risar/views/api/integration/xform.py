@@ -144,7 +144,8 @@ class ClientXForm(XForm, ClientSchema):
         client.patrName = data['FIO'].get('middlename') or ''
         client.birthDate = date_parse(data['birthday_date'])
         client.sexCode = data['gender']
-        client.SNILS = data['SNILS'].replace('-', '')
+        snils = data.get('SNILS')
+        client.SNILS = snils.replace('-', '') if snils else ''
         if self.rbAccountingSystem:
             ident = client.identifications.filter(ClientIdentification.accountingSystems == self.rbAccountingSystem).first()
             if not ident:
@@ -169,7 +170,7 @@ class ClientXForm(XForm, ClientSchema):
         # Есть странная бага в cymysql или SqlAlchemy, из-за которой некоторые строки не преобразуются в str, и
         # Query в UTF-8 не может шаблонизироваться unicode-ным параметром
         document.date = safe_date(data['document_beg_date'])
-        document.origin = data['document_issuing_authority']
+        document.origin = data.get('document_issuing_authority') or ''
 
     def _update_policies(self, policies):
         client = self.client

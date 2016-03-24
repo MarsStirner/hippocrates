@@ -107,10 +107,8 @@ class ClientSchema(object):
                 },
                 "required": [
                     "document_type_code",
-                    "document_series",
                     "document_number",
                     "document_beg_date",
-                    "document_issuing_authority"
                 ]
             },
             "insurance_documents": {
