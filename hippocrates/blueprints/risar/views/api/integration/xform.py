@@ -39,6 +39,41 @@ def none_default(function=None, default=None):
     return decorator
 
 
+class Undefined(object):
+    pass
+
+
+def wrap_simplify(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return simplify(func(*args, **kwargs))
+    return wrapper
+
+
+def simplify(o):
+    if isinstance(o, dict):
+        return simplify_dict(o)
+    elif isinstance(o, list):
+        return simplify_list(o)
+    return o
+
+
+def simplify_dict(d):
+    return {
+        key: simplify(value)
+        for key, value in d.iteritems()
+        if value is not Undefined
+    }
+
+
+def simplify_list(l):
+    return [
+        item
+        for item in l
+        if item is not Undefined
+    ]
+
+
 class XForm(object):
     version = 0
 
@@ -265,13 +300,14 @@ class ClientXForm(XForm, ClientSchema):
             intolerance_object.name = intolerance_data['medicine_substance']
             intolerance_object.power = intolerance_data['medicine_intolerance__power']
 
+    @wrap_simplify
     def as_json(self):
         client = self.client
         return {
             'id': self.external_client_id,
             'FIO': {
                 'name': client.firstName,
-                'middlename': client.patrName,
+                'middlename': client.patrName or Undefined,
                 'surname': client.lastName,
             },
             'birthday_date': client.birthDate,
@@ -293,10 +329,10 @@ class ClientXForm(XForm, ClientSchema):
         """
         return {
             "document_type_code": doc.documentType.TFOMSCode,
-            "document_series": doc.serial,
+            "document_series": doc.serial or Undefined,
             "document_number": doc.number,
             "document_beg_date": doc.date,
-            "document_issuing_authority": doc.origin,
+            "document_issuing_authority": doc.origin or Undefined,
         }
 
     @none_default
@@ -308,7 +344,7 @@ class ClientXForm(XForm, ClientSchema):
         """
         return {
             "insurance_document_type": doc.policyType.TFOMSCode,
-            "insurance_document_series": doc.serial,
+            "insurance_document_series": doc.serial or Undefined,
             "insurance_document_number": doc.number,
             "insurance_document_beg_date": doc.begDate,
             "insurance_document_issuing_authority": doc.insurer.INN if doc.insurer else None,
@@ -325,8 +361,8 @@ class ClientXForm(XForm, ClientSchema):
             "KLADR_locality": address.KLADRCode,
             "KLADR_street": address.KLADRStreetCode,
             "house": address.number,
-            "building": address.corpus,
-            "flat": address.flat,
+            "building": address.corpus or Undefined,
+            "flat": address.flat or Undefined,
             "locality_type": address.localityType
         }
 
