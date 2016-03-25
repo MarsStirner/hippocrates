@@ -16,6 +16,7 @@ from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
 
 
+# Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
 risk_rates_diagID = {
     'low': ['Z34.0', 'Z34.8', 'Z34.9'],
     'middle': ['I34.1', 'О99.5', 'E04.0', 'E04.1', 'E04.2', 'E04.3', 'E04.4', 'E04.5', 'E04.6', 'E04.7', 'E04.8',
