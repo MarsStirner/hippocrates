@@ -206,7 +206,7 @@ def calc_risk_groups(card):
         u'Z51.3',
         mkb_from_mkb
     )
-    p2_needles = explode_needles(u'O36.1')
+    p2_needles = explode_needles(u'O36.0')
     p2 = any_thing(
         all_diagnostics,
         p2_needles,
@@ -220,6 +220,12 @@ def calc_risk_groups(card):
     # p1 и p2 идентичны предыдущей группе риска
     father_bt = card.anamnesis.father['blood_type'].value
     mother_bt = get_mother_bt(card.event)
+    p2_needles = explode_needles(u'O36.1')
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3 = father_bt and mother_bt and \
          mother_bt.bloodType.code in ('1-', '1+') and \
          father_bt.code in ('2+', '2-', '3+', '3-', '4+', '4-')
