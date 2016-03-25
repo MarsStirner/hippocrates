@@ -265,9 +265,14 @@ def calc_risk_groups(card):
         lambda x: x.MKB,
     )
     p3 = any(
-        (preg['pregnancyResult'].value_raw == 'delivery' and
-         preg['pregnancy_week'].value >= 36 and
-         any(child['weight'].value < 2500 for child in preg['newborn_inspections'].value))
+        (
+            (
+                preg['pregnancyResult'].value_raw in ('delivery', 'postmature_birth')
+                if preg['pregnancy_week'].value is None
+                else preg['pregnancy_week'].value >= 37
+            ) and
+            any(child['weight'].value < 2500 for child in preg['newborn_inspections'].value)
+        )
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3 or low_hemo:
