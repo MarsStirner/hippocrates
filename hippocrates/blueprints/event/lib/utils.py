@@ -409,7 +409,7 @@ def check_existing_open_events(client_id, request_type_kind):
     if request_type_kind == 'stationary':
         request_type_codes = STATIONARY_EVENT_CODES
 
-        # event latest action moving
+        # самая поздняя дата движения для каждого обращения пациента
         q_action_begdates = db.session.query(Action).join(
             Event, EventType, rbRequestType, ActionType,
         ).filter(
@@ -421,35 +421,41 @@ def check_existing_open_events(client_id, request_type_kind):
             Event.id
         ).subquery('MaxActionBegDates')
 
+        # самое позднее движение (включая уже и дату и id, если даты совпадают) для каждого обращения пациента
         q_latest_movings = db.session.query(Action).join(
             q_action_begdates, and_(q_action_begdates.c.max_beg_date == Action.begDate,
                                     q_action_begdates.c.event_id == Action.event_id)
         ).with_entities(
-            Action.id.label('action_id')
+            func.max(Action.id).label('action_id'), Action.event_id.label('event_id')
+        ).group_by(
+            Action.event_id
         ).subquery('EventLatestMovings')
 
-        q_moving_ap = db.session.query(Action).join(
-            Event, ActionProperty, ActionType, ActionPropertyType, ActionProperty_OrgStructure
+        # значения полей Переведен в отделение для всех движений, всех обращений пациента
+        q_transfer_os = db.session.query(Action).join(
+            Event, ActionType, ActionProperty, ActionPropertyType
+        ).outerjoin(
+            ActionProperty_OrgStructure
         ).filter(
             Action.deleted == 0, ActionProperty.deleted == 0, ActionType.flatCode == STATIONARY_MOVING_CODE,
             ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE, Event.client_id == client_id
         ).with_entities(
-            Action.id.label('action_id'), ActionProperty_OrgStructure.value.label('os_id')
+            Action.id.label('action_id'), ActionProperty_OrgStructure.value_.label('os_id')
         ).subquery('MovingTransferOs')
 
-        q_latest_moving = db.session.query(Action).join(
+        # итого: самое позднее движение и значение поля Переведен в отделение
+        q_latest_movings_os = db.session.query(Action).join(
             q_latest_movings, q_latest_movings.c.action_id == Action.id
         ).outerjoin(
-            q_moving_ap, q_moving_ap.c.action_id == Action.id
+            q_transfer_os, q_transfer_os.c.action_id == Action.id
         ).with_entities(
-            Action.id.label('action_id'), Action.begDate.label('beg_date'), Action.event_id.label('event_id'),
-            Action.endDate.label('end_date'), q_moving_ap.c.os_id.label('os_id')
-        ).order_by(
-            Action.id.desc()
-        ).limit(1).subquery('EventLatestMoving')
+            Action.id.label('action_id'), Action.event_id.label('event_id'),
+            Action.begDate.label('beg_date'), Action.endDate.label('end_date'),
+            q_transfer_os.c.os_id.label('os_id')
+        ).subquery('EventLatestMovingsOs')
 
         from_ = from_.outerjoin(
-            q_latest_moving, Event.id == q_latest_moving.c.event_id
+            q_latest_movings_os, Event.id == q_latest_movings_os.c.event_id
         )
     elif request_type_kind == 'policlinic':
         request_type_codes = POLICLINIC_EVENT_CODES
@@ -468,9 +474,9 @@ def check_existing_open_events(client_id, request_type_kind):
     if request_type_kind == 'stationary':
         result = result.where(
             or_(
-                q_latest_moving.c.end_date.is_(None),
-                and_(q_latest_moving.c.os_id.isnot(None),
-                     q_latest_moving.c.os_id != 0)
+                q_latest_movings_os.c.end_date.is_(None),
+                and_(q_latest_movings_os.c.os_id.isnot(None),
+                     q_latest_movings_os.c.os_id != 0)
             )
         )
     return db.session.query(result).scalar()
