@@ -19,6 +19,10 @@ class CheckupObsFirstSchema(object):
             "description": "Первичный осмотр беременной акушером-гинекологом и специалистом ПЦ",
             "type": "object",
             "properties": {
+                "external_id": {
+                    "description": "Внешний ID",
+                    "type": "string"
+                },
                 "general_info": {
                     "description": "Общие данные осмотра",
                     "type": "object",
@@ -28,13 +32,12 @@ class CheckupObsFirstSchema(object):
                             "type": "string",
                             "format": "date"
                         },
-                        "time": {
-                            "description": "Время осмотра",
-                            "type": "string",
-                            "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
+                        "hospital": {
+                            "description": "ЛПУ осмотра (код)",
+                            "type": "string"
                         },
                         "doctor": {
-                            "description": "Врач",
+                            "description": "Врач (код)",
                             "type": "string"
                         },
                         "height": {
@@ -48,7 +51,7 @@ class CheckupObsFirstSchema(object):
                             "format": "double"
                         }
                     },
-                    "required": ["date", "time", "doctor", "height", "weight"]
+                    "required": ["date", "hospital", "doctor", "height", "weight"]
                 },
                 "somatic_status": {
                     "description": "Данные соматического статуса",
@@ -435,7 +438,10 @@ class CheckupObsFirstSchema(object):
                                     "pattern": "^(0[1-3])$"
                                 }
                             },
-                            "required": ["fhr", "fhr_variability_amp", "fhr_variability_freq", "fhr_acceleration", "fhr_deceleration"]
+                            "required": ["fhr", "fhr_variability_amp",
+                                         "fhr_variability_freq",
+                                         "fhr_acceleration",
+                                         "fhr_deceleration"]
                         }
                     }
                 },
@@ -480,7 +486,9 @@ class CheckupObsFirstSchema(object):
                         "cervix_position": {
                             "description": "Позиция шейки матки, справочник rbRisarCervix_Position",
                             "type": "string",
-                            "enum": ["kperediotprovodnoj", "kzadiotprovodnojosi", "poprovodnojositaza"]
+                            "enum": ["kperediotprovodnoj",
+                                     "kzadiotprovodnojosi",
+                                     "poprovodnojositaza"]
                         },
                         "cervix_maturity": {
                             "description": "Зрелость шейки матки, справочник rbRisarCervix_Maturity",
@@ -592,7 +600,7 @@ class CheckupObsFirstSchema(object):
                             "type": "string"
                         }
                     },
-                    "required":[
+                    "required": [
                         "pregnancy_week",
                         "next_visit_date",
                         "pregnancy_continuation",
@@ -600,6 +608,7 @@ class CheckupObsFirstSchema(object):
                     ]
                 }
             },
-            "required": ["general_info", "somatic_status", "obstetric_status", "medical_report"]
+            "required": ["external_id", "general_info", "somatic_status",
+                         "obstetric_status", "medical_report"]
         },
     ]

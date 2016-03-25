@@ -11,13 +11,22 @@ import logging
 import functools
 
 import jsonschema
+from abc import ABCMeta, abstractmethod
+from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_first_schemas import \
     CheckupObsFirstSchema
 from nemesis.lib.apiutils import ApiException
-from nemesis.models.exists import rbAccountingSystem
+from nemesis.models.actions import ActionType, Action
+from nemesis.models.event import Event
 from nemesis.systemwide import db
+from sqlalchemy import literal
 
 logger = logging.getLogger('simple')
+
+INTERNAL_ERROR = 500
+VALIDATION_ERROR = 406
+NOT_FOUND_ERROR = 404
+ALREADY_PRESENT_ERROR = 400
 
 
 def none_default(function=None, default=None):
@@ -36,15 +45,15 @@ def none_default(function=None, default=None):
 
 
 class XForm(object):
+    __metaclass__ = ABCMeta
+
     version = 0
-    rbAccountingSystem = None
-    external_system_id = None
     schema = None
     new = False
-    parent_obj = None
-    target_obj = None
-    _parent_obj_id = None
-    _target_obj_id = None
+    parent_obj_id = None
+    target_obj_id = None
+    parent_obj_class = None
+    target_obj_class = None
 
     def __init__(self, api_version):
         self.set_version(api_version)
@@ -60,14 +69,6 @@ class XForm(object):
                 method()
         self.version = version
 
-    def set_external_system(self, external_system_id):
-        self.external_system_id = external_system_id
-        self.rbAccountingSystem = rbAS = rbAccountingSystem.query.filter(
-            rbAccountingSystem.code == external_system_id
-        ).first()
-        if not rbAS:
-            raise ApiException(404, 'External system not found')
-
     def validate(self, data):
         if data is None:
             raise ApiException(400, 'No JSON body')
@@ -81,30 +82,10 @@ class XForm(object):
         if errors:
             logger.error(u'Ошибка валидации данных', extra={'errors': errors})
             raise ApiException(
-                406,
+                VALIDATION_ERROR,
                 'Validation error',
                 errors=errors,
             )
-
-    @property
-    def parent_obj_id(self):
-        if self.rbAccountingSystem:
-            return self._parent_obj_id
-        return self.parent_obj.id
-
-    @parent_obj_id.setter
-    def parent_obj_id(self, value):
-        self._parent_obj_id = value
-
-    @property
-    def target_obj_id(self):
-        if self.rbAccountingSystem:
-            return self._target_obj_id
-        return self.target_obj.id
-
-    @target_obj_id.setter
-    def target_obj_id(self, value):
-        self._target_obj_id = value
 
     def find_parent_obj(self, parent_obj_id):
         self.parent_obj_id = parent_obj_id
@@ -115,50 +96,82 @@ class XForm(object):
                 self.__class__.__name__
             )
         else:
-            parent_obj = self._find_parent_obj_query(parent_obj_id).first()
+            parent_obj = self._find_parent_obj_query().first()
             if not parent_obj:
-                raise ApiException(404, u'Card not found')
+                raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                                   self.parent_obj_class.__name__)
         self.parent_obj = parent_obj
 
-    def find_target_obj(self, parent_id, target_obj_id):
-        self.find_parent_obj(parent_id)
+    def check_parent_obj(self, parent_obj_id):
+        self.parent_obj_id = parent_obj_id
+        if parent_obj_id is None:
+            # Ручная валидация
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'%s.find_parent_obj called without "parent_obj_id"' %
+                self.__class__.__name__
+            )
+        else:
+            q = self._find_parent_obj_query()
+            parent_obj_exists = db.session.query(
+                literal(True)
+            ).filter(q.exists()).scalar()
+            if not parent_obj_exists:
+                raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                                   self.parent_obj_class.__name__)
+
+    def check_target_obj(self, parent_obj_id, target_obj_id):
+        self.parent_obj_id = parent_obj_id
         self.target_obj_id = target_obj_id
         if target_obj_id is None:
-            target_obj = self.target_obj_class()
-            db.session.add(target_obj)
             self.new = True
+            self.check_parent_obj(parent_obj_id)
         else:
-            target_obj = self._find_target_obj_query(target_obj_id).first()
-            if not target_obj:
-                raise ApiException(404, u'Client not found')
-        self.target_obj = target_obj
+            if parent_obj_id is None:
+                # Ручная валидация
+                raise ApiException(
+                    VALIDATION_ERROR,
+                    u'%s.check_target_obj called without "parent_obj_id"' %
+                    self.__class__.__name__
+                )
+
+            q = self._find_target_obj_query()
+            target_obj_exists = db.session.query(
+                literal(True)
+            ).filter(q.exists()).scalar()
+            if not target_obj_exists:
+                raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                                   self.target_obj_class.__name__)
+
+    def _find_parent_obj_query(self):
+        return self.parent_obj_class.query.filter(
+            self.parent_obj_class.id == self.parent_obj_id
+        )
+
+    @abstractmethod
+    def _find_target_obj_query(self):
+        pass
 
 
 class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     """
     Класс-преобразователь
     """
-    target_obj_class = Client
+    parent_obj_class = Event
+    target_obj_class = Action
 
-    def _find_parent_obj_query(self, parent_obj_id):
-        if not self.rbAccountingSystem:
-            return Client.query.filter(Client.id == parent_obj_id)
-        return Client.query.join(ClientIdentification).filter(
-            ClientIdentification.identifier == parent_obj_id,
-            ClientIdentification.accountingSystems == self.rbAccountingSystem,
-        )
-
-    def _find_target_obj_query(self, target_obj_id):
-        if not self.rbAccountingSystem:
-            return self.target_obj_class.query.filter(
-                self.target_obj_class.id == target_obj_id
-            )
-        return self.target_obj_class.query.join(ClientIdentification).filter(
-            ClientIdentification.identifier == target_obj_id,
-            ClientIdentification.accountingSystems == self.rbAccountingSystem,
+    def _find_target_obj_query(self):
+        return self.target_obj_class.query.join(ActionType).filter(
+            self.target_obj_class.event == self.parent_obj_id,
+            self.target_obj_class.id == self.target_obj_id,
+            self.target_obj_class.deleted == 0,
+            ActionType.flatCode == first_inspection_code,
         )
 
     def update_target_obj(self, data):
+        # target_obj = self.target_obj_class()
+        # # db.session.add(target_obj)
+        # self.target_obj = target_obj
         with db.session.no_autoflush:
             self._update_general_info(data.get('general_info', None))
             self._update_somatic_status(data.get('somatic_status', None))

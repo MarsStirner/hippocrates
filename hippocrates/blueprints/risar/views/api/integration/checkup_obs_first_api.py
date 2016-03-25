@@ -43,7 +43,7 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
     data = request.get_json()
     xform = CheckupObsFirstXForm(api_version)
     xform.validate(data)
-    xform.find_target_obj(card_id, exam_obs_id)
+    xform.check_target_obj(card_id, exam_obs_id)
     xform.update_target_obj(data)
     db.session.add(xform.target_obj)
     db.session.commit()
@@ -55,5 +55,4 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
 @public_api
 def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
     xform = CheckupObsFirstXForm(api_version)
-    xform.find_target_obj(card_id, exam_obs_id)
-    xform.delete_target_obj()
+    xform.delete_target_obj(card_id, exam_obs_id)
