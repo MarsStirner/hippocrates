@@ -433,7 +433,7 @@ def calc_risk_groups(card):
         lambda x: x.MKB,
     )
     p1_b = any_thing(
-        card.anamnesis.mother['current_diseases'],
+        card.anamnesis.mother['current_diseases'].value,
         diseases,
         lambda x: x.DiagID,
     )
