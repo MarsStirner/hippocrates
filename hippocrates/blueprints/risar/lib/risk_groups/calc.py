@@ -427,11 +427,17 @@ def calc_risk_groups(card):
     checkups = card.checkups
     prev_pregnancies = card.prev_pregs
 
-    p1 = any_thing(
+    p1_a = any_thing(
         all_diagnostics,
         diseases,
         lambda x: x.MKB,
     )
+    p1_b = any_thing(
+        card.anamnesis.mother['current_diseases'],
+        diseases,
+        lambda x: x.DiagID,
+    )
+    p1 = p1_a or p1_b
 
     p2 = not prev_pregnancies
     p3 = card.event.client.age_tuple()[-1] > 35
