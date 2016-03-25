@@ -193,9 +193,7 @@ def calc_risk_groups(card):
         for preg in card.prev_pregs
     )
     p4 = any(
-        (preg['pregnancyResult'].value_raw == 'delivery' and
-         preg['pregnancy_week'].value >= 36 and
-         any(child['weight'].value >= 4000 for child in preg['newborn_inspections'].value))
+        (any(child['weight'].value >= 4000 for child in preg['newborn_inspections'].value))
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or p4:
