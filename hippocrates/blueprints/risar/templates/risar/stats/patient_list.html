@@ -3,6 +3,7 @@
         <h3 class="box-title">Пациентки на прием</h3>
         <span class="badge label-info" style="margin-right: 5px;">[[ tickets.length ]]</span>
         <div class="box-tools pull-right">
+            <a href="{{ url_for('patients.search') }}" class="rmargin10">Добавить пациентку</a>
             <span style="display: inline-block; vertical-align: middle;margin-bottom: -5px; margin-right:10px"><wm-date
                 ng-model="search_date.date" style="width: 274px"></wm-date></span>
 {#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
