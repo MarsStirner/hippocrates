@@ -186,7 +186,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         if (p.preeclampsia) {
             result.push('Преэклампсия');
         }
-        if (p.after_birth_complications){
+        if (p.after_birth_complications && p.after_birth_complications.length) {
             result.push('Осложнения после родов/абортов: ' + _.map(p.after_birth_complications, function (pat) {
                 return pat.name;
             }).join(', '))
