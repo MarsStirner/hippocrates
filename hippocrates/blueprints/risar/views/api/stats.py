@@ -373,6 +373,8 @@ def api_0_death_stats():
 
     #материнская смертность
     def check_pat_diagnosis(action):
+        if 'pat_diagnosis' not in action.propsByCode:
+            return False
         pat_diagnosis = action.propsByCode['pat_diagnosis'].value
         for diag_code in ('V', 'W', 'X', 'Y'):
             if pat_diagnosis and pat_diagnosis.diagnosis.mkb.DiagID.startswith(diag_code):

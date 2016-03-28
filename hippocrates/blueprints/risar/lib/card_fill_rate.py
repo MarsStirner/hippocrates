@@ -251,8 +251,6 @@ class CFRSelecter(BaseSelecter):
             Action.deleted == 0, Event.deleted == 0, ActionProperty.deleted == 0,
             ActionType.flatCode == 'cardAttributes',
             Event.execPerson_id == doctor_id
-        ).group_by(
-            Event.execPerson_id
         ).with_entities(
             Event.execPerson_id
         ).add_columns(

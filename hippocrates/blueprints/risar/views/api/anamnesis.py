@@ -9,7 +9,7 @@ from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from blueprints.risar.models.risar import RisarRiskGroup
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.data import create_action
+from nemesis.lib.data import create_action, create_action_property
 from nemesis.lib.utils import safe_traverse, public_endpoint
 from nemesis.models.actions import Action
 from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
@@ -91,10 +91,14 @@ def api_0_pregnancies_post(action_id=None):
     card = PregnancyCard.get_for_event(event)
     json = request.get_json()
     newborn_inspections = json.pop('newborn_inspections', [])
+    prop_types = {p.code: p for p in action.actionType.property_types if p.code}
     for code in pregnancy_apt_codes:
         if code not in action.propsByCode:
-            logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, action_id, risar_anamnesis_pregnancy)
-            continue
+            if code in prop_types:
+                action.propsByCode[code] = create_action_property(action, prop_types[code])
+            else:
+                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, action_id, risar_anamnesis_pregnancy)
+                continue
         action.propsByCode[code].value = json.get(code)
 
     child_inspection_actions = []

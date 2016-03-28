@@ -148,8 +148,8 @@ class StatsSelecter(BaseSelecter):
         q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
 
         # 2) event latest inspection
-        q_action_begdates = self.model_provider.get_query('Action')
-        q_action_begdates = q_action_begdates.join(
+        # * самые поздние даты осмотров по обращениям
+        q_action_begdates = self.model_provider.get_query('Action').join(
             Event, EventType, rbRequestType, ActionType,
         ).filter(
             Event.deleted == 0, Action.deleted == 0, rbRequestType.code == request_type_pregnancy,
@@ -160,22 +160,23 @@ class StatsSelecter(BaseSelecter):
             Event.id
         ).subquery('MaxActionBegDates')
 
-        q_latest_inspections = self.model_provider.get_query('Action')
-        q_latest_inspections = q_latest_inspections.join(
+        # * id самых поздних осмотров (включая уже и дату и id, если даты совпадают) для каждого случая
+        q_latest_checkups_id = self.model_provider.get_query('Action').join(
             q_action_begdates, and_(q_action_begdates.c.max_beg_date == Action.begDate,
                                     q_action_begdates.c.event_id == Action.event_id)
         ).with_entities(
-            Action.id.label('action_id')
-        ).subquery('EventLatestInspections')
+            func.max(Action.id).label('action_id'), Action.event_id.label('event_id')
+        ).group_by(
+            Action.event_id
+        ).subquery('EventLatestCheckups')
 
-        q_latest_inspection = self.model_provider.get_query('Action')
-        q_latest_inspection = q_latest_inspection.join(
-            q_latest_inspections, q_latest_inspections.c.action_id == Action.id
+        # * итого: самый поздний осмотр для каждого случая
+        q_latest_inspections = self.model_provider.get_query('Action').join(
+            q_latest_checkups_id, q_latest_checkups_id.c.action_id == Action.id
         ).with_entities(
-            Action.id.label('action_id'), Action.begDate.label('beg_date'), Action.event_id.label('event_id')
-        ).order_by(
-            Action.id.desc()
-        ).limit(1).subquery('EventLatestInspection')
+            Action.id.label('action_id'), Action.event_id.label('event_id'),
+            Action.begDate.label('beg_date'), Action.endDate.label('end_date')
+        ).subquery('EventLatestInspections')
 
         # 3) event perinatal risk rate
         q_event_prr = self.model_provider.get_query('Event')
@@ -195,7 +196,7 @@ class StatsSelecter(BaseSelecter):
         query = query.outerjoin(
             q_event_psd, q_event_psd.c.event_id == Event.id
         ).outerjoin(
-            q_latest_inspection, q_latest_inspection.c.event_id == Event.id
+            q_latest_inspections, q_latest_inspections.c.event_id == Event.id
         ).outerjoin(
             q_event_prr, q_event_prr.c.event_id == Event.id
         )
@@ -212,7 +213,7 @@ class StatsSelecter(BaseSelecter):
             func.sum(func.IF(
                 # с момента последнего осмотра (или даты постановки на учет) прошло более 2 месяцев (60 дней)
                 func.datediff(func.curdate(),
-                              func.coalesce(q_latest_inspection.c.beg_date, Event.setDate)) / 30 >= 2,
+                              func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) / 30 >= 2,
                 1, 0)
             ).label('count_event_2m_no_inspection'),
             func.sum(func.IF(

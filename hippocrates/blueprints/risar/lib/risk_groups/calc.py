@@ -81,11 +81,11 @@ def calc_risk_groups(card):
     p3 = any(preg['pregnancyResult'].value_raw in ('premature_birth_22-27', 'premature_birth_28-37') for preg in card.prev_pregs)
     p4_needles = explode_needles(u'O10-O84, O00-O08')
     p4_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p4_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p4_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p4_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p4_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p5 = any(
@@ -110,11 +110,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O10-O92')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or low_hemo:
@@ -135,11 +135,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O72.0-O72.3, O03-O08')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or abortion_or_miscarriage or low_hemo:
@@ -160,11 +160,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O00-O08, O82')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or abortion_or_miscarriage:
@@ -185,17 +185,15 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O36.6')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = any(
-        (preg['pregnancyResult'].value_raw == 'delivery' and
-         preg['pregnancy_week'].value >= 36 and
-         any(child['weight'].value >= 4000 for child in preg['newborn_inspections'].value))
+        (any(child['weight'].value >= 4000 for child in preg['newborn_inspections'].value))
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or p4:
@@ -208,7 +206,7 @@ def calc_risk_groups(card):
         u'Z51.3',
         mkb_from_mkb
     )
-    p2_needles = explode_needles(u'O36.1')
+    p2_needles = explode_needles(u'O36.0')
     p2 = any_thing(
         all_diagnostics,
         p2_needles,
@@ -222,6 +220,12 @@ def calc_risk_groups(card):
     # p1 и p2 идентичны предыдущей группе риска
     father_bt = card.anamnesis.father['blood_type'].value
     mother_bt = get_mother_bt(card.event)
+    p2_needles = explode_needles(u'O36.1')
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3 = father_bt and mother_bt and \
          mother_bt.bloodType.code in ('1-', '1+') and \
          father_bt.code in ('2+', '2-', '3+', '3-', '4+', '4-')
@@ -243,11 +247,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O10-O16, O45, O99.0')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or low_hemo:
@@ -267,9 +271,14 @@ def calc_risk_groups(card):
         lambda x: x.MKB,
     )
     p3 = any(
-        (preg['pregnancyResult'].value_raw == 'delivery' and
-         preg['pregnancy_week'].value >= 36 and
-         any(child['weight'].value < 2500 for child in preg['newborn_inspections'].value))
+        (
+            (
+                preg['pregnancyResult'].value_raw in ('delivery', 'postmature_birth')
+                if preg['pregnancy_week'].value is None
+                else preg['pregnancy_week'].value >= 37
+            ) and
+            any(child['weight'].value < 2500 for child in preg['newborn_inspections'].value)
+        )
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3 or low_hemo:
@@ -290,11 +299,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O82.0-O82.9')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b:
@@ -315,11 +324,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O03-O08, O43, O44, O45')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or abortion_or_miscarriage:
@@ -340,11 +349,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'J45, J46')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b:
@@ -365,11 +374,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O85, O86, O87, O91, O92')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b:
@@ -390,11 +399,11 @@ def calc_risk_groups(card):
     )
     p3_needles = explode_needles(u'O10-O92, O99.0')
     p3_a = any(
-        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['pregnancy_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
+        any_thing(preg['delivery_pathology'].value, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = card.anamnesis.mother['alcohol'].value or \
@@ -418,11 +427,17 @@ def calc_risk_groups(card):
     checkups = card.checkups
     prev_pregnancies = card.prev_pregs
 
-    p1 = any_thing(
+    p1_a = any_thing(
         all_diagnostics,
         diseases,
         lambda x: x.MKB,
     )
+    p1_b = any_thing(
+        card.anamnesis.mother['current_diseases'].value,
+        diseases,
+        lambda x: x.DiagID,
+    )
+    p1 = p1_a or p1_b
 
     p2 = not prev_pregnancies
     p3 = card.event.client.age_tuple()[-1] > 35

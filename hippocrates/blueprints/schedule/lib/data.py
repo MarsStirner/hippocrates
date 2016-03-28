@@ -8,6 +8,8 @@ def delete_schedules(dates, person_id):
     schedules = Schedule.query.filter(
         Schedule.person_id == person_id, Schedule.date.in_(dates),
     )
+    if not schedules.count():
+        return True, ''
     schedules_with_clients = schedules.join(ScheduleTicket).join(ScheduleClientTicket).filter(
         Schedule.deleted == 0,
         ScheduleClientTicket.client_id is not None,
@@ -20,8 +22,8 @@ def delete_schedules(dates, person_id):
         Schedule.deleted: 1,
     }, synchronize_session=False)
 
-    schedules.join(ScheduleTicket).filter(
-        ScheduleTicket.schedule_id == Schedule.id,
+    ScheduleTicket.query.filter(
+        ScheduleTicket.schedule_id.in_([s.id for s in schedules])
     ).update({
         ScheduleTicket.deleted: 1
     }, synchronize_session=False)

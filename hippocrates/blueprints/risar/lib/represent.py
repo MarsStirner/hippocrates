@@ -6,28 +6,26 @@ import itertools
 from collections import defaultdict
 
 from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import get_all_diagnoses, check_disease
+from blueprints.risar.lib.card_attrs import check_disease
 from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
-    risk_rates_blockID, get_action_list
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_list
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, attach_codes
 from nemesis.app import app
-from nemesis.lib.jsonify import EventVisualizer, DiagnosisVisualizer
+from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_traverse_attrs, safe_date
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
-from nemesis.models.diagnosis import Diagnosis, Diagnostic
-from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PerinatalRiskRate, PreeclampsiaRisk,
-                                  PregnancyPathology, ErrandStatus, CardFillRate)
-from nemesis.models.exists import rbAttachType, MKB
-from nemesis.systemwide import db
+from nemesis.models.diagnosis import Diagnostic
+from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PregnancyPathology, ErrandStatus, CardFillRate)
+from nemesis.models.exists import rbAttachType
+from nemesis.models.risar import rbPerinatalRiskRate
 
 __author__ = 'mmalkov'
 
@@ -174,25 +172,23 @@ def represent_mkbs_for_routing(event):
     :param event:
     :return:
     """
+    objects = rbPerinatalRiskRate.query.all()
+
+    mapping_mkb = {
+        risk_rate.code: set(mkb.DiagID for mkb in risk_rate.mkbs)
+        for risk_rate in objects
+    }
+    mapping_risk_rates = {
+        risk_rate.code: risk_rate for risk_rate in objects
+    }
     card = PregnancyCard.get_for_event(event)
     diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
 
-    hi_diag_rates = set(risk_rates_diagID['high'])
-    hi_block_rates = set(risk_rates_blockID['high'])
-
-    mid_diag_rates = set(risk_rates_diagID['middle'])
-    mid_block_rates = set(risk_rates_blockID['middle'])
-
-    low_diag_rates = set(risk_rates_diagID['low'])
-    low_block_rates = set(risk_rates_blockID['low'])
-
-    def calc_risk(DiagID, BlockID):
-        if DiagID in hi_diag_rates or BlockID in hi_block_rates:
-            return PerinatalRiskRate(PerinatalRiskRate.high[0])
-        elif DiagID in mid_diag_rates or BlockID in mid_block_rates:
-            return PerinatalRiskRate(PerinatalRiskRate.medium[0])
-        elif DiagID in low_diag_rates or BlockID in low_block_rates:
-            return PerinatalRiskRate(PerinatalRiskRate.low[0])
+    def calc_risk(DiagID):
+        for code in ['high', 'medium', 'low']:
+            if code in mapping_mkb and DiagID in mapping_mkb[code]:
+                return mapping_risk_rates[code]
+        return mapping_risk_rates['undefined']
 
     result = []
     for diag in diagnostics:
@@ -200,7 +196,7 @@ def represent_mkbs_for_routing(event):
             'id': diag.mkb.id,
             'code': diag.mkb.DiagID,
             'name': diag.mkb.DiagName,
-            'risk_rate': calc_risk(diag.mkb.DiagID, diag.mkb.BlockID),
+            'risk_rate': calc_risk(diag.mkb.DiagID),
         })
 
     result.sort(key=lambda x: x['code'])
@@ -376,7 +372,7 @@ def represent_checkups(event):
 
 
 def represent_event_diagnoses(event):
-    from nemesis.models.diagnosis import Event_Diagnosis, rbDiagnosisKind
+    from nemesis.models.diagnosis import Event_Diagnosis
 
     card = PregnancyCard.get_for_event(event)
 
