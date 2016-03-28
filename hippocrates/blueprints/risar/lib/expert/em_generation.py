@@ -407,9 +407,12 @@ class EventMeasureGenerator(object):
             )
 
         existing_len = len(existing_em_list)
+        new_len = len(em_list)
         idx = 0
         while idx < existing_len:
             exist_em = existing_em_list[idx]
+            if new_len <= idx:
+                break
             new_em = em_list[idx]
             if not is_same(exist_em, new_em):
                 break
