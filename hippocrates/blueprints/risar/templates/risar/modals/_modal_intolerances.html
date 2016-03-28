@@ -3,6 +3,7 @@
 </div>
 <div class="modal-body">
     <div class="das-form">
+    <ng-form name="algForm">
         <table class="table table-condensed">
             <thead>
                 <tr>
@@ -12,9 +13,10 @@
             </thead>
             <tbody>
                 <tr>
-                    <th class="text-right">Тип</th>
-                    <td ng-if="!model.id"><div class="col-md-4" ><rb-select ref-book="IntoleranceType"
-                                                                            ng-model="model.type" autofocus="autofocus"/></div></td>
+                    <th class="text-right">Тип <span class="text-danger">*</span></th>
+                    <td ng-if="!model.id"><div class="col-md-4" >
+                        <rb-select ref-book="IntoleranceType" ng-model="model.type" autofocus="autofocus" ng-required="true" />
+                    </div></td>
                     <td ng-if="model.id"><div class="col-md-12" ng-bind="model.type.name"></div></td>
                 </tr>
                 <tr>
@@ -28,15 +30,15 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Наименование</th>
+                    <th class="text-right">Наименование <span class="text-danger">*</span></th>
                     <td>
-                        <div class="col-md-8"><input class="form-control" type="text" ng-model="model.name" /></div>
+                        <div class="col-md-8"><input class="form-control" type="text" ng-model="model.name" ng-required="true" /></div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Степень</th>
+                    <th class="text-right">Степень <span class="text-danger">*</span></th>
                     <td>
-                        <div class="col-md-8"><rb-select ref-book="AllergyPower" ng-model="model.power" /></div>
+                        <div class="col-md-8"><rb-select ref-book="AllergyPower" ng-model="model.power" ng-required="true" /></div>
                     </td>
                 </tr>
                 <tr>
@@ -47,10 +49,11 @@
                 </tr>
             </tbody>
         </table>
+    </ng-form>
     </div>
 </div>
 <div class="modal-footer">
     <input type="checkbox" ng-model="restart" id="another"><label for="another"> Создать ещё </label>
-    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+    <button class="btn btn-success" ng-click="$close([model, restart])" ng-disabled="!algForm.$valid">Сохранить</button>
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
 </div>
