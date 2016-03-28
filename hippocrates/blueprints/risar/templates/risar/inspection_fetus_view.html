@@ -1,0 +1,118 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> Осмотры плода{% endblock %}
+
+{% block main %}
+<div ng-controller="InspectionFetusViewCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_ext_n('Осмотры плода беременной', 'inspection_fetus') }}
+        {{ rimacros.navigation('[[ header.event.id ]]') }}
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+        <div class="box-body">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th width="280px">Дата первого шевеления</th>
+                    <td> [[ checkup.fetus_first_movement_date ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Шевеление</th>
+                    <td> [[ checkup.fetus_movement ]]</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+
+        <div class="box box-primary">
+        <div class="box-body" ng-repeat="fetus in checkup.fetuses">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="280px">Плод [[$index + 1]]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Положение</td>
+                    <td> [[ fetus.state.position.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Позиция</td>
+                    <td> [[ fetus.state.position_2.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Вид плода</td>
+                    <td> [[ fetus.state.type.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Предлежание</td>
+                    <td> [[ fetus.state.presenting_part.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Задержка в развитии</td>
+                    <td> [[ fetus.state.delay.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Сердцебиение</td>
+                    <td> [[ fetus.state.heartbeat.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>ЧСС, уд/мин</td>
+                    <td> [[ fetus.state.heart_rate ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Данные КТГ</td>
+                    <td><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !fetus.state.ktg_input, 'fa-check text-danger': fetus.state.ktg_input}"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="small-left-margin">Базальный ритм</span></td>
+                    <td> [[ fetus.state.basal.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="small-left-margin">Вариабельность (амплитуда)</span></td>
+                    <td> [[ fetus.state.variability_range.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="small-left-margin">Вариабельность (частота в минуту)</span></td>
+                    <td> [[ fetus.state.frequency_per_minute.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="small-left-margin">Акселерации за 30 минут</span></td>
+                    <td> [[ fetus.state.acceleration.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="small-left-margin">Децелерации за 30 минут</span></td>
+                    <td> [[ fetus.state.deceleration.name ]]</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
+{% endblock %}

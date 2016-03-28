@@ -13,6 +13,7 @@ from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_list
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
+from blueprints.risar.models.fetus import FetusState
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, attach_codes
@@ -26,6 +27,7 @@ from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PregnancyPathology, ErrandStatus, CardFillRate)
 from nemesis.models.exists import rbAttachType
 from nemesis.models.risar import rbPerinatalRiskRate
+from sqlalchemy import desc
 
 __author__ = 'mmalkov'
 
@@ -371,6 +373,18 @@ def represent_checkups(event):
     return map(represent_checkup, query)
 
 
+def represent_fetuses(event):
+    action = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)
+    ).order_by(desc(Action.begDate)).first()
+    if action:
+        return represent_fetus(action)
+    else:
+        return {}
+
+
 def represent_event_diagnoses(event):
     from nemesis.models.diagnosis import Event_Diagnosis
 
@@ -458,11 +472,28 @@ def represent_checkup(action, with_measures=True):
     result['diagnoses'] = represent_action_diagnoses(action)
     result['diagnosis_types'] = action.actionType.diagnosis_types
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
+    result['fetuses'] = represent_action_fetuses(action)
 
     if with_measures:
         em_ctrl = EventMeasureController()
         measures = em_ctrl.get_measures_in_action(action)
         result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
+    return result
+
+
+def represent_fetus(action):
+    result = dict(
+        (code, prop.value)
+        for (code, prop) in action.propsByCode.iteritems()
+    )
+    result['beg_date'] = action.begDate
+    result['end_date'] = action.endDate
+    result['person'] = action.person
+    result['flat_code'] = action.actionType.flatCode
+    result['id'] = action.id
+
+    result['fetuses'] = represent_action_fetuses(action)
+
     return result
 
 
@@ -688,3 +719,30 @@ def represent_event_cfrs(card_attrs_action):
         'card_fill_rate_repeated_inspection': CardFillRate(card_attrs_action['card_fill_rate_repeated_inspection'].value),
         'card_fill_rate_epicrisis': CardFillRate(card_attrs_action['card_fill_rate_epicrisis'].value),
     }
+
+
+def represent_action_fetuses(action):
+    res = []
+    fetus_states = FetusState.query.filter(
+        FetusState.action_id == action.id
+    ).order_by(FetusState.id)
+    for fetus_state in fetus_states:
+        res.append({
+            'state': {
+                'id': fetus_state.id,
+                'position': fetus_state.position,
+                'position_2': fetus_state.position_2,
+                'type': fetus_state.type,
+                'presenting_part': fetus_state.presenting_part,
+                'heartbeat': fetus_state.heartbeat,
+                'delay': fetus_state.delay,
+                'basal': fetus_state.basal,
+                'variability_range': fetus_state.variability_range,
+                'frequency_per_minute': fetus_state.frequency_per_minute,
+                'acceleration': fetus_state.acceleration,
+                'deceleration': fetus_state.deceleration,
+                'heart_rate': fetus_state.heart_rate,
+                'ktg_input': fetus_state.ktg_input,
+            },
+        })
+    return res

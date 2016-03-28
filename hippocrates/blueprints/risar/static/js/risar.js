@@ -162,6 +162,11 @@ WebMis20
             return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
         }
     };
+    this.fetus = {
+        get_fetus_list: function (event_id) {
+            return wrapper('GET', Config.url.api_fetus_list + event_id);
+        }
+    };
     this.gravidograma = {
         get: function (event_id){
             return wrapper('GET', Config.url.api_gravidograma + event_id);

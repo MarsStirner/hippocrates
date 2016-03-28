@@ -164,7 +164,26 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
     reload();
 };
 
+var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
+    var params = aux.getQueryParams(window.location.search);
+    var event_id = params.event_id;
+
+    var reload = function () {
+        RisarApi.chart.get_header(event_id).
+            then(function (data) {
+                $scope.header = data.header;
+            });
+        RisarApi.fetus.get_fetus_list(event_id)
+            .then(function (data) {
+                $scope.checkup = data;
+            });
+    };
+
+    reload();
+};
+
 WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     'RefBookService', InspectionViewCtrl]);
+WebMis20.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', InspectionFetusViewCtrl]);

@@ -1,7 +1,7 @@
 
 'use strict';
 
-var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog) {
+var CheckupCtrl = function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingDialog) {
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
@@ -41,13 +41,37 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
             RisarApi.checkup.create(event_id, $scope.getFlatCode()).
                 then(function (checkup) {
                     $scope.checkup = checkup;
+                    if(!$scope.checkup.fetuses.length) {
+                        $scope.add_child();
+                    }
                 });
         } else {
             RisarApi.checkup.get(checkup_id)
                 .then(function (checkup) {
                     $scope.checkup = checkup;
+                    if(!$scope.checkup.fetuses.length) {
+                        $scope.add_child();
+                    }
                 });
         }
+    };
+    $scope.add_child = function (){
+        $scope.checkup.fetuses.push({
+            id: null,
+            alive: true,
+            deleted: 0
+        });
+        $timeout(function(){
+            $('#childrenTabs').find('a:last').tab('show');
+        }, 0);
+
+    };
+    $scope.delete_child = function(child){
+        child.deleted = 1;
+        $timeout(function(){
+            $('#childrenTabs li.active').removeClass('active');
+            $('#childrenTabs').find('a:first').tab('show');
+        }, 0);
     };
 
     $scope.init = function () {
@@ -178,7 +202,7 @@ var CheckupSecondEditCtrl = function ($scope, $controller, $window, $location, $
     $scope.init();
 };
 
-WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
+WebMis20.controller('CheckupCtrl', ['$scope', '$timeout', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
     CheckupCtrl]);
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',
     'Config', CheckupFirstEditCtrl]);

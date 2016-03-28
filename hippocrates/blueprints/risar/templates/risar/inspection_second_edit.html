@@ -21,38 +21,44 @@
                         <div class="box-body no-padding">
                             <ul class="nav nav-pills nav-stacked">
                                 <li class="active">
-                                    <a aria-controls="first" class="active" href="#first" data-toggle="tab">
+                                    <a aria-controls="common" class="active" href="#common" data-toggle="tab">
                                         <span class="badge">1</span>
                                         <span>Лист динамического наблюдения</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="second" href="#second" data-toggle="tab">
+                                    <a aria-controls="somatic" href="#somatic" data-toggle="tab">
                                         <span class="badge">2</span>
                                         <span>Соматический статус</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="third" href="#third" data-toggle="tab">
+                                    <a aria-controls="obstetrician" href="#obstetrician" data-toggle="tab">
                                         <span class="badge">3</span>
                                         <span>Акушерский статус</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="fourth" href="#fourth" data-toggle="tab">
+                                    <a aria-controls="fetus" href="#fetus" data-toggle="tab">
                                         <span class="badge">4</span>
+                                        <span>Данные плода</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a aria-controls="conclusion" href="#conclusion" data-toggle="tab">
+                                        <span class="badge">5</span>
                                         <span>Заключение</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="fifth" href="#fifth" data-toggle="tab">
-                                        <span class="badge">5</span>
+                                    <a aria-controls="ticket" href="#ticket" data-toggle="tab">
+                                        <span class="badge">6</span>
                                         <span>Талон посещения</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="last" href="#last" data-toggle="tab">
-                                        <span class="badge">6</span>
+                                    <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
+                                        <span class="badge">7</span>
                                         <span>Диагностические мероприятия</span>
                                     </a>
                                 </li>
@@ -62,7 +68,7 @@
                 </div>
                 <div class="col-sm-9">
                     <div class="tab-content">
-                        <ng-form class="tab-pane active" id="first" name="firstForm" novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane active" id="common" name="commonForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 1. Лист динамического наблюдения</h3>
@@ -73,20 +79,20 @@
                                     <tr>
                                         <th class="text-right col-md-4">Дата осмотра <span class="text-danger">*</span></th>
                                         <td class="col-md-8">
-                                            <wm-date ng-class="{'has-error': firstForm.beg_date.$invalid && firstForm.submit_attempt}" name="beg_date"
+                                            <wm-date ng-class="{'has-error': commonForm.beg_date.$invalid && commonForm.submit_attempt}" name="beg_date"
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Время осмотра <span class="text-danger">*</span></th>
-                                        <td><wm-time ng-class="{'has-error': firstForm.beg_time.$invalid && firstForm.submit_attempt}" name="beg_time"
+                                        <td><wm-time ng-class="{'has-error': commonForm.beg_time.$invalid && commonForm.submit_attempt}" name="beg_time"
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
                                         <td><div class="row"
-                                                 ng-class="{'has-error': firstForm.weight.$invalid && firstForm.submit_attempt}">
+                                                 ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
                                                 <input name="weight" ng-model="checkup.weight" class="form-control"
                                                        ng-required="true" autofocus>
@@ -97,7 +103,7 @@
                                     <tr>
                                         <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
-                                                 ng-class="{'has-error': (firstForm.ad_right_high.$invalid || firstForm.ad_right_low.$invalid)  && firstForm.submit_attempt}">
+                                                 ng-class="{'has-error': (commonForm.ad_right_high.$invalid || commonForm.ad_right_low.$invalid)  && commonForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input name="ad_right_high" ng-model="checkup.ad_right_high"
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
@@ -111,7 +117,7 @@
                                     <tr>
                                         <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
-                                                 ng-class="{'has-error': (firstForm.ad_left_high.$invalid || firstForm.ad_left_low.$invalid) && firstForm.submit_attempt}">
+                                                 ng-class="{'has-error': (commonForm.ad_left_high.$invalid || commonForm.ad_left_low.$invalid) && commonForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
                                                        class="form-control blood_presure" ng-required="true">
@@ -146,7 +152,7 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="second" name="secondForm" novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="somatic" name="somaticForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 2. Соматический статус</h3>
@@ -156,7 +162,7 @@
                                 <tbody>
                                     <tr>
                                         <th class="text-right col-md-4">Общее состояние <span class="text-danger">*</span></th>
-                                        <td class="col-md-8"><div class="row" ng-class="{'has-error': secondForm.state.$invalid && secondForm.submit_attempt}">
+                                        <td class="col-md-8"><div class="row" ng-class="{'has-error': somaticForm.state.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
                                             </div>
@@ -164,7 +170,7 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Жалобы <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': secondForm.complaints.$invalid && secondForm.submit_attempt}">
+                                        <td><div ng-class="{'text-danger': somaticForm.complaints.$invalid && somaticForm.submit_attempt}">
                                             <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
                                                 [[ item.name ]]
                                             </div>
@@ -262,7 +268,7 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="third" name="thirdForm"  novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="obstetrician" name="obstetricianForm"  novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 3. Акушерский статус</h3>
@@ -280,48 +286,147 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Состояние матки</th>
-                                        <td><div class="row" ng-class="{'has-error': thirdForm.metra_state.$invalid && thirdFormm.submit_attempt}">
+                                        <td><div class="row" ng-class="{'has-error': obstetricianForm.metra_state.$invalid && obstetricianForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State"></rb-select>
                                         </div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Плод</th>
-                                        <td>&nbsp;</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Положение</td>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.fetus_position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Предлежание</td>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Сердцебиение</td>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">ЧСС, уд/мин</td>
-                                        <td><div class="row"><div class="col-md-3">
-                                            <input ng-model="checkup.fetus_heart_rate" class="form-control"></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Шевеление</td>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="fetus_movement" /></div></div></td>
                                     </tr>
                                 </tbody>
                             </table>
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="fetus" name="fetusForm"  novalidate rc-submit rc-step box-wizard>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 4. Заключение</h3>
+                                <h3 class="box-title">Шаг 4. Данные плода</h3>
+                            </div>
+                            <div class="box-body">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        <tr>
+                                            <th class="text-right">Дата первого шевеления <span>&nbsp;</span></th>
+                                            <td><div class="row"><div class="col-md-4">
+                                                <wm-date ng-model="checkup.fetus_first_movement_date" style="width: 250px"></wm-date></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-right">Шевеление <span>&nbsp;</span></th>
+                                            <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fetus_movement" /></div></div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                                            <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
+                                                <li ng-class="{'active': $index==0}" ng-repeat="child in checkup.fetuses | flt_not_deleted">
+                                                    <a href="#fetus[[$index+1]]" data-toggle="pill">
+                                                        Плод [[$index+1]]<button class="text-red close btn btn-small btn-default closeBtn"
+                                                                                    ng-click="delete_child(child)" type="button"
+                                                                                    ng-hide="child.id"
+                                                                                    tooltip="Удалить">
+                                                                                <span class="glyphicon glyphicon-remove"></span>
+                                                                            </button>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="tab-content">
+                                                <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
+                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted">
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th class="col-md-4"></th>
+                                                            <th class="col-md-8"></th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th class="text-right">Положение <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Позиция <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.position_2" ref-book="rbRisarFetus_Position_2"></rb-select>
+                                                                </div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Вид плода <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4"><rb-select ng-model="child.state.type" ref-book="rbRisarFetus_Type"></rb-select>
+                                                                </div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Предлежание <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Задержка в развитии <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.delay" ref-book="rbRisarFetus_Delay"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Сердцебиение <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-3">
+                                                                    <input ng-model="child.state.heart_rate" class="form-control"></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Данные КТГ <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-3">
+                                                                    <input type="checkbox" ng-model="child.state.ktg_input"></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Базальный ритм <span class="text-danger">*</span></th>
+                                                                <td><div class="row"><div class="col-md-8">
+                                                                    <rb-select ng-model="child.state.basal" ref-book="rbRisarBasal"
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Вариабельность (амплитуда) <span class="text-danger">*</span></th>
+                                                                <td><div class="row"><div class="col-md-8">
+                                                                    <rb-select ng-model="child.state.variability_range" ref-book="rbRisarVariabilityRange"
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Вариабельность (частота в минуту) <span class="text-danger">*</span></th>
+                                                                <td><div class="row"><div class="col-md-8">
+                                                                    <rb-select ng-model="child.state.frequency_per_minute" ref-book="rbRisarFrequencyPerMinute"
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Акселерации за 30 минут <span class="text-danger">*</span></th>
+                                                                <td><div class="row"><div class="col-md-8">
+                                                                    <rb-select ng-model="child.state.acceleration" ref-book="rbRisarAcceleration"
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Децелерации за 30 минут <span class="text-danger">*</span></th>
+                                                                <td><div class="row"><div class="col-md-8">
+                                                                    <rb-select ng-model="child.state.deceleration" ref-book="rbRisarDeceleration"
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                            </div>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="conclusion" name="conclusionForm" novalidate rc-submit rc-step>
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 5. Заключение</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -339,7 +444,7 @@
                                         <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
                                         <td>
                                             <div class="row"
-                                                 ng-class="{'has-error': fifthForm.pregnancy_week.$invalid && fifthForm.submit_attempt}">
+                                                 ng-class="{'has-error': ticketForm.pregnancy_week.$invalid && ticketForm.submit_attempt}">
                                                 <div class="col-md-2">
                                                     <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
                                                            class="form-control" type="number" min="1" max="45" valid-number ng-required="true">
@@ -381,7 +486,7 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'has-error': fifthForm.next_date.$invalid}">
+                                        <td><div ng-class="{'has-error': ticketForm.next_date.$invalid}">
                                             <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date>
                                         </div></td>
                                     </tr>
@@ -398,10 +503,10 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="ticket" name="ticketForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 5. Талон посещения</h3>
+                                <h3 class="box-title">Шаг 6. Талон посещения</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -499,10 +604,10 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 6. Диагностические мероприятия</h3>
+                                <h3 class="box-title">Шаг 7. Диагностические мероприятия</h3>
                             </div>
                             <div class="box-body">
                             {% include 'risar/inspection_measure_list.html' %}

@@ -57,6 +57,7 @@ WebMis20
         api_measure_list: '{{ url_for('.api_0_measure_list') }}',
         api_chart_header: '{{ url_for('.api_0_chart_header') }}',
         api_checkup_list: '{{ url_for('.api_0_checkup_list') }}',
+        api_fetus_list: '{{ url_for('.api_0_fetus_list') }}',
         api_checkup_get: '{{ url_for('.api_0_checkup_get') }}{0}',
         api_checkup_new: '{{ url_for('.api_0_checkup_new') }}{0}',
         api_checkup_save: '{{ url_for('.api_0_checkup') }}{0}',

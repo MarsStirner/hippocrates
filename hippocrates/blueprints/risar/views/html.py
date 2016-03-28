@@ -112,6 +112,11 @@ def html_inspection_edit():
         return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
 
 
+@module.route('/inspection_fetus.html')
+def html_inspection_fetus():
+    return render_template('risar/inspection_fetus_view.html')
+
+
 @module.route('/epicrisis.html')
 def html_epicrisis():
     return render_template('risar/epicrisis.html')

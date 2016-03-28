@@ -1,10 +1,12 @@
 # -*- encoding: utf-8 -*-
+from blueprints.risar.lib.fetus import create_or_update_fetuses
 from flask import request
 
 from blueprints.risar.app import module
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.represent import represent_checkup, represent_checkups
+from blueprints.risar.lib.represent import represent_checkup, represent_checkups, \
+    represent_fetuses
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -23,6 +25,7 @@ def api_0_checkup(event_id):
     beg_date = safe_datetime(data.pop('beg_date', None))
     person = data.pop('person', None)
     diagnoses = data.pop('diagnoses', None)
+    fetuses = data.pop('fetuses', None)
 
     if not flat_code:
         raise ApiException(400, 'flat_code required')
@@ -43,6 +46,8 @@ def api_0_checkup(event_id):
     create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
+    # после комита, чтобы получили ID нового действия перед созданием нового плода
+    create_or_update_fetuses(action, fetuses)
     card.reevaluate_card_attrs()
     db.session.commit()
 
@@ -84,3 +89,11 @@ def api_0_checkup_list(event_id):
     return {
         'checkups': represent_checkups(event)
     }
+
+
+@module.route('/api/0/fetus_list/')
+@module.route('/api/0/fetus_list/<int:event_id>')
+@api_method
+def api_0_fetus_list(event_id):
+    event = Event.query.get(event_id)
+    return represent_fetuses(event)

@@ -134,30 +134,6 @@
                     <td ng-repeat="checkup in checkups"> [[ checkup.metra_state.name ]]</td>
                     <td></td>
                 </tr>
-                <tr>
-                    <th>Плод</th>
-                    <td colspan="[[ checkups.length + 1 ]]"></td>
-                </tr>
-                <tr>
-                    <td>Положение</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.fetus_position.name ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Предлежание</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.presenting_part.name ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Характер СС</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.fetus_heartbeat.name ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Частота СС</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.fetus_heart_rate ]]</td>
-                    <td></td>
-                </tr>
             </tbody>
         </table>
         </div>

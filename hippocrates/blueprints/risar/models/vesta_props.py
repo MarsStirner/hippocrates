@@ -19,7 +19,8 @@ class VestaProperty(object):
             self.cache[instance] = {}
 
     def __pull_vesta(self, value):
-        return Vesta.get_rb(self.rb, value)
+        if value:
+            return Vesta.get_rb(self.rb, value)
 
     def __get__(self, instance, owner):
         if instance is None:
