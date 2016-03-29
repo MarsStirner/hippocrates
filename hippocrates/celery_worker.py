@@ -4,17 +4,16 @@ import os
 from celery.utils.log import get_task_logger
 from celery.signals import worker_process_init
 
-import config
-from nemesis.app import app as flask_app, bootstrap_app
+from celeryusagicompat import HippoCeleryUsagiClient
+from nemesis.app import app as flask_app
 from nemesis.systemwide import db
 
 
 logger = get_task_logger(__name__)
 
-
-flask_app.config.from_object(config)
-flask_app.config['SQLALCHEMY_ECHO'] = False
-bootstrap_app(None)
+usagi = HippoCeleryUsagiClient(flask_app.wsgi_app, os.getenv('TSUKINO_USAGI_URL', 'http://127.0.0.1:5900'), 'hippo')
+flask_app.wsgi_app = usagi.app
+usagi()
 
 
 # https://github.com/Robpol86/Flask-Large-Application-Example
@@ -35,5 +34,5 @@ with flask_app.app_context():
         db.init_app(flask_app)
 
 
-from nemesis.systemwide import celery
+from nemesis.systemwide import celery  # this is what celery process uses
 from celery_tasks import *
