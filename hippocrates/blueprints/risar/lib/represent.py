@@ -531,6 +531,7 @@ def represent_checkup_shortly(action):
         'beg_date': action.begDate,
         'end_date': action.endDate,
         'person': action.person,
+        'flat_code': action.actionType.flatCode,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
         'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
         'diag': represent_diag_shortly(diagnostic) if diagnostic else None

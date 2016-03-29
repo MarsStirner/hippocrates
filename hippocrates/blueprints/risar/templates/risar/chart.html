@@ -115,8 +115,8 @@
                         </thead>
                         <tr ng-repeat="checkup in chart.checkups">
                             <td>[[ $index + 1 ]]</td>
-                            <td><a ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
-                            <td><a ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_pc_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                            <td ng-if="checkup.flat_code != 'risarPCCheckUp'"><a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                            <td ng-if="checkup.flat_code == 'risarPCCheckUp'"><a ng-href="{{ url_for('.html_inspection_pc_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
                             <td>[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
                             <td><span class="bottom_dotted" tooltip="[[ checkup.diag.mkb.name ]]">[[ checkup.diag.mkb.code ]]</span></td>
                             <td>[[ checkup.person.name ]]</td>
