@@ -112,22 +112,24 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                         $scope.abdominal[index] + ', ' + checkup.abdominal : checkup.abdominal;
                 }
 
-                if(checkup.fetus_heart_rate){
-                    $scope.fetus_heart_rate[index] = $scope.fetus_heart_rate[index] ?
-                        $scope.fetus_heart_rate[index] + ', ' + checkup.fetus_heart_rate : checkup.fetus_heart_rate
-                }
-                ;
+                for (var j in checkup.fetuses) {
+                    var fetus_state = checkup.fetuses[j].state;
+                    if(fetus_state && fetus_state.heart_rate){
+                        $scope.fetus_heart_rate[index] = $scope.fetus_heart_rate[index] ?
+                            $scope.fetus_heart_rate[index] + ', ' + fetus_state.heart_rate : fetus_state.heart_rate
+                    }
 
-                // предлежание плода
-                if (checkup.presenting_part){
-                    var short_name = checkup.presenting_part.name.split(' ').reduce(function(prev, curr){
-                        var str = prev + curr[0].toUpperCase();
-                        return str
-                    }, "");
-                    if($scope.presenting_part[index]){
-                        $scope.presenting_part[index].push([short_name, checkup.presenting_part.name]);
-                    } else{
-                        $scope.presenting_part[index] = [short_name, checkup.presenting_part.name];
+                    // предлежание плода
+                    if (fetus_state && fetus_state.presenting_part){
+                        var short_name = fetus_state.presenting_part.name.split(' ').reduce(function(prev, curr){
+                            var str = prev + curr[0].toUpperCase();
+                            return str
+                        }, "");
+                        if($scope.presenting_part[index]){
+                            $scope.presenting_part[index].push([short_name, fetus_state.presenting_part.name]);
+                        } else{
+                            $scope.presenting_part[index] = [[short_name, fetus_state.presenting_part.name]];
+                        }
                     }
                 }
 
