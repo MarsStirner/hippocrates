@@ -32,7 +32,8 @@ father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + common_codes
 
 first_inspection_code = 'risarFirstInspection'
 second_inspection_code = 'risarSecondInspection'
-checkup_flat_codes = [first_inspection_code, second_inspection_code]
+pc_inspection_code = 'risarPCCheckUp'
+checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspection_code]
 
 # inspection properties
 inspection_preg_week_code = 'pregnancy_week'

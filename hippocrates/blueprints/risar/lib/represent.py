@@ -27,7 +27,6 @@ from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PregnancyPathology, ErrandStatus, CardFillRate)
 from nemesis.models.exists import rbAttachType
 from nemesis.models.risar import rbPerinatalRiskRate
-from sqlalchemy import desc
 
 __author__ = 'mmalkov'
 
@@ -378,7 +377,7 @@ def represent_fetuses(event):
         Action.event == event,
         Action.deleted == 0,
         ActionType.flatCode.in_(checkup_flat_codes)
-    ).order_by(desc(Action.begDate)).first()
+    ).order_by(Action.begDate.desc()).first()
     if action:
         return represent_fetus(action)
     else:

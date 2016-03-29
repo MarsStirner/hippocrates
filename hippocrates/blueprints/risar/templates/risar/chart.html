@@ -90,8 +90,17 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Осмотры акушером-гинекологом (<a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
                         <div class="box-tools">
-                            <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]"
-                               title=""><span class="glyphicon glyphicon-plus"></span> Добавить осмотр</a>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default" ng-click="add_inspection()">Добавить</button>
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]">Создать осмотр акушером-гинекологом</a></li>
+                                    <li><a ng-href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ chart.id ]]">Создать осмотр специалистом ПЦ</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <table class="table table-condensed">
@@ -106,7 +115,8 @@
                         </thead>
                         <tr ng-repeat="checkup in chart.checkups">
                             <td>[[ $index + 1 ]]</td>
-                            <td><a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                            <td><a ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                            <td><a ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_pc_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
                             <td>[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
                             <td><span class="bottom_dotted" tooltip="[[ checkup.diag.mkb.name ]]">[[ checkup.diag.mkb.code ]]</span></td>
                             <td>[[ checkup.person.name ]]</td>

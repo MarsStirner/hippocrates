@@ -15,9 +15,10 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th width="10%" nowrap>Данные осмотра <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></th>
+                    <th width="10%" nowrap>Данные осмотра </th>
                     <th width="10%" nowrap ng-repeat="checkup in checkups">
-                        <a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
+                        <a ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
+                        <a ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_pc_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
                             <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
@@ -25,7 +26,8 @@
                             <ul class="dropdown-menu" role="menu">
                                 <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
                                 <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}"><a href="#" ng-click="open_print_window(ps_si, checkup.id)" >Печать</a></li>
-                                <li ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
+                                <li ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
+                                <li ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
                                 <li><a href="#">Копировать</a></li>
                                 <li><a href="#">Удалить</a></li>
                             </ul>

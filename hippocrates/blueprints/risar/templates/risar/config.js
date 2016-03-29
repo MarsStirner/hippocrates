@@ -50,6 +50,7 @@ WebMis20
         anamnesis_html: '{{ url_for('.html_anamnesis') }}',
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
+        inspection_pc_edit_html:'{{ url_for('.html_inspection_pc_edit') }}',
         epicrisis_html:'{{ url_for('.html_epicrisis') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
         card_fill_history: '{{ url_for('.html_card_fill_history') }}',

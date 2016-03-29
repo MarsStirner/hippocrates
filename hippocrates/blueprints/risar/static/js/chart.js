@@ -4,8 +4,8 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser,
-                          UserErrand, RefBookService) {
+var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser,
+                          UserErrand, RefBookService, Config) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var client_id = params.client_id;
@@ -88,6 +88,9 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
                 restart = rslt[1];
             UserErrand.create_errand(result.exec_person, result.text, $scope.chart.id, result.status, result.planned_exec_date);
         })
+    };
+    $scope.add_inspection = function() {
+        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
     };
     var open_edit_errand = function(e){
         var scope = $scope.$new();
@@ -182,8 +185,8 @@ var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
     reload();
 };
 
-WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
-    'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', ChartCtrl]);
+WebMis20.controller('ChartCtrl', ['$scope', '$modal', '$window', 'RisarApi', 'PrintingService', 'PrintingDialog',
+    'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', 'Config', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     'RefBookService', InspectionViewCtrl]);
 WebMis20.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', InspectionFetusViewCtrl]);
