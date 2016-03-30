@@ -13,8 +13,8 @@ from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
 from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
-from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
-
+from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
+    puerpera_inspection_code
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
 risk_rates_diagID = {
@@ -224,6 +224,20 @@ def close_open_checkups(event_id):
         Action.deleted == 0,
         ActionType.id == Action.actionType_id,
         ActionType.flatCode.in_(checkup_flat_codes)
+    ).update({
+        Action.endDate: now,
+        Action.status: ActionStatus.finished[0],
+    }, synchronize_session=False)
+
+
+def close_open_checkups_puerpera(event_id):
+    now = datetime.datetime.now()
+    db.session.query(Action).filter(
+        Action.event_id == event_id,
+        Action.endDate.is_(None),
+        Action.deleted == 0,
+        ActionType.id == Action.actionType_id,
+        ActionType.flatCode == puerpera_inspection_code,
     ).update({
         Action.endDate: now,
         Action.status: ActionStatus.finished[0],

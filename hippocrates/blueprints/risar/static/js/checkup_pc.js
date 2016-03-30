@@ -2,7 +2,6 @@
 'use strict';
 
 var CheckupCtrl = function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingDialog) {
-    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
     $scope.ps_talon = new PrintingService("risar");

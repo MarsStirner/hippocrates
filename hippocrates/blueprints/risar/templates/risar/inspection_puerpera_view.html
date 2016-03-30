@@ -1,12 +1,12 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
 
-{% block title %}> Осмотры акушером-гинекологом беременной{% endblock %}
+{% block title %}> Осмотры родильницы{% endblock %}
 
 {% block main %}
-<div ng-controller="InspectionViewCtrl" ng-cloak>
+<div ng-controller="InspectionPuerperaViewCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title_ext_n('Осмотры акушером-гинекологом беременной', 'inspection') }}
+        {{ rimacros.page_title_ext_n('Осмотры родильницы', 'inspection_puepera') }}
         {{ rimacros.navigation('[[ header.event.id ]]') }}
     </section>
     <section class="content">
@@ -17,17 +17,14 @@
                 <tr>
                     <th width="10%" nowrap>Данные осмотра </th>
                     <th width="10%" nowrap ng-repeat="checkup in checkups">
-                        <a ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
-                        <a ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-href="{{ url_for('.html_inspection_pc_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
+                        <a ng-href="{{ url_for('.html_inspection_puerpera_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
                             <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
-                                <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}"><a href="#" ng-click="open_print_window(ps_si, checkup.id)" >Печать</a></li>
-                                <li ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
-                                <li ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
+                                <li ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
+                                <li ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
                                 <li><a href="#">Копировать</a></li>
                                 <li><a href="#">Удалить</a></li>
                             </ul>
@@ -38,58 +35,28 @@
             </thead>
             <tbody>
                 <tr>
-                    <th>Срок беременности (расчётный)</th>
-                    <td ng-repeat="checkup in checkups">[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
+                    <th>Общее состояние</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.state.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Диагнозы</th>
-                    <td colspan="[[ checkups.length + 1 ]]"></td>
-                </tr>
-                <!-- TODO: Отображение диагнозов -->
-                <tr>
-                    <td>основной</td>
-                    <td ng-repeat="checkup in checkups">
-                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
-                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                [[ diag.diagnostic.mkb.code ]]
-                            </span>
-                        </p>
-                    </td>
+                    <th>АД правая рука</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_right_high ]]/[[ checkup.ad_right_low ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td>сопутствующие</td>
-                    <td ng-repeat="checkup in checkups">
-                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
-                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                [[ diag.diagnostic.mkb.code ]]
-                            </span>
-                        </p>
-                    </td>
+                    <th>АД левая рука</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_left_high ]]/[[ checkup.ad_left_low ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td>осложнения</td>
-                    <td ng-repeat="checkup in checkups">
-                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
-                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                [[ diag.diagnostic.mkb.code ]]
-                            </span>
-                        </p>
-                    </td>
+                    <th>Жалобы</th>
+                    <td ng-repeat="checkup in checkups"><p ng-repeat="item in checkup.complaints">[[ item | format:'{name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Масса тела</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Прибавка в массе</th>
-                    <td ng-repeat="checkup in checkups">
-                        <span tooltip="Прибавка в массе на расчётный срок [[ checkup.pregnancy_week ]] [[declOfNum(checkup.pregnancy_week, ['неделя', 'недели', 'недель'])]]">
-                            [[checkup.weight-first_checkup.weight]]</span>/<span tooltip="Прибавка в массе за [[ checkup.weight_gain[1] ]] [[declOfNum(checkup.weight_gain[1], ['день', 'дня', 'дней'])]]">[[ checkup.weight_gain[0] ]]</span></td>
+                    <th>Состояние вен</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.vein.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
@@ -103,37 +70,30 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Отёки</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.if_edema ]]</td>
+                    <th>Состояние матки</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.uterus.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>АД левая рука</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_left_high ]]/[[ checkup.ad_left_low ]]</td>
+                    <th>Состояние послеоперационного рубца</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.scar.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>АД правая рука</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_right_high ]]/[[ checkup.ad_right_low ]]</td>
+                    <th>Выделения</th>
+                    <td ng-repeat="checkup in checkups"><p ng-repeat="item in checkup.secretion">[[ item | format:'{name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Окружность живота</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.abdominal ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Матка</th>
-                    <td colspan="[[ checkups.length + 1 ]]"></td>
-                </tr>
-                <tr>
-                    <td>Высота дна</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.fundal_height ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Состояние</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.metra_state.name ]]</td>
+                    <th>Диагнозы</th>
+                    <td ng-repeat="checkup in checkups">
+                        <!--| collapse_diagnoses:'main'-->
+                        <p ng-repeat="diag in checkup.diagnoses">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
                     <td></td>
                 </tr>
             </tbody>
@@ -146,5 +106,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/chart_puerpera.js', v=app_version) }}"></script>
 {% endblock %}

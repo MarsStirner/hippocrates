@@ -33,6 +33,7 @@ father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + common_codes
 first_inspection_code = 'risarFirstInspection'
 second_inspection_code = 'risarSecondInspection'
 pc_inspection_code = 'risarPCCheckUp'
+puerpera_inspection_code = 'risarPuerperaCheckUp'
 checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspection_code]
 
 # inspection properties

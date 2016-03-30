@@ -2,7 +2,6 @@
 'use strict';
 
 var CheckupCtrl = function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingDialog) {
-    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
     $scope.ps_talon = new PrintingService("risar");
@@ -36,40 +35,16 @@ var CheckupCtrl = function ($scope, $timeout, RisarApi, RefBookService, Printing
                 $scope.header = data.header;
             });
         if (!checkup_id) {
-            RisarApi.checkup.create(event_id, $scope.getFlatCode()).
+            RisarApi.checkup_puerpera.create(event_id, $scope.getFlatCode()).
                 then(function (checkup) {
                     $scope.checkup = checkup;
-                    if(!$scope.checkup.fetuses.length) {
-                        $scope.add_child();
-                    }
                 });
         } else {
-            RisarApi.checkup.get(checkup_id)
+            RisarApi.checkup_puerpera.get(checkup_id)
                 .then(function (checkup) {
                     $scope.checkup = checkup;
-                    if(!$scope.checkup.fetuses.length) {
-                        $scope.add_child();
-                    }
                 });
         }
-    };
-    $scope.add_child = function (){
-        $scope.checkup.fetuses.push({
-            id: null,
-            alive: true,
-            deleted: 0
-        });
-        $timeout(function(){
-            $('#childrenTabs').find('a:last').tab('show');
-        }, 0);
-
-    };
-    $scope.delete_child = function(child){
-        child.deleted = 1;
-        $timeout(function(){
-            $('#childrenTabs li.active').removeClass('active');
-            $('#childrenTabs').find('a:first').tab('show');
-        }, 0);
     };
 
     $scope.init = function () {
@@ -100,49 +75,49 @@ var CheckupCtrl = function ($scope, $timeout, RisarApi, RefBookService, Printing
     };
 };
 
-var CheckupPCEditCtrl = function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
+var CheckupPuerperaEditCtrl = function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
-    var updateHW_Ratio = function (){
-        $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
-    };
-    var updateBMI = function (){
-        $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
-    };
+    // var updateHW_Ratio = function (){
+    //     $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
+    // };
+    // var updateBMI = function (){
+    //     $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
+    // };
     $scope.getFlatCode = function () {
-        return 'risarPCCheckUp';
+        return 'risarPuerperaCheckUp';
     };
-    $scope.$watch('checkup.height', function() {
-        if ($scope.checkup && $scope.checkup.height && (!isNaN($scope.checkup.weight))) {
-            updateHW_Ratio();
-            updateBMI();
-        }
-    });
-    $scope.$watch('checkup.weight', function() {
-        if ($scope.checkup && !isNaN($scope.checkup.weight)) {
-            updateHW_Ratio();
-            updateBMI();
-        }
-    });
+    // $scope.$watch('checkup.height', function() {
+    //     if ($scope.checkup && $scope.checkup.height && (!isNaN($scope.checkup.weight))) {
+    //         updateHW_Ratio();
+    //         updateBMI();
+    //     }
+    // });
+    // $scope.$watch('checkup.weight', function() {
+    //     if ($scope.checkup && !isNaN($scope.checkup.weight)) {
+    //         updateHW_Ratio();
+    //         updateBMI();
+    //     }
+    // });
     $scope.save = function (form_controller) {
         if (form_controller.$invalid) {
             //var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');
             //$document.scrollToElement(formelm, 100, 1500);
             return false;
         }
-        return RisarApi.checkup.save($scope.event_id, $scope.checkup)
+        return RisarApi.checkup_puerpera.save($scope.event_id, $scope.checkup)
             .then(function (data) {
                 if($scope.checkup.id){
                     $scope.checkup = data;
                 } else {
-                    $window.open(Config.url.inspection_pc_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
+                    $window.open(Config.url.inspection_puerpera_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
                 }
             });
     };
     $scope.save_forward = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            RisarApi.checkup.save($scope.event_id, $scope.checkup)
+            RisarApi.checkup_puerpera.save($scope.event_id, $scope.checkup)
                 .then(function (data) {
                     if($scope.checkup.id){
                         $scope.checkup = data;
@@ -151,7 +126,7 @@ var CheckupPCEditCtrl = function ($scope, $controller, $window, $location, $docu
                     } else {
                         $scope.rc.sampleWizard.forward();
                         var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
-                        $window.open(Config.url.inspection_pc_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
+                        $window.open(Config.url.inspection_puerpera_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
                     }
                 });
         }
@@ -162,5 +137,5 @@ var CheckupPCEditCtrl = function ($scope, $controller, $window, $location, $docu
 
 WebMis20.controller('CheckupCtrl', ['$scope', '$timeout', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
     CheckupCtrl]);
-WebMis20.controller('CheckupPCEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',
-    'Config', CheckupPCEditCtrl]);
+WebMis20.controller('CheckupPuerperaEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',
+    'Config', CheckupPuerperaEditCtrl]);

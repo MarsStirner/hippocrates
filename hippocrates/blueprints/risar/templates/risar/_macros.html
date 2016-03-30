@@ -146,9 +146,11 @@
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Осмотры <span class="fa fa-caret-down"></span></button>
             <ul role="menu" class="dropdown-menu">
                 <li><a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}">Осмотры беременной</a></li>
+                <li><a ng-href="{{ url_for('.html_inspection_puerpera') }}?event_id={{ event_id_repl }}">Осмотры родильницы</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр акушером-гинекологом</a></li>
                 <li><a ng-href="{{ url_for('.html_inspection_pc_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр специалистом ПЦ</a></li>
+                <li><a ng-href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр родильницы</a></li>
             </ul>
         </div>
         <a ng-href="{{ url_for('.html_inspection_fetus') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection_fetus']) }}>Плод</a>

@@ -129,6 +129,28 @@ def html_inspection_pc_edit():
     return render_template('risar/inspection_pc_edit.html', debug_data=debug_data)
 
 
+@module.route('/inspection_puerpera.html')
+def html_inspection_puerpera():
+    return render_template('risar/inspection_puerpera_view.html')
+
+
+@module.route('/inspection_puerpera_read.html')
+def html_inspection_puerpera_read():
+    return render_template('risar/inspection_puerpera_read.html')
+
+
+@module.route('/inspection_puerpera_edit.html')
+def html_inspection_puerpera_edit():
+    debug_data = get_debug_data(request.args)
+    event_id = request.args['event_id']
+    checkup_id = request.args.get('checkup_id')
+    if checkup_id:
+        checkup = Action.query.get(checkup_id)
+        if checkup.endDate:
+            return redirect(url_for('.html_inspection_puerpera_read', event_id=event_id, checkup_id=checkup_id))
+    return render_template('risar/inspection_puerpera_edit.html', debug_data=debug_data)
+
+
 @module.route('/inspection_fetus.html')
 def html_inspection_fetus():
     return render_template('risar/inspection_fetus_view.html')

@@ -16,7 +16,7 @@ from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.models.fetus import FetusState
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
-    checkup_flat_codes, risar_epicrisis, attach_codes
+    checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_traverse_attrs, safe_date
@@ -93,6 +93,7 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups_shortly(event),
+        'checkups_puerpera': represent_checkups_puerpera_shortly(event),
         'risk_rate': card_attrs_action['prenatal_risk_572'].value,
         'preeclampsia_susp_rate': card_attrs_action['preeclampsia_susp'].value if
             card_attrs_action.propsByCode.get('preeclampsia_susp') else None,
@@ -372,6 +373,15 @@ def represent_checkups(event):
     return map(represent_checkup, query)
 
 
+def represent_checkups_puerpera(event):
+    query = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == puerpera_inspection_code,
+    ).order_by(Action.begDate)
+    return map(represent_checkup_puerpera, query)
+
+
 def represent_fetuses(event):
     action = Action.query.join(ActionType).filter(
         Action.event == event,
@@ -480,6 +490,27 @@ def represent_checkup(action, with_measures=True):
     return result
 
 
+def represent_checkup_puerpera(action, with_measures=True):
+    result = dict(
+        (code, prop.value)
+        for (code, prop) in action.propsByCode.iteritems()
+    )
+    result['beg_date'] = action.begDate
+    result['end_date'] = action.endDate
+    result['person'] = action.person
+    result['flat_code'] = action.actionType.flatCode
+    result['id'] = action.id
+
+    result['diagnoses'] = represent_action_diagnoses(action)
+    result['diagnosis_types'] = action.actionType.diagnosis_types
+
+    # if with_measures:
+    #     em_ctrl = EventMeasureController()
+    #     measures = em_ctrl.get_measures_in_action(action)
+    #     result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
+    return result
+
+
 def represent_fetus(action):
     result = dict(
         (code, prop.value)
@@ -503,6 +534,15 @@ def represent_checkups_shortly(event):
         ActionType.flatCode.in_(checkup_flat_codes)
     ).order_by(Action.begDate)
     return map(represent_checkup_shortly, query)
+
+
+def represent_checkups_puerpera_shortly(event):
+    query = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == puerpera_inspection_code,
+    ).order_by(Action.begDate)
+    return map(represent_checkup_puerpera_shortly, query)
 
 
 def represent_checkup_shortly(action):
@@ -534,6 +574,33 @@ def represent_checkup_shortly(action):
         'flat_code': action.actionType.flatCode,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
         'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
+        'diag': represent_diag_shortly(diagnostic) if diagnostic else None
+    }
+    return result
+
+
+def represent_checkup_puerpera_shortly(action):
+    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisTypeN
+
+    card = PregnancyCard.get_for_event(action.event)
+    # Получим диагностики, актуальные на начало действия (Diagnostic JOIN Diagnosis)
+    diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
+    diagnosis_ids = [
+        diagnostic.diagnosis_id for diagnostic in diagnostics
+    ]
+    diagnostic = Diagnostic.query.join(
+        Action_Diagnosis, Action_Diagnosis.diagnosis_id == Diagnostic.diagnosis_id
+    ).filter(
+        Action_Diagnosis.action == action,
+        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
+    ).first()
+
+    result = {
+        'id': action.id,
+        'beg_date': action.begDate,
+        'end_date': action.endDate,
+        'person': action.person,
+        'flat_code': action.actionType.flatCode,
         'diag': represent_diag_shortly(diagnostic) if diagnostic else None
     }
     return result
