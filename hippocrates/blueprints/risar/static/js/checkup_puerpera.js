@@ -78,31 +78,11 @@ var CheckupCtrl = function ($scope, $timeout, RisarApi, RefBookService, Printing
 var CheckupPuerperaEditCtrl = function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
-    // var updateHW_Ratio = function (){
-    //     $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
-    // };
-    // var updateBMI = function (){
-    //     $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
-    // };
     $scope.getFlatCode = function () {
         return 'risarPuerperaCheckUp';
     };
-    // $scope.$watch('checkup.height', function() {
-    //     if ($scope.checkup && $scope.checkup.height && (!isNaN($scope.checkup.weight))) {
-    //         updateHW_Ratio();
-    //         updateBMI();
-    //     }
-    // });
-    // $scope.$watch('checkup.weight', function() {
-    //     if ($scope.checkup && !isNaN($scope.checkup.weight)) {
-    //         updateHW_Ratio();
-    //         updateBMI();
-    //     }
-    // });
     $scope.save = function (form_controller) {
         if (form_controller.$invalid) {
-            //var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');
-            //$document.scrollToElement(formelm, 100, 1500);
             return false;
         }
         return RisarApi.checkup_puerpera.save($scope.event_id, $scope.checkup)
