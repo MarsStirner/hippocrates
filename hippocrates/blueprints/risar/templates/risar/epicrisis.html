@@ -308,7 +308,6 @@
                                 <th rowspan="2">Степень доношенности</th>
                                 <th colspan="3">Оценка по Апгар на минуту жизни</th>
                                 <th rowspan="2">Особенности</th>
-                                <th rowspan="2">Причина смерти</th>
                                 <th rowspan="2"></th>
                             </tr>
                             <tr>
@@ -332,10 +331,10 @@
                                 <td ng-if="!inspection.deleted">[[inspection.apgar_score_5]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.apgar_score_10]]</td>
                                 <td ng-if="!inspection.deleted">
-                                    <div ng-repeat="mkb in inspection.diseases">[[mkb.code]] - [[mkb.-name]]</div>
-                                </td>
-                                <td ng-if="!inspection.deleted">
-                                    <div ng-if="!inspection.alive" ng-repeat="mkb in inspection.death_reasons">[[mkb.code]] - [[mkb.-name]]</div>
+                                    <div ng-if="inspection.diseases.length">Заболевания новорождённого:</div>
+                                    <div ng-repeat="mkb in inspection.diseases">[[mkb.code]] - [[mkb.name]]</div>
+                                    <div ng-if="!inspection.alive && inspection.death_reasons.length">Причина смерти:</div>
+                                    <div ng-if="!inspection.alive" ng-repeat="mkb in inspection.death_reasons">[[mkb.code]] - [[mkb.name]]</div>
                                 </td>
                                 <td ng-if="!inspection.deleted" class="col-md-1 nowrap">
                                     <a class="btn btn-primary" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_child[[$index+1]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
