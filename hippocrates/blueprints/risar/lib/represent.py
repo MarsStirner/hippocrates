@@ -613,17 +613,16 @@ def represent_diag_shortly(diagnostic):
     }
 
 
-def represent_ticket(ticket):
+def represent_ticket(ticket_event):
     from nemesis.models.actions import Action, ActionType
-    from nemesis.models.event import Event
+    event = ticket_event.Event
+    ticket = ticket_event.ScheduleTicket
     checkup_n = 0
-    event_id = ticket.client_ticket.event_id if ticket.client_ticket else None
-    event = Event.query.get(event_id) if event_id else None
-    if event_id is not None:
+    if event.id is not None:
         checkup_n = Action.query\
             .join(ActionType)\
             .filter(
-                Action.event_id == event_id,
+                Action.event_id == event.id,
                 Action.deleted == 0,
                 ActionType.flatCode.in_(checkup_flat_codes))\
             .count()
