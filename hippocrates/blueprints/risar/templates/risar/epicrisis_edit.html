@@ -578,10 +578,7 @@
                                         <th class="text-right">Осложнения операции</th>
                                         <td>
                                             <div class="row">
-                                                <wm-diagnosis model="epicrisis.operation_complication" list-mode="true"
-                                                              can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="epicrisis" event="chart" risar="true"
-                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
+                                                <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
                                             </div>
                                         </td>
                                     </tr>
