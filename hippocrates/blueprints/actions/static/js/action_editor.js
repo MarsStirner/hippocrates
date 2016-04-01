@@ -405,19 +405,6 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
             }
         });
     }
-    function save_int (self, url) {
-        var data = {};
-        merge_fields(data, self);
-        data.action_type_id = self.action_type_id || self.action_type.id;
-        merge_properties(data, self);
-        data.id = self.id;
-        return ApiCalls.wrapper('POST', url, undefined, data)
-            .then(function (result) {
-                return self.merge(result);
-            }, function (result) {
-                return $q.reject(result);
-            });
-    }
     /* class methods */
     Action.get = function (id) {
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
@@ -486,20 +473,57 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         return !this.id;
     };
     Action.prototype.save = function () {
-        return save_int(this, '/actions/api/action/{0}'.format(this.id || ''));
+        var self = this,
+            data = {};
+        merge_fields(data, self);
+        data.diagnoses = self._get_entity_changes('diagnoses');
+        data.action_type_id = self.action_type_id || self.action_type.id;
+        merge_properties(data, self);
+        data.id = self.id;
+        return ApiCalls.wrapper(
+            'POST',
+            '/actions/api/action/{0}'.format(this.id || ''), undefined, data
+        )
+            .then(function (result) {
+                return self.merge(result);
+            }, function (result) {
+                return $q.reject(result);
+            });
     };
     Action.prototype.autosave = function () {
+        var self = this,
+            data = {};
+        merge_fields(data, self);
+        data.diagnoses = self._get_entity_changes('diagnoses');
+        data.action_type_id = self.action_type_id || self.action_type.id;
+        merge_properties(data, self);
         if (this.id && !_.isNaN(this.id)) {
-            return save_int(this, '/actions/api/action/{0}/autosave/'.format(this.id));
+            data.id = self.id;
+            return ApiCalls.wrapper(
+                'POST',
+                '/actions/api/action/{0}/autosave/'.format(this.id), undefined, data
+            )
         } else {
-            return $q.defer().resolve(null);
+            return ApiCalls.wrapper(
+                'POST',
+                '/actions/api/action/new/autosave/{0}/{1}/'.format(
+                    self.event_id,
+                    self.action_type_id || self.action_type.id
+                ), undefined, data
+            )
         }
     };
     Action.prototype.discard = function () {
         if (this.id && !_.isNaN(this.id)) {
             return ApiCalls.wrapper('DELETE', '/actions/api/action/{0}/autosave/'.format(this.id))
         } else {
-            return $q.defer().resolve(null);
+            return ApiCalls.wrapper(
+                'DELETE',
+                '/actions/api/action/new/autosave/{0}/{1}/'.format(
+                    this.event_id,
+                    this.action_type_id || this.action_type.id
+                )
+            );
         }
     };
     Action.prototype.reload = function () {

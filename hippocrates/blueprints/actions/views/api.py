@@ -6,7 +6,7 @@ from flask import request, abort, url_for
 
 from flask.ext.login import current_user
 
-from blueprints.actions.lib.models import ActionAutoSave
+from blueprints.actions.lib.models import ActionAutoSave, ActionAutoSaveUnsaved
 from ..app import module
 from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
@@ -51,6 +51,15 @@ def api_action_new_get(action_type_id, event_id):
         src_action = Action.query.get(src_action_id)
 
     action = create_action(action_type_id, event_id, src_action=src_action)
+
+    autosave = ActionAutoSaveUnsaved.query.filter(
+        ActionAutoSaveUnsaved.actionType_id == action_type_id,
+        ActionAutoSaveUnsaved.event_id == event_id,
+        ActionAutoSaveUnsaved.user_id == safe_current_user_id(),
+    ).first()
+    if autosave and autosave.data:
+        data = prepare_action_data(autosave.data)
+        update_action(action, **data)
 
     v = ActionVisualizer()
     result = v.make_action(action)
@@ -143,6 +152,35 @@ def api_action_autosave_delete(action_id):
     ActionAutoSave.query.filter(
         ActionAutoSave.action_id == action_id,
         ActionAutoSave.user_id == safe_current_user_id(),
+    ).delete()
+    db.session.commit()
+
+
+@module.route('/api/action/new/autosave/<int:event_id>/<int:action_type_id>/', methods=['POST'])
+@api_method
+def api_action_autosave_unsaved(event_id, action_type_id):
+    data = request.get_json()
+    autosave = ActionAutoSaveUnsaved.query.filter(
+        ActionAutoSaveUnsaved.actionType_id == action_type_id,
+        ActionAutoSaveUnsaved.event_id == event_id,
+        ActionAutoSaveUnsaved.user_id == safe_current_user_id(),
+    ).first()
+    if not autosave:
+        autosave = ActionAutoSaveUnsaved()
+        autosave.actionType_id = action_type_id
+        autosave.event_id = event_id
+        db.session.add(autosave)
+    autosave.data = data
+    db.session.commit()
+
+
+@module.route('/api/action/new/autosave/<int:event_id>/<int:action_type_id>/', methods=['DELETE'])
+@api_method
+def api_action_autosave_delete_unsaved(event_id, action_type_id):
+    ActionAutoSaveUnsaved.query.filter(
+        ActionAutoSaveUnsaved.actionType_id == action_type_id,
+        ActionAutoSaveUnsaved.event_id == event_id,
+        ActionAutoSaveUnsaved.user_id == safe_current_user_id(),
     ).delete()
     db.session.commit()
 
