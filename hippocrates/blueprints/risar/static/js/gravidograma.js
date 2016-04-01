@@ -51,6 +51,15 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
         $scope.xml_gravidograma = d3.select('#gravidograma svg').node().parentNode.innerHTML;
         $scope.xml_weight_gain_data = d3.select('#weight_gain_data svg').node().parentNode.innerHTML;
 
+        var presenting_part = [];
+        $scope.presenting_part.forEach(function(el, i) {
+            var el_str = '';
+            $scope.presenting_part[i].forEach(function(el, j) {
+                if(j > 0) {el_str = el_str + ', ';}
+                el_str = el_str + $scope.presenting_part[i][j][0];
+            });
+            presenting_part[i] = el_str;
+        });
         return {
             event_id: $scope.event_id,
             blood_pressure_right: $scope.xml_blood_pressure_right,
@@ -61,7 +70,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                                weight: $scope.weight},
             abdominal: $scope.abdominal,
             fetus_heart_rate: $scope.fetus_heart_rate,
-            presenting_part: $scope.presenting_part,
+            presenting_part: presenting_part,
             edema: $scope.edema
         }
     };
