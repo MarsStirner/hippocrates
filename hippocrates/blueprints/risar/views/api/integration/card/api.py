@@ -45,4 +45,11 @@ def api_card_save(api_version, card_id=None):
 @module.route('/api/integration/<int:api_version>/card/<card_id>', methods=['DELETE'])
 @api_method(hook=hook)
 def api_card_delete(api_version, card_id):
-    pass
+    xform = CardXForm()
+    xform.set_version(api_version)
+    xform.find_card(card_id)
+    xform.delete_card()
+    db.session.add(xform.event)
+    db.session.commit()
+
+    return xform.as_json()

@@ -2,7 +2,7 @@
 
 import requests
 
-from test_data import test_client_data, test_event_data
+from test_data import test_client_data, test_event_data, test_event_data2
 
 
 coldstar_url = 'http://127.0.0.1:6098'
@@ -57,11 +57,36 @@ def make_client_save(token, session_token):
     return j
 
 
-def make_card_save(token, session_token):
+def register_card(token, session_token):
     url = u'%s/risar/api/integration/0/card/' % mis_url
     result = requests.post(
         url,
         json=test_event_data,
+        cookies={auth_token_name: token,
+                 session_token_name: session_token}
+    )
+    print result
+    j = result.json()
+    return j
+
+
+def change_card(token, session_token, event_id):
+    url = u'%s/risar/api/integration/0/card/%s' % (mis_url, event_id)
+    result = requests.put(
+        url,
+        json=test_event_data2,
+        cookies={auth_token_name: token,
+                 session_token_name: session_token}
+    )
+    print result
+    j = result.json()
+    return j
+
+
+def delete_card(token, session_token, event_id):
+    url = u'%s/risar/api/integration/0/card/%s' % (mis_url, event_id)
+    result = requests.delete(
+        url,
         cookies={auth_token_name: token,
                  session_token_name: session_token}
     )
@@ -76,10 +101,21 @@ if __name__ == '__main__':
     session_token = get_role(token)
     print ' > session token: ', session_token
 
-    result = make_client_save(token, session_token)
-    print u'new client data: {0}'.format(repr(result).decode("unicode-escape"))
+    # ========================================================================
+    # result = make_client_save(token, session_token)
+    # print u'new client data: {0}'.format(repr(result).decode("unicode-escape"))
+    #
+    # client_id = '17700'
+    # test_event_data['client_id'] = client_id
+    # result = register_card(token, session_token)
+    # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
     client_id = '17700'
-    test_event_data['client_id'] = client_id
-    result = make_card_save(token, session_token)
+    event_id = '160'
+    test_event_data2['client_id'] = client_id
+    result = change_card(token, session_token, event_id)
     print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
+
+    # event_id = '160'
+    # result = delete_card(token, session_token, event_id)
+    # print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))

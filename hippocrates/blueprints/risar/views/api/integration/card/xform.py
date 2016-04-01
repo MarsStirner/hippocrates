@@ -60,8 +60,8 @@ class CardXForm(XForm, CardSchema):
             self.update_event(data)
 
     def update_event(self, data):
-        self.event.setDate = safe_datetime(data['card_set_date'])
-        new_doctor = self.find_doctor('card_doctor')
+        self.event.setDate = safe_datetime(safe_date(data['card_set_date']))
+        new_doctor = self.find_doctor(data['card_doctor'])
         self.event.execPerson = new_doctor
         self.event.execPerson_id = new_doctor.id
         new_org = self.find_org(data['card_LPU'])
@@ -70,6 +70,7 @@ class CardXForm(XForm, CardSchema):
 
         self.pcard = PregnancyCard.get_for_event(self.event)
         check_card_attrs_action_integrity(self.pcard.attrs)
+        self.update_card_attrs()
 
     def create_event(self, data):
         event = self.event
@@ -81,7 +82,7 @@ class CardXForm(XForm, CardSchema):
         client = self.find_client(data['client_id'])
         event.client = client
         event.cleint_id = client.id
-        event.setDate = safe_datetime(data['card_set_date'])
+        event.setDate = safe_datetime(safe_date(data['card_set_date']))
         new_doctor = self.find_doctor(data['card_doctor'])
         event.execPerson = new_doctor
         event.execPerson_id = new_doctor.id
@@ -110,6 +111,9 @@ class CardXForm(XForm, CardSchema):
             raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
         ca_action = create_action(at.id, self.event)
         self.pcard._card_attrs_action = ca_action
+
+    def delete_card(self):
+        self.event.deleted = 1
 
     @wrap_simplify
     def as_json(self):
