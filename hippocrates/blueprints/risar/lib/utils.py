@@ -157,6 +157,16 @@ def get_action_by_id(action_id, event=None, flat_code=None, create=False):
     return action
 
 
+def copy_attrs_from_last_action(event, flat_code, action, attr_list):
+    last_action = get_action_list(event, flat_code).order_by(
+        Action.id.desc()
+    ).first()
+    if last_action:
+        for code in attr_list:
+            if code in last_action.propsByCode:
+                action.propsByCode[code].value = last_action.propsByCode[code].value
+
+
 def action_apt_values(action, codes):
     """
     Получение справочника всех возможных значений свойств действия по кодам

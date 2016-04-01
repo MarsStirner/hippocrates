@@ -7,7 +7,8 @@ from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.represent import represent_checkup, represent_checkups, \
     represent_fetuses
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
+from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
+    copy_attrs_from_last_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -75,6 +76,9 @@ def api_0_checkup_new(event_id):
         raise ApiException(400, 'flat_code required')
     event = Event.query.get(event_id)
     action = get_action_by_id(None, event, flat_code, True)
+    copy_attrs_from_last_action(event, flat_code, action, (
+        'fetus_first_movement_date',
+    ))
     result = represent_checkup(action)
     result['pregnancy_week'] = get_pregnancy_week(event)
     return result
