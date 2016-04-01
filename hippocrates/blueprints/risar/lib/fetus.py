@@ -23,7 +23,7 @@ def create_or_update_fetuses(action, fetuses):
             if fetuse_state_id:
                 fetus_state = FetusState.query.get(fetuse_state_id)
             else:
-                fetus_state = FetusState(action_id=action.id)
+                fetus_state = FetusState(action=action, action_id=action.id)
             db.session.add(fetus_state)  # Ничего страшного, если добавим в сессию уже добавленный объект
             for sd_key, sd_val in state_data.items():
                 if isinstance(getattr(fetus_state.__class__, sd_key), VestaProperty):

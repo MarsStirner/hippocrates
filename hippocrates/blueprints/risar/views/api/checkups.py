@@ -44,10 +44,9 @@ def api_0_checkup(event_id):
             action.propsByCode[code].value = value
 
     create_or_update_diagnoses(action, diagnoses)
+    create_or_update_fetuses(action, fetuses)
 
     db.session.commit()
-    # после комита, чтобы получили ID нового действия перед созданием нового плода
-    create_or_update_fetuses(action, fetuses)
     card.reevaluate_card_attrs()
     db.session.commit()
 
