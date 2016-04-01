@@ -69,14 +69,12 @@ tuberculosis_diags = ['A15', 'A16', 'A17', 'A18', 'A19', 'P37.0']
 scabies_diags = ['B86']
 pediculosis_diags = ['B85']
 multiple_birth = ['O30']
-hypertensia = ['O10']
-kidney_diseases = ['N00', 'N01', 'N02', 'N03', 'N04', 'N05', 'N06', 'N07', 'N08', 'N10', 'N11', 'N12', 'N13', 'N14',
-                   'N15', 'N16', 'N17', 'N18', 'N19', 'N20', 'N21', 'N22', 'N23', 'N25', 'N26', 'N27', 'N28', 'N29',
-                   'N25-N29', 'O23.0']
+hypertensia = ['O10-O10.99']
+kidney_diseases = ['N00-N08.99', 'N10-N23.99', 'N25-N29.99', 'O23.0']
 collagenoses = ['Q79.6', 'Q87.4', 'Q78.0', 'M33.0', 'M33.1', 'M33.2', 'L94.0', 'M34.0', 'M35.0', 'D69.0', 'D89.1',
-                'Q81', 'M05', 'M32', 'L95']
-vascular_diseases = ['I70', 'I71', 'I72', 'I73', 'I74', 'I75', 'I76', 'I77', 'I78', 'I79', 'O22']
-diabetes = ['E10', 'E11', 'E12', 'E13', 'E14', 'O24']
+                'Q81-Q81.99', 'M05-M05.99', 'M32-M32.99', 'L95-L95.99']
+vascular_diseases = ['I70-I79.99', 'O22-O22.99']
+diabetes = ['E10-E14.99', 'O24-O24.99']
 antiphospholipid_syndrome = ['I82.9', 'D68.8', 'D89.9']
 
 week_postfix = {1: u'я', 2: u'и', 3: u'и', 4: u'и', 5: u'ь',  6: u'ь', 7: u'ь', 8: u'ь', 9: u'ь', 0: u'ь'}
