@@ -7,7 +7,7 @@
 
 """
 from blueprints.risar.app import module
-from blueprints.risar.views.api.integration.checkup_obs_first_xform import \
+from blueprints.risar.views.api.integration.checkup_obs_first.xform import \
     CheckupObsFirstXForm
 from blueprints.risar.views.api.integration.logformat import hook
 from flask import request
@@ -43,9 +43,8 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
     data = request.get_json()
     xform = CheckupObsFirstXForm(api_version)
     xform.validate(data)
-    xform.check_target_obj(card_id, exam_obs_id)
+    xform.check_target_obj(card_id, exam_obs_id, data)
     xform.update_target_obj(data)
-    db.session.add(xform.target_obj)
     db.session.commit()
     return xform.as_json()
 

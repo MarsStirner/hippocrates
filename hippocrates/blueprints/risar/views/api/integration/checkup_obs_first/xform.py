@@ -12,10 +12,15 @@ import functools
 
 import jsonschema
 from abc import ABCMeta, abstractmethod
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.fetus import create_or_update_fetuses
+from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from blueprints.risar.risar_config import first_inspection_code
-from blueprints.risar.views.api.integration.checkup_obs_first_schemas import \
+from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
 from nemesis.lib.apiutils import ApiException
+from nemesis.lib.diagnosis import create_or_update_diagnoses
+from nemesis.lib.utils import safe_datetime
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
 from nemesis.systemwide import db
@@ -52,6 +57,8 @@ class XForm(object):
     new = False
     parent_obj_id = None
     target_obj_id = None
+    parent_obj = None
+    target_obj = None
     parent_obj_class = None
     target_obj_class = None
 
@@ -120,12 +127,13 @@ class XForm(object):
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.parent_obj_class.__name__)
 
-    def check_target_obj(self, parent_obj_id, target_obj_id):
+    def check_target_obj(self, parent_obj_id, target_obj_id, data):
         self.parent_obj_id = parent_obj_id
         self.target_obj_id = target_obj_id
         if target_obj_id is None:
             self.new = True
             self.check_parent_obj(parent_obj_id)
+            self.check_duplicate(data)
         else:
             if parent_obj_id is None:
                 # Ручная валидация
@@ -136,10 +144,10 @@ class XForm(object):
                 )
 
             q = self._find_target_obj_query()
-            target_obj_exists = db.session.query(
+            target_obj_exist = db.session.query(
                 literal(True)
             ).filter(q.exists()).scalar()
-            if not target_obj_exists:
+            if not target_obj_exist:
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.target_obj_class.__name__)
 
@@ -152,6 +160,18 @@ class XForm(object):
     def _find_target_obj_query(self):
         pass
 
+    def check_duplicate(self, data):
+        external_id = data.get('external_id', None)
+        q = self._find_target_obj_query().filter(
+            self.target_obj_class.external_id == external_id
+        )
+        target_obj_exist = db.session.query(
+            literal(True)
+        ).filter(q.exists()).scalar()
+        if not target_obj_exist:
+            raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
+                               self.target_obj_class.__name__)
+
 
 class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     """
@@ -161,100 +181,197 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     target_obj_class = Action
 
     def _find_target_obj_query(self):
-        return self.target_obj_class.query.join(ActionType).filter(
+        res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event == self.parent_obj_id,
-            self.target_obj_class.id == self.target_obj_id,
             self.target_obj_class.deleted == 0,
             ActionType.flatCode == first_inspection_code,
         )
+        if self.target_obj_id:
+            res = res.filter(self.target_obj_class.id == self.target_obj_id,)
+        return res
 
     def update_target_obj(self, data):
-        # target_obj = self.target_obj_class()
-        # # db.session.add(target_obj)
-        # self.target_obj = target_obj
-        with db.session.no_autoflush:
-            self._update_general_info(data.get('general_info', None))
-            self._update_somatic_status(data.get('somatic_status', None))
-            self._update_obstetric_status(data.get('obstetric_status', None))
-            self._update_medical_report(data.get('medical_report', None))
+        form_data = self.mapping_as_form(data)
+        self.delete_diags()
+        self.delete_fetuses()
+        self.update_form(form_data)
+
+    def mapping_as_form(self, data):
+        res = {}
+        self.mapping_general_info(data, res)
+        self.mapping_somatic_status(data, res)
+        self.mapping_obstetric_status(data, res)
+        self.mapping_fetus(data, res)
+        self.mapping_vaginal_examination(data, res)
+        self.mapping_medical_report(data, res)
+        return res
+
+    def mapping_general_info(self, data, res):
+        general_info = data.get('general_info', None)
+        if general_info:
+            res.update({
+                'beg_date': general_info.date,
+                # 'person': general_info.hospital,
+                # 'person': general_info.doctor,
+                'height': general_info.height,
+                'weight': general_info.weight,
+            })
+
+    def mapping_somatic_status(self, data, res):
+        somatic_status = data.get('somatic_status', None)
+        if somatic_status:
+            res.update({
+                'state': self.rb(somatic_status.state),
+                'subcutaneous_fat': self.rb(somatic_status.subcutaneous_fat),
+                'tongue': map(self.rb, somatic_status.tongue),
+                'complaints': map(self.rb, somatic_status.complaints),
+                'skin': map(self.rb, somatic_status.skin),
+                'lymph': map(self.rb, somatic_status.lymph),
+                'breast': map(self.rb, somatic_status.breast),
+                'heart_tones': map(self.rb, somatic_status.heart_tones),
+                'pulse': map(self.rb, somatic_status.pulse),
+                'nipples': map(self.rb, somatic_status.nipples),
+                'mouth': self.rb(somatic_status.mouth),
+                'breathe': map(self.rb, somatic_status.respiratory),
+                'stomach': map(self.rb, somatic_status.abdomen),
+                'liver': map(self.rb, somatic_status.liver),
+                'urinoexcretory': map(self.rb, somatic_status.urinoexcretory),
+                'ad_right_high': somatic_status.ad_right_high,
+                'ad_left_high': somatic_status.ad_left_high,
+                'ad_right_low': somatic_status.ad_right_low,
+                'ad_left_low': somatic_status.ad_left_low,
+                'edema': somatic_status.edema,
+                'vein': somatic_status.veins,
+                'bowel_and_bladder_habits': self.rb(somatic_status.bowel_and_bladder_habits),
+                'heart_rate': somatic_status.heart_rate,
+            })
+
+    def mapping_obstetric_status(self, data, res):
+        obstetric_status = data.get('obstetric_status', None)
+        if obstetric_status:
+            res.update({
+                'MikHHor': obstetric_status.horiz_diagonal,
+                'MikhVert': obstetric_status.vert_diagonal,
+                'abdominal': obstetric_status.abdominal_circumference,
+                'fundal_height': obstetric_status.fundal_height,
+                'metra_state': self.rb(obstetric_status.uterus_state),
+                'DsSP': obstetric_status.dssp,
+                'DsCr': obstetric_status.dscr,
+                'DsTr': obstetric_status.dstr,
+                'CExt': obstetric_status.cext,
+                'CDiag': obstetric_status.cdiag,
+                'CVera': obstetric_status.cvera,
+                'soloviev_index': obstetric_status.soloviev_index,
+                'pelvis_narrowness': self.rb(obstetric_status.pelvis_narrowness),
+                'pelvis_form': self.rb(obstetric_status.pelvis_form),
+            })
+
+    def mapping_fetus(self, data, res):
+        fetus_list = data.get('fetus', None)
+        for fetus in fetus_list:
+            res.setdefault('fetuses', []).append({
+                'state': {
+                    'position': self.rb(fetus.fetus_lie),
+                    'position_2': self.rb(fetus.fetus_position),
+                    'type': self.rb(fetus.fetus_type),
+                    'presenting_part': self.rb(fetus.fetus_presentation),
+                    'heartbeat': map(self.rb, fetus.fetus_heartbeat),
+                    'heart_rate': fetus.fetus_heart_rate,
+                },
+            })
+
+    def mapping_vaginal_examination(self, data, res):
+        vaginal_examination = data.get('vaginal_examination', None)
+        if vaginal_examination:
+            res.update({
+                'vagina': self.rb(vaginal_examination.vagina),
+                'cervix': self.rb(vaginal_examination.cervix),
+                'cervix_length': self.rb(vaginal_examination.cervix_length),
+                'cervical_canal': self.rb(vaginal_examination.cervical_canal),
+                'cervix_consistency': self.rb(vaginal_examination.cervix_consistency),
+                'cervix_position': self.rb(vaginal_examination.cervix_position),
+                'cervix_maturity': self.rb(vaginal_examination.cervix_maturity),
+                'body_of_womb': map(self.rb, vaginal_examination.body_of_uterus),
+                'appendages': self.rb(vaginal_examination.adnexa),
+                'features': vaginal_examination.specialities,
+                'externalia': vaginal_examination.vulva,
+                'parametrium': vaginal_examination.parametrium,
+                'vagina_secretion': vaginal_examination.vaginal_smear,
+                'cervical_canal_secretion': vaginal_examination.cervical_canal_smear,
+                'onco_smear': vaginal_examination.onco_smear,
+                'urethra_secretion': vaginal_examination.urethra_smear,
+            })
+
+    def mapping_medical_report(self, data, res):
+        medical_report = data.get('medical_report', None)
+        if medical_report:
+            res.update({
+                'pregnancy_week': medical_report.pregnancy_week,
+                'next_date': medical_report.next_visit_date,
+                'pregnancy_continuation': medical_report.pregnancy_continuation,
+                'pregnancy_continuation_refusal': medical_report.abortion_refusal,
+                'craft': self.rb(medical_report.working_conditions),
+                'recommendations': medical_report.recommendations,
+                'notes': medical_report.notes,
+            })
+        for risar_key, mis_key in (('main', 'diagnosis_osn'),
+                                   ('associated', 'diagnosis_sop'),
+                                   ('complication', 'diagnosis_osl')):
+            mkb = getattr(medical_report, mis_key)
+            if mkb:
+                res.setdefault('diagnoses', []).append({
+                    'diagnostic': {
+                        'mkb': mkb,
+                        'kind_changed': True,
+                        'set_date': res.beg_date,
+                    },
+                    'diagnosis_types': {'final': self.rb(risar_key)},
+                })
+
+    @staticmethod
+    def rb(code):
+        return {'code': code}
+
+    def update_form(self, data):
+        event_id = self.parent_obj_id
+        checkup_id = self.target_obj_id
+        flat_code = first_inspection_code
+
+        # like blueprints.risar.views.api.checkups.api_0_checkup
+        beg_date = safe_datetime(data.pop('beg_date', None))
+        person = data.pop('person', None)
+        diagnoses = data.pop('diagnoses', None)
+        fetuses = data.pop('fetuses', None)
+
+        event = Event.query.get(event_id)
+        card = PregnancyCard.get_for_event(event)
+        action = get_action_by_id(checkup_id, event, flat_code, True)
+
+        if not checkup_id:
+            close_open_checkups(event_id)
+
+        action.begDate = beg_date
+
+        for code, value in data.iteritems():
+            if code in action.propsByCode:
+                action.propsByCode[code].value = value
+
+        create_or_update_diagnoses(action, diagnoses)
+        create_or_update_fetuses(action, fetuses)
+
+        card.reevaluate_card_attrs()
+
+        self.target_obj = action
+
+    def delete_diags(self):
+        # todo:
+        pass
+
+    def delete_fetuses(self):
+        # todo:
+        pass
 
     def as_json(self):
-        target_obj = self.target_obj
         return {
             "exam_obs_id": self.target_obj_id,
-            "general_info": self._represent_general_info(target_obj.general_info),
-            "somatic_status": self._represent_somatic_status(target_obj.somatic_status),
-            "obstetric_status": self._represent_obstetric_status(target_obj.obstetric_status),
-            "medical_report": self._represent_medical_report(target_obj.medical_report),
         }
-
-    @none_default
-    def _represent_general_info(self, general_info):
-        return {
-            "date": "2011-11-11",
-            "time": "18:00",
-            "doctor": "Иванов И.И.",
-            "height": 175,
-            "weight": 70
-        }
-
-    @none_default
-    def _represent_somatic_status(self, somatic_status):
-        return {
-            "state": "udovletvoritel_noe",
-            "subcutaneous_fat": "izbytocnorazvita",
-            "tongue": "01",
-            "complaints": "oteki",
-            "skin": "suhaa",
-            "lymph": "boleznennye",
-            "breast": "nagrubanie",
-            "heart_tones": "akzentIItona",
-            "pulse": "defizitpul_sa",
-            "nipples": "norma",
-            "mouth": "sanirovana",
-            "respiratory": "hripyotsutstvuut",
-            "abdomen": "jivotnaprajennyj",
-            "liver": "nepal_piruetsa",
-            "urinoexcretory": "СindromПasternazkogo",
-            "ad_right_high": 120,
-            "ad_left_high": 120,
-            "ad_right_low": 80,
-            "ad_left_low": 80,
-            "veins": "noma",
-            "heart_rate": 80
-        }
-
-    @none_default
-    def _represent_obstetric_status(self, obstetric_status):
-        return {
-            "uterus_state": "normal_nyjtonus",
-            "dssp": 1,
-            "dscr": 1,
-            "dstr": 1,
-            "cext": 1,
-            "soloviev_index": 1
-        }
-
-    @none_default
-    def _represent_medical_report(self, medical_report):
-        return {
-            "pregnancy_week": 42,
-            "next_visit_date": "2011-11-12",
-            "pregnancy_continuation": true,
-            "abortion_refusal": true,
-            "diagnosis_osn": "Q00.0",
-            "recommendations": "улыбаться",
-            "notes": "мало улыбается"
-        }
-
-    def _update_general_info(self, general_info):
-        pass
-
-    def _update_somatic_status(self, somatic_status):
-        pass
-
-    def _update_obstetric_status(self, obstetric_status):
-        pass
-
-    def _update_medical_report(self, medical_report):
-        pass
