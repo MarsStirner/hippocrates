@@ -77,7 +77,8 @@
 
                 <tr>
                     <td class="text-right">Вид</td>
-                    <td><input ng-model="anamnesis_father.infertility_type" class="form-control" ng-disabled="!anamnesis_father.infertility"></td>
+                    <td><rb-select ref-book="rbRisarInfertility_Type" ng-model="anamnesis_father.infertility_type"
+                        ng-disabled="!anamnesis_father.infertility"></rb-select></td>
                 </tr>
 
                 <tr>
@@ -87,12 +88,14 @@
 
                 <tr>
                     <td class="text-right">Лечение</td>
-                    <td><input ng-model="anamnesis_father.infertility_treatment" class="form-control" ng-disabled="!anamnesis_father.infertility"></td>
+                    <td><rb-select multiple="true" ref-book="rbRisarInfertility_Treatment" ng-model="anamnesis_father.infertility_treatment"
+                        ng-disabled="!anamnesis_father.infertility"></rb-select></td>
                 </tr>
 
                 <tr>
-                    <td class="text-right">Причина</td>
-                    <td><input ng-model="anamnesis_father.infertility_cause" class="form-control" ng-disabled="!anamnesis_father.infertility"></td>
+                    <td class="text-right">Причины</td>
+                    <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_father.infertility_cause"
+                        ng-disabled="!anamnesis_father.infertility"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Перенесенные заболевания</th>
@@ -104,7 +107,7 @@
                 </tr>
                 <tr>
                     <th class="text-right">Наследственность</th>
-                    <td><input ng-model="anamnesis_father.hereditary" class="form-control"></td>
+                    <td><rb-select multiple="true" ref-book="rbRisarHereditary" ng-model="anamnesis_father.hereditary"></rb-select></td>
                 </tr>
 
                 <tr>

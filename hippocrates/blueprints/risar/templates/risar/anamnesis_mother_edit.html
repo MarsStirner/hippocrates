@@ -39,7 +39,7 @@
                 </tr>
                 <tr>
                     <th class="text-right">Доход семьи <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.family_income" class="form-control"></td>
+                    <td><rb-select ng-model="anamnesis_mother.family_income" ref-book="rbRisarFamily_Income"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Группа крови и резус-фактор <span>&nbsp;</span></th>
@@ -75,7 +75,7 @@
                 </tr>
                 <tr>
                     <th class="text-right">Сведения по контрацепции <span>&nbsp;</span></th>
-                    <td><rb-select ref-book="rbContraception" ng-model="anamnesis_mother.contraception" class="form-control"></rb-select></td>
+                    <td><rb-select multiple="true" ref-book="rbContraception" ng-model="anamnesis_mother.contraception" class="form-control"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Способ оплодотворения <span>&nbsp;</span></th>
@@ -95,7 +95,8 @@
                 </tr>
                 <tr>
                     <td class="text-right">Вид <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.infertility_type" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
+                    <td><rb-select ref-book="rbRisarInfertility_Type" ng-model="anamnesis_mother.infertility_type"
+                        ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
                 </tr>
                 <tr>
                     <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
@@ -103,11 +104,13 @@
                 </tr>
                 <tr>
                     <td class="text-right">Лечение <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.infertility_treatment" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
+                    <td><rb-select multiple="true" ref-book="rbRisarInfertility_Treatment" ng-model="anamnesis_mother.infertility_treatment"
+                        ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Причина <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.infertility_cause" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
+                    <td class="text-right">Причины <span>&nbsp;</span></td>
+                    <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_mother.infertility_cause"
+                        ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Перенесенные заболевания <span>&nbsp;</span></th>
@@ -119,7 +122,7 @@
                 </tr>
                 <tr>
                     <th class="text-right">Наследственность <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.hereditary" class="form-control"></td>
+                    <td><rb-select multiple="true" ref-book="rbRisarHereditary" ng-model="anamnesis_mother.hereditary"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Текущие заболевания <span>&nbsp;</span></th>
