@@ -18,15 +18,15 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
     $scope.locker_person = null;
 
     // Здесь начинается хрень
-    var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
-        on_user_activity = _.throttle(_autosave, 10000);
-    function _autosave () {
-        $scope.action.autosave();
-    }
-    function _set_tracking(on) {
-        $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
-    }
-    _set_tracking(true);
+    //var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
+    //    on_user_activity = _.throttle(_autosave, 10000);
+    //function _autosave () {
+    //    $scope.action.autosave();
+    //}
+    //function _set_tracking(on) {
+    //    $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
+    //}
+    //_set_tracking(true);
     // Здесь она типа заканчивается
 
     $scope.init = function () {
