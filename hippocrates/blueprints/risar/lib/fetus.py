@@ -18,7 +18,9 @@ def create_or_update_fetuses(action, fetuses):
         fetuse_state_id = state_data and state_data.get('id', None)
         if deleted:
             if fetuse_state_id:
-                FetusState.query.filter(FetusState.id == fetuse_state_id).delete()
+                FetusState.query.filter(
+                    FetusState.id == fetuse_state_id
+                ).update({'deleted': 1})
         elif state_data:
             if fetuse_state_id:
                 fetus_state = FetusState.query.get(fetuse_state_id)

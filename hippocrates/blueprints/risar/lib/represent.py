@@ -790,7 +790,8 @@ def represent_event_cfrs(card_attrs_action):
 def represent_action_fetuses(action):
     res = []
     fetus_states = FetusState.query.filter(
-        FetusState.action_id == action.id
+        FetusState.action_id == action.id,
+        FetusState.deleted == 0,
     ).order_by(FetusState.id)
     for fetus_state in fetus_states:
         res.append({
