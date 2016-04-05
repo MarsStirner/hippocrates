@@ -25,7 +25,7 @@
                         </p>
                         <p>
                             Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
-                            Вид контрацепции: <b ng-bind-html="anamnesis.mother.contraception.name | underlineNoVal"></b>.
+                            Вид контрацепции: <b ng-bind-html="format_multiple(anamnesis.mother.contraception, 'name') | underlineNoVal"></b>.
                         </p>
                         <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b>.</p>
                         <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b>.</p>
@@ -80,8 +80,8 @@
                     </tr>
                     <tr>
                         <td><span class="small-left-margin">Вид</span></td>
-                        <td ng-bind="anamnesis.mother.infertility_type"></td>
-                        <td ng-bind="anamnesis.father.infertility_type"></td>
+                        <td ng-bind="anamnesis.mother.infertility_type.name"></td>
+                        <td ng-bind="anamnesis.father.infertility_type.name"></td>
                     </tr>
                     <tr>
                         <td><span class="small-left-margin">Длительность</span></td>
@@ -89,14 +89,14 @@
                         <td ng-bind="anamnesis.father.infertility_period"></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Причина</span></td>
-                        <td ng-bind="anamnesis.mother.infertility_cause"></td>
-                        <td ng-bind="anamnesis.father.infertility_cause"></td>
+                        <td><span class="small-left-margin">Причины</span></td>
+                        <td ng-bind="format_multiple(anamnesis.mother.infertility_cause, 'name')"></td>
+                        <td ng-bind="format_multiple(anamnesis.father.infertility_cause, 'name')"></td>
                     </tr>
                     <tr>
                         <td><span class="small-left-margin">Лечение</span></td>
-                        <td ng-bind="anamnesis.mother.infertility_treatment"></td>
-                        <td ng-bind="anamnesis.father.infertility_treatment"></td>
+                        <td ng-bind="format_multiple(anamnesis.mother.infertility_treatment, 'name')"></td>
+                        <td ng-bind="format_multiple(anamnesis.father.infertility_treatment, 'name')"></td>
                     </tr>
                     <tr ng-if="warnings.blood_type">
                         <td rowspan="2">Группа крови и резус-фактор</td>
@@ -135,8 +135,8 @@
                     </tr>
                     <tr>
                         <td>Наследственность</td>
-                        <td ng-bind="anamnesis.mother.hereditary"></td>
-                        <td ng-bind="anamnesis.father.hereditary"></td>
+                        <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
+                        <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
                     </tr>
                     <tr>
                         <td>Вредные привычки</td>

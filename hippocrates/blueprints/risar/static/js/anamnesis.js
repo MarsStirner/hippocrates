@@ -53,6 +53,11 @@ var AnamnesisCtrl = function ($scope, $controller, RisarApi) {
             $scope.anamnesis = data.anamnesis;
         })
     };
+    $scope.format_multiple = function (obj, attr) {
+        if (!obj) { return '' }
+        return _.map(obj, function (o) { return o[attr]; }).join(', ');
+    };
+
     reload_anamnesis();
 };
 
@@ -171,7 +176,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             result.push(p.note)
         }
         if (p.maternity_aid) {
-            result.push('Пособия, операции: ' + p.maternity_aid.name)
+            result.push('Пособия, операции: ' + _.map(p.maternity_aid, function (ma) { return ma.name; }).join(', '));
         }
         if (p.pregnancy_pathology && p.pregnancy_pathology.length) {
             result.push('Патологии беременности: ' + _.map(p.pregnancy_pathology, function (pat) {
