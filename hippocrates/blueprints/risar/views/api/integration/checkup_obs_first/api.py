@@ -26,13 +26,14 @@ def api_checkup_obs_first_schema(api_version):
         raise ApiException(404, u'Api version %i is not supported. Maximum is %i' % (api_version, len(CheckupObsFirstXForm.schema) - 1))
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/', methods=['GET'])
-@api_method(hook=hook)
-@public_api
-def api_checkup_obs_first_get(api_version, card_id):
-    xform = CheckupObsFirstXForm(api_version)
-    xform.find_parent_obj(card_id)
-    return xform.as_json()
+# если не будет полного ответа, то возвращать нечего
+# @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/', methods=['GET'])
+# @api_method(hook=hook)
+# @public_api
+# def api_checkup_obs_first_get(api_version, card_id):
+#     xform = CheckupObsFirstXForm(api_version)
+#     xform.find_parent_obj(card_id)
+#     return xform.as_json()
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>', methods=['PUT'])

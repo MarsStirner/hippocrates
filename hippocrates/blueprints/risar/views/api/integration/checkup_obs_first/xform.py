@@ -186,11 +186,8 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     """
     Класс-преобразователь
     """
-
-    def __init__(self, *a, **kw):
-        super(CheckupObsFirstXForm, self).__init__(*a, **kw)
-        self.parent_obj_class = Event
-        self.target_obj_class = Action
+    parent_obj_class = Event
+    target_obj_class = Action
 
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
@@ -362,11 +359,12 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         return {'code': code}
 
     def update_form(self, data):
+        # like blueprints.risar.views.api.checkups.api_0_checkup
+
         event_id = self.parent_obj_id
         checkup_id = self.target_obj_id
         flat_code = first_inspection_code
 
-        # like blueprints.risar.views.api.checkups.api_0_checkup
         beg_date = safe_datetime(data.pop('beg_date', None))
         person = data.pop('person', None)
         diagnoses = data.pop('diagnoses', None)
