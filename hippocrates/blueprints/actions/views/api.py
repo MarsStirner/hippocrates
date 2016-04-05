@@ -45,26 +45,28 @@ def delete_all_autosaves(action_id):
 @module.route('/api/action/new/<int:action_type_id>/<int:event_id>', methods=['GET'])
 @api_method
 def api_action_new_get(action_type_id, event_id):
-    src_action_id = request.args.get('src_action_id')
-    src_action = None
-    if src_action_id:
-        src_action = Action.query.get(src_action_id)
+    with db.session.no_autoflush:
+        src_action_id = request.args.get('src_action_id')
+        src_action = None
+        if src_action_id:
+            src_action = Action.query.get(src_action_id)
 
-    action = create_action(action_type_id, event_id, src_action=src_action)
+        autosave = ActionAutoSaveUnsaved.query.filter(
+            ActionAutoSaveUnsaved.actionType_id == action_type_id,
+            ActionAutoSaveUnsaved.event_id == event_id,
+            ActionAutoSaveUnsaved.user_id == safe_current_user_id(),
+        ).first()
 
-    autosave = ActionAutoSaveUnsaved.query.filter(
-        ActionAutoSaveUnsaved.actionType_id == action_type_id,
-        ActionAutoSaveUnsaved.event_id == event_id,
-        ActionAutoSaveUnsaved.user_id == safe_current_user_id(),
-    ).first()
-    if autosave and autosave.data:
-        data = prepare_action_data(autosave.data)
-        update_action(action, **data)
+        action = create_action(action_type_id, event_id, src_action=src_action)
 
-    v = ActionVisualizer()
-    result = v.make_action(action)
-    db.session.rollback()
-    return result
+        if autosave and autosave.data:
+            data = prepare_action_data(autosave.data)
+            update_action(action, **data)
+
+        v = ActionVisualizer()
+        result = v.make_action(action)
+        db.session.rollback()
+        return result
 
 
 @module.route('/api/action/')
