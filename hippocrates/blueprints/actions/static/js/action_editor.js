@@ -476,7 +476,6 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         var self = this,
             data = {};
         merge_fields(data, self);
-        data.diagnoses = self._get_entity_changes('diagnoses');
         data.action_type_id = self.action_type_id || self.action_type.id;
         merge_properties(data, self);
         data.id = self.id;
@@ -494,7 +493,6 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         var self = this,
             data = {};
         merge_fields(data, self);
-        data.diagnoses = self._get_entity_changes('diagnoses');
         data.action_type_id = self.action_type_id || self.action_type.id;
         merge_properties(data, self);
         if (this.id && !_.isNaN(this.id)) {
