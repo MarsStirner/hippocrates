@@ -27,10 +27,18 @@ def api_0_schedule(person_id=None):
         person_id = safe_current_user_id()
     for_date = request.args.get('date', datetime.date.today())
 
+    # Есть три запроса: все тикеты врача, все незакрытые евенты
+    # "случай беременности" и последние незакрытые евенты "случай беременности"
+    # сгруппррованные по client_id. Они джойнятся по сложному условию: если
+    # ScheduleClientTicket.event_id указывает на кого-нибудь из незакрытых
+    # эвентов (первых), то работает такая связка. Если нет (event_id пуст или
+    # указывает на неподходящий event), то из последних незакрытых случаев
+    # беременности выбирается для данного пациента (если он есть).
     sq = db.session.query(
         Event.client_id,
         func.max(Event.id).label('max_id')
     ).select_from(Event).filter(
+        Event.deleted == 0,
         Event.execDate == None,
     ).group_by(Event.client_id).subquery('sq')
 
@@ -50,6 +58,7 @@ def api_0_schedule(person_id=None):
         Schedule.person_id == person_id,
         ScheduleTicket.deleted == 0,
         ScheduleClientTicket.deleted == 0,
+        Event.deleted == 0,
         Event.execDate == None,
     )
     if not all_tickets:
