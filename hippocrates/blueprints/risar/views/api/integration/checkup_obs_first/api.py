@@ -54,4 +54,6 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
 @public_api
 def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
     xform = CheckupObsFirstXForm(api_version)
-    xform.delete_target_obj(card_id, exam_obs_id)
+    xform.check_target_obj(card_id, exam_obs_id)
+    xform.delete_target_obj()
+    db.session.commit()

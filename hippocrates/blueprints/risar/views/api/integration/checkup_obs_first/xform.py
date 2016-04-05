@@ -15,6 +15,7 @@ from abc import ABCMeta, abstractmethod
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
+from blueprints.risar.models.fetus import FetusState
 from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
@@ -22,6 +23,7 @@ from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
 from nemesis.models.actions import ActionType, Action
+from nemesis.models.diagnosis import Diagnosis
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 from sqlalchemy import literal
@@ -52,17 +54,17 @@ def none_default(function=None, default=None):
 class XForm(object):
     __metaclass__ = ABCMeta
 
-    version = 0
-    schema = None
-    new = False
-    parent_obj_id = None
-    target_obj_id = None
-    parent_obj = None
-    target_obj = None
-    parent_obj_class = None
-    target_obj_class = None
-
     def __init__(self, api_version):
+        self.version = 0
+        self.schema = None
+        self.new = False
+        self.parent_obj_id = None
+        self.target_obj_id = None
+        self.parent_obj = None
+        self.target_obj = None
+        self.parent_obj_class = None
+        self.target_obj_class = None
+
         self.set_version(api_version)
 
     def set_version(self, version):
@@ -127,10 +129,17 @@ class XForm(object):
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.parent_obj_class.__name__)
 
-    def check_target_obj(self, parent_obj_id, target_obj_id, data):
+    def check_target_obj(self, parent_obj_id, target_obj_id, data=None):
         self.parent_obj_id = parent_obj_id
         self.target_obj_id = target_obj_id
         if target_obj_id is None:
+            if not data:
+                raise ApiException(
+                    INTERNAL_ERROR,
+                    u'%s.check_target_obj called without "data"' %
+                    self.__class__.__name__
+                )
+
             self.new = True
             self.check_parent_obj(parent_obj_id)
             self.check_duplicate(data)
@@ -177,8 +186,11 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     """
     Класс-преобразователь
     """
-    parent_obj_class = Event
-    target_obj_class = Action
+
+    def __init__(self, *a, **kw):
+        super(CheckupObsFirstXForm, self).__init__(*a, **kw)
+        self.parent_obj_class = Event
+        self.target_obj_class = Action
 
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
@@ -193,7 +205,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     def update_target_obj(self, data):
         form_data = self.mapping_as_form(data)
         self.delete_diags()
-        self.delete_fetuses()
         self.update_form(form_data)
 
     def mapping_as_form(self, data):
@@ -268,15 +279,28 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
 
     def mapping_fetus(self, data, res):
         fetus_list = data.get('fetus', None)
-        for fetus in fetus_list:
+        fetus_q = FetusState.query.filter(FetusState.action == self.target_obj)
+        fetus_ids = fetus_q.values(FetusState.id)
+        # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
+        for i in xrange(max(len(fetus_ids), len(fetus_list))):
+            deleted = 1
+            fetus = None
+            fetus_id = None
+            if i < len(fetus_ids):
+                deleted = 0
+                fetus_id = fetus_ids[i]
+            if i < len(fetus_list):
+                fetus = fetus_list[i]
             res.setdefault('fetuses', []).append({
+                'deleted': deleted,
                 'state': {
-                    'position': self.rb(fetus.fetus_lie),
-                    'position_2': self.rb(fetus.fetus_position),
-                    'type': self.rb(fetus.fetus_type),
-                    'presenting_part': self.rb(fetus.fetus_presentation),
-                    'heartbeat': map(self.rb, fetus.fetus_heartbeat),
-                    'heart_rate': fetus.fetus_heart_rate,
+                    'id': fetus_id,
+                    'position': fetus and self.rb(fetus.fetus_lie),
+                    'position_2': fetus and self.rb(fetus.fetus_position),
+                    'type': fetus and self.rb(fetus.fetus_type),
+                    'presenting_part': fetus and self.rb(fetus.fetus_presentation),
+                    'heartbeat': fetus and map(self.rb, fetus.fetus_heartbeat),
+                    'heart_rate': fetus and fetus.fetus_heart_rate,
                 },
             })
 
@@ -314,9 +338,11 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
                 'recommendations': medical_report.recommendations,
                 'notes': medical_report.notes,
             })
-        for risar_key, mis_key in (('main', 'diagnosis_osn'),
-                                   ('associated', 'diagnosis_sop'),
-                                   ('complication', 'diagnosis_osl')):
+        for risar_key, mis_key, is_array in (
+            ('main', 'diagnosis_osn', False),
+            ('associated', 'diagnosis_sop', True),
+            ('complication', 'diagnosis_osl', True),
+        ):
             mkb = getattr(medical_report, mis_key)
             if mkb:
                 res.setdefault('diagnoses', []).append({
@@ -325,7 +351,10 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
                         'kind_changed': True,
                         'set_date': res.beg_date,
                     },
-                    'diagnosis_types': {'final': self.rb(risar_key)},
+                    'diagnosis_types': {
+                        'final': is_array and map(self.rb, risar_key) or
+                                 self.rb(risar_key),
+                    },
                 })
 
     @staticmethod
@@ -364,14 +393,40 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         self.target_obj = action
 
     def delete_diags(self):
-        # todo:
-        pass
+        # нужно сначала разобраться с диагнозами и их проблемами.
 
-    def delete_fetuses(self):
-        # todo:
-        pass
+        # Роман:
+        # сначала найти открытые диагнозы пациента (это будут просто диагнозы без типа), затем среди них определить какие являются основными,
+        # осложнениями и пр. - это значит, что Diagnosis связывается с осмотром через Action_Diagnosis, где указывается его тип, т.е. диагноз
+        # пациента в рамках какого-то осмотра будет иметь определенный тип. *Все открытые диагнозы пациента, для которых не указан тип в связке
+        # с экшеном являются сопотствующими неявно*.
+        # тут надо понять логику работы с диагнозами (четкого описания нет), после этого нужно доработать механизм диагнозов - из того, что я знаю,
+        # сейчас проблема как раз с определением тех диагнозов пациента, которые относятся к текущему случаю. Для этого нужно исправлять запрос,
+        # выбирающий диагнозы по датам с учетом дат Event'а. После этого уже интегрировать.
+
+        # Action_Diagnosis
+        # Diagnostic.filter(Diagnosis.id == diagnosis)
+        # q = Diagnosis.query.filter(Diagnosis.client == self.parent_obj.client)
+        # q.update({'deleted': 1})
+        raise
 
     def as_json(self):
         return {
-            "exam_obs_id": self.target_obj_id,
+            "exam_obs_id": self.target_obj.id,
         }
+
+    def delete_target_obj(self):
+        self.delete_diags()
+        self.delete_fetuses()
+
+        self.target_obj_class.query.filter(
+            self.target_obj_class.event == self.parent_obj_id,
+            self.target_obj_class.id == self.target_obj_id,
+            Action.deleted == 0
+        ).update({'deleted': 1})
+
+    def delete_fetuses(self):
+        FetusState.query.filter(
+            FetusState.delete == 0,
+            FetusState.action_id == self.target_obj_id
+        ).update({'deleted': 1})

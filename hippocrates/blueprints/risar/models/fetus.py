@@ -6,7 +6,10 @@
 @date: 25.03.2016
 
 """
+import datetime
+
 from blueprints.risar.models.vesta_props import VestaProperty
+from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 
 
@@ -16,6 +19,12 @@ class FetusState(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     action_id = db.Column(db.ForeignKey('Action.id'), index=True)
     action = db.relationship('Action')
+
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     position_code = db.Column(db.String(250), index=True)
     position_2_code = db.Column(db.String(250), index=True)
