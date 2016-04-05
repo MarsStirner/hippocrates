@@ -25,6 +25,7 @@ angular.module('WebMis20')
                     );
                 }
             };
+            scope.unity_function = function (arg) { return arg };
 
             function build(tag) {
                 var context = arguments[1];
@@ -48,6 +49,8 @@ angular.module('WebMis20')
                                 case 'Жалобы':
                                     inner_template = '<span ng-bind-html="{0}.value | trustHtml"></span>'; break;
                                 case 'String':
+                                case 'String/Select':
+                                case 'String/Free':
                                 case 'Integer':
                                 case 'Double':
                                     inner_template = '<span>[[ {0}.value ]] {1}</span>'.format('{0}', property_unit_code); break;
@@ -112,14 +115,28 @@ angular.module('WebMis20')
                                     inner_template = '<div fs-time ng-model="{0}.value"></div>';
                                     break;
                                 case 'String':
-                                    if (property.type.domain) {
-                                        inner_template = '<select class="form-control" ng-model="{0}.value" ng-options="val for val in {0}.type.values"></select>'
-                                    } else {
-                                        inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
-                                        if (property.type.unit) {
-                                            inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
-                                        }
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                    if (property.type.unit) {
+                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
                                     }
+                                    break;
+                                case 'String/Select':
+                                    inner_template =
+                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off">\
+                                            <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
+                                            <ui-select-choices repeat="item in {0}.type.domain_obj | filter: $select.search">\
+                                                <span ng-bind-html="item | highlight: $select.search"></span>\
+                                            </ui-select-choices>\
+                                        </ui-select>';
+                                    break;
+                                case 'String/Free':
+                                    inner_template =
+                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function" autocomplete="off">\
+                                            <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
+                                            <ui-select-choices repeat="item in [].concat({0}.type.domain_obj, \'\') | filter: $select.search">\
+                                                <span ng-bind-html="item | highlight: $select.search"></span>\
+                                            </ui-select-choices>\
+                                        </ui-select>';
                                     break;
                                 case 'JobTicket':
                                     inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
