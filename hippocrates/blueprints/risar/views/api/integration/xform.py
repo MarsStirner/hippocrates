@@ -3,9 +3,10 @@ import functools
 import logging
 import jsonschema
 
+from blueprints.risar.lib.card import PregnancyCard
 from nemesis.lib.apiutils import ApiException
-from nemesis.models.client import Client
-from .utils import get_org_by_tfoms_code, get_person_by_code
+from nemesis.views.rb import check_rb_value_exists
+from .utils import get_org_by_tfoms_code, get_person_by_code, get_client_query, get_event_query
 
 
 __author__ = 'viruzzz-kun'
@@ -97,17 +98,38 @@ class XForm(object):
     def find_org(self, tfoms_code):
         org = get_org_by_tfoms_code(tfoms_code)
         if not org:
-            raise ApiException(400, u'Не найдена организация по коду {0}'.format(tfoms_code))
+            raise ApiException(404, u'Не найдена организация по коду {0}'.format(tfoms_code))
         return org
 
     def find_doctor(self, code):
         org = get_person_by_code(code)
         if not org:
-            raise ApiException(400, u'Не найден врач по коду {0}'.format(code))
+            raise ApiException(404, u'Не найден врач по коду {0}'.format(code))
         return org
 
     def find_client(self, client_id):
-        client = Client.query.filter(Client.id == client_id).first()
+        client = get_client_query(client_id).first()
         if not client:
-            raise ApiException(400, u'Не найден пациент с id = {0}'.format(client_id))
+            raise ApiException(404, u'Не найден пациент с id = {0}'.format(client_id))
         return client
+
+    def find_pcard(self, event_id):
+        event = get_event_query(event_id).first()
+        if not event:
+            raise ApiException(404, u'Не найдена карта с id = {0}'.format(event_id))
+
+        pcard = PregnancyCard.get_for_event(event)
+        return pcard
+
+    def check_prop_value(self, prop, value):
+        if value is None:
+            return
+        if isinstance(value, (list, tuple)):
+            for val in value:
+                self.check_prop_value(prop, val)
+        elif prop.type.typeName in ('ReferenceRb', 'ExtReferenceRb'):
+            rb_name = prop.type.valueDomain.split(';')[0]
+            if (rb_name != 'rbBloodType'  # code in name field, see to_blood_type_rb()
+                    and not check_rb_value_exists(rb_name, value['code'])):
+                raise ApiException(400, u'Не найдено значение по коду {0} в справочнике {1}'.format(
+                    value['code'], rb_name))

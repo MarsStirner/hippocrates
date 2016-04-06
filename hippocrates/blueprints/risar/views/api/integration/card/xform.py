@@ -10,12 +10,10 @@ from blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity
 from blueprints.risar.views.api.chart import default_AT_Heuristic, default_ET_Heuristic
 from nemesis.models.enums import EventPrimary, EventOrder
 
-from nemesis.systemwide import db
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import get_new_event_ext_id, safe_datetime, safe_date
 from nemesis.models.event import Event
 from nemesis.lib.data import create_action
-
 
 
 logger = logging.getLogger('simple')
