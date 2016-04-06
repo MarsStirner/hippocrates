@@ -12,7 +12,7 @@ from blueprints.risar.views.api.integration.checkup_obs_first.xform import \
 from blueprints.risar.views.api.integration.logformat import hook
 from flask import request
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import public_endpoint, public_api
+from nemesis.lib.utils import public_endpoint
 from nemesis.systemwide import db
 
 
@@ -39,7 +39,6 @@ def api_checkup_obs_first_schema(api_version):
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/', methods=['POST'])
 @api_method(hook=hook)
-@public_api
 def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
     data = request.get_json()
     xform = CheckupObsFirstXForm(api_version)
@@ -52,7 +51,6 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/', methods=['DELETE'])
 @api_method(hook=hook)
-@public_api
 def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
     xform = CheckupObsFirstXForm(api_version)
     xform.check_target_obj(card_id, exam_obs_id)

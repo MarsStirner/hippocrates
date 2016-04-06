@@ -12,6 +12,7 @@ import functools
 
 import jsonschema
 from abc import ABCMeta, abstractmethod
+
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
@@ -21,9 +22,10 @@ from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime
+from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
-from nemesis.models.diagnosis import Diagnosis
+from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis, \
+    rbDiagnosisKind
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 from sqlalchemy import literal
@@ -53,17 +55,17 @@ def none_default(function=None, default=None):
 
 class XForm(object):
     __metaclass__ = ABCMeta
+    schema = None
+    parent_obj_class = None
+    target_obj_class = None
 
     def __init__(self, api_version):
         self.version = 0
-        self.schema = None
         self.new = False
         self.parent_obj_id = None
         self.target_obj_id = None
         self.parent_obj = None
         self.target_obj = None
-        self.parent_obj_class = None
-        self.target_obj_class = None
 
         self.set_version(api_version)
 
@@ -153,9 +155,7 @@ class XForm(object):
                 )
 
             q = self._find_target_obj_query()
-            target_obj_exist = db.session.query(
-                literal(True)
-            ).filter(q.exists()).scalar()
+            target_obj_exist = db.session.query(q.exists()).scalar()
             if not target_obj_exist:
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.target_obj_class.__name__)
@@ -181,6 +181,17 @@ class XForm(object):
             raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
                                self.target_obj_class.__name__)
 
+    def rb(self, code, rb_name):
+        self.rb_validate(rb_name, code)
+        return code and {'code': code} or None
+
+    @staticmethod
+    def arr(rb_func, codes, rb_name):
+        return map(lambda code: rb_func(code, rb_name), codes)
+
+    def rb_validate(self, rb_name, param):
+        pass
+
 
 class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     """
@@ -191,7 +202,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
 
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
-            self.target_obj_class.event == self.parent_obj_id,
+            self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
             ActionType.flatCode == first_inspection_code,
         )
@@ -201,7 +212,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
 
     def update_target_obj(self, data):
         form_data = self.mapping_as_form(data)
-        self.delete_diags()
         self.update_form(form_data)
 
     def mapping_as_form(self, data):
@@ -215,148 +225,189 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         return res
 
     def mapping_general_info(self, data, res):
-        general_info = data.get('general_info', None)
-        if general_info:
-            res.update({
-                'beg_date': general_info.date,
-                # 'person': general_info.hospital,
-                # 'person': general_info.doctor,
-                'height': general_info.height,
-                'weight': general_info.weight,
-            })
+        general_info = data.get('general_info', {})
+        res.update({
+            'beg_date': general_info.get('date', None),
+            'person': {
+                'id': None,
+                'hospital': general_info.get('hospital', None),
+                'doctor': general_info.get('doctor', None),
+            },
+            'height': general_info.get('height', None),
+            'weight': general_info.get('weight', None),
+        })
 
     def mapping_somatic_status(self, data, res):
-        somatic_status = data.get('somatic_status', None)
-        if somatic_status:
-            res.update({
-                'state': self.rb(somatic_status.state),
-                'subcutaneous_fat': self.rb(somatic_status.subcutaneous_fat),
-                'tongue': map(self.rb, somatic_status.tongue),
-                'complaints': map(self.rb, somatic_status.complaints),
-                'skin': map(self.rb, somatic_status.skin),
-                'lymph': map(self.rb, somatic_status.lymph),
-                'breast': map(self.rb, somatic_status.breast),
-                'heart_tones': map(self.rb, somatic_status.heart_tones),
-                'pulse': map(self.rb, somatic_status.pulse),
-                'nipples': map(self.rb, somatic_status.nipples),
-                'mouth': self.rb(somatic_status.mouth),
-                'breathe': map(self.rb, somatic_status.respiratory),
-                'stomach': map(self.rb, somatic_status.abdomen),
-                'liver': map(self.rb, somatic_status.liver),
-                'urinoexcretory': map(self.rb, somatic_status.urinoexcretory),
-                'ad_right_high': somatic_status.ad_right_high,
-                'ad_left_high': somatic_status.ad_left_high,
-                'ad_right_low': somatic_status.ad_right_low,
-                'ad_left_low': somatic_status.ad_left_low,
-                'edema': somatic_status.edema,
-                'vein': somatic_status.veins,
-                'bowel_and_bladder_habits': self.rb(somatic_status.bowel_and_bladder_habits),
-                'heart_rate': somatic_status.heart_rate,
-            })
+        somatic_status = data.get('somatic_status', {})
+        res.update({
+            'state': self.rb(somatic_status.get('state', None), 'rbRisarState'),
+            'subcutaneous_fat': self.rb(somatic_status.get('subcutaneous_fat', None), 'rbRisarSubcutaneous_Fat'),
+            'tongue': self.arr(self.rb, somatic_status.get('tongue', None), 'rbRisarTongue'),
+            'complaints': self.arr(self.rb, somatic_status.get('complaints', None), 'rbRisarComplaints'),
+            'skin': self.arr(self.rb, somatic_status.get('skin', None), 'rbRisarSkin'),
+            'lymph': self.arr(self.rb, somatic_status.get('lymph', None), 'rbRisarLymph'),
+            'breast': self.arr(self.rb, somatic_status.get('breast', None), 'rbRisarBreast'),
+            'heart_tones': self.arr(self.rb, somatic_status.get('heart_tones', None), 'rbRisarHeart_Tones'),
+            'pulse': self.arr(self.rb, somatic_status.get('pulse', None), 'rbRisarPulse'),
+            'nipples': self.arr(self.rb, somatic_status.get('nipples', None), 'rbRisarNipples'),
+            'mouth': self.rb(somatic_status.get('mouth', None), 'rbRisarMouth'),
+            'breathe': self.arr(self.rb, somatic_status.get('respiratory', None), 'rbRisarBreathe'),
+            'stomach': self.arr(self.rb, somatic_status.get('abdomen', None), 'rbRisarStomach'),
+            'liver': self.arr(self.rb, somatic_status.get('liver', None), 'rbRisarLiver'),
+            'urinoexcretory': self.arr(self.rb, somatic_status.get('urinoexcretory', None), 'rbRisarUrinoexcretory'),
+            'ad_right_high': somatic_status.get('ad_right_high', None),
+            'ad_left_high': somatic_status.get('ad_left_high', None),
+            'ad_right_low': somatic_status.get('ad_right_low', None),
+            'ad_left_low': somatic_status.get('ad_left_low', None),
+            'edema': somatic_status.get('edema', None),
+            'vein': self.rb(somatic_status.get('veins', None), 'rbRisarVein'),
+            'bowel_and_bladder_habits': somatic_status.get('bowel_and_bladder_habits', None),
+            'heart_rate': somatic_status.get('heart_rate', None),
+        })
 
     def mapping_obstetric_status(self, data, res):
-        obstetric_status = data.get('obstetric_status', None)
-        if obstetric_status:
-            res.update({
-                'MikHHor': obstetric_status.horiz_diagonal,
-                'MikhVert': obstetric_status.vert_diagonal,
-                'abdominal': obstetric_status.abdominal_circumference,
-                'fundal_height': obstetric_status.fundal_height,
-                'metra_state': self.rb(obstetric_status.uterus_state),
-                'DsSP': obstetric_status.dssp,
-                'DsCr': obstetric_status.dscr,
-                'DsTr': obstetric_status.dstr,
-                'CExt': obstetric_status.cext,
-                'CDiag': obstetric_status.cdiag,
-                'CVera': obstetric_status.cvera,
-                'soloviev_index': obstetric_status.soloviev_index,
-                'pelvis_narrowness': self.rb(obstetric_status.pelvis_narrowness),
-                'pelvis_form': self.rb(obstetric_status.pelvis_form),
-            })
+        obstetric_status = data.get('obstetric_status', {})
+        res.update({
+            'MikHHor': obstetric_status.get('horiz_diagonal', None),
+            'MikhVert': obstetric_status.get('vert_diagonal', None),
+            'abdominal': obstetric_status.get('abdominal_circumference', None),
+            'fundal_height': obstetric_status.get('fundal_height', None),
+            'metra_state': self.rb(obstetric_status.get('uterus_state', None), 'rbRisarMetra_State'),
+            'DsSP': obstetric_status.get('dssp', None),
+            'DsCr': obstetric_status.get('dscr', None),
+            'DsTr': obstetric_status.get('dstr', None),
+            'CExt': obstetric_status.get('cext', None),
+            'CDiag': obstetric_status.get('cdiag', None),
+            'CVera': obstetric_status.get('cvera', None),
+            'soloviev_index': obstetric_status.get('soloviev_index', None),
+            'pelvis_narrowness': self.rb(obstetric_status.get('pelvis_narrowness', None), 'rbRisarPelvis_Narrowness'),
+            'pelvis_form': self.rb(obstetric_status.get('pelvis_form', None), 'rbRisarPelvis_Form'),
+        })
 
     def mapping_fetus(self, data, res):
-        fetus_list = data.get('fetus', None)
-        fetus_q = FetusState.query.filter(FetusState.action == self.target_obj)
-        fetus_ids = fetus_q.values(FetusState.id)
+        fetus_list = data.get('fetus', [])
+        fetus_q = FetusState.query.filter(FetusState.action_id == self.target_obj_id)
+        fetus_ids = tuple(fetus_q.values(FetusState.id))
         # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
         for i in xrange(max(len(fetus_ids), len(fetus_list))):
             deleted = 1
-            fetus = None
+            fetus = {}
             fetus_id = None
             if i < len(fetus_ids):
-                deleted = 0
-                fetus_id = fetus_ids[i]
+                fetus_id = fetus_ids[i][0]
             if i < len(fetus_list):
+                deleted = 0
                 fetus = fetus_list[i]
             res.setdefault('fetuses', []).append({
                 'deleted': deleted,
                 'state': {
                     'id': fetus_id,
-                    'position': fetus and self.rb(fetus.fetus_lie),
-                    'position_2': fetus and self.rb(fetus.fetus_position),
-                    'type': fetus and self.rb(fetus.fetus_type),
-                    'presenting_part': fetus and self.rb(fetus.fetus_presentation),
-                    'heartbeat': fetus and map(self.rb, fetus.fetus_heartbeat),
-                    'heart_rate': fetus and fetus.fetus_heart_rate,
+                    'position': self.rb(fetus.get('fetus_lie', None), 'rbRisarFetus_Position'),
+                    'position_2': self.rb(fetus.get('fetus_position', None), 'rbRisarFetus_Position_2'),
+                    'type': self.rb(fetus.get('fetus_type', None), 'rbRisarFetus_Type'),
+                    'presenting_part': self.rb(fetus.get('fetus_presentation', None), 'rbRisarPresenting_Part'),
+                    'heartbeat': self.arr(self.rb, fetus.get('fetus_heartbeat', None), 'rbRisarFetus_Heartbeat'),
+                    'heart_rate': fetus.get('fetus_heart_rate', None),
                 },
             })
 
     def mapping_vaginal_examination(self, data, res):
-        vaginal_examination = data.get('vaginal_examination', None)
-        if vaginal_examination:
-            res.update({
-                'vagina': self.rb(vaginal_examination.vagina),
-                'cervix': self.rb(vaginal_examination.cervix),
-                'cervix_length': self.rb(vaginal_examination.cervix_length),
-                'cervical_canal': self.rb(vaginal_examination.cervical_canal),
-                'cervix_consistency': self.rb(vaginal_examination.cervix_consistency),
-                'cervix_position': self.rb(vaginal_examination.cervix_position),
-                'cervix_maturity': self.rb(vaginal_examination.cervix_maturity),
-                'body_of_womb': map(self.rb, vaginal_examination.body_of_uterus),
-                'appendages': self.rb(vaginal_examination.adnexa),
-                'features': vaginal_examination.specialities,
-                'externalia': vaginal_examination.vulva,
-                'parametrium': vaginal_examination.parametrium,
-                'vagina_secretion': vaginal_examination.vaginal_smear,
-                'cervical_canal_secretion': vaginal_examination.cervical_canal_smear,
-                'onco_smear': vaginal_examination.onco_smear,
-                'urethra_secretion': vaginal_examination.urethra_smear,
-            })
+        vaginal_examination = data.get('vaginal_examination', {})
+        res.update({
+            'vagina': self.rb(vaginal_examination.get('vagina', None), 'rbRisarVagina'),
+            'cervix': self.rb(vaginal_examination.get('cervix', None), 'rbRisarCervix'),
+            'cervix_length': self.rb(vaginal_examination.get('cervix_length', None), 'rbRisarCervix_Length'),
+            'cervical_canal': self.rb(vaginal_examination.get('cervical_canal', None), 'rbRisarCervical_Canal'),
+            'cervix_consistency': self.rb(vaginal_examination.get('cervix_consistency', None), 'rbRisarCervix_Consistency'),
+            'cervix_position': self.rb(vaginal_examination.get('cervix_position', None), 'rbRisarCervix_Position'),
+            'cervix_maturity': self.rb(vaginal_examination.get('cervix_maturity', None), 'rbRisarCervix_Maturity'),
+            'body_of_womb': self.arr(self.rb, vaginal_examination.get('body_of_uterus', []), 'rbRisarBody_Of_Womb'),
+            'appendages': self.rb(vaginal_examination.get('adnexa', None), 'rbRisarAppendages'),
+            'features': vaginal_examination.get('specialities', None),
+            'externalia': vaginal_examination.get('vulva', None),
+            # 'parametrium': self.arr(self.rb, vaginal_examination.get('parametrium', []), '...'),
+            'parametrium': self.rb(vaginal_examination.get('parametrium', None), '...'),
+            'vagina_secretion': vaginal_examination.get('vaginal_smear', None),
+            'cervical_canal_secretion': vaginal_examination.get('cervical_canal_smear', None),
+            'onco_smear': vaginal_examination.get('onco_smear', None),
+            'urethra_secretion': vaginal_examination.get('urethra_smear', None),
+        })
 
     def mapping_medical_report(self, data, res):
-        medical_report = data.get('medical_report', None)
-        if medical_report:
-            res.update({
-                'pregnancy_week': medical_report.pregnancy_week,
-                'next_date': medical_report.next_visit_date,
-                'pregnancy_continuation': medical_report.pregnancy_continuation,
-                'pregnancy_continuation_refusal': medical_report.abortion_refusal,
-                'craft': self.rb(medical_report.working_conditions),
-                'recommendations': medical_report.recommendations,
-                'notes': medical_report.notes,
+        medical_report = data.get('medical_report', {})
+        res.update({
+            'pregnancy_week': medical_report.get('pregnancy_week', None),
+            'next_date': medical_report.get('next_visit_date', None),
+            'pregnancy_continuation': medical_report.get('pregnancy_continuation', None),
+            'pregnancy_continuation_refusal': medical_report.get('abortion_refusal', None),
+            'craft': self.rb(medical_report.get('working_conditions', None), 'rbRisarCraft'),
+            'recommendations': medical_report.get('recommendations', None),
+            'notes': medical_report.get('notes', None),
+            'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
+        })
+
+    def get_diagnoses(self, data, data_res):
+        medical_report = data.get('medical_report', {})
+        action = self.target_obj
+        card = PregnancyCard.get_for_event(action.event)
+        diagnostics = card.get_client_diagnostics(action.begDate,
+                                                  action.endDate)
+        db_diags = []
+        for diagnostic in diagnostics:
+            diagnosis = diagnostic.diagnosis
+            diagKind_code = list(Action_Diagnosis.query.join(rbDiagnosisKind).filter(
+                Action_Diagnosis.action == action,
+                Action_Diagnosis.diagnosis == diagnosis,
+            ).values(rbDiagnosisKind.code))[0]
+            db_diags.append({
+                'diagnosis_id': diagnosis.id,
+                'diagKind_code': diagKind_code,
+                'mkb_code': diagnostic.MKB,
             })
-        for risar_key, mis_key, is_array in (
-            ('main', 'diagnosis_osn', False),
-            ('associated', 'diagnosis_sop', True),
-            ('complication', 'diagnosis_osl', True),
+
+        mis_diags = []
+        for risar_key, mis_key, is_array, default in (
+            ('main', 'diagnosis_osn', False, None),
+            ('associated', 'diagnosis_sop', True, []),
+            ('complication', 'diagnosis_osl', True, []),
         ):
-            mkb = getattr(medical_report, mis_key)
-            if mkb:
-                res.setdefault('diagnoses', []).append({
-                    'diagnostic': {
-                        'mkb': mkb,
-                        'kind_changed': True,
-                        'set_date': res.beg_date,
-                    },
-                    'diagnosis_types': {
-                        'final': is_array and map(self.rb, risar_key) or
-                                 self.rb(risar_key),
-                    },
+            mkb_list = medical_report.get(mis_key, default)
+            if not is_array:
+                mkb_list = mkb_list and [mkb_list] or []
+            for mkb in mkb_list:
+                mis_diags.append({
+                    'diagKind_code': risar_key,
+                    'mkb_code': mkb,
                 })
 
-    @staticmethod
-    def rb(code):
-        return {'code': code}
+        res = []
+        # todo: удаление должно быть реализовано для интерфеса
+        for i in xrange(max(len(db_diags), len(mis_diags))):
+            deleted = 1
+            db_diag = None
+            mis_diag = None
+            if i < len(db_diags):
+                db_diag = db_diags[i]
+            if i < len(mis_diags):
+                deleted = 0
+                mis_diag = mis_diags[i]
+
+            res.append({
+                'id': db_diag.get('diagnosis_id'),
+                'deleted': deleted,
+                'kind_changed': mis_diag.get('diagKind_code') != db_diag.get('diagKind_code'),
+                'diagnostic_changed': mis_diag.get('mkb_code') != db_diag.get('mkb_code'),
+                'diagnostic': {
+                    'mkb': self.rb(mis_diag.get('mkb_code'), 'MKB'),
+                },
+                'diagnosis_types': {
+                    'final': self.rb(mis_diag.get('diagKind_code'), 'rbDiagnosisKind'),
+                },
+                'person': data_res.get('person'),
+                'set_date': data_res.get('beg_date'),
+                'end_date': None,
+            })
+        return res
 
     def update_form(self, data):
         # like blueprints.risar.views.api.checkups.api_0_checkup
@@ -365,14 +416,17 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         checkup_id = self.target_obj_id
         flat_code = first_inspection_code
 
-        beg_date = safe_datetime(data.pop('beg_date', None))
+        beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         person = data.pop('person', None)
-        diagnoses = data.pop('diagnoses', None)
+        get_diagnoses_func = data.pop('get_diagnoses_func')
         fetuses = data.pop('fetuses', None)
 
         event = Event.query.get(event_id)
         card = PregnancyCard.get_for_event(event)
         action = get_action_by_id(checkup_id, event, flat_code, True)
+
+        self.target_obj = action
+        diagnoses = get_diagnoses_func()
 
         if not checkup_id:
             close_open_checkups(event_id)
@@ -387,8 +441,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         create_or_update_fetuses(action, fetuses)
 
         card.reevaluate_card_attrs()
-
-        self.target_obj = action
 
     def delete_diags(self):
         # нужно сначала разобраться с диагнозами и их проблемами.
