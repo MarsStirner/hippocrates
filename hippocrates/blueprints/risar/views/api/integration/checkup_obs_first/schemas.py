@@ -73,11 +73,12 @@ class CheckupObsFirstSchema(object):
                         },
                         "tongue": {
                             "description": "Язык, справочник rbRisarTongue",
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                # "enum": ["01", "02", "03", "04", "vlajnyj"]
-                            }
+                            "type": "string",
+                            # "type": "array",
+                            # "items": {
+                            #     "type": "string",
+                            #     # "enum": ["01", "02", "03", "04", "vlajnyj"]
+                            # }
                         },
                         "complaints": {
                             "description": "Жалобы, справочник rbRisarComplaints",
@@ -424,11 +425,12 @@ class CheckupObsFirstSchema(object):
                             },
                             "fetus_heartbeat": {
                                 "description": "Сердцебиение плода, справочник rbRisarFetus_Heartbeat",
-                                "type": "array",
-                                "items": {
-                                    "type": "string",
-                                    # "enum": ["asnoe", "ritmicnoe"]
-                                }
+                                "type": "string",
+                                # "type": "array",
+                                # "items": {
+                                #     "type": "string",
+                                #     # "enum": ["asnoe", "ritmicnoe"]
+                                # }
                             },
                             "fetus_heart_rate": {
                                 "description": "ЧСС плода",

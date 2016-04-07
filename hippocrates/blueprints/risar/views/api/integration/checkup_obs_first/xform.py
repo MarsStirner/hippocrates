@@ -17,18 +17,19 @@ from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from blueprints.risar.models.fetus import FetusState
+from blueprints.risar.models.risar import ExternalAction
 from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
+from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import ActionType, Action
-from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis, \
-    rbDiagnosisKind
+from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
 from nemesis.models.event import Event
+from nemesis.models.exists import MKB, rbAccountingSystem
 from nemesis.systemwide import db
-from sqlalchemy import literal
 
 logger = logging.getLogger('simple')
 
@@ -36,6 +37,7 @@ INTERNAL_ERROR = 500
 VALIDATION_ERROR = 406
 NOT_FOUND_ERROR = 404
 ALREADY_PRESENT_ERROR = 400
+MIS_BARS_CODE = 'Mis-Bars'
 
 
 def none_default(function=None, default=None):
@@ -66,6 +68,11 @@ class XForm(object):
         self.target_obj_id = None
         self.parent_obj = None
         self.target_obj = None
+        self.external_id = None
+
+        self.external_system = rbAccountingSystem.query.filter(
+            rbAccountingSystem.code == MIS_BARS_CODE,
+        ).get()
 
         self.set_version(api_version)
 
@@ -124,9 +131,7 @@ class XForm(object):
             )
         else:
             q = self._find_parent_obj_query()
-            parent_obj_exists = db.session.query(
-                literal(True)
-            ).filter(q.exists()).scalar()
+            parent_obj_exists = db.session.query(q.exists()).scalar()
             if not parent_obj_exists:
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.parent_obj_class.__name__)
@@ -159,6 +164,7 @@ class XForm(object):
             if not target_obj_exist:
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.target_obj_class.__name__)
+            self.check_external_id(data)
 
     def _find_parent_obj_query(self):
         return self.parent_obj_class.query.filter(
@@ -170,27 +176,63 @@ class XForm(object):
         pass
 
     def check_duplicate(self, data):
-        external_id = data.get('external_id', None)
-        q = self._find_target_obj_query().filter(
-            self.target_obj_class.external_id == external_id
+        self.external_id = data.get('external_id')
+        if not self.external_id:
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'api_checkup_obs_first_save used without "external_id"' %
+                self.target_obj_class.__name__
+            )
+        q = self._find_target_obj_query().join(
+            ExternalAction
+        ).join(rbAccountingSystem).filter(
+            ExternalAction.external_id == self.external_id,
+            rbAccountingSystem.code == MIS_BARS_CODE,
         )
-        target_obj_exist = db.session.query(
-            literal(True)
-        ).filter(q.exists()).scalar()
-        if not target_obj_exist:
+        target_obj_exist = db.session.query(q.exists()).scalar()
+        if target_obj_exist:
             raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
                                self.target_obj_class.__name__)
 
-    def rb(self, code, rb_name):
-        self.rb_validate(rb_name, code)
-        return code and {'code': code} or None
+    def check_external_id(self, data):
+        self.external_id = data.get('external_id')
+        if not self.external_id:
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'api_checkup_obs_first_save used without "external_id"' %
+                self.target_obj_class.__name__
+            )
+        q = ExternalAction.query.join(rbAccountingSystem).filter(
+            ExternalAction.external_id == self.external_id,
+            rbAccountingSystem.code == MIS_BARS_CODE,
+            ExternalAction.action_id == self.target_obj_id,
+        )
+        target_obj_exist = db.session.query(q.exists()).scalar()
+        if not target_obj_exist:
+            raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                               self.target_obj_class.__name__)
+
+    def rb(self, code, rb_model, code_field_name='code'):
+        id_ = self.rb_validate(rb_model, code, code_field_name)
+        return code and {'code': code, 'id': id_} or None
 
     @staticmethod
     def arr(rb_func, codes, rb_name):
         return map(lambda code: rb_func(code, rb_name), codes)
 
-    def rb_validate(self, rb_name, param):
-        pass
+    @staticmethod
+    def rb_validate(rb_model, code, code_field_name):
+        row_id = None
+        if code:
+            if isinstance(rb_model, basestring):
+                rb = Vesta.get_rb(rb_model, code)
+                row_id = rb['_id']
+            else:
+                field = getattr(rb_model, code_field_name)
+                row_id = list(rb_model.query.filter(
+                    field == code
+                ).values(rb_model.id))[0][0]
+        return row_id
 
 
 class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
@@ -213,6 +255,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
     def update_target_obj(self, data):
         form_data = self.mapping_as_form(data)
         self.update_form(form_data)
+        self.save_external_data()
 
     def mapping_as_form(self, data):
         res = {}
@@ -225,63 +268,64 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         return res
 
     def mapping_general_info(self, data, res):
-        general_info = data.get('general_info', {})
+        gi = data.get('general_info', {})
         res.update({
-            'beg_date': general_info.get('date', None),
+            'beg_date': gi.get('date', None),
             'person': {
                 'id': None,
-                'hospital': general_info.get('hospital', None),
-                'doctor': general_info.get('doctor', None),
+                'hospital': gi.get('hospital', None),
+                'doctor': gi.get('doctor', None),
             },
-            'height': general_info.get('height', None),
-            'weight': general_info.get('weight', None),
+            'height': gi.get('height', None),
+            'weight': gi.get('weight', None),
         })
 
     def mapping_somatic_status(self, data, res):
-        somatic_status = data.get('somatic_status', {})
+        ss = data.get('somatic_status', {})
         res.update({
-            'state': self.rb(somatic_status.get('state', None), 'rbRisarState'),
-            'subcutaneous_fat': self.rb(somatic_status.get('subcutaneous_fat', None), 'rbRisarSubcutaneous_Fat'),
-            'tongue': self.arr(self.rb, somatic_status.get('tongue', None), 'rbRisarTongue'),
-            'complaints': self.arr(self.rb, somatic_status.get('complaints', None), 'rbRisarComplaints'),
-            'skin': self.arr(self.rb, somatic_status.get('skin', None), 'rbRisarSkin'),
-            'lymph': self.arr(self.rb, somatic_status.get('lymph', None), 'rbRisarLymph'),
-            'breast': self.arr(self.rb, somatic_status.get('breast', None), 'rbRisarBreast'),
-            'heart_tones': self.arr(self.rb, somatic_status.get('heart_tones', None), 'rbRisarHeart_Tones'),
-            'pulse': self.arr(self.rb, somatic_status.get('pulse', None), 'rbRisarPulse'),
-            'nipples': self.arr(self.rb, somatic_status.get('nipples', None), 'rbRisarNipples'),
-            'mouth': self.rb(somatic_status.get('mouth', None), 'rbRisarMouth'),
-            'breathe': self.arr(self.rb, somatic_status.get('respiratory', None), 'rbRisarBreathe'),
-            'stomach': self.arr(self.rb, somatic_status.get('abdomen', None), 'rbRisarStomach'),
-            'liver': self.arr(self.rb, somatic_status.get('liver', None), 'rbRisarLiver'),
-            'urinoexcretory': self.arr(self.rb, somatic_status.get('urinoexcretory', None), 'rbRisarUrinoexcretory'),
-            'ad_right_high': somatic_status.get('ad_right_high', None),
-            'ad_left_high': somatic_status.get('ad_left_high', None),
-            'ad_right_low': somatic_status.get('ad_right_low', None),
-            'ad_left_low': somatic_status.get('ad_left_low', None),
-            'edema': somatic_status.get('edema', None),
-            'vein': self.rb(somatic_status.get('veins', None), 'rbRisarVein'),
-            'bowel_and_bladder_habits': somatic_status.get('bowel_and_bladder_habits', None),
-            'heart_rate': somatic_status.get('heart_rate', None),
+            'state': self.rb(ss.get('state', None), 'rbRisarState'),
+            'subcutaneous_fat': self.rb(ss.get('subcutaneous_fat', None), 'rbRisarSubcutaneous_Fat'),
+            # 'tongue': self.arr(self.rb, somatic_status.get('tongue', None), 'rbRisarTongue'),
+            'tongue': self.rb(ss.get('tongue', None), 'rbRisarTongue'),
+            'complaints': self.arr(self.rb, ss.get('complaints', None), 'rbRisarComplaints'),
+            'skin': self.arr(self.rb, ss.get('skin', None), 'rbRisarSkin'),
+            'lymph': self.arr(self.rb, ss.get('lymph', None), 'rbRisarLymph'),
+            'breast': self.arr(self.rb, ss.get('breast', None), 'rbRisarBreast'),
+            'heart_tones': self.arr(self.rb, ss.get('heart_tones', None), 'rbRisarHeart_Tones'),
+            'pulse': self.arr(self.rb, ss.get('pulse', None), 'rbRisarPulse'),
+            'nipples': self.arr(self.rb, ss.get('nipples', None), 'rbRisarNipples'),
+            'mouth': self.rb(ss.get('mouth', None), 'rbRisarMouth'),
+            'breathe': self.arr(self.rb, ss.get('respiratory', None), 'rbRisarBreathe'),
+            'stomach': self.arr(self.rb, ss.get('abdomen', None), 'rbRisarStomach'),
+            'liver': self.arr(self.rb, ss.get('liver', None), 'rbRisarLiver'),
+            'urinoexcretory': self.arr(self.rb, ss.get('urinoexcretory', None), 'rbRisarUrinoexcretory'),
+            'ad_right_high': ss.get('ad_right_high', None),
+            'ad_left_high': ss.get('ad_left_high', None),
+            'ad_right_low': ss.get('ad_right_low', None),
+            'ad_left_low': ss.get('ad_left_low', None),
+            'edema': ss.get('edema', None),
+            'vein': self.rb(ss.get('veins', None), 'rbRisarVein'),
+            'bowel_and_bladder_habits': ss.get('bowel_and_bladder_habits', None),
+            'heart_rate': ss.get('heart_rate', None),
         })
 
     def mapping_obstetric_status(self, data, res):
-        obstetric_status = data.get('obstetric_status', {})
+        os = data.get('obstetric_status', {})
         res.update({
-            'MikHHor': obstetric_status.get('horiz_diagonal', None),
-            'MikhVert': obstetric_status.get('vert_diagonal', None),
-            'abdominal': obstetric_status.get('abdominal_circumference', None),
-            'fundal_height': obstetric_status.get('fundal_height', None),
-            'metra_state': self.rb(obstetric_status.get('uterus_state', None), 'rbRisarMetra_State'),
-            'DsSP': obstetric_status.get('dssp', None),
-            'DsCr': obstetric_status.get('dscr', None),
-            'DsTr': obstetric_status.get('dstr', None),
-            'CExt': obstetric_status.get('cext', None),
-            'CDiag': obstetric_status.get('cdiag', None),
-            'CVera': obstetric_status.get('cvera', None),
-            'soloviev_index': obstetric_status.get('soloviev_index', None),
-            'pelvis_narrowness': self.rb(obstetric_status.get('pelvis_narrowness', None), 'rbRisarPelvis_Narrowness'),
-            'pelvis_form': self.rb(obstetric_status.get('pelvis_form', None), 'rbRisarPelvis_Form'),
+            'MikHHor': os.get('horiz_diagonal', None),
+            'MikhVert': os.get('vert_diagonal', None),
+            'abdominal': os.get('abdominal_circumference', None),
+            'fundal_height': os.get('fundal_height', None),
+            'metra_state': self.rb(os.get('uterus_state', None), 'rbRisarMetra_State'),
+            'DsSP': os.get('dssp', None),
+            'DsCr': os.get('dscr', None),
+            'DsTr': os.get('dstr', None),
+            'CExt': os.get('cext', None),
+            'CDiag': os.get('cdiag', None),
+            'CVera': os.get('cvera', None),
+            'soloviev_index': os.get('soloviev_index', None),
+            'pelvis_narrowness': self.rb(os.get('pelvis_narrowness', None), 'rbRisarPelvis_Narrowness'),
+            'pelvis_form': self.rb(os.get('pelvis_form', None), 'rbRisarPelvis_Form'),
         })
 
     def mapping_fetus(self, data, res):
@@ -306,7 +350,8 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
                     'position_2': self.rb(fetus.get('fetus_position', None), 'rbRisarFetus_Position_2'),
                     'type': self.rb(fetus.get('fetus_type', None), 'rbRisarFetus_Type'),
                     'presenting_part': self.rb(fetus.get('fetus_presentation', None), 'rbRisarPresenting_Part'),
-                    'heartbeat': self.arr(self.rb, fetus.get('fetus_heartbeat', None), 'rbRisarFetus_Heartbeat'),
+                    # 'heartbeat': self.arr(self.rb, fetus.get('fetus_heartbeat', []), 'rbRisarFetus_Heartbeat'),
+                    'heartbeat': self.rb(fetus.get('fetus_heartbeat', None), 'rbRisarFetus_Heartbeat'),
                     'heart_rate': fetus.get('fetus_heart_rate', None),
                 },
             })
@@ -346,68 +391,101 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
             'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
         })
 
-    def get_diagnoses(self, data, data_res):
+    def get_diagnoses(self, data, form_data):
+        # Прислали новый код МКБ, и не прислали старый - старый диагноз закрыли, новый открыли.
+        # если тот же МКБ пришел не как осложнение, а как сопутствующий, это смена вида
+        # если в списке диагнозов из МИС придут дубли кодов МКБ - отсекать лишние
+        # Если код МКБ в основном заболевании - игнорировать (отсекать) его в осложнениях и сопутствующих.
+        # Если код МКБ в осложнении - отсекать его в сопутствующих
+        # если два раза в одной группе (в осложнениях, например) - оставлять один
+
         medical_report = data.get('medical_report', {})
         action = self.target_obj
         card = PregnancyCard.get_for_event(action.event)
         diagnostics = card.get_client_diagnostics(action.begDate,
                                                   action.endDate)
-        db_diags = []
+        db_diags = {}
         for diagnostic in diagnostics:
             diagnosis = diagnostic.diagnosis
-            diagKind_code = list(Action_Diagnosis.query.join(rbDiagnosisKind).filter(
+            diagKind_code = list(Action_Diagnosis.query.join(
+                rbDiagnosisKind,
+            ).filter(
                 Action_Diagnosis.action == action,
                 Action_Diagnosis.diagnosis == diagnosis,
-            ).values(rbDiagnosisKind.code))[0]
-            db_diags.append({
+            ).values(rbDiagnosisKind.code))[0][0]
+            db_diags[diagnostic.MKB] = {
                 'diagnosis_id': diagnosis.id,
                 'diagKind_code': diagKind_code,
-                'mkb_code': diagnostic.MKB,
-            })
+            }
 
-        mis_diags = []
+        mis_diags = {}
         for risar_key, mis_key, is_array, default in (
             ('main', 'diagnosis_osn', False, None),
-            ('associated', 'diagnosis_sop', True, []),
             ('complication', 'diagnosis_osl', True, []),
+            ('associated', 'diagnosis_sop', True, []),
         ):
             mkb_list = medical_report.get(mis_key, default)
             if not is_array:
                 mkb_list = mkb_list and [mkb_list] or []
             for mkb in mkb_list:
-                mis_diags.append({
-                    'diagKind_code': risar_key,
-                    'mkb_code': mkb,
-                })
+                if mkb not in mis_diags:
+                    mis_diags[mkb] = {
+                        'diagKind_code': risar_key,
+                    }
 
-        res = []
-        # todo: удаление должно быть реализовано для интерфеса
-        for i in xrange(max(len(db_diags), len(mis_diags))):
-            deleted = 1
-            db_diag = None
-            mis_diag = None
-            if i < len(db_diags):
-                db_diag = db_diags[i]
-            if i < len(mis_diags):
-                deleted = 0
-                mis_diag = mis_diags[i]
-
+        def add_diag_data():
             res.append({
                 'id': db_diag.get('diagnosis_id'),
-                'deleted': deleted,
-                'kind_changed': mis_diag.get('diagKind_code') != db_diag.get('diagKind_code'),
-                'diagnostic_changed': mis_diag.get('mkb_code') != db_diag.get('mkb_code'),
+                'deleted': 0,
+                'kind_changed': kind_changed,
+                'diagnostic_changed': False,
                 'diagnostic': {
-                    'mkb': self.rb(mis_diag.get('mkb_code'), 'MKB'),
+                    'mkb': self.rb(mkb, MKB, 'DiagID'),
                 },
                 'diagnosis_types': {
-                    'final': self.rb(mis_diag.get('diagKind_code'), 'rbDiagnosisKind'),
+                    'final': diagnosis_type,
                 },
-                'person': data_res.get('person'),
-                'set_date': data_res.get('beg_date'),
-                'end_date': None,
+                'person': form_data.get('person'),
+                'set_date': form_data.get('beg_date'),
+                'end_date': end_date,
             })
+
+        res = []
+        for mkb in set(db_diags.keys() + mis_diags.keys()):
+            db_diag = db_diags.get(mkb, {})
+            mis_diag = mis_diags.get(mkb, {})
+            if db_diag and mis_diag:
+                # сменить тип
+                kind_changed = mis_diag.get('diagKind_code') != db_diag.get('diagKind_code')
+                diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
+                end_date = None
+                add_diag_data()
+            elif not db_diag and mis_diag:
+                # открыть
+                kind_changed = False
+                diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
+                end_date = None
+                add_diag_data()
+            elif db_diag and not mis_diag:
+                # закрыть
+                # нельзя закрывать, если используется в документах своего типа с бОльшей датой
+                if self.is_using_by_next_checkups(db_diag['diagnosis_id'], action):
+                    continue
+                kind_changed = False
+                diagnosis_type = self.rb(db_diag.get('diagKind_code'), rbDiagnosisKind)
+                end_date = form_data.get('beg_date')
+                add_diag_data()
         return res
+
+    @staticmethod
+    def is_using_by_next_checkups(diagnosis_id, action):
+        q = Action_Diagnosis.query.join(Action).filter(
+            Action_Diagnosis.diagnosis_id == diagnosis_id,
+            Action.begDate >= action.begDate,
+            Action.actionType == action.actionType,
+            Action.deleted == 0,
+        )
+        return db.session.query(q.exists()).scalar()
 
     def update_form(self, data):
         # like blueprints.risar.views.api.checkups.api_0_checkup
@@ -442,9 +520,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
 
         card.reevaluate_card_attrs()
 
-    def delete_diags(self):
-        # нужно сначала разобраться с диагнозами и их проблемами.
-
+    def close_diags(self):
         # Роман:
         # сначала найти открытые диагнозы пациента (это будут просто диагнозы без типа), затем среди них определить какие являются основными,
         # осложнениями и пр. - это значит, что Diagnosis связывается с осмотром через Action_Diagnosis, где указывается его тип, т.е. диагноз
@@ -455,7 +531,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         # выбирающий диагнозы по датам с учетом дат Event'а. После этого уже интегрировать.
 
         # Action_Diagnosis
-        # Diagnostic.filter(Diagnosis.id == diagnosis)
+        # Diagnostic.query.filter(Diagnosis.id == diagnosis)
         # q = Diagnosis.query.filter(Diagnosis.client == self.parent_obj.client)
         # q.update({'deleted': 1})
         raise
@@ -466,8 +542,10 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         }
 
     def delete_target_obj(self):
-        self.delete_diags()
-        self.delete_fetuses()
+        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
+        # self.close_diags()
+        # В методе удаления осмотра с плодами ничего не делать, у action.deleted = 1
+        # self.delete_fetuses()
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event == self.parent_obj_id,
@@ -479,4 +557,15 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         FetusState.query.filter(
             FetusState.delete == 0,
             FetusState.action_id == self.target_obj_id
-        ).update({'deleted': 1})
+        ).delete()
+
+    def save_external_data(self):
+        if self.new:
+            external_action = ExternalAction(
+                action=self.target_obj,
+                action_id=self.target_obj_id,
+                external_id=self.external_id,
+                external_system=self.external_system,
+                external_system_id=self.external_system.id,
+            )
+            db.session.add(external_action)

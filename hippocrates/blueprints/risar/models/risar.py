@@ -36,3 +36,14 @@ class RisarRiskGroup(db.Model):
             'modify_person': self.modifyPerson,
             'risk_group': self.risk_group,
         }
+
+
+class ExternalAction(db.Model):
+    __tablename__ = 'ExternalAction'
+
+    id = db.Column(db.Integer, primary_key=True)
+    action_id = db.Column(db.ForeignKey('Action.id'), index=True)
+    action = db.relationship('Action')
+    external_id = db.Column(db.String(250), index=True)
+    external_system_id = db.Column(db.Integer, db.ForeignKey('rbAccountingSystem.id'), nullable=False)
+    external_system = db.relationship(u'rbAccountingSystem')

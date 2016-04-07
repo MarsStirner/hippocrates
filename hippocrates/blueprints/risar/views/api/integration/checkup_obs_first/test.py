@@ -19,7 +19,7 @@ auth_token_name = 'CastielAuthToken'
 session_token_name = 'hippocrates.session.id'
 
 login = u'ВнешСис'
-password = '0909'
+password = ''
 
 
 def get_token(login, password):
@@ -78,7 +78,7 @@ def change_checkup(token, session_token, event_id, checkup_id):
     return j
 
 
-def delete_checkup(token, session_token, event_id):
+def delete_checkup(token, session_token, event_id, checkup_id):
     url = u'%s/risar/api/integration/0/card/%s/checkup/obs/first/%s' % (mis_url, event_id, checkup_id)
     result = requests.delete(
         url,
@@ -97,9 +97,8 @@ if __name__ == '__main__':
     print ' > session token: ', session_token
 
     # ========================================================================
-    # client_id = '17700'
-    # test_event_data['client_id'] = client_id
-    # result = register_card(token, session_token)
+    # event_id = '140'
+    # result = new_checkup(token, session_token, event_id)
     # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
     event_id = '144'
@@ -107,6 +106,7 @@ if __name__ == '__main__':
     result = change_checkup(token, session_token, event_id, checkup_id)
     print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    # event_id = '160'
-    # result = delete_card(token, session_token, event_id)
+    # event_id = '140'
+    # checkup_id = '554'
+    # result = delete_checkup(token, session_token, event_id, checkup_id)
     # print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))

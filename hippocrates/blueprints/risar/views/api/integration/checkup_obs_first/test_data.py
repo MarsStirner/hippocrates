@@ -18,15 +18,16 @@ test_obs_first_data = {
         "weight": 120  # *
     },
     "somatic_status": {
-        "state": "",  # * Общ. состояние ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
+        "state": "tajeloe",  # * Общ. состояние ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
         "subcutaneous_fat": "",  # * Подкожно жир. клетчатка ["izbytocnorazvita", "nedostatocnorazvita", "umerennorazvita"]
         "tongue": [],  # * Язык ["01", "02", "03", "04", "vlajnyj"]
-        "complaints": [],  # * Жалобы ["epigastrii", "golovnaabol_", "moving", "net", "oteki", "rvota", "tosnota", "zrenie"]
+        "tongue": "vlajnyj",  # * Язык ["01", "02", "03", "04", "vlajnyj"]
+        "complaints": ["moving", "golovnaabol_"],  # * Жалобы ["epigastrii", "golovnaabol_", "moving", "net", "oteki", "rvota", "tosnota", "zrenie"]
         "skin": [],  # * Кожа ["naliciekrovoizlianij", "naliciesypi", "obycnojokraskiivlajnosticistaa", "povysennojvlajnosti", "suhaa"]
         "lymph": [],  # * Лимфоузлы ["boleznennye", "neboleznennye", "nepal_piruutsa", "neuvelicennye", "pal_piruutsa", "uvelicennye"]
         "breast": [],  # * Молочные железы ["bezpatologiceskihizmenenij", "mestnoeuplotnenie", "nagrubanie", "pokrasnenie", "tresinysoskov"]
         "heart_tones": [],  # * Тоны сердца ["akzentIItona", "aritmicnye", "asnye", "gluhie", "prigluseny", "proslusivautsa", "ritmicnye"]
-        "pulse": [],  # * Пульс ["defizitpul_sa", "udovletvoritel_nogonapolnenia"]
+        "pulse": ["defizitpul_sa"],  # * Пульс ["defizitpul_sa", "udovletvoritel_nogonapolnenia"]
         "nipples": [],  # * Состояние сосков ["norma", "tresiny", "vospalenie"]
         "mouth": "",  # * Полость рта ["nujdaetsavsanazii", "sanirovana"]
         "respiratory": [],  # * Органы дыхания ["dyhaniejestkoe", "dyhanievezikularnoe", "hripyotsutstvuut", "hripysuhie", "hripyvlajnye"]
@@ -37,10 +38,10 @@ test_obs_first_data = {
         "ad_left_high": 0,  # *
         "ad_right_low": 0,  # *
         "ad_left_low": 0,  # *
-        "edema": "",  #  "Отёки"
+        "edema": u"Средние",  #  "Отёки"
         "veins": "",  # * Состояние вен ["noma", "poverhnostnyjvarikoz", "varikoznoerassirenieven"]
         "bowel_and_bladder_habits": "",  # Физиологические отправления",
-        "heart_rate": 0  # *
+        "heart_rate": 70  # *
     },
     "obstetric_status": {  # Акушерский статус",
         # "horiz_diagonal": None,  # Горизонтальная диагональ"
@@ -64,9 +65,19 @@ test_obs_first_data = {
             "fetus_position": "pervaa",  # Позиция плода ["pervaa", "vtoraa"]
             "fetus_type": "perednij",  # Вид плода ["perednij", "zadnij"]
             "fetus_presentation": "zatylocnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
-            "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+            # "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+            "fetus_heartbeat": "ritmicnoe",  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 120  # ЧСС плода
-        }
+        },
+        # {
+        #     "fetus_lie": "kosoe",  # Положение плода ["kosoe", "poperecnoe", "prodol_noe"]
+        #     "fetus_position": "vtoraa",  # Позиция плода ["pervaa", "vtoraa"]
+        #     "fetus_type": "",  # Вид плода ["perednij", "zadnij"]
+        #     "fetus_presentation": "golovnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
+        #     # "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+        #     "fetus_heartbeat": "asnoe",  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+        #     "fetus_heart_rate": 121  # ЧСС плода
+        # }
     ],
     "vaginal_examination": {  # Влагалищное исследование
         "vagina": "",  # * Влагалище ["svobodnoe", "uzkoe"]
@@ -87,8 +98,8 @@ test_obs_first_data = {
         # "urethra_smear": False,  # Отделяемое и при наличии данных з уретры взято на анализ
     },
     "medical_report": {  # Заключение
-        "pregnancy_week": 0,  # * Беременность (недель)
-        "next_visit_date": "",  # * Плановая дата следующей явки
+        "pregnancy_week": 12,  # * Беременность (недель)
+        "next_visit_date": "2016-04-15",  # * Плановая дата следующей явки
         "pregnancy_continuation": True,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
