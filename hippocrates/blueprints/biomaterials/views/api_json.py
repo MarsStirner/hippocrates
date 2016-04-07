@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import collections
 
+import requests
 from flask import request
+from nemesis.app import app
+from nemesis.lib.settings import Settings
 from sqlalchemy import func
 
 from ..app import module
 from ..lib.utils import TTJVisualizer
-from nemesis.lib.apiutils import api_method
+from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_date
 from nemesis.models.actions import TakenTissueJournal
 from nemesis.models.enums import TTJStatus
@@ -71,6 +74,29 @@ def api_ttj_change_status():
     data = request.json
     status = data.get('status')
     ids = data.get('ids')
-    TakenTissueJournal.query.filter(TakenTissueJournal.id.in_(ids),).update({'status': status['id']},
-                                                                            synchronize_session=False)
-    db.session.commit()
+    if not status:
+        raise ApiException(400, u'Invalid request. `status` must be set')
+    if not ids:
+        raise ApiException(400, u'Invalid request. `ids` must be non-empty list')
+    core_integration_address = Settings.getString('appPrefs.CoreWS.LIS-1022')
+    if status['code'] == 'sending_to_lab' and core_integration_address:
+        auth_token_cookie = app.config.get('CASTIEL_AUTH_TOKEN')
+        sess = requests.session()
+        sess.cookies[auth_token_cookie] = request.cookies[auth_token_cookie]
+        try:
+            result = sess.put(
+                core_integration_address,
+                json={'ids': ids}
+            )
+        except requests.ConnectionError:
+            raise ApiException(500, u'Cannot connect to core')
+        else:
+            return result.json()
+    else:
+        TakenTissueJournal.query.filter(
+            TakenTissueJournal.id.in_(ids)
+        ).update(
+            {'statusCode': status['id']},
+            synchronize_session=False
+        )
+        db.session.commit()
