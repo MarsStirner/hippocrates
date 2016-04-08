@@ -3,36 +3,30 @@
 import datetime
 import logging
 
-from flask import request, abort
-from flask.ext.login import current_user
-from sqlalchemy import desc, func
-from sqlalchemy.orm import joinedload
-
-from nemesis.app import app
-from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
-from nemesis.models.client import Client
-from nemesis.models.enums import EventPrimary, EventOrder
-from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
-from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
-from nemesis.models.diagnosis import Diagnosis, Diagnostic
-from nemesis.models.accounting import Service
-from nemesis.systemwide import db
-from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
-from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.models.schedule import ScheduleClientTicket
-from nemesis.models.exists import (Organisation, )
-from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
-from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
-                                        save_executives, EventSaveController, ReceivedController, MovingController)
+                                        save_executives, EventSaveController, MovingController)
 from blueprints.patients.lib.utils import add_or_update_blood_type
-from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
-from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
+from flask import request, abort
 from nemesis.lib.agesex import recordAcceptableEx
+from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
+from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
+from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
+from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
+from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.user import UserUtils
-
+from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int)
+from nemesis.models.accounting import Service
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
+from nemesis.models.client import Client
+from nemesis.models.diagnosis import Diagnosis, Diagnostic
+from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
+from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
+from nemesis.models.schedule import ScheduleClientTicket
+from nemesis.systemwide import db
+from sqlalchemy import desc, func
+from sqlalchemy.orm import joinedload
 
 logger = logging.getLogger('simple')
 

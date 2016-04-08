@@ -43,7 +43,18 @@ prescriptionFlatCodes = (
 
 
 def delete_all_autosaves(action_id):
-    ActionAutoSave.query.filter(ActionAutoSave.action_id == action_id).delete()
+    ActionAutoSave.query.filter(
+        ActionAutoSave.action_id == action_id,
+        ActionAutoSave.user_id == safe_current_user_id(),
+    ).delete()
+
+
+def delete_all_autounsaves(action_type_id, event_id):
+    ActionAutoSaveUnsaved.query.filter(
+        ActionAutoSaveUnsaved.actionType_id == action_type_id,
+        ActionAutoSaveUnsaved.event_id == event_id,
+        ActionAutoSaveUnsaved.user_id == safe_current_user_id(),
+    ).delete()
 
 
 @module.route('/api/action/new/')
@@ -289,6 +300,7 @@ def api_action_post(action_id=None):
         except ActionServiceException, e:
             logger.error(unicode(e), exc_info=True)
             raise ApiException(500, u'Ошибка в настройках услуг и прайс-листов')
+        delete_all_autounsaves(at_id, event_id)
 
     diagnoses_data = action_desc.get('diagnoses')
     if diagnoses_data:
