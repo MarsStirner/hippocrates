@@ -11,7 +11,8 @@ from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_list
+from blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list,
+    get_previous_children)
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.models.fetus import FetusState
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
@@ -300,9 +301,24 @@ def represent_pregnancies(event):
 
 def represent_pregnancy(action):
     pregnancy = dict(action_apt_values(action, pregnancy_apt_codes), id=action.id)
-    pregnancy['newborn_inspections'] = represent_newborn_inspections(pregnancy['newborn_inspections']) if \
-        pregnancy.get('newborn_inspections') else []
+    prev_children = get_previous_children(action.id)
+    pregnancy['newborn_inspections'] = represent_anamnesis_newborn_inspections(prev_children)
     return pregnancy
+
+
+def represent_anamnesis_newborn_inspections(prev_children):
+    result = []
+    for child in prev_children:
+        result.append({
+            'id': child.id,
+            'weight': child.weight,
+            'alive': child.alive,
+            'death_reason': child.death_reason,
+            'died_at': child.died_at,
+            'abnormal_development': child.abnormal_development,
+            'neurological_disorders': child.neurological_disorders,
+        })
+    return result
 
 
 def represent_anamnesis(event):

@@ -59,7 +59,7 @@ def any_thing(haystack, needles, extract):
     :param haystack: Стог
     :param needles: Описание иголок
     :param extract: Функция, возвращающая сено-иголку из куска сена
-    :return: соответствует ли стог сена описнанию иголкок
+    :return: соответствует ли стог сена описанию иголкок
     """
     if not haystack:
         return False

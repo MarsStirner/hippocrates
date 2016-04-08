@@ -91,10 +91,10 @@
                 <div class="col-md-3">
                     <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child(model)"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
                     <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
-                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections | flt_not_deleted">
+                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections">
                             <a href="#child[[$index+1]]" data-toggle="pill">
                                 Ребенок [[$index+1]]<button class="text-red close btn btn-small btn-default closeBtn"
-                                                            ng-click="delete_child(child)" type="button"
+                                                            ng-click="delete_child($index)" type="button"
                                                             tooltip="Удалить">
                                                         <span class="glyphicon glyphicon-remove"></span>
                                                     </button>
@@ -105,7 +105,7 @@
                 <div class="col-md-9">
                     <div class="tab-content">
                         <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index+1]]"
-                             ng-repeat="child in model.newborn_inspections | flt_not_deleted">
+                             ng-repeat="child in model.newborn_inspections">
                             <table class="table">
                                 <thead>
                                 <tr>

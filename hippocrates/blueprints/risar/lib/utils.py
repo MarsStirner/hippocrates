@@ -15,6 +15,8 @@ from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
     puerpera_inspection_code
+from blueprints.risar.models.risar import RisarPreviousPregnancy_Children
+
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
 risk_rates_diagID = {
@@ -300,3 +302,13 @@ def format_action_data(json_data):
         'properties': json_data['properties']
     }
     return data
+
+
+def get_previous_children(action_id):
+    if not action_id:
+        return []
+    return db.session.query(RisarPreviousPregnancy_Children).filter(
+        RisarPreviousPregnancy_Children.action_id == action_id
+    ).order_by(
+        RisarPreviousPregnancy_Children.id
+    ).all()

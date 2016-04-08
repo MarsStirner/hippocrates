@@ -6,7 +6,7 @@ import datetime
 import functools
 import sqlalchemy
 
-from blueprints.risar.lib.utils import get_action, get_action_list
+from blueprints.risar.lib.utils import get_action, get_action_list, get_previous_children
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy
 from nemesis.lib.data import create_action
@@ -53,6 +53,19 @@ class Anamnesis(object):
     @lazy
     def father(self):
         return get_action(self._event, risar_father_anamnesis, True)
+
+
+class PreviousPregnancy(object):
+    def __init__(self, action):
+        self._action = action
+
+    @property
+    def action(self):
+        return self._action
+
+    @lazy
+    def newborn_inspections(self):
+        return get_previous_children(self._action.id)
 
 
 class LocalCache(object):
@@ -102,7 +115,10 @@ class PregnancyCard(object):
 
     @lazy
     def prev_pregs(self):
-        return get_action_list(self.event, risar_anamnesis_pregnancy).all()
+        return [
+            PreviousPregnancy(action)
+            for action in get_action_list(self.event, risar_anamnesis_pregnancy).all()
+        ]
 
     @property
     def attrs(self):
