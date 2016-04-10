@@ -73,12 +73,11 @@ class CheckupObsFirstSchema(object):
                         },
                         "tongue": {
                             "description": "Язык, справочник rbRisarTongue",
-                            "type": "string",
-                            # "type": "array",
-                            # "items": {
-                            #     "type": "string",
-                            #     # "enum": ["01", "02", "03", "04", "vlajnyj"]
-                            # }
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                # "enum": ["01", "02", "03", "04", "vlajnyj"]
+                            }
                         },
                         "complaints": {
                             "description": "Жалобы, справочник rbRisarComplaints",

@@ -15,9 +15,10 @@ from abc import ABCMeta, abstractmethod
 
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
+from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from blueprints.risar.models.fetus import FetusState
-from blueprints.risar.models.risar import ExternalAction
+from blueprints.risar.models.risar import ActionIdentification
 from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
@@ -29,6 +30,8 @@ from nemesis.models.actions import ActionType, Action
 from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
 from nemesis.models.event import Event
 from nemesis.models.exists import MKB, rbAccountingSystem
+from nemesis.models.organisation import Organisation
+from nemesis.models.person import Person
 from nemesis.systemwide import db
 
 logger = logging.getLogger('simple')
@@ -72,7 +75,7 @@ class XForm(object):
 
         self.external_system = rbAccountingSystem.query.filter(
             rbAccountingSystem.code == MIS_BARS_CODE,
-        ).get()
+        ).first()
 
         self.set_version(api_version)
 
@@ -184,9 +187,9 @@ class XForm(object):
                 self.target_obj_class.__name__
             )
         q = self._find_target_obj_query().join(
-            ExternalAction
+            ActionIdentification
         ).join(rbAccountingSystem).filter(
-            ExternalAction.external_id == self.external_id,
+            ActionIdentification.external_id == self.external_id,
             rbAccountingSystem.code == MIS_BARS_CODE,
         )
         target_obj_exist = db.session.query(q.exists()).scalar()
@@ -202,10 +205,10 @@ class XForm(object):
                 u'api_checkup_obs_first_save used without "external_id"' %
                 self.target_obj_class.__name__
             )
-        q = ExternalAction.query.join(rbAccountingSystem).filter(
-            ExternalAction.external_id == self.external_id,
+        q = ActionIdentification.query.join(rbAccountingSystem).filter(
+            ActionIdentification.external_id == self.external_id,
             rbAccountingSystem.code == MIS_BARS_CODE,
-            ExternalAction.action_id == self.target_obj_id,
+            ActionIdentification.action_id == self.target_obj_id,
         )
         target_obj_exist = db.session.query(q.exists()).scalar()
         if not target_obj_exist:
@@ -269,12 +272,11 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
 
     def mapping_general_info(self, data, res):
         gi = data.get('general_info', {})
+        person_id = self.get_person_id(gi.get('doctor'), gi.get('hospital'))
         res.update({
             'beg_date': gi.get('date', None),
             'person': {
-                'id': None,
-                'hospital': gi.get('hospital', None),
-                'doctor': gi.get('doctor', None),
+                'id': person_id,
             },
             'height': gi.get('height', None),
             'weight': gi.get('weight', None),
@@ -285,8 +287,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         res.update({
             'state': self.rb(ss.get('state', None), 'rbRisarState'),
             'subcutaneous_fat': self.rb(ss.get('subcutaneous_fat', None), 'rbRisarSubcutaneous_Fat'),
-            # 'tongue': self.arr(self.rb, somatic_status.get('tongue', None), 'rbRisarTongue'),
-            'tongue': self.rb(ss.get('tongue', None), 'rbRisarTongue'),
+            'tongue': self.arr(self.rb, ss.get('tongue', None), 'rbRisarTongue'),
             'complaints': self.arr(self.rb, ss.get('complaints', None), 'rbRisarComplaints'),
             'skin': self.arr(self.rb, ss.get('skin', None), 'rbRisarSkin'),
             'lymph': self.arr(self.rb, ss.get('lymph', None), 'rbRisarLymph'),
@@ -407,15 +408,21 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         db_diags = {}
         for diagnostic in diagnostics:
             diagnosis = diagnostic.diagnosis
-            diagKind_code = list(Action_Diagnosis.query.join(
+            if diagnosis.endDate:
+                continue
+            q_list = list(Action_Diagnosis.query.join(
                 rbDiagnosisKind,
             ).filter(
                 Action_Diagnosis.action == action,
                 Action_Diagnosis.diagnosis == diagnosis,
-            ).values(rbDiagnosisKind.code))[0][0]
+                Action_Diagnosis.deleted == 0,
+            ).values(rbDiagnosisKind.code))
+            diag_kind_code = 'associated'
+            if q_list:
+                diag_kind_code = q_list[0][0]
             db_diags[diagnostic.MKB] = {
                 'diagnosis_id': diagnosis.id,
-                'diagKind_code': diagKind_code,
+                'diagKind_code': diag_kind_code,
             }
 
         mis_diags = {}
@@ -438,7 +445,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
                 'id': db_diag.get('diagnosis_id'),
                 'deleted': 0,
                 'kind_changed': kind_changed,
-                'diagnostic_changed': False,
+                'diagnostic_changed': diagnostic_changed,
                 'diagnostic': {
                     'mkb': self.rb(mkb, MKB, 'DiagID'),
                 },
@@ -456,13 +463,15 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
             mis_diag = mis_diags.get(mkb, {})
             if db_diag and mis_diag:
                 # сменить тип
+                diagnostic_changed = False
                 kind_changed = mis_diag.get('diagKind_code') != db_diag.get('diagKind_code')
                 diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
                 end_date = None
                 add_diag_data()
             elif not db_diag and mis_diag:
                 # открыть
-                kind_changed = False
+                diagnostic_changed = False
+                kind_changed = True
                 diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
                 end_date = None
                 add_diag_data()
@@ -471,6 +480,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
                 # нельзя закрывать, если используется в документах своего типа с бОльшей датой
                 if self.is_using_by_next_checkups(db_diag['diagnosis_id'], action):
                     continue
+                diagnostic_changed = True
                 kind_changed = False
                 diagnosis_type = self.rb(db_diag.get('diagKind_code'), rbDiagnosisKind)
                 end_date = form_data.get('beg_date')
@@ -483,6 +493,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
             Action_Diagnosis.diagnosis_id == diagnosis_id,
             Action.begDate >= action.begDate,
             Action.actionType == action.actionType,
+            Action.id != action.id,
             Action.deleted == 0,
         )
         return db.session.query(q.exists()).scalar()
@@ -495,7 +506,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         flat_code = first_inspection_code
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
-        person = data.pop('person', None)
         get_diagnoses_func = data.pop('get_diagnoses_func')
         fetuses = data.pop('fetuses', None)
 
@@ -536,11 +546,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         # q.update({'deleted': 1})
         raise
 
-    def as_json(self):
-        return {
-            "exam_obs_id": self.target_obj.id,
-        }
-
     def delete_target_obj(self):
         #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
         # self.close_diags()
@@ -548,7 +553,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
         # self.delete_fetuses()
 
         self.target_obj_class.query.filter(
-            self.target_obj_class.event == self.parent_obj_id,
+            self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.id == self.target_obj_id,
             Action.deleted == 0
         ).update({'deleted': 1})
@@ -561,7 +566,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
 
     def save_external_data(self):
         if self.new:
-            external_action = ExternalAction(
+            external_action = ActionIdentification(
                 action=self.target_obj,
                 action_id=self.target_obj_id,
                 external_id=self.external_id,
@@ -569,3 +574,17 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, XForm):
                 external_system_id=self.external_system.id,
             )
             db.session.add(external_action)
+
+    @staticmethod
+    def get_person_id(regional_code, tfoms_code):
+        res = list(Person.query.join(Organisation).filter(
+            Person.regionalCode == regional_code,
+            Organisation.TFOMSCode == tfoms_code,
+        ).values(Person.id))[0][0]
+        return res
+
+    def as_json(self):
+        # data = represent_checkup(self.target_obj)
+        return {
+            "exam_obs_id": self.target_obj.id,
+        }

@@ -66,7 +66,7 @@ def new_checkup(token, session_token, event_id):
 
 
 def change_checkup(token, session_token, event_id, checkup_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/obs/first/%s' % (mis_url, event_id, checkup_id)
+    url = u'%s/risar/api/integration/0/card/%s/checkup/obs/first/%s/' % (mis_url, event_id, checkup_id)
     result = requests.put(
         url,
         json=test_obs_first_data,
@@ -79,7 +79,7 @@ def change_checkup(token, session_token, event_id, checkup_id):
 
 
 def delete_checkup(token, session_token, event_id, checkup_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/obs/first/%s' % (mis_url, event_id, checkup_id)
+    url = u'%s/risar/api/integration/0/card/%s/checkup/obs/first/%s/' % (mis_url, event_id, checkup_id)
     result = requests.delete(
         url,
         cookies={auth_token_name: token,
@@ -107,6 +107,6 @@ if __name__ == '__main__':
     print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
     # event_id = '140'
-    # checkup_id = '554'
+    # checkup_id = '646'
     # result = delete_checkup(token, session_token, event_id, checkup_id)
     # print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))

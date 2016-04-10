@@ -38,8 +38,8 @@ class RisarRiskGroup(db.Model):
         }
 
 
-class ExternalAction(db.Model):
-    __tablename__ = 'ExternalAction'
+class ActionIdentification(db.Model):
+    __tablename__ = 'ActionIdentification'
 
     id = db.Column(db.Integer, primary_key=True)
     action_id = db.Column(db.ForeignKey('Action.id'), index=True)

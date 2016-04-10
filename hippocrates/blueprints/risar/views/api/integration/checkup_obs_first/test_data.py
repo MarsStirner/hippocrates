@@ -12,16 +12,15 @@ test_obs_first_data = {
     # "exam_obs_id": "",
     "general_info": {
         "date": "2016-03-31",  # *
-        "hospital": "",  # *
-        "doctor": "",  # *
+        "hospital": "-1",  # *
+        "doctor": "22",  # *
         "height": 120,  # *
         "weight": 120  # *
     },
     "somatic_status": {
         "state": "tajeloe",  # * Общ. состояние ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
         "subcutaneous_fat": "",  # * Подкожно жир. клетчатка ["izbytocnorazvita", "nedostatocnorazvita", "umerennorazvita"]
-        "tongue": [],  # * Язык ["01", "02", "03", "04", "vlajnyj"]
-        "tongue": "vlajnyj",  # * Язык ["01", "02", "03", "04", "vlajnyj"]
+        "tongue": ["vlajnyj"],  # * Язык ["01", "02", "03", "04", "vlajnyj"]
         "complaints": ["moving", "golovnaabol_"],  # * Жалобы ["epigastrii", "golovnaabol_", "moving", "net", "oteki", "rvota", "tosnota", "zrenie"]
         "skin": [],  # * Кожа ["naliciekrovoizlianij", "naliciesypi", "obycnojokraskiivlajnosticistaa", "povysennojvlajnosti", "suhaa"]
         "lymph": [],  # * Лимфоузлы ["boleznennye", "neboleznennye", "nepal_piruutsa", "neuvelicennye", "pal_piruutsa", "uvelicennye"]
@@ -62,12 +61,12 @@ test_obs_first_data = {
     "fetus": [  # Плод
         {
             "fetus_lie": "prodol_noe",  # Положение плода ["kosoe", "poperecnoe", "prodol_noe"]
-            "fetus_position": "pervaa",  # Позиция плода ["pervaa", "vtoraa"]
+            "fetus_position": "vtoraa",  # Позиция плода ["pervaa", "vtoraa"]
             "fetus_type": "perednij",  # Вид плода ["perednij", "zadnij"]
             "fetus_presentation": "zatylocnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
             # "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heartbeat": "ritmicnoe",  # Сердцебиение плода ["asnoe", "ritmicnoe"]
-            "fetus_heart_rate": 120  # ЧСС плода
+            "fetus_heart_rate": 121  # ЧСС плода
         },
         # {
         #     "fetus_lie": "kosoe",  # Положение плода ["kosoe", "poperecnoe", "prodol_noe"]
@@ -103,7 +102,7 @@ test_obs_first_data = {
         "pregnancy_continuation": True,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "A01",  # Основной диагноз
+        "diagnosis_osn": "A03",  # Основной диагноз
         # "diagnosis_sop": [],  # Диагноз сопутствующий
         # "diagnosis_osl": [],  # Диагноз осложнения
         # "recommendations": "",  # Рекомендации
