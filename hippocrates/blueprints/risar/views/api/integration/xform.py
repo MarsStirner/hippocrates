@@ -239,7 +239,8 @@ class CheckupsXForm(object):
             if not target_obj_exist:
                 raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
                                    self.target_obj_class.__name__)
-            self.check_external_id(data)
+            if data:
+                self.check_external_id(data)
 
     def _find_parent_obj_query(self):
         return self.parent_obj_class.query.filter(

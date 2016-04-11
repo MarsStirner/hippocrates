@@ -11,7 +11,7 @@
 
 import requests
 
-from test_data import test_pc_data
+from test_data import test_puerpera_data
 
 coldstar_url = 'http://127.0.0.1:6097'
 mis_url = 'http://127.0.0.1:6600'
@@ -53,10 +53,10 @@ def get_role(token, role_code=''):
 
 
 def new_checkup(token, session_token, event_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/pc/' % (mis_url, event_id)
+    url = u'%s/risar/api/integration/0/card/%s/checkup/puerpera/' % (mis_url, event_id)
     result = requests.post(
         url,
-        json=test_pc_data,
+        json=test_puerpera_data,
         cookies={auth_token_name: token,
                  session_token_name: session_token}
     )
@@ -66,10 +66,10 @@ def new_checkup(token, session_token, event_id):
 
 
 def change_checkup(token, session_token, event_id, checkup_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/pc/%s/' % (mis_url, event_id, checkup_id)
+    url = u'%s/risar/api/integration/0/card/%s/checkup/puerpera/%s/' % (mis_url, event_id, checkup_id)
     result = requests.put(
         url,
-        json=test_pc_data,
+        json=test_puerpera_data,
         cookies={auth_token_name: token,
                  session_token_name: session_token}
     )
@@ -79,7 +79,7 @@ def change_checkup(token, session_token, event_id, checkup_id):
 
 
 def delete_checkup(token, session_token, event_id, checkup_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/pc/%s/' % (mis_url, event_id, checkup_id)
+    url = u'%s/risar/api/integration/0/card/%s/checkup/puerpera/%s/' % (mis_url, event_id, checkup_id)
     result = requests.delete(
         url,
         cookies={auth_token_name: token,
@@ -97,16 +97,16 @@ if __name__ == '__main__':
     print ' > session token: ', session_token
 
     # ========================================================================
-    # event_id = '140'
+    # event_id = '146'
     # result = new_checkup(token, session_token, event_id)
     # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    # event_id = '144'
-    # checkup_id = '554'
+    # event_id = '146'
+    # checkup_id = '659'
     # result = change_checkup(token, session_token, event_id, checkup_id)
     # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    # event_id = '140'
-    # checkup_id = '646'
-    # result = delete_checkup(token, session_token, event_id, checkup_id)
-    # print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))
+    event_id = '146'
+    checkup_id = '659'
+    result = delete_checkup(token, session_token, event_id, checkup_id)
+    print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))

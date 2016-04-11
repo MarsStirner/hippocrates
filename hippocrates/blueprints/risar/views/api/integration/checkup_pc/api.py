@@ -16,7 +16,7 @@ from nemesis.lib.utils import public_endpoint
 from nemesis.systemwide import db
 
 
-@module.route('/api/integration/<int:api_version>/checkup/obs/pc/schema.json', methods=["GET"])
+@module.route('/api/integration/<int:api_version>/checkup/pc/schema.json', methods=["GET"])
 @api_method(hook=hook)
 @public_endpoint
 def api_checkup_pc_schema(api_version):
@@ -26,37 +26,37 @@ def api_checkup_pc_schema(api_version):
         raise ApiException(404, u'Api version %i is not supported. Maximum is %i' % (api_version, len(CheckupPCXForm.schema) - 1))
 
 
-# если не будет полного ответа, то возвращать нечего
-# @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/pc/', methods=['GET'])
+# метод GET не описан
+# @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/pc/<int:exam_pc_id>/', methods=['GET'])
 # @api_method(hook=hook)
-# @public_api
-# def api_checkup_pc_get(api_version, card_id):
+# def api_checkup_pc_get(api_version, card_id, exam_pc_id):
 #     xform = CheckupPCXForm(api_version)
-#     xform.find_parent_obj(card_id)
+#     xform.check_target_obj(card_id, exam_pc_id)
 #     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/pc/<int:exam_obs_id>/', methods=['PUT'])
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/pc/', methods=['POST'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/pc/<int:exam_pc_id>/', methods=['PUT'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/pc/', methods=['POST'])
 @api_method(hook=hook)
-def api_checkup_pc_save(api_version, card_id, exam_obs_id=None):
+def api_checkup_pc_save(api_version, card_id, exam_pc_id=None):
     data = request.get_json()
     xform = CheckupPCXForm(api_version)
     xform.validate(data)
-    xform.check_target_obj(card_id, exam_obs_id, data)
+    xform.check_target_obj(card_id, exam_pc_id, data)
     xform.update_target_obj(data)
-    res = xform.as_json()
     db.session.commit()
-    return res
+    xform.reevaluate_data()
+    db.session.commit()
+    return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/pc/<int:exam_obs_id>/', methods=['DELETE'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/pc/<int:exam_pc_id>/', methods=['DELETE'])
 @api_method(hook=hook)
-def api_checkup_pc_delete(api_version, card_id, exam_obs_id):
+def api_checkup_pc_delete(api_version, card_id, exam_pc_id):
     # data = request.get_json()
     xform = CheckupPCXForm(api_version)
     # xform.validate(data)
-    # xform.check_target_obj(card_id, exam_obs_id, data)
-    xform.check_target_obj(card_id, exam_obs_id)
+    # xform.check_target_obj(card_id, exam_pc_id, data)
+    xform.check_target_obj(card_id, exam_pc_id)
     xform.delete_target_obj()
     db.session.commit()

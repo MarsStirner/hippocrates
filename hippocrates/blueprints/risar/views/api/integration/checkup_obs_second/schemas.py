@@ -24,7 +24,7 @@ class CheckupObsSecondSchema(object):
                     "type": "string"
                 },
                 "exam_obs_id": {
-                    "description": "ID первичного осмотра",
+                    "description": "ID повторного осмотра",
                     "type": "string"
                 },
                 "dynamic_monitoring": {

@@ -23,8 +23,8 @@ class CheckupPCSchema(object):
                     "description": "Внешний ID",
                     "type": "string"
                 },
-                "exam_obs_id": {
-                    "description": "ID первичного осмотра",
+                "exam_pc_id": {
+                    "description": "ID осмотра специалистом ПЦ",
                     "type": "string"
                 },
                 "general_info": {

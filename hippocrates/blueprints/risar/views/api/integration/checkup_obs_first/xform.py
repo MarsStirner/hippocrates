@@ -126,6 +126,10 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         'associated': {'attr': 'diagnosis_sop', 'default': [], 'is_vector': True, 'level': 3},
     }
 
+    def __init__(self, *a, **kw):
+        super(CheckupObsFirstXForm, self).__init__(*a, **kw)
+        self.card = None
+
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
@@ -336,7 +340,10 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_fetuses(action, fetuses)
 
-        card.reevaluate_card_attrs()
+        self.card = card
+
+    def reevaluate_data(self):
+        self.card.reevaluate_card_attrs()
 
     def close_diags(self):
         # Роман:
@@ -359,6 +366,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         # self.close_diags()
         # В методе удаления осмотра с плодами ничего не делать, у action.deleted = 1
         # self.delete_fetuses()
+        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,
