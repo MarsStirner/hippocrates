@@ -488,9 +488,13 @@
                                                                     <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
-                                                                <th class="text-right">Сердцебиение <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-4">
-                                                                    <rb-select ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
+                                                                <th class="text-right">Сердцебиение </th>
+                                                                <td><div ng-class="{'text-danger': somaticForm.heartbeat.$invalid && somaticForm.submit_attempt}">
+                                                                    <div name="heartbeat" refbook-checkbox ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat" ng-required="false">
+                                                                        [[ item.name ]]
+                                                                    </div>
+                                                                    </div>
+                                                                </td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>

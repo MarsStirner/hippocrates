@@ -324,6 +324,16 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th class="text-right">Полость рта <span class="text-danger">*</span></th>
+                                        <td><div class="row" ng-class="{'has-error': somaticForm.mouth.$invalid && somaticForm.submit_attempt}">
+                                            <div class="col-md-4">
+                                            <rb-select name="mouth" ng-model="checkup.mouth" ref-book="rbRisarMouth"
+                                                       ng-required="true"></rb-select>
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th class="text-right">Физиологические отправления</th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
                                     </tr>
@@ -489,8 +499,11 @@
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Сердцебиение <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-4">
-                                                                    <rb-select ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
+                                                                <td>
+                                                                    <div refbook-checkbox ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat">
+                                                                        [[ item.name ]]
+                                                                    </div>
+                                                                </td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>

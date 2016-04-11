@@ -64,8 +64,7 @@ test_obs_first_data = {
             "fetus_position": "vtoraa",  # Позиция плода ["pervaa", "vtoraa"]
             "fetus_type": "perednij",  # Вид плода ["perednij", "zadnij"]
             "fetus_presentation": "zatylocnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
-            # "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
-            "fetus_heartbeat": "ritmicnoe",  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+            "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 121  # ЧСС плода
         },
         # {

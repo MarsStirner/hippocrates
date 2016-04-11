@@ -10,7 +10,7 @@ from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
-from blueprints.risar.models.fetus import FetusState
+from blueprints.risar.models.fetus import RisarFetusState
 from blueprints.risar.risar_config import second_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_second.schemas import \
     CheckupObsSecondSchema
@@ -73,8 +73,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         'position_2': {'attr': 'fetus_position', 'default': None, 'rb': 'rbRisarFetus_Position_2', 'is_vector': False},
         'type': {'attr': 'fetus_type', 'default': None, 'rb': 'rbRisarFetus_Type', 'is_vector': False},
         'presenting_part': {'attr': 'fetus_presentation', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
-        # 'heartbeat': self.arr(self.rb, fetus.get('fetus_heartbeat', []), 'rbRisarFetus_Heartbeat'),
-        'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': False},
+        'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
         'delay': {'attr': 'intrauterine_growth_retardation', 'default': None, 'rb': 'rbRisarFetus_Delay', 'is_vector': False},
     }
@@ -153,8 +152,8 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
 
     def mapping_fetus(self, data, res):
         mis_fetus_list = data.get('fetus', [])
-        db_fetus_q = FetusState.query.filter(FetusState.action_id == self.target_obj_id)
-        db_fetus_ids = tuple(db_fetus_q.values(FetusState.id))
+        db_fetus_q = RisarFetusState.query.filter(RisarFetusState.action_id == self.target_obj_id)
+        db_fetus_ids = tuple(db_fetus_q.values(RisarFetusState.id))
         # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
         for i in xrange(max(len(db_fetus_ids), len(mis_fetus_list))):
             deleted = 1
@@ -354,9 +353,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         ).update({'deleted': 1})
 
     def delete_fetuses(self):
-        FetusState.query.filter(
-            FetusState.delete == 0,
-            FetusState.action_id == self.target_obj_id
+        RisarFetusState.query.filter(
+            RisarFetusState.delete == 0,
+            RisarFetusState.action_id == self.target_obj_id
         ).delete()
 
     def as_json(self):

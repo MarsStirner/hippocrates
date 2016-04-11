@@ -316,12 +316,11 @@ class CheckupObsSecondSchema(object):
                             },
                             "fetus_heartbeat": {
                                 "description": "Сердцебиение плода, справочник rbRisarFetus_Heartbeat",
-                                "type": "string",
-                                # "type": "array",
-                                # "items": {
-                                #     "type": "string",
-                                #     # "enum": ["asnoe", "ritmicnoe"]
-                                # }
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    # "enum": ["asnoe", "ritmicnoe"]
+                                }
                             },
                             "fetus_heart_rate": {
                                 "description": "ЧСС плода",

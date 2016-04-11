@@ -10,7 +10,7 @@ from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
-from blueprints.risar.models.fetus import FetusState
+from blueprints.risar.models.fetus import RisarFetusState
 from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
@@ -85,8 +85,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         'position_2': {'attr': 'fetus_position', 'default': None, 'rb': 'rbRisarFetus_Position_2', 'is_vector': False},
         'type': {'attr': 'fetus_type', 'default': None, 'rb': 'rbRisarFetus_Type', 'is_vector': False},
         'presenting_part': {'attr': 'fetus_presentation', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
-        # 'heartbeat': self.arr(self.rb, fetus.get('fetus_heartbeat', []), 'rbRisarFetus_Heartbeat'),
-        'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': False},
+        'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
     }
 
@@ -102,8 +101,8 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
-        # 'parametrium': {'attr': 'parametrium', 'default': [], 'rb': '...', 'is_vector': True},
-        'parametrium': {'attr': 'parametrium', 'default': None, 'rb': '...', 'is_vector': False},
+        # 'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': True},
+        'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
         'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
         'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},
         'onco_smear': {'attr': 'onco_smear', 'default': None, 'rb': None, 'is_vector': False},
@@ -174,8 +173,8 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
 
     def mapping_fetus(self, data, res):
         fetus_list = data.get('fetus', [])
-        fetus_q = FetusState.query.filter(FetusState.action_id == self.target_obj_id)
-        fetus_ids = tuple(fetus_q.values(FetusState.id))
+        fetus_q = RisarFetusState.query.filter(RisarFetusState.action_id == self.target_obj_id)
+        fetus_ids = tuple(fetus_q.values(RisarFetusState.id))
         # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
         for i in xrange(max(len(fetus_ids), len(fetus_list))):
             deleted = 1
@@ -375,9 +374,9 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         ).update({'deleted': 1})
 
     def delete_fetuses(self):
-        FetusState.query.filter(
-            FetusState.delete == 0,
-            FetusState.action_id == self.target_obj_id
+        RisarFetusState.query.filter(
+            RisarFetusState.delete == 0,
+            RisarFetusState.action_id == self.target_obj_id
         ).delete()
 
     def as_json(self):

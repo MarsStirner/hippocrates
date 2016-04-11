@@ -47,8 +47,7 @@ test_obs_second_data = {
             "fetus_position": "vtoraa",  # Позиция плода ["pervaa", "vtoraa"]
             "fetus_type": "perednij",  # Вид плода ["perednij", "zadnij"]
             "fetus_presentation": "zatylocnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
-            # "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
-            "fetus_heartbeat": "ritmicnoe",  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+            "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 121,  # ЧСС плода
             "intrauterine_growth_retardation": "otsutstvuet",  # Задержка в развитии плода ["1-2nedeli", "4_and_more", ">3nedel_", "otsutstvuet"]
             # "ctg_data": {
@@ -64,8 +63,7 @@ test_obs_second_data = {
             "fetus_position": "pervaa",  # Позиция плода ["pervaa", "vtoraa"]
             "fetus_type": "zadnij",  # Вид плода ["perednij", "zadnij"]
             "fetus_presentation": "cistoagodicnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
-            # "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
-            "fetus_heartbeat": "asnoe",  # Сердцебиение плода ["asnoe", "ritmicnoe"]
+            "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 120,  # ЧСС плода
             "intrauterine_growth_retardation": "otsutstvuet",  # Задержка в развитии плода ["1-2nedeli", "4_and_more", ">3nedel_", "otsutstvuet"]
             "ctg_data": {
