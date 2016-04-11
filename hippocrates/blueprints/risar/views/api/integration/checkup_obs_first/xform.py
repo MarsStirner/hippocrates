@@ -390,7 +390,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
 
         person = data.get('person')
         res.update({
-            'hospital': person.organisation.TFOMSCode,
+            'hospital': person.organisation and person.organisation.TFOMSCode or '',
             'doctor': person.regionalCode,
         })
         return res

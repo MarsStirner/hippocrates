@@ -45,16 +45,18 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
     xform.validate(data)
     xform.check_target_obj(card_id, exam_obs_id, data)
     xform.update_target_obj(data)
+    res = xform.as_json()
     db.session.commit()
-    return xform.as_json()
+    return res
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/', methods=['DELETE'])
 @api_method(hook=hook)
 def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
-    data = request.get_json()
+    # data = request.get_json()
     xform = CheckupObsFirstXForm(api_version)
-    xform.validate(data)
-    xform.check_target_obj(card_id, exam_obs_id, data)
+    # xform.validate(data)
+    # xform.check_target_obj(card_id, exam_obs_id, data)
+    xform.check_target_obj(card_id, exam_obs_id)
     xform.delete_target_obj()
     db.session.commit()

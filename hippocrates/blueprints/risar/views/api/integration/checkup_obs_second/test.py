@@ -97,16 +97,16 @@ if __name__ == '__main__':
     print ' > session token: ', session_token
 
     # ========================================================================
-    # event_id = '140'
+    # event_id = '146'
     # result = new_checkup(token, session_token, event_id)
     # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    event_id = '144'
-    checkup_id = '554'
+    event_id = '146'
+    checkup_id = '564'
     result = change_checkup(token, session_token, event_id, checkup_id)
     print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    # event_id = '140'
-    # checkup_id = '646'
+    # event_id = '146'
+    # checkup_id = '653'
     # result = delete_checkup(token, session_token, event_id, checkup_id)
     # print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))

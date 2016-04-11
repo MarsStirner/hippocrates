@@ -31,53 +31,40 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
     parent_obj_class = Event
     target_obj_class = Action
 
-    GENERAL_MAP = {
+    DYNAMIC_MAP = {
         'beg_date': {'attr': 'date', 'default': None, 'rb': None, 'is_vector': False},
-        'height': {'attr': 'height', 'default': None, 'rb': None, 'is_vector': False},
-        'weight': {'attr': 'weight', 'default': None, 'rb': None, 'is_vector': False},
-    }
-
-    SOMATIC_MAP = {
-        'state': {'attr': 'state', 'default': None, 'rb': 'rbRisarState', 'is_vector': False},
-        'subcutaneous_fat': {'attr': 'subcutaneous_fat', 'default': None, 'rb': 'rbRisarSubcutaneous_Fat', 'is_vector': False},
-        'tongue': {'attr': 'tongue', 'default': None, 'rb': 'rbRisarTongue', 'is_vector': True},
-        'complaints': {'attr': 'complaints', 'default': None, 'rb': 'rbRisarComplaints', 'is_vector': True},
-        'skin': {'attr': 'skin', 'default': None, 'rb': 'rbRisarSkin', 'is_vector': True},
-        'lymph': {'attr': 'lymph', 'default': None, 'rb': 'rbRisarLymph', 'is_vector': True},
-        'breast': {'attr': 'breast', 'default': None, 'rb': 'rbRisarBreast', 'is_vector': True},
-        'heart_tones': {'attr': 'heart_tones', 'default': None, 'rb': 'rbRisarHeart_Tones', 'is_vector': True},
-        'pulse': {'attr': 'pulse', 'default': None, 'rb': 'rbRisarPulse', 'is_vector': True},
-        'nipples': {'attr': 'nipples', 'default': None, 'rb': 'rbRisarNipples', 'is_vector': True},
-        'mouth': {'attr': 'mouth', 'default': None, 'rb': 'rbRisarMouth', 'is_vector': False},
-        'breathe': {'attr': 'respiratory', 'default': None, 'rb': 'rbRisarBreathe', 'is_vector': True},
-        'stomach': {'attr': 'abdomen', 'default': None, 'rb': 'rbRisarStomach', 'is_vector': True},
-        'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
-        'urinoexcretory': {'attr': 'urinoexcretory', 'default': None, 'rb': 'rbRisarUrinoexcretory', 'is_vector': True},
         'ad_right_high': {'attr': 'ad_right_high', 'default': None, 'rb': None, 'is_vector': False},
         'ad_left_high': {'attr': 'ad_left_high', 'default': None, 'rb': None, 'is_vector': False},
         'ad_right_low': {'attr': 'ad_right_low', 'default': None, 'rb': None, 'is_vector': False},
         'ad_left_low': {'attr': 'ad_left_low', 'default': None, 'rb': None, 'is_vector': False},
+        'weight': {'attr': 'weight', 'default': None, 'rb': None, 'is_vector': False},
+        'urine': {'attr': 'urina_comment', 'default': None, 'rb': None, 'is_vector': False},
+        'blood': {'attr': 'blood_comment', 'default': None, 'rb': None, 'is_vector': False},
+        'us': {'attr': 'ultrasound_comment', 'default': None, 'rb': None, 'is_vector': False},
+        'other_analysis': {'attr': 'other_analyzes_comment', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    SOMATIC_MAP = {
+        'state': {'attr': 'state', 'default': None, 'rb': 'rbRisarState', 'is_vector': False},
+        'complaints': {'attr': 'complaints', 'default': None, 'rb': 'rbRisarComplaints', 'is_vector': True},
+        'skin': {'attr': 'skin', 'default': None, 'rb': 'rbRisarSkin', 'is_vector': True},
+        'lymph_nodes': {'attr': 'lymph', 'default': None, 'rb': 'rbRisarLymph', 'is_vector': True},
+        'breast': {'attr': 'breast', 'default': None, 'rb': 'rbRisarBreast', 'is_vector': True},
+        'heart_tones': {'attr': 'heart_tones', 'default': None, 'rb': 'rbRisarHeart_Tones', 'is_vector': True},
+        'nipples': {'attr': 'nipples', 'default': None, 'rb': 'rbRisarNipples', 'is_vector': True},
+        'breathe': {'attr': 'respiratory', 'default': None, 'rb': 'rbRisarBreathe', 'is_vector': True},
+        'stomach': {'attr': 'abdomen', 'default': None, 'rb': 'rbRisarStomach', 'is_vector': True},
+        'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
         'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
-        'vein': {'attr': 'veins', 'default': None, 'rb': 'rbRisarVein', 'is_vector': False},
         'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
-        'heart_rate': {'attr': 'heart_rate', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     OBSTETRIC_MAP = {
-        'MikHHor': {'attr': 'horiz_diagonal', 'default': None, 'rb': None, 'is_vector': False},
-        'MikhVert': {'attr': 'vert_diagonal', 'default': None, 'rb': None, 'is_vector': False},
         'abdominal': {'attr': 'abdominal_circumference', 'default': None, 'rb': None, 'is_vector': False},
         'fundal_height': {'attr': 'fundal_height', 'default': None, 'rb': None, 'is_vector': False},
         'metra_state': {'attr': 'uterus_state', 'default': None, 'rb': 'rbRisarMetra_State', 'is_vector': False},
-        'DsSP': {'attr': 'dssp', 'default': None, 'rb': None, 'is_vector': False},
-        'DsCr': {'attr': 'dscr', 'default': None, 'rb': None, 'is_vector': False},
-        'DsTr': {'attr': 'dstr', 'default': None, 'rb': None, 'is_vector': False},
-        'CExt': {'attr': 'cext', 'default': None, 'rb': None, 'is_vector': False},
-        'CDiag': {'attr': 'cdiag', 'default': None, 'rb': None, 'is_vector': False},
-        'CVera': {'attr': 'cvera', 'default': None, 'rb': None, 'is_vector': False},
-        'soloviev_index': {'attr': 'soloviev_index', 'default': None, 'rb': None, 'is_vector': False},
-        'pelvis_narrowness': {'attr': 'pelvis_narrowness', 'default': None, 'rb': 'rbRisarPelvis_Narrowness', 'is_vector': False},
-        'pelvis_form': {'attr': 'pelvis_form', 'default': None, 'rb': 'rbRisarPelvis_Form', 'is_vector': False},
+        'fetus_first_movement_date': {'attr': 'first_fetal_movement', 'default': None, 'rb': None, 'is_vector': False},
+        'fetus_movement': {'attr': 'fetal_movements', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     FETUS_MAP = {
@@ -88,26 +75,15 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         # 'heartbeat': self.arr(self.rb, fetus.get('fetus_heartbeat', []), 'rbRisarFetus_Heartbeat'),
         'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': False},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
+        'delay': {'attr': 'intrauterine_growth_retardation', 'default': None, 'rb': 'rbRisarFetus_Delay', 'is_vector': False},
     }
 
-    VAGINAL_MAP = {
-        'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
-        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': False},
-        'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
-        'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal', 'is_vector': False},
-        'cervix_consistency': {'attr': 'cervix_consistency', 'default': None, 'rb': 'rbRisarCervix_Consistency', 'is_vector': False},
-        'cervix_position': {'attr': 'cervix_position', 'default': None, 'rb': 'rbRisarCervix_Position', 'is_vector': False},
-        'cervix_maturity': {'attr': 'cervix_maturity', 'default': None, 'rb': 'rbRisarCervix_Maturity', 'is_vector': False},
-        'body_of_womb': {'attr': 'body_of_uterus', 'default': [], 'rb': 'rbRisarBody_Of_Womb', 'is_vector': True},
-        'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
-        'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
-        'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
-        # 'parametrium': {'attr': 'parametrium', 'default': [], 'rb': '...', 'is_vector': True},
-        'parametrium': {'attr': 'parametrium', 'default': None, 'rb': '...', 'is_vector': False},
-        'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
-        'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},
-        'onco_smear': {'attr': 'onco_smear', 'default': None, 'rb': None, 'is_vector': False},
-        'urethra_secretion': {'attr': 'urethra_smear', 'default': None, 'rb': None, 'is_vector': False},
+    FETUS_CTG_MAP = {
+        'basal': {'attr': 'fhr', 'default': None, 'rb': 'rbRisarBasal', 'is_vector': False},
+        'variability_range': {'attr': 'fhr_variability_amp', 'default': None, 'rb': 'rbRisarVariabilityRange', 'is_vector': False},
+        'frequency_per_minute': {'attr': 'fhr_variability_freq', 'default': None, 'rb': 'rbRisarFrequencyPerMinute', 'is_vector': False},
+        'acceleration': {'attr': 'fhr_acceleration', 'default': None, 'rb': 'rbRisarAcceleration', 'is_vector': False},
+        'deceleration': {'attr': 'fhr_deceleration', 'default': None, 'rb': 'rbRisarDeceleration', 'is_vector': False},
     }
 
     REPORT_MAP = {
@@ -115,9 +91,12 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         'next_date': {'attr': 'next_visit_date', 'default': None, 'rb': None, 'is_vector': False},
         'pregnancy_continuation': {'attr': 'pregnancy_continuation', 'default': None, 'rb': None, 'is_vector': False},
         'pregnancy_continuation_refusal': {'attr': 'abortion_refusal', 'default': None, 'rb': None, 'is_vector': False},
-        'craft': {'attr': 'working_conditions', 'default': None, 'rb': 'rbRisarCraft', 'is_vector': False},
+        # 'craft': {'attr': 'working_conditions', 'default': None, 'rb': 'rbRisarCraft', 'is_vector': False},
         'recommendations': {'attr': 'recommendations', 'default': None, 'rb': None, 'is_vector': False},
         'notes': {'attr': 'notes', 'default': None, 'rb': None, 'is_vector': False},
+        'fortification': {'attr': 'vitaminization', 'default': None, 'rb': None, 'is_vector': False},
+        'nutrition': {'attr': 'nutrition', 'default': None, 'rb': None, 'is_vector': False},
+        'treatment': {'attr': 'treatment', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     DIAG_KINDS_MAP = {
@@ -143,17 +122,16 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
 
     def mapping_as_form(self, data):
         res = {}
-        self.mapping_general_info(data, res)
+        self.mapping_dynamic_monitoring(data, res)
         self.mapping_somatic_status(data, res)
         self.mapping_obstetric_status(data, res)
         self.mapping_fetus(data, res)
-        self.mapping_vaginal_examination(data, res)
         self.mapping_medical_report(data, res)
         return res
 
-    def mapping_general_info(self, data, res):
-        gi = data.get('general_info', {})
-        self.mapping_part(self.GENERAL_MAP, gi, res)
+    def mapping_dynamic_monitoring(self, data, res):
+        gi = data.get('dynamic_monitoring', {})
+        self.mapping_part(self.DYNAMIC_MAP, gi, res)
 
         person_id = self.get_person_id(gi.get('doctor'), gi.get('hospital'))
         res['person'] = {
@@ -169,30 +147,30 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         self.mapping_part(self.OBSTETRIC_MAP, os, res)
 
     def mapping_fetus(self, data, res):
-        fetus_list = data.get('fetus', [])
-        fetus_q = FetusState.query.filter(FetusState.action_id == self.target_obj_id)
-        fetus_ids = tuple(fetus_q.values(FetusState.id))
+        mis_fetus_list = data.get('fetus', [])
+        db_fetus_q = FetusState.query.filter(FetusState.action_id == self.target_obj_id)
+        db_fetus_ids = tuple(db_fetus_q.values(FetusState.id))
         # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
-        for i in xrange(max(len(fetus_ids), len(fetus_list))):
+        for i in xrange(max(len(db_fetus_ids), len(mis_fetus_list))):
             deleted = 1
-            fs = {}
-            fetus_id = None
-            if i < len(fetus_ids):
-                fetus_id = fetus_ids[i][0]
-            if i < len(fetus_list):
+            mis_fetus = {}
+            db_fetus_id = None
+            if i < len(db_fetus_ids):
+                db_fetus_id = db_fetus_ids[i][0]
+            if i < len(mis_fetus_list):
                 deleted = 0
-                fs = fetus_list[i]
+                mis_fetus = mis_fetus_list[i]
 
-            f_state = {'id': fetus_id}
-            self.mapping_part(self.FETUS_MAP, fs, f_state)
+            f_state = {'id': db_fetus_id}
+            self.mapping_part(self.FETUS_MAP, mis_fetus, f_state)
+            ctg_data = mis_fetus.get('ctg_data', {})
+            f_state['ktg_input'] = bool(ctg_data)
+            self.mapping_part(self.FETUS_CTG_MAP, ctg_data, f_state)
+
             res.setdefault('fetuses', []).append({
                 'deleted': deleted,
                 'state': f_state,
             })
-
-    def mapping_vaginal_examination(self, data, res):
-        ve = data.get('vaginal_examination', {})
-        self.mapping_part(self.VAGINAL_MAP, ve, res)
 
     def mapping_medical_report(self, data, res):
         mr = data.get('medical_report', {})
@@ -377,20 +355,19 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         return {
             "exam_obs_id": self.target_obj.id,
             "external_id": self.external_id,
-            "general_info": self._represent_general_info(data),
+            "dynamic_monitoring": self._represent_dynamic_monitoring(data),
             "somatic_status": self._represent_somatic_status(data),
             "obstetric_status": self._represent_obstetric_status(data),
             "fetus": self._represent_fetus(data),
-            "vaginal_examination": self._represent_vaginal_examination(data),
             "medical_report": self._represent_medical_report(data),
         }
 
-    def _represent_general_info(self, data):
-        res = self._represent_part(self.GENERAL_MAP, data)
+    def _represent_dynamic_monitoring(self, data):
+        res = self._represent_part(self.DYNAMIC_MAP, data)
 
         person = data.get('person')
         res.update({
-            'hospital': person.organisation.TFOMSCode,
+            'hospital': person.organisation and person.organisation.TFOMSCode or '',
             'doctor': person.regionalCode,
         })
         return res
@@ -405,12 +382,13 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         fetus_list = data.get('fetuses', [])
         res = []
         for fs_data in fetus_list:
-            fs = self._represent_part(self.FETUS_MAP, fs_data.get('state'))
+            state = fs_data.get('state')
+            fs = self._represent_part(self.FETUS_MAP, state)
+            if state.get('ktg_input'):
+                r = self._represent_part(self.FETUS_CTG_MAP, state)
+                fs['ctg_data'] = r
             res.append(fs)
         return res
-
-    def _represent_vaginal_examination(self, data):
-        return self._represent_part(self.VAGINAL_MAP, data)
 
     def _represent_medical_report(self, data):
         res = self._represent_part(self.REPORT_MAP, data)
