@@ -166,12 +166,12 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Язык <span class="text-danger">*</span></th>
-                                        <td><div class="row" ng-class="{'has-error': somaticForm.tongue.$invalid && somaticForm.submit_attempt}">
-                                            <div class="col-md-4">
-                                            <rb-select name="tongue" ng-model="checkup.tongue" ref-book="rbRisarTongue"
-                                                       ng-required="true"></rb-select>
+                                        <td><div ng-class="{'text-danger': somaticForm.tongue.$invalid && somaticForm.submit_attempt}">
+                                            <div name="tongue" refbook-checkbox ref-book="rbRisarTongue" ng-model="checkup.tongue" ng-required="true">
+                                                [[ item.name ]]
                                             </div>
-                                        </div></td>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Подкожно-жировая клетчатка <span class="text-danger">*</span></th>

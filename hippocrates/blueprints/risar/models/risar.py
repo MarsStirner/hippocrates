@@ -66,3 +66,14 @@ class RisarPreviousPregnancy_Children(db.Model):
         return {
             'id': self.id,
         }
+
+
+class ActionIdentification(db.Model):
+    __tablename__ = 'ActionIdentification'
+
+    id = db.Column(db.Integer, primary_key=True)
+    action_id = db.Column(db.ForeignKey('Action.id'), index=True)
+    action = db.relationship('Action')
+    external_id = db.Column(db.String(250), index=True)
+    external_system_id = db.Column(db.Integer, db.ForeignKey('rbAccountingSystem.id'), nullable=False)
+    external_system = db.relationship(u'rbAccountingSystem')
