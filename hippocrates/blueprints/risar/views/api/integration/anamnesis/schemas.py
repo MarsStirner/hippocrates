@@ -356,3 +356,129 @@ class AnamnesisFatherSchema(object):
             }
         }
     }]
+
+
+class AnamnesisPrevPregSchema(object):
+    """
+    Схемы для проверки валидности данных анамнеза предыдущих беременностей
+    """
+    schema = [{
+        "$schema": "http://json-schema.org/draft-04/schema",
+        "id": "anamnesis_prev_pregnancy_schema",
+        "title": "anamnesis_prev_pregnancy_schema",
+        "type": "object",
+        "description": "Сведение о предыдущей беременности",
+        "properties": {
+            "pregnancy_year": {
+                "id": "anamnesis_prev_pregnancy_schema/pregnancy_year",
+                "type": "integer",
+                "maxLength": 4,
+                "minLength": 4,
+                "description": "Год беременности"
+            },
+            "pregnancy_result": {
+                "id": "anamnesis_prev_pregnancy_schema/pregnancy_result",
+                "type": "string",
+                "description": "Код значения исхода беременности в анамнезе"
+            },
+            "gestational_age": {
+                "id": "anamnesis_prev_pregnancy_schema/gestational_age",
+                "type": "integer",
+                "description": "Срок беременности"
+            },
+            "preeclampsia": {
+                "id": "anamnesis_prev_pregnancy_schema/preeclampsia",
+                "type": "boolean",
+                "description": "Наличие преэклампсии при беременности в анамнезе"
+            },
+            "after_birth_complications": {
+                "id": "anamnesis_prev_pregnancy_schema/after_birth_complications",
+                "type": "array",
+                "description": "Осложнения после родов или аборта в виде кодов МКБ",
+                "items": {
+                    "type": "string",
+                    "description": "Код осложнения по МКБ-10",
+                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                }
+            },
+            "assistance_and_operations": {
+                "id": "anamnesis_prev_pregnancy_schema/assistance_and_operations",
+                "type": "array",
+                "description": "Коды значений пособий и операций",
+                "items": {
+                    "type": "string",
+                    "description": "Код значения пособия/операции"
+                }
+            },
+            "pregnancy_pathologies": {
+                "id": "anamnesis_prev_pregnancy_schema/pregnancy_pathologies",
+                "type": "array",
+                "description": "Патологии беременности в виде кодов МКБ",
+                "items": {
+                    "type": "string",
+                    "description": "Код патологии по МКБ-10",
+                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                }
+            },
+            "birth_pathologies": {
+                "id": "anamnesis_prev_pregnancy_schema/birth_pathologies",
+                "type": "array",
+                "description": "Патологии родов/аборта в виде кодов МКБ",
+                "items": {
+                    "type": "string",
+                    "description": "Код патологии по МКБ-10",
+                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                }
+            },
+            "features": {
+                "id": "anamnesis_prev_pregnancy_schema/features",
+                "type": "string",
+                "description": "Особенности беременности"
+            },
+            "child_information": {
+                "id": "anamnesis_prev_pregnancy_schema/child_information",
+                "type": "array",
+                "description": "Список детей и информации о них",
+                "items": {
+                    "type": "object",
+                    "description": "Сведение о ребенке",
+                    "properties": {
+                        "is_alive": {
+                            "id": "anamnesis_prev_pregnancy_schema/child_information/is_alive",
+                            "type": "boolean",
+                            "description": "Живой или нет"
+                        },
+                        "weight": {
+                            "id": "anamnesis_prev_pregnancy_schema/child_information/weight",
+                            "type": "number",
+                            "description": "Вес при рождении в граммах"
+                        },
+                        "death_cause": {
+                            "id": "anamnesis_prev_pregnancy_schema/child_information/death_cause",
+                            "type": "string",
+                            "description": "Причина смерти"
+                        },
+                        "death_at": {
+                            "id": "anamnesis_prev_pregnancy_schema/child_information/death_at",
+                            "type": "string",
+                            "description": "Код значения срока смерти. Является обязательным при передаче,если значение isAlive = false"
+                        },
+                        "abnormal_development": {
+                            "id": "anamnesis_prev_pregnancy_schema/child_information/abnormal_development",
+                            "type": "boolean",
+                            "description": "Наличие аномалий развития"
+                        },
+                        "neurological_disorders": {
+                            "id": "anamnesis_prev_pregnancy_schema/child_information/neurological_disorders",
+                            "type": "boolean",
+                            "description": "Наличие неврологических нарушений"
+                        }
+                    }
+                }
+            }
+        },
+        "required": [
+            "pregnancy_year",
+            "pregnancy_result"
+        ]
+    }]

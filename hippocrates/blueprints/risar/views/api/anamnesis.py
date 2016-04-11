@@ -7,8 +7,9 @@ from flask import request
 from flask.ext.login import current_user
 
 from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_previous_children
-from blueprints.risar.models.risar import RisarRiskGroup, RisarPreviousPregnancy_Children
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
+from blueprints.risar.models.risar import RisarRiskGroup
+from blueprints.risar.lib.prev_children import create_or_update_prev_children
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, create_action_property
 from nemesis.lib.utils import safe_traverse, safe_date, safe_time, safe_int, safe_bool, safe_double
@@ -101,32 +102,17 @@ def api_0_pregnancies_post(action_id=None):
             if code in prop_types:
                 action.propsByCode[code] = create_action_property(action, prop_types[code])
             else:
-                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, action_id, risar_anamnesis_pregnancy)
+                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"',
+                            code, action_id, risar_anamnesis_pregnancy)
                 continue
         action.propsByCode[code].value = json.get(code)
 
     # prev pregnancy children
-    existing_prev_children = get_previous_children(action_id)
-    children_data = []
-    for new_data, exist_child in itertools.izip_longest(newborn_inspections, existing_prev_children):
-        if not new_data:
-            db.session.delete(exist_child)
-            continue
-        if not exist_child:
-            exist_child = RisarPreviousPregnancy_Children()
-
-        exist_child.action_id = action_id
-        exist_child.action = action
-        exist_child.weight = safe_double(new_data.get('weight'))
-        exist_child.alive = safe_int(safe_bool(new_data.get('alive')))
-        exist_child.death_reason = new_data.get('death_reason')
-        exist_child.died_at = new_data.get('died_at')
-        exist_child.abnormal_development = safe_int(safe_bool(new_data.get('abnormal_development')))
-        exist_child.neurological_disorders = safe_int(safe_bool(new_data.get('neurological_disorders')))
-        children_data.append(exist_child)
-
+    new_children, deleted_children = create_or_update_prev_children(action, newborn_inspections)
+    for dc in deleted_children:
+        db.session.delete(dc)
     db.session.add(action)
-    db.session.add_all(children_data)
+    db.session.add_all(new_children)
     db.session.commit()
 
     card.reevaluate_card_attrs()

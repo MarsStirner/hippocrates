@@ -11,8 +11,8 @@ from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list,
-    get_previous_children)
+from blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list)
+from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.models.fetus import FetusState
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
@@ -20,7 +20,7 @@ from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_p
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
-from nemesis.lib.utils import safe_traverse_attrs, safe_date
+from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
@@ -312,11 +312,11 @@ def represent_anamnesis_newborn_inspections(prev_children):
         result.append({
             'id': child.id,
             'weight': child.weight,
-            'alive': child.alive,
+            'alive': safe_bool(child.alive),
             'death_reason': child.death_reason,
             'died_at': child.died_at,
-            'abnormal_development': child.abnormal_development,
-            'neurological_disorders': child.neurological_disorders,
+            'abnormal_development': safe_bool(child.abnormal_development),
+            'neurological_disorders': safe_bool(child.neurological_disorders),
         })
     return result
 

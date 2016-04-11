@@ -3,11 +3,12 @@
 import logging
 
 from ..xform import XForm, wrap_simplify, none_default
-from .schemas import AnamnesisMotherSchema, AnamnesisFatherSchema
+from .schemas import AnamnesisMotherSchema, AnamnesisFatherSchema, AnamnesisPrevPregSchema
 from ..utils import get_action_query
 
-from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis
+from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, risar_anamnesis_pregnancy
 from blueprints.risar.lib.utils import get_action_by_id
+from blueprints.risar.lib.prev_children import create_or_update_prev_children, get_previous_children
 
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import ApiException
@@ -317,3 +318,120 @@ class AnamnesisFatherXForm(XForm, AnamnesisFatherSchema):
             'infertility_treatment': map(from_rb, an_props['infertility_treatment'].value),
             'infertility_causes': map(from_rb, an_props['infertility_cause'].value)
         }
+
+
+class AnamnesisPrevPregXForm(XForm, AnamnesisPrevPregSchema):
+    """
+    Класс-преобразователь для документа анамнеза отца
+    """
+
+    def __init__(self):
+        self.anamnesis = None
+        self.pcard = None
+        self.new = False
+        self.changed = []
+        self.deleted = []
+
+    def find_anamnesis(self, card_id, anamnesis_id=None, data=None):
+        pcard = self.find_pcard(card_id)
+        self.pcard = pcard
+
+        if anamnesis_id is None:
+            # Ручная валидация
+            if data is None:
+                raise Exception('CardXForm.find_anamnesis called for creation without "data"')
+
+            self.new = True
+        else:
+            anamnesis = get_action_query(anamnesis_id).first()
+            if not anamnesis:
+                raise ApiException(404, u'Анамнез с id = {0} не найден'.format(anamnesis_id))
+            self.anamnesis = anamnesis
+
+    def convert_and_format(self, data):
+        res = {}
+        res.update({
+            'year': safe_int(data.get('pregnancy_year')),
+            'pregnancyResult': to_rb(data.get('pregnancy_result')),
+            'pregnancy_week': safe_int(data.get('gestational_age')),
+            'preeclampsia': safe_bool(data.get('preeclampsia')),
+            'after_birth_complications': map(to_mkb_rb, data.get('after_birth_complications', [])),
+            'maternity_aid': map(to_rb, data.get('assistance_and_operations', [])),
+            'pregnancy_pathology': map(to_mkb_rb, data.get('pregnancy_pathologies', [])),
+            'delivery_pathology': map(to_mkb_rb, data.get('birth_pathologies', [])),
+            'note': data.get('features'),
+        })
+        newborn_inspections = []
+        for child_data in data.get('child_information', []):
+            newborn_inspections.append({
+                'alive': safe_bool(child_data.get('is_alive')),
+                'weight': safe_int(child_data.get('weight')),
+                'death_reason': child_data.get('death_cause'),
+                'died_at': to_rb(child_data.get('death_at')),
+                'abnormal_development': safe_bool(child_data.get('abnormal_development')),
+                'neurological_disorders': safe_bool(child_data.get('neurological_disorders'))
+            })
+        res.update(newborn_inspections=newborn_inspections)
+        return res
+
+    def update_anamnesis(self, data):
+        data = self.convert_and_format(data)
+        anamnesis = self.anamnesis = get_action_by_id(
+            self.anamnesis and self.anamnesis.id, self.pcard.event, risar_anamnesis_pregnancy, True
+        )
+
+        for code, value in data.iteritems():
+            if code in anamnesis.propsByCode:
+                try:
+                    prop = anamnesis.propsByCode[code]
+                    self.check_prop_value(prop, value)
+                    prop.value = value
+                except Exception, e:
+                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
+                        prop.type.name, prop.type.id), exc_info=True)
+                    raise e
+
+        newborn_inspections = data.get('newborn_inspections', [])
+        new_children, deleted_children = create_or_update_prev_children(anamnesis, newborn_inspections)
+
+        self.changed.extend(new_children)
+        self.changed.append(anamnesis)
+        self.deleted.extend(deleted_children)
+
+    def update_card_attrs(self):
+        self.pcard.reevaluate_card_attrs()
+
+    def delete_anamnesis(self):
+        self.anamnesis.deleted = 1
+
+    @wrap_simplify
+    def as_json(self):
+        an_props = self.anamnesis.propsByCode
+        return {
+            'prevpregnancy_id': str(self.anamnesis.id),
+            'pregnancy_result': from_rb(an_props['pregnancyResult'].value),
+            'gestational_age': an_props['pregnancy_week'].value,
+            'preeclampsia': an_props['preeclampsia'].value,
+            'after_birth_complications': map(from_mkb_rb, an_props['after_birth_complications'].value),
+            'assistance_and_operations': map(from_rb, an_props['maternity_aid'].value),
+            'pregnancy_pathologies': map(from_mkb_rb, an_props['pregnancy_pathology'].value),
+            'birth_pathologies': map(from_mkb_rb, an_props['delivery_pathology'].value),
+            'features': an_props['note'].value,
+            'child_information': self._represent_children(),
+        }
+
+    @none_default
+    def _represent_children(self):
+        # TODO: ?
+        prev_children = get_previous_children(self.anamnesis.id)
+        return [
+            {
+                'is_alive': child.alive,
+                'weight': child.weight,
+                'death_cause': child.death_reason,
+                'death_at': child.died_at,
+                'abnormal_development': child.abnormal_development,
+                'neurological_disorders': child.neurological_disorders,
+            }
+            for child in prev_children
+        ]

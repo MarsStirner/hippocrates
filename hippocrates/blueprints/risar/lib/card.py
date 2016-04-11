@@ -6,7 +6,8 @@ import datetime
 import functools
 import sqlalchemy
 
-from blueprints.risar.lib.utils import get_action, get_action_list, get_previous_children
+from blueprints.risar.lib.utils import get_action, get_action_list
+from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy
 from nemesis.lib.data import create_action

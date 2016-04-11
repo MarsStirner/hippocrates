@@ -3,7 +3,7 @@
 import requests
 
 from test_data import test_client_data, test_event_data, test_event_data2, test_anamnesis_data, test_anamnesis_data2, \
-    test_anamnesis_f_data
+    test_anamnesis_f_data, test_prev_preg_data, test_prev_preg_data2
 
 
 coldstar_url = 'http://127.0.0.1:6098'
@@ -168,6 +168,30 @@ def delete_father_anamnesis(token, session_token, event_id, anamnesis_id):
     return j
 
 
+def create_prev_pregnancy(token, session_token, event_id, data):
+    url = u'%s/risar/api/integration/0/card/%s/anamnesis/prevpregnancy/' % (mis_url, event_id)
+    result = make_request('post', url, token, session_token, data)
+    print result
+    j = result.json()
+    return j
+
+
+def edit_prev_pregnancy(token, session_token, event_id, anamnesis_id, data):
+    url = u'%s/risar/api/integration/0/card/%s/anamnesis/prevpregnancy/%s' % (mis_url, event_id, anamnesis_id)
+    result = make_request('put', url, token, session_token, data)
+    print result
+    j = result.json()
+    return j
+
+
+def delete_prev_pregnancy(token, session_token, event_id, anamnesis_id):
+    url = u'%s/risar/api/integration/0/card/%s/anamnesis/prevpregnancy/%s' % (mis_url, event_id, anamnesis_id)
+    result = make_request('delete', url, token, session_token)
+    print result
+    j = result.json()
+    return j
+
+
 if __name__ == '__main__':
     token = get_token(login, password)
     print ' > auth token: ', token
@@ -211,12 +235,26 @@ if __name__ == '__main__':
     # result = create_father_anamnesis(token, session_token, event_id, test_anamnesis_f_data)
     # print u'new father anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    event_id = '157'
-    anamnesis_id = '634'
-    result = edit_father_anamnesis(token, session_token, event_id, anamnesis_id, test_anamnesis_f_data)
-    print u'edited father anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))
+    # event_id = '157'
+    # anamnesis_id = '634'
+    # result = edit_father_anamnesis(token, session_token, event_id, anamnesis_id, test_anamnesis_f_data)
+    # print u'edited father anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))
 
     # event_id = '157'
     # anamnesis_id = '635'
     # result = delete_father_anamnesis(token, session_token, event_id, anamnesis_id)
     # print u'deleted father anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))
+
+    # event_id = '157'
+    # result = create_prev_pregnancy(token, session_token, event_id, test_prev_preg_data)
+    # print u'new prev preg anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))
+
+    # event_id = '157'
+    # anamnesis_id = '645'
+    # result = edit_prev_pregnancy(token, session_token, event_id, anamnesis_id, test_prev_preg_data2)
+    # print u'edited prev preg anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))
+
+    event_id = '157'
+    anamnesis_id = '645'
+    result = delete_prev_pregnancy(token, session_token, event_id, anamnesis_id)
+    print u'deleted prev preg anamnesis data: {0}'.format(repr(result).decode("unicode-escape"))

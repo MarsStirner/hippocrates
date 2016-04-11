@@ -302,13 +302,3 @@ def format_action_data(json_data):
         'properties': json_data['properties']
     }
     return data
-
-
-def get_previous_children(action_id):
-    if not action_id:
-        return []
-    return db.session.query(RisarPreviousPregnancy_Children).filter(
-        RisarPreviousPregnancy_Children.action_id == action_id
-    ).order_by(
-        RisarPreviousPregnancy_Children.id
-    ).all()

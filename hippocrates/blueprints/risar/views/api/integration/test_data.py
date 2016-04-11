@@ -100,3 +100,63 @@ test_anamnesis_f_data = {
     "finished_diseases": u"Анемия",
     "current_diseases": u"Отсутствуют"
 }
+
+
+test_prev_preg_data = {
+    "pregnancy_year": 1990,
+    "pregnancy_result": "premature_birth_28-37",
+    "gestational_age": 36,
+    "preeclampsia": False,
+    "after_birth_complications": ["O86.1", "O86.4"],
+    "assistance_and_operations": ["03"],
+    "pregnancy_pathologies": ["O32.3"],
+    "birth_pathologies": ["O64.3", "O67.8"],
+    "child_information": [
+        {
+            "is_alive": True,
+            "weight": 3250,
+            "abnormal_development": True,
+            "neurological_disorders": False
+        }
+    ]
+}
+
+
+test_prev_preg_data2 = {
+    "pregnancy_year": 1990,
+    "pregnancy_result": "premature_birth_28-37",
+    "gestational_age": 35,
+    "preeclampsia": False,
+    "after_birth_complications": ["O86.1", "O86.3"],
+    "assistance_and_operations": ["03"],
+    "pregnancy_pathologies": ["O32.3"],
+    "birth_pathologies": ["O64.3", "O67.8"],
+    "child_information": [
+        {
+            "is_alive": True,
+            "weight": 3250,
+            "abnormal_development": True,
+            "neurological_disorders": False
+        },
+        # {
+        #     "is_alive": True,
+        #     "weight": 3520,
+        #     "abnormal_development": False,
+        #     "neurological_disorders": False
+        # },
+        {
+            "is_alive": True,
+            "weight": 3777,
+            "abnormal_development": True,
+            "neurological_disorders": True
+        },
+        # {
+        #     "is_alive": False,
+        #     "weight": 3778,
+        #     "abnormal_development": True,
+        #     "neurological_disorders": True,
+        #     "death_at": "01",
+        #     "death_cause": u'н'
+        # }
+    ]
+}
