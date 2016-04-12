@@ -7,6 +7,7 @@ from blueprints.risar.lib.utils import get_action_list
 from blueprints.risar.risar_config import first_inspection_code
 from nemesis.models.actions import Action
 from nemesis.models.client import BloodHistory
+from nemesis.models.diagnosis import rbDiagnosisKind
 
 __author__ = 'viruzzz-kun'
 
@@ -423,9 +424,12 @@ def calc_risk_groups(card):
 
     from blueprints.risar.lib.utils import multiple_birth, collagenoses, hypertensia, kidney_diseases, vascular_diseases, diabetes, antiphospholipid_syndrome
 
-    diseases = multiple_birth + hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + antiphospholipid_syndrome
+    diseases = hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + antiphospholipid_syndrome
     checkups = card.checkups
     prev_pregnancies = card.prev_pregs
+    main_kind = rbDiagnosisKind.query.filter(rbDiagnosisKind.code == 'main').first()
+    kind_ids = (main_kind.id,)
+    event_main_diags = card.get_event_diagnostics(card.event.setDate, card.event.execDate, kind_ids)
 
     p1_a = any_thing(
         all_diagnostics,
@@ -437,7 +441,12 @@ def calc_risk_groups(card):
         diseases,
         lambda x: x.DiagID,
     )
-    p1 = p1_a or p1_b
+    p1_c = any_thing(
+        event_main_diags,
+        multiple_birth,
+        lambda x: x.MKB,
+    )
+    p1 = p1_a or p1_b or p1_c
 
     p2 = not prev_pregnancies
     p3 = card.event.client.age_tuple()[-1] > 35

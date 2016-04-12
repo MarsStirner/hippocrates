@@ -11,8 +11,9 @@ from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_a
     risar_anamnesis_pregnancy
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
-from nemesis.models.diagnosis import Diagnosis
+from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
 from nemesis.models.diagnosis import Diagnostic
+from nemesis.models.event import Event
 from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
@@ -159,6 +160,53 @@ class PregnancyCard(object):
             Diagnosis.deleted == 0,
             Diagnostic.deleted == 0,
         )
+        if end_date is not None:
+            query = query.filter(
+                Diagnostic.createDatetime <= end_date,
+                Diagnosis.setDate <= end_date,
+            )
+        if not including_closed:
+            query = query.filter(
+                db.or_(
+                    Diagnosis.endDate.is_(None),
+                    Diagnosis.endDate >= beg_date,
+                )
+            )
+        query = query.group_by(
+            Diagnostic.diagnosis_id
+        )
+        query = query.with_entities(sqlalchemy.func.max(Diagnostic.id).label('zid')).subquery()
+        query = db.session.query(Diagnostic).join(query, query.c.zid == Diagnostic.id)
+        return query.all()
+
+    @cache.cached_call
+    def get_event_diagnostics(self, beg_date, end_date=None, kind_ids=None, including_closed=False):
+        """
+        :type beg_date: datetime.date
+        :type end_date: datetime.date | NoneType
+        :type including_closed: bool
+        :param beg_date:
+        :param end_date:
+        :param kinds:
+        :param including_closed:
+        :return:
+        """
+        query = db.session.query(Diagnostic).join(
+            Diagnosis
+        ).join(
+            Event, Event.client_id == Diagnosis.client_id,
+        ).filter(
+            Event.id == self.event.id,
+            Event.execDate.is_(None),
+            Event.deleted == 0,
+            Diagnosis.deleted == 0,
+            Diagnostic.deleted == 0,
+        )
+        if kind_ids:
+            query = query.join(Action_Diagnosis).join(Action).filter(
+                Action.event_id == Event.id,
+                Action_Diagnosis.diagnosisKind_id.in_(kind_ids),
+            )
         if end_date is not None:
             query = query.filter(
                 Diagnostic.createDatetime <= end_date,
