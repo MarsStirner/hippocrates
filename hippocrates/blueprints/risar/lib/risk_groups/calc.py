@@ -278,7 +278,7 @@ def calc_risk_groups(card):
                 if preg['pregnancy_week'].value is None
                 else preg['pregnancy_week'].value >= 37
             ) and
-            any(child['weight'].value < 2500 for child in preg['newborn_inspections'].value)
+            any(child['weight'].value and child['weight'].value < 2500 for child in preg['newborn_inspections'].value)
         )
         for preg in card.prev_pregs
     )
