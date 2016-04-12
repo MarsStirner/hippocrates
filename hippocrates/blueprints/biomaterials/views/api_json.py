@@ -11,7 +11,7 @@ from ..app import module
 from ..lib.utils import TTJVisualizer
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_date
-from nemesis.models.actions import TakenTissueJournal
+from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournalAssoc
 from nemesis.models.enums import TTJStatus
 from nemesis.systemwide import db
 
@@ -71,6 +71,7 @@ def api_get_ttj_records():
 @module.route('/api/ttj_change_status.json', methods=['POST'])
 @api_method
 def api_ttj_change_status():
+    result = None
     data = request.json
     status = data.get('status')
     ids = data.get('ids')
@@ -79,24 +80,28 @@ def api_ttj_change_status():
     if not ids:
         raise ApiException(400, u'Invalid request. `ids` must be non-empty list')
     core_integration_address = Settings.getString('appPrefs.CoreWS.LIS-1022')
-    if status['code'] == 'sending_to_lab' and core_integration_address:
+    if status['code'] == 'finished' and core_integration_address:
         auth_token_cookie = app.config.get('CASTIEL_AUTH_TOKEN')
         sess = requests.session()
         sess.cookies[auth_token_cookie] = request.cookies[auth_token_cookie]
+        aids = set(
+            assoc.action_id
+            for assoc in Action_TakenTissueJournalAssoc.query.filter(
+               Action_TakenTissueJournalAssoc.takenTissueJournal_id.in_(ids)
+            )
+        )
         try:
             result = sess.put(
                 core_integration_address,
-                json={'ids': ids}
+                json={'ids': list(aids)}
             )
         except requests.ConnectionError:
             raise ApiException(500, u'Cannot connect to core')
-        else:
-            return result.json()
-    else:
-        TakenTissueJournal.query.filter(
-            TakenTissueJournal.id.in_(ids)
-        ).update(
-            {'statusCode': status['id']},
-            synchronize_session=False
-        )
-        db.session.commit()
+    TakenTissueJournal.query.filter(
+        TakenTissueJournal.id.in_(ids)
+    ).update(
+        {TakenTissueJournal.statusCode: status['id']},
+        synchronize_session=False
+    )
+    db.session.commit()
+    return result

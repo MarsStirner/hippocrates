@@ -48,10 +48,10 @@
                         ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">
                     Выполняется <span title="" class="badge bg-white">[[ number_by_status.in_progress ]]</span>
                 </button>
-                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 3"
-                        ng-class="{'btn-info': filter.status != 3, 'btn-primary': filter.status == 3}">
-                    Отправка в лаб. <span title="" class="badge bg-white">[[ number_by_status.sending_to_lab ]]</span>
-                </button>
+{#                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 3"#}
+{#                        ng-class="{'btn-info': filter.status != 3, 'btn-primary': filter.status == 3}">#}
+{#                    Отправка в лаб. <span title="" class="badge bg-white">[[ number_by_status.sending_to_lab ]]</span>#}
+{#                </button>#}
                 <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 2"
                         ng-class="{'btn-info': filter.status != 2, 'btn-primary': filter.status == 2}">
                     Закончено <span title="" class="badge bg-white">[[ number_by_status.finished ]]</span>
@@ -66,7 +66,7 @@
                         ng-disabled="!selected_records.length" ng-if="filter.status == 0">
                     Выполнить
                 </button>
-                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('sending_to_lab')"
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('finished')"
                         ng-disabled="!selected_records.length" ng-if="filter.status == 1">
                     Отправить в лабораторию
                 </button>
