@@ -62,11 +62,11 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Забор материалов</h3>
             <div class="box-tools pull-right">
-                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('in_progress')"
+                <button type="button" class="btn btn-primary" ng-click="change_status('in_progress')"
                         ng-disabled="!selected_records.length" ng-if="filter.status == 0">
                     Выполнить
                 </button>
-                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('finished')"
+                <button type="button" class="btn btn-primary" ng-click="change_status('finished')"
                         ng-disabled="!selected_records.length" ng-if="filter.status == 1">
                     Отправить в лабораторию
                 </button>
