@@ -189,7 +189,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             }).join(', '))
         }
         if (p.preeclampsia) {
-            result.push('Преэклампсия');
+            result.push('Была преэклампсия во время беременности');
         }
         if (p.after_birth_complications && p.after_birth_complications.length) {
             result.push('Осложнения после родов/абортов: ' + _.map(p.after_birth_complications, function (pat) {

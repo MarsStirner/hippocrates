@@ -370,7 +370,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.id == self.target_obj_id,
-            Action.deleted == 0
+            self.target_obj_class.deleted == 0,
         ).update({'deleted': 1})
 
     def delete_fetuses(self):
