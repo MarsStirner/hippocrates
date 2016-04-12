@@ -11,9 +11,9 @@ from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from blueprints.risar.models.fetus import RisarFetusState
-from blueprints.risar.risar_config import first_inspection_code
-from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
-    CheckupObsFirstSchema
+from blueprints.risar.risar_config import pc_inspection_code
+from blueprints.risar.views.api.integration.checkup_pc.schemas import \
+    CheckupPCSchema
 from blueprints.risar.views.api.integration.xform import CheckupsXForm
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
@@ -24,7 +24,7 @@ from nemesis.models.exists import MKB
 from nemesis.systemwide import db
 
 
-class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
+class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
     """
     Класс-преобразователь
     """
@@ -126,14 +126,14 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
     }
 
     def __init__(self, *a, **kw):
-        super(CheckupObsFirstXForm, self).__init__(*a, **kw)
+        super(CheckupPCXForm, self).__init__(*a, **kw)
         self.card = None
 
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
-            ActionType.flatCode == first_inspection_code,
+            ActionType.flatCode == pc_inspection_code,
         )
         if self.target_obj_id:
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
@@ -314,7 +314,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
 
         event_id = self.parent_obj_id
         checkup_id = self.target_obj_id
-        flat_code = first_inspection_code
+        flat_code = pc_inspection_code
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         get_diagnoses_func = data.pop('get_diagnoses_func')
@@ -382,7 +382,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
     def as_json(self):
         data = represent_checkup(self.target_obj, False)
         return {
-            "exam_obs_id": self.target_obj.id,
+            "exam_pc_id": self.target_obj.id,
             "external_id": self.external_id,
             "general_info": self._represent_general_info(data),
             "somatic_status": self._represent_somatic_status(data),

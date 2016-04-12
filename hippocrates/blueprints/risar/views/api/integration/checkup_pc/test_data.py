@@ -7,11 +7,11 @@
 
 """
 
-test_obs_first_data = {
+test_pc_data = {
     "external_id": "12345",
-    # "exam_obs_id": "",
+    # "exam_pc_id": "",
     "general_info": {
-        "date": "2016-03-31",  # *
+        "date": "2016-04-05",  # *
         "hospital": "-1",  # *
         "doctor": "22",  # *
         "height": 120,  # *
