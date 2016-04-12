@@ -59,4 +59,5 @@ def api_checkup_puerpera_delete(api_version, card_id, exam_puerpera_id):
     # xform.check_target_obj(card_id, exam_puerpera_id, data)
     xform.check_target_obj(card_id, exam_puerpera_id)
     xform.delete_target_obj()
+    xform.reevaluate_data()
     db.session.commit()

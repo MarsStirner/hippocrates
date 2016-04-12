@@ -60,4 +60,5 @@ def api_checkup_obs_second_delete(api_version, card_id, exam_obs_id):
     # xform.check_target_obj(card_id, exam_obs_id, data)
     xform.check_target_obj(card_id, exam_obs_id)
     xform.delete_target_obj()
+    xform.reevaluate_data()
     db.session.commit()
