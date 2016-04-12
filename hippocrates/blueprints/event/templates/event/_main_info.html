@@ -59,6 +59,7 @@
                                 ng-disabled="widget_disabled('contract') || services_added()">
                             </ui-select>
                             <span class="text-warning" ng-show="isContractListEmptyLabelVisible()">Не найдено подходящего договора</span>
+                            <span class="text-warning" ng-show="isContractDraftLabelVisible()">Договор не заключен</span>
                         </div>
                         <div class="col-md-1">
                             <div class="btn-group">

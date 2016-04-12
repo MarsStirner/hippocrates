@@ -4,6 +4,7 @@ import datetime
 import logging
 
 from flask.ext.login import current_user
+from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from sqlalchemy import func
 
 from nemesis.lib.data import create_new_action, update_action, ActionException, create_action
@@ -46,6 +47,12 @@ class EventSaveController():
         return event
 
     def update_base_info(self, event, event_data):
+        """
+        @type event: nemesis.models.event.Event
+        @param event:
+        @param event_data:
+        @return:
+        """
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
         event.setDate = safe_datetime(event_data['set_date'])
@@ -57,7 +64,14 @@ class EventSaveController():
         contract_id = event_data['contract']['id']
         event.contract_id = contract_id
         if not event.id:
-            self.update_contract(contract_id, event.client_id)
+            if not contract_id:
+                contract_controller = ContractController()
+                contract = contract_controller.get_new_contract()
+                contract = contract_controller.update_contract(contract, event_data['contract'])
+                contract_controller.session.add(contract)
+                event.contract = contract
+            else:
+                self.update_contract(contract_id, event.client_id)
         event.note = event_data['note']
         event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
         event.result_id = safe_traverse(event_data, 'result', 'id')

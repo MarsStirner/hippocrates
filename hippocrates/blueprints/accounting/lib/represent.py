@@ -17,6 +17,11 @@ class ContractRepr(object):
         self.pricelist_repr = PriceListRepr()
 
     def represent_contract_full(self, contract):
+        """
+        @type contract: nemesis.models.accounting.Contract
+        @param contract:
+        @return:
+        """
         if not contract:
             return None
         data = self.represent_contract(contract)
@@ -42,6 +47,11 @@ class ContractRepr(object):
         return data
 
     def represent_contract(self, contract):
+        """
+        @type contract: nemesis.models.accounting.Contract
+        @param contract:
+        @return:
+        """
         return {
             'id': contract.id,
             'number': contract.number,
@@ -56,6 +66,11 @@ class ContractRepr(object):
         }
 
     def represent_contract_with_description(self, contract):
+        """
+        @type contract: nemesis.models.accounting.Contract
+        @param contract:
+        @return:
+        """
         if not contract:
             return None
         data = self.represent_contract(contract)
@@ -68,6 +83,11 @@ class ContractRepr(object):
         return data
 
     def represent_contract_for_invoice(self, contract):
+        """
+        @type contract: nemesis.models.accounting.Contract
+        @param contract:
+        @return:
+        """
         data = self.represent_contract(contract)
         data.update({
             'description': {
@@ -79,16 +99,30 @@ class ContractRepr(object):
         return data
 
     def make_full_description(self, contract):
-        return u'''\
-№{0} от {1}. {2}. с {3} по {4}'''.format(
+        """
+        @type contract: nemesis.models.accounting.Contract
+        @param contract:
+        @return:
+        """
+        return u'''№{0} от {1}. {2}. с {3} по {4}'''.format(
             contract.number, format_date(contract.date), contract.resolution or '', format_date(contract.begDate),
             format_date(contract.endDate)
         )
 
     def make_short_description(self, contract):
+        """
+        @type contract: nemesis.models.accounting.Contract
+        @param contract:
+        @return:
+        """
         return u'№{0} от {1}. {2}'.format(contract.number, format_date(contract.date), contract.resolution or '')
 
     def represent_paginated_contracts(self, paginated_data):
+        """
+        @type paginated_data: nemesis.lib.pagination.Pagination
+        @param paginated_data:
+        @return:
+        """
         return {
             'count': paginated_data.total,
             'total_pages': paginated_data.pages,

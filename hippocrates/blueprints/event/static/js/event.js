@@ -23,6 +23,9 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     $scope.available_contracts = {
         list: []
     };
+    $scope.available_pricelists = {
+        list: []
+    };
     var event_created = !$scope.event.is_new(),
         main_user = CurrentUser.get_main_user();
 
@@ -66,8 +69,14 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     $scope.isContractListEmpty = function () {
         return $scope.available_contracts.list.length === 0;
     };
+    $scope.isContractDraft = function () {
+        return !!safe_traverse($scope, ['event', 'info', 'contract', 'draft']);
+    };
     $scope.isContractListEmptyLabelVisible = function () {
         return $scope.create_mode && $scope.isContractListEmpty();
+    };
+    $scope.isContractDraftLabelVisible = function () {
+        return $scope.create_mode && $scope.isContractDraft();
     };
 
     $scope.createContract = function () {
@@ -176,6 +185,9 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     };
 
+    function contract_list_has_draft(list) {
+        return _.filter(list, function (item) { return item && !!item.draft }).length > 0;
+    }
     function clearErrors() {
         for (var key in $scope.formErrors){
             if ($scope.formErrors.hasOwnProperty(key)){
@@ -200,6 +212,19 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         return AccountingService.get_available_contracts(client_id, finance_id, set_date)
             .then(function (contract_list) {
                 $scope.available_contracts.list = contract_list;
+                if (!contract_list_has_draft(contract_list)) {
+                    AccountingService.get_contract(undefined, {
+                        finance_id: finance_id,
+                        client_id: client_id,
+                        payer_client_id: client_id,
+                        draft: 1
+                    }).then(function (result) {
+                        contract_list.push(result);
+                        if (!safe_traverse($scope, ['event', 'info', 'contract'])) {
+                            $scope.event.info.contract = result;
+                        }
+                    })
+                }
             });
     }
     function refreshAvailableOmsPolicy() {
