@@ -56,12 +56,7 @@ class RisarFetusState(db.Model):
         q = RisarFetusState_heartbeats.query.filter(
             RisarFetusState_heartbeats.fetus_state == self,
         )
-        res = map(lambda x: x.heartbeat, list(q))
-        # todo: почему Веста присылает _id для rbRisarFetus_Heartbeat?
-        def func1(x):
-            x['id'] = x.pop('_id')
-        map(func1, res)
-        return res
+        return map(lambda x: x.heartbeat, list(q))
 
     @heartbeat.setter
     def heartbeat(self, values):
