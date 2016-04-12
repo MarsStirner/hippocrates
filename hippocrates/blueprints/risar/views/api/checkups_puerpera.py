@@ -31,6 +31,7 @@ def api_0_checkup_puerpera(event_id):
 
     if not checkup_id:
         close_open_checkups_puerpera(event_id)
+    db.session.add(action)
 
     action.begDate = beg_date
 
