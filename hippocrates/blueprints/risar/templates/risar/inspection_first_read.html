@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Язык:</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.tongue.name]]</div>
+                                    <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.tongue" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Подкожно-жировая клетчатка:</div>

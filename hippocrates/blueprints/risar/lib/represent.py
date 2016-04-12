@@ -13,7 +13,7 @@ from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_list
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
-from blueprints.risar.models.fetus import FetusState
+from blueprints.risar.models.fetus import RisarFetusState
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
@@ -789,10 +789,10 @@ def represent_event_cfrs(card_attrs_action):
 
 def represent_action_fetuses(action):
     res = []
-    fetus_states = FetusState.query.filter(
-        FetusState.action_id == action.id,
-        FetusState.deleted == 0,
-    ).order_by(FetusState.id)
+    fetus_states = RisarFetusState.query.filter(
+        RisarFetusState.action_id == action.id,
+        RisarFetusState.deleted == 0,
+    ).order_by(RisarFetusState.id)
     for fetus_state in fetus_states:
         res.append({
             'state': {
