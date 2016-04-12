@@ -19,7 +19,8 @@ __author__ = 'viruzzz-kun'
 @api_method
 def api_errands_summary():
     query = Errand.query.filter(
-        Errand.execPerson_id == safe_current_user_id()
+        Errand.execPerson_id == safe_current_user_id(),
+        Errand.deleted == 0
     )
     count = query.count()
     query = query.filter(Errand.readingDate.is_(None))

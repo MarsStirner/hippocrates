@@ -3,7 +3,6 @@ from flask import request
 
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import public_endpoint
-from nemesis.systemwide import db
 from .....app import module
 
 from ..logformat import hook
@@ -28,28 +27,22 @@ def api_card_schema(api_version):
 @api_method(hook=hook)
 def api_card_save(api_version, card_id=None):
     data = request.get_json()
-    xform = CardXForm()
-    xform.set_version(api_version)
+    xform = CardXForm(api_version)
     xform.validate(data)
-    xform.find_card(card_id, data)
-    xform.update_card(data)
-    db.session.add(xform.event)
-    db.session.commit()
+    client_id = data.get('client_id')
+    xform.check_target_obj(client_id, card_id, data)
+    xform.update_target_obj(data)
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.add(xform.ca_action)
-    db.session.commit()
+    xform.store()
     return xform.as_json()
 
 
 @module.route('/api/integration/<int:api_version>/card/<card_id>', methods=['DELETE'])
 @api_method(hook=hook)
 def api_card_delete(api_version, card_id):
-    xform = CardXForm()
-    xform.set_version(api_version)
-    xform.find_card(card_id)
-    xform.delete_card()
-    db.session.add(xform.event)
-    db.session.commit()
-
-    return xform.as_json()
+    xform = CardXForm(api_version)
+    xform.check_target_obj(None, card_id)
+    xform.delete_target_obj()
+    xform.store()

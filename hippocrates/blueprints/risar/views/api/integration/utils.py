@@ -15,11 +15,12 @@ def get_org_by_tfoms_code(tfoms_code):
     return org
 
 
-def get_person_by_code(code):
-    # TODO: what code?
-    person = Person.query.filter(
-        Person.regionalCode == code,
-        Person.deleted == 0
+def get_person_by_codes(person_code, org_code):
+    person = Person.query.join(Organisation).filter(
+        Person.regionalCode == person_code,
+        Person.deleted == 0,
+        Organisation.TFOMSCode == org_code,
+        Organisation.deleted == 0
     ).first()
     return person
 

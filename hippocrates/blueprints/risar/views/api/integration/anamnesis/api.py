@@ -24,36 +24,32 @@ def api_anamnesis_mother_schema(api_version):
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/mother/', methods=['POST'])
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/mother/<anamnesis_id>', methods=['PUT'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/mother/', methods=['PUT'])
 @api_method(hook=hook)
-def api_anamnesis_mother_save(api_version, card_id, anamnesis_id=None):
+def api_anamnesis_mother_save(api_version, card_id):
     data = request.get_json()
-    xform = AnamnesisMotherXForm()
-    xform.set_version(api_version)
+    xform = AnamnesisMotherXForm(api_version)
     xform.validate(data)
-    xform.find_anamnesis(card_id, anamnesis_id, data)
-    xform.update_anamnesis(data)
-    db.session.add(xform.anamnesis)
-    db.session.commit()
+    create = request.method == 'POST'
+    xform.check_target_obj_single(card_id, data, create)
+    xform.update_target_obj(data)
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.commit()
+    xform.store()
     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/mother/<anamnesis_id>', methods=['DELETE'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/mother/', methods=['DELETE'])
 @api_method(hook=hook)
-def api_anamnesis_mother_delete(api_version, card_id, anamnesis_id):
-    xform = AnamnesisMotherXForm()
-    xform.set_version(api_version)
-    xform.find_anamnesis(card_id, anamnesis_id)
-    xform.delete_anamnesis()
-    db.session.add(xform.anamnesis)
-    db.session.commit()
+def api_anamnesis_mother_delete(api_version, card_id):
+    xform = AnamnesisMotherXForm(api_version)
+    xform.check_target_obj_single(card_id)
+    xform.delete_target_obj()
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.commit()
-    return xform.as_json()
+    xform.store()
 
 
 @module.route('/api/integration/<int:api_version>/anamnesis/father/schema.json', methods=["GET"])
@@ -70,36 +66,32 @@ def api_anamnesis_father_schema(api_version):
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/father/', methods=['POST'])
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/father/<anamnesis_id>', methods=['PUT'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/father/', methods=['PUT'])
 @api_method(hook=hook)
-def api_anamnesis_father_save(api_version, card_id, anamnesis_id=None):
+def api_anamnesis_father_save(api_version, card_id):
     data = request.get_json()
-    xform = AnamnesisFatherXForm()
-    xform.set_version(api_version)
+    xform = AnamnesisFatherXForm(api_version)
     xform.validate(data)
-    xform.find_anamnesis(card_id, anamnesis_id, data)
-    xform.update_anamnesis(data)
-    db.session.add(xform.anamnesis)
-    db.session.commit()
+    create = request.method == 'POST'
+    xform.check_target_obj_single(card_id, data, create)
+    xform.update_target_obj(data)
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.commit()
+    xform.store()
     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/father/<anamnesis_id>', methods=['DELETE'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/father/', methods=['DELETE'])
 @api_method(hook=hook)
-def api_anamnesis_father_delete(api_version, card_id, anamnesis_id):
-    xform = AnamnesisFatherXForm()
-    xform.set_version(api_version)
-    xform.find_anamnesis(card_id, anamnesis_id)
-    xform.delete_anamnesis()
-    db.session.add(xform.anamnesis)
-    db.session.commit()
+def api_anamnesis_father_delete(api_version, card_id):
+    xform = AnamnesisFatherXForm(api_version)
+    xform.check_target_obj_single(card_id)
+    xform.delete_target_obj()
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.commit()
-    return xform.as_json()
+    xform.store()
 
 
 @module.route('/api/integration/<int:api_version>/anamnesis/prevpregnancy/schema.json', methods=["GET"])
@@ -120,31 +112,24 @@ def api_anamnesis_prevpregnancy_schema(api_version):
 @api_method(hook=hook)
 def api_anamnesis_prevpregnancy_save(api_version, card_id, prevpregnancy_id=None):
     data = request.get_json()
-    xform = AnamnesisPrevPregXForm()
-    xform.set_version(api_version)
+    xform = AnamnesisPrevPregXForm(api_version)
     xform.validate(data)
-    xform.find_anamnesis(card_id, prevpregnancy_id, data)
-    xform.update_anamnesis(data)
-    for d in xform.deleted:
-        db.session.delete(d)
-    db.session.add_all(xform.changed)
-    db.session.commit()
+    xform.check_target_obj(card_id, prevpregnancy_id, data)
+    xform.update_target_obj(data)
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.commit()
+    xform.store()
     return xform.as_json()
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/anamnesis/prevpregnancy/<prevpregnancy_id>', methods=['DELETE'])
 @api_method(hook=hook)
 def api_anamnesis_prevpregnancy_delete(api_version, card_id, prevpregnancy_id):
-    xform = AnamnesisPrevPregXForm()
-    xform.set_version(api_version)
-    xform.find_anamnesis(card_id, prevpregnancy_id)
-    xform.delete_anamnesis()
-    db.session.add(xform.anamnesis)
-    db.session.commit()
+    xform = AnamnesisPrevPregXForm(api_version)
+    xform.check_target_obj(card_id, prevpregnancy_id)
+    xform.delete_target_obj()
+    xform.store()
 
     xform.update_card_attrs()
-    db.session.commit()
-    return xform.as_json()
+    xform.store()

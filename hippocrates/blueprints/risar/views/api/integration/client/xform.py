@@ -22,7 +22,7 @@ __author__ = 'viruzzz-kun'
 logger = logging.getLogger('simple')
 
 
-class ClientXForm(XForm, ClientSchema):
+class ClientXForm(ClientSchema, XForm):
     """
     Класс-преобразователь для пациентки
     """

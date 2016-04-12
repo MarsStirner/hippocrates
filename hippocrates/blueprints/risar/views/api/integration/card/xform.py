@@ -2,89 +2,96 @@
 
 import logging
 
-from ..xform import XForm, wrap_simplify
+from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR
 from .schemas import CardSchema
 
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity
 from blueprints.risar.views.api.chart import default_AT_Heuristic, default_ET_Heuristic
-from nemesis.models.enums import EventPrimary, EventOrder
+from blueprints.risar.risar_config import request_type_pregnancy
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import get_new_event_ext_id, safe_datetime, safe_date
-from nemesis.models.event import Event
+from nemesis.models.event import Event, EventType
+from nemesis.models.exists import rbRequestType
+from nemesis.models.client import Client
+from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.lib.data import create_action
+from nemesis.systemwide import db
 
 
 logger = logging.getLogger('simple')
 
 
-class CardXForm(XForm, CardSchema):
+class CardXForm(CardSchema, XForm):
     """
     Класс-преобразователь для медицинской карты случая
     """
+    target_obj_class = Event
+    parent_obj_class = Client
+    parent_id_required = False
 
-    def __init__(self):
-        self.event = None
-        self.pcard = None
-        self.new = False
+    def _find_target_obj_query(self):
+        return Event.query.join(EventType, rbRequestType).filter(
+            Event.id == self.target_obj_id,
+            Event.deleted == 0,
+            rbRequestType.code == request_type_pregnancy
+        )
 
-    @property
-    def ca_action(self):
-        return self.pcard.attrs if self.pcard is not None else None
-
-    def _find_event_query(self, event_id):
-        return Event.query.filter(Event.id == event_id, Event.deleted == 0)
-
-    def find_card(self, card_id=None, data=None):
-        if card_id is None:
-            # Ручная валидация
-            if data is None:
-                raise Exception('CardXForm.find_card called for creation without "data"')
-
-            event = Event()
-            self.new = True
-        else:
-            event = self._find_event_query(card_id).first()
-            if not event:
-                raise ApiException(404, u'Карта с id = {0} не найдена'.format(card_id))
-        self.event = event
-
-    def update_card(self, data):
-        # with db.session.no_autoflush:
+    def check_duplicate(self, parent_obj_id, target_obj_id, data):
         if self.new:
+            q = db.session.query(Event).join(Client).filter(
+                Client.id == parent_obj_id,
+                Event.deleted == 0,
+                Event.execDate.is_(None)
+            )
+            exists_open = db.session.query(q.exists()).scalar()
+            if exists_open:
+                raise ApiException(
+                    ALREADY_PRESENT_ERROR,
+                    u'Уже существует открытая карта для пациента с id = {0}'.format(self.parent_obj_id)
+                )
+
+    def get_target_nf_msg(self):
+        return u'Не найдена карта с id = {0}'.format(self.target_obj_id)
+
+    def get_parent_nf_msg(self):
+        return u'Не найден пациент с id = {0}'.format(self.parent_obj_id)
+
+    def update_target_obj(self, data):
+        if self.new:
+            self.target_obj = Event()
             self.create_event(data)
         else:
+            self.target_obj = self._find_target_obj_query().first()
             self.update_event(data)
+        self._changed.append(self.target_obj)
 
     def update_event(self, data):
-        self.event.setDate = safe_datetime(safe_date(data['card_set_date']))
-        new_doctor = self.find_doctor(data['card_doctor'])
-        self.event.execPerson = new_doctor
-        self.event.execPerson_id = new_doctor.id
-        new_org = self.find_org(data['card_LPU'])
-        self.event.organisation = new_org
-        self.event.org_id = new_org.id
-
-        self.pcard = PregnancyCard.get_for_event(self.event)
-        check_card_attrs_action_integrity(self.pcard.attrs)
-        self.update_card_attrs()
-
-    def create_event(self, data):
-        event = self.event
-        et = default_ET_Heuristic()
-        if et is None:
-            raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
-        event.eventType = et
-
-        client = self.find_client(data['client_id'])
-        event.client = client
-        event.cleint_id = client.id
+        event = self.target_obj
         event.setDate = safe_datetime(safe_date(data['card_set_date']))
-        new_doctor = self.find_doctor(data['card_doctor'])
+        new_doctor = self.find_doctor(data['card_doctor'], data['card_LPU'])
         event.execPerson = new_doctor
         event.execPerson_id = new_doctor.id
-        new_org = self.find_org(data['card_LPU'])
+        new_org = new_doctor.organisation
+        event.organisation = new_org
+        event.org_id = new_org.id
+
+    def create_event(self, data):
+        event = self.target_obj
+        et = default_ET_Heuristic()
+        if et is None:
+            raise ApiException(INTERNAL_ERROR, u'Не настроен тип события - Случай беременности ОМС')
+        event.eventType = et
+
+        self.parent_obj = self.find_client(data['client_id'])
+        event.client = self.parent_obj
+        event.client_id = self.parent_obj.id
+        event.setDate = safe_datetime(safe_date(data['card_set_date']))
+        new_doctor = self.find_doctor(data['card_doctor'], data['card_LPU'])
+        event.execPerson = new_doctor
+        event.execPerson_id = new_doctor.id
+        new_org = new_doctor.organisation
         event.organisation = new_org
         event.org_id = new_org.id
 
@@ -92,34 +99,37 @@ class CardXForm(XForm, CardSchema):
         event.isPrimaryCode = EventPrimary.primary[0]
         event.order = EventOrder.planned[0]
         event.note = ''
-        event.externalId = get_new_event_ext_id(event.eventType.id, client.id)
+        event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         event.payStatus = 0
 
     def update_card_attrs(self):
-        # with db.session.no_autoflush:
+        self.pcard = PregnancyCard.get_for_event(self.target_obj)
         if self.new:
             self.create_ca_action()
-
+        else:
+            check_card_attrs_action_integrity(self.pcard.attrs)
         self.pcard.reevaluate_card_attrs()
+        self._changed.append(self.pcard.attrs)
 
     def create_ca_action(self):
-        self.pcard = PregnancyCard.get_for_event(self.event)
         at = default_AT_Heuristic()
         if not at:
-            raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
-        ca_action = create_action(at.id, self.event)
+            raise ApiException(INTERNAL_ERROR, u'Нет типа действия с flatCode = "cardAttributes"')
+        ca_action = create_action(at.id, self.target_obj)
         self.pcard._card_attrs_action = ca_action
 
-    def delete_card(self):
-        self.event.deleted = 1
+    def delete_target_obj(self):
+        self.target_obj_class.query.filter(
+            self.target_obj_class.id == self.target_obj_id,
+        ).update({'deleted': 1})
 
     @wrap_simplify
     def as_json(self):
-        event = self.event
+        event = self.target_obj
         return {
             'card_id': event.id,
             'client_id': event.client_id,
             'card_set_date': safe_date(event.setDate),
-            'card_doctor': event.execPerson.regionalCode,  # TODO: what code
+            'card_doctor': event.execPerson.regionalCode,
             "card_LPU": event.organisation.TFOMSCode
         }

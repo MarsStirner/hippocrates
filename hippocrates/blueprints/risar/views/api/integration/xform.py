@@ -9,15 +9,14 @@ from abc import ABCMeta, abstractmethod
 from blueprints.risar.lib.card import PregnancyCard
 from nemesis.lib.apiutils import ApiException
 from nemesis.views.rb import check_rb_value_exists
-from .utils import get_client_query, get_event_query
 from nemesis.models.organisation import Organisation
 from nemesis.models.person import Person
-from .utils import get_org_by_tfoms_code, get_person_by_code
 from nemesis.lib.vesta import Vesta
-from nemesis.models.exists import rbAccountingSystem
+from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
 from blueprints.risar.models.risar import ActionIdentification
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date
+from nemesis.lib.utils import safe_date, safe_dict
+from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
 __author__ = 'viruzzz-kun'
@@ -26,9 +25,9 @@ logger = logging.getLogger('simple')
 
 
 INTERNAL_ERROR = 500
-VALIDATION_ERROR = 406
+VALIDATION_ERROR = 400
 NOT_FOUND_ERROR = 404
-ALREADY_PRESENT_ERROR = 400
+ALREADY_PRESENT_ERROR = 409
 MIS_BARS_CODE = 'Mis-Bars'
 
 
@@ -83,20 +82,38 @@ def simplify_list(l):
 
 
 class XForm(object):
-    version = 0
+    __metaclass__ = ABCMeta
+    schema = None
+    parent_obj_class = None
+    target_obj_class = None
+    parent_id_required = True
+    target_id_required = True
+
+    def __init__(self, api_version):
+        self.version = 0
+        self.new = False
+        self.parent_obj_id = None
+        self.target_obj_id = None
+        self.parent_obj = None
+        self.target_obj = None
+        self.pcard = None
+        self._changed = []
+        self._deleted = []
+
+        self.set_version(api_version)
 
     def set_version(self, version):
         for v in xrange(self.version + 1, version + 1):
             method = getattr(self, 'set_version_%i' % v, None)
             if method is None:
-                raise ApiException(400, 'Version %i of API is unsupported' % (version, ))
+                raise ApiException(VALIDATION_ERROR, 'Version %i of API is unsupported' % (version, ))
             else:
                 method()
         self.version = version
 
     def validate(self, data):
         if data is None:
-            raise ApiException(400, 'No JSON body')
+            raise ApiException(VALIDATION_ERROR, 'No JSON body')
         schema = self.schema[self.version]
         cls = jsonschema.validators.validator_for(schema)
         val = cls(schema)
@@ -108,36 +125,136 @@ class XForm(object):
         if errors:
             logger.error(u'Ошибка валидации данных', extra={'errors': errors})
             raise ApiException(
-                400,
+                VALIDATION_ERROR,
                 'Validation error',
                 errors=errors,
             )
 
+    def find_parent_obj(self, parent_obj_id):
+        self.parent_obj_id = parent_obj_id
+        if parent_obj_id is None:
+            # Ручная валидация
+            raise Exception(
+                u'%s.find_parent_obj called without "parent_obj_id"' %
+                self.__class__.__name__
+            )
+        else:
+            parent_obj = self._find_parent_obj_query().first()
+            if not parent_obj:
+                raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
+        self.parent_obj = parent_obj
+
+    def check_parent_obj(self, parent_obj_id):
+        self.parent_obj_id = parent_obj_id
+        if parent_obj_id is None:
+            # Ручная валидация
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'%s.find_parent_obj called without "parent_obj_id"' %
+                self.__class__.__name__
+            )
+        else:
+            q = self._find_parent_obj_query()
+            parent_obj_exists = db.session.query(q.exists()).scalar()
+            if not parent_obj_exists:
+                raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
+
+    def check_target_obj(self, parent_obj_id, target_obj_id, data=None):
+        self.parent_obj_id = parent_obj_id
+        self.target_obj_id = target_obj_id
+        if target_obj_id is None:
+            if self.target_id_required and not data:
+                raise ApiException(
+                    INTERNAL_ERROR,
+                    u'%s.check_target_obj called without "data"' %
+                    self.__class__.__name__
+                )
+
+            self.new = True
+            self.check_parent_obj(parent_obj_id)
+        else:
+            if self.parent_id_required and parent_obj_id is None:
+                # Ручная валидация
+                raise ApiException(
+                    VALIDATION_ERROR,
+                    u'%s.check_target_obj called without "parent_obj_id"' %
+                    self.__class__.__name__
+                )
+
+            q = self._find_target_obj_query()
+            target_obj_exist = db.session.query(q.exists()).scalar()
+            if not target_obj_exist:
+                raise ApiException(NOT_FOUND_ERROR, self.get_target_nf_msg())
+        self.check_duplicate(parent_obj_id, target_obj_id, data)
+
+    def check_target_obj_single(self, parent_obj_id, data=None, create=False):
+        target_obj_id = None if create else 'single_obj'
+        self.check_target_obj(parent_obj_id, target_obj_id, data)
+
+    def _find_parent_obj_query(self):
+        q = self.parent_obj_class.query.filter(
+            self.parent_obj_class.id == self.parent_obj_id
+        )
+        if hasattr(self.parent_obj_class, 'deleted'):
+            q = q.filter(self.parent_obj_class.deleted == 0)
+        return q
+
+    @abstractmethod
+    def _find_target_obj_query(self):
+        pass
+
+    @abstractmethod
+    def check_duplicate(self, parent_obj_id, target_obj_id, data):
+        pass
+
+    @abstractmethod
+    def update_target_obj(self, data):
+        pass
+
+    @abstractmethod
+    def delete_target_obj(self):
+        pass
+
+    def store(self):
+        db.session.add_all(self._changed)
+        for d in self._deleted:
+            db.session.delete(d)
+        db.session.commit()
+
+        self._changed = []
+        self._deleted = []
+
+    def get_target_nf_msg(self):
+        return u'Не найден {0} с id = {1}'.format(self.target_obj_class.__name__, self.target_obj_id)
+
+    def get_parent_nf_msg(self):
+        return u'Не найден {0} с id = {1}'.format(self.parent_obj_class.__name__, self.parent_obj_id)
+
+    # -----
+
     def find_org(self, tfoms_code):
         org = get_org_by_tfoms_code(tfoms_code)
         if not org:
-            raise ApiException(404, u'Не найдена организация по коду {0}'.format(tfoms_code))
+            raise ApiException(NOT_FOUND_ERROR, u'Не найдена организация по коду {0}'.format(tfoms_code))
         return org
 
-    def find_doctor(self, code):
-        org = get_person_by_code(code)
+    def find_doctor(self, person_code, org_code):
+        org = get_person_by_codes(person_code, org_code)
         if not org:
-            raise ApiException(404, u'Не найден врач по коду {0}'.format(code))
+            raise ApiException(NOT_FOUND_ERROR, u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code))
         return org
 
     def find_client(self, client_id):
         client = get_client_query(client_id).first()
         if not client:
-            raise ApiException(404, u'Не найден пациент с id = {0}'.format(client_id))
+            raise ApiException(NOT_FOUND_ERROR, u'Не найден пациент с id = {0}'.format(client_id))
         return client
 
-    def find_pcard(self, event_id):
+    def find_event(self, event_id):
         event = get_event_query(event_id).first()
         if not event:
-            raise ApiException(404, u'Не найдена карта с id = {0}'.format(event_id))
-
-        pcard = PregnancyCard.get_for_event(event)
-        return pcard
+            raise ApiException(NOT_FOUND_ERROR, u'Не найдена карта с id = {0}'.format(event_id))
+        return event
 
     def check_prop_value(self, prop, value):
         if value is None:
@@ -149,8 +266,53 @@ class XForm(object):
             rb_name = prop.type.valueDomain.split(';')[0]
             if (rb_name != 'rbBloodType'  # code in name field, see to_blood_type_rb()
                     and not check_rb_value_exists(rb_name, value['code'])):
-                raise ApiException(400, u'Не найдено значение по коду {0} в справочнике {1}'.format(
+                raise ApiException(VALIDATION_ERROR, u'Не найдено значение по коду {0} в справочнике {1}'.format(
                     value['code'], rb_name))
+
+    @staticmethod
+    def to_rb(code):
+        return {
+            'code': code
+        } if code is not None else None
+
+    @staticmethod
+    def from_rb(rb):
+        if rb is None:
+            return None
+        return rb.code if hasattr(rb, 'code') else rb['code']
+
+    @staticmethod
+    def to_mkb_rb(code):
+        if code is None:
+            return None
+        mkb = db.session.query(MKB).filter(MKB.DiagID == code, MKB.deleted == 0).first()
+        if not mkb:
+            raise ApiException(400, u'Не найден МКБ по коду "{0}"'.format(code))
+        return {
+            'id': mkb.id,
+            'code': code
+        }
+
+    @staticmethod
+    def from_mkb_rb(rb):
+        if rb is None:
+            return None
+        return rb.DiagID if hasattr(rb, 'DiagID') else rb['code']
+
+    @staticmethod
+    def to_blood_type_rb(code):
+        if code is None:
+            return None
+        bt = db.session.query(rbBloodType).filter(rbBloodType.name == code).first()
+        if not bt:
+            raise ApiException(400, u'Не найдена группа крови по коду "{0}"'.format(code))
+        return safe_dict(bt)
+
+    @staticmethod
+    def from_blood_type_rb(rb):
+        if rb is None:
+            return None
+        return rb.name if hasattr(rb, 'name') else rb['name']
 
 
 class CheckupsXForm(object):
@@ -179,7 +341,7 @@ class CheckupsXForm(object):
             method = getattr(self, 'set_version_%i' % v, None)
             if method is None:
                 raise ApiException(
-                    400, 'Version %i of API is unsupported' % (version, )
+                    VALIDATION_ERROR, 'Version %i of API is unsupported' % (version, )
                 )
             else:
                 method()
@@ -187,7 +349,7 @@ class CheckupsXForm(object):
 
     def validate(self, data):
         if data is None:
-            raise ApiException(400, 'No JSON body')
+            raise ApiException(VALIDATION_ERROR, 'No JSON body')
         schema = self.schema[self.version]
         cls = jsonschema.validators.validator_for(schema)
         val = cls(schema)
