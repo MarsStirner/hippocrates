@@ -74,7 +74,7 @@ def simplify_dict(d):
 
 def simplify_list(l):
     return [
-        item
+        simplify(item)
         for item in l
         if item is not Undefined
     ]
