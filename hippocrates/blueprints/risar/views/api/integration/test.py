@@ -2,7 +2,11 @@
 
 import requests
 
-from test_data import test_client_data, test_event_data, test_event_data2
+from contextlib import contextmanager
+
+from nemesis.app import app
+
+from test_data import test_client_data
 
 
 coldstar_url = 'http://127.0.0.1:6098'
@@ -30,6 +34,20 @@ def get_token(login, password):
     return j['token']
 
 
+def release_token(token):
+    url = u'%s/cas/api/release' % coldstar_url
+    result = requests.post(
+        url,
+        {
+            'token': token,
+        }
+    )
+    j = result.json()
+    if not j['success']:
+        print j
+        raise Exception(j['exception'])
+
+
 def get_role(token, role_code=''):
     url = u'%s/chose_role/' % mis_url
     if role_code:
@@ -42,6 +60,36 @@ def get_role(token, role_code=''):
     if not result.status_code == 200:
         raise Exception('Ошибка авторизации')
     return result.cookies['hippocrates.session.id']
+
+
+@contextmanager
+def make_login():
+    token = get_token(login, password)
+    print ' > auth token: ', token
+    session_token = get_role(token)
+    print ' > session token: ', session_token
+
+    yield (token, session_token)
+
+    release_token(token)
+
+
+def make_api_request(method, url, token, session_token, json_data=None):
+    result = getattr(requests, method)(
+        mis_url + url,
+        json=json_data,
+        cookies={auth_token_name: token,
+                 session_token_name: session_token}
+    )
+    if result.status_code != 200:
+        try:
+            j = result.json()
+            message = u'{0}: {1}'.format(j['meta']['code'], j['meta']['name'])
+        except Exception, e:
+            raise e
+            message = u'Unknown'
+        raise Exception(unicode(u'Api Error: {0}'.format(message)).encode('utf-8'))
+    return result.json()
 
 
 def make_client_save(token, session_token):
@@ -57,65 +105,31 @@ def make_client_save(token, session_token):
     return j
 
 
-def register_card(token, session_token):
-    url = u'%s/risar/api/integration/0/card/' % mis_url
-    result = requests.post(
-        url,
-        json=test_event_data,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
-
-
-def change_card(token, session_token, event_id):
-    url = u'%s/risar/api/integration/0/card/%s' % (mis_url, event_id)
-    result = requests.put(
-        url,
-        json=test_event_data2,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
-
-
-def delete_card(token, session_token, event_id):
-    url = u'%s/risar/api/integration/0/card/%s' % (mis_url, event_id)
-    result = requests.delete(
-        url,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
-
-
 if __name__ == '__main__':
-    token = get_token(login, password)
-    print ' > auth token: ', token
-    session_token = get_role(token)
-    print ' > session token: ', session_token
+    # token = get_token(login, password)
+    # print ' > auth token: ', token
+    # session_token = get_role(token)
+    # print ' > session token: ', session_token
 
     # ========================================================================
     # result = make_client_save(token, session_token)
     # print u'new client data: {0}'.format(repr(result).decode("unicode-escape"))
     #
-    # client_id = '17700'
-    # test_event_data['client_id'] = client_id
-    # result = register_card(token, session_token)
-    # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
 
-    client_id = '17700'
-    event_id = '160'
-    test_event_data2['client_id'] = client_id
-    result = change_card(token, session_token, event_id)
-    print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
+    with app.app_context():
+        from blueprints.risar.views.api.integration.card.test import (test_register_edit_delete_card,
+            get_new_card_id_for_test, delete_test_card_id)
+        from blueprints.risar.views.api.integration.anamnesis.test import (test_register_edit_delete_mother_anamnesis,
+            test_register_edit_delete_father_anamnesis, test_register_edit_delete_prevpregnancies_anamnesis)
 
-    # event_id = '160'
-    # result = delete_card(token, session_token, event_id)
-    # print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))
+        client_id = '17700'
+        # test_register_edit_delete_card(client_id)
+
+        test_card_id = get_new_card_id_for_test(client_id)
+        # test_card_id = '197'
+
+        test_register_edit_delete_mother_anamnesis(test_card_id)
+        test_register_edit_delete_father_anamnesis(test_card_id)
+        test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
+
+        delete_test_card_id(test_card_id)

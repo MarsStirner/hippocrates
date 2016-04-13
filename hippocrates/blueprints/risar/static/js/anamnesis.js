@@ -103,35 +103,6 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         });
     };
 
-    $scope.add_child = function (pregnancy){
-        pregnancy.newborn_inspections.push({
-            id: null,
-            alive: true,
-            deleted: 0
-        });
-        $timeout(function(){
-            $('#childrenTabs').find('a:last').tab('show');
-        }, 0);
-
-    };
-
-    $scope.delete_child = function(child){
-        child.deleted = 1;
-        $timeout(function(){
-            $('#childrenTabs li.active').removeClass('active');
-            $('#childrenTabs').find('a:first').tab('show');
-        }, 0);
-    }
-
-    $scope.result_change = function (pregnancy){
-        if (miscarriage_codes.has(pregnancy.pregnancyResult.code)){
-            pregnancy.newborn_inspections = pregnancy.newborn_inspections.filter(function (inspection) {
-                inspection.deleted = 1;
-                return inspection.id
-            })
-        }
-    };
-
     $scope.remove = function (p) {
         if (p.id) {
             RisarApi.anamnesis.pregnancies.delete(p.id).then(function () {
@@ -214,6 +185,28 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
                     )
                 })
             )
+        };
+        scope.add_child = function (pregnancy){
+            pregnancy.newborn_inspections.push({
+                id: null,
+                alive: true,
+                deleted: 0
+            });
+            $timeout(function(){
+                $('#childrenTabs').find('a:last').tab('show');
+            }, 0);
+        };
+        scope.delete_child = function(idx) {
+            scope.model.newborn_inspections.splice(idx, 1);
+            $timeout(function() {
+                $('#childrenTabs li.active').removeClass('active');
+                $('#childrenTabs').find('a:first').tab('show');
+            }, 0);
+        };
+        scope.result_change = function (pregnancy){
+            if (miscarriage_codes.has(pregnancy.pregnancyResult.code)) {
+                pregnancy.newborn_inspections = [];
+            }
         };
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/pregnancies.html',

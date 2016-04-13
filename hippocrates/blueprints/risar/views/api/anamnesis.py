@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
+import itertools
 
 from flask import request
 from flask.ext.login import current_user
 
 from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from blueprints.risar.models.risar import RisarRiskGroup
+from blueprints.risar.lib.prev_children import create_or_update_prev_children
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, create_action_property
-from nemesis.lib.utils import safe_traverse, public_endpoint
+from nemesis.lib.utils import safe_traverse, safe_date, safe_time, safe_int, safe_bool, safe_double
 from nemesis.models.actions import Action
 from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from nemesis.models.event import Event
@@ -19,7 +21,7 @@ from ...app import module
 from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
     represent_pregnancy, represent_anamnesis
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
+    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
 
 logger = logging.getLogger('simple')
 
@@ -90,42 +92,29 @@ def api_0_pregnancies_post(action_id=None):
     event = Event.query.get(action.event_id)
     card = PregnancyCard.get_for_event(event)
     json = request.get_json()
+
     newborn_inspections = json.pop('newborn_inspections', [])
+
+    # prev pregnancy
     prop_types = {p.code: p for p in action.actionType.property_types if p.code}
     for code in pregnancy_apt_codes:
         if code not in action.propsByCode:
             if code in prop_types:
                 action.propsByCode[code] = create_action_property(action, prop_types[code])
             else:
-                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, action_id, risar_anamnesis_pregnancy)
+                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"',
+                            code, action_id, risar_anamnesis_pregnancy)
                 continue
         action.propsByCode[code].value = json.get(code)
 
-    child_inspection_actions = []
-    for child_inspection in newborn_inspections:
-        if not child_inspection:
-            continue  # How can it be?
-        child_action_id = child_inspection.pop('id', None)
-        child_action = get_action_by_id(child_action_id, event,  risar_newborn_inspection, True)
-        child_action.deleted = child_inspection.get('deleted', 0)
-        for code, value in child_inspection.iteritems():
-            prop = child_action.propsByCode.get(code)
-            if not prop:
-                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, child_action_id, risar_newborn_inspection)
-                continue
-            prop.value = value
-        db.session.add(child_action)
-        if not child_action.deleted:
-            child_inspection_actions.append(child_action)
-
+    # prev pregnancy children
+    new_children, deleted_children = create_or_update_prev_children(action, newborn_inspections)
+    for dc in deleted_children:
+        db.session.delete(dc)
+    db.session.add(action)
+    db.session.add_all(new_children)
     db.session.commit()
 
-    action.propsByCode['newborn_inspections'].value = [
-        {'id': child_action.id}
-        for child_action in child_inspection_actions
-    ]
-
-    db.session.add(action)
     card.reevaluate_card_attrs()
     db.session.commit()
     return represent_pregnancy(action)

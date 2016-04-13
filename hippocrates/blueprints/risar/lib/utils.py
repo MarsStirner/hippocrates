@@ -15,6 +15,8 @@ from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
     puerpera_inspection_code
+from blueprints.risar.models.risar import RisarPreviousPregnancy_Children
+
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
 risk_rates_diagID = {
