@@ -10,7 +10,7 @@
                     <label for="appointed_by">Кем направлен</label>
                     <select id="appointed_by" name="appointed_by" class="form-control"
                             ng-model="model.appointed_by.value"
-                            ng-options="val for val in model.appointed_by.type.values"></select>
+                            ng-options="val for val in model.appointed_by.type.domain_obj.values"></select>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="appointment_doctor">Направивший врач</label>
@@ -65,7 +65,7 @@
                     <label for="delivered_by">Кем доставлен</label>
                     <select id="delivered_by" name="delivered_by" class="form-control"
                             ng-model="model.delivered_by.value"
-                            ng-options="val for val in model.delivered_by.type.values"></select>
+                            ng-options="val for val in model.delivered_by.type.domain_obj.values"></select>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="ambulance_number">№ наряда СП</label>
@@ -82,14 +82,14 @@
                     <label for="delivered_after">Доставлен от начала заболевания\травмы через</label>
                     <select id="delivered_after" name="delivered_by" class="form-control"
                             ng-model="model.delivered_after.value"
-                            ng-options="val for val in model.delivered_after.type.values"></select>
+                            ng-options="val for val in model.delivered_after.type.domain_obj.values"></select>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="transp_type">Вид транспортировки</label>
                     <ui-select id="transp_type" name="transp_type" theme="select2"
                                ng-model="model.transp_type.value">
                         <ui-select-match placeholder="Вид транспортировки">[[$select.selected]]</ui-select-match>
-                        <ui-select-choices repeat="val in model.transp_type.type.values">
+                        <ui-select-choices repeat="val in model.transp_type.type.domain_obj.values">
                             <div ng-bind-html="val | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
@@ -98,7 +98,7 @@
                     <label for="intoxication">Доставлен в состоянии опьянения</label>
                     <select id="intoxication" name="delivered_by" class="form-control"
                             ng-model="model.intoxication.value"
-                            ng-options="val for val in model.intoxication.type.values"></select>
+                            ng-options="val for val in model.intoxication.type.domain_obj.values"></select>
                 </div>
             </div>
         </div>

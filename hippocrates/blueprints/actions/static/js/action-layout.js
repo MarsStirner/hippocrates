@@ -124,7 +124,7 @@ angular.module('WebMis20')
                                     inner_template =
                                         '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off">\
                                             <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
-                                            <ui-select-choices repeat="item in {0}.type.domain_obj | filter: $select.search">\
+                                            <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
                                                 <span ng-bind-html="item | highlight: $select.search"></span>\
                                             </ui-select-choices>\
                                         </ui-select>';
@@ -133,7 +133,7 @@ angular.module('WebMis20')
                                     inner_template =
                                         '<ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function" autocomplete="off">\
                                             <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
-                                            <ui-select-choices repeat="item in [].concat({0}.type.domain_obj, \'\') | filter: $select.search">\
+                                            <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
                                                 <span ng-bind-html="item | highlight: $select.search"></span>\
                                             </ui-select-choices>\
                                         </ui-select>';

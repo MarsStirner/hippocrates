@@ -125,7 +125,7 @@ def api_event_save():
     except EventSaveException:
         raise
     except Exception, e:
-        logger.error(e, exc_info=True)
+        logger.error(u'Ошибка сохранения обращения', exc_info=True)
         raise EventSaveException(e)
     return result
 
