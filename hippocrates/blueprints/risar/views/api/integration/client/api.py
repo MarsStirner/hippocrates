@@ -26,8 +26,7 @@ def api_client_schema(api_version):
 @module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['GET'])
 @api_method(hook=hook)
 def api_client_get(api_version, client_id):
-    xform = ClientXForm()
-    xform.set_version(api_version)
+    xform = ClientXForm(api_version)
     xform.find_client(client_id)
     return xform.as_json()
 
@@ -37,8 +36,7 @@ def api_client_get(api_version, client_id):
 @api_method(hook=hook)
 def api_client_save(api_version, client_id=None):
     data = request.get_json()
-    xform = ClientXForm()
-    xform.set_version(api_version)
+    xform = ClientXForm(api_version)
     xform.validate(data)
     xform.find_client(client_id, data)
     xform.update_client(data)

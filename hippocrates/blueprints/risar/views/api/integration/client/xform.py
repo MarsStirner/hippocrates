@@ -32,6 +32,18 @@ class ClientXForm(ClientSchema, XForm):
     external_system_id = None
     _external_client_id = None
 
+    def _find_target_obj_query(self):
+        pass
+
+    def check_duplicate(self, parent_obj_id, target_obj_id, data):
+        pass
+
+    def update_target_obj(self, data):
+        pass
+
+    def delete_target_obj(self):
+        pass
+
     @property
     def external_client_id(self):
         if self.rbAccountingSystem:
