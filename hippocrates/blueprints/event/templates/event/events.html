@@ -28,6 +28,11 @@
                                 <input type="checkbox" ng-model="flt.unfinished" ng-change="on_unfinished_changed()">Только незавершённые
                             </label>
                         </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" ng-model="flt.draft_contract">Только без договоров
+                            </label>
+                        </div>
 
                         <label for="filter-end-date">Завершено</label>
                         <div class="row">
@@ -119,9 +124,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="event in results" ng-click="open_event(event.id)">
+                <tr ng-repeat="event in results" ng-click="open_event(event.id)" ng-class="{'danger': event.contract.draft}">
                     <td>[[ event.external_id ]]</td>
-                    <td>[[ event.type_name ]]</td>
+                    <td>
+                        <span ng-if="event.contract.draft" tooltip="Договор не заключен">[[ event.type_name ]]</span>
+                        <span ng-if="!event.contract.draft">[[ event.type_name ]]</span>
+                    </td>
                     <td>[[ event.beg_date | asDate ]]</td>
                     <td>[[ event.end_date | asDate ]]</td>
                     <td>[[ event.client_full_name ]]</td>

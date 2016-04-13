@@ -22,6 +22,7 @@ var EventListCtrl = function ($scope, $http, $window, $q, MessageBox) {
         if ($scope.flt.result) model.result_id = $scope.flt.result.id;
         if ($scope.flt.org_struct) model.org_struct_id = $scope.flt.org_struct.id;
         if ($scope.flt.diag_mkb) model.diag_mkb = $scope.flt.diag_mkb;
+        if ($scope.flt.draft_contract) model.draft_contract = $scope.flt.draft_contract;
         return model;
     }
 
@@ -116,7 +117,8 @@ var EventListCtrl = function ($scope, $http, $window, $q, MessageBox) {
             result: undefined,
             org_struct: null,
             diag_mkb: null,
-            unfinished: false
+            unfinished: false,
+            draft_contract: false
         };
     };
     $scope.clear_all = function () {

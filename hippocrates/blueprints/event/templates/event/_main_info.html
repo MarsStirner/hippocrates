@@ -59,17 +59,18 @@
                                 ng-disabled="widget_disabled('contract') || services_added()">
                             </ui-select>
                             <span class="text-warning" ng-show="isContractListEmptyLabelVisible()">Не найдено подходящего договора</span>
-                            <span class="text-warning" ng-show="isContractDraftLabelVisible()">Договор не заключен</span>
+                            <span class="text-danger" ng-show="isContractDraftLabelVisible()">Договор не заключен</span>
                         </div>
                         <div class="col-md-1">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false"
-                                    ng-disabled="widget_disabled('contract') || services_added()">
+                                    ng-disabled="!event.info.contract.draft && (widget_disabled('contract') || services_added())">
                                     <span class="fa fa-reorder"></span> <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="javascript:void(0)" ng-click="editContract()">Редактировать</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="createContractFromDraft()" ng-hide="!event.info.contract.draft">Заключить договор</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="editContract()" ng-hide="!event.info.contract || event.info.contract.draft">Редактировать</a></li>
                                     <li><a href="javascript:void(0)" ng-click="createContract()">Создать новый договор</a></li>
                                     <li role="separator" class="divider"></li>
                                     <li><a href="javascript:void(0)" ng-click="openContractListUi()">Перейти к списку договоров</a></li>

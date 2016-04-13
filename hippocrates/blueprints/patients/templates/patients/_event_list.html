@@ -11,12 +11,14 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="event in client.events" {# ng-class="{'bg-danger': !event.execDate}" #}
-        ng-click="open_event(event.id)" style="cursor: pointer">
+    <tr ng-repeat="event in client.events" ng-class="{'danger': event.contract.draft}" ng-click="open_event(event.id)" style="cursor: pointer">
         <td>[[ event.externalId ]]</td>
         <td>[[ event.setDate | asDate ]]</td>
         <td>[[ event.execDate | asDate ]]</td>
-        <td>[[ event.event_type.name ]]</td>
+        <td>
+            <span ng-if="event.contract.draft" tooltip="Договор не заключен">[[ event.event_type.name ]]</span>
+            <span ng-if="!event.contract.draft">[[ event.event_type.name ]]</span>
+        </td>
         <td>[[ event.person.name ]]</td>
         <td>[[ event.result.name ]]</td>
         {# <td>[[ event.requestType.name ]]</td>#}

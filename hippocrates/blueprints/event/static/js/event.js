@@ -76,7 +76,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         return $scope.create_mode && $scope.isContractListEmpty();
     };
     $scope.isContractDraftLabelVisible = function () {
-        return $scope.create_mode && $scope.isContractDraft();
+        return $scope.isContractDraft();
     };
 
     $scope.createContract = function () {
@@ -111,6 +111,30 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
                         set_contract(upd_contract.id)
                     });
             });
+    };
+    $scope.createContractFromDraft = function () {
+        if (!safe_traverse($scope, ['event', 'info', 'contract', 'draft'])) return;
+        var client_id = safe_traverse($scope.event.info, ['client_id']),
+            finance_id = safe_traverse($scope.event.info, ['event_type', 'finance', 'id']);
+        AccountingService.get_contract(undefined, {
+            finance_id: finance_id,
+            client_id: client_id,
+            payer_client_id: client_id,
+            generate_number: true
+        }).then(function (new_contract) {
+            var contract = _.deepCopy($scope.event.info.contract);
+            contract.number = new_contract.number;
+            contract.description = new_contract.description;
+            contract.draft = 0;
+            ContractModalService.openEdit(contract)
+                .then(function (result) {
+                    refreshAvailableContracts()
+                        .then(function () {
+                            set_contract(result.contract.id)
+                        });
+                });
+        })
+        
     };
     $scope.openContractListUi = function () {
         WMWindowSync.openTab(WMConfig.url.html_contract_list, refreshAvailableContracts);

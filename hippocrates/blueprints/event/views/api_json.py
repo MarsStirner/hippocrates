@@ -17,7 +17,7 @@ from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int)
-from nemesis.models.accounting import Service
+from nemesis.models.accounting import Service, Contract
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
 from nemesis.models.client import Client
 from nemesis.models.diagnosis import Diagnosis, Diagnostic
@@ -530,7 +530,10 @@ def api_delete_event():
 @api_method
 def api_get_events():
     flt = request.get_json()
-    base_query = Event.query.join(Client).filter(Event.deleted == 0)
+    base_query = Event.query.join(Client).filter(Event.deleted == 0).options(
+        db.contains_eager(Event.client),
+        # db.contains_eager(Event.contract),
+    )
     context = EventVisualizer()
     if 'id' in flt:
         event = base_query.filter(Event.id == flt['id']).first()
@@ -591,6 +594,9 @@ def api_get_events():
         )
     if 'diag_mkb' in flt:
         base_query = base_query.join(Event.diagnostics, Diagnosis, Diagnosis.mkb).filter(MKB.DiagID == flt['diag_mkb']['code'])
+
+    if 'draft_contract' in flt:
+        base_query = base_query.join(Contract).filter(Contract.draft == (flt['draft_contract'] and 1 or 0))
 
     order_options = flt.get('sorting_params')
     if order_options:
