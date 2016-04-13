@@ -173,7 +173,7 @@ def api_0_event_search_ambulance():
 def api_0_area_list():
     level1 = {}
     level2 = []
-    organisation = Organisation.query.get(current_user.org_id)
+    organisation = Organisation.query.get(current_user.org_id) if current_user.org_id else None
     risar_regions = [organisation.area[:2].ljust(11, '0')] if organisation else None
     if not risar_regions:
         risar_regions = app.config.get('RISAR_REGIONS', [])
