@@ -71,7 +71,6 @@ def api_get_ttj_records():
 @module.route('/api/ttj_change_status.json', methods=['POST'])
 @api_method
 def api_ttj_change_status():
-    result = None
     data = request.json
     status = data.get('status')
     ids = data.get('ids')
@@ -91,7 +90,7 @@ def api_ttj_change_status():
             )
         )
         try:
-            result = sess.put(
+            sess.put(
                 core_integration_address,
                 json={'ids': list(aids)}
             )
@@ -104,4 +103,3 @@ def api_ttj_change_status():
         synchronize_session=False
     )
     db.session.commit()
-    return result
