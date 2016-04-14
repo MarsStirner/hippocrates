@@ -148,7 +148,7 @@ class XForm(object):
                 # Ручная валидация
                 raise ApiException(
                     VALIDATION_ERROR,
-                    u'%s.find_parent_obj called without "parent_obj_id"' %
+                    u'%s.check_parent_obj called without "parent_obj_id"' %
                     self.__class__.__name__
                 )
             else:
@@ -393,6 +393,9 @@ class XForm(object):
         return res
 
 
+from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
+from blueprints.risar.lib.card import PregnancyCard
+
 class CheckupsXForm(XForm):
     __metaclass__ = ABCMeta
 
@@ -450,3 +453,113 @@ class CheckupsXForm(XForm):
                 external_system_id=self.external_system.id,
             )
             db.session.add(external_action)
+
+    def set_pcard(self):
+        event = self.parent_obj
+        self.pcard = PregnancyCard.get_for_event(event)
+
+    def get_diags_data(self, data):
+        return data.get('medical_report', {})
+
+    def get_diagnoses(self, data, form_data):
+        # Прислали новый код МКБ, и не прислали старый - старый диагноз закрыли, новый открыли.
+        # если тот же МКБ пришел не как осложнение, а как сопутствующий, это смена вида
+        # если в списке диагнозов из МИС придут дубли кодов МКБ - отсекать лишние
+        # Если код МКБ в основном заболевании - игнорировать (отсекать) его в осложнениях и сопутствующих.
+        # Если код МКБ в осложнении - отсекать его в сопутствующих
+        # если два раза в одной группе (в осложнениях, например) - оставлять один
+
+        diags_data = self.get_diags_data(data)
+        action = self.target_obj
+        diagnostics = self.pcard.get_client_diagnostics(action.begDate,
+                                                        action.endDate)
+        db_diags = {}
+        for diagnostic in diagnostics:
+            diagnosis = diagnostic.diagnosis
+            if diagnosis.endDate:
+                continue
+            q_list = list(Action_Diagnosis.query.join(
+                rbDiagnosisKind,
+            ).filter(
+                Action_Diagnosis.action == action,
+                Action_Diagnosis.diagnosis == diagnosis,
+                Action_Diagnosis.deleted == 0,
+            ).values(rbDiagnosisKind.code))
+            diag_kind_code = 'associated'
+            if q_list:
+                diag_kind_code = q_list[0][0]
+            db_diags[diagnostic.MKB] = {
+                'diagnosis_id': diagnosis.id,
+                'diagKind_code': diag_kind_code,
+            }
+
+        mis_diags = {}
+        for risar_key, v in sorted(self.DIAG_KINDS_MAP.items(),
+                                   key=lambda x: x[1]['level']):
+            mis_key, is_vector, default = v['attr'], v['is_vector'], v['default']
+            mkb_list = diags_data.get(mis_key, default)
+            if not is_vector:
+                mkb_list = mkb_list and [mkb_list] or []
+            for mkb in mkb_list:
+                if mkb not in mis_diags:
+                    mis_diags[mkb] = {
+                        'diagKind_code': risar_key,
+                    }
+
+        def add_diag_data():
+            res.append({
+                'id': db_diag.get('diagnosis_id'),
+                'deleted': 0,
+                'kind_changed': kind_changed,
+                'diagnostic_changed': diagnostic_changed,
+                'diagnostic': {
+                    'mkb': self.rb(mkb, MKB, 'DiagID'),
+                },
+                'diagnosis_types': {
+                    'final': diagnosis_type,
+                },
+                'person': form_data.get('person'),
+                'set_date': form_data.get('beg_date'),
+                'end_date': end_date,
+            })
+
+        res = []
+        for mkb in set(db_diags.keys() + mis_diags.keys()):
+            db_diag = db_diags.get(mkb, {})
+            mis_diag = mis_diags.get(mkb, {})
+            if db_diag and mis_diag:
+                # сменить тип
+                diagnostic_changed = False
+                kind_changed = mis_diag.get('diagKind_code') != db_diag.get('diagKind_code')
+                diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
+                end_date = None
+                add_diag_data()
+            elif not db_diag and mis_diag:
+                # открыть
+                diagnostic_changed = False
+                kind_changed = True
+                diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
+                end_date = None
+                add_diag_data()
+            elif db_diag and not mis_diag:
+                # закрыть
+                # нельзя закрывать, если используется в документах своего типа с бОльшей датой
+                if self.is_using_by_next_checkups(db_diag['diagnosis_id'], action):
+                    continue
+                diagnostic_changed = True
+                kind_changed = False
+                diagnosis_type = self.rb(db_diag.get('diagKind_code'), rbDiagnosisKind)
+                end_date = form_data.get('beg_date')
+                add_diag_data()
+        return res
+
+    @classmethod
+    def is_using_by_next_checkups(cls, diagnosis_id, action):
+        q = Action_Diagnosis.query.join(cls.target_obj_class).filter(
+            Action_Diagnosis.diagnosis_id == diagnosis_id,
+            cls.target_obj_class.begDate >= action.begDate,
+            cls.target_obj_class.actionType == action.actionType,
+            cls.target_obj_class.id != action.id,
+            cls.target_obj_class.deleted == 0,
+        )
+        return db.session.query(q.exists()).scalar()
