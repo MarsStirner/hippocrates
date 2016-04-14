@@ -69,8 +69,10 @@
                                     <span class="fa fa-reorder"></span> <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="javascript:void(0)" ng-click="createContractFromDraft()" ng-hide="!event.info.contract.draft">Заключить договор</a></li>
-                                    <li><a href="javascript:void(0)" ng-click="editContract()" ng-hide="!event.info.contract || event.info.contract.draft">Редактировать</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="createContractFromDraft()"
+                                           ng-hide="!event.info.contract.draft || !event.info.contract.id">Заключить договор</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="editContract()"
+                                           ng-hide="!event.info.contract || event.info.contract.draft">Редактировать</a></li>
                                     <li><a href="javascript:void(0)" ng-click="createContract()">Создать новый договор</a></li>
                                     <li role="separator" class="divider"></li>
                                     <li><a href="javascript:void(0)" ng-click="openContractListUi()">Перейти к списку договоров</a></li>
