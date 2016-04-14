@@ -29,7 +29,7 @@
                         <td ng-bind="risk.modify_datetime | asDateTime"></td>
                         <td ng-bind="risk.modify_person.name"></td>
                         <td simple-collapsable>
-                            <div ng-bind-html="risk.risk_group.name | trustHtml"></div>
+                            <div ng-bind-html="risk.risk_group.conditions | trustHtml"></div>
                         </td>
                     </tr>
                     </tbody>
