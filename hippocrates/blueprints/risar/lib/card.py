@@ -223,6 +223,8 @@ class PregnancyCard(object):
             query = query.join(Action_Diagnosis).join(Action).filter(
                 Action.event_id == Event.id,
                 Action_Diagnosis.diagnosisKind_id.in_(kind_ids),
+                Action.deleted == 0,
+                Action_Diagnosis.deleted == 0,
             )
         if end_date is not None:
             query = query.filter(
