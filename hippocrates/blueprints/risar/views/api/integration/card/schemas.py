@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from blueprints.risar.views.api.integration.schemas import Schema
 
 
-class CardSchema(object):
+class CardSchema(Schema):
     """
     Схемы для проверки валидности данных карты случая
     """

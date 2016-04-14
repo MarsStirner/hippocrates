@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from blueprints.risar.views.api.integration.schemas import Schema
 
 
-class AnamnesisMotherSchema(object):
+class AnamnesisMotherSchema(Schema):
     """
     Схемы для проверки валидности данных анамнеза матери
     """
@@ -198,7 +199,7 @@ class AnamnesisMotherSchema(object):
     }]
 
 
-class AnamnesisFatherSchema(object):
+class AnamnesisFatherSchema(Schema):
     """
     Схемы для проверки валидности данных анамнеза отца
     """
@@ -358,7 +359,7 @@ class AnamnesisFatherSchema(object):
     }]
 
 
-class AnamnesisPrevPregSchema(object):
+class AnamnesisPrevPregSchema(Schema):
     """
     Схемы для проверки валидности данных анамнеза предыдущих беременностей
     """

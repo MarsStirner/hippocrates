@@ -6,11 +6,8 @@ from datetime import datetime
 from decimal import Decimal
 from abc import ABCMeta, abstractmethod
 
-from blueprints.risar.lib.card import PregnancyCard
 from nemesis.lib.apiutils import ApiException
 from nemesis.views.rb import check_rb_value_exists
-from nemesis.models.organisation import Organisation
-from nemesis.models.person import Person
 from nemesis.lib.vesta import Vesta
 from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
 from blueprints.risar.models.risar import ActionIdentification
@@ -89,9 +86,9 @@ class XForm(object):
     parent_id_required = True
     target_id_required = True
 
-    def __init__(self, api_version):
+    def __init__(self, api_version, is_create=False):
         self.version = 0
-        self.new = False
+        self.new = is_create
         self.parent_obj_id = None
         self.target_obj_id = None
         self.parent_obj = None
@@ -146,32 +143,38 @@ class XForm(object):
 
     def check_parent_obj(self, parent_obj_id):
         self.parent_obj_id = parent_obj_id
-        if parent_obj_id is None:
-            # Ручная валидация
-            raise ApiException(
-                VALIDATION_ERROR,
-                u'%s.find_parent_obj called without "parent_obj_id"' %
-                self.__class__.__name__
-            )
-        else:
-            q = self._find_parent_obj_query()
-            parent_obj_exists = db.session.query(q.exists()).scalar()
-            if not parent_obj_exists:
-                raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
+        if self.parent_id_required or parent_obj_id:
+            if parent_obj_id is None:
+                # Ручная валидация
+                raise ApiException(
+                    VALIDATION_ERROR,
+                    u'%s.find_parent_obj called without "parent_obj_id"' %
+                    self.__class__.__name__
+                )
+            else:
+                q = self._find_parent_obj_query()
+                parent_obj_exists = db.session.query(q.exists()).scalar()
+                if not parent_obj_exists:
+                    raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
 
-    def check_target_obj(self, parent_obj_id, target_obj_id, data=None):
+    def check_params(self, target_obj_id, parent_obj_id=None, data=None):
         self.parent_obj_id = parent_obj_id
         self.target_obj_id = target_obj_id
-        if target_obj_id is None:
-            if self.target_id_required and not data:
+        if self.target_id_required and bool(self.new) ^ (target_obj_id is None):
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'Метод запроса не соответствует пути API'
+            )
+        if self.new:
+            if not data:
                 raise ApiException(
                     INTERNAL_ERROR,
                     u'%s.check_target_obj called without "data"' %
                     self.__class__.__name__
                 )
 
-            self.new = True
             self.check_parent_obj(parent_obj_id)
+            self.check_duplicate(data)
         else:
             if self.parent_id_required and parent_obj_id is None:
                 # Ручная валидация
@@ -181,15 +184,20 @@ class XForm(object):
                     self.__class__.__name__
                 )
 
-            q = self._find_target_obj_query()
-            target_obj_exist = db.session.query(q.exists()).scalar()
-            if not target_obj_exist:
-                raise ApiException(NOT_FOUND_ERROR, self.get_target_nf_msg())
-        self.check_duplicate(parent_obj_id, target_obj_id, data)
+            if self.target_id_required:
+                q = self._find_target_obj_query()
+                target_obj_exist = db.session.query(q.exists()).scalar()
+                if not target_obj_exist:
+                    raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                                       self.target_obj_class.__name__)
+            else:
+                self.check_parent_obj(parent_obj_id)
 
-    def check_target_obj_single(self, parent_obj_id, data=None, create=False):
-        target_obj_id = None if create else 'single_obj'
-        self.check_target_obj(parent_obj_id, target_obj_id, data)
+            if data:
+                self.check_external_id(data)
+
+    def check_external_id(self, data):
+        pass
 
     def _find_parent_obj_query(self):
         q = self.parent_obj_class.query.filter(
@@ -204,14 +212,12 @@ class XForm(object):
         pass
 
     @abstractmethod
-    def check_duplicate(self, parent_obj_id, target_obj_id, data):
+    def check_duplicate(self, data):
         pass
 
-    @abstractmethod
     def update_target_obj(self, data):
         pass
 
-    @abstractmethod
     def delete_target_obj(self):
         pass
 
@@ -238,11 +244,12 @@ class XForm(object):
             raise ApiException(NOT_FOUND_ERROR, u'Не найдена организация по коду {0}'.format(tfoms_code))
         return org
 
-    def find_doctor(self, person_code, org_code):
-        org = get_person_by_codes(person_code, org_code)
-        if not org:
+    @staticmethod
+    def find_doctor(person_code, org_code):
+        person = get_person_by_codes(person_code, org_code)
+        if not person:
             raise ApiException(NOT_FOUND_ERROR, u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code))
-        return org
+        return person
 
     def find_client(self, client_id):
         client = get_client_query(client_id).first()
@@ -314,165 +321,6 @@ class XForm(object):
             return None
         return rb.name if hasattr(rb, 'name') else rb['name']
 
-
-class CheckupsXForm(object):
-    __metaclass__ = ABCMeta
-    schema = None
-    parent_obj_class = None
-    target_obj_class = None
-
-    def __init__(self, api_version):
-        self.version = 0
-        self.new = False
-        self.parent_obj_id = None
-        self.target_obj_id = None
-        self.parent_obj = None
-        self.target_obj = None
-        self.external_id = None
-
-        self.external_system = rbAccountingSystem.query.filter(
-            rbAccountingSystem.code == MIS_BARS_CODE,
-        ).first()
-
-        self.set_version(api_version)
-
-    def set_version(self, version):
-        for v in xrange(self.version + 1, version + 1):
-            method = getattr(self, 'set_version_%i' % v, None)
-            if method is None:
-                raise ApiException(
-                    VALIDATION_ERROR, 'Version %i of API is unsupported' % (version, )
-                )
-            else:
-                method()
-        self.version = version
-
-    def validate(self, data):
-        if data is None:
-            raise ApiException(VALIDATION_ERROR, 'No JSON body')
-        schema = self.schema[self.version]
-        cls = jsonschema.validators.validator_for(schema)
-        val = cls(schema)
-        errors = [{'error': error.message,
-                   'instance': error.instance,
-                   'path': '/' + '/'.join(map(unicode, error.absolute_path))}
-                  for error in val.iter_errors(data)]
-        if errors:
-            logger.error(u'Ошибка валидации данных', extra={'errors': errors})
-            raise ApiException(
-                VALIDATION_ERROR,
-                'Validation error',
-                errors=errors,
-            )
-
-    def find_parent_obj(self, parent_obj_id):
-        self.parent_obj_id = parent_obj_id
-        if parent_obj_id is None:
-            # Ручная валидация
-            raise Exception(
-                u'%s.find_parent_obj called without "parent_obj_id"' %
-                self.__class__.__name__
-            )
-        else:
-            parent_obj = self._find_parent_obj_query().first()
-            if not parent_obj:
-                raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
-                                   self.parent_obj_class.__name__)
-        self.parent_obj = parent_obj
-
-    def check_parent_obj(self, parent_obj_id):
-        self.parent_obj_id = parent_obj_id
-        if parent_obj_id is None:
-            # Ручная валидация
-            raise ApiException(
-                VALIDATION_ERROR,
-                u'%s.find_parent_obj called without "parent_obj_id"' %
-                self.__class__.__name__
-            )
-        else:
-            q = self._find_parent_obj_query()
-            parent_obj_exists = db.session.query(q.exists()).scalar()
-            if not parent_obj_exists:
-                raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
-                                   self.parent_obj_class.__name__)
-
-    def check_target_obj(self, parent_obj_id, target_obj_id, data=None):
-        self.parent_obj_id = parent_obj_id
-        self.target_obj_id = target_obj_id
-        if target_obj_id is None:
-            if not data:
-                raise ApiException(
-                    INTERNAL_ERROR,
-                    u'%s.check_target_obj called without "data"' %
-                    self.__class__.__name__
-                )
-
-            self.new = True
-            self.check_parent_obj(parent_obj_id)
-            self.check_duplicate(data)
-        else:
-            if parent_obj_id is None:
-                # Ручная валидация
-                raise ApiException(
-                    VALIDATION_ERROR,
-                    u'%s.check_target_obj called without "parent_obj_id"' %
-                    self.__class__.__name__
-                )
-
-            q = self._find_target_obj_query()
-            target_obj_exist = db.session.query(q.exists()).scalar()
-            if not target_obj_exist:
-                raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
-                                   self.target_obj_class.__name__)
-            if data:
-                self.check_external_id(data)
-
-    def _find_parent_obj_query(self):
-        return self.parent_obj_class.query.filter(
-            self.parent_obj_class.id == self.parent_obj_id
-        )
-
-    @abstractmethod
-    def _find_target_obj_query(self):
-        pass
-
-    def check_duplicate(self, data):
-        self.external_id = data.get('external_id')
-        if not self.external_id:
-            raise ApiException(
-                VALIDATION_ERROR,
-                u'api_checkup_obs_first_save used without "external_id"' %
-                self.target_obj_class.__name__
-            )
-        q = self._find_target_obj_query().join(
-            ActionIdentification
-        ).join(rbAccountingSystem).filter(
-            ActionIdentification.external_id == self.external_id,
-            rbAccountingSystem.code == MIS_BARS_CODE,
-        )
-        target_obj_exist = db.session.query(q.exists()).scalar()
-        if target_obj_exist:
-            raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
-                               self.target_obj_class.__name__)
-
-    def check_external_id(self, data):
-        self.external_id = data.get('external_id')
-        if not self.external_id:
-            raise ApiException(
-                VALIDATION_ERROR,
-                u'api_checkup_obs_first_save used without "external_id"' %
-                self.target_obj_class.__name__
-            )
-        q = ActionIdentification.query.join(rbAccountingSystem).filter(
-            ActionIdentification.external_id == self.external_id,
-            rbAccountingSystem.code == MIS_BARS_CODE,
-            ActionIdentification.action_id == self.target_obj_id,
-        )
-        target_obj_exist = db.session.query(q.exists()).scalar()
-        if not target_obj_exist:
-            raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
-                               self.target_obj_class.__name__)
-
     def rb(self, code, rb_model, code_field_name='code'):
         id_ = self.rb_validate(rb_model, code, code_field_name)
         return code and {'code': code, 'id': id_} or None
@@ -487,12 +335,21 @@ class CheckupsXForm(object):
         if code:
             if isinstance(rb_model, basestring):
                 rb = Vesta.get_rb(rb_model, code)
-                row_id = rb['_id']
+                row_id = rb and rb.get('_id')
             else:
                 field = getattr(rb_model, code_field_name)
-                row_id = list(rb_model.query.filter(
+                res_list = list(rb_model.query.filter(
                     field == code
-                ).values(rb_model.id))[0][0]
+                ).values(rb_model.id))[0]
+                row_id = res_list and res_list[0] or None
+            if not row_id:
+                raise ApiException(
+                    NOT_FOUND_ERROR,
+                    u'В справочнике "%s" запись с кодом "%s" не найдена' % (
+                        rb_model.__name__,
+                        code,
+                    )
+                )
         return row_id
 
     def mapping_part(self, part, data, res):
@@ -535,6 +392,54 @@ class CheckupsXForm(object):
             res = int(v)
         return res
 
+
+class CheckupsXForm(XForm):
+    __metaclass__ = ABCMeta
+
+    def __init__(self, *a, **kw):
+        super(CheckupsXForm, self).__init__(*a, **kw)
+        self.external_id = None
+        self.external_system = rbAccountingSystem.query.filter(
+            rbAccountingSystem.code == MIS_BARS_CODE,
+        ).first()
+
+    def check_duplicate(self, data):
+        self.external_id = data.get('external_id')
+        if not self.external_id:
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'api_checkup_obs_first_save used without "external_id"' %
+                self.target_obj_class.__name__
+            )
+        q = self._find_target_obj_query().join(
+            ActionIdentification
+        ).join(rbAccountingSystem).filter(
+            ActionIdentification.external_id == self.external_id,
+            rbAccountingSystem.code == MIS_BARS_CODE,
+        )
+        target_obj_exist = db.session.query(q.exists()).scalar()
+        if target_obj_exist:
+            raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
+                               self.target_obj_class.__name__)
+
+    def check_external_id(self, data):
+        self.external_id = data.get('external_id')
+        if not self.external_id:
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'api_checkup_obs_first_save used without "external_id"' %
+                self.target_obj_class.__name__
+            )
+        q = ActionIdentification.query.join(rbAccountingSystem).filter(
+            ActionIdentification.external_id == self.external_id,
+            rbAccountingSystem.code == MIS_BARS_CODE,
+            ActionIdentification.action_id == self.target_obj_id,
+        )
+        target_obj_exist = db.session.query(q.exists()).scalar()
+        if not target_obj_exist:
+            raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                               self.target_obj_class.__name__)
+
     def save_external_data(self):
         if self.new:
             external_action = ActionIdentification(
@@ -545,11 +450,3 @@ class CheckupsXForm(object):
                 external_system_id=self.external_system.id,
             )
             db.session.add(external_action)
-
-    @staticmethod
-    def get_person_id(regional_code, tfoms_code):
-        res = list(Person.query.join(Organisation).filter(
-            Person.regionalCode == regional_code,
-            Organisation.TFOMSCode == tfoms_code,
-        ).values(Person.id))[0][0]
-        return res

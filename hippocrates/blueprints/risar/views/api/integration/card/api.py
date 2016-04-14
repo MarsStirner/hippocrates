@@ -13,13 +13,7 @@ from .xform import CardXForm
 @api_method(hook=hook)
 @public_endpoint
 def api_card_schema(api_version):
-    try:
-        return CardXForm.schema[api_version]
-    except IndexError:
-        raise ApiException(
-            404,
-            u'Api version {0} is not supported. Maximum is {0}'.format(api_version, len(CardXForm.schema) - 1)
-        )
+    return CardXForm.get_schema(api_version)
 
 
 @module.route('/api/integration/<int:api_version>/card/', methods=['POST'])
@@ -27,10 +21,11 @@ def api_card_schema(api_version):
 @api_method(hook=hook)
 def api_card_save(api_version, card_id=None):
     data = request.get_json()
-    xform = CardXForm(api_version)
+    create = request.method == 'POST'
+    xform = CardXForm(api_version, create)
     xform.validate(data)
     client_id = data.get('client_id')
-    xform.check_target_obj(client_id, card_id, data)
+    xform.check_params(card_id, client_id, data)
     xform.update_target_obj(data)
     xform.store()
 
@@ -43,6 +38,6 @@ def api_card_save(api_version, card_id=None):
 @api_method(hook=hook)
 def api_card_delete(api_version, card_id):
     xform = CardXForm(api_version)
-    xform.check_target_obj(None, card_id)
+    xform.check_params(card_id)
     xform.delete_target_obj()
     xform.store()

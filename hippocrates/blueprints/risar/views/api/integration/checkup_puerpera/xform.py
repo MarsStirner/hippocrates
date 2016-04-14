@@ -84,7 +84,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
     def mapping_fields(self, data, res):
         self.mapping_part(self.FIELDS_MAP, data, res)
 
-        person_id = self.get_person_id(data.get('doctor'), data.get('hospital'))
+        person_id = self.find_doctor(data.get('doctor'), data.get('hospital')).id
         res.update({
             'person': {
                 'id': person_id,

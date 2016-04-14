@@ -38,10 +38,10 @@ class CardXForm(CardSchema, XForm):
             rbRequestType.code == request_type_pregnancy
         )
 
-    def check_duplicate(self, parent_obj_id, target_obj_id, data):
+    def check_duplicate(self, data):
         if self.new:
             q = db.session.query(Event).join(Client).filter(
-                Client.id == parent_obj_id,
+                Client.id == self.parent_obj_id,
                 Event.deleted == 0,
                 Event.execDate.is_(None)
             )

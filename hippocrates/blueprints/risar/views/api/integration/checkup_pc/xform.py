@@ -158,7 +158,7 @@ class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
         gi = data.get('general_info', {})
         self.mapping_part(self.GENERAL_MAP, gi, res)
 
-        person_id = self.get_person_id(gi.get('doctor'), gi.get('hospital'))
+        person_id = self.find_doctor(gi.get('doctor'), gi.get('hospital')).id
         res['person'] = {
             'id': person_id,
         }

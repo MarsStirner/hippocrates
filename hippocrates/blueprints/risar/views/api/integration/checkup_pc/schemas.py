@@ -6,9 +6,10 @@
 @date: 22.03.2016
 
 """
+from blueprints.risar.views.api.integration.schemas import Schema
 
 
-class CheckupPCSchema(object):
+class CheckupPCSchema(Schema):
     """
     Схемы для проверки валидности данных первичного осмотра
     """

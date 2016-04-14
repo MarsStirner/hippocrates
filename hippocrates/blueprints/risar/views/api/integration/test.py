@@ -68,13 +68,16 @@ def make_login():
     print ' > auth token: ', token
     session_token = get_role(token)
     print ' > session token: ', session_token
+    session = token, session_token
 
-    yield (token, session_token)
+    try:
+        yield session
+    finally:
+        release_token(token)
 
-    release_token(token)
 
-
-def make_api_request(method, url, token, session_token, json_data=None):
+def make_api_request(method, url, session, json_data=None):
+    token, session_token = session
     result = getattr(requests, method)(
         mis_url + url,
         json=json_data,

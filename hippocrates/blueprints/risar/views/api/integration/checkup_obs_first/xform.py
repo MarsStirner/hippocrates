@@ -125,10 +125,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         'associated': {'attr': 'diagnosis_sop', 'default': [], 'is_vector': True, 'level': 3},
     }
 
-    def __init__(self, *a, **kw):
-        super(CheckupObsFirstXForm, self).__init__(*a, **kw)
-        self.card = None
-
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
@@ -158,7 +154,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         gi = data.get('general_info', {})
         self.mapping_part(self.GENERAL_MAP, gi, res)
 
-        person_id = self.get_person_id(gi.get('doctor'), gi.get('hospital'))
+        person_id = self.find_doctor(gi.get('doctor'), gi.get('hospital')).id
         res['person'] = {
             'id': person_id,
         }
@@ -215,8 +211,8 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
 
         medical_report = data.get('medical_report', {})
         action = self.target_obj
-        card = PregnancyCard.get_for_event(action.event)
-        diagnostics = card.get_client_diagnostics(action.begDate,
+        pcard = PregnancyCard.get_for_event(action.event)
+        diagnostics = pcard.get_client_diagnostics(action.begDate,
                                                   action.endDate)
         db_diags = {}
         for diagnostic in diagnostics:
@@ -321,7 +317,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         fetuses = data.pop('fetuses', None)
 
         event = Event.query.get(event_id)
-        card = PregnancyCard.get_for_event(event)
+        pcard = PregnancyCard.get_for_event(event)
         action = get_action_by_id(checkup_id, event, flat_code, True)
 
         self.target_obj = action
@@ -339,10 +335,10 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_fetuses(action, fetuses)
 
-        self.card = card
+        self.pcard = pcard
 
     def reevaluate_data(self):
-        self.card.reevaluate_card_attrs()
+        self.pcard.reevaluate_card_attrs()
 
     def close_diags(self):
         # Роман:

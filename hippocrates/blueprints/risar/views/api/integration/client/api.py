@@ -17,10 +17,7 @@ __author__ = 'viruzzz-kun'
 @api_method(hook=hook)
 @public_endpoint
 def api_client_schema(api_version):
-    try:
-        return ClientXForm.schema[api_version]
-    except IndexError:
-        raise ApiException(404, u'Api version %i is not supported. Maximum is %i' % (api_version, len(ClientXForm.schema) - 1))
+    return ClientXForm.get_schema(api_version)
 
 
 @module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['GET'])

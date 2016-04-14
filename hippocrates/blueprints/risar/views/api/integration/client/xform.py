@@ -35,13 +35,7 @@ class ClientXForm(ClientSchema, XForm):
     def _find_target_obj_query(self):
         pass
 
-    def check_duplicate(self, parent_obj_id, target_obj_id, data):
-        pass
-
-    def update_target_obj(self, data):
-        pass
-
-    def delete_target_obj(self):
+    def check_duplicate(self, data):
         pass
 
     @property

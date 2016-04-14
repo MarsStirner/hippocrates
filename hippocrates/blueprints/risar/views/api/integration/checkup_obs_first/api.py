@@ -20,20 +20,7 @@ from nemesis.systemwide import db
 @api_method(hook=hook)
 @public_endpoint
 def api_checkup_obs_first_schema(api_version):
-    try:
-        return CheckupObsFirstXForm.schema[api_version]
-    except IndexError:
-        raise ApiException(404, u'Api version %i is not supported. Maximum is %i' % (api_version, len(CheckupObsFirstXForm.schema) - 1))
-
-
-# метод GET не описан
-# @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/', methods=['GET'])
-# @api_method(hook=hook)
-# @public_api
-# def api_checkup_obs_first_get(api_version, card_id):
-#     xform = CheckupObsFirstXForm(api_version)
-#     xform.find_parent_obj(card_id)
-#     return xform.as_json()
+    return CheckupObsFirstXForm.get_schema(api_version)
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/', methods=['PUT'])
@@ -41,9 +28,10 @@ def api_checkup_obs_first_schema(api_version):
 @api_method(hook=hook)
 def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
     data = request.get_json()
-    xform = CheckupObsFirstXForm(api_version)
+    create = request.method == 'POST'
+    xform = CheckupObsFirstXForm(api_version, create)
     xform.validate(data)
-    xform.check_target_obj(card_id, exam_obs_id, data)
+    xform.check_params(exam_obs_id, card_id, data)
     xform.update_target_obj(data)
     db.session.commit()
     xform.reevaluate_data()
@@ -54,11 +42,8 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/', methods=['DELETE'])
 @api_method(hook=hook)
 def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
-    # data = request.get_json()
     xform = CheckupObsFirstXForm(api_version)
-    # xform.validate(data)
-    # xform.check_target_obj(card_id, exam_obs_id, data)
-    xform.check_target_obj(card_id, exam_obs_id)
+    xform.check_params(exam_obs_id, card_id)
     xform.delete_target_obj()
     xform.reevaluate_data()
     db.session.commit()

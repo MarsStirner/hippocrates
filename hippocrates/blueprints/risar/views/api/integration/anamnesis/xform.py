@@ -81,15 +81,14 @@ class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
     target_id_required = False
     flat_code = risar_mother_anamnesis
 
-    def check_duplicate(self, parent_obj_id, target_obj_id, data):
-        if self.new:
-            q = self._find_target_obj_query()
-            anamnesis_exists = db.session.query(q.exists()).scalar()
-            if anamnesis_exists:
-                raise ApiException(
-                    ALREADY_PRESENT_ERROR,
-                    u'Уже существует анамнез матери для карты с id = {0}'.format(self.parent_obj_id)
-                )
+    def check_duplicate(self, data):
+        q = self._find_target_obj_query()
+        anamnesis_exists = db.session.query(q.exists()).scalar()
+        if anamnesis_exists:
+            raise ApiException(
+                ALREADY_PRESENT_ERROR,
+                u'Уже существует анамнез матери для карты с id = {0}'.format(self.parent_obj_id)
+            )
 
     def get_target_nf_msg(self):
         return u'Не найден анамнез матери для карты с id = {0}'.format(self.parent_obj_id)
@@ -189,15 +188,14 @@ class AnamnesisFatherXForm(AnamnesisFatherSchema, AnamnesisXForm):
     target_id_required = False
     flat_code = risar_father_anamnesis
 
-    def check_duplicate(self, parent_obj_id, target_obj_id, data):
-        if self.new:
-            q = self._find_target_obj_query()
-            anamnesis_exists = db.session.query(q.exists()).scalar()
-            if anamnesis_exists:
-                raise ApiException(
-                    ALREADY_PRESENT_ERROR,
-                    u'Уже существует анамнез отца для карты с id = {0}'.format(self.parent_obj_id)
-                )
+    def check_duplicate(self, data):
+        q = self._find_target_obj_query()
+        anamnesis_exists = db.session.query(q.exists()).scalar()
+        if anamnesis_exists:
+            raise ApiException(
+                ALREADY_PRESENT_ERROR,
+                u'Уже существует анамнез отца для карты с id = {0}'.format(self.parent_obj_id)
+            )
 
     def get_target_nf_msg(self):
         return u'Не найден анамнез отца для карты с id = {0}'.format(self.parent_obj_id)
@@ -290,7 +288,7 @@ class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
     def get_target_nf_msg(self):
         return u'Не найден анамнез предыдущей беременности с id = {0}'.format(self.target_obj_id)
 
-    def check_duplicate(self, parent_obj_id, target_obj_id, data):
+    def check_duplicate(self, data):
         pass
 
     def convert_and_format(self, data):
