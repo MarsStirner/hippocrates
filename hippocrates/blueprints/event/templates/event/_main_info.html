@@ -81,6 +81,12 @@
                     </div>
                 </div>
                 <div class="row marginal">
+                    <div class="col-md-12" ng-if="formstate.is_dms()">
+                        <label for="event_note" class="control-label">Гарантийное письмо</label>
+                        <input ng-model="event.info.note" class="form-control">
+                    </div>
+                </div>
+                <div class="row marginal">
                 {% if requestType_kind == 'policlinic' %}
                     <div class="col-md-4" ng-hide="formstate.is_diagnostic()"
                          ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
