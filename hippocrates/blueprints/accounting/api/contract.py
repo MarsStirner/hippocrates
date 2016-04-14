@@ -22,7 +22,7 @@ def api_0_contract_get(contract_id=None):
     if get_new:
         contract = con_ctrl.get_new_contract(args)
     elif contract_id:
-        contract = con_ctrl.get_contract(contract_id)
+        contract = con_ctrl.get_contract(contract_id, args)
     else:
         raise ApiException(404, u'`contract_id` required')
     return ContractRepr().represent_contract_full(contract)

@@ -114,18 +114,9 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     };
     $scope.createContractFromDraft = function () {
         if (!safe_traverse($scope, ['event', 'info', 'contract', 'draft'])) return;
-        var client_id = safe_traverse($scope.event.info, ['client_id']),
-            finance_id = safe_traverse($scope.event.info, ['event_type', 'finance', 'id']);
-        AccountingService.get_contract(undefined, {
-            finance_id: finance_id,
-            client_id: client_id,
-            payer_client_id: client_id,
-            generate_number: true
-        }).then(function (new_contract) {
-            var contract = _.deepCopy($scope.event.info.contract);
-            contract.number = new_contract.number;
-            contract.description = new_contract.description;
-            contract.draft = 0;
+        AccountingService.get_contract($scope.event.info.contract.id, {
+            undraft: true
+        }).then(function (contract) {
             ContractModalService.openEdit(contract)
                 .then(function (result) {
                     refreshAvailableContracts()
