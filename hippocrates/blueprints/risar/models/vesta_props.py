@@ -27,10 +27,10 @@ class VestaProperty(object):
             return self
         self.__ensure_instance(instance)
         if self.local not in self.cache[instance]:
-            item = self.cache[instance][self.local] = self.__pull_vesta(getattr(instance, self.local))
+            result = self.cache[instance][self.local] = self.__pull_vesta(getattr(instance, self.local))
         else:
-            item = self.cache[instance][self.local]
-        result = item and {'id': item['_id'], 'name': item['name'], 'code': item['code']}
+            result = self.cache[instance][self.local]
+        result['id'] = result.get('_id')
         return result
 
     def __set__(self, instance, value):
