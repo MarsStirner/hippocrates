@@ -30,7 +30,8 @@ class VestaProperty(object):
             result = self.cache[instance][self.local] = self.__pull_vesta(getattr(instance, self.local))
         else:
             result = self.cache[instance][self.local]
-        result['id'] = result.get('_id')
+        if isinstance(result, dict):
+            result['id'] = result.get('_id')
         return result
 
     def __set__(self, instance, value):
