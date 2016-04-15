@@ -177,14 +177,16 @@ class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
         for i in xrange(max(len(fetus_ids), len(fetus_list))):
             deleted = 1
             fs = {}
-            fetus_id = None
+            db_fetus_id = None
             if i < len(fetus_ids):
-                fetus_id = fetus_ids[i][0]
+                db_fetus_id = fetus_ids[i][0]
             if i < len(fetus_list):
                 deleted = 0
                 fs = fetus_list[i]
 
-            f_state = {'id': fetus_id}
+            f_state = {}
+            if db_fetus_id:
+                f_state['id'] = db_fetus_id
             self.mapping_part(self.FETUS_MAP, fs, f_state)
             res.setdefault('fetuses', []).append({
                 'deleted': deleted,
@@ -231,9 +233,6 @@ class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
 
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_fetuses(action, fetuses)
-
-    def reevaluate_data(self):
-        self.pcard.reevaluate_card_attrs()
 
     def close_diags(self):
         # Роман:

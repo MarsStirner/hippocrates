@@ -469,8 +469,15 @@ class CheckupsXForm(XForm):
             db.session.add(external_action)
 
     def set_pcard(self):
-        event = self.parent_obj
-        self.pcard = PregnancyCard.get_for_event(event)
+        if not self.pcard:
+            if not self.parent_obj:
+                self.find_parent_obj(self.parent_obj_id)
+            event = self.parent_obj
+            self.pcard = PregnancyCard.get_for_event(event)
+
+    def reevaluate_data(self):
+        self.set_pcard()
+        self.pcard.reevaluate_card_attrs()
 
     def get_diags_data(self, data):
         return data.get('medical_report', {})

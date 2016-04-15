@@ -163,7 +163,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
                 deleted = 0
                 mis_fetus = mis_fetus_list[i]
 
-            f_state = {'id': db_fetus_id}
+            f_state = {}
+            if db_fetus_id:
+                f_state['id'] = db_fetus_id
             self.mapping_part(self.FETUS_MAP, mis_fetus, f_state)
             ctg_data = mis_fetus.get('ctg_data', {})
             f_state['ktg_input'] = bool(ctg_data)
@@ -210,9 +212,6 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
 
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_fetuses(action, fetuses)
-
-    def reevaluate_data(self):
-        self.pcard.reevaluate_card_attrs()
 
     def close_diags(self):
         # Роман:
