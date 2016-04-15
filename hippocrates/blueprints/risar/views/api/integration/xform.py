@@ -174,7 +174,7 @@ class XForm(object):
     def check_params(self, target_obj_id, parent_obj_id=None, data=None):
         self.parent_obj_id = parent_obj_id
         self.target_obj_id = target_obj_id
-        if self.target_id_required and bool(self.new) ^ (target_obj_id is None):
+        if self.target_id_required and (bool(self.new) ^ (target_obj_id is not None)):
             raise ApiException(
                 VALIDATION_ERROR,
                 u'Метод запроса не соответствует пути API'
