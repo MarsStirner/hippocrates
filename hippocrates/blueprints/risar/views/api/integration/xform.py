@@ -141,6 +141,20 @@ class XForm(object):
                 raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
         self.parent_obj = parent_obj
 
+    def find_target_obj(self, target_obj_id):
+        self.target_obj_id = target_obj_id
+        if target_obj_id is None:
+            # Ручная валидация
+            raise Exception(
+                u'%s.find_target_obj called without "target_obj_id"' %
+                self.__class__.__name__
+            )
+        else:
+            target_obj = self._find_target_obj_query().first()
+            if not target_obj:
+                raise ApiException(NOT_FOUND_ERROR, self.get_target_nf_msg())
+        self.target_obj = target_obj
+
     def check_parent_obj(self, parent_obj_id):
         self.parent_obj_id = parent_obj_id
         if self.parent_id_required or parent_obj_id:

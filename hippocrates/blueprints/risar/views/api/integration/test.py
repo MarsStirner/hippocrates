@@ -136,3 +136,8 @@ if __name__ == '__main__':
         test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
 
         delete_test_card_id(test_card_id)
+
+        # from blueprints.risar.views.api.integration.expert_data.test import \
+        #     test_get_expert_data
+        # client_id = '121'
+        # test_get_expert_data(client_id)
