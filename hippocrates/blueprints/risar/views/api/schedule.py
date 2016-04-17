@@ -35,34 +35,38 @@ def api_0_schedule(person_id=None):
     # указывает на неподходящий event), то из последних незакрытых случаев
     # беременности выбирается для данного пациента (если он есть).
     sq = db.session.query(
-        Event.client_id,
         func.max(Event.id).label('max_id')
     ).select_from(Event).filter(
         Event.deleted == 0,
         Event.execDate == None,
-    ).group_by(Event.client_id).subquery('sq')
+        ScheduleClientTicket.client_id == Event.client_id,
+    ).correlate(ScheduleClientTicket
+    ).group_by(Event.client_id)
 
-    query = db.session.query(ScheduleTicket, Event).join(
+    query = db.session.query(ScheduleTicket).join(
         Schedule
     ).outerjoin(
         ScheduleClientTicket
-    ).filter(
-        or_(
-            and_(ScheduleClientTicket.event_id.isnot(None),
-                 Event.id == ScheduleClientTicket.event_id),
-            and_(ScheduleClientTicket.event_id.is_(None),
-                 Event.id == (sq.c.max_id))
+    ).outerjoin(
+        Event,
+        and_(
+            Event.deleted == 0,
+            Event.execDate == None,
+            or_(
+                and_(ScheduleClientTicket.event_id.isnot(None),
+                     Event.id == ScheduleClientTicket.event_id),
+                and_(ScheduleClientTicket.event_id.is_(None),
+                     Event.id == sq)
+            )
         ),
-        ScheduleClientTicket.client_id == sq.c.client_id,
+    ).filter(
         Schedule.date == for_date,
         Schedule.person_id == person_id,
         ScheduleTicket.deleted == 0,
         ScheduleClientTicket.deleted == 0,
-        Event.deleted == 0,
-        Event.execDate == None,
     )
     if not all_tickets:
         query = query.filter(ScheduleClientTicket.id.isnot(None))
-    ticket_event_list = query.all()
+    ticket_event_ids_list = query.values(ScheduleTicket.id, Event.id)
 
-    return map(represent_ticket, ticket_event_list)
+    return map(represent_ticket, ticket_event_ids_list)

@@ -26,8 +26,10 @@ from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
 from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PregnancyPathology, ErrandStatus, CardFillRate)
+from nemesis.models.event import Event
 from nemesis.models.exists import rbAttachType
 from nemesis.models.risar import rbPerinatalRiskRate
+from nemesis.models.schedule import ScheduleTicket
 
 __author__ = 'mmalkov'
 
@@ -629,12 +631,12 @@ def represent_diag_shortly(diagnostic):
     }
 
 
-def represent_ticket(ticket_event):
+def represent_ticket(ticket_event_ids):
     from nemesis.models.actions import Action, ActionType
-    event = ticket_event.Event
-    ticket = ticket_event.ScheduleTicket
+    event = Event.query.filter(Event.id == ticket_event_ids[1]).first()
+    ticket = ScheduleTicket.query.get(ticket_event_ids[0])
     checkup_n = 0
-    if event.id is not None:
+    if event:
         checkup_n = Action.query\
             .join(ActionType)\
             .filter(
