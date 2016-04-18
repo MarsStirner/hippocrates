@@ -24,6 +24,10 @@ class HospitalizationSchema(Schema):
                     "description": "Внешний ID",
                     "type": "string"
                 },
+                "hospitalization_id": {
+                    "description": "ID Госпитализации",
+                    "type": "string"
+                },
                 "date_in": {
                     "description": "Дата поступленияя",
                     "type": "string",

@@ -23,14 +23,6 @@ def api_hospitalization_schema(api_version):
     return HospitalizationXForm.get_schema(api_version)
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization', methods=['GET'])
-@api_method(hook=hook)
-def api_hospitalization_get(api_version, card_id):
-    xform = HospitalizationXForm(api_version)
-    xform.check_params(card_id)
-    return xform.as_json()
-
-
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/<int:hospitalization_id>', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization', methods=['POST'])
 @api_method(hook=hook)
