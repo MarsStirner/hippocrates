@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import func, and_
 
 from blueprints.risar.lib.utils import format_action_data
 from blueprints.risar.lib.expert.utils import em_stats_status_list
+from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
@@ -15,6 +16,14 @@ class EventMeasureController(BaseModelController):
 
     def get_selecter(self):
         return EventMeasureSelecter()
+
+    def regenerate(self, action):
+        gen = EventMeasureGenerator(action)
+        gen.generate_measures()
+
+    def delete_in_action(self, action):
+        gen = EventMeasureGenerator(action)
+        gen.clear_existing_measures()
 
     def execute(self, em):
         em.status = MeasureStatus.performed[0]

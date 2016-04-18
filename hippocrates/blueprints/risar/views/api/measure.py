@@ -8,7 +8,6 @@ from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
 from nemesis.systemwide import db
 from blueprints.risar.app import module
-from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
 from blueprints.risar.lib.expert.em_result_repr import EmResultRepr
@@ -23,9 +22,8 @@ from blueprints.risar.risar_config import request_type_pregnancy
 @api_method
 def api_0_event_measure_generate(action_id):
     action = Action.query.get_or_404(action_id)
-    measure_gen = EventMeasureGenerator(action)
-    measure_gen.generate_measures()
     em_ctrl = EventMeasureController()
+    em_ctrl.regenerate(action)
     measures = em_ctrl.get_measures_in_action(action)
     return EventMeasureRepr().represent_listed_event_measures_in_action(measures)
 
@@ -45,8 +43,8 @@ def api_0_event_measure_get(event_measure_id=None):
 @api_method
 def api_0_event_measure_remove(action_id):
     action = Action.query.get_or_404(action_id)
-    measure_gen = EventMeasureGenerator(action)
-    measure_gen.clear_existing_measures()
+    em_ctrl = EventMeasureController()
+    em_ctrl.delete_in_action(action)
     return []
 
 

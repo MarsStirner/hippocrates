@@ -9,6 +9,7 @@ from blueprints.risar.lib.represent import represent_checkup, represent_checkups
     represent_fetuses
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -51,8 +52,9 @@ def api_0_checkup(event_id):
     card.reevaluate_card_attrs()
     db.session.commit()
 
-    # measure_mng = EventMeasureGenerator(action)
-    # measure_mng.generate_measures()
+    em_ctrl = EventMeasureController()
+    em_ctrl.regenerate(action)
+
     return represent_checkup(action)
 
 
