@@ -12,7 +12,7 @@ from nemesis.lib.vesta import Vesta
 from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
 from blueprints.risar.models.risar import ActionIdentification
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, safe_dict
+from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
@@ -172,8 +172,8 @@ class XForm(object):
                     raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
 
     def check_params(self, target_obj_id, parent_obj_id=None, data=None):
-        self.parent_obj_id = parent_obj_id
-        self.target_obj_id = target_obj_id
+        self.parent_obj_id = safe_int(parent_obj_id)
+        self.target_obj_id = safe_int(target_obj_id)
         if self.target_id_required and (bool(self.new) ^ (target_obj_id is None)):
             raise ApiException(
                 VALIDATION_ERROR,

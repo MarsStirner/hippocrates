@@ -76,8 +76,11 @@ class EventMeasureController(BaseModelController):
         return em_result
 
     def get_measures_in_event(self, event, args, paginate=False):
+        event_id = event.id if event is not None else args.get('event_id')
+        if not event_id:
+            raise ValueError('`event` argument or `event_id` in `args` required')
         args.update({
-            'event_id': event.id
+            'event_id': event_id
         })
         if paginate:
             return self.get_paginated_data(args)
@@ -208,7 +211,7 @@ class EventMeasureSelecter(BaseSelecter):
         ).filter(
             EventMeasure.event_id == event_id,
             EventMeasure.deleted == 0,
-            EventMeasure.status.in_(em_stats_status_list)
+            EventMeasure.status.in_(tuple(em_stats_status_list))
         ).with_entities(
             EventMeasure.id
         ).add_columns(
