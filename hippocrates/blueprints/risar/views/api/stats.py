@@ -313,7 +313,7 @@ def api_0_death_stats():
     regions.extend(app.config.get('RISAR_REGIONS', []))
 
     # младеньческая смертность
-    result = collections.defaultdict(list)
+    result = {0: [], 1: []}
     result1 = {'maternal_death': []}
     now = datetime.datetime.now()
     prev = now + datetime.timedelta(days=-now.day)
