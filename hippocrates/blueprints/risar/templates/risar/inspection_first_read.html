@@ -468,7 +468,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Сердцебиение:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.heartbeat.name]]</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.heartbeat" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">ЧСС, уд/мин:</div>
