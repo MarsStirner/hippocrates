@@ -44,6 +44,8 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
                         diagnoses: []
                     };
                 }
+                $scope.epicrisis.diagnosis_pathanatomical = $scope.filterRb($scope.epicrisis.diagnosis_types, 'pathanatomical');
+                $scope.epicrisis.diagnosis_final = $scope.filterRb($scope.epicrisis.diagnosis_types, 'final');
                 $timeout(function () {
                     var hash = document.location.hash;
                     if (hash.match('child')) {
@@ -82,6 +84,19 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
             $('#childrenTabs').find('a:last').tab('show');
         }, 0);
 
+    };
+
+    $scope.filterRb = function (list, code) {
+        var res = [];
+        if(list) {
+            list.forEach(function(el) {
+                if(el.code == code) {
+                    res.push(el);
+                    return res;
+                }
+            });
+        }
+        return res;
     };
 
     $scope.newborn_inspection_delete = function (inspection) {

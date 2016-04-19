@@ -182,7 +182,7 @@
                                         </tr>
                                         <tr>
                                             <td colspan="2">
-                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses" diag-types="epicrisis.diagnosis_types | filter:{code:'final'}" can-add-new="true" can-edit="! epicrisis.endDate" />
+                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses" diag-types="epicrisis.diagnosis_final" can-add-new="true" can-edit="! epicrisis.endDate"></wm-diagnosis-new>
                                             </td>
                                         </tr>
                                         <tr>
@@ -262,7 +262,7 @@
                                         <td colspan="2">
                                             <div class="row">
                                                 <wm-diagnosis-new ng-model="epicrisis.diagnoses" can-add-new="true" can-edit="!! mother_death && ! epicrisis.endDate"
-                                                  diag-types="epicrisis.diagnosis_types | filter:{code:'pathanatomical'}"></wm-diagnosis-new>
+                                                  diag-types="epicrisis.diagnosis_pathanatomical"></wm-diagnosis-new>
                                             </div>
                                         </td>
                                     </tr>
