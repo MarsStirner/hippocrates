@@ -7,12 +7,12 @@
 
 """
 from blueprints.risar.lib.fetus import create_or_update_fetuses
-from blueprints.risar.lib.represent import represent_checkup
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
+from blueprints.risar.lib.represent import represent_epicrisis
+from blueprints.risar.lib.utils import get_action_by_id
 from blueprints.risar.models.fetus import RisarFetusState
-from blueprints.risar.risar_config import first_inspection_code
-from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
-    CheckupObsFirstSchema
+from blueprints.risar.risar_config import risar_epicrisis
+from blueprints.risar.views.api.integration.childbirth.schemas import \
+    ChildbirthSchema
 from blueprints.risar.views.api.integration.xform import CheckupsXForm
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
@@ -20,7 +20,7 @@ from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
 
 
-class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
+class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
     """
     Класс-преобразователь
     """
@@ -125,7 +125,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
-            ActionType.flatCode == first_inspection_code,
+            ActionType.flatCode == risar_epicrisis,
         )
         if self.target_obj_id:
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
@@ -202,24 +202,21 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         })
 
     def update_form(self, data):
-        # like blueprints.risar.views.api.checkups.api_0_checkup
+        # like blueprints.risar.views.api.childbirths.api_0_childbirth
 
         event_id = self.parent_obj_id
         event = self.parent_obj
-        checkup_id = self.target_obj_id
-        flat_code = first_inspection_code
+        childbirth_id = self.target_obj_id
+        flat_code = risar_epicrisis
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         get_diagnoses_func = data.pop('get_diagnoses_func')
         fetuses = data.pop('fetuses', None)
 
-        action = get_action_by_id(checkup_id, event, flat_code, True)
+        action = get_action_by_id(childbirth_id, event, flat_code, True)
 
         self.target_obj = action
         diagnoses = get_diagnoses_func()
-
-        if not checkup_id:
-            close_open_checkups(event_id)
 
         action.begDate = beg_date
 
@@ -256,7 +253,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.id == self.target_obj_id,
-            self.target_obj_class.deleted == 0,
+            Action.deleted == 0
         ).update({'deleted': 1})
 
     def delete_fetuses(self):
@@ -266,9 +263,9 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         ).delete()
 
     def as_json(self):
-        data = represent_checkup(self.target_obj, False)
+        data = represent_epicrisis(self.target_obj, False)
         return {
-            "exam_obs_id": self.target_obj.id,
+            "exam_pc_id": self.target_obj.id,
             "external_id": self.external_id,
             "general_info": self._represent_general_info(data),
             "somatic_status": self._represent_somatic_status(data),
