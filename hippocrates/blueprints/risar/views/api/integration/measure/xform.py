@@ -11,6 +11,7 @@ from blueprints.risar.lib.expert.utils import em_cancelled_all, em_status_all
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_date, safe_bool, safe_int
 from nemesis.models.event import Event
+from nemesis.models.enums import MeasureStatus
 
 
 logger = logging.getLogger('simple')
@@ -70,9 +71,9 @@ class MeasureListXForm(MeasureListSchema, XForm):
     def _represent_measure(self, measure):
         return {
             'measure_id': measure.id,
-            'measure_type_code': measure.measure.code,  # TODO: конвертация кодов
+            'measure_type_code': measure.measure.code,
             'begin_datetime': safe_date(measure.begDateTime),
             'end_datetime': safe_date(measure.endDateTime),
-            'status': measure.status,  # TODO: конвертация кодов
+            'status': unicode(MeasureStatus(measure.status)),
             'result_action_id': measure.resultAction_id,
         }

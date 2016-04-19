@@ -143,7 +143,6 @@ if __name__ == '__main__':
 
         test_auth(login, password)
 
-
         # client_id = '17700'
         # # test_register_edit_delete_card(client_id)
         #
