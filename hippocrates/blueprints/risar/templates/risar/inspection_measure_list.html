@@ -1,11 +1,14 @@
 <div ng-controller="EventMeasureActionViewCtrl">
-<div ng-if="checkup.measures.length || true">
-<div class="text-right">
+<div ng-if="checkup.measures.length">
+<div class="text-right marginal">
     <div class="btn-group">
-        <button type="button" class="btn btn-danger" ng-click="removeMeasures()">Удалить мероприятия</button>
-        <button type="button" class="btn btn-default" ng-click="generateMeasures()">Сформировать мероприятия</button>
+{#        <button type="button" class="btn btn-danger" ng-click="removeMeasures()">Удалить мероприятия</button>#}
+{#        <button type="button" class="btn btn-default" ng-click="generateMeasures()">Сформировать мероприятия</button>#}
         <button type="button" class="btn btn-default"><span class="fa fa-print"></span>Печать всех</button>
     </div>
+</div>
+<div ng-if="checkup.em_error" class="alert alert-danger">
+    [[ checkup.em_error ]]
 </div>
 <table class="table table-striped">
     <thead>
@@ -60,9 +63,6 @@
         </tr>
     </tbody>
 </table>
-</div>
-<div ng-if="checkup.em_error" class="alert alert-danger">
-    [[ checkup.em_error ]]
 </div>
 <div ng-if="!checkup.measures.length && !checkup.em_error">
     <h3 class="text-center">Не хватает данных для формирования мероприятий</h3>
