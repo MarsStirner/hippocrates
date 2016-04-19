@@ -46,8 +46,6 @@ def api_0_checkup_puerpera(event_id):
     reevaluate_card_fill_rate_all(card)
     db.session.commit()
 
-    # measure_mng = EventMeasureGenerator(action)
-    # measure_mng.generate_measures()
     return represent_checkup_puerpera(action)
 
 

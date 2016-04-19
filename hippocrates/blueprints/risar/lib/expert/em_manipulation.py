@@ -1,20 +1,42 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import func, and_
 
 from blueprints.risar.lib.utils import format_action_data
 from blueprints.risar.lib.expert.utils import em_stats_status_list
+from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 
 
+logger = logging.getLogger('simple')
+
+
+class EMGenerateException(Exception):
+    pass
+
+
 class EventMeasureController(BaseModelController):
 
     def get_selecter(self):
         return EventMeasureSelecter()
+
+    def regenerate(self, action):
+        gen = EventMeasureGenerator(action)
+        try:
+            gen.generate_measures()
+        except Exception, e:
+            logger.error(u'Ошибка генерации мероприятий для action с id={0}'.format(action.id), exc_info=True)
+            raise EMGenerateException(u'Ошибка генерации мероприятий')
+
+    def delete_in_action(self, action):
+        gen = EventMeasureGenerator(action)
+        gen.clear_existing_measures()
 
     def execute(self, em):
         em.status = MeasureStatus.performed[0]
@@ -76,8 +98,11 @@ class EventMeasureController(BaseModelController):
         return em_result
 
     def get_measures_in_event(self, event, args, paginate=False):
+        event_id = event.id if event is not None else args.get('event_id')
+        if not event_id:
+            raise ValueError('`event` argument or `event_id` in `args` required')
         args.update({
-            'event_id': event.id
+            'event_id': event_id
         })
         if paginate:
             return self.get_paginated_data(args)
@@ -208,7 +233,7 @@ class EventMeasureSelecter(BaseSelecter):
         ).filter(
             EventMeasure.event_id == event_id,
             EventMeasure.deleted == 0,
-            EventMeasure.status.in_(em_stats_status_list)
+            EventMeasure.status.in_(tuple(em_stats_status_list))
         ).with_entities(
             EventMeasure.id
         ).add_columns(

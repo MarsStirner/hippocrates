@@ -119,6 +119,12 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
     $scope.canEditEmResult = function (em) {
         return em.access.can_edit_result;
     };
+    $scope.emHasAppointment = function (em) {
+        return Boolean(em.data.appointment_action_id);
+    };
+    $scope.emHasResult = function (em) {
+        return Boolean(em.data.result_action_id);
+    };
 
     $scope.init = function () {
         $scope.resetFilters();
@@ -208,8 +214,8 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
     var refreshMeasureCalendar = function (start, end) {
         var query = {
             paginate: false,
-            beg_date_from: start.local().startOf('day').toDate(),
-            end_date_to: end.local().endOf('day').toDate(),
+            beg_date_to: end.local().endOf('day').toDate(),
+            end_date_from: start.local().startOf('day').toDate(),
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined

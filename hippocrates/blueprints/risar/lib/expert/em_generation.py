@@ -249,7 +249,7 @@ class EventMeasureGenerator(object):
         query = db.session.query(EventMeasure).filter(
             EventMeasure.event_id == self.source_action.event_id,
             EventMeasure.deleted == 0,
-            EventMeasure.status.notin_(em_garbage_status_list),
+            EventMeasure.status.notin_(tuple(em_garbage_status_list)),
             EventMeasure.is_actual == EventMeasureActuality.actual[0]
         ).order_by(
             EventMeasure.begDateTime,
@@ -476,6 +476,7 @@ class EventMeasureGenerator(object):
     def create_measure(self, scheme_measure, beg_dt, end_dt, status, action=None):
         em = EventMeasure()
         em.scheme_measure = scheme_measure
+        em.schemeMeasure_id = scheme_measure.id
         em.begDateTime = beg_dt
         em.endDateTime = end_dt
         em.status = status

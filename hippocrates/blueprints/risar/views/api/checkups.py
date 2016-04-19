@@ -9,6 +9,7 @@ from blueprints.risar.lib.represent import represent_checkup, represent_checkups
     represent_fetuses
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -51,9 +52,14 @@ def api_0_checkup(event_id):
     card.reevaluate_card_attrs()
     db.session.commit()
 
-    # measure_mng = EventMeasureGenerator(action)
-    # measure_mng.generate_measures()
-    return represent_checkup(action)
+    em_ctrl = EventMeasureController()
+    em_error = None
+    try:
+        em_ctrl.regenerate(action)
+    except EMGenerateException:
+        em_error = u'Произошла ошибка формирования списка мероприятий'
+
+    return represent_checkup(action, True, em_error)
 
 
 @module.route('/api/0/checkup/')
