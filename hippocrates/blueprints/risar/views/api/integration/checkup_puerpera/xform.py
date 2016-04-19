@@ -83,7 +83,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
             'person': {
                 'id': person_id,
             },
-            'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
+            'get_diagnoses_func': lambda: self.get_diagnoses(data, res, self.DIAG_KINDS_MAP, 'final'),
         })
 
     def get_diags_data(self, data):

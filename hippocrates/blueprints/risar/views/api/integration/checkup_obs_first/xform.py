@@ -198,7 +198,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         self.mapping_part(self.REPORT_MAP, mr, res)
 
         res.update({
-            'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
+            'get_diagnoses_func': lambda: self.get_diagnoses(data, res, self.DIAG_KINDS_MAP, 'final'),
         })
 
     def update_form(self, data):

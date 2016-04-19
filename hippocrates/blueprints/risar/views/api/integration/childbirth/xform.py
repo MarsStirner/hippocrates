@@ -6,17 +6,17 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.lib.fetus import create_or_update_fetuses
+from blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from blueprints.risar.lib.represent import represent_epicrisis
-from blueprints.risar.lib.utils import get_action_by_id
-from blueprints.risar.models.fetus import RisarFetusState
+from blueprints.risar.lib.utils import close_open_checkups, get_action
+from blueprints.risar.models.risar import RisarEpicrisis_Children
 from blueprints.risar.risar_config import risar_epicrisis
 from blueprints.risar.views.api.integration.childbirth.schemas import \
     ChildbirthSchema
 from blueprints.risar.views.api.integration.xform import CheckupsXForm
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
+from nemesis.models.enums import Gender
 from nemesis.models.event import Event
 
 
@@ -26,93 +26,73 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
     """
     parent_obj_class = Event
     target_obj_class = Action
+    target_id_required = False
 
     GENERAL_MAP = {
-        'beg_date': {'attr': 'date', 'default': None, 'rb': None, 'is_vector': False},
-        'height': {'attr': 'height', 'default': None, 'rb': None, 'is_vector': False},
+        'arrival_date': {'attr': 'admission_date', 'default': None, 'rb': None, 'is_vector': False},
+        'pregnancy_duration': {'attr': 'pregnancy_duration', 'default': None, 'rb': None, 'is_vector': False},
+        'delivery_date': {'attr': 'delivery_date', 'default': None, 'rb': None, 'is_vector': False},
+        'delivery_time': {'attr': 'delivery_time', 'default': None, 'rb': None, 'is_vector': False},
+        'pregnancy_speciality': {'attr': 'pregnancy_speciality', 'default': None, 'rb': None, 'is_vector': False},
+        'afterbirth_features': {'attr': 'postnatal_speciality', 'default': None, 'rb': None, 'is_vector': False},
+        'help': {'attr': 'help', 'default': None, 'rb': None, 'is_vector': False},
+        'pregnancy_final': {'attr': 'pregnancy_final', 'default': None, 'rb': 'rbRisarPregnancy_Final', 'is_vector': False},
+        'abort': {'attr': 'abortion', 'default': None, 'rb': 'rbRisarAbort', 'is_vector': False},
+        'maternity_hosp_doctor': {'attr': 'maternity_hospital_doctor', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    MOTHER_DEATH_MAP = {
+        'reason_of_death': {'attr': 'reason_of_death', 'default': None, 'rb': None, 'is_vector': False},
+        'death_date': {'attr': 'death_date', 'default': None, 'rb': None, 'is_vector': False},
+        'death_time': {'attr': 'death_time', 'default': None, 'rb': None, 'is_vector': False},
+        'control_expert_conclusion': {'attr': 'control_expert_conclusion', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    COMPLICATIONS_MAP = {
+        'delivery_waters': {'attr': 'delivery_waters', 'default': None, 'rb': 'rbRisarDelivery_Waters', 'is_vector': False},
+        'weakness': {'attr': 'weakness', 'default': None, 'rb': 'rbRisarWeakness', 'is_vector': False},
+        'meconium_colouring': {'attr': 'meconium_color', 'default': None, 'rb': None, 'is_vector': False},
+        'patologicsl_preliminal_period': {'attr': 'pathological_preliminary_period', 'default': None, 'rb': None, 'is_vector': False},
+        'labor_anomalies': {'attr': 'abnormalities_of_labor', 'default': None, 'rb': None, 'is_vector': False},
+        'chorioamnionit': {'attr': 'chorioamnionitis', 'default': None, 'rb': None, 'is_vector': False},
+        'perineal_tear': {'attr': 'perineal_tear', 'default': None, 'rb': 'rbPerinealTear', 'is_vector': False},
+        'eclampsia': {'attr': 'eclampsia', 'default': None, 'rb': 'rbRisarEclampsia', 'is_vector': False},
+        'funiculus': {'attr': 'funiculus', 'default': None, 'rb': 'rbRisarFuniculus', 'is_vector': False},
+        'afterbirth': {'attr': 'afterbirth', 'default': None, 'rb': 'rbRisarAfterbirth', 'is_vector': False},
+        'poor_blood': {'attr': 'anemia', 'default': None, 'rb': None, 'is_vector': False},
+        'infections_during_birth': {'attr': 'infections_during_delivery', 'default': None, 'rb': None, 'is_vector': False},
+        'infections_after_birth': {'attr': 'infections_after_delivery', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    MANIPULATIONS_MAP = {
+        'caul': {'attr': 'caul', 'default': None, 'rb': None, 'is_vector': False},
+        'calfbed': {'attr': 'calfbed', 'default': None, 'rb': None, 'is_vector': False},
+        'perineotomy': {'attr': 'perineotomy', 'default': None, 'rb': None, 'is_vector': False},
+        'secundines': {'attr': 'secundines', 'default': None, 'rb': None, 'is_vector': False},
+        'other_manipulations': {'attr': 'other_manipulations', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    OPERATIONS_MAP = {
+        'caesarean_section': {'attr': 'caesarean_section', 'default': None, 'rb': 'rbRisarCaesarean_Section', 'is_vector': False},
+        'obstetrical_forceps': {'attr': 'obstetrical_forceps', 'default': None, 'rb': 'rbRisarObstetrical_Forceps', 'is_vector': False},
+        'vacuum_extraction': {'attr': 'vacuum_extraction', 'default': None, 'rb': None, 'is_vector': False},
+        'indication': {'attr': 'indication', 'default': None, 'rb': 'rbRisarIndication', 'is_vector': False},
+        'specialities': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
+        'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
+        'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
+        'operation_complication': {'attr': 'complications', 'default': None, 'rb': 'MKB', 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'embryotomy': {'attr': 'embryotomy', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    KIDS_MAP = {
+        'alive': {'attr': 'alive', 'default': None, 'rb': None, 'is_vector': False},
         'weight': {'attr': 'weight', 'default': None, 'rb': None, 'is_vector': False},
-    }
-
-    SOMATIC_MAP = {
-        'state': {'attr': 'state', 'default': None, 'rb': 'rbRisarState', 'is_vector': False},
-        'subcutaneous_fat': {'attr': 'subcutaneous_fat', 'default': None, 'rb': 'rbRisarSubcutaneous_Fat', 'is_vector': False},
-        'tongue': {'attr': 'tongue', 'default': None, 'rb': 'rbRisarTongue', 'is_vector': True},
-        'complaints': {'attr': 'complaints', 'default': None, 'rb': 'rbRisarComplaints', 'is_vector': True},
-        'skin': {'attr': 'skin', 'default': None, 'rb': 'rbRisarSkin', 'is_vector': True},
-        'lymph': {'attr': 'lymph', 'default': None, 'rb': 'rbRisarLymph', 'is_vector': True},
-        'breast': {'attr': 'breast', 'default': None, 'rb': 'rbRisarBreast', 'is_vector': True},
-        'heart_tones': {'attr': 'heart_tones', 'default': None, 'rb': 'rbRisarHeart_Tones', 'is_vector': True},
-        'pulse': {'attr': 'pulse', 'default': None, 'rb': 'rbRisarPulse', 'is_vector': True},
-        'nipples': {'attr': 'nipples', 'default': None, 'rb': 'rbRisarNipples', 'is_vector': True},
-        'mouth': {'attr': 'mouth', 'default': None, 'rb': 'rbRisarMouth', 'is_vector': False},
-        'breathe': {'attr': 'respiratory', 'default': None, 'rb': 'rbRisarBreathe', 'is_vector': True},
-        'stomach': {'attr': 'abdomen', 'default': None, 'rb': 'rbRisarStomach', 'is_vector': True},
-        'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
-        'urinoexcretory': {'attr': 'urinoexcretory', 'default': None, 'rb': 'rbRisarUrinoexcretory', 'is_vector': True},
-        'ad_right_high': {'attr': 'ad_right_high', 'default': None, 'rb': None, 'is_vector': False},
-        'ad_left_high': {'attr': 'ad_left_high', 'default': None, 'rb': None, 'is_vector': False},
-        'ad_right_low': {'attr': 'ad_right_low', 'default': None, 'rb': None, 'is_vector': False},
-        'ad_left_low': {'attr': 'ad_left_low', 'default': None, 'rb': None, 'is_vector': False},
-        'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
-        'vein': {'attr': 'veins', 'default': None, 'rb': 'rbRisarVein', 'is_vector': False},
-        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
-        'heart_rate': {'attr': 'heart_rate', 'default': None, 'rb': None, 'is_vector': False},
-    }
-
-    OBSTETRIC_MAP = {
-        'MikHHor': {'attr': 'horiz_diagonal', 'default': None, 'rb': None, 'is_vector': False},
-        'MikhVert': {'attr': 'vert_diagonal', 'default': None, 'rb': None, 'is_vector': False},
-        'abdominal': {'attr': 'abdominal_circumference', 'default': None, 'rb': None, 'is_vector': False},
-        'fundal_height': {'attr': 'fundal_height', 'default': None, 'rb': None, 'is_vector': False},
-        'metra_state': {'attr': 'uterus_state', 'default': None, 'rb': 'rbRisarMetra_State', 'is_vector': False},
-        'DsSP': {'attr': 'dssp', 'default': None, 'rb': None, 'is_vector': False},
-        'DsCr': {'attr': 'dscr', 'default': None, 'rb': None, 'is_vector': False},
-        'DsTr': {'attr': 'dstr', 'default': None, 'rb': None, 'is_vector': False},
-        'CExt': {'attr': 'cext', 'default': None, 'rb': None, 'is_vector': False},
-        'CDiag': {'attr': 'cdiag', 'default': None, 'rb': None, 'is_vector': False},
-        'CVera': {'attr': 'cvera', 'default': None, 'rb': None, 'is_vector': False},
-        'soloviev_index': {'attr': 'soloviev_index', 'default': None, 'rb': None, 'is_vector': False},
-        'pelvis_narrowness': {'attr': 'pelvis_narrowness', 'default': None, 'rb': 'rbRisarPelvis_Narrowness', 'is_vector': False},
-        'pelvis_form': {'attr': 'pelvis_form', 'default': None, 'rb': 'rbRisarPelvis_Form', 'is_vector': False},
-    }
-
-    FETUS_MAP = {
-        'position': {'attr': 'fetus_lie', 'default': None, 'rb': 'rbRisarFetus_Position', 'is_vector': False},
-        'position_2': {'attr': 'fetus_position', 'default': None, 'rb': 'rbRisarFetus_Position_2', 'is_vector': False},
-        'type': {'attr': 'fetus_type', 'default': None, 'rb': 'rbRisarFetus_Type', 'is_vector': False},
-        'presenting_part': {'attr': 'fetus_presentation', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
-        'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
-        'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
-    }
-
-    VAGINAL_MAP = {
-        'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
-        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': False},
-        'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
-        'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal', 'is_vector': False},
-        'cervix_consistency': {'attr': 'cervix_consistency', 'default': None, 'rb': 'rbRisarCervix_Consistency', 'is_vector': False},
-        'cervix_position': {'attr': 'cervix_position', 'default': None, 'rb': 'rbRisarCervix_Position', 'is_vector': False},
-        'cervix_maturity': {'attr': 'cervix_maturity', 'default': None, 'rb': 'rbRisarCervix_Maturity', 'is_vector': False},
-        'body_of_womb': {'attr': 'body_of_uterus', 'default': [], 'rb': 'rbRisarBody_Of_Womb', 'is_vector': True},
-        'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
-        'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
-        'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
-        # 'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': True},
-        'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
-        'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
-        'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},
-        'onco_smear': {'attr': 'onco_smear', 'default': None, 'rb': None, 'is_vector': False},
-        'urethra_secretion': {'attr': 'urethra_smear', 'default': None, 'rb': None, 'is_vector': False},
-    }
-
-    REPORT_MAP = {
-        'pregnancy_week': {'attr': 'pregnancy_week', 'default': None, 'rb': None, 'is_vector': False},
-        'next_date': {'attr': 'next_visit_date', 'default': None, 'rb': None, 'is_vector': False},
-        'pregnancy_continuation': {'attr': 'pregnancy_continuation', 'default': None, 'rb': None, 'is_vector': False},
-        'pregnancy_continuation_refusal': {'attr': 'abortion_refusal', 'default': None, 'rb': None, 'is_vector': False},
-        'craft': {'attr': 'working_conditions', 'default': None, 'rb': 'rbRisarCraft', 'is_vector': False},
-        'recommendations': {'attr': 'recommendations', 'default': None, 'rb': None, 'is_vector': False},
-        'notes': {'attr': 'notes', 'default': None, 'rb': None, 'is_vector': False},
+        'length': {'attr': 'length', 'default': None, 'rb': None, 'is_vector': False},
+        'maturity_rate': {'attr': 'maturity_rate', 'default': None, 'rb': 'rbRisarMaturity_Rate', 'is_vector': False},
+        'apgar_score_1': {'attr': 'apgar_score_1', 'default': None, 'rb': None, 'is_vector': False},
+        'apgar_score_5': {'attr': 'apgar_score_5', 'default': None, 'rb': None, 'is_vector': False},
+        'apgar_score_10': {'attr': 'apgar_score_10', 'default': None, 'rb': None, 'is_vector': False},
+        'death_reasons': {'attr': 'death_reason', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     DIAG_KINDS_MAP = {
@@ -121,111 +101,117 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         'associated': {'attr': 'diagnosis_sop', 'default': [], 'is_vector': True, 'level': 3},
     }
 
+    PAT_DIAG_KINDS_MAP = {
+        'main': {'attr': 'pat_diagnosis_osn', 'default': None, 'is_vector': False, 'level': 1},
+        'complication': {'attr': 'pat_diagnosis_osl', 'default': [], 'is_vector': True, 'level': 2},
+        'associated': {'attr': 'pat_diagnosis_sop', 'default': [], 'is_vector': True, 'level': 3},
+    }
+
     def _find_target_obj_query(self):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
             ActionType.flatCode == risar_epicrisis,
         )
-        if self.target_obj_id:
-            res = res.filter(self.target_obj_class.id == self.target_obj_id,)
         return res
 
     def update_target_obj(self, data):
+        if not self.new:
+            self.find_target_obj(self.target_obj_id)
         self.find_parent_obj(self.parent_obj_id)
         self.set_pcard()
         form_data = self.mapping_as_form(data)
         self.update_form(form_data)
-        self.save_external_data()
 
     def mapping_as_form(self, data):
         res = {}
         self.mapping_general_info(data, res)
-        self.mapping_somatic_status(data, res)
-        self.mapping_obstetric_status(data, res)
-        self.mapping_fetus(data, res)
-        self.mapping_vaginal_examination(data, res)
-        self.mapping_medical_report(data, res)
+        self.mapping_mother_death(data, res)
+        self.mapping_complications(data, res)
+        self.mapping_manipulations(data, res)
+        self.mapping_operations(data, res)
+        self.mapping_kids(data, res)
         return res
 
     def mapping_general_info(self, data, res):
-        gi = data.get('general_info', {})
-        self.mapping_part(self.GENERAL_MAP, gi, res)
+        part = data.get('general_info', {})
+        self.mapping_part(self.GENERAL_MAP, part, res)
 
-        person_id = self.find_doctor(gi.get('doctor'), gi.get('hospital')).id
-        res['person'] = {
-            'id': person_id,
-        }
-
-    def mapping_somatic_status(self, data, res):
-        ss = data.get('somatic_status', {})
-        self.mapping_part(self.SOMATIC_MAP, ss, res)
-
-    def mapping_obstetric_status(self, data, res):
-        os = data.get('obstetric_status', {})
-        self.mapping_part(self.OBSTETRIC_MAP, os, res)
-
-    def mapping_fetus(self, data, res):
-        fetus_list = data.get('fetus', [])
-        fetus_q = RisarFetusState.query.filter(RisarFetusState.action_id == self.target_obj_id)
-        fetus_ids = tuple(fetus_q.values(RisarFetusState.id))
-        # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
-        for i in xrange(max(len(fetus_ids), len(fetus_list))):
-            deleted = 1
-            fs = {}
-            db_fetus_id = None
-            if i < len(fetus_ids):
-                db_fetus_id = fetus_ids[i][0]
-            if i < len(fetus_list):
-                deleted = 0
-                fs = fetus_list[i]
-
-            f_state = {}
-            if db_fetus_id:
-                f_state['id'] = db_fetus_id
-            self.mapping_part(self.FETUS_MAP, fs, f_state)
-            res.setdefault('fetuses', []).append({
-                'deleted': deleted,
-                'state': f_state,
-            })
-
-    def mapping_vaginal_examination(self, data, res):
-        ve = data.get('vaginal_examination', {})
-        self.mapping_part(self.VAGINAL_MAP, ve, res)
-
-    def mapping_medical_report(self, data, res):
-        mr = data.get('medical_report', {})
-        self.mapping_part(self.REPORT_MAP, mr, res)
-
+        maternity_hospital = self.find_org(part.get('maternity_hospital'))
+        curation_hospital = self.find_org(part.get('curation_hospital'))
         res.update({
-            'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
+            'LPU': maternity_hospital,
+            'newborn_LPU': curation_hospital,
+            'get_final_diagnoses_func': lambda: self.get_diagnoses(data, res, self.DIAG_KINDS_MAP, 'final'),
         })
 
+    def mapping_mother_death(self, data, res):
+        part = data.get('mother_death', {})
+        self.mapping_part(self.MOTHER_DEATH_MAP, part, res)
+
+        res.update({
+            'get_pat_diagnoses_func': lambda: self.get_diagnoses(data, res, self.PAT_DIAG_KINDS_MAP, 'pathanatomical'),
+        })
+
+    def mapping_complications(self, data, res):
+        part = data.get('complications', {})
+        self.mapping_part(self.COMPLICATIONS_MAP, part, res)
+
+    def mapping_manipulations(self, data, res):
+        part = data.get('manipulations', {})
+        self.mapping_part(self.MANIPULATIONS_MAP, part, res)
+
+    def mapping_operations(self, data, res):
+        part = data.get('operations', {})
+        self.mapping_part(self.OPERATIONS_MAP, part, res)
+
+    def mapping_kids(self, data, res):
+        mis_kids_list = data.get('kids', [])
+        db_kids_q = RisarEpicrisis_Children.query.filter(RisarEpicrisis_Children.action_id == self.target_obj_id)
+        db_kids_ids = tuple(db_kids_q.values(RisarEpicrisis_Children.id))
+        # Обновляем записи как попало (нет ID), лишние удаляем, новые создаем
+        for i in xrange(max(len(db_kids_ids), len(mis_kids_list))):
+            deleted = 1
+            mis_child = {}
+            db_child_id = None
+            if i < len(db_kids_ids):
+                db_child_id = db_kids_ids[i][0]
+            if i < len(mis_kids_list):
+                deleted = 0
+                mis_child = mis_kids_list[i]
+
+            nb_state = {'deleted': deleted}
+            if db_child_id:
+                nb_state['id'] = db_child_id
+            if mis_child:
+                self.mapping_part(self.KIDS_MAP, mis_child, nb_state)
+                nb_state['sex'] = Gender(mis_child['sex']) if mis_child['sex'] is not None else None
+                nb_state['date'] = mis_child['date'] if mis_child['alive'] else mis_child['death_date']
+                nb_state['time'] = mis_child['time'] if mis_child['alive'] else mis_child['death_time']
+            res.setdefault('newborn_inspections', []).append(nb_state)
+
     def update_form(self, data):
-        # like blueprints.risar.views.api.childbirths.api_0_childbirth
+        # like blueprints.risar.views.api.epicrisis.api_0_chart_epicrisis
 
         event_id = self.parent_obj_id
         event = self.parent_obj
-        childbirth_id = self.target_obj_id
-        flat_code = risar_epicrisis
+        get_final_diagnoses_func = data.pop('get_final_diagnoses_func')
+        get_pat_diagnoses_func = data.pop('get_pat_diagnoses_func')
 
-        beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
-        get_diagnoses_func = data.pop('get_diagnoses_func')
-        fetuses = data.pop('fetuses', None)
-
-        action = get_action_by_id(childbirth_id, event, flat_code, True)
-
+        newborn_inspections = filter(None, data.pop('newborn_inspections', []))
+        action = get_action(event, risar_epicrisis, True)
         self.target_obj = action
-        diagnoses = get_diagnoses_func()
+        final_diagnoses = get_final_diagnoses_func()
+        pat_diagnoses = get_pat_diagnoses_func()
+        diagnoses = self.merge_diagnoses((final_diagnoses, pat_diagnoses))
 
-        action.begDate = beg_date
-
+        if not action.id:
+            close_open_checkups(event_id)  # закрыть все незакрытые осмотры
         for code, value in data.iteritems():
             if code in action.propsByCode:
                 action.propsByCode[code].value = value
-
         create_or_update_diagnoses(action, diagnoses)
-        create_or_update_fetuses(action, fetuses)
+        create_or_update_newborns(action, newborn_inspections)
 
     def close_diags(self):
         # Роман:
@@ -244,10 +230,12 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         raise
 
     def delete_target_obj(self):
+        self.find_target_obj(self.target_obj_id)
+
         #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
         # self.close_diags()
         # В методе удаления осмотра с плодами ничего не делать, у action.deleted = 1
-        # self.delete_fetuses()
+        # self.delete_newborns()
         # todo: при удалении последнего осмотра наверно нужно открывать предпослений
 
         self.target_obj_class.query.filter(
@@ -256,54 +244,33 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             Action.deleted == 0
         ).update({'deleted': 1})
 
-    def delete_fetuses(self):
-        RisarFetusState.query.filter(
-            RisarFetusState.delete == 0,
-            RisarFetusState.action_id == self.target_obj_id
+    def delete_newborns(self):
+        RisarEpicrisis_Children.query.filter(
+            RisarEpicrisis_Children.delete == 0,
+            RisarEpicrisis_Children.action_id == self.target_obj_id
         ).delete()
 
     def as_json(self):
         data = represent_epicrisis(self.target_obj, False)
         return {
-            "exam_pc_id": self.target_obj.id,
-            "external_id": self.external_id,
+            "childbirth_id": self.target_obj.id,
             "general_info": self._represent_general_info(data),
-            "somatic_status": self._represent_somatic_status(data),
-            "obstetric_status": self._represent_obstetric_status(data),
-            "fetus": self._represent_fetus(data),
-            "vaginal_examination": self._represent_vaginal_examination(data),
-            "medical_report": self._represent_medical_report(data),
+            "mother_death": self._represent_mother_death(data),
+            "complications": self._represent_complications(data),
+            "manipulations": self._represent_manipulations(data),
+            "operations": self._represent_operations(data),
+            "kids": self._represent_kids(data),
         }
 
     def _represent_general_info(self, data):
         res = self._represent_part(self.GENERAL_MAP, data)
 
-        person = data.get('person')
+        lpu = data.get('LPU')
+        newborn_lpu = data.get('newborn_LPU')
         res.update({
-            'hospital': person.organisation and person.organisation.TFOMSCode or '',
-            'doctor': person.regionalCode,
+            'maternity_hospital': lpu and lpu['code'],
+            'curation_hospital': newborn_lpu and newborn_lpu['code'],
         })
-        return res
-
-    def _represent_somatic_status(self, data):
-        return self._represent_part(self.SOMATIC_MAP, data)
-
-    def _represent_obstetric_status(self, data):
-        return self._represent_part(self.OBSTETRIC_MAP, data)
-
-    def _represent_fetus(self, data):
-        fetus_list = data.get('fetuses', [])
-        res = []
-        for fs_data in fetus_list:
-            fs = self._represent_part(self.FETUS_MAP, fs_data.get('state'))
-            res.append(fs)
-        return res
-
-    def _represent_vaginal_examination(self, data):
-        return self._represent_part(self.VAGINAL_MAP, data)
-
-    def _represent_medical_report(self, data):
-        res = self._represent_part(self.REPORT_MAP, data)
 
         diags_data = data.get('diagnoses')
         for dd in diags_data:
@@ -315,4 +282,43 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
                 res.setdefault(kind['attr'], []).append(mkb_code)
             else:
                 res[kind['attr']] = mkb_code
+        return res
+
+    def _represent_mother_death(self, data):
+        res = self._represent_part(self.MOTHER_DEATH_MAP, data)
+
+        res.update({
+            'death': bool(data.get('death_date')),
+        })
+
+        diags_data = data.get('diagnoses')
+        for dd in diags_data:
+            if dd['end_date']:
+                continue
+            kind = self.PAT_DIAG_KINDS_MAP[dd['diagnosis_types']['pathanatomical'].code]
+            mkb_code = dd['diagnostic']['mkb'].DiagID
+            if kind['is_vector']:
+                res.setdefault(kind['attr'], []).append(mkb_code)
+            else:
+                res[kind['attr']] = mkb_code
+        return res
+
+    def _represent_complications(self, data):
+        return self._represent_part(self.COMPLICATIONS_MAP, data)
+
+    def _represent_manipulations(self, data):
+        return self._represent_part(self.MANIPULATIONS_MAP, data)
+
+    def _represent_operations(self, data):
+        return self._represent_part(self.OPERATIONS_MAP, data)
+
+    def _represent_kids(self, data):
+        newborns_list = data.get('newborn_inspections', [])
+        res = []
+        for nb_data in newborns_list:
+            nb = self._represent_part(self.KIDS_MAP, nb_data)
+            nb['sex'] = Gender(nb_data['sex']) if nb_data['sex'] is not None else None
+            nb['date' if nb_data['alive'] else 'death_date'] = nb_data['date']
+            nb['time' if nb_data['alive'] else 'death_time'] = nb_data['time']
+            res.append(nb)
         return res

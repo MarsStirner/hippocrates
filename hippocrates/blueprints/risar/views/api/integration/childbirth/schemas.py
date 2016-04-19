@@ -201,7 +201,7 @@ class ChildbirthSchema(Schema):
                             "type": "boolean"
                         },
                         "perineal_tear": {
-                            "description": "Разрыв промежностей (степень)",
+                            "description": "Разрыв промежностей (степень) rbPerinealTear",
                             "type": "string"
                         },
                         "eclampsia": {
@@ -233,7 +233,7 @@ class ChildbirthSchema(Schema):
                         },
                         "anemia": {
                             "description": "Анемия после родов (Hb<110 г/л)",
-                            "type": "string"
+                            "type": "boolean"
                         },
                         "infections_during_delivery": {
                             "description": "Инфекции в родах",

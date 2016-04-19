@@ -142,8 +142,7 @@ class XForm(object):
         self.parent_obj = parent_obj
 
     def find_target_obj(self, target_obj_id):
-        self.target_obj_id = target_obj_id
-        if target_obj_id is None:
+        if self.target_id_required and target_obj_id is None:
             # Ручная валидация
             raise Exception(
                 u'%s.find_target_obj called without "target_obj_id"' %
@@ -153,6 +152,7 @@ class XForm(object):
             target_obj = self._find_target_obj_query().first()
             if not target_obj:
                 raise ApiException(NOT_FOUND_ERROR, self.get_target_nf_msg())
+        self.target_obj_id = target_obj.id
         self.target_obj = target_obj
 
     def check_parent_obj(self, parent_obj_id):
@@ -367,6 +367,8 @@ class XForm(object):
         return row_id
 
     def mapping_part(self, part, data, res):
+        if not data:
+            return
         for k, v in part.items():
             if v['rb']:
                 if v['is_vector']:
@@ -482,7 +484,7 @@ class CheckupsXForm(XForm):
     def get_diags_data(self, data):
         return data.get('medical_report', {})
 
-    def get_diagnoses(self, data, form_data):
+    def get_diagnoses(self, data, form_data, diag_kinds_map, diag_type):
         # Прислали новый код МКБ, и не прислали старый - старый диагноз закрыли, новый открыли.
         # если тот же МКБ пришел не как осложнение, а как сопутствующий, это смена вида
         # если в списке диагнозов из МИС придут дубли кодов МКБ - отсекать лишние
@@ -515,7 +517,7 @@ class CheckupsXForm(XForm):
             }
 
         mis_diags = {}
-        for risar_key, v in sorted(self.DIAG_KINDS_MAP.items(),
+        for risar_key, v in sorted(diag_kinds_map.items(),
                                    key=lambda x: x[1]['level']):
             mis_key, is_vector, default = v['attr'], v['is_vector'], v['default']
             mkb_list = diags_data.get(mis_key, default)
@@ -537,7 +539,7 @@ class CheckupsXForm(XForm):
                     'mkb': self.rb(mkb, MKB, 'DiagID'),
                 },
                 'diagnosis_types': {
-                    'final': diagnosis_type,
+                    diag_type: diagnosis_type,
                 },
                 'person': form_data.get('person'),
                 'set_date': form_data.get('beg_date'),
@@ -572,6 +574,36 @@ class CheckupsXForm(XForm):
                 diagnosis_type = self.rb(db_diag.get('diagKind_code'), rbDiagnosisKind)
                 end_date = form_data.get('beg_date')
                 add_diag_data()
+        return res
+
+    def merge_diagnoses(self, diags_tuple):
+        res = {}
+        sorted_diags = []
+        for d in diags_tuple:
+            sorted_diags.append(d.sort(key=lambda x: x['diagnostic']['mkb']['code']))
+        for cmp_diags in zip(sorted_diags):
+            d_ids = filter(None, map(lambda x: x['id'], cmp_diags))
+            d_mkbs = map(lambda x: x['diagnostic']['mkb']['code'], cmp_diags)
+            if len(set(d_ids)) > 1:
+                raise ApiException(INTERNAL_ERROR, u'Ошибка сохранения диагнозов')
+            if len(set(d_mkbs)) > 1:
+                raise ApiException(INTERNAL_ERROR, u'Ошибка сохранения диагнозов')
+            diagnosis_types = {}
+            map(lambda x: diagnosis_types.update(x['diagnosis_types']), cmp_diags)
+            d_end_dates = filter(None, map(lambda x: x['end_date'], cmp_diags))
+            res = {
+                'id': d_ids and d_ids[0] or None,
+                'deleted': int(all(map(lambda x: x['deleted'], cmp_diags))),
+                'kind_changed': any(map(lambda x: x['kind_changed'], cmp_diags)),
+                'diagnostic_changed': any(map(lambda x: x['diagnostic_changed'], cmp_diags)),
+                'diagnostic': {
+                    'mkb': d_mkbs[0],
+                },
+                'diagnosis_types': diagnosis_types,
+                'person': cmp_diags[0].get('person'),
+                'set_date': cmp_diags[0].get('set_date'),
+                'end_date': d_end_dates and d_end_dates[0] or None,
+            }
         return res
 
     @classmethod
