@@ -119,6 +119,12 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
     $scope.canEditEmResult = function (em) {
         return em.access.can_edit_result;
     };
+    $scope.emHasAppointment = function (em) {
+        return Boolean(em.data.appointment_action_id);
+    };
+    $scope.emHasResult = function (em) {
+        return Boolean(em.data.result_action_id);
+    };
 
     $scope.init = function () {
         $scope.resetFilters();

@@ -98,7 +98,12 @@
                             <tbody>
                             <tr ng-repeat="em in model.measure_list">
                                 <td><span measure-type-icon="em.data.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
-                                <td>[[ em.data.scheme_measure.measure.name ]]</td>
+                                <td>
+                                    <span ng-bind="em.data.scheme_measure.measure.name"></span>
+                                    <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
+                                    <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
+                                    <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
+                                </td>
                                 <td>
                                     <event-measure-status status="em.data.status"></event-measure-status>
                                 </td>
@@ -159,4 +164,9 @@
     <script src="{{ url_for('.static', filename='js/event_measure_list.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_info.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/modal_appointment.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/modal_em_result.js', v=app_version) }}"></script>
+    <script src="{{ url_for('actions.static', filename='js/action-layout.js', v=app_version) }}"></script>
+    <script src="{{ url_for('actions.static', filename='js/action_editor.js', v=app_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/ezekiel.js', v=nemesis_version) }}"></script>
 {% endblock %}
