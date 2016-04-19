@@ -11,7 +11,7 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
 from blueprints.risar.lib.expert.em_result_repr import EmResultRepr
-from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
 from blueprints.risar.lib.represent import represent_checkups_shortly
 from blueprints.risar.lib.utils import get_action_by_id
 from blueprints.risar.risar_config import request_type_pregnancy
@@ -23,7 +23,10 @@ from blueprints.risar.risar_config import request_type_pregnancy
 def api_0_event_measure_generate(action_id):
     action = Action.query.get_or_404(action_id)
     em_ctrl = EventMeasureController()
-    em_ctrl.regenerate(action)
+    try:
+        em_ctrl.regenerate(action)
+    except EMGenerateException, e:
+        raise ApiException(500, unicode(e))
     measures = em_ctrl.get_measures_in_action(action)
     return EventMeasureRepr().represent_listed_event_measures_in_action(measures)
 

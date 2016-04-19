@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import func, and_
 
@@ -12,6 +14,13 @@ from nemesis.lib.data import create_action, update_action, safe_datetime
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 
 
+logger = logging.getLogger('simple')
+
+
+class EMGenerateException(Exception):
+    pass
+
+
 class EventMeasureController(BaseModelController):
 
     def get_selecter(self):
@@ -19,7 +28,11 @@ class EventMeasureController(BaseModelController):
 
     def regenerate(self, action):
         gen = EventMeasureGenerator(action)
-        gen.generate_measures()
+        try:
+            gen.generate_measures()
+        except Exception, e:
+            logger.error(u'Ошибка генерации мероприятий для action с id={0}'.format(action.id), exc_info=True)
+            raise EMGenerateException(u'Ошибка генерации мероприятий')
 
     def delete_in_action(self, action):
         gen = EventMeasureGenerator(action)

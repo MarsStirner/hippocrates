@@ -61,7 +61,10 @@
     </tbody>
 </table>
 </div>
-<div ng-if="!checkup.measures.length">
+<div ng-if="checkup.em_error" class="alert alert-danger">
+    [[ checkup.em_error ]]
+</div>
+<div ng-if="!checkup.measures.length && !checkup.em_error">
     <h3 class="text-center">Не хватает данных для формирования мероприятий</h3>
     <span class="text-muted">Требуется заполнить раздел «Заключение»: Беременность (недель),
         Плановая дата следующей явки, Основной диагноз.</span>

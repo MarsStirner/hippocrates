@@ -483,7 +483,7 @@ def represent_action_diagnoses(action):
     return result
 
 
-def represent_checkup(action, with_measures=True):
+def represent_checkup(action, with_measures=True, measures_error=None):
     result = dict(
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
@@ -503,6 +503,8 @@ def represent_checkup(action, with_measures=True):
         em_ctrl = EventMeasureController()
         measures = em_ctrl.get_measures_in_action(action)
         result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
+    if measures_error:
+        result['em_error'] = measures_error
     return result
 
 
