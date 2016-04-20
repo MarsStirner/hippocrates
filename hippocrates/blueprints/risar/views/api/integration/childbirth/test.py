@@ -8,13 +8,14 @@
 """
 
 # coding: utf-8
-
+from blueprints.risar.views.api.integration.childbirth.test_data import \
+    test_childbirth_data
 from ..test import make_api_request, make_login
 
 
 def request_post_childbirth(session, card_id):
     url = u'/risar/api/integration/0/card/%s/childbirth/' % card_id
-    result = make_api_request('post', url, session)
+    result = make_api_request('post', url, session, test_childbirth_data)
     return result
 
 
@@ -26,7 +27,7 @@ def test_post_childbirth(card_id):
 
 def request_put_childbirth(session, card_id):
     url = u'/risar/api/integration/0/card/%s/childbirth/' % card_id
-    result = make_api_request('put', url, session)
+    result = make_api_request('put', url, session, test_childbirth_data)
     return result
 
 

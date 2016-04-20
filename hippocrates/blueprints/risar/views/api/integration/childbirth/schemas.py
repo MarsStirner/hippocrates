@@ -179,6 +179,10 @@ class ChildbirthSchema(Schema):
                             "type": "string",
                             # "enum": ["prejdevremennye", "rannie"]
                         },
+                        "pre_birth_delivery_waters": {
+                            "description": "Дородовое излитие вод",
+                            "type": "boolean"
+                        },
                         "weakness": {
                             "description": "Слабость родовых сил, справочник rbRisarWeakness",
                             "type": "string",
@@ -308,7 +312,7 @@ class ChildbirthSchema(Schema):
                         "anesthetization": {
                             "description": "Обезболивание, справочник rbRisarAnesthetization",
                             "type": "string",
-                            "pattern": "^(0[1-9]|10)$"
+                            # "pattern": "^(0[1-9]|10)$"
                         },
                         "hysterectomy": {
                             "description": "Гистерэктомия, справочник rbRisarHysterectomy",
@@ -361,6 +365,11 @@ class ChildbirthSchema(Schema):
                                 "type": "string",
                                 "format": "date"
                             },
+                            "time": {
+                                "description": "Время рождения",
+                                "type": "string",
+                                "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
+                            },
                             "maturity_rate": {
                                 "description": "Степень доношенности, справочник rbRisarMaturity_Rate",
                                 "type": "string",
@@ -391,7 +400,16 @@ class ChildbirthSchema(Schema):
                             "death_reason": {
                                 "description": "Причина смерти",
                                 "type": "string"
-                            }
+                            },
+                            "diseases": {
+                                "description": "Заболевания новорождённого (массив, код диагноза по МКБ-10)",
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                                },
+                                "minItems": 0
+                            },
                         },
                         "required": ["alive", "sex", "weight", "length", "date"]
                     },

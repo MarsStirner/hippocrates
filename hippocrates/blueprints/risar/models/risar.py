@@ -92,6 +92,34 @@ class RisarEpicrisis_Children(db.Model):
             'id': self.id,
         }
 
+    @property
+    def diseases(self):
+        q = RisarEpicrisis_Children_diseases.query.filter(
+            RisarEpicrisis_Children_diseases.newborn == self,
+        )
+        return map(lambda x: x.mkb, list(q))
+
+    @diseases.setter
+    def diseases(self, values):
+        RisarEpicrisis_Children_diseases.query.filter(
+            RisarEpicrisis_Children_diseases.newborn_id == self.id,
+            RisarEpicrisis_Children_diseases.newborn == self,
+        ).delete()
+        for v in values:
+            obj = RisarEpicrisis_Children_diseases(newborn=self)
+            obj.mkb_id = v['id']
+            db.session.add(obj)
+
+
+class RisarEpicrisis_Children_diseases(db.Model):
+    __tablename__ = u'RisarEpicrisis_Children_diseases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    newborn_id = db.Column(db.ForeignKey('RisarEpicrisis_Children.id'), index=True)
+    newborn = db.relationship('RisarEpicrisis_Children')
+    mkb_id = db.Column(db.Integer, db.ForeignKey('MKB.id'), nullable=False)
+    mkb = db.relationship('MKB')
+
 
 class ActionIdentification(db.Model):
     __tablename__ = 'ActionIdentification'

@@ -141,3 +141,10 @@ if __name__ == '__main__':
         #     test_get_expert_data
         # client_id = '121'
         # test_get_expert_data(client_id)
+
+        # from blueprints.risar.views.api.integration.childbirth.test import \
+        #     test_put_childbirth, test_delete_childbirth, test_post_childbirth
+        # card_id = '1'
+        # test_delete_childbirth(card_id)
+        # test_post_childbirth(card_id)
+        # test_put_childbirth(card_id)

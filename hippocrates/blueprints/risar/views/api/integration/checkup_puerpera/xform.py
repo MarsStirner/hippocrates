@@ -83,11 +83,10 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
             'person': {
                 'id': person_id,
             },
-            'get_diagnoses_func': lambda: self.get_diagnoses(data, res, self.DIAG_KINDS_MAP, 'final'),
+            'get_diagnoses_func': lambda: self.get_diagnoses((
+                (data, self.DIAG_KINDS_MAP, 'final'),
+            ), res.get('person'), res.get('beg_date'))
         })
-
-    def get_diags_data(self, data):
-        return data
 
     def update_form(self, data):
         # like blueprints.risar.views.api.checkups_puerpera.api_0_checkup_puerpera

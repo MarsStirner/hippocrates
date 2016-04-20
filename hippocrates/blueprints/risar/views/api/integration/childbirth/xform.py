@@ -13,11 +13,16 @@ from blueprints.risar.models.risar import RisarEpicrisis_Children
 from blueprints.risar.risar_config import risar_epicrisis
 from blueprints.risar.views.api.integration.childbirth.schemas import \
     ChildbirthSchema
-from blueprints.risar.views.api.integration.xform import CheckupsXForm
+from blueprints.risar.views.api.integration.xform import CheckupsXForm, \
+    ALREADY_PRESENT_ERROR
+from hitsl_utils.api import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
+from nemesis.lib.utils import safe_time
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.enums import Gender
 from nemesis.models.event import Event
+from nemesis.models.exists import MKB
+from nemesis.systemwide import db
 
 
 class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
@@ -50,6 +55,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
 
     COMPLICATIONS_MAP = {
         'delivery_waters': {'attr': 'delivery_waters', 'default': None, 'rb': 'rbRisarDelivery_Waters', 'is_vector': False},
+        'pre_birth_delivery_waters': {'attr': 'pre_birth_delivery_waters', 'default': None, 'rb': None, 'is_vector': False},
         'weakness': {'attr': 'weakness', 'default': None, 'rb': 'rbRisarWeakness', 'is_vector': False},
         'meconium_colouring': {'attr': 'meconium_color', 'default': None, 'rb': None, 'is_vector': False},
         'patologicsl_preliminal_period': {'attr': 'pathological_preliminary_period', 'default': None, 'rb': None, 'is_vector': False},
@@ -80,7 +86,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         'specialities': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
         'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
-        'operation_complication': {'attr': 'complications', 'default': None, 'rb': 'MKB', 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
         'embryotomy': {'attr': 'embryotomy', 'default': None, 'rb': None, 'is_vector': False},
     }
 
@@ -93,6 +99,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         'apgar_score_5': {'attr': 'apgar_score_5', 'default': None, 'rb': None, 'is_vector': False},
         'apgar_score_10': {'attr': 'apgar_score_10', 'default': None, 'rb': None, 'is_vector': False},
         'death_reasons': {'attr': 'death_reason', 'default': None, 'rb': None, 'is_vector': False},
+        'diseases': {'attr': 'diseases', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
     }
 
     DIAG_KINDS_MAP = {
@@ -115,6 +122,16 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         )
         return res
 
+    def check_external_id(self, data):
+        pass
+
+    def check_duplicate(self, data):
+        q = self._find_target_obj_query()
+        target_obj_exist = db.session.query(q.exists()).scalar()
+        if target_obj_exist:
+            raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
+                               self.target_obj_class.__name__)
+
     def update_target_obj(self, data):
         if not self.new:
             self.find_target_obj(self.target_obj_id)
@@ -131,18 +148,28 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         self.mapping_manipulations(data, res)
         self.mapping_operations(data, res)
         self.mapping_kids(data, res)
+        res['get_diagnoses_func'] = lambda: self.get_diagnoses((
+            (data.get('general_info', {}), self.DIAG_KINDS_MAP, 'final'),
+            (data.get('mother_death', {}), self.PAT_DIAG_KINDS_MAP, 'pathanatomical')
+        ), res.get('person'), res.get('delivery_date'))
         return res
 
     def mapping_general_info(self, data, res):
         part = data.get('general_info', {})
         self.mapping_part(self.GENERAL_MAP, part, res)
 
+        person = self.find_doctor(
+            part.get('maternity_hospital_doctor'),
+            part.get('maternity_hospital')
+        )
+        res['person'] = person.__json__()
+
         maternity_hospital = self.find_org(part.get('maternity_hospital'))
         curation_hospital = self.find_org(part.get('curation_hospital'))
         res.update({
             'LPU': maternity_hospital,
             'newborn_LPU': curation_hospital,
-            'get_final_diagnoses_func': lambda: self.get_diagnoses(data, res, self.DIAG_KINDS_MAP, 'final'),
+            'delivery_time': res.get('delivery_time') and safe_time(res.get('delivery_time')).isoformat(),
         })
 
     def mapping_mother_death(self, data, res):
@@ -150,7 +177,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         self.mapping_part(self.MOTHER_DEATH_MAP, part, res)
 
         res.update({
-            'get_pat_diagnoses_func': lambda: self.get_diagnoses(data, res, self.PAT_DIAG_KINDS_MAP, 'pathanatomical'),
+            'death_time': res.get('death_time') and safe_time(res.get('death_time')).isoformat(),
         })
 
     def mapping_complications(self, data, res):
@@ -185,9 +212,9 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
                 nb_state['id'] = db_child_id
             if mis_child:
                 self.mapping_part(self.KIDS_MAP, mis_child, nb_state)
-                nb_state['sex'] = Gender(mis_child['sex']) if mis_child['sex'] is not None else None
+                nb_state['sex'] = Gender(mis_child['sex']).__json__() if mis_child['sex'] is not None else None
                 nb_state['date'] = mis_child['date'] if mis_child['alive'] else mis_child['death_date']
-                nb_state['time'] = mis_child['time'] if mis_child['alive'] else mis_child['death_time']
+                nb_state['time'] = safe_time(mis_child['time'] if mis_child['alive'] else mis_child['death_time'])
             res.setdefault('newborn_inspections', []).append(nb_state)
 
     def update_form(self, data):
@@ -195,15 +222,12 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
 
         event_id = self.parent_obj_id
         event = self.parent_obj
-        get_final_diagnoses_func = data.pop('get_final_diagnoses_func')
-        get_pat_diagnoses_func = data.pop('get_pat_diagnoses_func')
+        get_diagnoses_func = data.pop('get_diagnoses_func')
 
         newborn_inspections = filter(None, data.pop('newborn_inspections', []))
         action = get_action(event, risar_epicrisis, True)
         self.target_obj = action
-        final_diagnoses = get_final_diagnoses_func()
-        pat_diagnoses = get_pat_diagnoses_func()
-        diagnoses = self.merge_diagnoses((final_diagnoses, pat_diagnoses))
+        diagnoses = get_diagnoses_func()
 
         if not action.id:
             close_open_checkups(event_id)  # закрыть все незакрытые осмотры
@@ -251,7 +275,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         ).delete()
 
     def as_json(self):
-        data = represent_epicrisis(self.target_obj, False)
+        data = represent_epicrisis(self.parent_obj, self.target_obj)
         return {
             "childbirth_id": self.target_obj.id,
             "general_info": self._represent_general_info(data),
@@ -268,8 +292,9 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         lpu = data.get('LPU')
         newborn_lpu = data.get('newborn_LPU')
         res.update({
-            'maternity_hospital': lpu and lpu['code'],
-            'curation_hospital': newborn_lpu and newborn_lpu['code'],
+            'maternity_hospital': lpu and lpu.TFOMSCode,
+            'curation_hospital': newborn_lpu and newborn_lpu.TFOMSCode,
+            'delivery_time': self.safe_time_format(res.get('delivery_time'), '%H:%M'),
         })
 
         diags_data = data.get('diagnoses')
@@ -289,6 +314,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
 
         res.update({
             'death': bool(data.get('death_date')),
+            'death_time': self.safe_time_format(res.get('death_time'), '%H:%M'),
         })
 
         diags_data = data.get('diagnoses')
@@ -317,8 +343,8 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         res = []
         for nb_data in newborns_list:
             nb = self._represent_part(self.KIDS_MAP, nb_data)
-            nb['sex'] = Gender(nb_data['sex']) if nb_data['sex'] is not None else None
-            nb['date' if nb_data['alive'] else 'death_date'] = nb_data['date']
-            nb['time' if nb_data['alive'] else 'death_time'] = nb_data['time']
+            nb['sex'] = nb_data['sex'].value if nb_data['sex'] is not None else None
+            nb['date' if nb_data['alive'] else 'death_date'] = nb_data.get('date')
+            nb['time' if nb_data['alive'] else 'death_time'] = self.safe_time_format(nb_data.get('time'), '%H:%M')
             res.append(nb)
         return res
