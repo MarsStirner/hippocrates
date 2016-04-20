@@ -221,25 +221,6 @@ def api_patient_save():
 
     return int(client)
 
-# for tests without external kladr
-@module.route('/api/kladr_city.json', methods=['GET'])
-def api_kladr_city_get():
-    from nemesis.models.kladr_models import Kladr
-    val = request.args['city']
-    res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
-    return jsonify([{'name': r.NAME,
-                    'code': r.CODE} for r in res])
-
-
-@module.route('/api/kladr_street.json', methods=['GET'])
-def api_kladr_street_get():
-    from nemesis.models.kladr_models import Street
-    city = request.args['city']
-    street = request.args['street']
-    res = Street.query.filter(Street.CODE.startswith(city[:-2]), Street.NAME.startswith(street)).all()
-    return jsonify([{'name': r.NAME,
-                    'code': r.CODE} for r in res])
-
 
 @module.route('/api/client_file_attach.json')
 @api_method

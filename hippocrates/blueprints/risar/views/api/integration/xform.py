@@ -255,14 +255,20 @@ class XForm(object):
     def find_org(self, tfoms_code):
         org = get_org_by_tfoms_code(tfoms_code)
         if not org:
-            raise ApiException(NOT_FOUND_ERROR, u'Не найдена организация по коду {0}'.format(tfoms_code))
+            raise ApiException(
+                NOT_FOUND_ERROR,
+                u'Не найдена организация по коду {0}'.format(tfoms_code)
+            )
         return org
 
     @staticmethod
     def find_doctor(person_code, org_code):
         person = get_person_by_codes(person_code, org_code)
         if not person:
-            raise ApiException(NOT_FOUND_ERROR, u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code))
+            raise ApiException(
+                NOT_FOUND_ERROR,
+                u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code)
+            )
         return person
 
     def find_client(self, client_id):
@@ -287,8 +293,22 @@ class XForm(object):
             rb_name = prop.type.valueDomain.split(';')[0]
             if (rb_name != 'rbBloodType'  # code in name field, see to_blood_type_rb()
                     and not check_rb_value_exists(rb_name, value['code'])):
-                raise ApiException(VALIDATION_ERROR, u'Не найдено значение по коду {0} в справочнике {1}'.format(
-                    value['code'], rb_name))
+                raise ApiException(
+                    VALIDATION_ERROR,
+                    u'Не найдено значение по коду {0} в справочнике {1}'.format(value['code'], rb_name)
+                )
+
+    def _check_rb_value(self, rb_name, value_code):
+        field_name = None
+        if rb_name == 'rbBloodType':
+            field_name = 'name'
+        elif rb_name in ('rbDocumentType', 'rbPolicyType'):
+            field_name = 'TFOMSCode'
+        if not check_rb_value_exists(rb_name, value_code, field_name):
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'Не найдено значение по коду {0} в справочнике {1}'.format(value_code, rb_name)
+            )
 
     @staticmethod
     def to_rb(code):

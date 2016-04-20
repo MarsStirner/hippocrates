@@ -307,7 +307,7 @@ def add_or_update_policy(client, data):
         policy.begDate = beg_date
         policy.endDate = end_date
         policy.insurer_id = insurer['id']
-        policy.name = insurer['full_name'] if not insurer['id'] else None
+        policy.name = insurer['full_name'] if not insurer['id'] else ''
         policy.client = client
     else:
         policy = ClientPolicy.create(pol_type, serial, number, beg_date, end_date, insurer, client)

@@ -7,8 +7,6 @@ from contextlib import contextmanager
 
 from nemesis.app import app
 
-from test_data import test_client_data
-
 
 coldstar_url = os.getenv('TEST_COLDSTAR_URL', 'http://127.0.0.1:6098')
 mis_url = os.getenv('TEST_MIS_URL', 'http://127.0.0.1:6600')
@@ -97,19 +95,6 @@ def make_api_request(method, url, session, json_data=None, url_args=None):
     return result.json()
 
 
-def make_client_save(token, session_token):
-    url = u'%s/risar/api/integration/0/client/' % mis_url
-    result = requests.post(
-        url,
-        json=test_client_data,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
-
-
 def test_auth(login, password):
     token = get_token(login, password)
     print ' > auth token: ', token
@@ -118,16 +103,8 @@ def test_auth(login, password):
 
 
 if __name__ == '__main__':
-    # token = get_token(login, password)
-    # print ' > auth token: ', token
-    # session_token = get_role(token)
-    # print ' > session token: ', session_token
-
-    # ========================================================================
-    # result = make_client_save(token, session_token)
-    # print u'new client data: {0}'.format(repr(result).decode("unicode-escape"))
-
     with app.app_context():
+        from blueprints.risar.views.api.integration.client.test import test_register_edit_client
         from blueprints.risar.views.api.integration.card.test import (
             test_register_edit_delete_card,
             get_new_card_id_for_test, delete_test_card_id
@@ -143,28 +120,30 @@ if __name__ == '__main__':
 
         test_auth(login, password)
 
+        # test_register_edit_client()
+
         # client_id = '17700'
         # # test_register_edit_delete_card(client_id)
-        #
+
         # test_card_id = get_new_card_id_for_test(client_id)
         # # test_card_id = '197'
-        #
+
         # test_register_edit_delete_mother_anamnesis(test_card_id)
         # test_register_edit_delete_father_anamnesis(test_card_id)
         # test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
-        #
+
         # delete_test_card_id(test_card_id)
 
         # client_id = '17700'
         # test_register_edit_delete_card(client_id)
 
         # test_card_id = get_new_card_id_for_test(client_id)
-        # test_card_id = '197'
+        # test_card_id = '7'
 
         # test_register_edit_delete_mother_anamnesis(test_card_id)
         # test_register_edit_delete_father_anamnesis(test_card_id)
         # test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
-        #
+
         # delete_test_card_id(test_card_id)
 
         # from blueprints.risar.views.api.integration.expert_data.test import \
@@ -177,11 +156,11 @@ if __name__ == '__main__':
         #
         #     test_card_id = get_new_card_id_for_test(client_id)
         #     # test_card_id = '197'
-        #
+
         #     test_register_edit_delete_mother_anamnesis(test_card_id)
         #     test_register_edit_delete_father_anamnesis(test_card_id)
         #     test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
-        #
+
         #     delete_test_card_id(test_card_id)
 
         # card_id = '214'
