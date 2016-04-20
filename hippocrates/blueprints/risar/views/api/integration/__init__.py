@@ -5,7 +5,7 @@ from . import (
     checkup_obs_first, checkup_obs_second, checkup_pc, checkup_puerpera,
     anamnesis,
     expert_data,
-    # measure
+    measure
 )
 from . import xform
 
