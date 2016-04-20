@@ -3,7 +3,7 @@
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
 
 
-# em_status_all = {id_val for id_val in MeasureStatus.get_values()}
+em_status_all = {id_val for id_val in MeasureStatus.get_values()}
 
 em_cancelled_explicit = {MeasureStatus.cancelled[0], MeasureStatus.cancelled_invalid[0]}
 
