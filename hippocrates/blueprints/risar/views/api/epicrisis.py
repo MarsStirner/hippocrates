@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from flask import request
 
 from blueprints.risar.lib.card import PregnancyCard
@@ -36,22 +37,8 @@ def api_0_chart_epicrisis(event_id):
             if code in action.propsByCode:
                 action.propsByCode[code].value = value
         create_or_update_diagnoses(action, diagnoses)
+        create_or_update_newborns(action, newborn_inspections)
 
-        child_inspection_actions = []
-        for child_inspection in newborn_inspections:
-            child_id = child_inspection.pop('id', None)
-            child_action = get_action_by_id(child_id, event,  risar_newborn_inspection, True)
-            for code, value in child_inspection.iteritems():
-                if code != 'sex' and code in child_action.propsByCode:
-                    child_action.propsByCode[code].value = value
-                elif code == 'sex' and value:
-                    child_action.propsByCode['sex'].value = 1 if value['code'] == 'male' else 2
-            db.session.add(child_action)
-            db.session.commit()
-            if not child_action.deleted:
-                child_inspection_actions.append({'id': child_action.id})
-
-        action.propsByCode['newborn_inspections'].value = child_inspection_actions
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()

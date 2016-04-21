@@ -6,7 +6,6 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
@@ -18,10 +17,7 @@ from blueprints.risar.views.api.integration.xform import CheckupsXForm
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
 from nemesis.models.event import Event
-from nemesis.models.exists import MKB
-from nemesis.systemwide import db
 
 
 class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
@@ -202,7 +198,9 @@ class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
         self.mapping_part(self.REPORT_MAP, mr, res)
 
         res.update({
-            'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
+            'get_diagnoses_func': lambda: self.get_diagnoses((
+                (mr, self.DIAG_KINDS_MAP, 'final'),
+            ), res.get('person'), res.get('beg_date'))
         })
 
     def update_form(self, data):

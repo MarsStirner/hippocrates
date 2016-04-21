@@ -165,3 +165,10 @@ if __name__ == '__main__':
 
         # card_id = '214'
         # test_get_card_measures(card_id)
+
+        # from blueprints.risar.views.api.integration.childbirth.test import \
+        #     test_put_childbirth, test_delete_childbirth, test_post_childbirth
+        # card_id = '1'
+        # test_delete_childbirth(card_id)
+        # test_post_childbirth(card_id)
+        # test_put_childbirth(card_id)

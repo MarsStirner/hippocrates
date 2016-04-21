@@ -11,7 +11,7 @@ from blueprints.risar.views.api.integration.checkup_obs_first.xform import \
     CheckupObsFirstXForm
 from blueprints.risar.views.api.integration.logformat import hook
 from flask import request
-from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import public_endpoint
 from nemesis.systemwide import db
 

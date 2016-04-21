@@ -6,7 +6,6 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.represent import represent_checkup_puerpera
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
 from blueprints.risar.risar_config import puerpera_inspection_code
@@ -16,10 +15,7 @@ from blueprints.risar.views.api.integration.xform import CheckupsXForm
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
 from nemesis.models.event import Event
-from nemesis.models.exists import MKB
-from nemesis.systemwide import db
 
 
 class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
@@ -87,11 +83,10 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
             'person': {
                 'id': person_id,
             },
-            'get_diagnoses_func': lambda: self.get_diagnoses(data, res),
+            'get_diagnoses_func': lambda: self.get_diagnoses((
+                (data, self.DIAG_KINDS_MAP, 'final'),
+            ), res.get('person'), res.get('beg_date'))
         })
-
-    def get_diags_data(self, data):
-        return data
 
     def update_form(self, data):
         # like blueprints.risar.views.api.checkups_puerpera.api_0_checkup_puerpera
