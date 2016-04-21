@@ -172,3 +172,15 @@ if __name__ == '__main__':
         # test_delete_childbirth(card_id)
         # test_post_childbirth(card_id)
         # test_put_childbirth(card_id)
+
+        from blueprints.risar.views.api.integration.hospitalization.test import \
+            test_put_hospitalization, test_delete_hospitalization, test_post_hospitalization
+        from blueprints.risar.views.api.integration.hospitalization.test_data import \
+            test_hospitalization_data
+        card_id = '1'
+        event_measure_id = '154'
+        hospitalization_id = '692'
+        test_hospitalization_data['measure_id'] = event_measure_id
+        # test_delete_hospitalization(card_id, hospitalization_id)
+        # test_post_hospitalization(card_id)
+        test_put_hospitalization(card_id, hospitalization_id)

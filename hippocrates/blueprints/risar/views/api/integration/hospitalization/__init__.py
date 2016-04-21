@@ -7,4 +7,4 @@
 
 """
 
-from api import api_hospitalization_schema, api_hospitalization_get, api_hospitalization_save, api_hospitalization_delete
+from api import api_hospitalization_schema, api_hospitalization_save, api_hospitalization_delete

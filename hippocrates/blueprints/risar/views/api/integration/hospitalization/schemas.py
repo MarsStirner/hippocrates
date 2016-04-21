@@ -25,7 +25,11 @@ class HospitalizationSchema(Schema):
                     "type": "string"
                 },
                 "hospitalization_id": {
-                    "description": "ID Госпитализации",
+                    "description": "ID госпистализации",
+                    "type": "string"
+                },
+                "measure_id": {
+                    "description": "ID мероприятия случая",
                     "type": "string"
                 },
                 "date_in": {

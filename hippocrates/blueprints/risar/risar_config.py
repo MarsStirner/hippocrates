@@ -8,6 +8,7 @@ risar_mother_anamnesis = 'risar_mother_anamnesis'
 risar_father_anamnesis = 'risar_father_anamnesis'
 risar_epicrisis = 'epicrisis'
 risar_newborn_inspection = 'risar_newborn_inspection'
+general_hospitalizations = 'general_hospitalizations'
 
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'

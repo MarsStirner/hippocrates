@@ -434,15 +434,11 @@ class XForm(object):
             return val.strftime(format)
 
 
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
-    rbDiagnosisTypeN
-from blueprints.risar.lib.card import PregnancyCard
-
-class CheckupsXForm(XForm):
+class ExternalXForm(XForm):
     __metaclass__ = ABCMeta
 
     def __init__(self, *a, **kw):
-        super(CheckupsXForm, self).__init__(*a, **kw)
+        super(ExternalXForm, self).__init__(*a, **kw)
         self.external_id = None
         self.external_system = rbAccountingSystem.query.filter(
             rbAccountingSystem.code == MIS_BARS_CODE,
@@ -493,6 +489,14 @@ class CheckupsXForm(XForm):
                 external_system_id=self.external_system.id,
             )
             db.session.add(external_action)
+
+
+from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
+    rbDiagnosisTypeN
+from blueprints.risar.lib.card import PregnancyCard
+
+class CheckupsXForm(ExternalXForm):
+    __metaclass__ = ABCMeta
 
     def set_pcard(self):
         if not self.pcard:

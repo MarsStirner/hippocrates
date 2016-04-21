@@ -6,7 +6,8 @@ from . import (
     anamnesis,
     expert_data,
     measure,
-    childbirth
+    childbirth,
+    hospitalization,
 )
 from . import xform
 
