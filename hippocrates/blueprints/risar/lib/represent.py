@@ -29,8 +29,10 @@ from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PregnancyPathology, ErrandStatus, CardFillRate)
 from nemesis.models.event import Event
 from nemesis.models.exists import rbAttachType
-from nemesis.models.risar import rbPerinatalRiskRate
+from nemesis.models.risar import rbPerinatalRiskRate, \
+    rbPerinatalRiskRateMkbAssoc
 from nemesis.models.schedule import ScheduleTicket
+from sqlalchemy import func
 
 __author__ = 'mmalkov'
 
@@ -190,6 +192,14 @@ def represent_mkbs_for_routing(event):
     card = PregnancyCard.get_for_event(event)
     diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
 
+    mkb_ids = [d.mkb.id for d in diagnostics]
+    max_risk_mkb_ids = set(x[0] for x in rbPerinatalRiskRateMkbAssoc.query.filter(
+        rbPerinatalRiskRateMkbAssoc.mkb_id.in_(mkb_ids)
+    ).values(
+        rbPerinatalRiskRateMkbAssoc.mkb_id,
+        func.Max(rbPerinatalRiskRate.value),
+    ))
+
     def calc_risk(DiagID):
         for code in ['high', 'medium', 'low']:
             if code in mapping_mkb and DiagID in mapping_mkb[code]:
@@ -198,12 +208,13 @@ def represent_mkbs_for_routing(event):
 
     result = []
     for diag in diagnostics:
-        result.append({
-            'id': diag.mkb.id,
-            'code': diag.mkb.DiagID,
-            'name': diag.mkb.DiagName,
-            'risk_rate': calc_risk(diag.mkb.DiagID),
-        })
+        if diag.mkb.id in max_risk_mkb_ids:
+            result.append({
+                'id': diag.mkb.id,
+                'code': diag.mkb.DiagID,
+                'name': diag.mkb.DiagName,
+                'risk_rate': calc_risk(diag.mkb.DiagID),
+            })
 
     result.sort(key=lambda x: x['code'])
     return result
