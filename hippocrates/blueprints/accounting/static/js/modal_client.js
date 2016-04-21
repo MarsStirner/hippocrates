@@ -177,6 +177,35 @@ WebMis20
                 </div>\
             </ng-form>\
         </ng-form>\
+        <ng-form name="contactsForm" toc-element="Связи и контакты">\
+            <h4>Контактная информация</h4>\
+            <ng-form name="_contacts" toc-element="Контакты">\
+                <div ng-repeat="contact in client.contacts | flt_not_deleted">\
+                    <div class="box box-info">\
+                        <div class="box-header with-border">\
+                            <h3 class="box-title">Контакты пациента</h3>\
+                            <div class="box-tools pull-right">\
+                                <button ng-show="contact.id" type="button" class="btn btn-box-tool" title="Редактировать" ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>\
+                                <button type="button" class="btn btn-box-tool" title="Удалить" ng-click="clientServices.delete_contact(client, contact)">\
+                                    <span class="glyphicon glyphicon-trash text-danger"></span>\
+                                </button>\
+                            </div>\
+                        </div>\
+                        <div class="box-body">\
+                            <ng-form name="contactForm">\
+                                <wm-client-contact id-postfix="[[$index]]" model-contact="contact" edit-mode="contact.id ? edit.activated : true">\
+                                </wm-client-contact>\
+                            </ng-form>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="panel marginal">\
+                    <button type="button" ng-click="clientServices.add_contact(client)" class="btn btn-lg btn-link btn-block">\
+                        <i class="ion ion-plus-round fa-fw"></i>Добавить контакт\
+                    </button>\
+                </div>\
+            </ng-form>\
+        </ng-form>\
     </ng-form>\
 </div>\
 <div class="modal-footer">\
