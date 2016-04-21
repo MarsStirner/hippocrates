@@ -68,6 +68,59 @@ class RisarPreviousPregnancy_Children(db.Model):
         }
 
 
+class RisarEpicrisis_Children(db.Model):
+    __tablename__ = 'RisarEpicrisis_Children'
+
+    id = db.Column(db.Integer, primary_key=True)
+    action_id = db.Column(db.ForeignKey('Action.id'))
+    date = db.Column(db.Date)
+    time = db.Column(db.Time)
+    sex = db.Column(db.Integer)
+    weight = db.Column(db.Float)
+    length = db.Column(db.Float)
+    maturity_rate_code = db.Column(db.String(250))
+    apgar_score_1 = db.Column(db.Integer)
+    apgar_score_5 = db.Column(db.Integer)
+    apgar_score_10 = db.Column(db.Integer)
+    alive = db.Column(db.Integer)
+    death_reason = db.Column(db.String(50))
+    action = db.relationship('Action')
+    maturity_rate = VestaProperty('maturity_rate_code', 'rbRisarMaturity_Rate')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+        }
+
+    @property
+    def diseases(self):
+        q = RisarEpicrisis_Children_diseases.query.filter(
+            RisarEpicrisis_Children_diseases.newborn == self,
+        )
+        return map(lambda x: x.mkb, list(q))
+
+    @diseases.setter
+    def diseases(self, values):
+        RisarEpicrisis_Children_diseases.query.filter(
+            RisarEpicrisis_Children_diseases.newborn_id == self.id,
+            RisarEpicrisis_Children_diseases.newborn == self,
+        ).delete()
+        for v in values:
+            obj = RisarEpicrisis_Children_diseases(newborn=self)
+            obj.mkb_id = v['id']
+            db.session.add(obj)
+
+
+class RisarEpicrisis_Children_diseases(db.Model):
+    __tablename__ = u'RisarEpicrisis_Children_diseases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    newborn_id = db.Column(db.ForeignKey('RisarEpicrisis_Children.id'), index=True)
+    newborn = db.relationship('RisarEpicrisis_Children')
+    mkb_id = db.Column(db.Integer, db.ForeignKey('MKB.id'), nullable=False)
+    mkb = db.relationship('MKB')
+
+
 class ActionIdentification(db.Model):
     __tablename__ = 'ActionIdentification'
 

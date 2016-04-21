@@ -12,7 +12,7 @@ from nemesis.lib.vesta import Vesta
 from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
 from blueprints.risar.models.risar import ActionIdentification
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, safe_dict
+from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
@@ -142,8 +142,7 @@ class XForm(object):
         self.parent_obj = parent_obj
 
     def find_target_obj(self, target_obj_id):
-        self.target_obj_id = target_obj_id
-        if target_obj_id is None:
+        if self.target_id_required and target_obj_id is None:
             # Ручная валидация
             raise Exception(
                 u'%s.find_target_obj called without "target_obj_id"' %
@@ -153,6 +152,7 @@ class XForm(object):
             target_obj = self._find_target_obj_query().first()
             if not target_obj:
                 raise ApiException(NOT_FOUND_ERROR, self.get_target_nf_msg())
+        self.target_obj_id = target_obj.id
         self.target_obj = target_obj
 
     def check_parent_obj(self, parent_obj_id):
@@ -172,8 +172,8 @@ class XForm(object):
                     raise ApiException(NOT_FOUND_ERROR, self.get_parent_nf_msg())
 
     def check_params(self, target_obj_id, parent_obj_id=None, data=None):
-        self.parent_obj_id = parent_obj_id
-        self.target_obj_id = target_obj_id
+        self.parent_obj_id = safe_int(parent_obj_id)
+        self.target_obj_id = safe_int(target_obj_id)
         if self.target_id_required and (bool(self.new) ^ (target_obj_id is None)):
             raise ApiException(
                 VALIDATION_ERROR,
@@ -255,14 +255,20 @@ class XForm(object):
     def find_org(self, tfoms_code):
         org = get_org_by_tfoms_code(tfoms_code)
         if not org:
-            raise ApiException(NOT_FOUND_ERROR, u'Не найдена организация по коду {0}'.format(tfoms_code))
+            raise ApiException(
+                NOT_FOUND_ERROR,
+                u'Не найдена организация по коду {0}'.format(tfoms_code)
+            )
         return org
 
     @staticmethod
     def find_doctor(person_code, org_code):
         person = get_person_by_codes(person_code, org_code)
         if not person:
-            raise ApiException(NOT_FOUND_ERROR, u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code))
+            raise ApiException(
+                NOT_FOUND_ERROR,
+                u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code)
+            )
         return person
 
     def find_client(self, client_id):
@@ -287,8 +293,22 @@ class XForm(object):
             rb_name = prop.type.valueDomain.split(';')[0]
             if (rb_name != 'rbBloodType'  # code in name field, see to_blood_type_rb()
                     and not check_rb_value_exists(rb_name, value['code'])):
-                raise ApiException(VALIDATION_ERROR, u'Не найдено значение по коду {0} в справочнике {1}'.format(
-                    value['code'], rb_name))
+                raise ApiException(
+                    VALIDATION_ERROR,
+                    u'Не найдено значение по коду {0} в справочнике {1}'.format(value['code'], rb_name)
+                )
+
+    def _check_rb_value(self, rb_name, value_code):
+        field_name = None
+        if rb_name == 'rbBloodType':
+            field_name = 'name'
+        elif rb_name in ('rbDocumentType', 'rbPolicyType'):
+            field_name = 'TFOMSCode'
+        if not check_rb_value_exists(rb_name, value_code, field_name):
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'Не найдено значение по коду {0} в справочнике {1}'.format(value_code, rb_name)
+            )
 
     @staticmethod
     def to_rb(code):
@@ -335,23 +355,23 @@ class XForm(object):
             return None
         return rb.name if hasattr(rb, 'name') else rb['name']
 
-    def rb(self, code, rb_model, code_field_name='code'):
-        id_ = self.rb_validate(rb_model, code, code_field_name)
+    def rb(self, code, rb_model, rb_code_field='code'):
+        id_ = self.rb_validate(rb_model, code, rb_code_field)
         return code and {'code': code, 'id': id_} or None
 
     @staticmethod
-    def arr(rb_func, codes, rb_name):
-        return map(lambda code: rb_func(code, rb_name), codes)
+    def arr(rb_func, codes, rb_name, rb_code_field='code'):
+        return map(lambda code: rb_func(code, rb_name, rb_code_field), codes)
 
     @staticmethod
-    def rb_validate(rb_model, code, code_field_name):
+    def rb_validate(rb_model, code, rb_code_field):
         row_id = None
         if code:
             if isinstance(rb_model, basestring):
                 rb = Vesta.get_rb(rb_model, code)
                 row_id = rb and rb.get('_id')
             else:
-                field = getattr(rb_model, code_field_name)
+                field = getattr(rb_model, rb_code_field)
                 res_list = list(rb_model.query.filter(
                     field == code
                 ).values(rb_model.id))[0]
@@ -360,38 +380,41 @@ class XForm(object):
                 raise ApiException(
                     NOT_FOUND_ERROR,
                     u'В справочнике "%s" запись с кодом "%s" не найдена' % (
-                        rb_model.__name__,
+                        rb_model,
                         code,
                     )
                 )
         return row_id
 
-    def mapping_part(self, part, data, res):
-        for k, v in part.items():
+    def mapping_part(self, part_map, data, res):
+        if not data:
+            return
+        for k, v in part_map.items():
+            val = data.get(v['attr'], v.get('default'))
             if v['rb']:
+                rb_code_field = v.get('rb_code_field', 'code')
                 if v['is_vector']:
-                    res[k] = self.arr(
-                        self.rb,
-                        data.get(v['attr'], v.get('default')),
-                        v['rb']
-                    )
+                    res[k] = self.arr(self.rb, val, v['rb'], rb_code_field)
                 else:
-                    res[k] = self.rb(
-                        data.get(v['attr'], v.get('default')),
-                        v['rb']
-                    )
+                    res[k] = self.rb(val, v['rb'], rb_code_field)
             else:
-                res[k] = data.get(v['attr'], v.get('default'))
+                res[k] = val
 
     def _represent_part(self, part, data):
         res = {}
         for k, v in part.items():
             if v['rb']:
+                rb_code_field = v.get('rb_code_field', 'code')
                 if v['is_vector']:
-                    rb_code_field = v.get('rb_code_field', 'code')
-                    val = map(lambda x: x[rb_code_field], data[k])
+                    if isinstance(v['rb'], basestring):
+                        val = map(lambda x: x[rb_code_field], data[k])
+                    else:
+                        val = map(lambda x: getattr(x, rb_code_field), data[k])
                 else:
-                    val = data[k] and data[k][v.get('rb_code_field', 'code')]
+                    if isinstance(v['rb'], basestring):
+                        val = data[k] and data[k][rb_code_field]
+                    else:
+                        val = data[k] and getattr(data[k], rb_code_field)
             else:
                 val = data[k]
             res[v['attr']] = self.safe_represent_val(val)
@@ -406,8 +429,13 @@ class XForm(object):
             res = int(v)
         return res
 
+    def safe_time_format(self, val, format):
+        if val:
+            return val.strftime(format)
 
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
+
+from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
+    rbDiagnosisTypeN
 from blueprints.risar.lib.card import PregnancyCard
 
 class CheckupsXForm(XForm):
@@ -425,8 +453,7 @@ class CheckupsXForm(XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'api_checkup_obs_first_save used without "external_id"' %
-                self.target_obj_class.__name__
+                u'check_duplicate used without "external_id"'
             )
         q = self._find_target_obj_query().join(
             ActionIdentification
@@ -444,8 +471,7 @@ class CheckupsXForm(XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'api_checkup_obs_first_save used without "external_id"' %
-                self.target_obj_class.__name__
+                u'check_external_id used without "external_id"'
             )
         q = ActionIdentification.query.join(rbAccountingSystem).filter(
             ActionIdentification.external_id == self.external_id,
@@ -479,10 +505,7 @@ class CheckupsXForm(XForm):
         self.set_pcard()
         self.pcard.reevaluate_card_attrs()
 
-    def get_diags_data(self, data):
-        return data.get('medical_report', {})
-
-    def get_diagnoses(self, data, form_data):
+    def get_diagnoses(self, diags_data_list, person, set_date):
         # Прислали новый код МКБ, и не прислали старый - старый диагноз закрыли, новый открыли.
         # если тот же МКБ пришел не как осложнение, а как сопутствующий, это смена вида
         # если в списке диагнозов из МИС придут дубли кодов МКБ - отсекать лишние
@@ -490,42 +513,48 @@ class CheckupsXForm(XForm):
         # Если код МКБ в осложнении - отсекать его в сопутствующих
         # если два раза в одной группе (в осложнениях, например) - оставлять один
 
-        diags_data = self.get_diags_data(data)
         action = self.target_obj
         diagnostics = self.pcard.get_client_diagnostics(action.begDate,
                                                         action.endDate)
         db_diags = {}
+        default_kind_codes = dict((x[2], 'associated') for x in diags_data_list)
         for diagnostic in diagnostics:
             diagnosis = diagnostic.diagnosis
             if diagnosis.endDate:
                 continue
-            q_list = list(Action_Diagnosis.query.join(
-                rbDiagnosisKind,
+            q_dict = dict(Action_Diagnosis.query.join(
+                rbDiagnosisKind, rbDiagnosisTypeN,
             ).filter(
                 Action_Diagnosis.action == action,
                 Action_Diagnosis.diagnosis == diagnosis,
                 Action_Diagnosis.deleted == 0,
-            ).values(rbDiagnosisKind.code))
-            diag_kind_code = 'associated'
-            if q_list:
-                diag_kind_code = q_list[0][0]
+            ).values(rbDiagnosisTypeN.code, rbDiagnosisKind.code))
+            diag_kind_codes = default_kind_codes.copy()
+            diag_kind_codes.update(q_dict)
             db_diags[diagnostic.MKB] = {
                 'diagnosis_id': diagnosis.id,
-                'diagKind_code': diag_kind_code,
+                'diagKind_codes': diag_kind_codes,
             }
 
         mis_diags = {}
-        for risar_key, v in sorted(self.DIAG_KINDS_MAP.items(),
-                                   key=lambda x: x[1]['level']):
-            mis_key, is_vector, default = v['attr'], v['is_vector'], v['default']
-            mkb_list = diags_data.get(mis_key, default)
-            if not is_vector:
-                mkb_list = mkb_list and [mkb_list] or []
-            for mkb in mkb_list:
-                if mkb not in mis_diags:
-                    mis_diags[mkb] = {
-                        'diagKind_code': risar_key,
-                    }
+        for diags_data, diag_kinds_map, diag_type in diags_data_list:
+            mis_diags_uniq = set()
+            for mis_diag_kind, v in sorted(diag_kinds_map.items(),
+                                           key=lambda x: x[1]['level']):
+                mis_key, is_vector, default = v['attr'], v['is_vector'], v['default']
+                mkb_list = diags_data.get(mis_key, default)
+                if not is_vector:
+                    mkb_list = mkb_list and [mkb_list] or []
+                for mkb in mkb_list:
+                    if mkb not in mis_diags_uniq:
+                        mis_diags_uniq.add(mkb)
+                        mis_diags.setdefault(
+                            mkb, {}
+                        ).setdefault(
+                            'diagKind_codes', {}
+                        ).update(
+                            {diag_type: mis_diag_kind}
+                        )
 
         def add_diag_data():
             res.append({
@@ -536,11 +565,9 @@ class CheckupsXForm(XForm):
                 'diagnostic': {
                     'mkb': self.rb(mkb, MKB, 'DiagID'),
                 },
-                'diagnosis_types': {
-                    'final': diagnosis_type,
-                },
-                'person': form_data.get('person'),
-                'set_date': form_data.get('beg_date'),
+                'diagnosis_types': diagnosis_types,
+                'person': person,
+                'set_date': set_date,
                 'end_date': end_date,
             })
 
@@ -548,18 +575,20 @@ class CheckupsXForm(XForm):
         for mkb in set(db_diags.keys() + mis_diags.keys()):
             db_diag = db_diags.get(mkb, {})
             mis_diag = mis_diags.get(mkb, {})
+            db_diagnosis_types = dict((k, self.rb(v, rbDiagnosisKind)) for k, v in db_diag.get('diagKind_codes').items())
+            mis_diagnosis_types = dict((k, self.rb(v, rbDiagnosisKind)) for k, v in mis_diag.get('diagKind_codes').items())
             if db_diag and mis_diag:
                 # сменить тип
                 diagnostic_changed = False
-                kind_changed = mis_diag.get('diagKind_code') != db_diag.get('diagKind_code')
-                diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
+                kind_changed = mis_diag.get('diagKind_codes') != db_diag.get('diagKind_codes')
+                diagnosis_types = mis_diagnosis_types
                 end_date = None
                 add_diag_data()
             elif not db_diag and mis_diag:
                 # открыть
                 diagnostic_changed = False
                 kind_changed = True
-                diagnosis_type = self.rb(mis_diag.get('diagKind_code'), rbDiagnosisKind)
+                diagnosis_types = mis_diagnosis_types
                 end_date = None
                 add_diag_data()
             elif db_diag and not mis_diag:
@@ -569,8 +598,8 @@ class CheckupsXForm(XForm):
                     continue
                 diagnostic_changed = True
                 kind_changed = False
-                diagnosis_type = self.rb(db_diag.get('diagKind_code'), rbDiagnosisKind)
-                end_date = form_data.get('beg_date')
+                diagnosis_types = db_diagnosis_types
+                end_date = set_date
                 add_diag_data()
         return res
 

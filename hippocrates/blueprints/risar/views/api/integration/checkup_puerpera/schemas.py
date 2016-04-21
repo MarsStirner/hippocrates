@@ -11,7 +11,7 @@ from blueprints.risar.views.api.integration.schemas import Schema
 
 class CheckupPuerperaSchema(Schema):
     """
-    Схемы для проверки валидности данных первичного осмотра
+    Схемы для проверки валидности данных
     """
     schema = [
         {

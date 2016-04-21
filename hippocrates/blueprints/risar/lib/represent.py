@@ -15,6 +15,7 @@ from blueprints.risar.lib.utils import (get_action, action_apt_values, get_actio
 from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.models.fetus import RisarFetusState
+from blueprints.risar.models.risar import RisarEpicrisis_Children
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
@@ -28,8 +29,10 @@ from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PregnancyPathology, ErrandStatus, CardFillRate)
 from nemesis.models.event import Event
 from nemesis.models.exists import rbAttachType
-from nemesis.models.risar import rbPerinatalRiskRate
+from nemesis.models.risar import rbPerinatalRiskRate, \
+    rbPerinatalRiskRateMkbAssoc
 from nemesis.models.schedule import ScheduleTicket
+from sqlalchemy import func
 
 __author__ = 'mmalkov'
 
@@ -189,6 +192,14 @@ def represent_mkbs_for_routing(event):
     card = PregnancyCard.get_for_event(event)
     diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
 
+    mkb_ids = [d.mkb.id for d in diagnostics]
+    max_risk_mkb_ids = set(x[0] for x in rbPerinatalRiskRateMkbAssoc.query.filter(
+        rbPerinatalRiskRateMkbAssoc.mkb_id.in_(mkb_ids)
+    ).values(
+        rbPerinatalRiskRateMkbAssoc.mkb_id,
+        func.Max(rbPerinatalRiskRate.value),
+    ))
+
     def calc_risk(DiagID):
         for code in ['high', 'medium', 'low']:
             if code in mapping_mkb and DiagID in mapping_mkb[code]:
@@ -197,12 +208,13 @@ def represent_mkbs_for_routing(event):
 
     result = []
     for diag in diagnostics:
-        result.append({
-            'id': diag.mkb.id,
-            'code': diag.mkb.DiagID,
-            'name': diag.mkb.DiagName,
-            'risk_rate': calc_risk(diag.mkb.DiagID),
-        })
+        if diag.mkb.id in max_risk_mkb_ids:
+            result.append({
+                'id': diag.mkb.id,
+                'code': diag.mkb.DiagID,
+                'name': diag.mkb.DiagName,
+                'risk_rate': calc_risk(diag.mkb.DiagID),
+            })
 
     result.sort(key=lambda x: x['code'])
     return result
@@ -485,7 +497,7 @@ def represent_action_diagnoses(action):
     return result
 
 
-def represent_checkup(action, with_measures=True):
+def represent_checkup(action, with_measures=True, measures_error=None):
     result = dict(
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
@@ -505,6 +517,8 @@ def represent_checkup(action, with_measures=True):
         em_ctrl = EventMeasureController()
         measures = em_ctrl.get_measures_in_action(action)
         result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
+    if measures_error:
+        result['em_error'] = measures_error
     return result
 
 
@@ -745,23 +759,35 @@ def represent_epicrisis(event, action=None):
 
     finish_date = epicrisis['delivery_date']
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, date=event.setDate.date()) if finish_date else None
-    epicrisis['newborn_inspections'] = represent_newborn_inspections(epicrisis['newborn_inspections']) if \
-        epicrisis.get('newborn_inspections') else []
+    epicrisis['newborn_inspections'] = represent_newborn_inspections(action)
     epicrisis['info'] = make_epicrisis_info(epicrisis)
     epicrisis['diagnoses'] = represent_action_diagnoses(action)
     epicrisis['diagnosis_types'] = action.actionType.diagnosis_types
     return epicrisis
 
 
-def represent_newborn_inspections(children_info):
-    newborn_inspections = []
-
-    for action in children_info:
-        inspection = dict((code, prop.value) for (code, prop) in action.propsByCode.iteritems())
-        inspection['id'] = action.id
-        inspection['sex'] = Gender(inspection['sex']) if inspection['sex'] is not None else None
-        newborn_inspections.append(inspection)
-    return newborn_inspections
+def represent_newborn_inspections(action):
+    res = []
+    childrens = RisarEpicrisis_Children.query.filter(
+        RisarEpicrisis_Children.action_id == action.id,
+    ).order_by(RisarEpicrisis_Children.id)
+    for newborn in childrens:
+        res.append({
+            'id': newborn.id,
+            'date': newborn.date,
+            'time': newborn.time,
+            'sex': Gender(newborn.sex) if newborn.sex is not None else None,
+            'weight': newborn.weight,
+            'length': newborn.length,
+            'maturity_rate': newborn.maturity_rate,
+            'apgar_score_1': newborn.apgar_score_1,
+            'apgar_score_5': newborn.apgar_score_5,
+            'apgar_score_10': newborn.apgar_score_10,
+            'alive': newborn.alive,
+            'death_reasons': newborn.death_reason,
+            'diseases': newborn.diseases,
+        })
+    return res
 
 
 def represent_errand(errand_info):

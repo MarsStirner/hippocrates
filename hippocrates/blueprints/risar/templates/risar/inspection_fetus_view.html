@@ -66,7 +66,7 @@
                 </tr>
                 <tr>
                     <th>Сердцебиение</th>
-                    <td> [[ fetus.state.heartbeat.name ]]</td>
+                    <td> <span ng-repeat="elem in fetus.state.heartbeat" >[[elem.name]][[$last ? '' : ', ']]</span></td>
                     <td></td>
                 </tr>
                 <tr>
