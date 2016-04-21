@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import request
+from nemesis.models.client import Client
 
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
@@ -42,3 +43,15 @@ def api_0_contragent_payer_get(payer_id=None):
     ca_ctrl = ContragentController()
     payer = ca_ctrl.get_payer(payer_id)
     return ContragentRepr().represent_contragent_payer_full(payer)
+
+
+@module.route('/api/0/client/')
+@module.route('/api/0/client/<int:client_id>')
+@api_method
+def api_0_contragent_client_get(client_id=None):
+    client = Client.query.get(client_id)
+    if not client:
+        raise ApiException(404, u'Client not found')
+    return ContragentRepr().represent_ca_client(client)
+
+

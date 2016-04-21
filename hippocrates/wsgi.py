@@ -100,6 +100,7 @@ def fc_urls():
             'api_subscription': url_for("useraccount.api_subscription") + '{0}',
             # accounting
             'html_contract_list': url_for('accounting.html_contract_list'),
+            'api_contragent_client_get': url_for('accounting.api_0_contragent_client_get'),
             'api_contract_get': url_for('accounting.api_0_contract_get'),
             'api_contract_list': url_for('accounting.api_0_contract_list'),
             'api_contract_save': url_for('accounting.api_0_contract_save'),

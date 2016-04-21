@@ -99,9 +99,16 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                         <ui-select ng-model="contract.payer.org" ext-select-org theme="select2"\
                             append-to-body="true" placeholder="Выберите организацию" ng-if="isPayerCreateMode() && isPayerLegal()">\
                         </ui-select>\
-                        <ui-select ng-model="contract.payer.client" ext-select-client-search theme="select2"\
-                            append-to-body="true" placeholder="Выберите клиента" ng-if="isPayerCreateMode() && isPayerIndividual()">\
-                        </ui-select>\
+                        <div class="row" ng-if="isPayerCreateMode() && isPayerIndividual()">\
+                            <div class="col-md-8">\
+                                <ui-select ng-model="contract.payer.client" ext-select-client-search theme="select2"\
+                                    append-to-body="true" placeholder="Выберите клиента">\
+                                </ui-select>\
+                            </div>\
+                            <div class="col-md-4">\
+                                <a href="javascript:void(0);" ng-click="addNewClient()">Добавить нового</a>\
+                            </div>\
+                        </div>\
                     </div>\
                 </div>\
                 <div class=col-md-6 col-sm-12>\
@@ -211,7 +218,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var ContractModalCtrl = function ($scope, $filter, AccountingService, contract, client) {
+var ContractModalCtrl = function ($scope, $filter, AccountingService, AccountingClientModal, contract, client) {
     $scope.contract = contract;
     $scope.client = client;
     $scope.ca_params = {
@@ -265,6 +272,13 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, contract, 
         clearLegalPayer();
         clearIndividualPayer();
         $scope.contract.payer.id = null;
+    };
+    $scope.addNewClient = function () {
+        AccountingClientModal.open().then(function (client_id) {
+            AccountingService.get_client(client_id).then(function (client) {
+                $scope.contract.payer.client = client;
+            });
+        });
     };
     $scope.$watch('contract.payer.ca_type_code', function (newVal, oldVal) {
         if (newVal === oldVal) return;

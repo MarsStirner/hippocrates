@@ -249,4 +249,7 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.calc_invoice_sum = function (invoice) {
         return WebMisApi.invoice.calc_sum(invoice.id, invoice);
     };
+    this.get_client = function (client_id) {
+        return WebMisApi.contragent.get_client(client_id);
+    }
 }]);
