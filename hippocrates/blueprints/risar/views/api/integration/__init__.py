@@ -8,6 +8,7 @@ from . import (
     measure,
     childbirth,
     hospitalization,
+    routing,
 )
 from . import xform
 

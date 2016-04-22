@@ -148,8 +148,8 @@ if __name__ == '__main__':
 
         # from blueprints.risar.views.api.integration.expert_data.test import \
         #     test_get_expert_data
-        # client_id = '121'
-        # test_get_expert_data(client_id)
+        # card_id = '121'
+        # test_get_expert_data(card_id)
 
         #     client_id = '1'
         #     test_register_edit_delete_card(client_id)
@@ -184,3 +184,8 @@ if __name__ == '__main__':
         # test_delete_hospitalization(card_id, hospitalization_id)
         # test_post_hospitalization(card_id)
         # test_put_hospitalization(card_id, hospitalization_id)
+
+        # from blueprints.risar.views.api.integration.routing.test import \
+        #     test_get_routing
+        # card_id = '1'
+        # test_get_routing(card_id)
