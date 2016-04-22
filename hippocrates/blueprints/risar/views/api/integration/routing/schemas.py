@@ -43,6 +43,14 @@ class RoutingSchema(Schema):
                         "type": "string"
                     },
                     "minItems": 0
+                },
+                "hospital_emergency_list_district": {
+                    "description": "Список ЛПУ экстренного родоразрешения в районе проживания пациентки (код ЛПУ)",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 0
                 }
             }
         },

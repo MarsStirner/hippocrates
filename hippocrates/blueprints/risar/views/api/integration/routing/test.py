@@ -19,4 +19,4 @@ def request_get_routing(session, card_id):
 def test_get_routing(card_id):
     with make_login() as session:
         result = request_get_routing(session, card_id)
-        print u'get expert data: {0}'.format(repr(result).decode("unicode-escape"))
+        print u'get routing: {0}'.format(repr(result).decode("unicode-escape"))
