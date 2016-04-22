@@ -3,7 +3,8 @@ from datetime import datetime
 
 from flask import request
 from flask.ext.login import current_user
-from sqlalchemy import func
+from nemesis.models.organisation import OrganisationBirthCareLevel
+from nemesis.models.risar import rbPerinatalRiskRate
 
 from blueprints.risar.app import module
 from blueprints.risar.lib.card import PregnancyCard
@@ -20,7 +21,7 @@ from nemesis.lib.diagnosis import create_or_update_diagnosis
 from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
 from nemesis.models.actions import Action
 from nemesis.models.client import Client, ClientAttach
-from nemesis.models.enums import EventPrimary, EventOrder
+from nemesis.models.enums import EventPrimary, EventOrder, PerinatalRiskRate
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
 from nemesis.models.schedule import ScheduleClientTicket
@@ -235,17 +236,16 @@ def api_0_event_routing():
 
     query = Organisation.query.filter(Organisation.isLPU == 1)
     if diagnoses:
-        mkb_ids = [d['id'] for d in diagnoses]
-        suit_orgs_q = db.session.query(Organisation.id).join(
-            Organisation.mkbs
-        ).filter(
-            MKB.id.in_(mkb_ids)
-        ).group_by(
-            Organisation.id
-        ).having(
-            func.Count(MKB.id.distinct()) == len(mkb_ids)
-        ).subquery('suitableOrgs')
-        query = query.join(suit_orgs_q, Organisation.id == suit_orgs_q.c.id)
+        max_risk = diagnoses[0]['risk_rate']['value']
+        if max_risk > rbPerinatalRiskRate.query.get(PerinatalRiskRate.undefined[0]).value:
+            suit_orgs_q = db.session.query(
+                Organisation.id.distinct().label('organisation_id')
+            ).join(
+                OrganisationBirthCareLevel.orgs
+            ).filter(
+                OrganisationBirthCareLevel.perinatalRiskRate_id == max_risk
+            ).subquery('suitableOrgs')
+            query = query.join(suit_orgs_q, Organisation.id == suit_orgs_q.c.organisation_id)
     suitable_orgs = query.all()
     orgs = group_orgs_for_routing(suitable_orgs, client)
     return orgs

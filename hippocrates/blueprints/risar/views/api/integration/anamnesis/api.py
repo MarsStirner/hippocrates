@@ -64,7 +64,7 @@ def api_anamnesis_father_save(api_version, card_id):
     create = request.method == 'POST'
     xform = AnamnesisFatherXForm(api_version, create)
     xform.validate(data)
-    xform.check_params(anamnesis_id, card_id)
+    xform.check_params(anamnesis_id, card_id, data)
     xform.update_target_obj(data)
     xform.store()
 

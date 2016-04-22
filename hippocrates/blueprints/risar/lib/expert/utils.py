@@ -3,22 +3,24 @@
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
 
 
-em_cancelled_explicit = (MeasureStatus.cancelled[0], MeasureStatus.cancelled_invalid[0])
+em_status_all = {id_val for id_val in MeasureStatus.get_values()}
 
-em_cancelled_implicit = (MeasureStatus.cancelled_dupl[0],
-                         MeasureStatus.cancelled_changed_data[0])
+em_cancelled_explicit = {MeasureStatus.cancelled[0], MeasureStatus.cancelled_invalid[0]}
 
-em_cancelled_all = em_cancelled_explicit + em_cancelled_implicit
+em_cancelled_implicit = {MeasureStatus.cancelled_dupl[0],
+                         MeasureStatus.cancelled_changed_data[0]}
 
-em_final_status_list = (MeasureStatus.performed[0], MeasureStatus.overdue[0]) + em_cancelled_all
+em_cancelled_all = em_cancelled_explicit | em_cancelled_implicit
+
+em_final_status_list = {MeasureStatus.performed[0], MeasureStatus.overdue[0]} | em_cancelled_all
 
 em_garbage_status_list = em_cancelled_implicit
 
-em_touched_status_list = (MeasureStatus.assigned[0], MeasureStatus.waiting[0],
-                          MeasureStatus.overdue[0], MeasureStatus.performed[0]) + em_cancelled_explicit
+em_touched_status_list = {MeasureStatus.assigned[0], MeasureStatus.waiting[0],
+                          MeasureStatus.overdue[0], MeasureStatus.performed[0]} | em_cancelled_explicit
 
-em_stats_status_list = (MeasureStatus.created[0], MeasureStatus.assigned[0], MeasureStatus.waiting[0],
-                        MeasureStatus.overdue[0], MeasureStatus.performed[0])
+em_stats_status_list = {MeasureStatus.created[0], MeasureStatus.assigned[0], MeasureStatus.waiting[0],
+                        MeasureStatus.overdue[0], MeasureStatus.performed[0]}
 
 
 def is_em_touched(em):

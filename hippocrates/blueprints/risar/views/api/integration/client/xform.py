@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import datetime
 import itertools
 import logging
 
-from ..xform import XForm, wrap_simplify, none_default, Undefined
+from ..xform import XForm, wrap_simplify, none_default, Undefined, ALREADY_PRESENT_ERROR
 from .schemas import ClientSchema
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_date
-from nemesis.models.client import Client, ClientIdentification, ClientDocument, ClientPolicy, BloodHistory, \
+from nemesis.models.client import Client, ClientDocument, ClientPolicy, BloodHistory, \
     ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse
+from nemesis.models.enums import AddressType
 
-from nemesis.models.exists import rbAccountingSystem, rbDocumentType, rbPolicyType, rbBloodType
+from nemesis.models.exists import rbDocumentType, rbPolicyType, rbBloodType
 from nemesis.models.organisation import Organisation
 from nemesis.systemwide import db
 
@@ -26,59 +26,53 @@ class ClientXForm(ClientSchema, XForm):
     """
     Класс-преобразователь для пациентки
     """
-    client = None
-    new = False
-    rbAccountingSystem = None
-    external_system_id = None
-    _external_client_id = None
+    parent_id_required = False
+    target_obj_class = Client
 
     def _find_target_obj_query(self):
-        pass
+        return Client.query.filter(Client.id == self.target_obj_id, Client.deleted == 0)
 
     def check_duplicate(self, data):
-        pass
+        fn = data['FIO']['name']
+        ln = data['FIO']['surname']
+        pn = data['FIO'].get('middlename') or ''
+        bd = safe_date(data['birthday_date'])
+        doc_type_code = data['document']['document_type_code']
+        self._check_rb_value('rbDocumentType', doc_type_code)
+        doc_number = data['document']['document_number']
 
-    @property
-    def external_client_id(self):
-        if self.rbAccountingSystem:
-            return self._external_client_id
-        return self.client.id
-
-    @external_client_id.setter
-    def external_client_id(self, value):
-        self._external_client_id = value
-
-    def set_external_system(self, external_system_id):
-        self.external_system_id = external_system_id
-        self.rbAccountingSystem = rbAS = rbAccountingSystem.query.filter(rbAccountingSystem.code == external_system_id).first()
-        if not rbAS:
-            raise ApiException(404, 'External system not found')
-
-    def _find_client_query(self, external_client_id):
-        if not self.rbAccountingSystem:
-            return Client.query.filter(Client.id == external_client_id)
-        return Client.query.join(ClientIdentification).filter(
-            ClientIdentification.identifier == external_client_id,
-            ClientIdentification.accountingSystems == self.rbAccountingSystem,
+        q = db.session.query(Client).join(ClientDocument).join(rbDocumentType).filter(
+            Client.firstName == fn,
+            Client.lastName == ln,
+            Client.birthDate == bd,
+            Client.deleted == 0,
+            rbDocumentType.TFOMSCode == doc_type_code,
+            ClientDocument.number == doc_number,
+            ClientDocument.deleted == 0
         )
+        if pn:
+            q = q.filter(Client.patrName == pn)
+        target_obj_exist = db.session.query(q.exists()).scalar()
+        if target_obj_exist:
+            raise ApiException(
+                ALREADY_PRESENT_ERROR,
+                (u'Уже существует пациент со следующими данными: '
+                 u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+                 u'номер документа - {4}').format(
+                    fn, ln, pn, bd, doc_number
+                )
+            )
 
-    def find_client(self, external_client_id=None, data=None):
-        self.external_client_id = external_client_id
-        if external_client_id is None:
-            # Ручная валидация
-            if data is None:
-                raise Exception('ClientXForm.find_client called for creation without "data"')
-
+    def load_data(self):
+        if self.new:
             client = Client()
             db.session.add(client)
-            self.new = True
         else:
-            client = self._find_client_query(external_client_id).first()
-            if not client:
-                raise ApiException(404, u'Client not found')
-        self.client = client
+            client = self.find_client(self.target_obj_id)
+        self.target_obj = client
 
     def update_client(self, data):
+        self.load_data()
         with db.session.no_autoflush:
             self._update_main_data(data)
             if 'document' in data:
@@ -95,7 +89,7 @@ class ClientXForm(ClientSchema, XForm):
                 self._update_intolerances(data['medicine_intolerance_info'])
 
     def _update_main_data(self, data):
-        client = self.client
+        client = self.target_obj
         client.firstName = data['FIO']['name']
         client.lastName = data['FIO']['surname']
         client.patrName = data['FIO'].get('middlename') or ''
@@ -103,32 +97,25 @@ class ClientXForm(ClientSchema, XForm):
         client.sexCode = data['gender']
         snils = data.get('SNILS')
         client.SNILS = snils.replace('-', '') if snils else ''
-        if self.rbAccountingSystem:
-            ident = client.identifications.filter(ClientIdentification.accountingSystems == self.rbAccountingSystem).first()
-            if not ident:
-                ident = ClientIdentification()
-                ident.accountingSystems = self.rbAccountingSystem
-                ident.checkDate = datetime.date.today()
-                ident.client = client
-                db.session.add(ident)
-            ident.identifier = data.get('id', self.external_client_id)
+        self._changed.append(client)
 
     def _update_id_document(self, data):
-        client = self.client
+        client = self.target_obj
+        self._check_rb_value('rbDocumentType', data['document_type_code'])
         doc_type = rbDocumentType.query.filter(rbDocumentType.TFOMSCode == data['document_type_code']).first()
-        document = client.documents.filter(ClientDocument.documentType == doc_type).first()
+        document = client.document
         if not document:
             document = ClientDocument()
             document.client = client
-            db.session.add(document)
         document.documentType = doc_type
-        document.serial = data['document_series']
+        document.serial = data.get('document_series') or ''
         document.number = data['document_number']
         document.date = safe_date(data['document_beg_date'])
         document.origin = data.get('document_issuing_authority') or ''
+        self._changed.append(document)
 
     def _update_policies(self, policies):
-        client = self.client
+        client = self.target_obj
         rbpt_map = dict(
             (str(item.TFOMSCode) or item.code, item)
             for item in rbPolicyType.query
@@ -140,37 +127,35 @@ class ClientXForm(ClientSchema, XForm):
         for pol_data, policy in itertools.izip_longest(policies, client_policies):
             if not pol_data:
                 policy.deleted = 1
+                self._changed.append(policy)
                 continue
-            policy_type = rbpt_map.get(str(pol_data['insurance_document_type'])) or rbpt_map.get('vmi')
-            org = Organisation.query.filter(
-                Organisation.TFOMSCode == pol_data['insurance_document_issuing_authority']
-            ).first()
+            pol_type_code = str(pol_data['insurance_document_type'])
+            self._check_rb_value('rbPolicyType', pol_type_code)
+            policy_type = rbpt_map.get(pol_type_code) or rbpt_map.get('vmi')
+            org = self.find_org(pol_data['insurance_document_issuing_authority'])
             if not policy:
                 policy = ClientPolicy()
                 policy.client = client
-                db.session.add(policy)
             policy.policyType = policy_type
-            policy.serial = pol_data.get('insurance_document_series', '')
+            policy.serial = pol_data.get('insurance_document_series') or ''
             policy.number = pol_data['insurance_document_number']
-            policy.begDate = pol_data['insurance_document_beg_date']
+            policy.begDate = safe_date(pol_data['insurance_document_beg_date'])
             policy.insurer = org
+            self._changed.append(policy)
 
     def _update_address(self, data):
-        client = self.client
+        client = self.target_obj
         client_address = client.loc_address
         if not client_address:
             client.loc_address = client_address = ClientAddress()
-            db.session.add(client_address)
 
         address = client_address.address
         if not address:
             address = client_address.address = Address()
-            db.session.add(address)
 
         house = address.house
         if not house:
             house = address.house = AddressHouse()
-            db.session.add(house)
 
         house.KLADRStreetCode = data['KLADR_street']
         house.KLADRCode = data['KLADR_locality']
@@ -178,61 +163,68 @@ class ClientXForm(ClientSchema, XForm):
         house.corpus = data.get('building', '')
         address.flat = data.get('flat')
         client_address.localityType = data.get('locality_type')
-        client_address.type = 1
+        client_address.type = AddressType.live[0]
+        self._changed.extend([client_address, address, house])
 
     def _update_blood(self, data_list):
         blood_types = dict(
             (bt.name, bt)
             for bt in rbBloodType.query
         )
-        client = self.client
+        client = self.target_obj
         for blood_data, blood_object in itertools.izip_longest(data_list, client.blood_history):
             if not blood_data:
                 blood_object.deleted = 1
+                self._changed.append(blood_object)
                 continue
             if not blood_object:
                 blood_object = BloodHistory()
                 blood_object.client = client
-                db.session.add(blood_object)
-            blood_object.bloodType = blood_types[blood_data['blood_type']]
+            bt_code = blood_data['blood_type']
+            self._check_rb_value('rbBloodType', bt_code)
+            blood_object.bloodType = blood_types[bt_code]
+            self._changed.append(blood_object)
 
     def _update_allergies(self, data_list):
-        client = self.client
+        client = self.target_obj
         for allergy_data, allergy_object in itertools.izip_longest(data_list, client.allergies):
             if not allergy_data:
                 allergy_object.deleted = 1
+                self._changed.append(allergy_object)
                 continue
             if not allergy_object:
                 allergy_object = ClientAllergy()
                 allergy_object.client = client
-                db.session.add(allergy_object)
             allergy_object.name = allergy_data['allergy_substance']
             allergy_object.power = allergy_data['allergy_power']
+            self._changed.append(allergy_object)
 
     def _update_intolerances(self, data_list):
-        client = self.client
+        client = self.target_obj
         for intolerance_data, intolerance_object in itertools.izip_longest(data_list, client.intolerances):
             if not intolerance_data:
                 intolerance_object.deleted = 1
+                self._changed.append(intolerance_object)
                 continue
             if not intolerance_object:
                 intolerance_object = ClientIntoleranceMedicament()
                 intolerance_object.client = client
-                db.session.add(intolerance_object)
             intolerance_object.name = intolerance_data['medicine_substance']
-            intolerance_object.power = intolerance_data['medicine_intolerance__power']
+            intolerance_object.power = intolerance_data['medicine_intolerance_power']
+            self._changed.append(intolerance_object)
 
     @wrap_simplify
     def as_json(self):
-        client = self.client
+        client = self.target_obj
         return {
-            'id': self.external_client_id,
+            'client_id': self.target_obj.id,
             'FIO': {
                 'name': client.firstName,
                 'middlename': client.patrName or Undefined,
                 'surname': client.lastName,
             },
             'birthday_date': client.birthDate,
+            'SNILS': client.SNILS or Undefined,
             'gender': client.sexCode,
             'document': self._represent_document(client.document),
             'insurance_documents': map(self._represent_policy, client.policies_all),
@@ -319,21 +311,6 @@ class ClientXForm(ClientSchema, XForm):
         :return:
         """
         return {
-            "medicine_intolerance__power": intolerance.power,
+            "medicine_intolerance_power": intolerance.power,
             "medicine_substance": intolerance.name,
         }
-
-    @none_default
-    def _represent_patient_external_code(self, client):
-        """
-        :type client: nemesis.models.client.Client
-        :param client:
-        :return:
-        """
-        if self.rbAccountingSystem:
-            ident = client.identifications.filter(
-                ClientIdentification.accountingSystems == self.rbAccountingSystem
-            ).first()
-            if ident:
-                return ident.identifier
-

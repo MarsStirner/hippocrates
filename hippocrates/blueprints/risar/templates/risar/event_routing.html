@@ -31,22 +31,16 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-default" ng-if="chart.diagnoses.length"
-                                    ng-click="toggleDiagnosesSelection()" title="[[getToggleDiagnosesBtnText()]]">
-                                    [[getToggleDiagnosesBtnText()]]
-                                </button>
-                            </div>
-                            <div class="col-md-8">
-                                <span class="pull-right text-muted">Диагнозы, выделенные <b>жирным</b>, определяют перинатальный риск,<br>цвет указывает на степень риска
+                            <div class="col-md-12">
+                                <span class="text-muted">Диагнозы, выделенные <b>жирным</b>, определяют перинатальный риск,<br>цвет указывает на степень риска
                                     <span class="rmargin10" style="font-size: x-large" ><i tooltip="Низкая степень риска" class="ri-prenatal-risk text-green"></i></span>
                                     <span class="rmargin10" style="font-size: x-large" ><i tooltip="Средняя степень риска" class="ri-prenatal-risk text-yellow"></i></span>
                                     <span class="rmargin10" style="font-size: x-large" ><i tooltip="Высокая степень риска" class="ri-prenatal-risk text-red"></i></span>
                                 </span>
                             </div>
                         </div>
-                        <div fs-checkbox items="chart.diagnoses" ng-model="selected_diagnoses">
-                            <span ng-class="$parent.$parent.getMkbItemClass(item)">[[ item.code ]] - [[ item.name ]]</span>
+                        <div ng-repeat="item in chart.diagnoses">
+                            <span ng-class="getMkbItemClass(item)">[[ item.code ]] - [[ item.name ]]</span>
                         </div>
                     </div>
                 </div>
@@ -114,7 +108,7 @@
                             <div ng-if="noLpuAvailable()">
                                 <hr>
                                 <h3 class="text-center">Подходящие ЛПУ не найдены</h3>
-                                <span class="text-muted">Уберите часть выбранных диагнозов для вывода учреждений более широкого профиля</span>
+                                <span class="text-muted">Обратитесь к администратору для уточнения настроек маршрутизации</span>
                             </div>
                         </div>
                     </div>

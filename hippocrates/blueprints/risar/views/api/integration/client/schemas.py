@@ -12,6 +12,11 @@ class ClientSchema(Schema):
         "type": "object",
         "$schema": "http://json-schema.org/draft-04/schema",
         "properties": {
+            "client_id": {
+                "id": "client/client_id",
+                "type": "string",
+                "description": "Идентификатор пациента в системе БАРС МР"
+            },
             "FIO": {
                 "type": "object",
                 "description": "ФИО пациента",
@@ -103,13 +108,14 @@ class ClientSchema(Schema):
                     },
                     "document_issuing_authority": {
                         "type": "string",
-                        "description": "Орган, выдавший документ, удостоверяющий личность пациента"
+                        "description": "Орган, выдавший документ, удостоверяющий личность пациента",
+                        "maxLength": 256
                     }
                 },
                 "required": [
                     "document_type_code",
                     "document_number",
-                    "document_beg_date",
+                    "document_beg_date"
                 ]
             },
             "insurance_documents": {
@@ -264,7 +270,7 @@ class ClientSchema(Schema):
                     "type": "object",
                     "description": "Сведение о медикаментозной непереносимости",
                     "properties": {
-                        "medicine_intolerance__power": {
+                        "medicine_intolerance_power": {
                             "type": "integer",
                             "description": "Степень медикаментозной непереносимости: 0-не известно, 1-малая, 2-средняя, 3- высокая, 4-строгая",
                             "enum": [
@@ -282,7 +288,7 @@ class ClientSchema(Schema):
                         }
                     },
                     "required": [
-                        "medicine_intolerance__power",
+                        "medicine_intolerance_power",
                         "medicine_substance"
                     ]
                 }

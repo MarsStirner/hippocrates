@@ -11,11 +11,6 @@ class AnamnesisMotherSchema(Schema):
         "id": "mother_anamnesis_schema",
         "type": "object",
         "properties": {
-            "anamnesis_id": {
-                "id": "mother_anamnesis_schema/anamnesis_id",
-                "type": "string",
-                "description": "Идентификатор анамнеза в системе БАРС МР"
-            },
             "education": {
                 "id": "mother_anamnesis_schema/education",
                 "type": "string",
@@ -157,9 +152,9 @@ class AnamnesisMotherSchema(Schema):
                 "type": "array",
                 "description": "Сведения о наследственных заболеванияъ женщины",
                 "items": {
-                        "type": "string",
-                        "description": "Код наследственного заболевания по справочнику"
-                    }
+                    "type": "string",
+                    "description": "Код наследственного заболевания по справочнику"
+                }
             },
             "finished_diseases": {
                 "id": "mother_anamnesis_schema/finished_diseases",
@@ -370,6 +365,11 @@ class AnamnesisPrevPregSchema(Schema):
         "type": "object",
         "description": "Сведение о предыдущей беременности",
         "properties": {
+            "prevpregnancy_id": {
+                "id": "anamnesis_prev_pregnancy_schema/prevpregnancy_id",
+                "type": "string",
+                "description": "Идентификатор анамнеза предыдущей беременности в системе БАРС МР"
+            },
             "pregnancy_year": {
                 "id": "anamnesis_prev_pregnancy_schema/pregnancy_year",
                 "type": "integer",

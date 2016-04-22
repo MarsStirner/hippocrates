@@ -24,7 +24,8 @@ def api_client_schema(api_version):
 @api_method(hook=hook)
 def api_client_get(api_version, client_id):
     xform = ClientXForm(api_version)
-    xform.find_client(client_id)
+    xform.check_params(client_id)
+    xform.load_data()
     return xform.as_json()
 
 
@@ -33,10 +34,10 @@ def api_client_get(api_version, client_id):
 @api_method(hook=hook)
 def api_client_save(api_version, client_id=None):
     data = request.get_json()
-    xform = ClientXForm(api_version)
+    create = request.method == 'POST'
+    xform = ClientXForm(api_version, create)
     xform.validate(data)
-    xform.find_client(client_id, data)
+    xform.check_params(client_id, None, data)
     xform.update_client(data)
-    db.session.add(xform.client)
-    db.session.commit()
+    xform.store()
     return xform.as_json()
