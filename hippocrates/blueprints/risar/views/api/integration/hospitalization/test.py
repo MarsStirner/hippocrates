@@ -36,7 +36,7 @@ def test_put_hospitalization(card_id, hospitalization_id):
 
 
 def request_delete_hospitalization(session, card_id, hospitalization_id):
-    url = u'/risar/api/integration/0/card/%s/hospitalization/%s' % (card_id, hospitalization_id)
+    url = u'/risar/api/integration/0/card/%s/hospitalization/%s/' % (card_id, hospitalization_id)
     result = make_api_request('delete', url, session)
     return result
 

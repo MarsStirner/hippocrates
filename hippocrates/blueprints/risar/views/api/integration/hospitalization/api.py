@@ -26,7 +26,7 @@ def api_hospitalization_schema(api_version):
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/<int:hospitalization_id>/', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/', methods=['POST'])
 @api_method(hook=hook)
-def api_hospitalization_save(api_version, card_id, hospitalization_id):
+def api_hospitalization_save(api_version, card_id, hospitalization_id=None):
     data = request.get_json()
     create = request.method == 'POST'
     xform = HospitalizationXForm(api_version, create)
@@ -37,7 +37,7 @@ def api_hospitalization_save(api_version, card_id, hospitalization_id):
     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/<int:hospitalization_id>', methods=['DELETE'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/<int:hospitalization_id>/', methods=['DELETE'])
 @api_method(hook=hook)
 def api_hospitalization_delete(api_version, card_id, hospitalization_id):
     xform = HospitalizationXForm(api_version)

@@ -42,7 +42,7 @@ class HospitalizationXForm(HospitalizationSchema, ExternalXForm):
 
     def update_target_obj(self, data):
         self.em = self.get_event_measure(data['measure_id'])
-        self.person = self.find_doctor(data.get('doctor'), data.get('doctor'))
+        self.person = self.find_doctor(data.get('doctor'), data.get('hospital'))
 
         if self.new:
             self.create_action()
@@ -102,12 +102,15 @@ class HospitalizationXForm(HospitalizationSchema, ExternalXForm):
             self.target_obj_class.id == self.target_obj_id,
             self.target_obj_class.deleted == 0
         ).update({'deleted': 1})
+        EventMeasure.query.filter(
+            EventMeasure.resultAction_id == self.target_obj_id
+        ).update({'resultAction_id': None})
 
     def as_json(self):
         an_props = self.target_obj.propsByCode
         res = {
             'external_id': self.external_id,
-            'hospitalization_id': self.target_obj_id,
+            'hospitalization_id': self.target_obj.id,
             'measure_id': self.em.id,
             'date_in': an_props['ReceiptDate'].value,
             'date_out': an_props['IssueDate'].value,
