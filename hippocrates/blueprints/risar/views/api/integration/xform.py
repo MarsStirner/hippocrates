@@ -7,6 +7,7 @@ from decimal import Decimal
 from abc import ABCMeta, abstractmethod
 
 from nemesis.lib.apiutils import ApiException
+from nemesis.lib.diagnosis import diagnosis_using_by_next_checkups
 from nemesis.views.rb import check_rb_value_exists
 from nemesis.lib.vesta import Vesta
 from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
@@ -598,7 +599,7 @@ class CheckupsXForm(ExternalXForm):
             elif db_diag and not mis_diag:
                 # закрыть
                 # нельзя закрывать, если используется в документах своего типа с бОльшей датой
-                if self.is_using_by_next_checkups(db_diag['diagnosis_id'], action):
+                if diagnosis_using_by_next_checkups(action):
                     continue
                 diagnostic_changed = True
                 kind_changed = False
@@ -606,14 +607,3 @@ class CheckupsXForm(ExternalXForm):
                 end_date = set_date
                 add_diag_data()
         return res
-
-    @classmethod
-    def is_using_by_next_checkups(cls, diagnosis_id, action):
-        q = Action_Diagnosis.query.join(cls.target_obj_class).filter(
-            Action_Diagnosis.diagnosis_id == diagnosis_id,
-            cls.target_obj_class.begDate >= action.begDate,
-            cls.target_obj_class.actionType == action.actionType,
-            cls.target_obj_class.id != action.id,
-            cls.target_obj_class.deleted == 0,
-        )
-        return db.session.query(q.exists()).scalar()

@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from blueprints.risar.lib.expert.em_diagnosis import get_event_measure_diag, \
+    update_patient_diagnoses
 from flask import request
 
 from nemesis.lib.apiutils import api_method, ApiException
@@ -170,13 +172,17 @@ def api_0_event_measure_result_save(event_measure_id, em_result_id=None):
         raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
     em_ctrl = EventMeasureController()
     if not em_result_id:
+        old_event_measure_diag = None
         em_result = em_ctrl.create_em_result(em, json_data)
+        update_patient_diagnoses(old_event_measure_diag, em_result)
         em_ctrl.store(em, em_result)
     elif em_result_id:
         em_result = get_action_by_id(em_result_id)
         if not em_result:
             raise ApiException(404, u'Не найден Action с id = '.format(em_result_id))
+        old_event_measure_diag = get_event_measure_diag(em_result, raw=True)
         em_result = em_ctrl.update_em_result(em, em_result, json_data)
+        update_patient_diagnoses(old_event_measure_diag, em_result)
         em_ctrl.store(em, em_result)
     else:
         raise ApiException(404, u'`appointment_id` required')
