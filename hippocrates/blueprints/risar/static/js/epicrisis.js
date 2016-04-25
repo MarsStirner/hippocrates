@@ -79,11 +79,22 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
     };
 
     $scope.add_child = function () {
-        $scope.epicrisis.newborn_inspections.push({});
+        $scope.epicrisis.newborn_inspections.push({
+            id: null,
+            deleted: 0
+        });
         $timeout(function () {
             $('#childrenTabs').find('a:last').tab('show');
         }, 0);
 
+    };
+
+    $scope.delete_child = function(child){
+        child.deleted = 1;
+        $timeout(function(){
+            $('#childrenTabs li.active').removeClass('active');
+            $('#childrenTabs').find('a:first').tab('show');
+        }, 0);
     };
 
     $scope.filterRb = function (list, code) {
