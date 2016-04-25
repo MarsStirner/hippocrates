@@ -63,7 +63,8 @@ var AnamnesisCtrl = function ($scope, $controller, RisarApi) {
 
 var MotherFatherCtrl = function ($scope) {
     $scope.warnings = {
-        blood_type: 'Несовместимый резус-фактор'
+        blood_type: 'Несовместимый резус-фактор',
+        risk_group_07: 'Внимание! Возможно развитие групповой несовместимости'
     };
 };
 var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {

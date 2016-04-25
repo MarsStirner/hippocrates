@@ -98,12 +98,16 @@
                         <td ng-bind="format_multiple(anamnesis.mother.infertility_treatment, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.infertility_treatment, 'name')"></td>
                     </tr>
-                    <tr ng-if="warnings.blood_type">
-                        <td rowspan="2">Группа крови и резус-фактор</td>
+                    <tr ng-if="false">
+                        <td>Группа крови и резус-фактор</td>
                         <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.blood_type ]]</td>
                     </tr>
+                    <tr ng-if="anamnesis.risk_groups.indexOf('07') >= 0">
+                        <td>Группа риска</td>
+                        <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.risk_group_07 ]]</td>
+                    </tr>
                     <tr>
-                        <td ng-if="!warnings.blood_type">Тип крови и резус-фактор</td>
+                        <td>Тип крови и резус-фактор</td>
                         <td ng-bind="anamnesis.mother.blood_type.name"></td>
                         <td ng-bind="anamnesis.father.blood_type.name"></td>
                     </tr>

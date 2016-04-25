@@ -11,6 +11,7 @@ from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
 from blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list)
 from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
@@ -336,6 +337,8 @@ def represent_anamnesis_newborn_inspections(prev_children):
 
 
 def represent_anamnesis(event):
+    card = PregnancyCard.get_for_event(event)
+    found_groups = list(calc_risk_groups(card))
     return {
         'mother': represent_mother_action(event),
         'father': represent_father_action(event),
@@ -348,7 +351,8 @@ def represent_anamnesis(event):
         'intolerances': [
             represent_intolerance(obj)
             for obj in itertools.chain(event.client.allergies, event.client.intolerances)
-        ]
+        ],
+        'risk_groups': found_groups,
     }
 
 
