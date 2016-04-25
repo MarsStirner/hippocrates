@@ -2,7 +2,10 @@
 import collections
 import datetime
 
+from blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
 from flask import request
+from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
+    Diagnosis, Diagnostic, Action_Diagnosis
 from sqlalchemy import func
 
 from blueprints.risar.lib.card import PregnancyCard
@@ -25,7 +28,7 @@ from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
 from blueprints.risar.lib.card_fill_rate import CFRController
-from blueprints.risar.lib.stats import StatsController
+from blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
 
 
 def get_rate_for_regions(regions, rate_code):
@@ -373,13 +376,20 @@ def api_0_death_stats():
 
     #материнская смертность
     def check_pat_diagnosis(action):
-        if 'pat_diagnosis' not in action.propsByCode:
-            return False
-        pat_diagnosis = action.propsByCode['pat_diagnosis'].value
-        for diag_code in ('V', 'W', 'X', 'Y'):
-            if pat_diagnosis and pat_diagnosis.diagnosis.mkb.DiagID.startswith(diag_code):
-                return False
-        return True
+        diagnostics = Diagnostic.query.join(Diagnosis).join(
+            Action_Diagnosis
+        ).join(rbDiagnosisKind).join(rbDiagnosisTypeN).filter(
+            Diagnostic.action == action,
+            Diagnosis.endDate.is_(None),
+            rbDiagnosisKind.code == 'main',
+            rbDiagnosisTypeN.code == 'pathanatomical',
+        ).all()
+        res = any_thing(
+            diagnostics,
+            mather_death_koef_diags,
+            lambda x: x.MKB
+        )
+        return res
 
     for i in range(1, 13):
         actions = Action.query.join(Event, EventType, rbRequestType, Action, ActionType, ActionProperty,

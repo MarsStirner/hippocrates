@@ -578,7 +578,7 @@ def represent_checkups_puerpera_shortly(event):
 
 
 def represent_checkup_shortly(action):
-    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisTypeN
+    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
 
     card = PregnancyCard.get_for_event(action.event)
     # Получим диагностики, актуальные на начало действия (Diagnostic JOIN Diagnosis)
@@ -590,11 +590,11 @@ def represent_checkup_shortly(action):
     diagnostic = Diagnostic.query.join(
         Action_Diagnosis, Action_Diagnosis.diagnosis_id == Diagnostic.diagnosis_id
     ).join(
-        rbDiagnosisTypeN,
+        rbDiagnosisKind,
     ).filter(
         Action_Diagnosis.action == action,
         Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
-        rbDiagnosisTypeN.code == 'main',
+        rbDiagnosisKind.code == 'main',
     ).first()
 
     pregnancy_week = get_action_property_value(action.id, 'pregnancy_week')
