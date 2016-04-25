@@ -470,6 +470,8 @@ def check_existing_open_events(client_id, request_type_kind):
         Event.client_id == client_id
     ).where(
         Event.execDate.is_(None)
+    ).where(
+        Event.deleted == 0
     )
     if request_type_kind == 'stationary':
         result = result.where(
