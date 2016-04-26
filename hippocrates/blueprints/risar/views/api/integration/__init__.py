@@ -9,6 +9,7 @@ from . import (
     childbirth,
     hospitalization,
     routing,
+    errands,
 )
 from . import xform
 
