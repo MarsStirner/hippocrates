@@ -318,19 +318,28 @@
                     </table>
                 </div>
                 <div class="box box-primary">
-                    <div class="box-header"><h3 class="box-title">Закрытие случая</h3></div>
+                    <div class="box-header">
+                        <h3 class="box-title">Закрытие случая
+                            <span ng-if="header.event.exec_date">(Случай закрыт)</span>
+                        </h3>
+                        <div class="box-tools">
+                            <div class="btn-group" role="group" ng-if="!header.event.exec_date">
+                                <button type="button" class="btn btn-primary" ng-click="close_event()">Закрыть случай</button>
+                            </div>
+                        </div>
+                    </div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
                             <td class="col-md-6 text-right">Дата закрытия случая:</td>
                             <td class="col-md-6">
-                                [[ chart.exec_date | asDate ]]
+                                [[ header.event.exec_date | asDate ]]
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-right">Время закрытия случая:</td>
+                            <td class="text-right">Заведующая ЖК:</td>
                             <td>
-                                [[ chart.exec_date | asTime ]]
+                                [[ header.event.manager.short_name ]]
                             </td>
                         </tr>
                         </tbody>
@@ -346,4 +355,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/create_errand.html">{% include 'risar/errands/_modal_create_errand.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/edit_epicrisis.html">{% include 'risar/modals/_modal_epicrisis.html' %}</script>
 {% endblock %}

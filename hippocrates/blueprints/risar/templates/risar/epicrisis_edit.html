@@ -794,7 +794,7 @@
                         <a class="btn btn-success"
                            ng-disabled="is_save_disabled(rc.sampleWizard)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
-                           ng-click="rc.sampleWizard.currentIndex == rc.sampleWizard.navigationLength ? close_event() : save(rc.sampleWizard.currentStep.formController)">
+                           ng-click="save(rc.sampleWizard.currentStep.formController)">
                             Сохранить</a>
                         <a class="btn btn-primary"
                            ng-disabled="is_save_disabled(rc.sampleWizard)"

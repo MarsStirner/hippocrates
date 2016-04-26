@@ -103,7 +103,53 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
             },
             size: 'lg'
         })
-    }
+    };
+    $scope.close_event = function() {
+        var model = {};
+        open_edit_epicrisis(model).result.then(function (rslt) {
+            var result = rslt[0];
+            RisarApi.chart.close_event($scope.chart.id, result).then(function (data) {
+                _.extend($scope.header.event, data);
+                NotificationService.notify(
+                    200,
+                    [
+                        'Случай беременности закрыт',
+                        {
+                            bold: false,
+                            text: ''
+                        }, '. ',
+                        {
+                            click: function () {
+                                $scope.close_event();
+                            },
+                            text: 'Изменить'
+                        }, ' ',
+                        {
+                            click: function () {
+                                RisarApi.chart.close_event($scope.chart.id, {cancel: true}).then(function(data){
+                                    _.extend($scope.header.event, data);
+                                });
+                            },
+                            text: 'Отменить'
+                        }
+                    ],
+                    'success'
+                );
+            });
+        })
+    };
+    var open_edit_epicrisis = function(e){
+        var scope = $scope.$new();
+        scope.model = e;
+        return $modal.open({
+            templateUrl: '/WebMis20/RISAR/modal/edit_epicrisis.html',
+            scope: scope,
+            resolve: {
+                model: function () {return e}
+            },
+            size: 'lg'
+        })
+    };
     reload_chart();
 };
 

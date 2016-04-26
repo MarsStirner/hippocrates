@@ -1,0 +1,38 @@
+<form name="closeEventForm">
+    <div class="modal-header">
+        <h3 class="modal-title">Закрытие случая</h3>
+    </div>
+    <div class="modal-body">
+        <div class="das-form">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th class="col-md-3"></th>
+                        <th class="col-md-9"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="text-right">Дата закрытия случая <span class="text-danger">*</span></th>
+                        <td><div class="col-lg-3 col-md-3 col-xs-3">
+                            <wm-date name="date" ng-model="model.exec_date" style="width: 250px" autofocus="true" ng-required="true"></wm-date>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Заведующая ЖК <span class="text-danger">*</span></th>
+                        <td><div class="col-md-10"><wm-person-select ng-model="model.manager" ng-required="true"></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a class="btn btn-success"
+           ng-disabled="closeEventForm.$invalid"
+           tooltip="[[closeEventForm.$invalid ? 'Заполните все обязательные поля': '']]"
+           ng-click="$close([model])">
+            Сохранить</a>
+        <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+    </div>
+</form>

@@ -71,13 +71,6 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
         return !!(wizard.currentIndex == 1 && $scope.mother_death && wizard.currentStep.formController.$invalid);
     };
 
-    $scope.close_event = function () {
-        RisarApi.chart.close_event($scope.chart.id, $scope.chart)
-            .then(function (data) {
-                $scope.chart = data;
-            })
-    };
-
     $scope.add_child = function () {
         $scope.epicrisis.newborn_inspections.push({
             id: null,

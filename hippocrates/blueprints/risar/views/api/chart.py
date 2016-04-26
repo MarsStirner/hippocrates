@@ -12,7 +12,8 @@ from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagno
     reevaluate_dates
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     group_orgs_for_routing, represent_checkups, represent_card_attributes, \
-    represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history
+    represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history, \
+    represent_chart_for_close_event
 from blueprints.risar.lib.utils import get_last_checkup_date
 from blueprints.risar.risar_config import attach_codes, request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
@@ -258,11 +259,16 @@ def api_0_chart_close(event_id=None):
     if not event_id:
         raise ApiException(400, u'Either event_id must be provided')
     else:
-        data = request.get_json()
         event = Event.query.get(event_id)
-        event.execDate = safe_datetime(data['exec_date'])
+        data = request.get_json()
+        if data.get('cancel'):
+            event.execDate = None
+            event.manager_id = None
+        else:
+            event.execDate = safe_datetime(data['exec_date'])
+            event.manager_id = data['manager']['id']
         db.session.commit()
-    return represent_chart_for_epicrisis(event)
+    return represent_chart_for_close_event(event)
 
 
 @module.route('/api/0/chart/attach_lpu/', methods=['POST'])

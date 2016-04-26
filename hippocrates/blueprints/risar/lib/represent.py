@@ -159,6 +159,14 @@ def represent_chart_for_epicrisis(event):
     }
 
 
+def represent_chart_for_close_event(event):
+    return {
+        'id': event.id,
+        'exec_date': event.execDate,
+        'manager': event.manager,
+    }
+
+
 def represent_chart_for_card_fill_rate_history(event):
     card = PregnancyCard.get_for_event(event)
     card_attrs_action = card.attrs
