@@ -10,6 +10,7 @@ from . import (
     hospitalization,
     routing,
     errands,
+    epicrisis,
 )
 from . import xform
 
