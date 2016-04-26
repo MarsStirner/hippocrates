@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * Этот коммит всё портит. По возможности откатите его и несколько последующих, и сделайте нормально.
+ */
+
 WebMis20.run(['$templateCache', function ($templateCache) {
     $templateCache.put(
         '/WebMis20/modal/accounting/cashbook_payer_balance.html',
@@ -109,7 +113,11 @@ WebMis20.run(['$templateCache', function ($templateCache) {
         '\
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">\
     <button type="button" class="close" ng-click="$dismiss(\'cancel\')">&times;</button>\
-    <h4 class="modal-title">Оплата счёта</h4>\
+    <h4 class="modal-title" ng-switch="role">\
+        <span ng-switch-when="settlement">Оплата счёта</span>\
+        <span ng-switch-when="cancel">Отмена оплаты</span>\
+        <span ng-switch-default>Счёт</span>\
+    </h4>\
 </div>\
 <div class="modal-body">\
     <div class="row">\
@@ -135,7 +143,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     </div>\
     <div class="row">\
     <div class="col-md-12">\
-    <ng-form name="invoicePaymentForm" class="form-horizontal">\
+    <ng-form name="invoicePaymentForm" class="form-horizontal" ng-show="role == \'settlement\'">\
         <div class="form-group">\
             <div class="col-sm-offset-3 col-sm-7">\
                 <div class="checkbox">\
@@ -176,6 +184,15 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             </div>\
         </div>\
     </ng-form>\
+    <ng-form name="invoiceCancelForm" class="form-horizontal" ng-show="role == \'cancel\'">\
+        <div class="form-group" ng-class="{\'has-error\': invoiceCancelForm.pay_type.$invalid}">\
+            <label for="sum" class="col-md-3 control-label">Способ</label>\
+            <div class="col-md-7">\
+                <rb-select ng-model="trxes.payer_balance_trx.pay_type" ref-book="rbPayType" id="pay_type" name="pay_type"\
+                    ng-required="role == \'cancel\'"></rb-select>\
+            </div>\
+        </div>\
+    </ng-form>\
     </div>\
     </div>\
     <div class="row">\
@@ -193,6 +210,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <th>Стоимость (руб.)</th>\
                     <th>Кол-во</th>\
                     <th>Итог (руб.)</th>\
+                    <th ng-if="role == \'cancel\'">&nbsp</th>\
                 </tr>\
                 </thead>\
                 <tbody>\
@@ -205,12 +223,22 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <td>[[ item.price ]]</td>\
                     <td>[[ item.amount ]]</td>\
                     <td>[[ item.sum ]]</td>\
+                    <td ng-if="role == \'cancel\'">\
+                        <wm-checkbox select-all="selected_items" key="item"/>\
+                    </td>\
                 </tr>\
                 </tbody>\
                 <tbody>\
                 <tr>\
                     <td colspan="4" class="text-right">Итого:</td>\
-                    <td class="text-left">[[ invoice.total_sum ]]</td>\
+                    <td class="text-left" ng-if="role == \'settlement\'">[[ invoice.total_sum ]]</td>\
+                    <td class="text-left" ng-if="role == \'cancel\'">[[ selected_items.unselected() | sum:\'sum\' ]]</td>\
+                </tr>\
+                </tbody>\
+                <tbody ng-if="role == \'cancel\'">\
+                <tr>\
+                    <td colspan="4" class="text-right">Сумма возврата:</td>\
+                    <td class="text-left">[[ selected_items.selected() | sum:\'sum\' ]]</td>\
                 </tr>\
                 </tbody>\
                 </table>\
@@ -222,24 +250,36 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default rmargin10" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
-    <button type="button" class="btn btn-success" ng-disabled="invoicePaymentForm.$invalid"\
-        ng-click="saveAndClose()">Оплатить</button>\
+    <button type="button" class="btn btn-success" ng-disabled="invoicePaymentForm.$invalid" ng-click="saveAndClose()" ng-if="role == \'settlement\'">Оплатить</button>\
+    <button type="button" class="btn btn-danger" ng-disabled="invoiceCancelForm.$invalid || !selected_items.any()" \
+            ng-click="cancel_coordinated.checked = true" \
+            ng-if="role == \'cancel\' && !cancel_coordinated.checked">Согласовать возврат</button>\
+    <button type="button" class="btn btn-danger" ng-disabled="invoiceCancelForm.$invalid || !selected_items.any()" \
+            ng-click="cancelPayment()" \
+            ng-if="role == \'cancel\' && cancel_coordinated.checked">Вернуть сумму</button>\
 </div>');
 }]);
 
 
-var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookService, payer, trxes, invoice) {
+var CashbookInvoiceModalCtrl = function ($scope, $q, $filter, AccountingService, RefBookService, SelectAll, payer, trxes, invoice, role) {
     $scope.payer = null;
     $scope.trxes = null;
     $scope.invoice = null;
+    $scope.role = null;
+    $scope.cancel_coordinated = {
+        checked: false
+    };
     $scope.deposit_payment = {
         checked: false
     };
     $scope.ops = {
         balance_in: null,
-        invoice_pay: null
+        balance_out: null,
+        invoice_pay: null,
+        invoice_cancel: null
     };
     $scope.trx_type = null;
+    $scope.selected_items = new SelectAll([]);
 
     $scope.isDepositPayment = function () {
         return $scope.deposit_payment.checked;
@@ -270,6 +310,10 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
             });
         });
     };
+    $scope.cancelPayment = function () {};
+    $scope.item_selection_changed = function () {
+        console.log(arguments);
+    };
     $scope.make_invoice_trxes = function () {
         var data = {};
         data.invoice_trx = angular.extend($scope.trxes.invoice_trx, {
@@ -291,11 +335,15 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
                 $scope.payer = payer;
                 $scope.trxes = trxes;
                 $scope.invoice = invoice;
+                $scope.selected_items.setSource($filter('flattenNested')(invoice.item_list, 'subitem_list'));
+                $scope.role = role;
                 if (parseFloat($scope.payer.balance) < parseFloat($scope.invoice.total_sum)) {
                     $scope.deposit_payment.checked = true;
                 }
                 $scope.ops.balance_in = trxOperations.get_by_code('payer_balance_in');
+                $scope.ops.balance_out = trxOperations.get_by_code('payer_balance_out');
                 $scope.ops.invoice_pay = trxOperations.get_by_code('invoice_pay');
+                $scope.ops.invoice_cancel = trxOperations.get_by_code('invoice_cancel');
                 $scope.trx_type = trxTypes.get_by_code('invoice');
             });
     };
@@ -303,5 +351,5 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
     $scope.init();
 };
 
-WebMis20.controller('CashbookInvoiceModalCtrl', ['$scope', '$q', 'AccountingService', 'RefBookService',
+WebMis20.controller('CashbookInvoiceModalCtrl', ['$scope', '$q', '$filter', 'AccountingService', 'RefBookService', 'SelectAll',
     CashbookInvoiceModalCtrl]);

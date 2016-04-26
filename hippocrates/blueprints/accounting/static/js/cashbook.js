@@ -68,12 +68,22 @@ var CashBookCtrl = function ($scope, AccountingService, CashBookModalService) {
                 $scope.invoice.search_result.splice(idx, 1, result.invoice);
             });
     };
+    $scope.processInvoiceCancel = function (idx) {
+        var invoice = $scope.invoice.search_result[idx];
+        CashBookModalService.openProcessInvoiceCancel(invoice.id, invoice.contract.payer.id)
+            .then(function (result) {
+                $scope.invoice.search_result.splice(idx, 1, result.invoice);
+            });
+    };
     $scope.isInvoiceClosed = function (invoice) {
         return invoice.closed;
     };
     $scope.canProcessInvoicePayment = function (invoice) {
         return !$scope.isInvoiceClosed(invoice);
     };
+    $scope.canProcessInvoiceCancel = function (invoice) {
+        return $scope.isInvoiceClosed(invoice);
+    }
 
 };
 

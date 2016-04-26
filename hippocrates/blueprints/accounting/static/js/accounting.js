@@ -120,11 +120,47 @@ WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
                             },
                             invoice: function () {
                                 return invoice;
+                            },
+                            role: function () {
+                                return 'settlement'
                             }
                         }
                     });
                     return instance.result;
             });
+        },
+        openProcessInvoiceCancel: function (invoice_id, contragent_id) {
+            var finance_trx_promise = AccountingService.get_new_finance_trx_invoice(contragent_id, invoice_id),
+                payer_promise = AccountingService.get_contragent_payer(contragent_id),
+                invoice_promise = AccountingService.get_invoice(invoice_id);
+            return $q.all([finance_trx_promise, payer_promise, invoice_promise])
+                .then(function (data) {
+                    var trxes = data[0],
+                        payer = data[1],
+                        invoice = data[2];
+                    var instance = $modal.open({
+                        templateUrl: '/WebMis20/modal/accounting/cashbook_invoice.html',
+                        controller: CashbookInvoiceModalCtrl,
+                        backdrop: 'static',
+                        size: 'lg',
+                        windowClass: 'modalScrollable',
+                        resolve: {
+                            payer: function () {
+                                return payer;
+                            },
+                            trxes: function () {
+                                return trxes;
+                            },
+                            invoice: function () {
+                                return invoice;
+                            },
+                            role: function () {
+                                return 'cancel'
+                            }
+                        }
+                    });
+                    return instance.result;
+                });
         }
     }
 }]);
