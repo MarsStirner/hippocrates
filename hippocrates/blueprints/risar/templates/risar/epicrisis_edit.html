@@ -55,12 +55,6 @@
                                         <span>Сведения о родившихся детях</span>
                                     </a>
                                 </li>
-                                <li>
-                                    <a href="#last" data-toggle="tab">
-                                        <span class="badge">7</span>
-                                        <span>Закрытие случая</span>
-                                    </a>
-                                </li>
                             </ul>
                         </div>
                     </div>
@@ -784,33 +778,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            </div>
-                        </ng-form>
-                        <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 7. Закрытие случая</h3>
-                                </div>
-                            <div class="box-body">
-                            <div class="row">
-                                <div class="col-md-4 text-right">
-                                    Дата закрытия случая
-                                </div>
-                                <div class="col-md-8">
-                                    <wm-date ng-class="{'has-error': lastForm.exec_date.$invalid}" name="exec_date"
-                                             ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-date>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4  text-right">
-                                    Время закрытия случая
-                                </div>
-                                <div class="col-md-8">
-                                    <wm-time ng-class="{'has-error': lastForm.exec_time.$invalid}" name="exec_time"
-                                             ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-time>
-                                </div>
-                            </div>
                             </div>
                             </div>
                         </ng-form>

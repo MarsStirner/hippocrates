@@ -57,6 +57,7 @@ def represent_header(event):
             'set_date': event.setDate,
             'exec_date': event.execDate,
             'person': event.execPerson,
+            'manager': event.manager,
             'external_id': event.externalId,
         }
     }
