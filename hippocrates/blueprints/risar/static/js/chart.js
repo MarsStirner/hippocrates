@@ -106,6 +106,7 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
     };
     $scope.close_event = function() {
         var model = {};
+        _.extend(model, $scope.header.event);
         open_edit_epicrisis(model).result.then(function (rslt) {
             var result = rslt[0];
             RisarApi.chart.close_event($scope.chart.id, result).then(function (data) {
