@@ -21,7 +21,7 @@ from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_p
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
-from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool
+from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool, safe_bool_none
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
@@ -857,3 +857,28 @@ def represent_action_fetuses(action):
             },
         })
     return res
+
+
+def represent_concilium(concilium):
+    return {
+        'id': concilium.id,
+        'date': concilium.date,
+        'hospital': concilium.hospital,
+        'doctor': concilium.doctor,
+        'patient_presence': safe_bool_none(concilium.patient_presence),
+        'mkb': concilium.mkb,
+        'reason': concilium.reason,
+        'patient_condition': concilium.patient_condition,
+        'decision': concilium.decision,
+        'members': [
+            represent_concilium_member(member)
+            for member in concilium.members
+        ]
+    }
+
+
+def represent_concilium_member(member):
+    return {
+        'doctor': member.person,
+        'opinion': member.opinion
+    }

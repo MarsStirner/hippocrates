@@ -213,3 +213,13 @@ def html_card_fill_history():
 @module.route('/risk_groups_list.html')
 def html_risk_groups_list():
     return render_template('risar/risk_groups_list.html')
+
+
+@module.route('/concilium_list.html')
+def html_concilium_list():
+    return render_template('risar/concilium_list.html')
+
+
+@module.route('/concilium.html')
+def html_concilium():
+    return render_template('risar/concilium.html')

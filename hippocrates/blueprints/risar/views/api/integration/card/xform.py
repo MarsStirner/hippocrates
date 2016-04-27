@@ -130,6 +130,6 @@ class CardXForm(CardSchema, XForm):
             'card_id': event.id,
             'client_id': event.client_id,
             'card_set_date': safe_date(event.setDate),
-            'card_doctor': event.execPerson.regionalCode,
-            "card_LPU": event.organisation.TFOMSCode
+            'card_doctor': self.from_person_rb(event.execPerson),
+            "card_LPU": self.from_org_rb(event.organisation)
         }

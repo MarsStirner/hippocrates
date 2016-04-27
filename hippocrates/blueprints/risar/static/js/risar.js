@@ -440,7 +440,15 @@ WebMis20
         list: function (event_id) {
             return wrapper('GET', Config.url.api_chart_risk_groups_list.format(event_id))
         }
-    }
+    };
+    this.concilium = {
+        get_list: function (event_id) {
+            return wrapper('GET', Config.url.api_concilium_list_get.format(event_id))
+        },
+        get: function (event_id, concilium_id) {
+            return wrapper('GET', Config.url.api_concilium_get.format(event_id) + concilium_id);
+        }
+    };
 }])
 .service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
     var event_source = new OneWayEvent(),

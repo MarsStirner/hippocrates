@@ -83,7 +83,9 @@ WebMis20
         api_errand_mark_as_read: '{{ url_for('.api_errand_mark_as_read') }}{0}',
         api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}',
         api_chart_card_fill_history: '{{ url_for('.api_0_chart_card_fill_history') }}',
-        api_chart_risk_groups_list: '{{ url_for('.api_0_chart_risks', event_id=-90) | replace("-90", "{0}") }}'
+        api_chart_risk_groups_list: '{{ url_for('.api_0_chart_risks', event_id=-90) | replace("-90", "{0}") }}',
+        api_concilium_list_get: '{{ url_for('.api_0_concilium_list_get', event_id=-90) | replace("-90", "{0}") }}',
+        api_concilium_get: '{{ url_for('.api_0_concilium_get', event_id=-90) | replace("-90", "{0}") }}'
     }
 })
 ;

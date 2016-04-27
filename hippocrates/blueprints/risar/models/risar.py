@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from sqlalchemy.dialects.mysql import LONGTEXT
+
 from blueprints.risar.models.vesta_props import VestaProperty
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
@@ -129,4 +131,52 @@ class ActionIdentification(db.Model):
     action = db.relationship('Action')
     external_id = db.Column(db.String(250), index=True)
     external_system_id = db.Column(db.Integer, db.ForeignKey('rbAccountingSystem.id'), nullable=False)
+    external_system = db.relationship(u'rbAccountingSystem')
+
+
+class RisarConcilium(db.Model):
+    __tablename__ = 'RisarConcilium'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    event_id = db.Column(db.ForeignKey('Event.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    hospital_id = db.Column(db.ForeignKey('Organisation.id'), nullable=False)
+    doctor_id = db.Column(db.ForeignKey('Person.id'), nullable=False)
+    patient_presence = db.Column(db.SmallInteger)
+    mkb_id = db.Column(db.ForeignKey('MKB.id'), nullable=False)
+    reason = db.Column(db.String(1024), nullable=False, server_default="''")
+    patient_condition = db.Column(LONGTEXT)
+    decision = db.Column(LONGTEXT, nullable=False)
+
+    event = db.relationship('Event')
+    hospital = db.relationship('Organisation')
+    doctor = db.relationship('Person')
+    mkb = db.relationship('MKB')
+    members = db.relationship('RisarConcilium_Members', backref='concilium')
+
+
+class RisarConcilium_Members(db.Model):
+    __tablename__ = 'RisarConcilium_Members'
+
+    id = db.Column(db.Integer, primary_key=True)
+    concilium_id = db.Column(db.ForeignKey('RisarConcilium.id'), nullable=False)
+    person_id = db.Column(db.ForeignKey('Person.id'), nullable=False)
+    opinion = db.Column(LONGTEXT)
+
+    person = db.relationship('Person')
+
+
+class RisarConcilium_Identification(db.Model):
+    __tablename__ = 'RisarConcilium_Identification'
+
+    id = db.Column(db.Integer, primary_key=True)
+    concilium_id = db.Column(db.ForeignKey('RisarConcilium.id'), nullable=False)
+    external_id = db.Column(db.String(250), nullable=False)
+    external_system_id = db.Column(db.ForeignKey('rbAccountingSystem.id'), nullable=False)
+
+    concilium = db.relationship('RisarConcilium')
     external_system = db.relationship(u'rbAccountingSystem')
