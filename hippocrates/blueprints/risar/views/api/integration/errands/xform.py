@@ -50,6 +50,9 @@ class ErrandsXForm(ErrandsSchema, XForm):
 
     def as_json(self):
         target_obj_query = self._find_target_obj_query()
+        target_obj_query = target_obj_query.filter(
+            self.target_obj_class.execDate.is_(None),
+        )
         res = []
         for errand in target_obj_query.all():
             res.append({
@@ -60,7 +63,7 @@ class ErrandsXForm(ErrandsSchema, XForm):
                 'comment': errand.text or '',
                 'execution_hospital': errand.execPerson.organisation and errand.execPerson.organisation.TFOMSCode or '',
                 'execution_doctor': errand.execPerson.regionalCode,
-                'execution_date': self.safe_represent_val(errand.execDate),
-                'execution_comment': errand.result or '',
+                # 'execution_date': self.safe_represent_val(errand.execDate),
+                # 'execution_comment': errand.result or '',
             })
         return res
