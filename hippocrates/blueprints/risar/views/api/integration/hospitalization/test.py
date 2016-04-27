@@ -12,7 +12,7 @@ from ..test import make_api_request, make_login
 
 
 def request_post_hospitalization(session, card_id):
-    url = u'/risar/api/integration/0/card/%s/hospitalization/' % card_id
+    url = u'/risar/api/integration/0/card/%s/measures/hospitalization/' % card_id
     result = make_api_request('post', url, session, test_hospitalization_data)
     return result
 
@@ -24,7 +24,7 @@ def test_post_hospitalization(card_id):
 
 
 def request_put_hospitalization(session, card_id, hospitalization_id):
-    url = u'/risar/api/integration/0/card/%s/hospitalization/%s/' % (card_id, hospitalization_id)
+    url = u'/risar/api/integration/0/card/%s/measures/hospitalization/%s/' % (card_id, hospitalization_id)
     result = make_api_request('put', url, session, test_hospitalization_data)
     return result
 
@@ -36,7 +36,7 @@ def test_put_hospitalization(card_id, hospitalization_id):
 
 
 def request_delete_hospitalization(session, card_id, hospitalization_id):
-    url = u'/risar/api/integration/0/card/%s/hospitalization/%s/' % (card_id, hospitalization_id)
+    url = u'/risar/api/integration/0/card/%s/measures/hospitalization/%s/' % (card_id, hospitalization_id)
     result = make_api_request('delete', url, session)
     return result
 

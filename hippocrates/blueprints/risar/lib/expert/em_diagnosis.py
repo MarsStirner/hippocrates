@@ -7,6 +7,8 @@
 
 """
 from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.risar_config import general_hospitalizations, \
+    general_specialists_checkups
 from nemesis.lib.diagnosis import create_or_update_diagnoses, \
     diagnosis_using_by_next_checkups
 
@@ -46,9 +48,9 @@ def update_patient_diagnoses(old_diag_id, new_em_result):
 
 def get_event_measure_diag(em_result, raw=False):
     def get_measure_diag_prop_code(em_result):
-        if em_result.actionType.context == 'general_specialists_checkups':
+        if em_result.actionType.context == general_specialists_checkups:
             return 'MainDiagnosis'
-        if em_result.actionType.context == 'general_hospitalizations':
+        if em_result.actionType.context == general_hospitalizations:
             return 'FinalDiagnosis'
 
     prop_type_code = get_measure_diag_prop_code(em_result)
@@ -60,9 +62,9 @@ def get_event_measure_diag(em_result, raw=False):
 
 def get_event_measure_doctor(em_result):
     def get_measure_diag_prop_code(em_result):
-        if em_result.actionType.context == 'general_specialists_checkups':
+        if em_result.actionType.context == general_specialists_checkups:
             return 'Doctor'
-        if em_result.actionType.context == 'general_hospitalizations':
+        if em_result.actionType.context == general_hospitalizations:
             return 'Doctor'
 
     prop_type_code = get_measure_diag_prop_code(em_result)

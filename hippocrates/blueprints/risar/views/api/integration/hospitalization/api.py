@@ -16,15 +16,15 @@ from nemesis.systemwide import db
 from flask import request
 
 
-@module.route('/api/integration/<int:api_version>/hospitalization/schema.json', methods=['GET'])
+@module.route('/api/integration/<int:api_version>/measures/hospitalization/schema.json', methods=['GET'])
 @api_method(hook=hook)
 @public_endpoint
 def api_hospitalization_schema(api_version):
     return HospitalizationXForm.get_schema(api_version)
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/<int:hospitalization_id>/', methods=['PUT'])
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/', methods=['POST'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/measures/hospitalization/<int:hospitalization_id>/', methods=['PUT'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/measures/hospitalization/', methods=['POST'])
 @api_method(hook=hook)
 def api_hospitalization_save(api_version, card_id, hospitalization_id=None):
     data = request.get_json()
@@ -37,7 +37,7 @@ def api_hospitalization_save(api_version, card_id, hospitalization_id=None):
     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/card/<int:card_id>/hospitalization/<int:hospitalization_id>/', methods=['DELETE'])
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/measures/hospitalization/<int:hospitalization_id>/', methods=['DELETE'])
 @api_method(hook=hook)
 def api_hospitalization_delete(api_version, card_id, hospitalization_id):
     xform = HospitalizationXForm(api_version)

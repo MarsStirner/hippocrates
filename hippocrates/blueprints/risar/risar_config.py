@@ -8,7 +8,6 @@ risar_mother_anamnesis = 'risar_mother_anamnesis'
 risar_father_anamnesis = 'risar_father_anamnesis'
 risar_epicrisis = 'epicrisis'
 risar_newborn_inspection = 'risar_newborn_inspection'
-general_hospitalizations = 'general_hospitalizations'
 
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
@@ -41,3 +40,7 @@ checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspecti
 inspection_preg_week_code = 'pregnancy_week'
 
 attach_codes = {'plan_lpu': '10', 'extra_lpu': '11'}
+
+# Action context codes
+general_hospitalizations = 'general_hospitalizations'
+general_specialists_checkups = 'general_specialists_checkups'

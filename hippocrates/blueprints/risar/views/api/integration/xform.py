@@ -624,3 +624,81 @@ class CheckupsXForm(ExternalXForm):
                 end_date = set_date
                 add_diag_data()
         return res
+
+
+from nemesis.models.expert_protocol import EventMeasure
+from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from nemesis.models.enums import MeasureStatus
+
+class MeasuresResultsXForm(ExternalXForm):
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def prepare_params(self, data):
+        self.em = None
+        self.person = None
+
+    @abstractmethod
+    def get_properties_data(self, data):
+        return data
+
+    def update_target_obj(self, data):
+        self.prepare_params(data)
+
+        if self.new:
+            self.create_action()
+        else:
+            self.find_target_obj(self.target_obj_id)
+
+        properties_data = self.get_properties_data(data)
+        self.set_properties(properties_data)
+        self.save_external_data()
+
+    def get_event_measure(self, event_measure_id):
+        if event_measure_id:
+            em = EventMeasure.query.get(event_measure_id)
+            if not em:
+                raise ApiException(NOT_FOUND_ERROR,
+                                   u'Не найдено EM с id = '.format(event_measure_id))
+        else:
+            status = MeasureStatus.created[0]
+            emg = EventMeasureGenerator(source_action)
+            em = emg.create_measure(sm, beg, end, status)
+        return em
+
+    def create_action(self):
+        # by blueprints.risar.views.api.measure.api_0_event_measure_result_save
+
+        em_ctrl = EventMeasureController()
+        em_result = em_ctrl.get_new_em_result(self.em)
+        self.em.result_action = em_result
+        em_ctrl.make_assigned(self.em)
+        db.session.add_all((self.em, em_result))
+
+        self.target_obj = em_result
+
+    def set_properties(self, data):
+        for code, value in data.iteritems():
+            if code in self.target_obj.propsByCode:
+                try:
+                    prop = self.target_obj.propsByCode[code]
+                    self.check_prop_value(prop, value)
+                    prop.value = value
+                except Exception, e:
+                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
+                        prop.type.name, prop.type.id), exc_info=True)
+                    raise
+
+    def delete_target_obj(self):
+        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
+        # self.close_diags()
+
+        self.target_obj_class.query.filter(
+            self.target_obj_class.event_id == self.parent_obj_id,
+            self.target_obj_class.id == self.target_obj_id,
+            self.target_obj_class.deleted == 0
+        ).update({'deleted': 1})
+        EventMeasure.query.filter(
+            EventMeasure.resultAction_id == self.target_obj_id
+        ).update({'resultAction_id': None})
