@@ -30,6 +30,7 @@ class EventMeasureRepr(object):
             'result_action_id': measure.resultAction_id,
             'is_actual': EventMeasureActuality(measure.is_actual),
             'scheme_measure': self.represent_scheme_measure(measure.scheme_measure),
+            'hand_measure': self.represent_measure_rb(measure.hand_measure),
             'create_datetime': measure.createDatetime,
             'modify_datetime': measure.modifyDatetime,
             'create_person': measure.create_person,
@@ -58,6 +59,8 @@ class EventMeasureRepr(object):
         return u'<br>'.join(parts)
 
     def represent_scheme_measure(self, scheme_measure):
+        if not scheme_measure:
+            return None
         return {
             'scheme': self.represent_scheme(scheme_measure.scheme),
             'measure': self.represent_measure_rb(scheme_measure.measure)
@@ -72,6 +75,8 @@ class EventMeasureRepr(object):
         }
 
     def represent_measure_rb(self, measure):
+        if not measure:
+            return None
         return {
             'id': measure.id,
             'code': measure.code,
