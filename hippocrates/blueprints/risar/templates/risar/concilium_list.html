@@ -1,0 +1,48 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="ConciliumListCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Консилиумы пациентки') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="col-md-2">Дата</th>
+                        <th class="col-md-4">ЛПУ</th>
+                        <th class="col-md-3">Диагноз</th>
+                        <th class="col-md-2">Лечащий врач</th>
+                        <th class="col-md-1"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="concilium in concilium_list">
+                        <td ng-bind="concilium.date | asDate"></td>
+                        <td ng-bind="concilium.hospital.short_name"></td>
+                        <td>
+                            <span tooltip="[[ concilium.mkb.name ]]" class="bottom_dotted">[[concilium.mkb.code]]</span>
+                        </td>
+                        <td ng-bind="concilium.doctor.short_name"></td>
+                        <td>
+                            <a ng-href="{{ url_for('.html_concilium') }}?event_id=[[ event_id ]]&concilium_id=[[concilium.id]]">Просмотр</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/concilium.js', v=app_version) }}"></script>
+{% endblock %}

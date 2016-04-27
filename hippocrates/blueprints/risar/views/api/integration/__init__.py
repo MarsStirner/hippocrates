@@ -11,6 +11,7 @@ from . import (
     routing,
     errands,
     epicrisis,
+    concilium
 )
 from . import xform
 

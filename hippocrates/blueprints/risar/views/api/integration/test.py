@@ -96,6 +96,7 @@ def make_api_request(method, url, session, json_data=None, url_args=None):
 
 
 def test_auth(login, password):
+    print 'Coldstar: ', coldstar_url, ', Risar: ', mis_url
     token = get_token(login, password)
     print ' > auth token: ', token
     session_token = get_role(token)
@@ -117,16 +118,18 @@ if __name__ == '__main__':
         from blueprints.risar.views.api.integration.measure.test import test_get_card_measures
         from blueprints.risar.views.api.integration.expert_data.test import \
             test_get_expert_data
+        from blueprints.risar.views.api.integration.concilium.test import \
+            test_register_edit_delete_concilium
 
         test_auth(login, password)
 
         # test_register_edit_client()
 
         # client_id = '17700'
-        # # test_register_edit_delete_card(client_id)
+        # test_register_edit_delete_card(client_id)
 
         # test_card_id = get_new_card_id_for_test(client_id)
-        # # test_card_id = '197'
+        # test_card_id = '200'
 
         # test_register_edit_delete_mother_anamnesis(test_card_id)
         # test_register_edit_delete_father_anamnesis(test_card_id)
@@ -204,3 +207,6 @@ if __name__ == '__main__':
         # test_post_epicrisis(card_id)
         # test_put_epicrisis(card_id)
         # test_delete_epicrisis(card_id)
+
+        # card_id = '214'
+        # test_register_edit_delete_concilium(card_id)

@@ -263,6 +263,12 @@ class XForm(object):
         return org
 
     @staticmethod
+    def from_org_rb(org):
+        if org is None:
+            return None
+        return org.TFOMSCode
+
+    @staticmethod
     def find_doctor(person_code, org_code):
         person = get_person_by_codes(person_code, org_code)
         if not person:
@@ -271,6 +277,12 @@ class XForm(object):
                 u'Не найден врач по коду {0} и коду ЛПУ {1}'.format(person_code, org_code)
             )
         return person
+
+    @staticmethod
+    def from_person_rb(person):
+        if person is None:
+            return None
+        return person.regionalCode
 
     def find_client(self, client_id):
         client = get_client_query(client_id).first()
@@ -283,6 +295,13 @@ class XForm(object):
         if not event:
             raise ApiException(NOT_FOUND_ERROR, u'Не найдена карта с id = {0}'.format(event_id))
         return event
+
+    @staticmethod
+    def find_mkb(code):
+        mkb = db.session.query(MKB).filter(MKB.DiagID == code, MKB.deleted == 0).first()
+        if not mkb:
+            raise ApiException(400, u'Не найден МКБ по коду "{0}"'.format(code))
+        return mkb
 
     def check_prop_value(self, prop, value):
         if value is None:
@@ -327,9 +346,7 @@ class XForm(object):
     def to_mkb_rb(code):
         if code is None:
             return None
-        mkb = db.session.query(MKB).filter(MKB.DiagID == code, MKB.deleted == 0).first()
-        if not mkb:
-            raise ApiException(400, u'Не найден МКБ по коду "{0}"'.format(code))
+        mkb = XForm.find_mkb(code)
         return {
             'id': mkb.id,
             'code': code
