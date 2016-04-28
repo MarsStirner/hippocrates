@@ -210,3 +210,17 @@ if __name__ == '__main__':
 
         # card_id = '214'
         # test_register_edit_delete_concilium(card_id)
+
+        # from blueprints.risar.views.api.integration.specialists_checkup.test import \
+        #     test_put_specialists_checkup, test_delete_specialists_checkup, test_post_specialists_checkup
+        # from blueprints.risar.views.api.integration.specialists_checkup.test_data import \
+        #     test_specialists_checkup_data
+        # card_id = '1'
+        # event_measure_id = '3230'
+        # result_action_id = '892'
+        # measure_type_code = '0003'
+        # test_specialists_checkup_data['measure_type_code'] = measure_type_code
+        # test_delete_specialists_checkup(card_id, result_action_id)
+        # test_post_specialists_checkup(card_id)
+        # test_specialists_checkup_data['measure_id'] = event_measure_id
+        # test_put_specialists_checkup(card_id, result_action_id)

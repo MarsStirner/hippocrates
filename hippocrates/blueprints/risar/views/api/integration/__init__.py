@@ -11,7 +11,8 @@ from . import (
     routing,
     errands,
     epicrisis,
-    concilium
+    concilium,
+    specialists_checkup,
 )
 from . import xform
 

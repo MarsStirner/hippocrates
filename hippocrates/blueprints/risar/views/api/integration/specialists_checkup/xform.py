@@ -33,7 +33,12 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
         return res
 
     def prepare_params(self, data):
-        self.em = self.get_event_measure(data['measure_id'])
+        self.em = self.get_event_measure(
+            data['measure_id'],
+            data['measure_type_code'],
+            data.get('checkup_date'),
+            data.get('checkup_date'),
+        )
         self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
     def get_properties_data(self, data):
@@ -50,7 +55,7 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             'external_id': self.external_id,
             'result_action_id': self.target_obj.id,
             'measure_id': self.em.id,
-            'measure_type_code': self.em.scheme_measure.measure.measure_type.code,
+            'measure_type_code': self.em.measure.code,
             'checkup_date': an_props['CheckupDate'].value,
             'lpu_code': self.person.organisation and self.person.organisation.TFOMSCode or '',
             'doctor_code': self.person.regionalCode,

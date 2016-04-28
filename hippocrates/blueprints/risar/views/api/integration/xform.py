@@ -5,8 +5,11 @@ import jsonschema
 from datetime import datetime
 from decimal import Decimal
 from abc import ABCMeta, abstractmethod
+from blueprints.risar.lib.expert.em_diagnosis import update_patient_diagnoses, \
+    get_event_measure_diag
 
 from nemesis.lib.apiutils import ApiException
+from nemesis.lib.data import create_action
 from nemesis.lib.diagnosis import diagnosis_using_by_next_checkups
 from nemesis.views.rb import check_rb_value_exists
 from nemesis.lib.vesta import Vesta
@@ -626,8 +629,7 @@ class CheckupsXForm(ExternalXForm):
         return res
 
 
-from nemesis.models.expert_protocol import EventMeasure
-from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from nemesis.models.expert_protocol import EventMeasure, Measure
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from nemesis.models.enums import MeasureStatus
 
@@ -648,30 +650,47 @@ class MeasuresResultsXForm(ExternalXForm):
 
         if self.new:
             self.create_action()
+            old_event_measure_diag = None
         else:
             self.find_target_obj(self.target_obj_id)
+            old_event_measure_diag = get_event_measure_diag(self.target_obj, raw=True)
 
         properties_data = self.get_properties_data(data)
         self.set_properties(properties_data)
+        update_patient_diagnoses(old_event_measure_diag, self.target_obj)
         self.save_external_data()
 
-    def get_event_measure(self, event_measure_id):
+    def get_event_measure(self, event_measure_id, measure_code, beg_date, end_date):
         if event_measure_id:
             em = EventMeasure.query.get(event_measure_id)
             if not em:
                 raise ApiException(NOT_FOUND_ERROR,
                                    u'Не найдено EM с id = '.format(event_measure_id))
         else:
-            status = MeasureStatus.created[0]
-            emg = EventMeasureGenerator(source_action)
-            em = emg.create_measure(sm, beg, end, status)
+            em = self.create_hand_event_measure(measure_code, beg_date, end_date)
+        return em
+
+    def create_hand_event_measure(self, measure_code, beg_date, end_date):
+        status = MeasureStatus.performed[0]
+        measure = Measure.query.filter(Measure.code == measure_code).first()
+        today = datetime.today()
+
+        em = EventMeasure()
+        em.hand_measure = measure
+        em.measure_id = measure.id
+        em.begDateTime, em.endDateTime = (beg_date, end_date) if all((beg_date, end_date)) else (today, today)
+        em.status = status
+        # em.event = self.parent_obj
+        em.event_id = self.parent_obj_id
         return em
 
     def create_action(self):
         # by blueprints.risar.views.api.measure.api_0_event_measure_result_save
 
         em_ctrl = EventMeasureController()
-        em_result = em_ctrl.get_new_em_result(self.em)
+        event_id = self.em.event_id
+        action_type_id = self.em.measure.resultAt_id
+        em_result = create_action(action_type_id, event_id)
         self.em.result_action = em_result
         em_ctrl.make_assigned(self.em)
         db.session.add_all((self.em, em_result))
@@ -699,6 +718,11 @@ class MeasuresResultsXForm(ExternalXForm):
             self.target_obj_class.id == self.target_obj_id,
             self.target_obj_class.deleted == 0
         ).update({'deleted': 1})
+
+        status = MeasureStatus.cancelled[0]
         EventMeasure.query.filter(
             EventMeasure.resultAction_id == self.target_obj_id
-        ).update({'resultAction_id': None})
+        ).update({
+            'resultAction_id': None,
+            'status': status,
+        })

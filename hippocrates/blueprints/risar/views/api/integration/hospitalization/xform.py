@@ -33,7 +33,13 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
         return res
 
     def prepare_params(self, data):
-        self.em = self.get_event_measure(data['measure_id'])
+        self.find_parent_obj(self.parent_obj_id)
+        self.em = self.get_event_measure(
+            data['measure_id'],
+            '65',
+            data.get('date_in'),
+            data.get('date_out'),
+        )
         self.person = self.find_doctor(data.get('doctor'), data.get('hospital'))
 
     def get_properties_data(self, data):

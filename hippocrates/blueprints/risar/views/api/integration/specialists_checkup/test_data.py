@@ -9,10 +9,13 @@
 
 
 test_specialists_checkup_data = {
-    'external_id': '12345',
-    'measure_id': None,
-    'checkup_date': '2016-03-28',
-    'lpu_code': '6202',
-    'doctor_code': '33',
-    'diagnosis': 'A01.1',
+    'external_id': '12346',
+    'measure_id': '',
+    'measure_type_code': None,
+    'checkup_date': '2016-02-24',
+    'lpu_code': '-1',
+    'doctor_code': '22',
+    # 'lpu_code': '6202',
+    # 'doctor_code': '33',
+    'diagnosis': 'A00',
 }
