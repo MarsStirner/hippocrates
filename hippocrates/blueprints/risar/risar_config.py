@@ -44,3 +44,4 @@ attach_codes = {'plan_lpu': '10', 'extra_lpu': '11'}
 # Action context codes
 general_hospitalizations = 'general_hospitalizations'
 general_specialists_checkups = 'general_specialists_checkups'
+general_results = 'general_results'

@@ -13,6 +13,7 @@ from . import (
     epicrisis,
     concilium,
     specialists_checkup,
+    research,
 )
 from . import xform
 
