@@ -530,6 +530,10 @@ class CheckupsXForm(ExternalXForm):
         self.set_pcard()
         self.pcard.reevaluate_card_attrs()
 
+    def generate_measures(self):
+        em_ctrl = EventMeasureController()
+        em_ctrl.regenerate(self.target_obj)
+
     def get_diagnoses(self, diags_data_list, person, set_date):
         # Прислали новый код МКБ, и не прислали старый - старый диагноз закрыли, новый открыли.
         # если тот же МКБ пришел не как осложнение, а как сопутствующий, это смена вида
@@ -600,8 +604,12 @@ class CheckupsXForm(ExternalXForm):
         for mkb in set(db_diags.keys() + mis_diags.keys()):
             db_diag = db_diags.get(mkb, {})
             mis_diag = mis_diags.get(mkb, {})
-            db_diagnosis_types = dict((k, self.rb(v, rbDiagnosisKind)) for k, v in db_diag.get('diagKind_codes').items())
-            mis_diagnosis_types = dict((k, self.rb(v, rbDiagnosisKind)) for k, v in mis_diag.get('diagKind_codes').items())
+            db_diagnosis_types = dict(
+                (k, self.rb(v, rbDiagnosisKind)) for k, v in db_diag.get('diagKind_codes', {}).items()
+            )
+            mis_diagnosis_types = dict(
+                (k, self.rb(v, rbDiagnosisKind)) for k, v in mis_diag.get('diagKind_codes', {}).items()
+            )
             if db_diag and mis_diag:
                 # сменить тип
                 diagnostic_changed = False

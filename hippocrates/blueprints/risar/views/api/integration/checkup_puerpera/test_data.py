@@ -7,7 +7,7 @@
 
 """
 
-test_puerpera_data = {
+puerpera_data = {
     "external_id": "12345",
     # "exam_puerpera_id": "",
     "date": "2016-04-01",  # *

@@ -7,7 +7,7 @@
 
 """
 
-test_obs_second_data = {
+obs_second_data = {
     "external_id": "12345",
     # "exam_obs_id": "",
     "dynamic_monitoring": {

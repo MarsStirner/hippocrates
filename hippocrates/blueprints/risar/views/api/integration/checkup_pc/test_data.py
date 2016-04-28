@@ -7,7 +7,7 @@
 
 """
 
-test_pc_data = {
+pc_data = {
     "external_id": "12345",
     # "exam_pc_id": "",
     "general_info": {

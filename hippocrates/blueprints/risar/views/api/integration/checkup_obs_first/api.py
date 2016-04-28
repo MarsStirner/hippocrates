@@ -6,14 +6,23 @@
 @date: 22.03.2016
 
 """
+import logging
+from flask import request
+
 from blueprints.risar.app import module
 from blueprints.risar.views.api.integration.checkup_obs_first.xform import \
     CheckupObsFirstXForm
 from blueprints.risar.views.api.integration.logformat import hook
-from flask import request
-from nemesis.lib.apiutils import api_method
+from blueprints.risar.views.api.integration.const import (
+    card_attrs_save_error_code, measures_save_error_code,
+    err_card_attrs_save_msg, err_measures_save_msg
+)
+from nemesis.lib.apiutils import api_method, RawApiResult
 from nemesis.lib.utils import public_endpoint
 from nemesis.systemwide import db
+
+
+logger = logging.getLogger('simple')
 
 
 @module.route('/api/integration/<int:api_version>/checkup/obs/first/schema.json', methods=["GET"])
@@ -33,9 +42,30 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
     xform.validate(data)
     xform.check_params(exam_obs_id, card_id, data)
     xform.update_target_obj(data)
-    db.session.commit()
-    xform.reevaluate_data()
-    db.session.commit()
+    xform.store()
+
+    try:
+        xform.reevaluate_data()
+        db.session.commit()
+    except Exception, e:
+        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
+        return RawApiResult(
+            xform.as_json(),
+            card_attrs_save_error_code,
+            u'Осмотр сохранён, но произошла ошибка при пересчёте атрибутов карты'
+        )
+
+    try:
+        xform.generate_measures()
+    except Exception, e:
+        action_id = xform.target_obj.id
+        logger.error(err_measures_save_msg.format(action_id))
+        return RawApiResult(
+            xform.as_json(),
+            measures_save_error_code,
+            u'Осмотр сохранён, но произошла ошибка при формировании мероприятий'
+        )
+
     return xform.as_json()
 
 
@@ -46,4 +76,26 @@ def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
     xform.check_params(exam_obs_id, card_id)
     xform.delete_target_obj()
     xform.reevaluate_data()
-    db.session.commit()
+    xform.store()
+
+    try:
+        xform.reevaluate_data()
+        db.session.commit()
+    except Exception, e:
+        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
+        return RawApiResult(
+            None,
+            card_attrs_save_error_code,
+            u'Осмотр удалён, но произошла ошибка при пересчёте атрибутов карты'
+        )
+
+    try:
+        xform.generate_measures()
+    except Exception, e:
+        action_id = exam_obs_id
+        logger.error(err_measures_save_msg.format(action_id))
+        return RawApiResult(
+            None,
+            measures_save_error_code,
+            u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
+        )

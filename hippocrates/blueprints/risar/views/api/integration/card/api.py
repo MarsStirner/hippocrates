@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
+
+import logging
 from flask import request
 
-from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import public_endpoint
+from blueprints.risar.views.api.integration.const import (
+    card_attrs_save_error_code, err_card_attrs_save_msg
+)
+from nemesis.lib.apiutils import api_method, RawApiResult
 from .....app import module
 
 from ..logformat import hook
 from .xform import CardXForm
+
+
+logger = logging.getLogger('simple')
 
 
 @module.route('/api/integration/<int:api_version>/card/schema.json', methods=["GET"])
@@ -29,8 +37,16 @@ def api_card_save(api_version, card_id=None):
     xform.update_target_obj(data)
     xform.store()
 
-    xform.update_card_attrs()
-    xform.store()
+    try:
+        xform.update_card_attrs()
+        xform.store()
+    except Exception, e:
+        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
+        return RawApiResult(
+            xform.as_json(),
+            card_attrs_save_error_code,
+            u'Карта сохранена, но произошла ошибка при пересчёте атрибутов карты'
+        )
     return xform.as_json()
 
 

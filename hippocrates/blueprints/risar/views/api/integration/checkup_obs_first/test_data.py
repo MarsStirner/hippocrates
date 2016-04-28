@@ -7,7 +7,7 @@
 
 """
 
-test_obs_first_data = {
+obs_first_data = {
     "external_id": "12345",
     # "exam_obs_id": "",
     "general_info": {

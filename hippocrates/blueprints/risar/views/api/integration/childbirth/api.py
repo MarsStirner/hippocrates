@@ -6,14 +6,21 @@
 @date: 22.03.2016
 
 """
+import logging
+from flask import request
+
 from blueprints.risar.app import module
 from blueprints.risar.views.api.integration.childbirth.xform import \
     ChildbirthXForm
 from blueprints.risar.views.api.integration.logformat import hook
-from flask import request
-from nemesis.lib.apiutils import api_method
+from blueprints.risar.views.api.integration.const import (
+    card_attrs_save_error_code, err_card_attrs_save_msg
+)
+from nemesis.lib.apiutils import api_method, RawApiResult
 from nemesis.lib.utils import public_endpoint
-from nemesis.systemwide import db
+
+
+logger = logging.getLogger('simple')
 
 
 @module.route('/api/integration/<int:api_version>/childbirth/schema.json', methods=["GET"])
@@ -33,9 +40,18 @@ def api_childbirth_save(api_version, card_id):
     xform.validate(data)
     xform.check_params(childbirth_id, card_id, data)
     xform.update_target_obj(data)
-    db.session.commit()
-    xform.reevaluate_data()
-    db.session.commit()
+    xform.store()
+
+    try:
+        xform.reevaluate_data()
+        xform.store()
+    except Exception, e:
+        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
+        return RawApiResult(
+            xform.as_json(),
+            card_attrs_save_error_code,
+            u'Данные родоразрешения сохранены, но произошла ошибка при пересчёте атрибутов карты'
+        )
     return xform.as_json()
 
 
@@ -46,5 +62,15 @@ def api_childbirth_delete(api_version, card_id):
     xform = ChildbirthXForm(api_version)
     xform.check_params(childbirth_id, card_id)
     xform.delete_target_obj()
-    xform.reevaluate_data()
-    db.session.commit()
+    xform.store()
+
+    try:
+        xform.reevaluate_data()
+        xform.store()
+    except Exception, e:
+        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
+        return RawApiResult(
+            None,
+            card_attrs_save_error_code,
+            u'Данные родоразрешения удалены, но произошла ошибка при пересчёте атрибутов карты'
+        )

@@ -7,106 +7,57 @@
 
 """
 
-# coding: utf-8
-
-import requests
-
-from test_data import test_puerpera_data
-
-coldstar_url = 'http://127.0.0.1:6097'
-mis_url = 'http://127.0.0.1:6600'
-auth_token_name = 'CastielAuthToken'
-session_token_name = 'hippocrates.session.id'
-
-login = u'ВнешСис'
-password = ''
+from ..test import make_login, make_api_request
+from test_data import (puerpera_data)
 
 
-def get_token(login, password):
-    url = u'%s/cas/api/acquire' % coldstar_url
-    result = requests.post(
-        url,
-        {
-            'login': login,
-            'password': password
-        }
-    )
-    j = result.json()
-    if not j['success']:
-        print j
-        raise Exception(j['exception'])
-    return j['token']
+def create_checkup(session, card_id, data):
+    url = u'/risar/api/integration/0/card/%s/checkup/puerpera/' % card_id
+    result = make_api_request('post', url, session, data)
+    return result
 
 
-def get_role(token, role_code=''):
-    url = u'%s/chose_role/' % mis_url
-    if role_code:
-        url += role_code
-    result = requests.post(
-        url,
-        cookies={auth_token_name: token}
-    )
-    j = result.json()
-    if not result.status_code == 200:
-        raise Exception('Ошибка авторизации')
-    return result.cookies['hippocrates.session.id']
+def edit_checkup(session, card_id, concilium_id, data):
+    url = u'/risar/api/integration/0/card/%s/checkup/puerpera/%s/' % (card_id, concilium_id)
+    result = make_api_request('put', url, session, data)
+    return result
 
 
-def new_checkup(token, session_token, event_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/puerpera/' % (mis_url, event_id)
-    result = requests.post(
-        url,
-        json=test_puerpera_data,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
+def delete_checkup(session, card_id, checkup_id):
+    url = u'/risar/api/integration/0/card/%s/checkup/puerpera/%s/' % (card_id, checkup_id)
+    result = make_api_request('delete', url, session)
+    return result
 
 
-def change_checkup(token, session_token, event_id, checkup_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/puerpera/%s/' % (mis_url, event_id, checkup_id)
-    result = requests.put(
-        url,
-        json=test_puerpera_data,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
+def test_register_edit_delete_puerpera_checkup(card_id):
+    with make_login() as session:
+        result = create_checkup(session, card_id, puerpera_data)
+        checkup = result['result']
+        checkup_id = checkup['exam_puerpera_id']
+        print u'new checkup data: {0}'.format(repr(checkup).decode("unicode-escape"))
 
+        try:
+            result = create_checkup(session, card_id, puerpera_data)
+        except Exception, e:
+            if '409' in e.message:
+                print e.message
+            else:
+                raise e
 
-def delete_checkup(token, session_token, event_id, checkup_id):
-    url = u'%s/risar/api/integration/0/card/%s/checkup/puerpera/%s/' % (mis_url, event_id, checkup_id)
-    result = requests.delete(
-        url,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    print result
-    j = result.json()
-    return j
+        result = edit_checkup(session, card_id, checkup_id, puerpera_data)
+        checkup = result['result']
+        meta = result['meta']
+        print u'edited checkup meta: {0}'.format(repr(meta).decode("unicode-escape"))
+        print u'edited checkup data: {0}'.format(repr(checkup).decode("unicode-escape"))
 
+        puerpera_data['external_id'] = 'x'
+        try:
+            result = edit_checkup(session, card_id, checkup_id, puerpera_data)
+        except Exception, e:
+            if '404' in e.message:
+                print e.message
+            else:
+                raise e
 
-if __name__ == '__main__':
-    token = get_token(login, password)
-    print ' > auth token: ', token
-    session_token = get_role(token)
-    print ' > session token: ', session_token
-
-    # ========================================================================
-    # event_id = '146'
-    # result = new_checkup(token, session_token, event_id)
-    # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
-
-    # event_id = '146'
-    # checkup_id = '659'
-    # result = change_checkup(token, session_token, event_id, checkup_id)
-    # print u'new event data: {0}'.format(repr(result).decode("unicode-escape"))
-
-    event_id = '146'
-    checkup_id = '659'
-    result = delete_checkup(token, session_token, event_id, checkup_id)
-    print u'deleted event data: {0}'.format(repr(result).decode("unicode-escape"))
+        result = delete_checkup(session, card_id, checkup_id)
+        print u'deleted checkup id = {0}'.format(checkup_id)

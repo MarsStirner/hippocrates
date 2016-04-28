@@ -125,46 +125,41 @@ if __name__ == '__main__':
 
         # test_register_edit_client()
 
-        # client_id = '17700'
+        # client_id = '17711'
         # test_register_edit_delete_card(client_id)
 
         # test_card_id = get_new_card_id_for_test(client_id)
-        # test_card_id = '200'
-
+        # test_card_id = '214'
         # test_register_edit_delete_mother_anamnesis(test_card_id)
         # test_register_edit_delete_father_anamnesis(test_card_id)
         # test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
 
         # delete_test_card_id(test_card_id)
 
-        # client_id = '17700'
-        # test_register_edit_delete_card(client_id)
+        # from blueprints.risar.views.api.integration.checkup_obs_first.test import \
+        #     test_register_edit_delete_first_checkup
+        # card_id = '214'
+        # test_register_edit_delete_first_checkup(card_id)
 
-        # test_card_id = get_new_card_id_for_test(client_id)
-        # test_card_id = '7'
+        # from blueprints.risar.views.api.integration.checkup_obs_second.test import \
+        #     test_register_edit_delete_second_checkup
+        # card_id = '214'
+        # test_register_edit_delete_second_checkup(card_id)
 
-        # test_register_edit_delete_mother_anamnesis(test_card_id)
-        # test_register_edit_delete_father_anamnesis(test_card_id)
-        # test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
+        # from blueprints.risar.views.api.integration.checkup_pc.test import \
+        #     test_register_edit_delete_pc_checkup
+        # card_id = '214'
+        # test_register_edit_delete_pc_checkup(card_id)
 
-        # delete_test_card_id(test_card_id)
+        # from blueprints.risar.views.api.integration.checkup_puerpera.test import \
+        #     test_register_edit_delete_puerpera_checkup
+        # card_id = '214'
+        # test_register_edit_delete_puerpera_checkup(card_id)
 
         # from blueprints.risar.views.api.integration.expert_data.test import \
         #     test_get_expert_data
         # card_id = '121'
         # test_get_expert_data(card_id)
-
-        #     client_id = '1'
-        #     test_register_edit_delete_card(client_id)
-        #
-        #     test_card_id = get_new_card_id_for_test(client_id)
-        #     # test_card_id = '197'
-
-        #     test_register_edit_delete_mother_anamnesis(test_card_id)
-        #     test_register_edit_delete_father_anamnesis(test_card_id)
-        #     test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
-
-        #     delete_test_card_id(test_card_id)
 
         # card_id = '214'
         # test_get_card_measures(card_id)
@@ -172,9 +167,9 @@ if __name__ == '__main__':
         # from blueprints.risar.views.api.integration.childbirth.test import \
         #     test_put_childbirth, test_delete_childbirth, test_post_childbirth
         # card_id = '1'
-        # test_delete_childbirth(card_id)
         # test_post_childbirth(card_id)
         # test_put_childbirth(card_id)
+        # test_delete_childbirth(card_id)
 
         # from blueprints.risar.views.api.integration.hospitalization.test import \
         #     test_put_hospitalization, test_delete_hospitalization, test_post_hospitalization
