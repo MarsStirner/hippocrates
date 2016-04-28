@@ -85,8 +85,8 @@ def api_0_event_measure_appointment_get(event_measure_id, appointment_id=None):
         em = EventMeasure.query.get(event_measure_id)
         if not em:
             raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
-        action_type_id = em.scheme_measure.measure.appointmentAt_id
-        measure_id = em.scheme_measure.measure_id
+        action_type_id = em.measure.appointmentAt_id
+        measure_id = em.measure.id
         if not action_type_id:
             raise ApiException(
                 422,
@@ -140,8 +140,8 @@ def api_0_event_measure_result_get(event_measure_id, em_result_id=None):
         em = EventMeasure.query.get(event_measure_id)
         if not em:
             raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
-        action_type_id = em.scheme_measure.measure.resultAt_id
-        measure_id = em.scheme_measure.measure_id
+        action_type_id = em.measure.resultAt_id
+        measure_id = em.measure_id
         if not action_type_id:
             raise ApiException(
                 422,

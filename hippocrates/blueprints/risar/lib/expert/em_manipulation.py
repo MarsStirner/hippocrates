@@ -3,7 +3,7 @@
 import logging
 
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import func, and_
+from sqlalchemy.sql.expression import func, and_, or_
 
 from blueprints.risar.lib.utils import format_action_data
 from blueprints.risar.lib.expert.utils import em_stats_status_list
@@ -53,7 +53,7 @@ class EventMeasureController(BaseModelController):
 
     def get_new_appointment(self, em, action_data=None, action_props=None):
         event_id = em.event_id
-        action_type_id = em.scheme_measure.measure.appointmentAt_id
+        action_type_id = em.measure.appointmentAt_id
         appointment = create_action(action_type_id, event_id, properties=action_props, data=action_data)
         return appointment
 
@@ -76,7 +76,7 @@ class EventMeasureController(BaseModelController):
 
     def get_new_em_result(self, em, action_data=None, action_props=None):
         event_id = em.event_id
-        action_type_id = em.scheme_measure.measure.resultAt_id
+        action_type_id = em.measure.resultAt_id
         em_result = create_action(action_type_id, event_id, properties=action_props, data=action_data)
         return em_result
 
@@ -175,7 +175,6 @@ class EventMeasureSelecter(BaseSelecter):
         EventMeasure = self.model_provider.get('EventMeasure')
         ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
         Measure = self.model_provider.get('Measure')
-        rbMeasureType = self.model_provider.get('rbMeasureType')
 
         if 'id' in flt:
             self.query = self.query.filter(EventMeasure.id == flt['id'])
@@ -187,9 +186,12 @@ class EventMeasureSelecter(BaseSelecter):
         if 'action_id_list' in flt:
             self.query = self.query.filter(EventMeasure.sourceAction_id.in_(flt['action_id_list']))
         if 'measure_type_id_list' in flt:
-            self.query = self.query.join(
-                ExpertSchemeMeasureAssoc, Measure, rbMeasureType
-            ).filter(rbMeasureType.id.in_(flt['measure_type_id_list']))
+            self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+                Measure, or_(
+                    Measure.id == ExpertSchemeMeasureAssoc.measure_id,
+                    Measure.id == EventMeasure.measure_id,
+                )
+            ).filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
         if 'beg_date_from' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:

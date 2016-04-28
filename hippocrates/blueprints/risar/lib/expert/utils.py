@@ -47,12 +47,12 @@ def is_em_in_final_status(em):
 def can_edit_em_appointment(em):
     return (
         em.appointmentAction_id is not None or
-        em.scheme_measure.measure.appointmentAt_id is not None
+        em.measure.appointmentAt_id is not None
     )
 
 
 def can_edit_em_result(em):
     return (
         em.resultAction_id is not None or
-        em.scheme_measure.measure.resultAt_id is not None
+        em.measure.resultAt_id is not None
     )

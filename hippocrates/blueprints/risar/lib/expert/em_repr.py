@@ -25,7 +25,7 @@ class EventMeasureRepr(object):
             'beg_datetime': measure.begDateTime,
             'end_datetime': measure.endDateTime,
             'status': MeasureStatus(measure.status),
-            'source_action': self.represent_source_action(measure.source_action),
+            'source_action': measure.source_action and self.represent_source_action(measure.source_action),
             'appointment_action_id': measure.appointmentAction_id,
             'result_action_id': measure.resultAction_id,
             'is_actual': EventMeasureActuality(measure.is_actual),
@@ -39,6 +39,8 @@ class EventMeasureRepr(object):
 
     def _make_em_addtional_info(self, em):
         sm = em.scheme_measure
+        if not sm:
+            return None
         parts = []
 
         additional_text = sm.schedule.additionalText
