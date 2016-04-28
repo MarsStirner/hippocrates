@@ -20,13 +20,13 @@ WebMis20.run(['$templateCache', function ($templateCache) {
         <div class="form-group">\
             <label for="measure_type" class="col-sm-3 control-label">Тип мероприятия</label>\
             <div class="col-sm-9 form-control-static">\
-                <span id="measure_type" ng-bind="event_measure.scheme_measure.measure.measure_type.name"></span>\
+                <span id="measure_type" ng-bind="event_measure.measure.measure_type.name"></span>\
             </div>\
         </div>\
         <div class="form-group">\
             <label for="measure" class="col-sm-3 control-label">Мероприятие</label>\
             <div class="col-sm-9 form-control-static">\
-                <span id="measure" ng-bind="event_measure.scheme_measure.measure.name"></span>\
+                <span id="measure" ng-bind="event_measure.measure.name"></span>\
             </div>\
         </div>\
         <div class="form-group">\
@@ -80,7 +80,9 @@ var EventMeasureModalCtrl = function ($scope, $filter, RisarApi, RefBookService,
     $scope.event_measure = event_measure;
 
     $scope.getSchemeInfo = function () {
-        return '{0}. {1}'.format(event_measure.scheme_measure.scheme.number, event_measure.scheme_measure.scheme.name);
+        if(event_measure.scheme) {
+            return '{0}. {1}'.format(event_measure.scheme.number, event_measure.scheme.name);
+        }
     };
     $scope.getMeasureDateRange = function () {
         return '{0} - {1}'.format(

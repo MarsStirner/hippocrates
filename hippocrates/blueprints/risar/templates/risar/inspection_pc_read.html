@@ -420,8 +420,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr ng-repeat="measure in checkup.measures">
-                                            <td><span ng-bind="measure.data.scheme_measure.measure.name"></span>
+                                        <tr ng-repeat="measure in checkup.measures" ng-class="{ 'measure-manual': !measure.data.scheme }">
+                                            <td><span ng-bind="measure.data.measure.name"></span>
                                             </td>
                                             <td>[[ measure.data.beg_datetime | asDateTime ]]</td>
                                             <td>[[ measure.data.end_datetime | asDateTime ]]</td>

@@ -249,7 +249,7 @@ class EventMeasureGenerator(object):
         query = db.session.query(EventMeasure).filter(
             EventMeasure.event_id == self.source_action.event_id,
             EventMeasure.deleted == 0,
-            EventMeasure.schemeMeasure_id > 0,  # отсекаем ручные мероприятия
+            EventMeasure.schemeMeasure_id.isnot(None),  # отсекаем ручные мероприятия
             EventMeasure.status.notin_(tuple(em_garbage_status_list)),
             EventMeasure.is_actual == EventMeasureActuality.actual[0]
         ).order_by(

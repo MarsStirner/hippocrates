@@ -22,10 +22,10 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="em in checkup.measures track by em.data.id">
+        <tr ng-repeat="em in checkup.measures track by em.data.id" ng-class="{ 'measure-manual': !em.data.scheme }">
             <td>[[ $index + 1 ]]</td>
             <td>
-                <span ng-bind="em.data.scheme_measure.measure.name"></span>
+                <span ng-bind="em.data.measure.name"></span>
                 <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
                 <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
                 <br><span class="text-muted" bind-html-compile="em.additional_info"></span>

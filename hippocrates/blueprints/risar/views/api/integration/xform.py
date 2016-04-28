@@ -676,7 +676,7 @@ class MeasuresResultsXForm(ExternalXForm):
         today = datetime.today()
 
         em = EventMeasure()
-        em.hand_measure = measure
+        em.manual_measure = measure
         em.measure_id = measure.id
         em.begDateTime, em.endDateTime = (beg_date, end_date) if all((beg_date, end_date)) else (today, today)
         em.status = status

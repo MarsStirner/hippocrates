@@ -228,10 +228,13 @@ class EventMeasureSelecter(BaseSelecter):
         ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
         Measure = self.model_provider.get('Measure')
         rbMeasureType = self.model_provider.get('rbMeasureType')
-        self.query = self.query.join(
-            ExpertSchemeMeasureAssoc,
-            Measure,
-            rbMeasureType
+        self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+            Measure, or_(
+                Measure.id == ExpertSchemeMeasureAssoc.measure_id,
+                Measure.id == EventMeasure.measure_id,
+            )
+        ).join(
+            rbMeasureType, rbMeasureType.id == Measure.measureType_id
         ).filter(
             EventMeasure.event_id == event_id,
             EventMeasure.deleted == 0,

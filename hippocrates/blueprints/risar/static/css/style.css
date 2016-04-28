@@ -314,6 +314,10 @@ ul.product-list, li.product-list-item-active {
   color: #AAA !important;
 }
 
+.measure-manual {
+    background-color: #818181 !important;
+    border-color: #818181 !important;
+}
 .measure-status-created {
     background-color: #FFB02E !important;
     border-color: #FFB02E !important;

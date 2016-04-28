@@ -205,7 +205,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
 var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, TimeoutCallback, uiCalendarConfig) {
     function makeTask(el) {
         return {
-            title: el.data.scheme_measure.measure.name,
+            title: el.data.measure.name,
             start: el.data.beg_datetime,
             end: el.data.end_datetime,
             className: 'measure-status-' + el.data.status.code

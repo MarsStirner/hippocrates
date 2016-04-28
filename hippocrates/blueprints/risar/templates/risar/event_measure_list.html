@@ -96,10 +96,10 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="em in model.measure_list">
-                                <td><span measure-type-icon="em.data.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
+                            <tr ng-repeat="em in model.measure_list" ng-class="{ 'measure-manual': !em.data.scheme }">
+                                <td><span measure-type-icon="em.data.measure.measure_type" style="font-size: x-large"></span></td>
                                 <td>
-                                    <span ng-bind="em.data.scheme_measure.measure.name"></span>
+                                    <span ng-bind="em.data.measure.name"></span>
                                     <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
                                     <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
                                     <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
