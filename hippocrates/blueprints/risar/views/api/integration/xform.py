@@ -314,12 +314,8 @@ class XForm(object):
                 self.check_prop_value(prop, val)
         elif prop.type.typeName in ('ReferenceRb', 'ExtReferenceRb'):
             rb_name = prop.type.valueDomain.split(';')[0]
-            if (rb_name != 'rbBloodType'  # code in name field, see to_blood_type_rb()
-                    and not check_rb_value_exists(rb_name, value['code'])):
-                raise ApiException(
-                    VALIDATION_ERROR,
-                    u'Не найдено значение по коду {0} в справочнике {1}'.format(value['code'], rb_name)
-                )
+            if rb_name not in ('rbBloodType', 'rbDocumentType', 'rbPolicyType'):
+                self._check_rb_value(rb_name, value['code'])
 
     def _check_rb_value(self, rb_name, value_code):
         field_name = None
@@ -330,7 +326,7 @@ class XForm(object):
         if not check_rb_value_exists(rb_name, value_code, field_name):
             raise ApiException(
                 VALIDATION_ERROR,
-                u'Не найдено значение по коду {0} в справочнике {1}'.format(value_code, rb_name)
+                u'Не найдено значение по коду `{0}` в справочнике {1}'.format(value_code, rb_name)
             )
 
     @staticmethod
