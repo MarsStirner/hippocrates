@@ -152,10 +152,9 @@ class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
         gi = data.get('general_info', {})
         self.mapping_part(self.GENERAL_MAP, gi, res)
 
-        person_id = self.find_doctor(gi.get('doctor'), gi.get('hospital')).id
-        res['person'] = {
-            'id': person_id,
-        }
+        person = self.find_doctor(gi.get('doctor'), gi.get('hospital'))
+        res['setPerson'] = person.__json__()
+        res['person'] = res['setPerson']
 
     def mapping_somatic_status(self, data, res):
         ss = data.get('somatic_status', {})
