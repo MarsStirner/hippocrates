@@ -78,11 +78,9 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
     def mapping_fields(self, data, res):
         self.mapping_part(self.FIELDS_MAP, data, res)
 
-        person_id = self.find_doctor(data.get('doctor'), data.get('hospital')).id
+        self.person = self.find_doctor(data.get('doctor'), data.get('hospital'))
+        res['person'] = self.person.__json__()
         res.update({
-            'person': {
-                'id': person_id,
-            },
             'get_diagnoses_func': lambda: self.get_diagnoses((
                 (data, self.DIAG_KINDS_MAP, 'final'),
             ), res.get('person'), res.get('beg_date'))
@@ -108,6 +106,8 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
             close_open_checkups_puerpera(event_id)
 
         action.begDate = beg_date
+        action.setPerson = self.person
+        action.person = self.person
 
         for code, value in data.iteritems():
             if code in action.propsByCode:

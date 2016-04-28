@@ -131,9 +131,8 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         gi = data.get('dynamic_monitoring', {})
         self.mapping_part(self.DYNAMIC_MAP, gi, res)
 
-        person = self.find_doctor(gi.get('doctor'), gi.get('hospital'))
-        res['setPerson'] = person.__json__()
-        res['person'] = res['setPerson']
+        self.person = self.find_doctor(gi.get('doctor'), gi.get('hospital'))
+        res['person'] = self.person.__json__()
 
     def mapping_somatic_status(self, data, res):
         ss = data.get('somatic_status', {})
@@ -202,6 +201,8 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
             close_open_checkups(event_id)
 
         action.begDate = beg_date
+        action.setPerson = self.person
+        action.person = self.person
 
         for code, value in data.iteritems():
             if code in action.propsByCode:

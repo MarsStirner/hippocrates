@@ -158,11 +158,11 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         part = data.get('general_info', {})
         self.mapping_part(self.GENERAL_MAP, part, res)
 
-        person = self.find_doctor(
+        self.person = self.find_doctor(
             part.get('maternity_hospital_doctor'),
             part.get('maternity_hospital')
         )
-        res['person'] = person.__json__()
+        res['person'] = self.person.__json__()
 
         maternity_hospital = self.find_org(part.get('maternity_hospital'))
         curation_hospital = self.find_org(part.get('curation_hospital'))
@@ -228,6 +228,8 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         action = get_action(event, risar_epicrisis, True)
         self.target_obj = action
         diagnoses = get_diagnoses_func()
+        action.setPerson = self.person
+        action.person = self.person
 
         if not action.id:
             close_open_checkups(event_id)  # закрыть все незакрытые осмотры
