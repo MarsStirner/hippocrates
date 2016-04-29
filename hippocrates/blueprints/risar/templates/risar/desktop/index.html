@@ -4,74 +4,10 @@
 
 {% block main %}
 <section class="content-header">
-    <h1>Рабочий стол {% if user_profiles_mng.has_ui_obstetrician() %}акушера-гинеколога{% endif %}</h1>
+    <h1>Рабочий стол</h1>
 </section>
 <section class="content">
     <div ng-controller="IndexCtrl" class="ng-cloak">
-        <div class="row">
-            <div class="col-md-12">
-                <input class="form-control" ng-model="query" placeholder="Быстрый поиск" autofocus>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12 text-right">
-                <a href="{{ url_for('.html_search') }}">Расширенный поиск</a>
-            </div>
-        </div>
-        {% if user_profiles_mng.has_ui_overseer_low() %}
-            <div class="row">
-                <div class="col-md-8">
-                    {% include "risar/stats/patient_list.html" %}
-                    {% include "risar/stats/annual_reports.html" %}
-                </div>
-                <div class="col-md-4">
-                    {% include "risar/stats/diagram_risk_rates.html" %}
-                </div>
-            </div>
-        {% elif user_profiles_mng.has_ui_overseer_high() %}
-            <div class="row">
-                <div class="col-md-4">
-                    {% include "risar/stats/diagram_risk_rates.html" %}
-                </div>
-                <div class="col-md-4">
-                    {% include "risar/stats/diagram_infants_death.html" %}
-                </div>
-                <div class="col-md-4">
-                    {% include "risar/stats/diagram_maternal_death.html" %}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8">
-                    {% include "risar/stats/annual_reports.html" %}
-                </div>
-                <div class="col-md-4">
-                    <div class="box box-default" ng-controller="OrgBirthCareViewCtrl">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Распределение медицинских учреждений по уровням оказания медицинской помощи</h3>
-                            <div class="box-tools">
-                                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                            </div>
-                        </div>
-                        <div class="box-body">
-                            <ul class="products-list product-list-in-box">
-                                <li ng-repeat="obcl in obcl_items" class="item">
-                                    <div class="product-img" style="width: 50px; height: 50px; background: lightgreen;">
-
-                                    </div>
-                                    <div class="product-info">
-                                        <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
-                                        <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="box-footer text-center">
-                            <a href="{{ url_for('.html_org_birth_care') }}" class="uppercase">Подробнее</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
     </div>
 </section>
 {% endblock %}
