@@ -33,11 +33,17 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         if (!set_page) {
             $scope.pager.current_page = 1;
         }
+        var orgs = [];
+        if($scope.query.curators.length && !$scope.query.org.id){
+            $scope.organisations.forEach(function(i) {if(i.id) orgs.push(i.id);});
+        } else {
+            orgs = $scope.query.org.id && [$scope.query.org.id];
+        }
         var data = {
             page: $scope.pager.current_page,
             areas: $scope.query.areas,
             curators: $scope.query.curators,
-            org_id: $scope.query.org.id,
+            org_ids: orgs,
             doc_id: $scope.query.person.id,
             fio: $scope.query.fio || undefined,
             checkup_date_from: $scope.query.checkup_date_from || undefined,

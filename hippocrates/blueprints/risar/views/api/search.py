@@ -43,6 +43,8 @@ def search_events(**kwargs):
         query = query.filter(area__in=areas)
     if 'org_id' in kwargs:
         query = query.filter(org_id__eq=int(kwargs['org_id']))
+    if 'org_ids' in kwargs:
+        query = query.filter(org_id__in=list(kwargs['org_ids']))
     if 'doc_id' in kwargs:
         query = query.filter(exec_person_id__eq=int(kwargs['doc_id']))
     if 'external_id' in kwargs:
@@ -128,6 +130,7 @@ def api_0_event_search():
                 'risk': PerinatalRiskRate(row['risk']),
                 'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if 'card_modify_date' in row else None,
                 'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
+                'curators': get_org_curators(safe_int(row['org_id']), '2'),
                 'week':((
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
                     datetime.date.fromtimestamp(row['psdate'])
@@ -137,6 +140,21 @@ def api_0_event_search():
         ]
     }
 
+def get_org_curators(org_id, curation_level):
+    query_val = Person.query.join(
+        PersonCurationAssoc, Person.id == PersonCurationAssoc.person_id
+    ).join(
+        OrganisationCurationAssoc, PersonCurationAssoc.id == OrganisationCurationAssoc.personCuration_id
+    ).join(
+        rbOrgCurationLevel, rbOrgCurationLevel.id == PersonCurationAssoc.orgCurationLevel_id
+    ).filter(
+        OrganisationCurationAssoc.org_id == org_id,
+        Person.deleted == 0,
+        rbOrgCurationLevel.code == curation_level,
+    ).values(
+        Person.lastName, Person.firstName
+    )
+    return u', '.join((u' '.join(x) for x in query_val))
 
 @module.route('/api/0/search_ambulance/', methods=['POST', 'GET'])
 @api_method
