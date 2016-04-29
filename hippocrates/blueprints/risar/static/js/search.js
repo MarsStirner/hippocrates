@@ -22,20 +22,6 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         name: 'Открытые',
         value: false
     }];
-    $scope.reset_filters = function () {
-        $scope.query = {
-            areas: [],
-            org: default_orgs[0],
-            person: default_docs[0],
-            checkup_date_from: null,
-            checkup_date_to: null,
-            bdate_from: null,
-            bdate_to: null,
-            risk: [],
-            closed: $scope.closed_items[0]
-        };
-    };
-    $scope.reset_filters();
     $scope.results = [];
     $scope.pager = {
         current_page: 1,
@@ -50,6 +36,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         var data = {
             page: $scope.pager.current_page,
             areas: $scope.query.areas,
+            curators: $scope.query.curators,
             org_id: $scope.query.org.id,
             doc_id: $scope.query.person.id,
             fio: $scope.query.fio || undefined,
@@ -76,12 +63,23 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         .then(function (result) {
             $scope.level1 = result[0];
             $scope.areas = result[1];
+            $scope.query.areas = [];
+            return $scope.refresh_curators();
+        });
+    };
+    $scope.refresh_curators = function () {
+        var areas = $scope.query.areas.length ? $scope.query.areas : $scope.areas;
+        return RisarApi.search_event.area_curator_list(areas)
+        .then(function (result) {
+            $scope.curators = result;
+            $scope.query.curators = [];
             return $scope.refresh_organisations();
         });
     };
     $scope.refresh_organisations = function () {
         var areas = $scope.query.areas.length ? $scope.query.areas : $scope.areas;
-        return RisarApi.search_event.area_lpu_list(areas)
+        var curators = $scope.query.curators.length ? $scope.query.curators : $scope.curators;
+        return RisarApi.search_event.curator_lpu_list(areas, curators)
         .then(function (result) {
             $scope.organisations = default_orgs.concat(result);
             $scope.query.org = $scope.organisations[0];
@@ -98,8 +96,22 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     };
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
 
-    var areas_promise = $scope.refresh_areas();
-
+    $scope.reset_filters = function () {
+        $scope.query = {
+            areas: [],
+            curators: [],
+            org: default_orgs[0],
+            person: default_docs[0],
+            checkup_date_from: null,
+            checkup_date_to: null,
+            bdate_from: null,
+            bdate_to: null,
+            risk: [],
+            closed: $scope.closed_items[0]
+        };
+        return $scope.refresh_areas();
+    };
+    var areas_promise = $scope.reset_filters();
     var tc = new TimeoutCallback(perform, 600);
 
     $scope.perform = function () {

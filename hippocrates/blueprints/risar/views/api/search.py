@@ -12,7 +12,8 @@ from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
-
+from nemesis.models.organisation import OrganisationCurationAssoc
+from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 
 __author__ = 'mmalkov'
 
@@ -185,13 +186,47 @@ def api_0_area_list():
     return level1, sorted(level2, key=lambda x: x.name)
 
 
-@module.route('/api/0/area_lpu_list.json', methods=['POST', 'GET'])
+@module.route('/api/0/area_curator_list.json', methods=['POST', 'GET'])
 @api_method
-def api_0_area_lpu_list():
+def api_0_area_curator_list():
     j = request.get_json()
     areas = j.get('areas')
+    query = Person.query
+    query = query.join(
+        PersonCurationAssoc, Person.id == PersonCurationAssoc.person_id
+    ).join(
+        OrganisationCurationAssoc, PersonCurationAssoc.id == OrganisationCurationAssoc.personCuration_id
+    ).join(
+        Organisation, Organisation.id == OrganisationCurationAssoc.org_id
+    ).join(
+        rbOrgCurationLevel, rbOrgCurationLevel.id == PersonCurationAssoc.orgCurationLevel_id
+    ).filter(
+        Person.deleted == 0,
+        Organisation.deleted == 0,
+        Organisation.isLPU == 1,
+    )
+    if areas:
+        regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
+        query = query.filter(Organisation.area.op('regexp')(regex))
+    query = query.group_by(
+        PersonCurationAssoc.id
+    ).order_by(
+        Person.lastName, Person.firstName, Person.patrName, rbOrgCurationLevel.name
+    )
+    return list(query.values(PersonCurationAssoc.id, Person.lastName, Person.firstName, Person.patrName, rbOrgCurationLevel.name))
+
+
+@module.route('/api/0/curator_lpu_list.json', methods=['POST', 'GET'])
+@api_method
+def api_0_curator_lpu_list():
+    j = request.get_json()
+    areas = j.get('areas')
+    curators_ids = (x['id'] for x in j.get('curators'))
     query = Organisation.query
-    query = query.filter(
+    query = query.join(
+        OrganisationCurationAssoc, Organisation.id == OrganisationCurationAssoc.org_id
+    ).filter(
+        OrganisationCurationAssoc.personCuration_id.in_(curators_ids),
         Organisation.deleted == 0,
         Organisation.isLPU == 1,
     )
