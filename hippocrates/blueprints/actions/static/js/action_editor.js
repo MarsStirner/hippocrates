@@ -499,7 +499,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
             data.id = self.id;
             return ApiCalls.wrapper(
                 'POST',
-                '/actions/api/action/{0}/autosave/'.format(this.id), undefined, data
+                '/actions/api/action/{0}/autosave/'.format(this.id), undefined, data, { silent: true }
             )
         } else {
             return ApiCalls.wrapper(
@@ -507,7 +507,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
                 '/actions/api/action/new/autosave/{0}/{1}/'.format(
                     self.event_id,
                     self.action_type_id || self.action_type.id
-                ), undefined, data
+                ), undefined, data, { silent: true }
             )
         }
     };
