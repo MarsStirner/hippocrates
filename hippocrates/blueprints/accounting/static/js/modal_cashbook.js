@@ -310,7 +310,42 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, $filter, AccountingService,
             });
         });
     };
-    $scope.cancelPayment = function () {};
+    $scope.cancelPayment = function () {
+        // Transform invoice items
+        function transform_subitem (subitem) {
+            var result = angular.extend({}, subitem, {
+                deleted: $scope.selected_items.selected(subitem),
+                subitem_list: _.map(subitem.subitem_list || [], transform_subitem)
+            });
+            delete result.ui_attrs;
+            return result
+        }
+        var invoice = angular.extend(
+            {}, $scope.invoice,
+            {item_list: _.map($scope.invoice.item_list, transform_subitem)}
+        ),
+            data_trxes = {
+                invoice_trx: angular.extend(
+                    {}, $scope.trxes.invoice_trx,
+                    {finance_operation_type: $scope.ops.invoice_cancel}
+                ),
+                payer_balance_trx: angular.extend(
+                    {}, $scope.trxes.payer_balance_trx,
+                    {finance_operation_type: $scope.ops.balance_out}
+                )
+            };
+        AccountingService.save_invoice(invoice).then(function (invoice2) {
+            AccountingService.make_finance_transaction_invoice(
+                $scope.trx_type, data_trxes
+            ).then(function (invoice3) {
+                $scope.$close({
+                    status: 'ok',
+                    invoice: invoice3
+                });
+            })
+        })
+        
+    };
     $scope.item_selection_changed = function () {
         console.log(arguments);
     };
