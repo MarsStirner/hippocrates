@@ -44,5 +44,8 @@ def format_logger_message(code, j, exception=None):
         return format_ok % d
 
 
-def hook(code,j, e=None):
-    logger.debug(format_logger_message(code, j))
+def hook(code, j, e=None):
+    if e:
+        logger.error(format_logger_message(code, j))
+    else:
+        logger.debug(format_logger_message(code, j))
