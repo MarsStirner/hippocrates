@@ -59,7 +59,7 @@ def api_checkup_obs_second_save(api_version, card_id, exam_obs_id=None):
         xform.generate_measures()
     except Exception, e:
         action_id = xform.target_obj.id
-        logger.error(err_measures_save_msg.format(action_id))
+        logger.error(err_measures_save_msg.format(action_id), exc_info=True)
         return RawApiResult(
             xform.as_json(),
             measures_save_error_code,
@@ -92,7 +92,7 @@ def api_checkup_obs_second_delete(api_version, card_id, exam_obs_id):
         xform.generate_measures()
     except Exception, e:
         action_id = exam_obs_id
-        logger.error(err_measures_save_msg.format(action_id))
+        logger.error(err_measures_save_msg.format(action_id), exc_info=True)
         return RawApiResult(
             None,
             measures_save_error_code,
