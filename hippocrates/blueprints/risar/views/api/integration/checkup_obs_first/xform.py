@@ -211,7 +211,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         get_diagnoses_func = data.pop('get_diagnoses_func')
-        fetuses = data.pop('fetuses', None)
+        fetuses = data.pop('fetuses', [])
 
         action = get_action_by_id(checkup_id, event, flat_code, True)
 

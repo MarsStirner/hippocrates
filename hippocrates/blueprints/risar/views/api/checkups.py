@@ -26,8 +26,8 @@ def api_0_checkup(event_id):
     flat_code = data.pop('flat_code', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
     person = data.pop('person', None)
-    diagnoses = data.pop('diagnoses', None)
-    fetuses = data.pop('fetuses', None)
+    diagnoses = data.pop('diagnoses', [])
+    fetuses = data.pop('fetuses', [])
 
     if not flat_code:
         raise ApiException(400, 'flat_code required')
