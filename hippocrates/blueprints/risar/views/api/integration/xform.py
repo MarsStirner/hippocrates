@@ -507,6 +507,13 @@ class ExternalXForm(XForm):
             )
             db.session.add(external_action)
 
+    def delete_external_data(self):
+        ActionIdentification.query.filter(
+            ActionIdentification.action_id == self.target_obj_id,
+            ActionIdentification.external_id == self.external_id,
+            ActionIdentification.external_system_id == self.external_system.id,
+        ).delete()
+
 
 from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
     rbDiagnosisTypeN
@@ -722,6 +729,8 @@ class MeasuresResultsXForm(ExternalXForm):
             self.target_obj_class.id == self.target_obj_id,
             self.target_obj_class.deleted == 0
         ).update({'deleted': 1})
+
+        self.delete_external_data()
 
         status = MeasureStatus.cancelled[0]
         EventMeasure.query.filter(

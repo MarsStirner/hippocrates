@@ -34,7 +34,7 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
 
     def prepare_params(self, data):
         self.em = self.get_event_measure(
-            data['measure_id'],
+            data.get('measure_id'),
             data['measure_type_code'],
             data.get('checkup_date'),
             data.get('checkup_date'),

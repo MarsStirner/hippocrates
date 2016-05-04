@@ -147,6 +147,8 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
             Action.deleted == 0
         ).update({'deleted': 1})
 
+        self.delete_external_data()
+
     def as_json(self):
         data = represent_checkup_puerpera(self.target_obj, False)
         res = {
