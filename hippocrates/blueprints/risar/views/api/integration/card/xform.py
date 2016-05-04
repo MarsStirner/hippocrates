@@ -40,16 +40,19 @@ class CardXForm(CardSchema, XForm):
 
     def check_duplicate(self, data):
         if self.new:
-            q = db.session.query(Event).join(Client).filter(
+            q = db.session.query(Event.id).join(Client).filter(
                 Client.id == self.parent_obj_id,
                 Event.deleted == 0,
                 Event.execDate.is_(None)
             )
-            exists_open = db.session.query(q.exists()).scalar()
-            if exists_open:
+            q_result = q.first()
+            existing_event_id = q_result[0] if q_result else None
+            if existing_event_id:
                 raise ApiException(
                     ALREADY_PRESENT_ERROR,
-                    u'Уже существует открытая карта для пациента с id = {0}'.format(self.parent_obj_id)
+                    u'Уже существует открытая карта с id = {0} для пациента с id = {1}'.format(
+                        existing_event_id, self.parent_obj_id
+                    )
                 )
 
     def get_target_nf_msg(self):

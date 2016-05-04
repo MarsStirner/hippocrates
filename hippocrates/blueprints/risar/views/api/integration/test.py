@@ -129,8 +129,8 @@ if __name__ == '__main__':
         # test_register_edit_delete_card(client_id)
 
         # test_card_id = get_new_card_id_for_test(client_id)
-        test_card_id = '214'
-        test_register_edit_delete_mother_anamnesis(test_card_id)
+        # test_card_id = '214'
+        # test_register_edit_delete_mother_anamnesis(test_card_id)
         # test_register_edit_delete_father_anamnesis(test_card_id)
         # test_register_edit_delete_prevpregnancies_anamnesis(test_card_id)
 
