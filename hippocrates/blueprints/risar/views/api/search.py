@@ -41,8 +41,6 @@ def search_events(**kwargs):
     if 'areas' in kwargs:
         areas = [area['code'][:5] for area in kwargs['areas']]
         query = query.filter(area__in=areas)
-    if 'org_id' in kwargs:
-        query = query.filter(org_id__eq=int(kwargs['org_id']))
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
     if 'doc_id' in kwargs:

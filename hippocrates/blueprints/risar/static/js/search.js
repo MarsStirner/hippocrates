@@ -5,10 +5,6 @@
 'use strict';
 
 var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookService, CurrentUser) {
-    var default_orgs = [{
-        full_name: 'Все',
-        short_name: 'Все'
-    }];
     var default_docs = [{
         full_name: 'Все',
         name: 'Все'
@@ -34,11 +30,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.pager.current_page = 1;
         }
         var orgs = [];
-        if($scope.query.curators.length && !$scope.query.org.id){
-            $scope.organisations.forEach(function(i) {if(i.id) orgs.push(i.id);});
-        } else {
-            orgs = $scope.query.org.id && [$scope.query.org.id];
-        }
+        var from_orgs = $scope.query.orgs.length ? $scope.query.orgs: $scope.organisations;
+        from_orgs.forEach(function(i) {if(i.id) orgs.push(i.id);});
         var data = {
             page: $scope.pager.current_page,
             areas: $scope.query.areas,
@@ -87,14 +80,14 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         var curators = $scope.query.curators.length ? $scope.query.curators : $scope.curators;
         return RisarApi.search_event.curator_lpu_list(areas, curators)
         .then(function (result) {
-            $scope.organisations = default_orgs.concat(result);
-            $scope.query.org = $scope.organisations[0];
+            $scope.organisations = result;
+            $scope.query.orgs = [];
             return $scope.refresh_doctors();
         });
     };
     $scope.refresh_doctors = function () {
-        var org = $scope.query.org.id ? [$scope.query.org] : $scope.organisations.slice(1);
-        return RisarApi.search_event.lpu_doctors_list(org)
+        var orgs = $scope.query.orgs.length ? $scope.query.orgs : $scope.organisations;
+        return RisarApi.search_event.lpu_doctors_list(orgs)
         .then(function (result) {
             $scope.doctors = default_docs.concat(result);
             $scope.query.person = $scope.doctors[0];
@@ -106,7 +99,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         $scope.query = {
             areas: [],
             curators: [],
-            org: default_orgs[0],
+            orgs: [],
             person: default_docs[0],
             checkup_date_from: null,
             checkup_date_to: null,

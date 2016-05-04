@@ -39,18 +39,17 @@
                 </div>
                 <div class="form-group">
                     <label>Куратор</label>
-                    <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()"
-                               class="form-control" autofocus>
+                    <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control">
                         <ui-select-match placeholder="Выберите кураторов">[[ $item.lastName + ' ' + $item.firstName + ', ' + $item.name ]]</ui-select-match>
-                        <ui-select-choices group-by="group_curators" repeat="curator in curators | filter: {name: $select.search} | limitTo:50">
+                        <ui-select-choices repeat="curator in curators | filter: {name: $select.search} | limitTo:50">
                             <div ng-bind-html="curator.lastName + ' ' + curator.firstName + ', ' + curator.name | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
                 </div>
                 <div class="form-group">
                     <label>ЛПУ</label>
-                    <ui-select ng-model="query.org" theme="select2" ng-change="refresh_doctors()" class="form-control">
-                        <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>
+                    <ui-select multiple ng-model="query.orgs" theme="select2" ng-change="refresh_doctors()" class="form-control">
+                        <ui-select-match placeholder="Выберите ЛПУ">[[ $item.short_name ]]</ui-select-match>
                         <ui-select-choices repeat="org in organisations | filter: {short_name: $select.search} | limitTo:50">
                             <div ng-bind-html="org.short_name | highlight: $select.search"></div>
                         </ui-select-choices>
