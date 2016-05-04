@@ -149,14 +149,16 @@ class PregnancyCard(object):
         """
         from .card_attrs import check_card_attrs_action_integrity, reevaluate_risk_rate, \
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, reevaluate_card_fill_rate_all
-        action = self.attrs
-        check_card_attrs_action_integrity(action)
-        reevaluate_risk_rate(self)
-        reevaluate_pregnacy_pathology(self)
-        reevaluate_dates(self)
-        reevaluate_preeclampsia_rate(self)
-        reevaluate_risk_groups(self)
-        reevaluate_card_fill_rate_all(self)
+
+        with db.session.no_autoflush:
+            action = self.attrs
+            check_card_attrs_action_integrity(action)
+            reevaluate_risk_rate(self)
+            reevaluate_pregnacy_pathology(self)
+            reevaluate_dates(self)
+            reevaluate_preeclampsia_rate(self)
+            reevaluate_risk_groups(self)
+            reevaluate_card_fill_rate_all(self)
 
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):
