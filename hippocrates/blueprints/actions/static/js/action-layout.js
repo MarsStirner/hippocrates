@@ -122,21 +122,35 @@ angular.module('WebMis20')
                                     break;
                                 case 'String/Select':
                                     inner_template =
-                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off">\
-                                            <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
-                                            <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
-                                                <span ng-bind-html="item | highlight: $select.search"></span>\
-                                            </ui-select-choices>\
-                                        </ui-select>';
+                                        '<div class="row">\
+                                            <div class="col-md-10">\
+                                                <ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off">\
+                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
+                                                    <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
+                                                        <span ng-bind-html="item | highlight: $select.search"></span>\
+                                                    </ui-select-choices>\
+                                                </ui-select>\
+                                            </div>\
+                                            <div class="col-md-2">\
+                                                <button class="btn btn-default" ng-click="{0}.value = \'\'"><i class="fa fa-remove"></i></button>\
+                                            </div>\
+                                        </div>';
                                     break;
                                 case 'String/Free':
                                     inner_template =
-                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function" autocomplete="off">\
-                                            <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
-                                            <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
-                                                <span ng-bind-html="item | highlight: $select.search"></span>\
-                                            </ui-select-choices>\
-                                        </ui-select>';
+                                        '<div class="btn-group">\
+                                            <div class="col-md-10">\
+                                                <ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function" autocomplete="off">\
+                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
+                                                    <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
+                                                        <span ng-bind-html="item | highlight: $select.search"></span>\
+                                                    </ui-select-choices>\
+                                                </ui-select>\
+                                            </div>\
+                                            <div class="col-md-2">\
+                                                <button class="btn btn-default" ng-click="{0}.value = \'\'"><i class="fa fa-remove"></i></button>\
+                                            </div>\
+                                        </div>';
                                     break;
                                 case 'JobTicket':
                                     inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
