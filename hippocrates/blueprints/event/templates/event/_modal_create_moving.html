@@ -9,7 +9,7 @@
             <ui-select id="" name="orgStructDirectedFrom" theme="select2"
                        ng-model="model.orgStructStay.value" ng-required="true">
                 <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
-                <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
+                <ui-select-choices repeat="os in OrgStructure.objects | filter: {show: 1} | filter: $select.search">
                     <div ng-bind-html="os.name | highlight: $select.search"></div>
                 </ui-select-choices>
             </ui-select>
