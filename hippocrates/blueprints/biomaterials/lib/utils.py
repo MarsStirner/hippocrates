@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+from nemesis.lib.jsonify import ActionVisualizer
 
 __author__ = 'plakrisenko'
-from nemesis.lib.jsonify import ActionVisualizer
 
 
 class TTJVisualizer(object):
     def make_ttj_record(self, ttj):
         avis = ActionVisualizer()
-        externalId = ttj.actions[0].event.externalId if ttj.actions else None  # предполагается, что все actions из одного event
+        event = ttj.actions[0].event
+        externalId = event.externalId if ttj.actions else None  # предполагается, что все actions из одного event
         return {
             'id': ttj.id,
             'externalId': externalId,
@@ -21,13 +22,6 @@ class TTJVisualizer(object):
             'status': ttj.status,
             'isUrgent': True if filter(lambda a: a.isUrgent, ttj.actions) else False,
             'actions': [avis.make_small_action_info(action) for action in ttj.actions],
-            'set_persons': self.get_set_persons(ttj.actions),
-            'org_str': ttj.actions[0].event.current_org_structure if ttj.actions else None
+            'set_persons': sorted({action.setPerson for action in ttj.actions if action.setPerson}),
+            'org_str': event.current_org_structure if ttj.actions else None
         }
-
-    def get_set_persons(self, actions):
-        set_persons = []
-        for action in actions:
-            if action.person not in set_persons:
-                set_persons.append(action.person)
-        return set_persons
