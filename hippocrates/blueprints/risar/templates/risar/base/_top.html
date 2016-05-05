@@ -69,7 +69,7 @@
               <!-- Tasks Menu -->
               <li class="dropdown tasks-menu">
                   <!-- Menu Toggle Button -->
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
                       <i class="fa fa-flag-o"></i>
                       <span class="label label-danger">[[unread]]</span>
                   </a>
@@ -85,9 +85,17 @@
                               </li><!-- end task item -->
                           </ul>
                       </li>
-                      <li class="footer">
-                          <li class="footer"><a href="{{ url_for('risar.html_errands_list') }}">Все поручения</a>
-                      </li>
+                      <li class="footer"><a href="{{ url_for('risar.html_errands_list') }}">Все поручения</a></li>
+                  </ul>
+              </li>
+              <li class="dropdown tasks-menu">
+                  <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
+                      <i class="fa fa-envelope-o"></i>
+                      <span class="label label-danger" ng-if="unread_email > 0" ng-bind="unread_email"></span>
+                  </a>
+                  <ul class="dropdown-menu" style="width: 350px;">
+                      <li class="header">У Вас [[unread_email]] непрочитанных писем</li>
+                      <li class="footer"><a href="{{ url_for('useraccount.index_html') }}">Посмотреть всю почту</a></li>
                   </ul>
               </li>
               <!-- User Account Menu -->
@@ -193,12 +201,18 @@
     {%- endif -%}
 </header>
 <script language="JavaScript">
-    WebMisHeader = function ($scope, UserErrand) {
+    WebMisHeader = function ($scope, UserErrand, UserMail) {
         $scope.unread = 0;
         $scope.errands = [];
+        $scope.unread_email = 0;
+        $scope.messages = [];
         UserErrand.subscribe('unread', function (result) {
             $scope.unread = result.unread;
             $scope.errands = result.errands;
+        });
+        UserMail.subscribe('unread', function (result) {
+            $scope.unread_email = result.unread;
+            $scope.messages = result.messages;
         });
     }
 </script>
