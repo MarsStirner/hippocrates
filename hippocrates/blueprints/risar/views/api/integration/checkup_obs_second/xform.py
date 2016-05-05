@@ -240,6 +240,8 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
             Action.deleted == 0
         ).update({'deleted': 1})
 
+        self.delete_external_data()
+
     def delete_fetuses(self):
         RisarFetusState.query.filter(
             RisarFetusState.delete == 0,

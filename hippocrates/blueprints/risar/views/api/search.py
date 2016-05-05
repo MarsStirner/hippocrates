@@ -14,6 +14,7 @@ from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+from sqlalchemy import or_
 
 __author__ = 'mmalkov'
 
@@ -191,7 +192,7 @@ def api_0_area_list():
     level1 = {}
     level2 = []
     organisation = Organisation.query.get(current_user.org_id) if current_user.org_id else None
-    risar_regions = [organisation.area[:2].ljust(11, '0')] if organisation else None
+    risar_regions = [organisation.area[:2].ljust(11, '0')] if organisation and organisation.area else None
     if not risar_regions:
         risar_regions = app.config.get('RISAR_REGIONS', [])
     for region in risar_regions:
@@ -223,7 +224,8 @@ def api_0_area_curator_list():
     )
     if areas:
         regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
-        query = query.filter(Organisation.area.op('regexp')(regex))
+        query = query.filter(or_(Organisation.area.is_(None),
+                                 Organisation.area.op('regexp')(regex)))
     query = query.group_by(
         PersonCurationAssoc.id
     ).order_by(
@@ -248,7 +250,8 @@ def api_0_curator_lpu_list():
     )
     if areas:
         regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
-        query = query.filter(Organisation.area.op('regexp')(regex))
+        query = query.filter(or_(Organisation.area.is_(None),
+                                 Organisation.area.op('regexp')(regex)))
     return query.all()
 
 

@@ -143,12 +143,21 @@ class ConciliumXForm(ConciliumSchema, XForm):
             )
             self._changed.append(external_ident)
 
+    def delete_external_data(self):
+        RisarConcilium_Identification.query.filter(
+            RisarConcilium_Identification.concilium_id == self.target_obj_id,
+            RisarConcilium_Identification.external_id == self.external_id,
+            RisarConcilium_Identification.external_system_id == self.external_system.id,
+        ).delete()
+
     def delete_target_obj(self):
         # db cascade deletes of RisarConcilium_Members and RisarConcilium_Identification
         db.session.query(self.target_obj_class).filter(
             self.target_obj_class.id == self.target_obj_id,
             self.target_obj_class.event_id == self.parent_obj_id
         ).delete()
+
+        self.delete_external_data()
 
     @wrap_simplify
     def as_json(self):
