@@ -223,9 +223,8 @@ def api_0_area_curator_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
-        query = query.filter(or_(Organisation.area.is_(None),
-                                 Organisation.area.op('regexp')(regex)))
+        regex = '^$|^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
+        query = query.filter(Organisation.area.op('regexp')(regex))
     query = query.group_by(
         PersonCurationAssoc.id
     ).order_by(
@@ -249,9 +248,8 @@ def api_0_curator_lpu_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
-        query = query.filter(or_(Organisation.area.is_(None),
-                                 Organisation.area.op('regexp')(regex)))
+        regex = '^$|^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
+        query = query.filter(Organisation.area.op('regexp')(regex))
     return query.all()
 
 
