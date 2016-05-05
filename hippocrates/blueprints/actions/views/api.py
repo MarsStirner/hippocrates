@@ -96,6 +96,7 @@ def api_action_get(action_id):
         if autosave and autosave.data:
             data = prepare_action_data(autosave.data)
             update_action(action, **data)
+            v.ignore_status = True
         return v.make_action(action)
 
 
