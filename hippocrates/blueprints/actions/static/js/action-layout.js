@@ -322,7 +322,21 @@ angular.module('WebMis20')
             scope.$watchCollection('action.properties', function (properties, old) {
                 //if (angular.equals(properties, old)) return;
                 properties = properties || [];
-                sas.setSource(properties.map(function (item) {return item.type.id}));
+                old = old || [];
+                if (angular.equals(properties, old)) return;
+                sas.setSource(_.map(properties, function (item) {return item.type.id}));
+                sas.selectNone();
+
+                var map_old = {};
+                _.each(old, function (prop) { map_old[prop.type.id] = prop });
+                _.each(properties, function (prop) {
+                    var id = prop.type.id,
+                        old_prop = map_old[id];
+                    // Здесь нужна будет точная подгонка под фантазии Опарина
+                    if (!_.isUndefined(old_prop) && (!angular.equals(old_prop.value, prop.value) || prop.value)) {
+                        sas.select(id);
+                    }
+                })
             });
 
             function rebuild_layout (layout) {
