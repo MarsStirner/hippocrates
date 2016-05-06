@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.time_converter import DateTimeUtil
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
-    tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
-    vascular_diseases, diabetes, antiphospholipid_syndrome, pregnancy_pathologies, risk_mkbs
+    tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, notify_risk_rate_changes
 from blueprints.risar.models.risar import RisarRiskGroup
 from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
     first_inspection_code
 from nemesis.lib.jsonify import EventVisualizer
-from nemesis.lib.utils import safe_dict, safe_bool, safe_int, safe_date
+from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
-from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk, PerinatalRiskRate, CardFillRate
+from nemesis.models.enums import PregnancyPathology, PerinatalRiskRate, CardFillRate
 from nemesis.models.risar import rbPreEclampsiaRate
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
+
+
+logger = logging.getLogger('simple')
+
 
 __author__ = 'viruzzz-kun'
 
@@ -163,9 +167,15 @@ def reevaluate_risk_rate(card):
             return PerinatalRiskRate.low[0]
         return PerinatalRiskRate.undefined[0]
 
-    max_rate = max(map(diag_to_risk_rate, card.get_client_diagnostics(card.event.setDate, card.event.execDate)) + [PerinatalRiskRate.undefined[0]])
+    max_rate = max(
+        map(diag_to_risk_rate, card.get_client_diagnostics(card.event.setDate, card.event.execDate)) +
+        [PerinatalRiskRate.undefined[0]]
+    )
 
-    card.attrs['prenatal_risk_572'].value = safe_dict(PerinatalRiskRate(max_rate))
+    new_prr = PerinatalRiskRate(max_rate)
+    notify_risk_rate_changes(card, new_prr)
+
+    card.attrs['prenatal_risk_572'].value = safe_dict(new_prr)
 
 
 def reevaluate_dates(card):
