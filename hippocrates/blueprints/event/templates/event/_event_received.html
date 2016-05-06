@@ -56,8 +56,25 @@
                         </tr>
                         <tr>
                             <th class="text-right">Диагноз направившего учреждения</th>
-                            <td><span ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'main'">[[ diag.diagnostic.mkb.code ]] -
-                                [[ diag.diagnostic.mkb.name ]]</span>
+                            <td>
+                                <div>
+                                    Основной:
+                                    <span ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'main'">
+                                        [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
+                                    </span>
+                                </div>
+                                <div ng-if="event.received.diagnoses | collapse_diagnoses:'complication' | count">
+                                    Осложнения:
+                                    <div ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'complication'">
+                                        [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
+                                    </div>
+                                </div>
+                                <div ng-if="event.received.diagnoses | collapse_diagnoses:'associated' | count">
+                                    Сопутствующие:
+                                    <div ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'associated'">
+                                        [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
