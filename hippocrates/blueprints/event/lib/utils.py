@@ -5,6 +5,7 @@ import logging
 
 from flask.ext.login import current_user
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
+from nemesis.models.utils import safe_current_user_id
 from sqlalchemy import func
 
 from nemesis.lib.data import create_new_action, update_action, ActionException, create_action
@@ -277,6 +278,20 @@ def received_save(event_id, received_data):
         create_or_update_diagnoses(received, diagnoses_data)
     db.session.add(received)
     db.session.commit()
+
+
+def received_close(event_id):
+    received = Action.query.join(ActionType).filter(
+        ActionType.flatCode == 'received',
+        Action.deleted == 0,
+        Action.event_id == event_id,
+    ).first()
+    if received and received.status < 2:
+        received.modifyPerson = safe_current_user_id()
+        received.modifyDatetime = datetime.datetime.now()
+        received.endDate = datetime.datetime.now()
+        received.status = 2
+        db.session.commit()
 
 
 def client_quota_save(event, quota_data):

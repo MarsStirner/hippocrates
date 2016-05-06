@@ -5,7 +5,7 @@ import logging
 
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
-                                        save_executives, EventSaveController, MovingController)
+                                        save_executives, EventSaveController, MovingController, received_close)
 from blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request, abort
 from nemesis.lib.agesex import recordAcceptableEx
@@ -147,6 +147,7 @@ def api_moving_save():
     else:
         result = mov_ctrl.create_moving(event_id, data)
         result = map(vis.make_moving_info, result)
+    received_close(event_id)
     return result
 
 
