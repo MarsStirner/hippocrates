@@ -71,10 +71,10 @@
                   <!-- Menu Toggle Button -->
                   <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
                       <i class="fa fa-flag-o"></i>
-                      <span class="label label-danger">[[unread]]</span>
+                      <span class="label label-danger" ng-if="unread > 0" ng-bind="unread"></span>
                   </a>
                   <ul class="dropdown-menu" style="width: 350px;">
-                      <li class="header">У Вас [[unread]] поручений</li>
+                      <li class="header">У Вас <b>[[unread]]</b> поручений</li>
                       <li>
                           <!-- Inner menu: contains the tasks -->
                           <ul class="menu">
@@ -94,7 +94,7 @@
                       <span class="label label-danger" ng-if="unread_email > 0" ng-bind="unread_email"></span>
                   </a>
                   <ul class="dropdown-menu" style="width: 350px;">
-                      <li class="header">У Вас [[unread_email]] непрочитанных писем</li>
+                      <li class="header">У Вас <b>[[unread_email]]</b> непрочитанных писем</li>
                       <li class="footer"><a href="{{ url_for('useraccount.index_html') }}">Посмотреть всю почту</a></li>
                   </ul>
               </li>
@@ -213,6 +213,9 @@
         UserMail.subscribe('unread', function (result) {
             $scope.unread_email = result.unread;
             $scope.messages = result.messages;
+        });
+        UserMail.subscribe('new_mail', function (result) {
+            $scope.unread_email += 1;
         });
     }
 </script>

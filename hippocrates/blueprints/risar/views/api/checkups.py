@@ -37,7 +37,7 @@ def api_0_checkup(event_id):
     card = PregnancyCard.get_for_event(event)
     action = get_action_by_id(checkup_id, event, flat_code, True)
 
-    notify_checkup_changes(card, action, data)
+    notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
 
     if not checkup_id:
         close_open_checkups(event_id)

@@ -302,9 +302,11 @@ def format_action_data(json_data):
     return data
 
 
-def notify_checkup_changes(card, action, data):
+def notify_checkup_changes(card, action, new_preg_cont):
+    if new_preg_cont is None:
+        return
     cur_preg_cont_possibility = action['pregnancy_continuation'].value
-    new_preg_cont_possibility = data.get('pregnancy_continuation')
+    new_preg_cont_possibility = new_preg_cont
 
     if new_preg_cont_possibility != cur_preg_cont_possibility and not bool(new_preg_cont_possibility):
         event = PregContInabilityEvent(card, action)

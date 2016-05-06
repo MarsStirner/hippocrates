@@ -8,7 +8,8 @@
 """
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
+from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
+    notify_checkup_changes
 from blueprints.risar.models.fetus import RisarFetusState
 from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
@@ -220,6 +221,9 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
 
         if not checkup_id:
             close_open_checkups(event_id)
+
+        self.set_pcard()
+        notify_checkup_changes(self.pcard, action, data.get('pregnancy_continuation'))
 
         action.begDate = beg_date
         action.setPerson = self.person
