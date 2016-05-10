@@ -10,7 +10,8 @@ from flask.ext.login import current_user
 
 from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
-from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool)
+from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt,
+    safe_traverse_attrs, format_date, initialize_name, safe_int)
 from nemesis.lib.utils import public_endpoint
 from nemesis.lib.apiutils import api_method
 from ..app import module
@@ -298,9 +299,14 @@ def api_persons_tree_schedule_info():
 
 @module.route('/api/search_persons.json')
 def api_search_persons():
+    personKind = {
+        0: 'only_doctors',
+        1: 'only_org_persons'
+    }
     try:
         query_string = request.args['q']
-        only_doctors = safe_bool(request.args.get('only_doctors', True))
+        pkind = safe_int(request.args.get('person_kind'))
+        pkind = personKind.get(pkind)
     except (KeyError, ValueError):
         return abort(404)
     try:
@@ -329,21 +335,29 @@ def api_search_persons():
 
                 'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
             }
-        if only_doctors:
+        if pkind == 'only_doctors':
             result = filter(lambda item: item['orgstructure_id'] and item['speciality_id'], result['result']['items'])
+        elif pkind == 'only_org_persons':
+            result = filter(lambda item: item['org_id'], result['result']['items'])
         data = map(cat, result)
     except Exception, e:
         logger.critical(u'Ошибка в сервисе поиска сотрудника через sphinx: %s' % e, exc_info=True)
         query_string = query_string.split()
         data = vrbPersonWithSpeciality.query.filter(
             *[vrbPersonWithSpeciality.name.like(u'%%%s%%' % q) for q in query_string]
+        ).filter(
+            vrbPersonWithSpeciality.deleted == 0
         ).order_by(
             vrbPersonWithSpeciality.name
         )
-        if only_doctors:
+        if pkind == 'only_doctors':
             data.filter(
                 vrbPersonWithSpeciality.speciality_id != None,
                 vrbPersonWithSpeciality.orgStructure_id != None
+            )
+        elif pkind == 'only_org_persons':
+            data.filter(
+                vrbPersonWithSpeciality.org_id != None
             )
         data = data.all()
     return jsonify(data)
