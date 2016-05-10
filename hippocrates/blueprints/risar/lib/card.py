@@ -137,6 +137,7 @@ class PregnancyCard(object):
             ).first()
             if action is None and auto:
                 action = create_action(default_AT_Heuristic().id, self.event)
+                self._card_attrs_action = action
                 self.reevaluate_card_attrs()
                 db.session.add(action)
                 db.session.commit()
