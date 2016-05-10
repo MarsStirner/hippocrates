@@ -25,6 +25,7 @@ WebMis20
         api_epicrisis:'{{ url_for('.api_0_chart')}}{0}/epicrisis',
         api_newborn_inspection: '{{ url_for('.api_0_newborn_inspection_delete') }}{0}',
         api_event_search: '{{ url_for('.api_0_event_search') }}',
+        api_event_print: '{{ url_for('.api_0_event_print') }}',
         api_event_search_ambulance: '{{ url_for('.api_0_event_search_ambulance') }}',
         api_event_search_area_list: '{{ url_for('.api_0_area_list') }}',
         api_event_search_area_curator_list: '{{ url_for('.api_0_area_curator_list') }}',

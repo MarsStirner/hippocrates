@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 import math
 
-from flask import request
+from flask import request, make_response
 from flask.ext.login import current_user
 
 from nemesis.app import app
@@ -14,7 +15,7 @@ from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
-from sqlalchemy import or_
+from blueprints.risar.lib.jasper_client import JasperReport
 
 __author__ = 'mmalkov'
 
@@ -33,7 +34,7 @@ def sphinx_days(date_string):
     return int(timegm(date.timetuple()) / 86400)
 
 
-def search_events(**kwargs):
+def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
@@ -70,10 +71,14 @@ def search_events(**kwargs):
         else:
             query = query.filter(exec_date__eq=0)
 
-    per_page = kwargs.get('per_page', 10)
-    page = kwargs.get('page', 1)
-    from_ = (page - 1) * per_page
-    result = query.limit(from_, per_page).ask()
+    if paginated:
+        per_page = kwargs.get('per_page', 10)
+        page = kwargs.get('page', 1)
+        from_ = (page - 1) * per_page
+        query = query.limit(from_, per_page)
+    else:
+        query = query.limit(0, 99999)
+    result = query.ask()
     return result
 
 
@@ -138,6 +143,39 @@ def api_0_event_search():
             for row in result['result']['items']
         ]
     }
+
+
+@module.route('/api/0/search-print/', methods=['POST'])
+def api_0_event_print():
+    data = dict(request.args)
+    if request.form and request.form.get('json'):
+        data.update(json.loads(request.form.get('json')))
+    file_format = data.get('print_format')
+    result = search_events(paginated=False, **data)
+
+    today = datetime.date.today()
+    data = (
+        {
+            'name': row['name'],
+            'external_id': row['external_id'],
+            'exec_person_name': row['person_name'],
+            'risk': PerinatalRiskRate(row['risk']).name,
+            'curators': get_org_curators(safe_int(row['org_id']), '2'),
+            'week':((
+                (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
+                datetime.date.fromtimestamp(row['psdate'])
+            ).days / 7 + 1) if row['psdate'] else None
+        }
+        for row in result['result']['items']
+    )
+    jasper_report = JasperReport(
+        'SearchPrint',
+        ('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week'),
+        '/reports/Custom/SearchPrint'
+    )
+    jasper_report.generate(data, file_format)
+    return make_response(jasper_report.get_response_data())
+
 
 def get_org_curators(org_id, curation_level):
     query_val = Person.query.join(

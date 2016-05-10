@@ -112,6 +112,20 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">Результаты поиска карт пациенток: <b>[[pager.record_count]]</b></h3>
+                        <div class="box-tools">
+                            <div class="btn-group">
+                                <a class="btn btn-lg dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="glyphicon glyphicon-print"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li class="dropdown-header" style="background-color: #e3e3e3">Формат</li>
+                                    <li><a ng-href="#" ng-click="print_search('pdf')">PDF</a></li>
+                                    <li><a ng-href="#" ng-click="print_search('docx')">Word</a></li>
+                                    <li><a ng-href="#" ng-click="print_search('xlsx')">Excel</a></li>
+                                    <li><a ng-href="#" ng-click="print_search('odt')">Open Office</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     <div class="box-body">
                         <table class="table table-condensed">
