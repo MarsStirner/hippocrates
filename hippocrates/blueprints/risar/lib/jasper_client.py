@@ -19,6 +19,7 @@ import os
 import uuid
 import requests
 from nemesis.systemwide import db
+from nemesis.app import app
 
 
 def get_mime_type(file_format, open_type='attachment'):
@@ -94,13 +95,15 @@ class JasperDBMemoryDataSource(object):
         }
 
 
-class JasperRest2Client(object):
+class JasperRestV2Client(object):
     def __init__(self, path, session=None, params=None):
         self.path = path
         self.session = session
-        self.jasper_url = os.getenv('JASPER_URL', 'http://10.1.2.11:8080/jasperserver-pro')
-        self.jasper_lg = os.getenv('JASPER_LOGIN') or 'jasperadmin'
-        self.jasper_pw = os.getenv('JASPER_PASSWORD') or 'jasperadmin'
+        self.jasper_url = app.config.get(
+            'JASPER_URL', 'http://10.1.2.11:8080/jasperserver-pro'
+        )
+        self.jasper_lg = app.config.get('JASPER_LOGIN', 'jasperadmin')
+        self.jasper_pw = app.config.get('JASPER_PASSWORD', '')
         self._params = params
         self._cookies = None
 
@@ -125,7 +128,7 @@ class JasperRest2Client(object):
     def running_report(self, res_format):
         self.jasper_login()
 
-        url = u'/rest_v2/reports%(path)s.%(format)s' % ({
+        url = '/rest_v2/reports%(path)s.%(format)s' % ({
             'path': self.path,
             'format': res_format,
         })
@@ -154,7 +157,7 @@ class JasperReport(object):
         self.table_name = table_name
         self.dsource = JasperDBMemoryDataSource(table_name, fields)
         params = self.dsource.get_request_params()
-        self.jclient = JasperRest2Client(path, session, params)
+        self.jclient = JasperRestV2Client(path, session, params)
 
     def generate(self, data, file_format):
         self.report = None
