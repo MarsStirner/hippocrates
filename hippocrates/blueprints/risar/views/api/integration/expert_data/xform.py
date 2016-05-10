@@ -13,6 +13,8 @@ from blueprints.risar.views.api.integration.expert_data.schemas import \
 from blueprints.risar.views.api.integration.xform import XForm
 from nemesis.models.event import Event, EventType
 from nemesis.models.risar import rbPerinatalRiskRateMkbAssoc
+from nemesis.models.enums import PregnancyPathology
+from nemesis.lib.utils import safe_dict
 
 
 class ExpertDataXForm(ExpertDataSchema, XForm):
@@ -44,7 +46,10 @@ class ExpertDataXForm(ExpertDataSchema, XForm):
             'suspected_preeclampsia': self.from_rb(action['preeclampsia_susp'].value),
             'estimated_birth_date': action['predicted_delivery_date'].value,
             'risk_groups': self._get_risk_groups(),
-            'patology_groups': [self.from_rb(x) for x in action['pregnancy_pathology_list'].value or []],
+            'patology_groups': [
+                safe_dict(self.to_enum(x, PregnancyPathology))
+                for x in action['pregnancy_pathology_list'].value or []
+            ],
         }
         self._set_risk_diagnosis(res, action)
         return res
