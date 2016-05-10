@@ -44,7 +44,7 @@ class ExpertDataXForm(ExpertDataSchema, XForm):
             'suspected_preeclampsia': self.from_rb(action['preeclampsia_susp'].value),
             'estimated_birth_date': action['predicted_delivery_date'].value,
             'risk_groups': self._get_risk_groups(),
-            'patology_groups': [unicode(x) for x in action['pregnancy_pathology_list'].value or []],
+            'patology_groups': [self.from_rb(x) for x in action['pregnancy_pathology_list'].value or []],
         }
         self._set_risk_diagnosis(res, action)
         return res
