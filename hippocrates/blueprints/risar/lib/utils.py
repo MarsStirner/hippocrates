@@ -317,7 +317,7 @@ def notify_risk_rate_changes(card, new_prr):
     current_rate = card.attrs['prenatal_risk_572'].value
     cur_prr = PerinatalRiskRate(current_rate.id) if current_rate is not None else None
 
-    if new_prr.value != PerinatalRiskRate.low[0] and (
+    if new_prr.value not in (PerinatalRiskRate.undefined[0], PerinatalRiskRate.low[0]) and (
             cur_prr is None or cur_prr.order < new_prr.order):
         event = RiskRateRiseEvent(card, new_prr)
         NotificationQueue.add_events(event)

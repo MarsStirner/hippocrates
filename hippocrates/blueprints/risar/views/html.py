@@ -3,14 +3,10 @@
 from flask import render_template, request, redirect, url_for, abort
 from flask.ext.login import current_user
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity, reevaluate_card_fill_rate_all
 from blueprints.risar.lib.debug import get_debug_data
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
-from nemesis.models.event import Event
-from nemesis.systemwide import db
 from ..app import module
 
 __author__ = 'mmalkov'
@@ -202,11 +198,6 @@ def html_card_fill_history():
     event_id = safe_int(args.get('event_id'))
     if not event_id:
         raise abort(404)
-    event = Event.query.get(event_id)
-    card = PregnancyCard.get_for_event(event)
-    check_card_attrs_action_integrity(card.attrs)
-    reevaluate_card_fill_rate_all(card)
-    db.session.commit()
     return render_template('risar/card_fill_history.html')
 
 
