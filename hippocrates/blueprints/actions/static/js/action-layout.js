@@ -97,10 +97,10 @@ angular.module('WebMis20')
                                     inner_template = '<wysiwyg ng-model="{0}.value" />';
                                     break;
                                 case 'Date':
-                                    inner_template = '<wm-date ng-model="{0}.value"></wm-date>'
+                                    inner_template = '<wm-date ng-model="{0}.value"></wm-date>';
                                     break;
                                 case 'Integer':
-                                    inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative>';
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value" valid-number valid-number-negative>';
                                     if (property.type.unit) {
                                         inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
                                     }
