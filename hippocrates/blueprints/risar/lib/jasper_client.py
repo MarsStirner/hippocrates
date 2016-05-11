@@ -5,16 +5,23 @@
 @author: BARS Group
 @date: 10.05.2016
 
+Description:
+https://conf.bars-open.ru/pages/viewpage.action?pageId=27505440
+
 Usage:
 jasper_client = JasperReport(
     'SearchPrint',
-    ('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week'),
-    '/reports/Custom/SearchPrint'
+    '/reports/Custom/SearchPrint',
+    fields=('name', 'risk', 'curators', 'week')
 )
-jasper_client.generate(data, file_format)
+file_format = 'pdf'
+data = [{'name': 'name', 'risk': 'risk', 'curators': 'curators', 'week': 'week'}]
+jasper_client.generate(file_format, data)
 jasper_client.save_to_file('/var/tmp/')
 flask.make_response(jasper_report.get_response_data())
+
 """
+
 import os
 import uuid
 import requests
@@ -47,7 +54,7 @@ class JasperDBMemoryDataSource(object):
     def __init__(self, table_name, fields):
         self.fields = fields
         self.uid = str(uuid.uuid4())
-        self.full_table_name = '`JasperReport%(table_name)s_%(uid)s`' % ({
+        self.full_table_name = '`JasperReport_%(table_name)s_%(uid)s`' % ({
             'table_name': table_name,
             'uid': self.uid,
         })
@@ -96,6 +103,9 @@ class JasperDBMemoryDataSource(object):
 
 
 class JasperRestV2Client(object):
+    """
+    Client of JasperReports server
+    """
     def __init__(self, path, session=None, params=None):
         self.path = path
         self.session = session
@@ -151,35 +161,71 @@ class JasperRestV2Client(object):
 
 class JasperReport(object):
     """
-    Generate report by python created data
+    Generate report
     """
-    def __init__(self, table_name, fields, path, session=None):
+    def __init__(self, table_name, path, params=None, fields=None, session=None):
+        """
+        :param table_name: Наименование результирующего файла отчета, а так же временной таблицы в БД
+        :param path: Путь к шаблону отчета в репозитории JasperReports
+        :param params: Словарь параметров отчета
+        :param fields: Список наименований полей шаблона
+        :param session: Сессия доступа к серверу JasperReports
+        """
         self.table_name = table_name
-        self.dsource = JasperDBMemoryDataSource(table_name, fields)
-        params = self.dsource.get_request_params()
+        if fields is None:
+            self.dsource = None
+        else:
+            self.dsource = JasperDBMemoryDataSource(table_name, fields)
+            params = params or {}
+            params.update(self.dsource.get_request_params())
         self.jclient = JasperRestV2Client(path, session, params)
 
-    def generate(self, data, file_format):
+    def generate(self, file_format, data=None):
+        """
+        Генерация отчета
+        :param file_format: Формат файла отчета
+        :param data: Данные для отчета, формируемые в питоне
+        :return: Содержимое файла отчета
+        """
         self.report = None
         self.file_format = file_format
         self.dsource.create_report_table()
-        try:
-            self.dsource.fill_report_table(data)
+        if data is None:
             self.report = self.jclient.running_report(file_format)
-        finally:
-            self.dsource.delete_report_table()
+        else:
+            try:
+                self.dsource.fill_report_table(data)
+                self.report = self.jclient.running_report(file_format)
+            finally:
+                self.dsource.delete_report_table()
         return self.report
 
     def save_to_file(self, file_place):
+        """
+        Сохранение отчета на диск
+        :param file_place: путь к файлу
+        """
         with open('.'.join(
             (os.path.join(file_place, self.table_name), self.file_format)
         ), 'wb') as f:
             f.write(self.report)
 
     def get_response_data(self):
+        """
+        Возврат отчета браузеру для доступа к отчету пользователем
+        :return: Данные ответа браузеру
+        """
         return self.report, 200, {
             'Content-Type': get_mime_type(self.file_format),
             'Content-Disposition': 'inline; filename="%s.%s"' % (
                 self.table_name, self.file_format
             ),
         }
+
+    @property
+    def session(self):
+        """
+        Сессия доступа к серверу отчетов, чтобы не выполнять повторный вход
+        :return: Данные сессии
+        """
+        return self.jclient.session

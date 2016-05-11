@@ -170,10 +170,10 @@ def api_0_event_print():
     )
     jasper_report = JasperReport(
         'SearchPrint',
-        ('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week'),
-        '/reports/Custom/SearchPrint'
+        '/reports/Custom/SearchPrint',
+        fields=('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week')
     )
-    jasper_report.generate(data, file_format)
+    jasper_report.generate(file_format, data)
     return make_response(jasper_report.get_response_data())
 
 
