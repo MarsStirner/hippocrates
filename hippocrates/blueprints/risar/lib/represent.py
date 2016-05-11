@@ -797,7 +797,7 @@ def represent_newborn_inspections(action):
             'apgar_score_5': newborn.apgar_score_5,
             'apgar_score_10': newborn.apgar_score_10,
             'alive': newborn.alive,
-            'death_reasons': newborn.death_reason,
+            'death_reasons': newborn.death_reasons,
             'diseases': newborn.diseases,
         })
     return res

@@ -663,10 +663,15 @@ from nemesis.models.enums import MeasureStatus
 class MeasuresResultsXForm(ExternalXForm):
     __metaclass__ = ABCMeta
 
-    @abstractmethod
-    def prepare_params(self, data):
+    def __init__(self, *args, **kwargs):
+        super(MeasuresResultsXForm, self).__init__(*args, **kwargs)
         self.em = None
         self.person = None
+
+    @abstractmethod
+    def prepare_params(self, data):
+        pass
+
 
     @abstractmethod
     def get_properties_data(self, data):
