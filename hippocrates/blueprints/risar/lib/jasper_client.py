@@ -184,15 +184,15 @@ class JasperReport(object):
         """
         Генерация отчета
         :param file_format: Формат файла отчета
-        :param data: Данные для отчета, формируемые в питоне
+        :param data: Данные для отчета, передаваемые из веб приложения
         :return: Содержимое файла отчета
         """
         self.report = None
         self.file_format = file_format
-        self.dsource.create_report_table()
         if data is None:
             self.report = self.jclient.running_report(file_format)
         else:
+            self.dsource.create_report_table()
             try:
                 self.dsource.fill_report_table(data)
                 self.report = self.jclient.running_report(file_format)
