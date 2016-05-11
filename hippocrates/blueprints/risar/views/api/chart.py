@@ -75,7 +75,10 @@ def api_0_chart(event_id=None):
         event = Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
         if not event:
             raise ApiException(404, u'Обращение не найдено')
-        action = PregnancyCard.get_for_event(event).attrs
+        card = PregnancyCard.get_for_event(event)
+        action = card.attrs
+        if not action:
+            action = card.get_card_attrs_action(True)
         check_card_attrs_action_integrity(action)
     else:
         ext = None

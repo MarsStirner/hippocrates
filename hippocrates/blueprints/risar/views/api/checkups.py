@@ -10,6 +10,7 @@ from blueprints.risar.lib.represent import represent_checkup, represent_checkups
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
+from blueprints.risar.lib.utils import notify_checkup_changes
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -35,6 +36,8 @@ def api_0_checkup(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     action = get_action_by_id(checkup_id, event, flat_code, True)
+
+    notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
 
     if not checkup_id:
         close_open_checkups(event_id)

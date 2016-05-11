@@ -78,7 +78,7 @@ obs_second_data = {
     "medical_report": {  # Заключение
         "pregnancy_week": 07,  # * Беременность (недель)
         "next_visit_date": "2016-04-15",  # * Плановая дата следующей явки
-        "pregnancy_continuation": True,  # * Возможность сохранения беременности
+        "pregnancy_continuation": False,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
         "diagnosis_osn": "A01",  # Основной диагноз

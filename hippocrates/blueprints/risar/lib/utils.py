@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+
 from sqlalchemy.orm import lazyload, joinedload
 
-from nemesis.lib.data import create_action, update_action
+from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from nemesis.models.event import Event
-from nemesis.models.diagnosis import Diagnostic, Diagnosis
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
-from nemesis.models.enums import ActionStatus
-from nemesis.models.exists import MKB
+from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
     puerpera_inspection_code
-from blueprints.risar.models.risar import RisarPreviousPregnancy_Children
+from blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
@@ -302,3 +300,24 @@ def format_action_data(json_data):
         'properties': json_data['properties']
     }
     return data
+
+
+def notify_checkup_changes(card, action, new_preg_cont):
+    if new_preg_cont is None:
+        return
+    cur_preg_cont_possibility = action['pregnancy_continuation'].value
+    new_preg_cont_possibility = new_preg_cont
+
+    if new_preg_cont_possibility != cur_preg_cont_possibility and not bool(new_preg_cont_possibility):
+        event = PregContInabilityEvent(card, action)
+        NotificationQueue.add_events(event)
+
+
+def notify_risk_rate_changes(card, new_prr):
+    current_rate = card.attrs['prenatal_risk_572'].value
+    cur_prr = PerinatalRiskRate(current_rate.id) if current_rate is not None else None
+
+    if new_prr.value not in (PerinatalRiskRate.undefined[0], PerinatalRiskRate.low[0]) and (
+            cur_prr is None or cur_prr.order < new_prr.order):
+        event = RiskRateRiseEvent(card, new_prr)
+        NotificationQueue.add_events(event)

@@ -372,6 +372,18 @@ class XForm(object):
             return None
         return rb.name if hasattr(rb, 'name') else rb['name']
 
+    @staticmethod
+    def to_enum(value, enum_model):
+        """
+        :param value: int | None
+        :param enum_model: nemesis.lib.enum.EnumBase class
+        :return nemesis.lib.enum.EnumBase instance | None:
+        """
+        if value is None:
+            return None
+        enum = enum_model(value)
+        return enum if enum.is_valid() else None
+
     def rb(self, code, rb_model, rb_code_field='code'):
         id_ = self.rb_validate(rb_model, code, rb_code_field)
         return code and {'code': code, 'id': id_} or None

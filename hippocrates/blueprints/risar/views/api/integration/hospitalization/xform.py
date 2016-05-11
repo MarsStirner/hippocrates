@@ -36,7 +36,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
         self.find_parent_obj(self.parent_obj_id)
         self.em = self.get_event_measure(
             data.get('measure_id'),
-            '65',
+            '0065',
             data.get('date_in'),
             data.get('date_out'),
         )
