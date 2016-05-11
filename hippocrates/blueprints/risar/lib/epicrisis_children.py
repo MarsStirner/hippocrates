@@ -21,7 +21,7 @@ def create_or_update_newborns(action, newborns):
             if newborn_id:
                 epicrisis_newborn = RisarEpicrisis_Children.query.get(newborn_id)
             else:
-                epicrisis_newborn = RisarEpicrisis_Children(action=action, action_id=action.id)
+                epicrisis_newborn = RisarEpicrisis_Children(action=action)
             db.session.add(epicrisis_newborn)  # Ничего страшного, если добавим в сессию уже добавленный объект
             for sd_key, sd_val in newborn_data.items():
                 if sd_key == 'sex':

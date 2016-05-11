@@ -462,6 +462,10 @@ class XForm(object):
         if val:
             return val.strftime(format)
 
+    @staticmethod
+    def or_undefined(value):
+        return value if value in ('', False, 0) or bool(value) else Undefined
+
 
 class ExternalXForm(XForm):
     __metaclass__ = ABCMeta

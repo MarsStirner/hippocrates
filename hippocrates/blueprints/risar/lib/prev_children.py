@@ -3,7 +3,7 @@
 import itertools
 
 from blueprints.risar.models.risar import RisarPreviousPregnancy_Children
-from nemesis.lib.utils import safe_int, safe_bool, safe_double
+from nemesis.lib.utils import safe_int, safe_bool_none, safe_double
 from nemesis.systemwide import db
 
 
@@ -31,10 +31,10 @@ def create_or_update_prev_children(action, newborn_inspections_data):
         exist_child.action_id = action.id
         exist_child.action = action
         exist_child.weight = safe_double(new_data.get('weight'))
-        exist_child.alive = safe_int(safe_bool(new_data.get('alive')))
+        exist_child.alive = safe_int(safe_bool_none(new_data.get('alive')))
         exist_child.death_reason = new_data.get('death_reason')
         exist_child.died_at = new_data.get('died_at')
-        exist_child.abnormal_development = safe_int(safe_bool(new_data.get('abnormal_development')))
-        exist_child.neurological_disorders = safe_int(safe_bool(new_data.get('neurological_disorders')))
+        exist_child.abnormal_development = safe_int(safe_bool_none(new_data.get('abnormal_development')))
+        exist_child.neurological_disorders = safe_int(safe_bool_none(new_data.get('neurological_disorders')))
         children.append(exist_child)
     return children, deleted_children

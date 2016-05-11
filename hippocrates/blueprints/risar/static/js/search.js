@@ -24,15 +24,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         max_pages: 10,
         pages: 1
     };
-
-    var perform = function (set_page) {
-        if (!set_page) {
-            $scope.pager.current_page = 1;
-        }
+    $scope.get_search_data = function () {
         var orgs = [];
         var from_orgs = $scope.query.orgs.length ? $scope.query.orgs: $scope.organisations;
         from_orgs.forEach(function(i) {if(i.id) orgs.push(i.id);});
-        var data = {
+        return {
             page: $scope.pager.current_page,
             areas: $scope.query.areas,
             curators: $scope.query.curators,
@@ -46,6 +42,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             risk: get_risk_list(), //$scope.query.risk.id,
             closed: $scope.query.closed.value
         };
+    };
+    var perform = function (set_page) {
+        if (!set_page) {
+            $scope.pager.current_page = 1;
+        }
+        var data = $scope.get_search_data();
         //console.log(JSON.stringify($scope.query));
         //console.log(JSON.stringify(data));
         RisarApi.search_event.get(data).then(function (result) {
@@ -53,6 +55,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.pager.record_count = result.count;
             $scope.results = result.events;
         });
+    };
+    $scope.print_search = function (format){
+        var data = $scope.get_search_data();
+        data.print_format = format;
+        RisarApi.search_event.print(data);
     };
     $scope.group_areas = function (item){
         return $scope.level1[item.parent_code];

@@ -2,7 +2,7 @@
 
 import logging
 
-from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR
+from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
 from .schemas import CardSchema
 
 from blueprints.risar.lib.card import PregnancyCard

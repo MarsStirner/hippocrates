@@ -9,6 +9,22 @@ WebMis20
     function (Config, NotificationService, $window, ApiCalls) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
+    this.file_get = function (verb, url, data, target) {
+        var form = document.createElement("form");
+        form.action = url;
+        form.method = verb;
+        form.target = target || "_blank";
+        if (data) {
+            var json = angular.toJson(data);
+            var input = document.createElement("textarea");
+            input.name = 'json';
+            input.value = json;
+            form.appendChild(input);
+        }
+        form.style.display = 'none';
+        document.body.appendChild(form);
+        form.submit();
+    };
     this.schedule = function () {
         var date = arguments[0];
         var all = arguments[1];
@@ -25,6 +41,9 @@ WebMis20
     this.search_event = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)
+        },
+        print: function (query) {
+            self.file_get('POST', Config.url.api_event_print, query);
         },
         area_list: function () {
             return wrapper('GET', Config.url.api_event_search_area_list)

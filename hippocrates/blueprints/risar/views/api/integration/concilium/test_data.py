@@ -21,6 +21,7 @@ concilium_data_1 = {
             "opinion": u'Долой этот консилиум'
         },
     ],
+    "patient_presence": True,
     "diagnosis": "Q00.0",
     "reason": "Больной заболел",
     "patient_condition": "Средненькое",
@@ -44,7 +45,7 @@ concilium_data_2 = {
             "opinion": u'Всё не так'
         }
     ],
-    "patient_presence": True,
+    # "patient_presence": True,
     "diagnosis": "Q00.0",
     "reason": "Больной заболел",
     "patient_condition": "Средненькое",
