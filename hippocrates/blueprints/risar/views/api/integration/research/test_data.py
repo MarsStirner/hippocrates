@@ -17,7 +17,7 @@ test_research_data = {
     'doctor_code': '22',
     # 'lpu_code': '6202',
     # 'doctor_code': '33',
-    'analysis_number': '12',
+    'analysis_number': '12ABC',
     'results': 'param1: 123; param2: 234',
     'comment': 'Результат',
 }

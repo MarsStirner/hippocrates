@@ -46,7 +46,7 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'Results': data.get('results'),
             'RealizationDate': safe_date(data.get('realization_date')),
             'LPURealization': self.person.organisation,
-            'AnalysisNumber': safe_int(data.get('analysis_number')),
+            'AnalysisNumber': data.get('analysis_number'),
             'Comment': data.get('comment'),
             'Doctor': self.person,
         }
