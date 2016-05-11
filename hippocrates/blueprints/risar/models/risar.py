@@ -85,7 +85,6 @@ class RisarEpicrisis_Children(db.Model):
     apgar_score_5 = db.Column(db.Integer)
     apgar_score_10 = db.Column(db.Integer)
     alive = db.Column(db.Integer)
-    death_reason = db.Column(db.String(50))
     action = db.relationship('Action')
     maturity_rate = VestaProperty('maturity_rate_code', 'rbRisarMaturity_Rate')
 
@@ -112,9 +111,37 @@ class RisarEpicrisis_Children(db.Model):
             obj.mkb_id = v['id']
             db.session.add(obj)
 
+    @property
+    def death_reasons(self):
+        q = RisarEpicrisis_Children_death_reasons.query.filter(
+            RisarEpicrisis_Children_death_reasons.newborn == self,
+        )
+        return map(lambda x: x.mkb, list(q))
+
+    @death_reasons.setter
+    def death_reasons(self, values):
+        RisarEpicrisis_Children_death_reasons.query.filter(
+            RisarEpicrisis_Children_death_reasons.newborn_id == self.id,
+            RisarEpicrisis_Children_death_reasons.newborn == self,
+        ).delete()
+        for v in values:
+            obj = RisarEpicrisis_Children_death_reasons(newborn=self)
+            obj.mkb_id = v['id']
+            db.session.add(obj)
+
 
 class RisarEpicrisis_Children_diseases(db.Model):
     __tablename__ = u'RisarEpicrisis_Children_diseases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    newborn_id = db.Column(db.ForeignKey('RisarEpicrisis_Children.id'), index=True)
+    newborn = db.relationship('RisarEpicrisis_Children')
+    mkb_id = db.Column(db.Integer, db.ForeignKey('MKB.id'), nullable=False)
+    mkb = db.relationship('MKB')
+
+
+class RisarEpicrisis_Children_death_reasons(db.Model):
+    __tablename__ = u'RisarEpicrisis_Children_death_reasons'
 
     id = db.Column(db.Integer, primary_key=True)
     newborn_id = db.Column(db.ForeignKey('RisarEpicrisis_Children.id'), index=True)

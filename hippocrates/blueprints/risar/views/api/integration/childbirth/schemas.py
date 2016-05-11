@@ -397,9 +397,14 @@ class ChildbirthSchema(Schema):
                                 "type": "string",
                                 "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
                             },
-                            "death_reason": {
-                                "description": "Причина смерти",
-                                "type": "string"
+                            "death_reasons": {
+                                "description": "Причины смерти",
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                                },
+                                "minItems": 0
                             },
                             "diseases": {
                                 "description": "Заболевания новорождённого (массив, код диагноза по МКБ-10)",

@@ -281,7 +281,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Осложнения операции:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-repeat="diag in epicrisis.operation_complication" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="diag in epicrisis.operation_complication" tooltip="[[diag.name]]">[[diag.code]]
                                     <span ng-if="epicrisis.operation_complication.length>1"><br></span></span></div>
                                 </div>
                                 <div class="row">
