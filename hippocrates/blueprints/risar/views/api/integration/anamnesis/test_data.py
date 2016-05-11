@@ -7,14 +7,14 @@ anamnesis_m_data = {
 
 
 anamnesis_m_data2 = {
-    "education": "05",
-    "work_group": "02",
-    "professional_properties": "psychic_tension",
-    "family_income": "02",
-    "menstruation_start_age": "12",
-    "menstruation_duration": "28",
-    "menstruation_period": "5",
-    "menstrual_disorder": False,
+    # "education": "05",
+    # "work_group": "02",
+    # "professional_properties": "psychic_tension",
+    # "family_income": "02",
+    # "menstruation_start_age": "12",
+    # "menstruation_duration": "28",
+    # "menstruation_period": "5",
+    # "menstrual_disorder": False,
     "sex_life_age": 23,
     "fertilization_type": "01",
     "intrauterine_operation": False,
@@ -30,12 +30,12 @@ anamnesis_m_data2 = {
     "alcohol": False,
     "toxic": True,
     "drugs": False,
-    "contraception": ["1", "2"],
-    "hereditary": ["11", "12"],
-    "finished_diseases": u"краснуха",
-    "current_diseases": ["O12.1", "O23.2"],
+    # "contraception": ["1", "2"],
+    # "hereditary": ["11", "12"],
+    # "finished_diseases": u"краснуха",
+    # "current_diseases": ["O12.1", "O23.2"],
     "last_period_date": "2015-12-31",
-    "preeclampsia_mother_sister": False,
+    # "preeclampsia_mother_sister": False,
     "marital_status": "03"
 }
 

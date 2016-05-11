@@ -2,7 +2,7 @@
 
 import logging
 
-from ..xform import XForm, wrap_simplify, none_default, ALREADY_PRESENT_ERROR
+from ..xform import XForm, wrap_simplify, none_default, ALREADY_PRESENT_ERROR, Undefined
 from .schemas import AnamnesisMotherSchema, AnamnesisFatherSchema, AnamnesisPrevPregSchema
 
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, risar_anamnesis_pregnancy
@@ -12,7 +12,7 @@ from blueprints.risar.lib.card import PregnancyCard
 
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import ApiException
-from nemesis.lib.utils import safe_date, safe_bool, safe_int
+from nemesis.lib.utils import safe_date, safe_int, safe_bool_none, safe_traverse
 from nemesis.models.event import Event
 from nemesis.models.actions import Action, ActionType
 
@@ -103,16 +103,16 @@ class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
             'menstruation_start_age': data.get('menstruation_start_age'),
             'menstruation_duration': data.get('menstruation_duration'),
             'menstruation_period': data.get('menstruation_period'),
-            'menstruation_disorders': safe_bool(data.get('menstrual_disorder')),
+            'menstruation_disorders': safe_bool_none(data.get('menstrual_disorder')),
             'sex_life_start_age': safe_int(data.get('sex_life_age')),
             'fertilization_type': self.to_rb(data.get('fertilization_type')),
-            'intrauterine': safe_bool(data.get('intrauterine_operation')),
-            'multifetation': safe_bool(data.get('multiple_fetation')),
+            'intrauterine': safe_bool_none(data.get('intrauterine_operation')),
+            'multifetation': safe_bool_none(data.get('multiple_fetation')),
 
-            'smoking': safe_bool(data.get('smoking')),
-            'alcohol': safe_bool(data.get('alcohol')),
-            'toxic': safe_bool(data.get('toxic')),
-            'drugs': safe_bool(data.get('drugs')),
+            'smoking': safe_bool_none(data.get('smoking')),
+            'alcohol': safe_bool_none(data.get('alcohol')),
+            'toxic': safe_bool_none(data.get('toxic')),
+            'drugs': safe_bool_none(data.get('drugs')),
             'contraception': map(self.to_rb, data.get('contraception', [])),
             'hereditary': map(self.to_rb, data.get('hereditary', [])),
 
@@ -120,63 +120,64 @@ class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
             'current_diseases': map(self.to_mkb_rb, data.get('current_diseases', [])),
 
             'menstruation_last_date': safe_date(data.get('last_period_date')),
-            'preeclampsia': safe_bool(data.get('preeclampsia_mother_sister')),
+            'preeclampsia': safe_bool_none(data.get('preeclampsia_mother_sister')),
             'marital_status': self.to_rb(data.get('marital_status'))
         })
-        if 'infertility' in data:
-            res.update({
-                'infertility': safe_bool(data['infertility']['infertility_occurence']),
-                'infertility_type': self.to_rb(data['infertility']['infertility_type']),
-                'infertility_period': safe_int(data['infertility']['infetrility_duration']),
-                'infertility_treatment': map(self.to_rb, data['infertility']['infertility_treatment']),
-                'infertility_cause': map(self.to_rb, data['infertility']['infertility_causes']),
-            })
+        res.update({
+            'infertility': safe_bool_none(safe_traverse(data, 'infertility', 'infertility_occurence')),
+            'infertility_type': self.to_rb(safe_traverse(data, 'infertility', 'infertility_type')),
+            'infertility_period': safe_int(safe_traverse(data, 'infertility', 'infetrility_duration')),
+            'infertility_treatment': map(self.to_rb, safe_traverse(data, 'infertility', 'infertility_treatment', default=[])),
+            'infertility_cause': map(self.to_rb, safe_traverse(data, 'infertility', 'infertility_causes', default=[])),
+        })
+
         return res
 
     @wrap_simplify
     def as_json(self):
         an_props = self.target_obj.propsByCode
         return {
-            'education': self.from_rb(an_props['education'].value),
-            'work_group': self.from_rb(an_props['work_group'].value),
-            'professional_properties': self.from_rb(an_props['professional_properties'].value),
-            'family_income': self.from_rb(an_props['family_income'].value),
-            'menstruation_start_age': an_props['menstruation_start_age'].value,
-            'menstruation_duration': an_props['menstruation_duration'].value,
-            'menstruation_period': an_props['menstruation_period'].value,
-            'menstrual_disorder': an_props['menstruation_disorders'].value,
-            'sex_life_age': an_props['sex_life_start_age'].value,
-            'fertilization_type': self.from_rb(an_props['fertilization_type'].value),
-            'intrauterine_operation': an_props['intrauterine'].value,
-            'multiple_fetation': an_props['multifetation'].value,
+            'education': self.or_undefined(self.from_rb(an_props['education'].value)),
+            'work_group': self.or_undefined(self.from_rb(an_props['work_group'].value)),
+            'professional_properties': self.or_undefined(self.from_rb(an_props['professional_properties'].value)),
+            'family_income': self.or_undefined(self.from_rb(an_props['family_income'].value)),
+            'menstruation_start_age': self.or_undefined(an_props['menstruation_start_age'].value),
+            'menstruation_duration': self.or_undefined(an_props['menstruation_duration'].value),
+            'menstruation_period': self.or_undefined(an_props['menstruation_period'].value),
+            'menstrual_disorder': self.or_undefined(an_props['menstruation_disorders'].value),
+            'sex_life_age': self.or_undefined(an_props['sex_life_start_age'].value),
+            'fertilization_type': self.or_undefined(self.from_rb(an_props['fertilization_type'].value)),
+            'intrauterine_operation': self.or_undefined(an_props['intrauterine'].value),
+            'multiple_fetation': self.or_undefined(an_props['multifetation'].value),
 
             'intertility': self._represent_intertility(),
 
-            'smoking': an_props['smoking'].value,
-            'alcohol': an_props['alcohol'].value,
-            'toxic': an_props['toxic'].value,
-            'drugs': an_props['drugs'].value,
-            'contraception': map(self.from_rb, an_props['contraception'].value),
-            'hereditary': map(self.from_rb, an_props['hereditary'].value),
+            'smoking': self.or_undefined(an_props['smoking'].value),
+            'alcohol': self.or_undefined(an_props['alcohol'].value),
+            'toxic': self.or_undefined(an_props['toxic'].value),
+            'drugs': self.or_undefined(an_props['drugs'].value),
+            'contraception': self.or_undefined(map(self.from_rb, an_props['contraception'].value)),
+            'hereditary': self.or_undefined(map(self.from_rb, an_props['hereditary'].value)),
 
-            'finished_diseases': an_props['finished_diseases_text'].value,
-            'current_diseases': map(self.from_mkb_rb, an_props['current_diseases'].value),
+            'finished_diseases': self.or_undefined(an_props['finished_diseases_text'].value),
+            'current_diseases': self.or_undefined(map(self.from_mkb_rb, an_props['current_diseases'].value)),
 
             'last_period_date': an_props['menstruation_last_date'].value,
-            'preeclampsia_mother_sister': an_props['preeclampsia'].value,
+            'preeclampsia_mother_sister': self.or_undefined(an_props['preeclampsia'].value),
             'marital_status': self.from_rb(an_props['marital_status'].value)
         }
 
     @none_default
     def _represent_intertility(self):
         an_props = self.target_obj.propsByCode
+        inf_present = safe_bool_none(an_props['infertility'].value)
         return {
             'infertility_occurence': an_props['infertility'].value,
             'infertility_type': self.from_rb(an_props['infertility_type'].value),
             'infetrility_duration': an_props['infertility_period'].value,
             'infertility_treatment': map(self.from_rb, an_props['infertility_treatment'].value),
             'infertility_causes': map(self.from_rb, an_props['infertility_cause'].value)
-        }
+        } if inf_present else Undefined
 
 
 class AnamnesisFatherXForm(AnamnesisFatherSchema, AnamnesisXForm):
@@ -210,64 +211,64 @@ class AnamnesisFatherXForm(AnamnesisFatherSchema, AnamnesisXForm):
             'professional_properties': self.to_rb(data.get('professional_properties')),
             'phone': data.get('telephone_number'),
             'fluorography': data.get('fluorography'),
-            'HIV': safe_bool(data.get('hiv')),
+            'HIV': safe_bool_none(data.get('hiv')),
             'blood_type': self.to_blood_type_rb(data.get('blood_type')),
 
-            'smoking': safe_bool(data.get('smoking')),
-            'alcohol': safe_bool(data.get('alcohol')),
-            'toxic': safe_bool(data.get('toxic')),
-            'drugs': safe_bool(data.get('drugs')),
+            'smoking': safe_bool_none(data.get('smoking')),
+            'alcohol': safe_bool_none(data.get('alcohol')),
+            'toxic': safe_bool_none(data.get('toxic')),
+            'drugs': safe_bool_none(data.get('drugs')),
             'hereditary': map(self.to_rb, data.get('hereditary', [])),
 
             'finished_diseases_text': data.get('finished_diseases'),
             'current_diseases_text': data.get('current_diseases'),
         })
-        if 'infertility' in data:
-            res.update({
-                'infertility': safe_bool(data['infertility']['infertility_occurence']),
-                'infertility_type': self.to_rb(data['infertility']['infertility_type']),
-                'infertility_period': safe_int(data['infertility']['infetrility_duration']),
-                'infertility_treatment': map(self.to_rb, data['infertility']['infertility_treatment']),
-                'infertility_cause': map(self.to_rb, data['infertility']['infertility_causes']),
-            })
+        res.update({
+            'infertility': safe_bool_none(safe_traverse(data, 'infertility', 'infertility_occurence')),
+            'infertility_type': self.to_rb(safe_traverse(data, 'infertility', 'infertility_type')),
+            'infertility_period': safe_int(safe_traverse(data, 'infertility', 'infetrility_duration')),
+            'infertility_treatment': map(self.to_rb, safe_traverse(data, 'infertility', 'infertility_treatment', default=[])),
+            'infertility_cause': map(self.to_rb, safe_traverse(data, 'infertility', 'infertility_causes', default=[])),
+        })
         return res
 
     @wrap_simplify
     def as_json(self):
         an_props = self.target_obj.propsByCode
         return {
-            'FIO': an_props['name'].value,
-            'age': an_props['age'].value,
-            'education': self.from_rb(an_props['education'].value),
-            'work_group': self.from_rb(an_props['work_group'].value),
-            'professional_properties': self.from_rb(an_props['professional_properties'].value),
-            'telephone_number': an_props['phone'].value,
-            'fluorography': an_props['fluorography'].value,
-            'hiv': an_props['HIV'].value,
-            'blood_type': self.from_blood_type_rb(an_props['blood_type'].value),
+            'FIO': self.or_undefined(an_props['name'].value),
+            'age': self.or_undefined(an_props['age'].value),
+            'education': self.or_undefined(self.from_rb(an_props['education'].value)),
+            'work_group': self.or_undefined(self.from_rb(an_props['work_group'].value)),
+            'professional_properties': self.or_undefined(self.from_rb(an_props['professional_properties'].value)),
+            'telephone_number': self.or_undefined(an_props['phone'].value),
+            'fluorography': self.or_undefined(an_props['fluorography'].value),
+            'hiv': self.or_undefined(an_props['HIV'].value),
+            'blood_type': self.or_undefined(self.from_blood_type_rb(an_props['blood_type'].value)),
 
             'intertility': self._represent_intertility(),
 
-            'smoking': an_props['smoking'].value,
-            'alcohol': an_props['alcohol'].value,
-            'toxic': an_props['toxic'].value,
-            'drugs': an_props['drugs'].value,
-            'hereditary': map(self.from_rb, an_props['hereditary'].value),
+            'smoking': self.or_undefined(an_props['smoking'].value),
+            'alcohol': self.or_undefined(an_props['alcohol'].value),
+            'toxic': self.or_undefined(an_props['toxic'].value),
+            'drugs': self.or_undefined(an_props['drugs'].value),
+            'hereditary': self.or_undefined(map(self.from_rb, an_props['hereditary'].value)),
 
-            'finished_diseases': an_props['finished_diseases_text'].value,
-            'current_diseases': an_props['current_diseases_text'].value
+            'finished_diseases': self.or_undefined(an_props['finished_diseases_text'].value),
+            'current_diseases': self.or_undefined(an_props['current_diseases_text'].value)
         }
 
     @none_default
     def _represent_intertility(self):
         an_props = self.target_obj.propsByCode
+        inf_present = safe_bool_none(an_props['infertility'].value)
         return {
             'infertility_occurence': an_props['infertility'].value,
             'infertility_type': self.from_rb(an_props['infertility_type'].value),
             'infetrility_duration': an_props['infertility_period'].value,
             'infertility_treatment': map(self.from_rb, an_props['infertility_treatment'].value),
             'infertility_causes': map(self.from_rb, an_props['infertility_cause'].value)
-        }
+        } if inf_present else Undefined
 
 
 class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
@@ -297,7 +298,7 @@ class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
             'year': safe_int(data.get('pregnancy_year')),
             'pregnancyResult': self.to_rb(data.get('pregnancy_result')),
             'pregnancy_week': safe_int(data.get('gestational_age')),
-            'preeclampsia': safe_bool(data.get('preeclampsia')),
+            'preeclampsia': safe_bool_none(data.get('preeclampsia')),
             'after_birth_complications': map(self.to_mkb_rb, data.get('after_birth_complications', [])),
             'maternity_aid': map(self.to_rb, data.get('assistance_and_operations', [])),
             'pregnancy_pathology': map(self.to_mkb_rb, data.get('pregnancy_pathologies', [])),
@@ -307,12 +308,12 @@ class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
         newborn_inspections = []
         for child_data in data.get('child_information', []):
             newborn_inspections.append({
-                'alive': safe_bool(child_data.get('is_alive')),
+                'alive': safe_bool_none(child_data.get('is_alive')),
                 'weight': safe_int(child_data.get('weight')),
                 'death_reason': child_data.get('death_cause'),
                 'died_at': self.to_rb(child_data.get('death_at')),
-                'abnormal_development': safe_bool(child_data.get('abnormal_development')),
-                'neurological_disorders': safe_bool(child_data.get('neurological_disorders'))
+                'abnormal_development': safe_bool_none(child_data.get('abnormal_development')),
+                'neurological_disorders': safe_bool_none(child_data.get('neurological_disorders'))
             })
         res.update(newborn_inspections=newborn_inspections)
         return res
@@ -358,28 +359,29 @@ class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
         an_props = self.target_obj.propsByCode
         return {
             'prevpregnancy_id': str(self.target_obj.id),
+            'pregnancy_year': an_props['year'].value,
             'pregnancy_result': self.from_rb(an_props['pregnancyResult'].value),
-            'gestational_age': an_props['pregnancy_week'].value,
-            'preeclampsia': an_props['preeclampsia'].value,
-            'after_birth_complications': map(self.from_mkb_rb, an_props['after_birth_complications'].value),
-            'assistance_and_operations': map(self.from_rb, an_props['maternity_aid'].value),
-            'pregnancy_pathologies': map(self.from_mkb_rb, an_props['pregnancy_pathology'].value),
-            'birth_pathologies': map(self.from_mkb_rb, an_props['delivery_pathology'].value),
-            'features': an_props['note'].value,
+            'gestational_age': self.or_undefined(an_props['pregnancy_week'].value),
+            'preeclampsia': self.or_undefined(an_props['preeclampsia'].value),
+            'after_birth_complications': self.or_undefined(map(self.from_mkb_rb, an_props['after_birth_complications'].value)),
+            'assistance_and_operations': self.or_undefined(map(self.from_rb, an_props['maternity_aid'].value)),
+            'pregnancy_pathologies': self.or_undefined(map(self.from_mkb_rb, an_props['pregnancy_pathology'].value)),
+            'birth_pathologies': self.or_undefined(map(self.from_mkb_rb, an_props['delivery_pathology'].value)),
+            'features': self.or_undefined(an_props['note'].value),
             'child_information': self._represent_children(),
         }
 
     @none_default
     def _represent_children(self):
         prev_children = get_previous_children(self.target_obj.id)
-        return [
+        return self.or_undefined([
             {
-                'is_alive': child.alive,
-                'weight': child.weight,
-                'death_cause': child.death_reason,
-                'death_at': child.died_at,
-                'abnormal_development': child.abnormal_development,
-                'neurological_disorders': child.neurological_disorders,
+                'is_alive': self.or_undefined(child.alive),
+                'weight': self.or_undefined(child.weight),
+                'death_cause': self.or_undefined(child.death_reason),
+                'death_at': self.or_undefined(child.died_at),
+                'abnormal_development': self.or_undefined(child.abnormal_development),
+                'neurological_disorders': self.or_undefined(child.neurological_disorders),
             }
             for child in prev_children
-        ]
+        ])

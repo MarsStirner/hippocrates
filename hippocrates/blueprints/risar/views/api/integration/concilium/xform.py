@@ -164,14 +164,14 @@ class ConciliumXForm(ConciliumSchema, XForm):
         concilium = self.target_obj
         return {
             'concilium_id': concilium.id,
-            'external_id': None,  # TODO:
+            'external_id': self.external_id,
             'date': concilium.date,
             'hospital': self.from_org_rb(concilium.hospital),
             'doctor': self.from_person_rb(concilium.doctor),
-            'patient_presence': safe_bool_none(concilium.patient_presence) or Undefined,
+            'patient_presence': self.or_undefined(safe_bool_none(concilium.patient_presence)),
             'diagnosis': self.from_mkb_rb(concilium.mkb),
             'reason': concilium.reason,
-            'patient_condition': concilium.patient_condition or Undefined,
+            'patient_condition': self.or_undefined(concilium.patient_condition),
             'decision': concilium.decision,
             'doctors': self._represent_concilium_members()
         }
@@ -181,7 +181,7 @@ class ConciliumXForm(ConciliumSchema, XForm):
         return [
             {
                 'doctor': self.from_person_rb(member.person),
-                'opinion': member.opinion
+                'opinion': self.or_undefined(member.opinion)
             }
             for member in members
         ]
