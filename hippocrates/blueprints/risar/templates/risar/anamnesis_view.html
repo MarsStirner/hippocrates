@@ -18,17 +18,18 @@
                             Менструации с <b ng-bind-html="anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
                             длительность <b ng-bind-html="anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
                             продолжительность цикла <b ng-bind-html="anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
-                            нарушения: <b ng-bind-html="anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>.
+                            нарушения: <b ng-bind-html="anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>
                         </p>
                         <p>
-                            Дата последней менструации <b ng-bind-html="anamnesis.mother.menstruation_last_date | asDate | underlineNoVal"></b>.
+                            Дата последней менструации <b ng-bind-html="anamnesis.mother.menstruation_last_date | asDate | underlineNoVal"></b>
                         </p>
                         <p>
-                            Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
-                            Вид контрацепции: <b ng-bind-html="format_multiple(anamnesis.mother.contraception, 'name') | underlineNoVal"></b>.
+                            Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>
+                            Вид контрацепции: <b ng-bind-html="format_multiple(anamnesis.mother.contraception, 'name') | underlineNoVal"></b>
                         </p>
-                        <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b>.</p>
-                        <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b>.</p>
+                        <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b></p>
+                        <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b></p>
+                        <p>Предыдущие многоплодные беременности: <b>[[ anamnesis.mother.multifetation ? 'Да' : 'Нет']]</b></p>
                         <p>Семейное положение: <b ng-bind-html="anamnesis.mother.marital_status.name | underlineNoVal"></b></p>
                         <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income.name | underlineNoVal"></b></p>
                     </div>
