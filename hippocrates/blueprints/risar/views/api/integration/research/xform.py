@@ -39,17 +39,24 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             data.get('realization_date'),
             data.get('realization_date'),
         )
-        self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
+        if data.get('doctor_code') and data.get('lpu_code'):
+            self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
     def get_properties_data(self, data):
-        return {
+        res = {
             'Results': data.get('results'),
             'RealizationDate': safe_date(data.get('realization_date')),
             'LPURealization': self.person.organisation,
             'AnalysisNumber': data.get('analysis_number'),
+
             'Comment': data.get('comment'),
-            'Doctor': self.person,
         }
+
+        if self.person:
+            res['LPURealization'] = self.person.organisation
+            res['Doctor'] = self.person
+
+        return res
 
     def as_json(self):
         an_props = self.target_obj.propsByCode
@@ -59,10 +66,13 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'measure_id': self.em.id,
             'measure_type_code': self.em.measure.code,
             'realization_date': an_props['RealizationDate'].value,
-            'lpu_code': self.person.organisation and self.person.organisation.TFOMSCode or '',
             'analysis_number': an_props['AnalysisNumber'].value or '',
             'results': an_props['Results'].value or '',
             'comment': an_props['Comment'].value or '',
-            'doctor_code': self.person.regionalCode,
         }
+
+        if self.person:
+            res['lpu_code'] = self.person.organisation and self.person.organisation.TFOMSCode or ''
+            res['doctor_code'] = self.person.regionalCode
+
         return res

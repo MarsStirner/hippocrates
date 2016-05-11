@@ -106,6 +106,7 @@ def test_auth(login, password):
 if __name__ == '__main__':
     with app.app_context():
         from blueprints.risar.views.api.integration.client.test import test_register_edit_client
+
         from blueprints.risar.views.api.integration.card.test import (
             test_register_edit_delete_card,
             get_new_card_id_for_test, delete_test_card_id
@@ -220,12 +221,13 @@ if __name__ == '__main__':
         # test_specialists_checkup_data['measure_id'] = event_measure_id
         # test_put_specialists_checkup(card_id, result_action_id)
 
-        # from blueprints.risar.views.api.integration.research.test import \
-        #     test_put_research, test_delete_research, test_post_research
+        from blueprints.risar.views.api.integration.research.test import \
+            test_put_research, test_delete_research, test_post_research
         # from blueprints.risar.views.api.integration.research.test_data import \
         #     test_research_data
-        # card_id = '1'
+        # card_id = '230'
         # event_measure_id = '3234'
+
         # result_action_id = '895'
         # measure_type_code = '0022'
         # test_research_data['measure_type_code'] = measure_type_code
