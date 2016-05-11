@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
         # from blueprints.risar.views.api.integration.expert_data.test import \
         #     test_get_expert_data
-        # card_id = '121'
+        # card_id = '214'
         # test_get_expert_data(card_id)
 
         # card_id = '214'
