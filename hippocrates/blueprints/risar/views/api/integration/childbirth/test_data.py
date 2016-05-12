@@ -91,7 +91,7 @@ test_childbirth_data = {
             "diseases": ["A00"],  # Заболевания новорождённого
             # "death_date": None,  # Дата смерти
             # "death_time": None,  # Время смерти
-            # "death_reasons": None,  # Причина смерти
+            # "death_reason": None,  # Причина смерти
         },
         # {
         #     "alive": True,  # * Живой
@@ -106,7 +106,7 @@ test_childbirth_data = {
         #     "apgar_score_10": 4,  # Оценка по Апгар на 10 минуту
         #     # "death_date": None,  # Дата смерти
         #     # "death_time": None,  # Время смерти
-        #     # "death_reasons": None,  # Причина смерти
+        #     # "death_reason": None,  # Причина смерти
         # }
     ],
 }

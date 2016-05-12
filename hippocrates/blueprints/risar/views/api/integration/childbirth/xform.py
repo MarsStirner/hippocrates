@@ -98,7 +98,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         'apgar_score_1': {'attr': 'apgar_score_1', 'default': None, 'rb': None, 'is_vector': False},
         'apgar_score_5': {'attr': 'apgar_score_5', 'default': None, 'rb': None, 'is_vector': False},
         'apgar_score_10': {'attr': 'apgar_score_10', 'default': None, 'rb': None, 'is_vector': False},
-        'death_reasons': {'attr': 'death_reasons', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'death_reasons': {'attr': 'death_reason', 'default': None, 'rb': None, 'is_vector': False},
         'diseases': {'attr': 'diseases', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
     }
 
