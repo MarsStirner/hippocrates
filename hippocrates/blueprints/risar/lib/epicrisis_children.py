@@ -24,6 +24,8 @@ def create_or_update_newborns(action, newborns):
                 epicrisis_newborn = RisarEpicrisis_Children(action=action)
             db.session.add(epicrisis_newborn)  # Ничего страшного, если добавим в сессию уже добавленный объект
             for sd_key, sd_val in newborn_data.items():
+                if sd_key == 'id':
+                    continue
                 if sd_key == 'sex':
                     setattr(epicrisis_newborn, sd_key, 1 if sd_val['code'] == 'male' else 2)
                 else:

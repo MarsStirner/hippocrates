@@ -104,7 +104,6 @@ class RisarEpicrisis_Children(db.Model):
     @diseases.setter
     def diseases(self, values):
         RisarEpicrisis_Children_diseases.query.filter(
-            RisarEpicrisis_Children_diseases.newborn_id == self.id,
             RisarEpicrisis_Children_diseases.newborn == self,
         ).delete()
         for v in values:
