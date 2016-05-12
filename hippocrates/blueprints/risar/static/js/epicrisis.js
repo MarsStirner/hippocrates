@@ -125,7 +125,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
         if (child_info.alive) {
             child_info.date = null;
             child_info.time = null;
-            child_info.death_reasons = [];
+            child_info.death_reasons = null;
         } else {
             child_info.date = null;
             child_info.time = null;

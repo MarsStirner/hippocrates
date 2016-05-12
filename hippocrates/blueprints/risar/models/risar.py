@@ -55,7 +55,7 @@ class RisarPreviousPregnancy_Children(db.Model):
     apgar_score_5 = db.Column(db.Integer)
     apgar_score_10 = db.Column(db.Integer)
     alive = db.Column(db.Integer)
-    death_reason = db.Column(db.String(50))
+    death_reason = db.Column(db.String(1024))
     died_at_code = db.Column(db.String(250))
     abnormal_development = db.Column(db.Integer)
     neurological_disorders = db.Column(db.Integer)
@@ -87,6 +87,7 @@ class RisarEpicrisis_Children(db.Model):
     alive = db.Column(db.Integer)
     action = db.relationship('Action')
     maturity_rate = VestaProperty('maturity_rate_code', 'rbRisarMaturity_Rate')
+    death_reasons = db.Column(db.String(50))  # Временное поле. После показа откатить комит.
 
     def __json__(self):
         return {
@@ -103,7 +104,6 @@ class RisarEpicrisis_Children(db.Model):
     @diseases.setter
     def diseases(self, values):
         RisarEpicrisis_Children_diseases.query.filter(
-            RisarEpicrisis_Children_diseases.newborn_id == self.id,
             RisarEpicrisis_Children_diseases.newborn == self,
         ).delete()
         for v in values:
@@ -112,14 +112,14 @@ class RisarEpicrisis_Children(db.Model):
             db.session.add(obj)
 
     @property
-    def death_reasons(self):
+    def death_reasons_(self):
         q = RisarEpicrisis_Children_death_reasons.query.filter(
             RisarEpicrisis_Children_death_reasons.newborn == self,
         )
         return map(lambda x: x.mkb, list(q))
 
-    @death_reasons.setter
-    def death_reasons(self, values):
+    @death_reasons_.setter
+    def death_reasons_(self, values):
         RisarEpicrisis_Children_death_reasons.query.filter(
             RisarEpicrisis_Children_death_reasons.newborn_id == self.id,
             RisarEpicrisis_Children_death_reasons.newborn == self,

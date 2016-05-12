@@ -25,4 +25,6 @@ def create_or_update_fetuses(action, fetuses):
                 fetus_state = RisarFetusState(action=action, action_id=action.id)
             db.session.add(fetus_state)  # Ничего страшного, если добавим в сессию уже добавленный объект
             for sd_key, sd_val in state_data.items():
+                if sd_key == 'id':
+                    continue
                 setattr(fetus_state, sd_key, sd_val)

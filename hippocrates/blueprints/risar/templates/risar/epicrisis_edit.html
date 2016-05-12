@@ -765,10 +765,9 @@
                                                             </td>
                                                         </tr>
                                                         <tr ng-if="child.alive==false">
-                                                            <th class="text-right">Причины смерти <span class="text-danger">*</span></th>
+                                                            <th class="text-right">Причина смерти <span class="text-danger">*</span></th>
                                                             <td>
-                                                                <wm-mkb-multiple ng-model="child.death_reasons"
-                                                                                 ng-required="true"></wm-mkb-multiple>
+                                                                <input ng-model="child.death_reasons" class="form-control">
                                                             </td>
                                                         </tr>
                                                     </tbody>
