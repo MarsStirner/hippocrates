@@ -55,7 +55,7 @@ class RisarPreviousPregnancy_Children(db.Model):
     apgar_score_5 = db.Column(db.Integer)
     apgar_score_10 = db.Column(db.Integer)
     alive = db.Column(db.Integer)
-    death_reason = db.Column(db.String(50))
+    death_reason = db.Column(db.String(1024))
     died_at_code = db.Column(db.String(250))
     abnormal_development = db.Column(db.Integer)
     neurological_disorders = db.Column(db.Integer)
