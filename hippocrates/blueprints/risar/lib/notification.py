@@ -36,9 +36,10 @@ class NotificationQueue(object):
 
 
 @app.teardown_request
-def process_notifications_ateor(*args, **kwargs):
-    # ateor - at the end of request
-    NotificationQueue.start_all()
+def process_notifications_ateor(exception):
+    # at the end of request
+    if not exception:
+        NotificationQueue.start_all()
 
 
 class NotificationEvent(object):
@@ -81,6 +82,7 @@ class RiskRateRiseEvent(NotificationEvent):
 
     def __init__(self, card, new_risk):
         self.card = card
+        self.card_id = card.event.id
         self.new_risk = new_risk
 
     def make_message(self):
@@ -120,10 +122,10 @@ class RiskRateRiseEvent(NotificationEvent):
         return u'''\
 Ошибка отправки уведомлений об изменении степени
 риска в карте с id = {0}
-'''.format(self.card.event.id)
+'''.format(self.card_id)
 
     def __repr__(self):
-        return u'{0} for card_id = {1}'.format(self.__class__.__name__, self.card.event.id)
+        return u'{0} for card_id = {1}'.format(self.__class__.__name__, self.card_id)
 
 
 class PregContInabilityEvent(NotificationEvent):
@@ -137,7 +139,9 @@ class PregContInabilityEvent(NotificationEvent):
 
     def __init__(self, card, action):
         self.card = card
+        self.card_id = card.event.id
         self.action = action
+        self.action_id = action.id
 
     def make_message(self):
         patient_name = self.card.event.client.nameText
@@ -175,9 +179,9 @@ class PregContInabilityEvent(NotificationEvent):
         return u'''\
 Ошибка отправки уведомлений о невозможности сохранения
 беременности после осмотра с id = {0} для карты с id = {1}
-'''.format(self.action.id, self.card.event.id)
+'''.format(self.action_id, self.card_id)
 
     def __repr__(self):
         return u'{0} for card_id = {1}, checkup_id = {2}'.format(
-            self.__class__.__name__, self.card.event.id, self.action.id
+            self.__class__.__name__, self.card_id, self.action_id
         )
