@@ -399,6 +399,8 @@ class XForm(object):
             if isinstance(rb_model, basestring):
                 rb = Vesta.get_rb(rb_model, code)
                 row_id = rb and rb.get('_id')
+                if row_id == 'None':
+                    row_id = None
             else:
                 field = getattr(rb_model, rb_code_field)
                 res_list = list(rb_model.query.filter(
