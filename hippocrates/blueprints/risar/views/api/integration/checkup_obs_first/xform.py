@@ -98,7 +98,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
-        # 'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': True},
         'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
         'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
         'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},

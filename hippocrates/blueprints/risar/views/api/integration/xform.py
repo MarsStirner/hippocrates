@@ -17,6 +17,7 @@ from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
 from blueprints.risar.models.risar import ActionIdentification
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
+from nemesis.lib.vesta import VestaNotFoundException
 from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
@@ -395,12 +396,16 @@ class XForm(object):
     @staticmethod
     def rb_validate(rb_model, code, rb_code_field):
         row_id = None
-        if code:
+        if code is not None:
             if isinstance(rb_model, basestring):
-                rb = Vesta.get_rb(rb_model, code)
-                row_id = rb and rb.get('_id')
-                if row_id == 'None':
+                try:
+                    rb = Vesta.get_rb(rb_model, code)
+                except VestaNotFoundException:
                     row_id = None
+                else:
+                    row_id = rb and rb.get('_id')
+                    if row_id == 'None':
+                        row_id = None
             else:
                 field = getattr(rb_model, rb_code_field)
                 res_list = list(rb_model.query.filter(

@@ -16,16 +16,12 @@ class CheckupPCSchema(Schema):
     schema = [
         {
             "$schema": "http://json-schema.org/draft-04/schema#",
-            "title": "pccheckup",
+            "title": "firstcheckup",
             "description": "Первичный осмотр беременной акушером-гинекологом и специалистом ПЦ",
             "type": "object",
             "properties": {
                 "external_id": {
                     "description": "Внешний ID",
-                    "type": "string"
-                },
-                "exam_pc_id": {
-                    "description": "ID осмотра специалистом ПЦ",
                     "type": "string"
                 },
                 "general_info": {
@@ -64,168 +60,98 @@ class CheckupPCSchema(Schema):
                     "properties": {
                         "state": {
                             "description": "Общее состояние, справочник rbRisarState",
-                            "type": "string",
-                            # "enum": ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
+                            "type": "string"
                         },
                         "subcutaneous_fat": {
                             "description": "Подкожно-жировая клетчатка, справочник rbRisarSubcutaneous_Fat",
-                            "type": "string",
-                            # "enum": ["izbytocnorazvita", "nedostatocnorazvita", "umerennorazvita"]
+                            "type": "string"
                         },
                         "tongue": {
                             "description": "Язык, справочник rbRisarTongue",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": ["01", "02", "03", "04", "vlajnyj"]
+                                "type": "string"
                             }
                         },
                         "complaints": {
                             "description": "Жалобы, справочник rbRisarComplaints",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "epigastrii",
-                                #     "golovnaabol_",
-                                #     "moving",
-                                #     "net",
-                                #     "oteki",
-                                #     "rvota",
-                                #     "tosnota",
-                                #     "zrenie"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "skin": {
                             "description": "Кожа, справочник rbRisarSkin",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "naliciekrovoizlianij",
-                                #     "naliciesypi",
-                                #     "obycnojokraskiivlajnosticistaa",
-                                #     "povysennojvlajnosti",
-                                #     "suhaa"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "lymph": {
                             "description": "Лимфоузлы, справочник rbRisarLymph",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "boleznennye",
-                                #     "neboleznennye",
-                                #     "nepal_piruutsa",
-                                #     "neuvelicennye",
-                                #     "pal_piruutsa",
-                                #     "uvelicennye"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "breast": {
                             "description": "Молочные железы, справочник rbRisarBreast",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "bezpatologiceskihizmenenij",
-                                #     "mestnoeuplotnenie",
-                                #     "nagrubanie",
-                                #     "pokrasnenie",
-                                #     "tresinysoskov"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "heart_tones": {
                             "description": "Тоны сердца, справочник rbRisarHeart_Tones",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "akzentIItona",
-                                #     "aritmicnye",
-                                #     "asnye",
-                                #     "gluhie",
-                                #     "prigluseny",
-                                #     "proslusivautsa",
-                                #     "ritmicnye"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "pulse": {
                             "description": "Пульс, справочник, справочник rbRisarPulse",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": ["defizitpul_sa",
-                                #          "udovletvoritel_nogonapolnenia"]
+                                "type": "string"
                             }
                         },
                         "nipples": {
                             "description": "Состояние сосков, справочник rbRisarNipples",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "norma",
-                                #     "tresiny",
-                                #     "vospalenie"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "mouth": {
                             "description": "Полость рта, справочник rbRisarMouth",
-                            "type": "string",
-                            # "enum": ["nujdaetsavsanazii", "sanirovana"]
+                            "type": "string"
                         },
                         "respiratory": {
                             "description": "Органы дыхания, справочник rbRisarBreathe",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "dyhaniejestkoe",
-                                #     "dyhanievezikularnoe",
-                                #     "hripyotsutstvuut",
-                                #     "hripysuhie",
-                                #     "hripyvlajnye"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "abdomen": {
                             "description": "Органы брюшной полости, справочник rbRisarStomach",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "jivotmagkijbezboleznennyj",
-                                #     "jivotnaprajennyj",
-                                #     "jivotuvelicenzascetberemennojmatki"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "liver": {
                             "description": "Печень, справочник rbRisarLiver",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": ["nepal_piruetsa", "uvelicena"]
+                                "type": "string"
                             }
                         },
                         "urinoexcretory": {
                             "description": "Мочевыводящая система, справочник rbRisarUrinoexcretory",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "moceispuskanieucasennoe",
-                                #     "moceispuskanievnorme",
-                                #     "СindromPasternazkogo"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "ad_right_high": {
@@ -254,8 +180,7 @@ class CheckupPCSchema(Schema):
                         },
                         "veins": {
                             "description": "Состояние вен, справочник rbRisarVein",
-                            "type": "string",
-                            # "enum": ["noma", "poverhnostnyjvarikoz", "varikoznoerassirenieven"]
+                            "type": "string"
                         },
                         "bowel_and_bladder_habits": {
                             "description": "Физиологические отправления",
@@ -316,8 +241,7 @@ class CheckupPCSchema(Schema):
                         },
                         "uterus_state": {
                             "description": "Состояние матки, справочник rbRisarMetra_State",
-                            "type": "string",
-                            # "enum": ["gipertonus", "normal_nyjtonus"]
+                            "type": "string"
                         },
                         "dssp": {
                             "description": "Ds.SP",
@@ -356,26 +280,11 @@ class CheckupPCSchema(Schema):
                         },
                         "pelvis_narrowness": {
                             "description": "Степень сужения таза, справочник rbRisarPelvis_Narrowness",
-                            "type": "string",
-                            # "enum": [
-                            #     "IIIsteen_",
-                            #     "IIstepen_",
-                            #     "IVstepen_",
-                            #     "Istepen_",
-                            #     "norma"
-                            # ]
+                            "type": "string"
                         },
                         "pelvis_form": {
                             "description": "Форма таза, справочник rbRisarPelvis_Form",
-                            "type": "string",
-                            # "enum": [
-                            #     "normal_nyj",
-                            #     "obseravnomernosujennyj",
-                            #     "obsesujennyjploskij",
-                            #     "ploskorahiticeskij",
-                            #     "poperecnosujennyj",
-                            #     "prostojploskij"
-                            # ]
+                            "type": "string"
                         }
                     },
                     "required": [
@@ -395,40 +304,25 @@ class CheckupPCSchema(Schema):
                         "properties": {
                             "fetus_lie": {
                                 "description": "Положение плода, справочник rbRisarFetus_Position",
-                                "type": "string",
-                                # "enum": ["kosoe", "poperecnoe", "prodol_noe"]
+                                "type": "string"
                             },
                             "fetus_position": {
                                 "description": "Позиция плода, справочник rbRisarFetus_Position_2",
-                                "type": "string",
-                                # "enum": ["pervaa", "vtoraa"]
+                                "type": "string"
                             },
                             "fetus_type": {
                                 "description": "Вид плода, справочник rbRisarFetus_Type",
-                                "type": "string",
-                                # "enum": ["perednij", "zadnij"]
+                                "type": "string"
                             },
                             "fetus_presentation": {
                                 "description": "Предлежащая часть плода, справочник rbRisarPresenting_Part",
-                                "type": "string",
-                                # "enum": [
-                                #     "cistoagodicnoepredlejanie",
-                                #     "golovnoepredlejanie",
-                                #     "lizevoepredlejanie",
-                                #     "lobnoepredlejanie",
-                                #     "nojnoepredlejanie",
-                                #     "perednegolovnoepredlejanie",
-                                #     "smesannoeagodicnoepredlejanie",
-                                #     "tazovoepredlejanie",
-                                #     "zatylocnoepredlejanie"
-                                # ]
+                                "type": "string"
                             },
                             "fetus_heartbeat": {
                                 "description": "Сердцебиение плода, справочник rbRisarFetus_Heartbeat",
                                 "type": "array",
                                 "items": {
-                                    "type": "string",
-                                    # "enum": ["asnoe", "ritmicnoe"]
+                                    "type": "string"
                                 }
                             },
                             "fetus_heart_rate": {
@@ -445,68 +339,42 @@ class CheckupPCSchema(Schema):
                     "properties": {
                         "vagina": {
                             "description": "Влагалище, справочник rbRisarVagina",
-                            "type": "string",
-                            # "enum": ["svobodnoe", "uzkoe"]
+                            "type": "string"
                         },
                         "cervix": {
                             "description": "Шейка матки, справочник rbRisarCervix",
-                            "type": "string",
-                            # "enum": [
-                            #     "koniceskaacistaa",
-                            #     "koniceskaaerozirovannaa",
-                            #     "zilindriceskaacistaa",
-                            #     "zilindriceskaaerozirovanaa"
-                            # ]
+                            "type": "string"
                         },
                         "cervix_length": {
                             "description": "Длина шейки матки, справочник rbRisarCervix_Length",
-                            "type": "string",
-                            # "enum": ["bolee2sm", "menee1sm", "menee2smnobolee1sm"]
+                            "type": "string"
                         },
                         "cervical_canal": {
                             "description": "Цервикальный канал, справочник rbRisarCervical_Canal",
-                            "type": "string",
-                            # "enum": [
-                            #     "narujnyjzevprohodimdla1poperecnogopal_za",
-                            #     "narujnyjzevzakryt",
-                            #     "vnutrennijzevpriotkryt"
-                            # ]
+                            "type": "string"
                         },
                         "cervix_consistency": {
                             "description": "Консистенция шейки матки, справочник rbRisarCervix_Consistency",
-                            "type": "string",
-                            # "enum": ["magkaa", "plotnaa", "razmagcennaa"]
+                            "type": "string"
                         },
                         "cervix_position": {
                             "description": "Позиция шейки матки, справочник rbRisarCervix_Position",
-                            "type": "string",
-                            # "enum": ["kperediotprovodnoj",
-                            #          "kzadiotprovodnojosi",
-                            #          "poprovodnojositaza"]
+                            "type": "string"
                         },
                         "cervix_maturity": {
                             "description": "Зрелость шейки матки, справочник rbRisarCervix_Maturity",
-                            "type": "string",
-                            # "enum": ["nezrelaa", "sozrevausaa", "zrelaa"]
+                            "type": "string"
                         },
                         "body_of_uterus": {
                             "description": "Тело матки, справочник rbRisarBody_Of_Womb",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "bezboleznennopripal_pazii",
-                                #     "boleznennopripal_pazii",
-                                #     "magkovatojkonsistenzii",
-                                #     "nepodvijno",
-                                #     "podvijno"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "adnexa": {
                             "description": "Придатки, справочник rbRisarAppendages",
-                            "type": "string",
-                            # "enum": ["bezosobennostej", "uveliceny"]
+                            "type": "string"
                         },
                         "specialities": {
                             "description": "Особенности",
@@ -517,11 +385,8 @@ class CheckupPCSchema(Schema):
                             "type": "string"
                         },
                         "parametrium": {
-                            "description": "Околоматочное пространство",
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                            }
+                            "description": "Околоматочное пространство, справочник rbRisarParametrium",
+                            "type": "string"
                         },
                         "vaginal_smear": {
                             "description": "Отделяемое из влагалища взято на анализ",
@@ -565,8 +430,7 @@ class CheckupPCSchema(Schema):
                         },
                         "working_conditions": {
                             "description": "Изменение условий труда, справочник rbRisarCraft",
-                            "type": "string",
-                            # "enum": ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
+                            "type": "string"
                         },
                         "diagnosis_osn": {
                             "description": "Основной диагноз, код диагноза по МКБ-10",
@@ -600,7 +464,7 @@ class CheckupPCSchema(Schema):
                             "type": "string"
                         }
                     },
-                    "required": [
+                    "required":[
                         "pregnancy_week",
                         "next_visit_date",
                         "pregnancy_continuation",
@@ -608,7 +472,6 @@ class CheckupPCSchema(Schema):
                     ]
                 }
             },
-            "required": ["external_id", "general_info", "somatic_status",
-                         "obstetric_status", "medical_report"]
-        },
+            "required": ["external_id", "general_info", "somatic_status", "obstetric_status", "medical_report"]
+        }
     ]

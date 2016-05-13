@@ -19,7 +19,7 @@ obs_first_data = {
     },
     "somatic_status": {
         "state": "tajeloe",  # * Общ. состояние ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
-        "subcutaneous_fat": "",  # * Подкожно жир. клетчатка ["izbytocnorazvita", "nedostatocnorazvita", "umerennorazvita"]
+        "subcutaneous_fat": "izbytocnorazvita",  # * Подкожно жир. клетчатка ["izbytocnorazvita", "nedostatocnorazvita", "umerennorazvita"]
         "tongue": ["vlajnyj"],  # * Язык ["01", "02", "03", "04", "vlajnyj"]
         "complaints": ["moving", "golovnaabol_"],  # * Жалобы ["epigastrii", "golovnaabol_", "moving", "net", "oteki", "rvota", "tosnota", "zrenie"]
         "skin": [],  # * Кожа ["naliciekrovoizlianij", "naliciesypi", "obycnojokraskiivlajnosticistaa", "povysennojvlajnosti", "suhaa"]
@@ -28,7 +28,7 @@ obs_first_data = {
         "heart_tones": [],  # * Тоны сердца ["akzentIItona", "aritmicnye", "asnye", "gluhie", "prigluseny", "proslusivautsa", "ritmicnye"]
         "pulse": ["defizitpul_sa"],  # * Пульс ["defizitpul_sa", "udovletvoritel_nogonapolnenia"]
         "nipples": [],  # * Состояние сосков ["norma", "tresiny", "vospalenie"]
-        "mouth": "",  # * Полость рта ["nujdaetsavsanazii", "sanirovana"]
+        "mouth": "nujdaetsavsanazii",  # * Полость рта ["nujdaetsavsanazii", "sanirovana"]
         "respiratory": [],  # * Органы дыхания ["dyhaniejestkoe", "dyhanievezikularnoe", "hripyotsutstvuut", "hripysuhie", "hripyvlajnye"]
         "abdomen": [],  # * Органы брюшной полости ["jivotmagkijbezboleznennyj", "jivotnaprajennyj", "jivotuvelicenzascetberemennojmatki"]
         "liver": [],  # * Печень ["nepal_piruetsa","uvelicena"]
@@ -38,8 +38,8 @@ obs_first_data = {
         "ad_right_low": 0,  # *
         "ad_left_low": 0,  # *
         "edema": u"Средние",  #  "Отёки"
-        "veins": "",  # * Состояние вен ["noma", "poverhnostnyjvarikoz", "varikoznoerassirenieven"]
-        "bowel_and_bladder_habits": "",  # Физиологические отправления",
+        "veins": "noma",  # * Состояние вен ["noma", "poverhnostnyjvarikoz", "varikoznoerassirenieven"]
+        # "bowel_and_bladder_habits": "",  # Физиологические отправления",
         "heart_rate": 70  # *
     },
     "obstetric_status": {  # Акушерский статус",
@@ -47,7 +47,7 @@ obs_first_data = {
         # "vert_diagonal": None,  # Вертикальная диагональ"
         # "abdominal_circumference": None,  # Окружность живота"
         # "fundal_height": None,  # Высота стояния дна матки"
-        "uterus_state": "",  # * Состояние матки ["gipertonus", "normal_nyjtonus"]
+        "uterus_state": "gipertonus",  # * Состояние матки ["gipertonus", "normal_nyjtonus"]
         "dssp": 0,  # * Ds.SP
         "dscr": 0,  # * Ds.Cr
         "dstr": 0,  # * Ds.Tr
@@ -78,8 +78,8 @@ obs_first_data = {
         # }
     ],
     "vaginal_examination": {  # Влагалищное исследование
-        "vagina": "",  # * Влагалище ["svobodnoe", "uzkoe"]
-        "cervix": "",  # * Шейка матки ["koniceskaacistaa", "koniceskaaerozirovannaa", "zilindriceskaacistaa", "zilindriceskaaerozirovanaa"]
+        "vagina": "svobodnoe",  # * Влагалище ["svobodnoe", "uzkoe"]
+        "cervix": "koniceskaacistaa",  # * Шейка матки ["koniceskaacistaa", "koniceskaaerozirovannaa", "zilindriceskaacistaa", "zilindriceskaaerozirovanaa"]
         # "cervix_length": None,  # Длина шейки матки ["bolee2sm", "menee1sm", "menee2smnobolee1sm"]
         # "cervical_canal": None,  # Цервикальный канал ["narujnyjzevprohodimdla1poperecnogopal_za", "narujnyjzevzakryt", "vnutrennijzevpriotkryt"]
         # "cervix_consistency": None,  # Консистенция шейки матки ["magkaa", "plotnaa", "razmagcennaa"]
@@ -89,7 +89,7 @@ obs_first_data = {
         # "adnexa": None,  # Придатки ["bezosobennostej", "uveliceny"]
         # "specialities": "",  # Особенности
         # "vulva": "",  # Наружные половые органы
-        # "parametrium": [],  # Околоматочное пространство ["", "", ""]
+        "parametrium": 'plotnoe',  # Околоматочное пространство
         # "vaginal_smear": False,  # Отделяемое из влагалища взято на анализ
         # "cervical_canal_smear": False,  # Отделяемое из цервикального канала взято на анализ
         # "onco_smear": False,  # Мазок на онкоцитологию взято на анализ
