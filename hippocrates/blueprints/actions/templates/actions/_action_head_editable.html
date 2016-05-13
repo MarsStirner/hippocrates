@@ -25,9 +25,13 @@
                     </div>
                 </div>
                 <div class="col-md-1">
-                    <div class="checkbox">
-                        <label><input type="checkbox" ng-model="action.is_urgent"></label>Срочно
-                    </div>
+                    <button checkbox-button="action.is_urgent">Срочно</button>
+
+{#                    <button class="btn" ng-click="action.is_urgent = !action.is_urgent"#}
+{#                            ng-class="{'btn-danger':action.is_urgent,'btn-default':!action.is_urgent}">#}
+{#                        <i class="fa" ng-class="{'fa-check-square-o':action.is_urgent, 'fa-square-o':!action.is_urgent}"></i>#}
+{#                        Срочно#}
+{#                    </button>#}
                 </div>
             </div>
         </div>

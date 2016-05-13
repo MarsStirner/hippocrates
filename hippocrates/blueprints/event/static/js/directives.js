@@ -351,6 +351,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}">\
         <td ng-click="open_action(action.id)">\
             <span ng-bind="action.name"></span>\
+            <span ng-if="action.urgent" class="label"\
+                  ng-class="{\'label-danger\': action.status.id < 2, \'label-default\': action.status.id >= 2}">Срочно</span>\
             <span ng-show="action_has_payment(action)" class="text-muted lmargin20"><br>\
             Стоимость: [[ action.payment.sum ]] руб. <span class="glyphicon glyphicon-ok text-success" title="Оплачено"\
             ng-show="action.payment.is_paid"></span>\

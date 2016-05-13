@@ -18,7 +18,7 @@ from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict, safe_bool
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
@@ -425,7 +425,8 @@ def api_create_lab_direction():
         action_type_id = j['type_id']
         assigned = j['assigned']
         data = {
-            'plannedEndDate': safe_datetime(j['planned_end_date'])
+            'plannedEndDate': safe_datetime(j['planned_end_date']),
+            'isUrgent': safe_bool(j.get('urgent', False))
         }
         service_data = j.get('service')
         try:
