@@ -11,7 +11,7 @@ from ..app import module
 from ..lib.utils import TTJVisualizer
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_date
-from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournalAssoc
+from nemesis.models.actions import TakenTissueJournal
 from nemesis.models.enums import TTJStatus
 from nemesis.systemwide import db
 
@@ -83,16 +83,10 @@ def api_ttj_change_status():
         auth_token_cookie = app.config.get('CASTIEL_AUTH_TOKEN')
         sess = requests.session()
         sess.cookies[auth_token_cookie] = request.cookies[auth_token_cookie]
-        aids = set(
-            assoc.action_id
-            for assoc in Action_TakenTissueJournalAssoc.query.filter(
-               Action_TakenTissueJournalAssoc.takenTissueJournal_id.in_(ids)
-            )
-        )
         try:
             sess.put(
                 core_integration_address,
-                json={'ids': list(aids)}
+                json={'ids': ids}
             )
         except requests.ConnectionError:
             raise ApiException(500, u'Cannot connect to core')
