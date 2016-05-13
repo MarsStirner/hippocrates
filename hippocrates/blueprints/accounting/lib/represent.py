@@ -476,6 +476,21 @@ class InvoiceRepr(object):
         })
         return data
 
+    def represent_refund(self, refund):
+        """
+        @type refund: nemesis.models.accounting.Invoice
+        @param refund:
+        @return:
+        """
+        if not refund:
+            return None
+        data = self.represent_invoice(refund)
+        data.update({
+            'item_list': map(self.represent_invoice_item_full, refund.refund_items),
+            'payment': self.represent_invoice_payment(refund),
+        })
+        return data
+
     def represent_invoice_for_payment(self, invoice):
         data = self.represent_invoice(invoice)
         cont_repr = ContractRepr()
@@ -500,6 +515,8 @@ class InvoiceRepr(object):
             'deleted': invoice.deleted,
             'note': invoice.note,
             'draft': invoice.draft,
+            # Поскольку я не уверен, где конкретно это понадобится, на всякий случай отображаю здесь
+            'refund': self.represent_refund(invoice.coordinated_refund),
         }
 
     def make_full_description(self, invoice):
@@ -527,6 +544,11 @@ class InvoiceRepr(object):
         return data
 
     def represent_invoice_item(self, item):
+        """
+        @type item: nemesis.models.accounting.InvoiceItem
+        @param item:
+        @return:
+        """
         return {
             'id': item.id,
             'invoice_id': item.invoice_id,
@@ -537,7 +559,8 @@ class InvoiceRepr(object):
             'price': format_money(item.price),
             'amount': item.amount,
             'sum': format_money(item.sum),
-            'deleted': item.deleted
+            'deleted': item.deleted,
+            'refund_id': item.refund_id,
         }
 
     def represent_listed_invoices(self, invoice_list):
