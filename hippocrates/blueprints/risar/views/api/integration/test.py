@@ -191,11 +191,12 @@ if __name__ == '__main__':
 
         # from blueprints.risar.views.api.integration.errands.test import \
         #     test_get_errands, test_put_errands, test_delete_errands
-        # card_id = '1'
-        # errand_id = '1'
+        # card_id = '214'
+        # errand_id = '21'
         # test_get_errands(card_id)
         # test_put_errands(card_id, errand_id)
         # test_delete_errands(card_id, errand_id)
+        # test_get_errands(card_id)
 
         # from blueprints.risar.views.api.integration.epicrisis.test import \
         #     test_post_epicrisis, test_put_epicrisis, test_delete_epicrisis

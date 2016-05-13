@@ -6,18 +6,15 @@
 @date: 22.03.2016
 
 """
-import logging
 from blueprints.risar.views.api.integration.errands.schemas import \
-    ErrandsSchema
-from blueprints.risar.views.api.integration.xform import XForm
+    ErrandSchema, ErrandListSchema
+from blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
 from nemesis.lib.utils import safe_date
 from nemesis.models.event import Event
-from nemesis.models.risar import Errand
-
-logger = logging.getLogger('simple')
+from nemesis.models.risar import Errand, rbErrandStatus
 
 
-class ErrandsXForm(ErrandsSchema, XForm):
+class ErrandXForm(ErrandSchema, XForm):
     """
     Класс-преобразователь
     """
@@ -37,17 +34,53 @@ class ErrandsXForm(ErrandsSchema, XForm):
         pass
 
     def update_target_obj(self, data):
-        self._find_target_obj_query().update({
-            'execDate': safe_date(data.get('execution_date')),
-            'result': data.get('execution_comment'),
-        })
+        target_obj_query = self._find_target_obj_query()
+        self.target_obj = target_obj_query.first()
+        self.target_obj.execDate = safe_date(data.get('execution_date'))
+        self.target_obj.result = data.get('execution_comment')
+        status_code = data.get('status')
+        self._check_rb_value('rbErrandStatus', status_code)
+        new_status = rbErrandStatus.query.filter(rbErrandStatus.code == status_code).first()
+        self.target_obj.status = new_status
 
-    def delete_target_obj(self):
+    def delete_target_obj_data(self):
         self._find_target_obj_query().update({
             'execDate': None,
             'result': None,
+            'status_id': None
         })
 
+    @wrap_simplify
+    def as_json(self):
+        return {
+            'errands_id': self.target_obj.id,
+            'status': self.or_undefined(self.from_rb(self.target_obj.status)),
+            'execution_date': self.or_undefined(safe_date(self.target_obj.execDate)),
+            'execution_comment': self.or_undefined(self.target_obj.result),
+        }
+
+
+class ErrandListXForm(ErrandListSchema, XForm):
+    """
+    Класс-преобразователь
+    """
+    parent_obj_class = Event
+    target_obj_class = Errand
+    target_id_required = False
+
+    def _find_target_obj_query(self):
+        res = self.target_obj_class.query.filter(
+            self.target_obj_class.event_id == self.parent_obj_id,
+            self.target_obj_class.deleted == 0,
+        )
+        if self.target_obj_id:
+            res = res.filter(self.target_obj_class.id == self.target_obj_id,)
+        return res
+
+    def check_duplicate(self, data):
+        pass
+
+    @wrap_simplify
     def as_json(self):
         target_obj_query = self._find_target_obj_query()
         target_obj_query = target_obj_query.filter(
@@ -57,13 +90,12 @@ class ErrandsXForm(ErrandsSchema, XForm):
         for errand in target_obj_query.all():
             res.append({
                 'errands_id': errand.id,
-                'hospital': errand.setPerson.organisation and errand.setPerson.organisation.TFOMSCode or '',
-                'doctor': errand.setPerson.regionalCode,
-                'date': self.safe_represent_val(errand.plannedExecDate),
-                'comment': errand.text or '',
-                'execution_hospital': errand.execPerson.organisation and errand.execPerson.organisation.TFOMSCode or '',
-                'execution_doctor': errand.execPerson.regionalCode,
-                # 'execution_date': self.safe_represent_val(errand.execDate),
-                # 'execution_comment': errand.result or '',
+                'hospital': self.from_org_rb(errand.setPerson and errand.setPerson.organisation),
+                'doctor': self.from_person_rb(errand.setPerson),
+                'date': safe_date(errand.plannedExecDate),
+                'comment': errand.text,
+                'execution_hospital': self.from_org_rb(errand.execPerson and errand.execPerson.organisation),
+                'execution_doctor': self.from_person_rb(errand.execPerson),
+                'status': self.from_rb(errand.status),
             })
         return res
