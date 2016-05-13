@@ -30,6 +30,7 @@
                         <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b></p>
                         <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b></p>
                         <p>Предыдущие многоплодные беременности: <b>[[ anamnesis.mother.multifetation ? 'Да' : 'Нет']]</b></p>
+                        <p>Преэклампсия была у матери или сестры: <b>[[ anamnesis.mother.preeclampsia ? 'Да' : 'Нет']]</b></p>
                         <p>Семейное положение: <b ng-bind-html="anamnesis.mother.marital_status.name | underlineNoVal"></b></p>
                         <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income.name | underlineNoVal"></b></p>
                     </div>
