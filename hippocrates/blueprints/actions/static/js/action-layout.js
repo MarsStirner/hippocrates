@@ -333,7 +333,7 @@ angular.module('WebMis20')
                     var id = prop.type.id,
                         old_prop = map_old[id];
                     // Здесь нужна будет точная подгонка под фантазии Опарина
-                    if (!_.isUndefined(old_prop) && (!angular.equals(old_prop.value, prop.value) || prop.value)) {
+                    if (prop.value || (!_.isUndefined(old_prop) && !angular.equals(old_prop.value, prop.value))) {
                         sas.select(id);
                     }
                 })
