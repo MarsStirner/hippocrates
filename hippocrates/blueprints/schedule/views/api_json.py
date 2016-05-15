@@ -12,7 +12,7 @@ from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
 from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool)
 from nemesis.lib.utils import public_endpoint
-from nemesis.lib.apiutils import api_method
+from nemesis.lib.apiutils import api_method, ApiException
 from ..app import module
 from ..lib.data import delete_schedules
 from nemesis.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
@@ -359,6 +359,7 @@ def api_person_get(person_id=None):
 
 # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
 @module.route('/api/appointment.json', methods=['POST'])
+@api_method
 @public_endpoint
 def api_appointment():
     """
@@ -377,19 +378,24 @@ def api_appointment():
     create_person = data.get('create_person', current_user.get_id())
     appointment_type_id = data.get('appointment_type_id')
     event_id = data.get('event_id')
-    delete = bool(data.get('delete', False))
+    delete = safe_bool(data.get('delete', False))
     ticket = ScheduleTicket.query.get(ticket_id)
     if not ticket:
-        return abort(404)
+        raise ApiException(404, u'Талончик не найден')
     client_ticket = ticket.client_ticket
     if client_ticket and client_ticket.client_id != client_id:
-        return jsonify(None, 400, u'Талончик занят другим пациентом (%d)' % client_ticket.client_id)
+        raise ApiException(
+            400, u'Запись занята другим пациентом. Выполните запись на другой свободный талон',
+            client_id=client_ticket.client_id,
+        )
     if delete:
         if not client_ticket:
-            return abort(404)
+            raise ApiException(404, u'Талончик не занят. Запись уже отменена или не была создана.')
+        if client_ticket.client_id != client_id:
+            raise ApiException(400, u'Талончик занят другим пациентом. Запись этого пациента уже была отменена или не была создана')
         client_ticket.deleted = 1
         db.session.commit()
-        return jsonify(None)
+        return
     if not client_ticket:
         client_ticket = ScheduleClientTicket()
         client_ticket.client_id = client_id
@@ -406,7 +412,6 @@ def api_appointment():
     if 'note' in data:
         client_ticket.note = data['note']
     db.session.commit()
-    return jsonify(None)
 
 
 @module.route('/api/schedule_lock.json', methods=['POST'])
