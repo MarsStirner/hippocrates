@@ -80,6 +80,23 @@ antiphospholipid_syndrome = ['I82.9', 'D68.8', 'D89.9']
 week_postfix = {1: u'я', 2: u'и', 3: u'и', 4: u'и', 5: u'ь',  6: u'ь', 7: u'ь', 8: u'ь', 9: u'ь', 0: u'ь'}
 
 
+def belongs_to_mkbgroup(diag, grp, with_subnodes=True):
+    """
+    :with_subnodes - входящие в этот узел
+    Определяет, принадлежит ли diag группе grp
+    Пример: A50 для syphilis_diags True
+    Пример: A50.0 для syphilis_diags True
+    """
+    if with_subnodes:
+        if diag.split('.')[0] in grp:
+            return True
+
+    if diag in grp:
+        return True
+
+    return False
+
+
 def get_action(event, flat_code, create=False):
     """
     Поиск и создание действия внутри обращения

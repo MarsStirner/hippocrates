@@ -5,7 +5,8 @@ import logging
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.time_converter import DateTimeUtil
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
-    tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, notify_risk_rate_changes
+    tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, notify_risk_rate_changes, \
+    belongs_to_mkbgroup
 from blueprints.risar.models.risar import RisarRiskGroup
 from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
     first_inspection_code
@@ -551,10 +552,10 @@ def check_disease(diagnostics):
         if diag.endDate is not None:
             continue
         diag_id = diag.MKB
-        has_disease['has_HIV'] |= diag_id in HIV_diags
-        has_disease['has_syphilis'] |= diag_id in syphilis_diags
-        has_disease['has_hepatitis'] |= diag_id in hepatitis_diags
-        has_disease['has_tuberculosis'] |= diag_id in tuberculosis_diags
-        has_disease['has_scabies'] |= diag_id in scabies_diags
-        has_disease['has_pediculosis'] |= diag_id in pediculosis_diags
+        has_disease['has_HIV'] |= belongs_to_mkbgroup(diag_id, HIV_diags)
+        has_disease['has_syphilis'] |= belongs_to_mkbgroup(diag_id, syphilis_diags)
+        has_disease['has_hepatitis'] |= belongs_to_mkbgroup(diag_id, hepatitis_diags)
+        has_disease['has_tuberculosis'] |= belongs_to_mkbgroup(diag_id, tuberculosis_diags)
+        has_disease['has_scabies'] |= belongs_to_mkbgroup(diag_id, scabies_diags, with_subnodes=False)
+        has_disease['has_pediculosis'] |= belongs_to_mkbgroup(diag_id, pediculosis_diags)
     return has_disease
