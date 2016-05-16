@@ -106,7 +106,7 @@ class JasperRestV2Client(object):
     """
     Client of JasperReports server
     """
-    def __init__(self, path, session=None, params=None):
+    def __init__(self, path=None, session=None, params=None):
         self.path = path
         self.session = session
         self.jasper_url = app.config.get(
@@ -136,6 +136,7 @@ class JasperRestV2Client(object):
         }
 
     def running_report(self, res_format):
+        assert self.path
         self.jasper_login()
 
         url = '/rest_v2/reports%(path)s.%(format)s' % ({
@@ -148,6 +149,18 @@ class JasperRestV2Client(object):
             cookies=self._cookies,
         )
         return result.content
+
+    def searching_repository(self):
+        self.jasper_login()
+
+        url = '/rest_v2/resources'
+        result = self.api_request(
+            'get', url,
+            params=self._params,
+            cookies=self._cookies,
+            headers={'accept': 'application/json'},
+        )
+        return result.json()['resourceLookup']
 
     def api_request(self, method, url, **kwargs):
         result = getattr(requests, method)(self.jasper_url + url, **kwargs)
@@ -229,3 +242,31 @@ class JasperReport(object):
         :return: Данные сессии
         """
         return self.jclient.session
+
+    @classmethod
+    def get_reports(cls, locate_reports):
+        params = {
+            'folderUri': locate_reports,
+            'type': 'reportUnit',
+        }
+        jclient = JasperRestV2Client(params=params)
+        return jclient.searching_repository()
+
+    @classmethod
+    def multi_generating(cls, report_data_list):
+        # если станет нужно для нескольких отчетов на один запрос
+        session = None
+        response = []
+        for report_data in report_data_list:
+            template_uri, template_code, params = report_data
+            table_name, file_format = template_code.rsplit('.', 1)
+            jasper_report = cls(
+                table_name,
+                template_uri,
+                params=params,
+                session=session,
+            )
+            jasper_report.generate(file_format)
+            response.append(jasper_report.get_response_data())
+            session = jasper_report.session
+        return response

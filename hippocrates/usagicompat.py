@@ -15,6 +15,7 @@ class HippoUsagiClient(TsukinoUsagiClient):
         bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
 
         from blueprints.accounting.app import module as accounting_module
+        from blueprints.reports.app import module as reports_module
         from blueprints.anareports.app import module as anareports_module
         from blueprints.biomaterials.app import module as biomaterials_module
         from blueprints.event.app import module as event_module
@@ -25,6 +26,7 @@ class HippoUsagiClient(TsukinoUsagiClient):
         from blueprints.risar.app import module as risar_module
 
         app.register_blueprint(accounting_module, url_prefix='/accounting')
+        app.register_blueprint(reports_module, url_prefix='/reports')
         app.register_blueprint(anareports_module, url_prefix='/anareports')
         app.register_blueprint(biomaterials_module, url_prefix='/biomaterials')
         app.register_blueprint(event_module, url_prefix='/event')
