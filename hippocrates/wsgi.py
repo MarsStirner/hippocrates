@@ -4,7 +4,7 @@ import os
 from flask import url_for
 
 from nemesis.app import app
-from nemesis.lib.frontend import frontend_config
+from nemesis.lib.frontend import frontend_config, uf_placeholders
 from usagicompat import HippoUsagiClient
 from version import version as app_version
 
@@ -127,7 +127,12 @@ def fc_urls():
             'api_finance_transaction_make': url_for('accounting.api_0_finance_transaction_make'),
             'api_finance_transaction_invoice_get': url_for('accounting.api_0_finance_transaction_invoice_get'),
             'api_finance_transaction_invoice_make': url_for('accounting.api_0_finance_transaction_invoice_make'),
-            'api_service_discount_list': url_for('accounting.api_0_service_discount_list')
+            'api_service_discount_list': url_for('accounting.api_0_service_discount_list'),
+
+            'api_invoice_refund_get': uf_placeholders('accounting.api_0_invoice_refund_get', ['invoice_id']),
+            'api_invoice_refund_save': uf_placeholders('accounting.api_0_invoice_refund_save', ['invoice_id']),
+            'api_invoice_refund_delete': uf_placeholders('accounting.api_0_invoice_refund_delete', ['invoice_id']),
+            'api_invoice_refund_process': uf_placeholders('accounting.api_0_invoice_refund_process', ['invoice_id']),
         }
     }
 
