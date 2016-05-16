@@ -490,6 +490,11 @@ WebMis20
         get_errands_summary();
         event_source.send('new:id', msg.data.id);
     });
+
+    Simargl.subscribe('errand:notify', function (msg) {
+        get_errands_summary();
+    });
+
     this.subscribe = event_source.eventSource.subscribe;
 
     this.edit_errand = function (errand, exec) {
@@ -529,7 +534,7 @@ WebMis20
         }, function (result) {
             NotificationService.notify(undefined, 'Не удалось создать поручение', 'danger', 5000);
             return result;
-        })
+        });
     };
 })
 .filter('underlineNoVal', function () {

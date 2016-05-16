@@ -24,10 +24,6 @@ class CheckupObsSecondSchema(Schema):
                     "description": "Внешний ID",
                     "type": "string"
                 },
-                "exam_obs_id": {
-                    "description": "ID повторного осмотра",
-                    "type": "string"
-                },
                 "dynamic_monitoring": {
                     "description": "Лист динамического наблюдения",
                     "type": "object",
@@ -104,139 +100,74 @@ class CheckupObsSecondSchema(Schema):
                     "properties": {
                         "state": {
                             "description": "Общее состояние, справочник rbRisarState",
-                            "type": "string",
-                            # "enum": ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
+                            "type": "string"
                         },
                         "complaints": {
                             "description": "Жалобы, справочник rbRisarComplaints",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "epigastrii",
-                                #     "golovnaabol_",
-                                #     "moving",
-                                #     "net",
-                                #     "oteki",
-                                #     "rvota",
-                                #     "tosnota",
-                                #     "zrenie"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "skin": {
                             "description": "Кожа, справочник rbRisarSkin",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "naliciekrovoizlianij",
-                                #     "naliciesypi",
-                                #     "obycnojokraskiivlajnosticistaa",
-                                #     "povysennojvlajnosti",
-                                #     "suhaa"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "lymph": {
                             "description": "Лимфоузлы, справочник rbRisarLymph",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "boleznennye",
-                                #     "neboleznennye",
-                                #     "nepal_piruutsa",
-                                #     "neuvelicennye",
-                                #     "pal_piruutsa",
-                                #     "uvelicennye"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "breast": {
                             "description": "Молочные железы, справочник rbRisarBreast",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "bezpatologiceskihizmenenij",
-                                #     "mestnoeuplotnenie",
-                                #     "nagrubanie",
-                                #     "pokrasnenie",
-                                #     "tresinysoskov"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "heart_tones": {
                             "description": "Тоны сердца, справочник rbRisarHeart_Tones",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "akzentIItona",
-                                #     "aritmicnye",
-                                #     "asnye",
-                                #     "gluhie",
-                                #     "prigluseny",
-                                #     "proslusivautsa",
-                                #     "ritmicnye"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "nipples": {
                             "description": "Состояние сосков, справочник rbRisarNipples",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "norma",
-                                #     "tresiny",
-                                #     "vospalenie"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "respiratory": {
                             "description": "Органы дыхания, справочник rbRisarBreathe",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "dyhaniejestkoe",
-                                #     "dyhanievezikularnoe",
-                                #     "hripyotsutstvuut",
-                                #     "hripysuhie",
-                                #     "hripyvlajnye"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "abdomen": {
                             "description": "Органы брюшной полости, справочник rbRisarStomach",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": [
-                                #     "jivotmagkijbezboleznennyj",
-                                #     "jivotnaprajennyj",
-                                #     "jivotuvelicenzascetberemennojmatki"
-                                # ]
+                                "type": "string"
                             }
                         },
                         "liver": {
                             "description": "Печень, справочник rbRisarLiver",
                             "type": "array",
                             "items": {
-                                "type": "string",
-                                # "enum": ["nepal_piruetsa", "uvelicena"]
+                                "type": "string"
                             }
                         },
                         "secretion": {
                             "description": "Выделения, справочник rbRisarSecretion",
-                            "type": "string",
-                            # "enum": [
-                            #     "slizistye",
-                            #     "sukrovicnye",
-                            #     "tvorojistye"
-                            # ]
+                            "type": "string"
                         },
                         "edema": {
                             "description": "Отёки",
@@ -265,8 +196,7 @@ class CheckupObsSecondSchema(Schema):
                         },
                         "uterus_state": {
                             "description": "Состояние матки, справочник rbRisarMetra_State",
-                            "type": "string",
-                            # "enum": ["gipertonus", "normal_nyjtonus"]
+                            "type": "string"
                         },
                         "first_fetal_movement": {
                             "description": "Первое шевеление плода (дата)",
@@ -287,40 +217,25 @@ class CheckupObsSecondSchema(Schema):
                         "properties": {
                             "fetus_lie": {
                                 "description": "Положение плода, справочник rbRisarFetus_Position",
-                                "type": "string",
-                                # "enum": ["kosoe", "poperecnoe", "prodol_noe"]
+                                "type": "string"
                             },
                             "fetus_position": {
                                 "description": "Позиция плода, справочник rbRisarFetus_Position_2",
-                                "type": "string",
-                                # "enum": ["pervaa", "vtoraa"]
+                                "type": "string"
                             },
                             "fetus_type": {
                                 "description": "Вид плода, справочник rbRisarFetus_Type",
-                                "type": "string",
-                                # "enum": ["perednij", "zadnij"]
+                                "type": "string"
                             },
                             "fetus_presentation": {
                                 "description": "Предлежащая часть плода, справочник rbRisarPresenting_Part",
-                                "type": "string",
-                                # "enum": [
-                                #     "cistoagodicnoepredlejanie",
-                                #     "golovnoepredlejanie",
-                                #     "lizevoepredlejanie",
-                                #     "lobnoepredlejanie",
-                                #     "nojnoepredlejanie",
-                                #     "perednegolovnoepredlejanie",
-                                #     "smesannoeagodicnoepredlejanie",
-                                #     "tazovoepredlejanie",
-                                #     "zatylocnoepredlejanie"
-                                # ]
+                                "type": "string"
                             },
                             "fetus_heartbeat": {
                                 "description": "Сердцебиение плода, справочник rbRisarFetus_Heartbeat",
                                 "type": "array",
                                 "items": {
-                                    "type": "string",
-                                    # "enum": ["asnoe", "ritmicnoe"]
+                                    "type": "string"
                                 }
                             },
                             "fetus_heart_rate": {
@@ -330,13 +245,7 @@ class CheckupObsSecondSchema(Schema):
                             },
                             "intrauterine_growth_retardation": {
                                 "description": "Задержка в развитии плода, справочник rbRisarFetus_Delay",
-                                "type": "string",
-                                # "enum": [
-                                #     "1-2nedeli",
-                                #     "4_and_more",
-                                #     ">3nedel_",
-                                #     "otsutstvuet"
-                                # ]
+                                "type": "string"
                             },
                             "ctg_data": {
                                 "description": "Данные КТГ",
@@ -344,28 +253,23 @@ class CheckupObsSecondSchema(Schema):
                                 "properties": {
                                     "fhr": {
                                         "description": "Базальный ритм, справочник rbRisarBasal",
-                                        "type": "string",
-                                        "pattern": "^(0[1-4])$"
+                                        "type": "string"
                                     },
                                     "fhr_variability_amp": {
                                         "description": "Вариабельность (амплитуда), справочник rbRisarVariabilityRange",
-                                        "type": "string",
-                                        "pattern": "^(0[1-3])$"
+                                        "type": "string"
                                     },
                                     "fhr_variability_freq": {
                                         "description": "Вариабельность (частота в минуту), справочник rbRisarFrequencyPerMinute",
-                                        "type": "string",
-                                        "pattern": "^(0[1-3])$"
+                                        "type": "string"
                                     },
                                     "fhr_acceleration": {
                                         "description": "Акселерации за 30 минут, справочник rbRisarAcceleration",
-                                        "type": "string",
-                                        "pattern": "^(0[1-3])$"
+                                        "type": "string"
                                     },
                                     "fhr_deceleration": {
                                         "description": "Децелерации за 30 минут, справочник rbRisarDeceleration",
-                                        "type": "string",
-                                        "pattern": "^(0[1-3])$"
+                                        "type": "string"
                                     }
                                 },
                                 "required": ["fhr", "fhr_variability_amp", "fhr_variability_freq", "fhr_acceleration", "fhr_deceleration"]
@@ -394,11 +298,10 @@ class CheckupObsSecondSchema(Schema):
                             "description": "Отказ от прерывания",
                             "type": "boolean"
                         },
-                        # "working_conditions": {
-                        #     "description": "Изменение условий труда, справочник rbRisarCraft",
-                        #     "type": "string",
-                        #     # "enum": ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-                        # },
+                        "working_conditions": {
+                            "description": "Изменение условий труда, справочник rbRisarCraft",
+                            "type": "string"
+                        },
                         "diagnosis_osn": {
                             "description": "Основной диагноз, код диагноза по МКБ-10",
                             "type": "string",
@@ -452,5 +355,5 @@ class CheckupObsSecondSchema(Schema):
                 }
             },
             "required": ["external_id", "dynamic_monitoring", "obstetric_status", "medical_report"]
-        },
+        }
     ]

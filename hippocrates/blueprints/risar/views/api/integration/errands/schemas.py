@@ -9,9 +9,9 @@
 from blueprints.risar.views.api.integration.schemas import Schema
 
 
-class ErrandsSchema(Schema):
+class ErrandSchema(Schema):
     """
-    Схемы для проверки валидности данных
+    Схемы для проверки валидности данных поручения
     """
     schema = [
         {
@@ -20,6 +20,10 @@ class ErrandsSchema(Schema):
             "description": "Поручение",
             "type": "object",
             "properties": {
+                "status": {
+                    "description": "Статус поручения, справочник rbErrandStatus",
+                    "type": "string"
+                },
                 "execution_date": {
                     "description": "Фактическая дата исполнения",
                     "type": "string",
@@ -33,7 +37,12 @@ class ErrandsSchema(Schema):
         },
     ]
 
-    schema_output = [
+
+class ErrandListSchema(Schema):
+    """
+    Схемы для проверки валидности данных списка поручений
+    """
+    schema = [
         {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "title": "errands_list",
@@ -69,20 +78,24 @@ class ErrandsSchema(Schema):
                         "type": "string"
                     },
                     "execution_doctor": {
-                        "description": "врач исполнитель (код врача)",
+                        "description": "Врач исполнитель (код врача)",
+                        "type": "string"
+                    },
+                    "status": {
+                        "description": "Статус поручения, справочник rbErrandStatus",
                         "type": "string"
                     },
                     "execution_date": {
-                        "description": "Плановая дата выполнения",
+                        "description": "Фактическая дата выполнения",
                         "type": "string",
                         "format": "date"
                     },
                     "execution_comment": {
-                        "description": "Текст поручения",
+                        "description": "Текст ответа на поручения",
                         "type": "string"
                     }
                 }
             },
             "minItems": 0
-        },
+        }
     ]
