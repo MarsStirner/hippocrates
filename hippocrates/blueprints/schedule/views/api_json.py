@@ -396,6 +396,41 @@ def api_appointment():
         client_ticket.deleted = 1
         db.session.commit()
         return
+    # Проверим, не записан ли пациент к кому-то на это же время
+    busy_tickets = ScheduleClientTicket.query.join(
+        ScheduleTicket
+    ).join(
+        Schedule
+    ).filter(
+        Schedule.date == ticket.schedule.date,
+        ScheduleClientTicket.client_id == client_id,
+        ScheduleClientTicket.deleted == 0,
+        ScheduleTicket.deleted == 0,
+        db.or_(
+            ScheduleTicket.begTime.between(ticket.begTime, ticket.endTime),
+            ScheduleTicket.endTime.between(ticket.begTime, ticket.endTime),
+        )
+    ).order_by(ScheduleTicket.begTime).all()
+    if busy_tickets:
+        if len(busy_tickets) == 1:
+            msg = u'Пациент уже записан на приём к врачу %s на %s-%s' % (
+                busy_tickets[0].ticket.schedule.person.shortNameText,
+                busy_tickets[0].ticket.begTime.strftime('%H:%M'),
+                busy_tickets[0].ticket.endTime.strftime('%H:%M'),
+            )
+        else:
+            msg = u'Пациент уже записан на приёмы: %s' % (
+                u', '.join(u'к %s на %s-%s' % (
+                    busy_ticket.ticket.schedule.person.shortNameText,
+                    busy_ticket.ticket.begTime.strftime('%H:%M'),
+                    busy_ticket.ticket.endTime.strftime('%H:%M'),
+                ) for busy_ticket in busy_tickets)
+            )
+        raise ApiException(400, msg, records=[{
+            'person_id': busy_ticket.ticket.schedule.person_id,
+            'begDateTime': busy_ticket.ticket.begDateTime,
+            'endDateTime': busy_ticket.ticket.endDateTime,
+        } for busy_ticket in busy_tickets])
     if not client_ticket:
         client_ticket = ScheduleClientTicket()
         client_ticket.client_id = client_id
