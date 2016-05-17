@@ -1,0 +1,22 @@
+{% extends '_base_simple.html' %}
+
+{% block title %} &gt; {{ title or message }}{% endblock %}
+
+{% block content %}
+<section class="content-header">
+    <h1>{{ title or message }}</h1>
+</section>
+<section class="content">
+    <div class="alert alert-danger">
+        <div>{{ message }}</div>
+    </div>
+    {%- with messages = get_flashed_messages() -%}
+        {%- for f_message in messages -%}
+            <div class="alert alert-danger">
+                <div>{{ f_message }}</div>
+            </div>
+        {%- endfor -%}
+    {%- endwith -%}
+    <a href="{{ url_for('index', next=request.args.get('next')) }}">Перейти на главную страницу</a>
+</section>
+{% endblock %}
