@@ -62,6 +62,8 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
             return RisarApi.epicrisis.save($scope.event_id, model)
                 .then(function (data) {
                     $scope.epicrisis = data.epicrisis;
+                    $scope.epicrisis.diagnosis_pathanatomical = $scope.filterRb($scope.epicrisis.diagnosis_types, 'pathanatomical');
+                    $scope.epicrisis.diagnosis_final = $scope.filterRb($scope.epicrisis.diagnosis_types, 'final');
                     $scope.chart = data.chart;
                 })
         }
