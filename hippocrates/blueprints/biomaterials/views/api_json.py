@@ -5,13 +5,16 @@ import requests
 from flask import request
 from nemesis.app import app
 from nemesis.lib.settings import Settings
+from nemesis.models.event import Event
+from nemesis.models.exists import rbLaboratory, rbTest, rbLaboratory_TestAssoc, rbTestTubeType
 from sqlalchemy import func
 
 from ..app import module
 from ..lib.utils import TTJVisualizer
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_date
-from nemesis.models.actions import TakenTissueJournal
+from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournalAssoc, Action, ActionPropertyType, \
+    ActionProperty
 from nemesis.models.enums import TTJStatus
 from nemesis.systemwide import db
 
@@ -21,51 +24,90 @@ from nemesis.systemwide import db
 def api_get_ttj_records():
     vis = TTJVisualizer()
     data = request.json
-    number_by_status = {'all': 0, 'waiting': 0, 'in_progress': 0, 'sending_to_lab': 0, 'finished': 0}
-
     flt = data.get('filter')
 
-    status = flt.get('status')
     exec_date = safe_date(flt.get('execDate'))
     biomaterial = flt.get('biomaterial')
     lab = flt.get('lab')
     org_str = flt.get('org_struct')
 
-    test_tubes = collections.defaultdict(lambda: {'number': 0})
-    query = TakenTissueJournal.query.filter(func.date(TakenTissueJournal.datetimeTaken) == exec_date)
-    if status is not None:
-        query = query.filter(TakenTissueJournal.statusCode == status)
+    query = TakenTissueJournal.query.join(
+        rbTestTubeType, Action_TakenTissueJournalAssoc, Action, Event, ActionProperty, ActionPropertyType, rbTest, rbLaboratory_TestAssoc, rbLaboratory
+    ).filter(
+        Action.deleted == 0,
+        ActionProperty.isAssigned == 1,
+        func.date(TakenTissueJournal.datetimeTaken) == exec_date,
+    )
     if biomaterial:
         query = query.filter(TakenTissueJournal.tissueType_id == biomaterial['id'])
-    ttj_records = query.all()
-    number_by_status['all'] = len(ttj_records)
+    query = query.with_entities(
+        TakenTissueJournal.id,
+        TakenTissueJournal,
+        Action,
+        rbLaboratory,
+        Event,
+        rbTestTubeType,
+    )
 
-    def filter_by_lab(ttj_record):
-        for action in ttj_record.actions:
-            for property in action.properties:
-                lab_codes = [item.laboratory.code for item in property.type.test.lab_test] if property.type.test else []
-                if property.isAssigned and lab['code'] in lab_codes:
-                    return True
+    filtered = query.all()
 
-    def filter_by_org_str(ttj_record):
-        if ttj_record.actions[0].event.current_org_structure.code == org_str['code']:
-            return True
-
-    if lab:
-        ttj_records = filter(filter_by_lab, ttj_records)
     if org_str:
-        ttj_records = filter(filter_by_org_str, ttj_records)
+        filtered = [
+            record for record in filtered
+            if record.Event.current_org_structure.id == org_str['id']
+        ]
+    if lab:
+        filtered = [
+            record for record in filtered
+            if record.rbLaboratory.id == lab['id']
+        ]
 
-    def count_tubes(x, y):
-        x[y.testTubeType.code]['name'] = y.testTubeType.name
-        x[y.testTubeType.code]['number'] += len(y.actions)
-        number_by_status[TTJStatus.codes[y.status.value]] += 1
-        return x
+    def make_default_result_record(record):
+        return {
+            'ttj': record.TakenTissueJournal,
+            'actions': {record.Action},
+            'events': {record.Event},
+            'labs': {record.rbLaboratory},
+            'ttt': {record.rbTestTubeType},
+        }
 
-    reduce(count_tubes, ttj_records, test_tubes)
-    return {'ttj_records': [vis.make_ttj_record(record) for record in ttj_records],
-            'test_tubes': test_tubes,
-            'number_by_status': number_by_status}
+    mapping = {}
+    for record in filtered:
+        if record[0] not in mapping:
+            r = mapping[record[0]] = make_default_result_record(record)
+        else:
+            r = mapping[record[0]]
+        r['actions'].add(record.Action)
+        r['events'].add(record.Event)
+        r['labs'].add(record.rbLaboratory)
+        r['ttt'].add(record.rbTestTubeType)
+
+    all_records = mapping.values()
+    all_records.sort(key=lambda x: x['ttj'].datetimeTaken)
+
+    ttj_by_status = {
+        ttj_status_code: [
+            record
+            for record in all_records 
+            if record['ttj'].status.value == ttj_value
+        ]
+        for ttj_value, ttj_status_code in TTJStatus.codes.items()
+    }
+    result = {}
+    for ttj_status, records in ttj_by_status.iteritems():
+        tube_dict = collections.defaultdict(lambda: {'name': None, 'count': 0})
+        for record in records:
+            for ttt in record['ttt']:
+                tube_dict[ttt.code]['name'] = ttt.name
+                tube_dict[ttt.code]['count'] += len(record['actions'])
+        result[ttj_status] = {
+            'records': [
+                vis.make_ttj_record(record['ttj'], record['actions'], record['events'])
+                for record in records
+            ],
+            'tubes': tube_dict,
+        }
+    return result
 
 
 @module.route('/api/ttj_change_status.json', methods=['POST'])
