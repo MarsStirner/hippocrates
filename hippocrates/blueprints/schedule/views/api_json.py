@@ -479,19 +479,20 @@ def api_schedule_lock():
 
 
 @module.route('/api/move_client.json', methods=['POST'])
+@api_method
 def api_move_client():
     j = request.get_json()
     try:
         ticket_id = int(j['ticket_id'])
         destination_tid = j['destination_ticket_id']
     except (ValueError, KeyError):
-        return jsonify(None, 418, 'Both ticket_id and destination_ticket_id must be specified')
+        raise ApiException(418, 'Both ticket_id and destination_ticket_id must be specified')
     source = ScheduleTicket.query.get(ticket_id)
     oldCT = source.client_ticket
 
     dest = ScheduleTicket.query.get(destination_tid)
     if dest.client:
-        return jsonify(None, 418, 'Destination ticket is busy')
+        raise ApiException(418, 'Destination ticket is busy')
     ct = ScheduleClientTicket()
     ct.appointmentType_id = oldCT.appointmentType_id
     ct.client_id = oldCT.client_id
@@ -506,29 +507,35 @@ def api_move_client():
     db.session.add(oldCT)
 
     db.session.commit()
-    return jsonify(None)
 
 
 @cache.memoize(86400)
-def int_get_orgstructure(org_id):
+def int_get_orgstructure(org_id, with_deleted=False, with_hidden=False):
     from nemesis.models.exists import OrgStructure
-    def schwing(t):
-        return {
-            'id': t.id,
-            'name': t.name,
-            'code': t.code,
-            'parent_id': t.parent_id,
-            }
-    return map(schwing, OrgStructure.query.filter(OrgStructure.organisation_id == org_id))
+    query = OrgStructure.query.filter(OrgStructure.organisation_id == org_id)
+    if not with_deleted:
+        query = query.filter(OrgStructure.deleted == 0)
+    if not with_hidden:
+        query = query.filter(OrgStructure.show == 1)
+    return [{
+        'id': t.id,
+        'name': t.name,
+        'code': t.code,
+        'parent_id': t.parent_id,
+    } for t in query]
 
 
 @module.route('/api/org-structure.json')
+@api_method
 def api_org_structure():
     org_id = int(request.args['org_id'])
-    return jsonify(int_get_orgstructure(org_id))
+    with_deleted = safe_bool(request.args.get('with_deleted', False))
+    with_hidden = safe_bool(request.args.get('with_hidden', False))
+    return int_get_orgstructure(org_id, with_deleted, with_hidden)
 
 
 @module.route('/api/schedule/procedure_offices.json', methods=['GET'])
+@api_method
 def api_procedure_offices_get():
     proc_offices = Person.query.filter(Person.id.in_(
         # I have a dream one day
@@ -536,5 +543,5 @@ def api_procedure_offices_get():
         [710, 879, 751, 555, 557, 553, 554, 752, 552, 556, 935,
          915, 916, 917, 913, 911, 912, 914, 962, 961, 608, 920,
          924, 709, 963, 936, 934, 934, 943, 944, 1200]
-    ))
-    return jsonify([po for po in proc_offices])
+    )).all()
+    return proc_offices
