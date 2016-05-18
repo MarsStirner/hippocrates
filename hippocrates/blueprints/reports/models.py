@@ -6,7 +6,7 @@
 @date: 13.05.2016
 
 """
-from sqlalchemy import Column, Integer, String, Text, Index, Enum
+from sqlalchemy import Column, Integer, String, Text, Index, Enum, Boolean
 from nemesis.systemwide import db
 
 
@@ -28,6 +28,7 @@ class rbRisarPrintTemplateMeta(db.Model):
     description = Column(String, nullable=False)
     arguments = Column(String)
     defaultValue = Column(Text)
+    required = Column(Boolean)
 
     def __json__(self):
         import json
@@ -52,4 +53,5 @@ class rbRisarPrintTemplateMeta(db.Model):
             'descr': self.description,
             'arguments': args,
             'default': default,
+            'required': self.required,
         }
