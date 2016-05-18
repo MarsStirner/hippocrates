@@ -45,6 +45,8 @@ class InputPrepare(object):
             #     context[name] = rbService.query.get(int(value)) if value else None
             # elif typeName == 'MKB':
             #     context[name] = MKB.query.get(int(value)) if value else None
+            if not context[name]:
+                context[name] = ''
 
     def report_data(self, doc):
         context_type = doc['context_type']
