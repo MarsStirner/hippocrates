@@ -248,6 +248,7 @@ class JasperReport(object):
         params = {
             'folderUri': locate_reports,
             'type': 'reportUnit',
+            'sortBy': 'description',
         }
         jclient = JasperRestV2Client(params=params)
         return jclient.searching_repository()
