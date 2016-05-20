@@ -46,7 +46,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             $scope.selected_records.selectNone();
         };
         $scope.get_data = function () {
-            ApiCalls.wrapper(
+            return ApiCalls.wrapper(
                 'POST',
                 WMConfig.url.api_get_ttj_records, {}, {filter: $scope.filter}
             ).then(_.passThrough(function (res) {
@@ -75,12 +75,24 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             })
         };
 
-        $scope.$watchCollection('filter', function (new_value, old_value) {
+        function watch_with_reload(n, o) {
+            if ($scope.filter.lab && $scope.filter.status != 2) {
+                $scope.filter.lab = null;
+            }
+            $scope.get_data().then(_.passThrough($scope.set_current_records));
+        }
+        function watch_without_reload(n, o) {
             if ($scope.filter.lab && $scope.filter.status != 2) {
                 $scope.filter.lab = null;
             }
             $scope.set_current_records();
-        });
+        }
+
+        $scope.$watch('filter.execDate', watch_with_reload);
+        $scope.$watch('filter.lab', watch_with_reload);
+        $scope.$watch('filter.org_struct', watch_with_reload);
+        $scope.$watch('filter.biomaterial', watch_with_reload);
+        $scope.$watch('filter.status', watch_without_reload);
 
         $scope.get_data();
     }])
