@@ -303,26 +303,26 @@
                                         <div class="col-sm-6 col-md-6">[[child.state.heart_rate]]</div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right"><b>Данные КТГ:</b></div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.ktg_input ? 'да': 'нет']]</div>
+                                        <div class="col-sm-6 col-md-6 text-right"><b>[[child.state.ktg_input ? 'Данные КТГ': 'Данные КТГ:']]</b></div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.ktg_input ? '': 'Нет данных']]</div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" ng-show="child.state.ktg_input">
                                         <div class="col-sm-6 col-md-6 text-right">Базальный ритм:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.basal.name]]</div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" ng-show="child.state.ktg_input">
                                         <div class="col-sm-6 col-md-6 text-right">Вариабельность (амплитуда):</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.variability_range.name]]</div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" ng-show="child.state.ktg_input">
                                         <div class="col-sm-6 col-md-6 text-right">Вариабельность (частота в минуту):</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.frequency_per_minute.name]]</div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" ng-show="child.state.ktg_input">
                                         <div class="col-sm-6 col-md-6 text-right">Акселерации за 30 минут:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.acceleration.name]]</div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" ng-show="child.state.ktg_input">
                                         <div class="col-sm-6 col-md-6 text-right">Децелерации за 30 минут:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.deceleration.name]]</div>
                                     </div>
