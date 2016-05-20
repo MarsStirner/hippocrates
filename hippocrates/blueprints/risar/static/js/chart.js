@@ -111,7 +111,7 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
             var result = rslt[0];
             RisarApi.chart.close_event($scope.chart.id, result).then(function (data) {
                 _.extend($scope.header.event, data);
-                NotificationService.notify(
+                var notify_id = NotificationService.notify(
                     200,
                     [
                         'Случай беременности закрыт',
@@ -122,6 +122,7 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
                         {
                             click: function () {
                                 $scope.close_event();
+                                close_notify();
                             },
                             text: 'Изменить'
                         }, ' ',
@@ -130,12 +131,16 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
                                 RisarApi.chart.close_event($scope.chart.id, {cancel: true}).then(function(data){
                                     _.extend($scope.header.event, data);
                                 });
+                                close_notify();
                             },
                             text: 'Отменить'
                         }
                     ],
                     'success'
                 );
+                var close_notify = function() {
+                    NotificationService.dismiss(notify_id);
+                };
             });
         })
     };
