@@ -11,9 +11,11 @@ from blueprints.risar.risar_config import general_hospitalizations, \
     general_specialists_checkups
 from nemesis.lib.diagnosis import create_or_update_diagnoses, \
     diagnosis_using_by_next_checkups
+from nemesis.models.exists import MKB
+from nemesis.models.person import Person
 
 
-def update_patient_diagnoses(old_diag_id, new_em_result):
+def update_patient_diagnoses(old_diag_id, new_em_result, set_person_id):
     """
     корректировка диагнозов пациента, при их изменении в результатах мероприятия
     :param old_diag_id:
@@ -22,6 +24,10 @@ def update_patient_diagnoses(old_diag_id, new_em_result):
     :return:
     """
     new_em_diag = get_event_measure_diag(new_em_result)
+    if not new_em_diag:
+        new_diag_id = get_event_measure_diag(new_em_result, raw=True)
+        if new_diag_id:
+            new_em_diag = MKB.query.get(new_diag_id)
     new_diag_id = new_em_diag and new_em_diag.id
     if new_diag_id != old_diag_id:
         event = new_em_result.event
@@ -36,6 +42,8 @@ def update_patient_diagnoses(old_diag_id, new_em_result):
         if new_diag_id and new_diag_id not in opened_diags:
             # создать
             person = get_event_measure_doctor(new_em_result)
+            if not person:
+                person = Person.query.get(set_person_id)
             diag_data = {
                 'diagnostic': {
                     'mkb': new_em_diag.__json__(),
