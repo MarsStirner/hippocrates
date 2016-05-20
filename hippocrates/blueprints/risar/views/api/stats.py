@@ -392,7 +392,7 @@ def api_0_death_stats():
         return res
 
     for i in range(1, 13):
-        actions = Action.query.join(Event, EventType, rbRequestType, Action, ActionType, ActionProperty,
+        actions = Action.query.join(Event, EventType, rbRequestType, ActionType, ActionProperty,
                                    ActionPropertyType, ActionProperty_Date)\
             .filter(ActionType.flatCode == 'epicrisis',
                     ActionPropertyType.code == 'death_date',
