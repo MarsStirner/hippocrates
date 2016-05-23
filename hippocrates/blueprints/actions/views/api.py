@@ -40,7 +40,6 @@ prescriptionFlatCodes = (
 def delete_all_autosaves(action_id):
     ActionAutoSave.query.filter(
         ActionAutoSave.action_id == action_id,
-        ActionAutoSave.user_id == safe_current_user_id(),
     ).delete()
 
 
