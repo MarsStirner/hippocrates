@@ -53,5 +53,3 @@ def api_0_contragent_client_get(client_id=None):
     if not client:
         raise ApiException(404, u'Client not found')
     return ContragentRepr().represent_ca_client(client)
-
-

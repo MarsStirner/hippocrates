@@ -94,6 +94,16 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <td colspan="[[isInvoiceWithDiscounts() ? 5 : 4]]" class="text-right">Итого:</td>\
                     <td class="text-left">[[ invoice.total_sum ]]</td>\
                 </tr>\
+                <tr ng-if="hasRefunds()">\
+                    <td colspan="[[isInvoiceWithDiscounts() ? 5 : 4]]" class="text-right">\
+                        <span style="font-size: larger; font-weight: bold">Итого с учётом возвратов:</span><br>\
+                        Возвратов на сумму:\
+                    </td>\
+                    <td class="text-left">\
+                        <span style="font-size: larger; font-weight: bold">[[ invoice.sum_with_refunds ]]</span><br>\
+                        [[ invoice.refunds_sum ]]\
+                    </td>\
+                </tr>\
                 </tbody>\
                 </table>\
                 \
@@ -121,6 +131,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     <!-- <pre>[[ invoice | json ]]</pre> -->\
 </div>\
 <div class="modal-footer">\
+    <button type="button" class="btn btn-warning pull-left" ng-click="processInvoiceCoordination()"\
+        ng-if="btnCoordRefundAvailable()">Согласовать возврат</button>\
     <button type="button" class="btn btn-danger pull-left" ng-click="deleteAndClose()"\
         ng-if="btnDeleteAvailable()">Удалить</button>\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
@@ -132,11 +144,28 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingService, invoice, event) {
-    $scope.invoice = invoice;
-    $scope.event = event;
+var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingService, CashBookModalService,
+                                 invoice, event) {
+    $scope.invoice = null;
+    $scope.event = null;
     $scope.newDiscount = {
         val: null
+    };
+
+    var setInvoice = function (invoice) {
+        $scope.invoice = invoice;
+        $scope.refundedItemIds = [];
+        var pendingCoordItemIds = safe_traverse(invoice, ['coordinated_refund', 'item_list'], [])
+            .map(function (item) {
+                return item.id
+            });
+        angular.forEach(invoice.refund_list, function (refund) {
+            angular.forEach(refund.item_list, function (item) {
+                if (!pendingCoordItemIds.has(item.id)) {
+                    $scope.refundedItemIds.push(item.id);
+                }
+            });
+        });
     };
 
     $scope.isNewInvoice = function () {
@@ -152,7 +181,7 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
         else return '‒';
     };
     $scope.getItemRowClass = function (item) {
-        if (item.ui_attrs.idx % 2 !== 0) return 'bg-muted';
+        if ($scope.refundedItemIds.has(item.id)) return 'bg-muted text-striked';
         else return '';
     };
     $scope.saveAndClose = function () {
@@ -229,6 +258,9 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
             return root_item.service.is_accumulative_price ? !item.service.is_accumulative_price : false;
         }
     };
+    $scope.hasRefunds = function () {
+        return $scope.invoice.refund_list.length;
+    };
     $scope.ps_resolve = function () {
         return {
             invoice_id: $scope.invoice.id,
@@ -242,13 +274,29 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
         return !$scope.event.ro && !$scope.isInvoiceClosed();
     };
 
+    $scope.btnCoordRefundAvailable = function () {
+        return $scope.invoice.payment.paid;
+    };
+    $scope.processInvoiceCoordination = function () {
+        CashBookModalService.openProcessInvoiceCancel($scope.invoice.id, undefined, {
+            coordOnly: true,
+            event_id: $scope.event.info.id
+        })
+            .then(function (result) {
+                AccountingService.get_invoice($scope.invoice.id).then(setInvoice);
+            });
+    };
+
     $scope.init = function () {
         $scope.ps = new PrintingService("invoice");
         $scope.ps.set_context('invoice');
+        setInvoice(invoice);
+        $scope.event = event;
     };
 
     $scope.init();
 };
 
 
-WebMis20.controller('InvoiceModalCtrl', ['$scope', '$filter', 'AccountingService', 'PrintingService', InvoiceModalCtrl]);
+WebMis20.controller('InvoiceModalCtrl', ['$scope', '$filter', 'AccountingService', 'PrintingService',
+    'CashBookModalService', InvoiceModalCtrl]);

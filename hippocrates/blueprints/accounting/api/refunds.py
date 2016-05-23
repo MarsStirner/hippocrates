@@ -2,6 +2,7 @@
 import datetime
 
 from flask import request
+from sqlalchemy.orm import aliased
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.accounting import Invoice, FinanceTransaction, rbFinanceTransactionType, rbFinanceOperationType, \
     rbPayType
@@ -16,8 +17,8 @@ def bail_out(exc):
     raise exc
 
 
-__no_coordinated_exception = ApiException(404, u'Invoice has no coordinated refund requests')
-__no_invoice_exception = ApiException(404, u'Invoice not found')
+__no_coordinated_exception = ApiException(404, u'По счёту не найдено согласованного возврата оплаты')
+__no_invoice_exception = ApiException(404, u'Не найден счёт')
 
 
 def find_invoice(invoice):
@@ -32,6 +33,16 @@ def find_invoice(invoice):
     if isinstance(invoice, int):
         invoice = Invoice.query.get(invoice)
     return invoice
+
+
+def get_invoice_refund_count(invoice_id):
+    rInvoice = aliased(Invoice)
+    return db.session.query(Invoice).join(
+        rInvoice, Invoice.id == rInvoice.parent_id
+    ).filter(
+        Invoice.id == invoice_id,
+        rInvoice.deleted == 0
+    ).count()
 
 
 @module.route('/api/0/invoice/<int:invoice_id>/refund', methods=['GET'])
@@ -62,26 +73,30 @@ def api_0_invoice_refund_save(invoice_id):
     """
     data = request.get_json()
     invoice = find_invoice(invoice_id) or bail_out(__no_invoice_exception)
-    refund = invoice.coordinated_refund
-    item_map = {
-        item.id: item
-        for item in invoice.item_list
-    }
-    item_id_list = [item['id'] for item in data['item_list']]
-    if not refund:
-        refund = Invoice()
-        db.session.add(refund)
-        refund.parent = invoice
-        refund.contract = invoice.contract
-        refund.setDate = datetime.date.today()
-    else:
-        for item in invoice.item_list:
-            if item.refund == refund and item.id not in item_id_list:
-                item.set_refund(None)
 
-    for item_id in item_id_list:
-        item = item_map[item_id]
-        item.set_refund(refund)
+    with db.session.no_autoflush:
+        refund = invoice.coordinated_refund
+        item_map = {
+            item.id: item
+            for item in invoice.get_all_subitems()
+        }
+        item_id_list = [item['id'] for item in data['item_list']]
+        if not refund:
+            refund = Invoice()
+            db.session.add(refund)
+            refund.parent = invoice
+            refund.contract = invoice.contract
+            refund.setDate = datetime.date.today()
+            exist_refund_count = get_invoice_refund_count(invoice.id)
+            refund.number = u'{0}/refund{1}'.format(refund.parent.number, exist_refund_count + 1)
+        else:
+            for item in invoice.item_list:
+                if item.refund == refund and item.id not in item_id_list:
+                    item.set_refund(None)
+
+        for item_id in item_id_list:
+            item = item_map[item_id]
+            item.set_refund(refund)
     db.session.commit()
     return InvoiceRepr().represent_refund(refund)
 
@@ -99,7 +114,7 @@ def api_0_invoice_refund_delete(invoice_id):
     refund = invoice.coordinated_refund or bail_out(__no_coordinated_exception)
     refund.deleted = 1
     for item in refund.refund_items:
-        item.set_refund(None, recursive=True)
+        item.set_refund(None)
     db.session.commit()
 
 
@@ -116,7 +131,7 @@ def api_0_invoice_refund_process(invoice_id):
     @return:
     """
     data = request.get_json()
-    with db.session.no_autocommit:
+    with db.session.no_autoflush:
         invoice = find_invoice(invoice_id) or bail_out(__no_invoice_exception)
         refund = invoice.coordinated_refund or bail_out(__no_coordinated_exception)
 
@@ -136,7 +151,7 @@ def api_0_invoice_refund_process(invoice_id):
         # Вертаем с баланса клиенту
         trx_2.invoice = refund
         trx_2.contragent = invoice.contract.payer
-        trx_2.trx_type = rbFinanceTransactionType.cache().by_code()['balance']
+        trx_2.trx_type = rbFinanceTransactionType.cache().by_code()['payer_balance']
         trx_2.operation_type = rbFinanceOperationType.cache().by_code()['payer_balance_out']
         trx_2.pay_type = rbPayType.cache().by_code()[data['pay_type']['code']]
         trx_2.trxDatetime = datetime.datetime.now()

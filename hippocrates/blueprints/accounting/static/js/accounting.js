@@ -49,23 +49,26 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                 return instance.result;
             });
         },
-        openEdit: function (invoice, event) {
-            var instance = $modal.open({
-                templateUrl: '/WebMis20/modal/accounting/invoice.html',
-                controller: InvoiceModalCtrl,
-                backdrop: 'static',
-                size: 'lg',
-                windowClass: 'modal-scrollable',
-                resolve: {
-                    invoice: function () {
-                        return invoice
-                    },
-                    event: function () {
-                        return event
-                    }
-                }
-            });
-            return instance.result;
+        openEdit: function (invoice_id, event) {
+            return AccountingService.get_invoice(invoice_id)
+                .then(function (invoice) {
+                    var instance = $modal.open({
+                        templateUrl: '/WebMis20/modal/accounting/invoice.html',
+                        controller: InvoiceModalCtrl,
+                        backdrop: 'static',
+                        size: 'lg',
+                        windowClass: 'modal-scrollable',
+                        resolve: {
+                            invoice: function () {
+                                return invoice
+                            },
+                            event: function () {
+                                return event
+                            }
+                        }
+                    });
+                    return instance.result;
+                });
         }
     }
 }]);
@@ -96,7 +99,7 @@ WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
                     return instance.result;
             });
         },
-        openProcessInvoicePayment: function (invoice_id, contragent_id) {
+        openProcessInvoicePayment: function (invoice_id, contragent_id, options) {
             var finance_trx_promise = AccountingService.get_new_finance_trx_invoice(contragent_id, invoice_id),
                 payer_promise = AccountingService.get_contragent_payer(contragent_id),
                 invoice_promise = AccountingService.get_invoice(invoice_id);
@@ -110,7 +113,7 @@ WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
                         controller: CashbookInvoiceModalCtrl,
                         backdrop: 'static',
                         size: 'lg',
-                        windowClass: 'modalScrollable',
+                        windowClass: 'modal-scrollable',
                         resolve: {
                             payer: function () {
                                 return payer;
@@ -121,41 +124,36 @@ WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
                             invoice: function () {
                                 return invoice;
                             },
-                            role: function () {
-                                return 'settlement'
+                            options: function () {
+                                return options;
                             }
                         }
                     });
                     return instance.result;
             });
         },
-        openProcessInvoiceCancel: function (invoice_id, contragent_id) {
-            var finance_trx_promise = AccountingService.get_new_finance_trx_invoice(contragent_id, invoice_id),
-                payer_promise = AccountingService.get_contragent_payer(contragent_id),
+        openProcessInvoiceCancel: function (invoice_id, contragent_id, options) {
+            var payer_promise = AccountingService.get_contragent_payer(contragent_id),
                 invoice_promise = AccountingService.get_invoice(invoice_id);
-            return $q.all([finance_trx_promise, payer_promise, invoice_promise])
+            return $q.all([payer_promise, invoice_promise])
                 .then(function (data) {
-                    var trxes = data[0],
-                        payer = data[1],
-                        invoice = data[2];
+                    var payer = data[0],
+                        invoice = data[1];
                     var instance = $modal.open({
-                        templateUrl: '/WebMis20/modal/accounting/cashbook_invoice.html',
-                        controller: CashbookInvoiceModalCtrl,
+                        templateUrl: '/WebMis20/modal/accounting/cashbook_invoice_refund.html',
+                        controller: CashbookInvoiceRefundModalCtrl,
                         backdrop: 'static',
                         size: 'lg',
-                        windowClass: 'modalScrollable',
+                        windowClass: 'modal-scrollable',
                         resolve: {
                             payer: function () {
                                 return payer;
                             },
-                            trxes: function () {
-                                return trxes;
-                            },
                             invoice: function () {
                                 return invoice;
                             },
-                            role: function () {
-                                return 'cancel'
+                            options: function () {
+                                return options;
                             }
                         }
                     });
@@ -165,7 +163,7 @@ WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
     }
 }]);
 
-WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
+WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisApi) {
     this.get_contract = function (contract_id, args) {
         return WebMisApi.contract.get(contract_id, args);
     };
@@ -199,6 +197,11 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
         });
     };
     this.get_contragent_payer = function (payer_id) {
+        if (payer_id === undefined) {
+            var payer = $q.defer();
+            payer.resolve();
+            return payer.promise;
+        }
         return WebMisApi.contragent.get_payer(payer_id);
     };
     this.get_new_contingent = function (args) {
@@ -217,6 +220,13 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
         });
     };
     this.get_service = function (service_id, args) {
+        if (args !== undefined && args.hasOwnProperty('serviced_entity_from_search')) {
+            args.serviced_entity_from_search = {
+                action_type_id: args.serviced_entity_from_search.action_type_id,
+                at_code: args.serviced_entity_from_search.at_code,
+                at_name: args.serviced_entity_from_search.at_name
+            }
+        }
         return WebMisApi.service.get(service_id, args);
     };
     this.save_service_list = function (event_id, service_list) {
@@ -238,6 +248,11 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
         return WebMisApi.service.get_service_at_price(contract_id);
     };
     this.get_invoice = function (invoice_id, args) {
+        if (args !== undefined && args.hasOwnProperty('service_list')) {
+            args.service_list = args.service_list.map(function (service) {
+                return service.id
+            });
+        }
         return WebMisApi.invoice.get(invoice_id, args);
     };
     this.save_invoice = function (invoice) {
@@ -287,5 +302,18 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     };
     this.get_client = function (client_id) {
         return WebMisApi.contragent.get_client(client_id);
-    }
+    };
+    this.coordinate_refund = function (invoice, items) {
+        return WebMisApi.refund.save(invoice.id, {
+            item_list: items
+        });
+    };
+    this.cancel_coordinated_refund = function (invoice) {
+        return WebMisApi.refund.del(invoice.id);
+    };
+    this.process_refund = function (invoice, pay_type) {
+        return WebMisApi.refund.process(invoice.id, {
+            pay_type: pay_type
+        });
+    };
 }]);

@@ -3,7 +3,7 @@
 from nemesis.models.enums import Gender, ContragentType, ServiceKind
 from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money, safe_bool
 from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_invoice_closed,
-    check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts)
+    check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts, calc_invoice_refunds_sum)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from nemesis.lib.data_ctrl.accounting.contract import ContragentController, ContractController
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
@@ -463,6 +463,8 @@ class InvoiceRepr(object):
         data.update({
             'total_sum': format_money(invoice.total_sum),
             'sum_wo_discounts': format_money(calc_invoice_sum_wo_discounts(invoice)),
+            'sum_with_refunds': format_money(invoice.sum_),
+            'refunds_sum': format_money(calc_invoice_refunds_sum(invoice)),
             'item_list': [
                 self.represent_invoice_item_full(item)
                 for item in invoice.item_list
@@ -472,7 +474,12 @@ class InvoiceRepr(object):
             },
             'closed': check_invoice_closed(invoice),
             'payment': self.represent_invoice_payment(invoice),
-            'can_add_discounts': check_invoice_can_add_discounts(invoice)
+            'can_add_discounts': check_invoice_can_add_discounts(invoice),
+            'coordinated_refund': self.represent_refund(invoice.coordinated_refund),
+            'refund_list': [
+                self.represent_refund(refund)
+                for refund in invoice.refunds
+            ]
         })
         return data
 
@@ -487,20 +494,41 @@ class InvoiceRepr(object):
         data = self.represent_invoice(refund)
         data.update({
             'item_list': map(self.represent_invoice_item_full, refund.refund_items),
-            'payment': self.represent_invoice_payment(refund),
+            'payment': self.represent_refund_payment(refund),
         })
         return data
 
     def represent_invoice_for_payment(self, invoice):
         data = self.represent_invoice(invoice)
+        inv_ctrl = InvoiceController()
         cont_repr = ContractRepr()
         data.update({
+            'event_id': inv_ctrl.get_invoice_event(invoice).id,
             'total_sum': format_money(invoice.total_sum),
+            'sum_with_refunds': format_money(invoice.sum_),
             'contract': cont_repr.represent_contract_for_invoice(invoice.contract),
             'description': {
                 'full': self.make_full_description(invoice),
             },
-            'closed': check_invoice_closed(invoice)
+            'closed': check_invoice_closed(invoice),
+            'coordinated_refund': self.represent_refund(invoice.coordinated_refund),
+            'refund_list': [
+                self.represent_refund(refund)
+                for refund in invoice.refunds
+            ]
+        })
+        return data
+
+    def represent_invoice_for_event(self, invoice):
+        data = self.represent_invoice(invoice)
+        refunds_sum = calc_invoice_refunds_sum(invoice)
+        data.update({
+            'description': {
+                'full': self.make_full_description(invoice),
+            },
+            'payment': self.represent_invoice_payment(invoice),
+            'has_refunds': refunds_sum != 0,
+            'refunds_sum': format_money(refunds_sum)
         })
         return data
 
@@ -515,8 +543,6 @@ class InvoiceRepr(object):
             'deleted': invoice.deleted,
             'note': invoice.note,
             'draft': invoice.draft,
-            # Поскольку я не уверен, где конкретно это понадобится, на всякий случай отображаю здесь
-            'refund': self.represent_refund(invoice.coordinated_refund),
         }
 
     def make_full_description(self, invoice):
@@ -533,6 +559,13 @@ class InvoiceRepr(object):
         pay_info['invoice_total_sum'] = format_money(pay_info['invoice_total_sum'])
         pay_info['paid_sum'] = format_money(pay_info['paid_sum'])
         pay_info['debt_sum'] = format_money(pay_info['debt_sum'])
+        return pay_info
+
+    def represent_refund_payment(self, refund):
+        invoice_ctrl = InvoiceController()
+        pay_info = invoice_ctrl.get_refund_payment_info(refund)
+        pay_info['refund_total_sum'] = format_money(pay_info['refund_total_sum'])
+        pay_info['refund_sum'] = format_money(pay_info['refund_sum'])
         return pay_info
 
     def represent_invoice_item_full(self, item):
@@ -571,6 +604,11 @@ class InvoiceRepr(object):
     def represent_listed_invoices_for_payment(self, invoice_list):
         return [
             self.represent_invoice_for_payment(invoice) for invoice in invoice_list
+        ]
+
+    def represent_listed_invoices_for_event(self, invoice_list):
+        return [
+            self.represent_invoice_for_event(invoice) for invoice in invoice_list
         ]
 
 
