@@ -2,6 +2,8 @@
 <html lang="ru" ng-app="WebMis20">
 <head>
     <title>{{ config['TITLE'] }} {% block title %}{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('risar.static', filename='i/favicon.ico') }}" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ url_for('risar.static', filename='i/favicon.ico') }}" type="image/x-icon" />
     {%- include '_header.html' -%}
     {%- block modules_css %}{% endblock -%}
 </head>
