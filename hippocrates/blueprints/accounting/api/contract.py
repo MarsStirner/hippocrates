@@ -28,7 +28,7 @@ def api_0_contract_get(contract_id=None):
     return ContractRepr().represent_contract_full(contract)
 
 
-@module.route('/api/0/contract/', methods=['PUT'])
+@module.route('/api/0/contract/', methods=['POST'])
 @module.route('/api/0/contract/<int:contract_id>', methods=['POST'])
 @api_method
 def api_0_contract_save(contract_id=None):

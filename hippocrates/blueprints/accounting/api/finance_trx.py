@@ -36,8 +36,8 @@ def api_0_finance_transaction_invoice_get():
     return FinanceTrxRepr.represent_finance_trx_invoice(trxes)
 
 
-@module.route('/api/0/finance_transaction/make/', methods=['PUT'])
-@module.route('/api/0/finance_transaction/make/<trx_type_code>/', methods=['PUT'])
+@module.route('/api/0/finance_transaction/make/', methods=['POST'])
+@module.route('/api/0/finance_transaction/make/<trx_type_code>/', methods=['POST'])
 @api_method
 def api_0_finance_transaction_make(trx_type_code=None):
     trx_type = get_finance_trx_type(trx_type_code)
@@ -54,8 +54,8 @@ def api_0_finance_transaction_make(trx_type_code=None):
     return ContragentRepr().represent_contragent_payer(payer)
 
 
-@module.route('/api/0/finance_transaction/invoice/make/', methods=['PUT'])
-@module.route('/api/0/finance_transaction/invoice/make/<trx_type_code>/', methods=['PUT'])
+@module.route('/api/0/finance_transaction/invoice/make/', methods=['POST'])
+@module.route('/api/0/finance_transaction/invoice/make/<trx_type_code>/', methods=['POST'])
 @api_method
 def api_0_finance_transaction_invoice_make(trx_type_code=None):
     trx_type = get_finance_trx_type(trx_type_code)

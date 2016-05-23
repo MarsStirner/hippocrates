@@ -57,22 +57,36 @@ var CashBookCtrl = function ($scope, AccountingService, CashBookModalService) {
                 });
         }
     };
+    var updateSearchResultItem = function (idx) {
+        var invoice = $scope.invoice.search_result[idx];
+        AccountingService.get_invoice(invoice.id, {
+            repr_type: 'for_payment'
+        }).then(function (upd_invoice) {
+            $scope.invoice.search_result.splice(idx, 1, upd_invoice);
+        });
+    };
     $scope.clearInvoiceQuery = function () {
         $scope.invoice.search_result = null;
         $scope.invoice.query = '';
     };
     $scope.processInvoicePayment = function (idx) {
         var invoice = $scope.invoice.search_result[idx];
-        CashBookModalService.openProcessInvoicePayment(invoice.id, invoice.contract.payer.id)
+        CashBookModalService.openProcessInvoicePayment(invoice.id, invoice.contract.payer.id, {
+            event_id: invoice.event_id
+        })
             .then(function (result) {
-                $scope.invoice.search_result.splice(idx, 1, result.invoice);
+                updateSearchResultItem(idx);
             });
     };
     $scope.processInvoiceCancel = function (idx) {
         var invoice = $scope.invoice.search_result[idx];
-        CashBookModalService.openProcessInvoiceCancel(invoice.id, invoice.contract.payer.id)
+        CashBookModalService.openProcessInvoiceCancel(invoice.id, invoice.contract.payer.id, {
+            event_id: invoice.event_id
+        })
             .then(function (result) {
-                $scope.invoice.search_result.splice(idx, 1, result.invoice);
+                updateSearchResultItem(idx);
+            }, function () {
+                updateSearchResultItem(idx);
             });
     };
     $scope.isInvoiceClosed = function (invoice) {
@@ -83,7 +97,10 @@ var CashBookCtrl = function ($scope, AccountingService, CashBookModalService) {
     };
     $scope.canProcessInvoiceCancel = function (invoice) {
         return $scope.isInvoiceClosed(invoice);
-    }
+    };
+    $scope.hasPendingCoordRefund = function (invoice) {
+        return Boolean(invoice.coordinated_refund);
+    };
 
 };
 
