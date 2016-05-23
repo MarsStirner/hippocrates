@@ -4,19 +4,22 @@ from flask import request
 
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_bool, safe_int, safe_date
+from nemesis.lib.utils import safe_bool, safe_int, safe_date, parse_json
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 from blueprints.accounting.lib.represent import InvoiceRepr
 
 
-@module.route('/api/0/invoice/', methods=['GET', 'POST'])
+@module.route('/api/0/invoice/')
 @module.route('/api/0/invoice/<int:invoice_id>')
 @api_method
 def api_0_invoice_get(invoice_id=None):
     args = request.args.to_dict()
+    if 'service_list' in args:
+        args['service_list'] = request.args.getlist('service_list')
     if request.json:
         args.update(request.json)
     get_new = safe_bool(args.get('new', False))
+    repr_type = args.get('repr_type')
 
     invoice_ctrl = InvoiceController()
     with invoice_ctrl.session.no_autoflush:
@@ -26,10 +29,13 @@ def api_0_invoice_get(invoice_id=None):
             invoice = invoice_ctrl.get_invoice(invoice_id)
         else:
             raise ApiException(404, u'`invoice_id` required')
-        return InvoiceRepr().represent_invoice_full(invoice)
+        if repr_type == 'for_payment':
+            return InvoiceRepr().represent_invoice_for_payment(invoice)
+        else:
+            return InvoiceRepr().represent_invoice_full(invoice)
 
 
-@module.route('/api/0/invoice/', methods=['PUT'])
+@module.route('/api/0/invoice/', methods=['POST'])
 @module.route('/api/0/invoice/<int:invoice_id>', methods=['POST'])
 @api_method
 def api_0_invoice_save(invoice_id=None):

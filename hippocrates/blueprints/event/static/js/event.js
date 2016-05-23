@@ -435,6 +435,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
                 $scope.query_clear();
                 $scope.editing = false;
                 $rootScope.$broadcast('serviceListChanged');
+                $scope.hideLabSubservices();
             });
     };
     $scope.refreshServiceList = function () {
@@ -442,6 +443,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
             .then(function (service_data) {
                 $scope.event.services = service_data;
                 $rootScope.$broadcast('serviceListChanged');
+                $scope.hideLabSubservices();
             });
     };
     $scope.inInvoiceEditMode = function () {
@@ -467,8 +469,8 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
             });
     };
     $scope.openInvoice = function (idx) {
-        var invoice = _.deepCopy($scope.event.invoices[idx]);
-        InvoiceModalService.openEdit(invoice, $scope.event)
+        var invoice = $scope.event.invoices[idx];
+        InvoiceModalService.openEdit(invoice.id, $scope.event)
             .then(function (result) {
                 var status = result.status;
                 if (status === 'ok') {
@@ -526,15 +528,14 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
         angular.forEach(service.subservice_list, traverseServices);
     };
     $scope.hideLabSubservices = function () {
-        angular.forEach($scope.event.services, traverseServices);
+        $timeout(function () {
+            angular.forEach($scope.event.services, traverseServices);
+        }, 0);
     };
-
-    $timeout(function () {
-        $scope.hideLabSubservices();
-    }, 0);
 
     $scope.$on('event_loaded', function() {
         $scope.query_clear();
+        $scope.hideLabSubservices();
     });
     $scope.$on('eventFormStateChanged', function() {
         $scope.query_clear();

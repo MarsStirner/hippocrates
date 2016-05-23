@@ -21,8 +21,8 @@ def api_0_service_search():
     return ServiceRepr().represent_search_result_mis_action_services(data)
 
 
-@module.route('/api/0/service/', methods=['GET', 'POST'])
-@module.route('/api/0/service/<int:service_id>', methods=['GET', 'POST'])
+@module.route('/api/0/service/')
+@module.route('/api/0/service/<int:service_id>')
 @api_method
 def api_0_service_get(service_id=None):
     args = request.args.to_dict()

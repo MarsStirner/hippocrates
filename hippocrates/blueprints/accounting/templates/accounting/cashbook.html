@@ -105,6 +105,7 @@
                     <th>Дата формирования</th>
                     <th>Дата погашения</th>
                     <th>Сумма (руб.)</th>
+                    <th>Возвраты</th>
                     <th>Договор/Плательщик</th>
                     <th></th>
                 </tr>
@@ -114,8 +115,24 @@
                     <td ng-bind="$index + 1"></td>
                     <td ng-bind="invoice.number"></td>
                     <td ng-bind="invoice.set_date | asDate"></td>
-                    <td>[[ invoice.settle_date | asDate ]] <i class="fa fa-check text-success" ng-show="isInvoiceClosed(invoice)"></i></td>
+                    <td>
+                        <span class="rmargin10">[[ invoice.settle_date | asDate ]]</span>
+                        <i class="fa fa-check text-success rmargin10" ng-show="isInvoiceClosed(invoice)"></i>
+                        <i class="fa fa-exclamation-circle text-warning" ng-show="hasPendingCoordRefund(invoice)"
+                            title="Имеется согласованный возврат оплаты по счёту"></i>
+                    </td>
                     <td ng-bind="invoice.total_sum"></td>
+                    <td>
+                        <span ng-show="hasPendingCoordRefund(invoice)" class="text-warning">
+                            Имеется согласованный возврат оплаты по счёту
+                        </span>
+                        <ol>
+                            <li ng-repeat="refund in invoice.refund_list" ng-if="refund.settle_date || true">
+                                [[ refund.set_date | asDate ]] ‒ [[ refund.payment.refund_total_sum ]] руб. <span
+                                ng-if="refund.settle_date">([[ refund.settle_date | asDate ]])</span>
+                            </li>
+                        </ol>
+                    </td>
                     <td>
                         <span>[[ invoice.contract.description.short ]]</span><br>
                         <span>[[ invoice.contract.payer.short_descr ]]</span>
@@ -126,7 +143,7 @@
                             title="Оплатить счёт"><i class="fa fa-credit-card"></i></button>
                         <button type="button" class="btn btn-sm btn-primary" ng-click="processInvoiceCancel($index)"
                             ng-if="canProcessInvoiceCancel(invoice)"
-                            title="Возврат"><i class="fa fa-reply"></i></button>
+                            title="Возврат"><i class="fa fa-undo"></i></button>
                     </td>
                 </tr>
             </tbody>
