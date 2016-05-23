@@ -25,6 +25,7 @@ angular.module('WebMis20')
                     );
                 }
             };
+            scope.unity_function = function (arg) { return arg };
 
             function build(tag) {
                 var context = arguments[1];
@@ -48,6 +49,8 @@ angular.module('WebMis20')
                                 case 'Жалобы':
                                     inner_template = '<span ng-bind-html="{0}.value | trustHtml"></span>'; break;
                                 case 'String':
+                                case 'String/Select':
+                                case 'String/Free':
                                 case 'Integer':
                                 case 'Double':
                                     inner_template = '<span>[[ {0}.value ]] {1}</span>'.format('{0}', property_unit_code); break;
@@ -94,10 +97,10 @@ angular.module('WebMis20')
                                     inner_template = '<wysiwyg ng-model="{0}.value" />';
                                     break;
                                 case 'Date':
-                                    inner_template = '<wm-date ng-model="{0}.value"></wm-date>'
+                                    inner_template = '<wm-date ng-model="{0}.value"></wm-date>';
                                     break;
                                 case 'Integer':
-                                    inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative>';
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value" valid-number valid-number-negative>';
                                     if (property.type.unit) {
                                         inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
                                     }
@@ -112,14 +115,42 @@ angular.module('WebMis20')
                                     inner_template = '<div fs-time ng-model="{0}.value"></div>';
                                     break;
                                 case 'String':
-                                    if (property.type.domain) {
-                                        inner_template = '<select class="form-control" ng-model="{0}.value" ng-options="val for val in {0}.type.values"></select>'
-                                    } else {
-                                        inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
-                                        if (property.type.unit) {
-                                            inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
-                                        }
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                    if (property.type.unit) {
+                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
                                     }
+                                    break;
+                                case 'String/Select':
+                                    inner_template =
+                                        '<div class="row">\
+                                            <div class="col-md-10">\
+                                                <ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off">\
+                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
+                                                    <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
+                                                        <span ng-bind-html="item | highlight: $select.search"></span>\
+                                                    </ui-select-choices>\
+                                                </ui-select>\
+                                            </div>\
+                                            <div class="col-md-2">\
+                                                <button class="btn btn-default" ng-click="{0}.value = \'\'"><i class="fa fa-remove"></i></button>\
+                                            </div>\
+                                        </div>';
+                                    break;
+                                case 'String/Free':
+                                    inner_template =
+                                        '<div class="btn-group">\
+                                            <div class="col-md-10">\
+                                                <ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function" autocomplete="off">\
+                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
+                                                    <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
+                                                        <span ng-bind-html="item | highlight: $select.search"></span>\
+                                                    </ui-select-choices>\
+                                                </ui-select>\
+                                            </div>\
+                                            <div class="col-md-2">\
+                                                <button class="btn btn-default" ng-click="{0}.value = \'\'"><i class="fa fa-remove"></i></button>\
+                                            </div>\
+                                        </div>';
                                     break;
                                 case 'JobTicket':
                                     inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
@@ -197,7 +228,7 @@ angular.module('WebMis20')
                                     property_name,
                                     property_code,
                                     property_is_assignable,
-                                    true,  // scope.action.readonly,
+                                    scope.action.readonly || property.has_pricelist_service,
                                     inner_template.format(property_code),
                                     property.type.norm ? property.type.norm : ''
                                 );

@@ -3,6 +3,7 @@ import datetime
 import json
 import math
 
+from blueprints.reports.jasper_client import JasperReport
 from flask import request, make_response
 from flask.ext.login import current_user
 
@@ -15,7 +16,6 @@ from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
-from blueprints.risar.lib.jasper_client import JasperReport
 
 __author__ = 'mmalkov'
 
@@ -170,7 +170,7 @@ def api_0_event_print():
     )
     jasper_report = JasperReport(
         'SearchPrint',
-        '/reports/Custom/SearchPrint',
+        '/reports/Hippocrates/Risar/SearchPrint',
         fields=('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week')
     )
     jasper_report.generate(file_format, data)

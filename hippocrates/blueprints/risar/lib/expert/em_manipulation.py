@@ -196,8 +196,10 @@ class EventMeasureSelecter(BaseSelecter):
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime <= safe_datetime(flt['beg_date_to']))
+
         if 'end_date_from' in flt:
-            self.query = self.query.filter(EventMeasure.endDateTime >= safe_datetime(flt['end_date_from']))
+            self.query = self.query.filter(or_(EventMeasure.endDateTime >= safe_datetime(flt['end_date_from']),
+                                           EventMeasure.endDateTime == None))
         if 'end_date_to' in flt:
             self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
         if 'measure_status_id_list' in flt:
