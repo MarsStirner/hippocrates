@@ -182,25 +182,15 @@ def api_0_recently_modified_charts():
 @module.route('/api/0/need_hospitalization/<int:person_id>/')
 @api_method
 def api_0_need_hospitalization(person_id=None):
-    # получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня
-
-    def get_delivery_date(event):
-        action = PregnancyCard.get_for_event(event).attrs
-        return action['predicted_delivery_date'].value
-
+    """получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня"""
     if not person_id:
         person_id = safe_current_user_id()
 
-    patient_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
-                                    ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
-                ActionType.flatCode == 'cardAttributes', Action.deleted == 0,
-                ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,
-                ActionProperty_Integer.value_.in_([3, 4]))\
-        .all()
-    patient_list = filter(lambda x: get_pregnancy_week(x) >= 38, patient_list)
-    patient_list.sort(key=get_delivery_date)
-    return [represent_chart_short(event) for event in patient_list]
+    stats_ctrl = StatsController()
+    events = stats_ctrl.get_cards_urgent_hosp(person_id)
+    return [
+        represent_chart_short(event) for event in events
+    ]
 
 
 @module.route('/api/0/stats/pregnancy_week_diagram/')
