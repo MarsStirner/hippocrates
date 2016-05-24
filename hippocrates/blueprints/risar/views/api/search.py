@@ -242,7 +242,7 @@ def api_0_area_list():
         risar_regions = app.config.get('RISAR_REGIONS', [])
     for region in risar_regions:
         l1 = Vesta.get_kladr_locality(region)
-        l2 = Vesta.get_kladr_locality_list("2", region)
+        l2 = Vesta.get_kladr_locality_list(None, region)
         level1[l1.code] = l1.name
         level2.extend(l2) if l2 else level2.append(l1)
     return level1, sorted(level2, key=lambda x: x.name)
