@@ -132,10 +132,11 @@ def api_ttj_change_status():
             )
         except requests.ConnectionError:
             raise ApiException(500, u'Cannot connect to core')
-    TakenTissueJournal.query.filter(
-        TakenTissueJournal.id.in_(ids)
-    ).update(
-        {TakenTissueJournal.statusCode: status['id']},
-        synchronize_session=False
-    )
-    db.session.commit()
+    else:
+        TakenTissueJournal.query.filter(
+            TakenTissueJournal.id.in_(ids)
+        ).update(
+            {TakenTissueJournal.statusCode: status['id']},
+            synchronize_session=False
+        )
+        db.session.commit()
