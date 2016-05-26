@@ -5,7 +5,7 @@ from flask import url_for
 
 from nemesis.app import app
 from nemesis.lib.frontend import frontend_config, uf_placeholders
-from usagicompat import HippoUsagiClient
+from hippocrates.usagicompat import HippoUsagiClient
 from version import version as app_version
 
 __author__ = 'viruzzz-kun'

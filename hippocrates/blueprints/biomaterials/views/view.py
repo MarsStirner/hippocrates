@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import render_template
 
-from blueprints.biomaterials.app import module
+from hippocrates.blueprints.biomaterials.app import module
 
 # noinspection PyUnresolvedReferences
 from . import api_json

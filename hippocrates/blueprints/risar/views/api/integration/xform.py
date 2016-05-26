@@ -9,7 +9,7 @@ import logging
 import jsonschema
 from dateutil.parser import parse as date_parse
 
-from blueprints.risar.views.api.integration.schemas import ClientSchema
+from hippocrates.blueprints.risar.views.api.integration.schemas import ClientSchema
 from nemesis.lib.apiutils import ApiException
 from nemesis.models.client import Client, ClientIdentification, ClientDocument, ClientPolicy, BloodHistory, \
     ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse

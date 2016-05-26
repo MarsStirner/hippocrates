@@ -2,7 +2,7 @@
 
 import datetime
 
-from blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
 
 
 def get_pregnancy_week(event, action=None, date=None):

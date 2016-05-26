@@ -14,7 +14,7 @@ from nemesis.models.client import Client, ClientAttach
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.lib.utils import format_hex_color, safe_dict
-from blueprints.risar.risar_config import attach_codes
+from hippocrates.blueprints.risar.risar_config import attach_codes
 
 
 class BaseFetcher(object):

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.time_converter import DateTimeUtil
-from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
     vascular_diseases, diabetes, antiphospholipid_syndrome, pregnancy_pathologies, risk_mkbs
-from blueprints.risar.models.risar import RisarRiskGroup
-from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
     first_inspection_code
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_bool, safe_int, safe_date
@@ -265,7 +265,7 @@ def reevaluate_preeclampsia_rate(card):
     и отображение преэклампсии установленной врачом
     :type card: PregnancyCard
     """
-    from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+    from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 
     def preec_diag(diag):
         DiagID = diag._diagnostic.MKB
@@ -510,7 +510,7 @@ def reevaluate_risk_groups(card):
     :param card:
     :return:
     """
-    from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
+    from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
     existing_groups = card.event.risk_groups
     found_groups = set(calc_risk_groups(card))
     for rg_record in existing_groups:

@@ -7,14 +7,14 @@ from nemesis.models.actions import Action
 from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
 from nemesis.systemwide import db
-from blueprints.risar.app import module
-from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
-from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
-from blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
-from blueprints.risar.lib.expert.em_result_repr import EmResultRepr
-from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from blueprints.risar.lib.utils import get_action_by_id
-from blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
+from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
+from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 
 
 @module.route('/api/0/event_measure/generate/')

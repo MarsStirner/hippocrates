@@ -6,8 +6,8 @@ import datetime
 import functools
 import sqlalchemy
 
-from blueprints.risar.lib.utils import get_action, get_action_list
-from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
+from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
@@ -110,7 +110,7 @@ class PregnancyCard(object):
 
     def get_card_attrs_action(self, auto=False):
         if self._card_attrs_action is None:
-            from blueprints.risar.lib.card_attrs import default_AT_Heuristic
+            from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic
 
             action = Action.query.join(ActionType).filter(
                 Action.event == self.event,

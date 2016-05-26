@@ -7,9 +7,9 @@ from flask import request, abort, url_for
 
 from flask.ext.login import current_user
 
-from blueprints.actions.lib.models import ActionAutoSave, ActionAutoSaveUnsaved
+from hippocrates.blueprints.actions.lib.models import ActionAutoSave, ActionAutoSaveUnsaved
 from ..app import module
-from blueprints.actions.lib.api import represent_action_template
+from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \

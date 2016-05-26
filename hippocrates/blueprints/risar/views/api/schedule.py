@@ -7,8 +7,8 @@ from flask import request
 from nemesis.lib.apiutils import api_method
 from nemesis.models.schedule import Schedule
 from nemesis.models.utils import safe_current_user_id
-from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_ticket
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent import represent_ticket
 
 
 __author__ = 'mmalkov'

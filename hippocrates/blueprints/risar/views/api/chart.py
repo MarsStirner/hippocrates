@@ -5,15 +5,15 @@ from flask import request
 from flask.ext.login import current_user
 from sqlalchemy import func
 
-from blueprints.risar.app import module
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, check_card_attrs_action_integrity, \
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, check_card_attrs_action_integrity, \
     reevaluate_dates
-from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
+from hippocrates.blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history
-from blueprints.risar.lib.utils import get_last_checkup_date
-from blueprints.risar.risar_config import attach_codes, request_type_pregnancy
+from hippocrates.blueprints.risar.lib.utils import get_last_checkup_date
+from hippocrates.blueprints.risar.risar_config import attach_codes, request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
 from nemesis.lib.diagnosis import create_or_update_diagnosis

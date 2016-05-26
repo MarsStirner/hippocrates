@@ -13,7 +13,7 @@ from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
 from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
-from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
 
 
 risk_rates_diagID = {

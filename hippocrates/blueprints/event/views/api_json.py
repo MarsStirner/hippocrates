@@ -3,10 +3,10 @@
 import datetime
 import logging
 
-from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
+from hippocrates.blueprints.event.app import module
+from hippocrates.blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
                                         save_executives, EventSaveController, MovingController, received_close)
-from blueprints.patients.lib.utils import add_or_update_blood_type
+from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request, abort
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.apiutils import api_method, ApiException

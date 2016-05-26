@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 from flask import request
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.models.actions import Action

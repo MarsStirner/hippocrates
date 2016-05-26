@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from blueprints.risar.models.vesta_props import VestaProperty
+from hippocrates.blueprints.risar.models.vesta_props import VestaProperty
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 

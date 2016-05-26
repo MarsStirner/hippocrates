@@ -11,7 +11,7 @@ from nemesis.lib.utils import safe_int
 from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
-from blueprints.risar.app import module
+from hippocrates.blueprints.risar.app import module
 
 
 __author__ = 'mmalkov'

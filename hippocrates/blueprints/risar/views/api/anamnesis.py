@@ -5,9 +5,9 @@ import logging
 from flask import request
 from flask.ext.login import current_user
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
-from blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse, public_endpoint

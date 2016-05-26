@@ -3,9 +3,9 @@
 from flask import render_template, request, redirect, url_for, abort
 from flask.ext.login import current_user
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity, reevaluate_card_fill_rate_all
-from blueprints.risar.lib.debug import get_debug_data
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity, reevaluate_card_fill_rate_all
+from hippocrates.blueprints.risar.lib.debug import get_debug_data
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType

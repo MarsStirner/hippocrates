@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
-from blueprints.risar.lib.expert.utils import can_edit_em_appointment, can_edit_em_result
+from hippocrates.blueprints.risar.lib.expert.utils import can_edit_em_appointment, can_edit_em_result
 
 
 class EventMeasureRepr(object):

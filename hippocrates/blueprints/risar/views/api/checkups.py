@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 from flask import request
 
-from blueprints.risar.app import module
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.represent import represent_checkup, represent_checkups
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.lib.represent import represent_checkup, represent_checkups
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime

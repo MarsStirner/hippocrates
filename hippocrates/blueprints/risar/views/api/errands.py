@@ -9,7 +9,7 @@ from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_int, string_to_datetime
-from blueprints.risar.lib.represent import represent_errand
+from hippocrates.blueprints.risar.lib.represent import represent_errand
 from sqlalchemy import func
 
 __author__ = 'viruzzz-kun'
