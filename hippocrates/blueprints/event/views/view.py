@@ -4,6 +4,7 @@ from flask import request, render_template, abort, redirect
 from flask.ext.login import current_user
 
 from nemesis.app import app
+from nemesis.lib.html_utils import UIException
 from ..app import module
 from nemesis.lib.utils import breadcrumb
 from nemesis.models.event import Event
@@ -18,9 +19,11 @@ def html_event_info():
     try:
         event_id = int(request.args['event_id'])
         event = Event.query.get(event_id)
+        if not event:
+            raise UIException(404, u'Обращение не найдено')
         requestType_kind = 'stationary' if event.is_stationary else 'policlinic'
     except (KeyError, ValueError):
-        return abort(400)
+        raise UIException(500, u'Неизвестная ошибка')
     # if event.is_stationary:
     #     wm10url = app.config['WEBMIS10_URL'].rstrip('/')
     #     if not wm10url:
