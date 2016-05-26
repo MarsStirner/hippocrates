@@ -20,8 +20,8 @@ def delete_schedules(dates, person_id):
         Schedule.deleted: 1,
     }, synchronize_session=False)
 
-    schedules.join(ScheduleTicket).filter(
-        ScheduleTicket.schedule_id == Schedule.id,
+    ScheduleTicket.query.filter(
+        ScheduleTicket.schedule_id.in_(schedules.with_entities(Schedule.id).subquery()),
     ).update({
         ScheduleTicket.deleted: 1
     }, synchronize_session=False)
