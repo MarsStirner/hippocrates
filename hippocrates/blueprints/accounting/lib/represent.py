@@ -377,7 +377,7 @@ class ServiceRepr(object):
     def represent_entity_lab_action(self, action):
         assignable = []
         assigned = []
-        for ap in action.properties:
+        for ap in sorted(action.properties, key=lambda prop: prop.type.idx):
             if ap.deleted != 1 and ap.type.isAssignable:
                 assignable.append([ap.type.id, ap.type.name, ap.pl_price if ap.has_pricelist_service else None])
                 if ap.isAssigned:
