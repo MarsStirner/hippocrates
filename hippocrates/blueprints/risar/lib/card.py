@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
-from weakref import WeakKeyDictionary, WeakValueDictionary
 
 import datetime
 
 import functools
 import sqlalchemy
 
+from weakref import WeakKeyDictionary, WeakValueDictionary
+
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
-    risar_anamnesis_pregnancy
+    risar_anamnesis_pregnancy, risar_epicrisis
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -122,6 +123,10 @@ class PregnancyCard(object):
             for action in get_action_list(self.event, risar_anamnesis_pregnancy).all()
         ]
 
+    @lazy
+    def epicrisis(self):
+        return get_action(self.event, risar_epicrisis, True)
+
     @property
     def attrs(self):
         return self.get_card_attrs_action()
@@ -149,7 +154,9 @@ class PregnancyCard(object):
         Пересчёт атрибутов карточки беременной
         """
         from .card_attrs import check_card_attrs_action_integrity, reevaluate_risk_rate, \
-            reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, reevaluate_card_fill_rate_all
+            reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, \
+            reevaluate_card_fill_rate_all
+        from .radzinsky_risks.calc import reevaluate_radzinsky_risks
 
         with db.session.no_autoflush:
             action = self.attrs
@@ -160,6 +167,7 @@ class PregnancyCard(object):
             reevaluate_preeclampsia_rate(self)
             reevaluate_risk_groups(self)
             reevaluate_card_fill_rate_all(self)
+            reevaluate_radzinsky_risks(self)
 
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):

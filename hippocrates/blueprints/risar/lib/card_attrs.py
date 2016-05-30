@@ -509,9 +509,11 @@ def reevaluate_card_fill_rate_epicrisis(card, update_general_rate=True):
     card.attrs['card_fill_rate_epicrisis'].value = epicrisis_fr
 
     if update_general_rate:
+        gen_up_data = dict(epicrisis_fr=epicrisis_fr)
         if old_cfr_epicrisis != epicrisis_fr:
-            reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate)
-        reevaluate_card_fill_rate(card, epicrisis_fr=epicrisis_fr)
+            ri_fr = reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate)
+            gen_up_data['repeated_inspection_fr'] = ri_fr
+        reevaluate_card_fill_rate(card, **gen_up_data)
     return epicrisis_fr
 
 
