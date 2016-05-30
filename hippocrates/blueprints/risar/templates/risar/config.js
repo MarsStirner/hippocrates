@@ -87,7 +87,9 @@ WebMis20
         api_chart_card_fill_history: '{{ url_for('.api_0_chart_card_fill_history') }}',
         api_chart_risk_groups_list: '{{ url_for('.api_0_chart_risks', event_id=-90) | replace("-90", "{0}") }}',
         api_concilium_list_get: '{{ url_for('.api_0_concilium_list_get', event_id=-90) | replace("-90", "{0}") }}',
-        api_concilium_get: '{{ url_for('.api_0_concilium_get', event_id=-90) | replace("-90", "{0}") }}'
+        api_concilium_get: '{{ url_for('.api_0_concilium_get', event_id=-90) | replace("-90", "{0}") }}',
+        api_person_contacts_get: '{{ url_for('schedule.api_person_contacts_get') }}{0}',
+
     }
 })
 ;

@@ -818,6 +818,7 @@ def represent_errand(errand_info):
         'set_person': errand_info.setPerson,
         'exec_person': errand_info.execPerson,
         'text': errand_info.text,
+        'communications': errand_info.communications,
         'planned_exec_date': errand_info.plannedExecDate,
         'exec_date': errand_info.execDate,
         'event': {'id': errand_info.event.id,

@@ -471,6 +471,11 @@ WebMis20
             return wrapper('GET', Config.url.api_concilium_get.format(event_id) + concilium_id);
         }
     };
+    this.utils = {
+        get_person_contacts: function(person_id){
+            return wrapper('GET', Config.url.api_person_contacts_get.format(person_id))
+        }
+    };
 }])
 .service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
     var event_source = new OneWayEvent(),
@@ -521,12 +526,17 @@ WebMis20
             page: page
         }, filters)
     };
-    this.create_errand = function (recipient, text, event_id, status, planned_exec_date) {
+    this.create_errand = function (recipient, text, event_id, status, planned_exec_date, communications) {
         Simargl.send_msg({
             topic: 'errand:new',
             recipient: recipient.id,
             sender: CurrentUser.id,
-            data: { text: text, event_id: event_id, status: status, planned_exec_date:planned_exec_date},
+            data: { text: text,
+                    event_id: event_id,
+                    status: status,
+                    planned_exec_date: planned_exec_date,
+                    communications: communications
+            },
             ctrl: true
         }).then(function (result) {
             NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);
