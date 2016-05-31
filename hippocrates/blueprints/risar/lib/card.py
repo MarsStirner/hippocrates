@@ -10,7 +10,7 @@ from weakref import WeakKeyDictionary, WeakValueDictionary
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
-    risar_anamnesis_pregnancy, risar_epicrisis
+    risar_anamnesis_pregnancy, risar_epicrisis, first_inspection_code
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -114,7 +114,13 @@ class PregnancyCard(object):
 
     @lazy
     def checkups(self):
-        return get_action_list(self.event, checkup_flat_codes).all()
+        return get_action_list(self.event, checkup_flat_codes).order_by(Action.begDate).all()
+
+    @lazy
+    def first_inspection(self):
+        for checkup in self.checkups:
+            if checkup.actionType.flatCode == first_inspection_code:
+                return checkup
 
     @lazy
     def prev_pregs(self):

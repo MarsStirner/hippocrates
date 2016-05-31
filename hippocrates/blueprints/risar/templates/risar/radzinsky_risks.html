@@ -1,0 +1,65 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="RadzinskyRisksCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Шкала рисков Радзинского') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+{#        <div class="box box-primary">#}
+{#            <div class="box-body">#}
+{#                <tabset vertical="true" type="pills">#}
+{#                    <tab heading="Vertical 1">Vertical content 1</tab>#}
+{#                    <tab heading="Vertical 2">Vertical content 2</tab>#}
+{#                </tabset>#}
+{#            </div>#}
+{#        </div>#}
+
+        <div class="row">
+        <div class="col-md-4">
+            <div class="list-group">
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected()}" ng-click="selectStage()">
+                    <span class="badge">14 / 30</span>
+                    Итоговые результаты
+                </a>
+                <a href="javascript:void(0);" class="list-group-item" ng-repeat="stage in rbRadzStage.objects"
+                    ng-class="{'active': isStageSelected(stage)}" ng-click="selectStage(stage)">
+                    <span class="badge">14 / 30</span>
+                    [[ stage.name ]]
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="box box-solid" ng-show="isStageSelected()">
+                <div class="box-header with-border">
+                    <h3 class="box-title">_ степень риска</h3>
+                </div>
+                <div class="box-body">
+                    <p>test</p>
+                </div>
+            </div>
+
+            <div class="box box-solid" ng-repeat="stage in rbRadzStage.objects" ng-show="isStageSelected(stage)">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Сумма баллов _</h3>
+                </div>
+                <div class="box-body">
+                    test [[stage.name]]
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/radzinsky_risks.js', v=app_version) }}"></script>
+{% endblock %}

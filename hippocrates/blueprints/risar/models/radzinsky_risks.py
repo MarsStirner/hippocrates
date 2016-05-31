@@ -27,7 +27,7 @@ class RisarRadzinskyRisks(db.Model):
     event = db.relationship('Event')
     risk_rate = db.relationship('rbRadzinskyRiskRate')
     # factors = db.relationship('rbRadzRiskFactor', secondary='RisarRadzinskyRisks_Factors', viewonly=True)
-    factor_stage_assoc = db.relationship('RisarRadzinskyRisks_FactorsAssoc', backref='radz_risk')
+    factors_assoc = db.relationship('RisarRadzinskyRisks_FactorsAssoc', backref='radz_risk')
 
     def __json__(self):
         return {
@@ -40,7 +40,9 @@ class RisarRadzinskyRisks(db.Model):
             'before32week_totalpoints': self.before32week_totalpoints,
             'after33week_totalpoints': self.after33week_totalpoints,
             'intranatal_totalpoints': self.intranatal_totalpoints,
-            'intranatal_growth': self.intranatal_growth
+            'intranatal_growth': self.intranatal_growth,
+            'risk_rate_id': self.risk_rate_id,
+            'risk_rate': self.risk_rate
         }
 
     def __int__(self):

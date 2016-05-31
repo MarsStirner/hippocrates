@@ -159,6 +159,7 @@
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Риски <span class="fa fa-caret-down"></span></button>
             <ul role="menu" class="dropdown-menu">
                 <li><a ng-href="{{ url_for('.html_risk_groups_list') }}?event_id={{ event_id_repl }}">Группы риска</a></li>
+                <li><a ng-href="{{ url_for('.html_radzinsky_risks') }}?event_id={{ event_id_repl }}">Шкала рисков Радзинского</a></li>
             </ul>
         </div>
         <a ng-href="{{ url_for('.html_routing') }}?event_id={{ event_id_repl }}&emergency=1" {{ navigation_btn_class_attribute(['.html_routing']) }}>Маршрутизация</a>
