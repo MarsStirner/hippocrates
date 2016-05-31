@@ -42,8 +42,7 @@ class ResearchSchema(Schema):
                 "realization_date": {
                     "type": "string",
                     "id": "research/realization_date",
-                    "description": "Дата выполнения исследования",
-                    "format": "date"
+                    "description": "Дата выполнения исследования"
                 },
                 "lpu_code": {
                     "type": "string",
@@ -69,6 +68,10 @@ class ResearchSchema(Schema):
                     "type": "string",
                     "id": "research/doctor_code",
                     "description": "Врач, проводивший исследование. Код из реестра сотрудников ЛПУ"
+                },
+                "status": {
+                    "description": "Статус мероприятия, справочник rbMeasureStatus",
+                    "type": "string"
                 }
             },
             "required": [

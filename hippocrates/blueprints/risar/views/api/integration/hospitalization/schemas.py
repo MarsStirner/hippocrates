@@ -20,12 +20,12 @@ class HospitalizationSchema(Schema):
             "description": "Госпитализация",
             "type": "object",
             "properties": {
-                "external_id": {
-                    "description": "Внешний ID",
+                "result_action_id": {
+                    "description": "ID Action с результатами госпитализации",
                     "type": "string"
                 },
-                "hospitalization_id": {
-                    "description": "ID госпистализации",
+                "external_id": {
+                    "description": "Внешний ID",
                     "type": "string"
                 },
                 "measure_id": {
@@ -63,7 +63,12 @@ class HospitalizationSchema(Schema):
                     "description": "Диагноз при выписке",
                     "type": "string",
                     "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                },
+                "status": {
+                    "description": "Статус мероприятия, справочник rbMeasureStatus",
+                    "type": "string"
                 }
-            }
+            },
+            "required": ["hospital", "doctor", "diagnosis_in", "diagnosis_out"]
         },
     ]
