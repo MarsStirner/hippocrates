@@ -42,8 +42,7 @@ class SpecialistsCheckupSchema(Schema):
                 "checkup_date": {
                     "type": "string",
                     "id": "specialists_checkup/checkup_date",
-                    "description": "Дата осмотра",
-                    "format": "date"
+                    "description": "Дата осмотра"
                 },
                 "lpu_code": {
                     "type": "string",
@@ -59,6 +58,10 @@ class SpecialistsCheckupSchema(Schema):
                     "type": "string",
                     "id": "specialists_checkup/diagnosis",
                     "description": "Диагноз в формате кода МКБ"
+                },
+                "status": {
+                    "description": "Статус мероприятия, справочник rbMeasureStatus",
+                    "type": "string"
                 }
             },
             "required": [

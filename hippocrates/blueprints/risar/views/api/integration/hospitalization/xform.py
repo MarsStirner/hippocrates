@@ -58,6 +58,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             'external_id': self.external_id,
             'hospitalization_id': self.target_obj.id,
             'measure_id': self.em.id,
+            'measure_status': self.em.literal_status,
             'date_in': an_props['ReceiptDate'].value,
             'date_out': an_props['IssueDate'].value,
             'hospital': self.person.organisation and self.person.organisation.TFOMSCode or '',
