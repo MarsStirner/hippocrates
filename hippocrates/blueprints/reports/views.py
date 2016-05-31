@@ -9,6 +9,7 @@
 import json
 from flask import make_response, request
 from nemesis.lib.utils import jsonify, public_endpoint
+from nemesis.app import app
 
 from blueprints.reports.jasper_client import JasperReport
 from blueprints.reports.models import rbRisarPrintTemplateMeta
@@ -50,10 +51,17 @@ def print_jr_templates_post():
         InputPrepare().report_data(doc)
         for doc in data.get('documents', [])
     ]
-    # несколько отчетов на один запрос не поддерживается
+    # несколько отчетов на один запрос еще не поддерживается
     report_data = report_data_list[0]
     template_uri, template_code, params = report_data
     table_name, file_format = template_code.rsplit('.', 1)
+    params.update({
+        'mongo_host': app.config.get('MONGO_HOST', '10.1.2.11'),
+        'mongo_port': app.config.get('MONGO_PORT', '27017'),
+        'mongo_dbname': app.config.get('MONGO_DBNAME', 'nvesta'),
+        'mongo_user': app.config.get('MONGO_USERNAME', ''),
+        'mongo_pw': app.config.get('MONGO_PASSWORD', ''),
+    })
     jasper_report = JasperReport(
         table_name,
         template_uri,

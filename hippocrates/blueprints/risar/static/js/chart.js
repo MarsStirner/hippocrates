@@ -78,16 +78,22 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
     $scope.create_errand = function () {
         var model = {
             set_person: CurrentUser.info,
+            communications: '',
             exec_person: $scope.chart.person,
             is_author: true,
             event: {external_id: $scope.chart.external_id},
             status: $scope.rbErrandStatus.get_by_code('waiting')
         };
-        open_edit_errand(model).result.then(function (rslt) {
-            var result = rslt[0],
-                restart = rslt[1];
-            UserErrand.create_errand(result.exec_person, result.text, $scope.chart.id, result.status, result.planned_exec_date);
-        })
+
+        RisarApi.utils.get_person_contacts(model.set_person.id).then(function (contacts) {
+            model.communications = contacts;
+            open_edit_errand(model).result.then(function (rslt) {
+                var result = rslt[0],
+                    restart = rslt[1];
+                UserErrand.create_errand(result.exec_person, result.text, $scope.chart.id, result.status, result.planned_exec_date, result.communications);
+            });
+        });
+
     };
     $scope.add_inspection = function() {
         $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');

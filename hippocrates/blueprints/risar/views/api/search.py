@@ -2,6 +2,7 @@
 import datetime
 import json
 import math
+import time
 
 from blueprints.reports.jasper_client import JasperReport
 from flask import request, make_response
@@ -34,6 +35,12 @@ def sphinx_days(date_string):
     return int(timegm(date.timetuple()) / 86400)
 
 
+def sphinx_local_days(date_string):
+    date_string = date_string[:10]
+    date = datetime.datetime.strptime(date_string, '%Y-%m-%d')
+    return int(time.mktime(date.timetuple()))
+
+
 def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
@@ -56,15 +63,15 @@ def search_events(paginated=True, **kwargs):
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
     if 'bdate_from' in kwargs:
-        query = query.filter(bdate__gte=sphinx_days(kwargs['bdate_from']))
+        query = query.filter(bdate__gte=sphinx_local_days(kwargs['bdate_from']))
     if 'bdate_to' in kwargs:
-        query = query.filter(bdate__lte=sphinx_days(kwargs['bdate_to']))
+        query = query.filter(bdate__lte=sphinx_local_days(kwargs['bdate_to']))
     if 'psdate' in kwargs:
-        query = query.filter(psdate__eq=sphinx_days(kwargs['psdate']))
+        query = query.filter(psdate__eq=sphinx_local_days(kwargs['psdate']))
     if 'checkup_date_from' in kwargs:
-        query = query.filter(checkups__gte=sphinx_days(kwargs['checkup_date_from']))
+        query = query.filter(checkups__gte=sphinx_local_days(kwargs['checkup_date_from']))
     if 'checkup_date_to' in kwargs:
-        query = query.filter(checkups__lte=sphinx_days(kwargs['checkup_date_to']))
+        query = query.filter(checkups__lte=sphinx_local_days(kwargs['checkup_date_to']))
     if 'closed' in kwargs:
         if kwargs['closed']:
             query = query.filter(exec_date__neq=0)
@@ -235,7 +242,7 @@ def api_0_area_list():
         risar_regions = app.config.get('RISAR_REGIONS', [])
     for region in risar_regions:
         l1 = Vesta.get_kladr_locality(region)
-        l2 = Vesta.get_kladr_locality_list("2", region)
+        l2 = Vesta.get_kladr_locality_list(None, region)
         level1[l1.code] = l1.name
         level2.extend(l2) if l2 else level2.append(l1)
     return level1, sorted(level2, key=lambda x: x.name)

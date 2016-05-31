@@ -51,6 +51,12 @@ class StatsController(BaseModelController):
     def get_risk_groups_distribution(self, person_id, curation_level):
         return dict(self.get_selecter().get_risk_group_counts(person_id, curation_level))
 
+    def get_cards_urgent_hosp(self, person_id):
+        """Карты пациенток, требующие срочной госпитализации"""
+        sel = self.get_selecter()
+        events = sel.get_events_urgent_hosp(person_id)
+        return events
+
 
 class StatsSelecter(BaseSelecter):
 
@@ -269,6 +275,72 @@ class StatsSelecter(BaseSelecter):
                     q_event_psd.c.psd
                 ) / 7
             ) + 1
+        )
+
+        self.query = query
+        return self.get_all()
+
+    def get_events_urgent_hosp(self, person_id):
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        # main query
+        query = self.query_main(person_id, None)
+
+        # event prr query
+        q_event_prr = self.model_provider.get_query('Event')
+        q_event_prr = q_event_prr.join(
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'prenatal_risk_572'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
+        ).subquery('EventPerinatalRiskRate')
+
+        # event pregnancy start date
+        q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
+
+        # event predicted delivery date
+        q_event_pdd = self.model_provider.get_query('Event')
+        q_event_pdd = q_event_pdd.join(
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'predicted_delivery_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
+        ).subquery('EventPredictedDeliveryDate')
+
+        query = query.join(
+            q_event_prr,
+            and_(Event.id == q_event_prr.c.event_id,
+                 q_event_prr.c.prr.in_([PerinatalRiskRate.medium[0], PerinatalRiskRate.high[0]]))
+        ).join(
+            q_event_pdd, Event.id == q_event_pdd.c.event_id
+        ).join(
+            q_event_psd, Event.id == q_event_psd.c.event_id
+        ).filter(
+            # неделя беременности
+            func.floor(
+                func.datediff(
+                    func.IF(func.coalesce(q_event_pdd.c.pdd, func.curdate()) < func.curdate(),
+                            q_event_pdd.c.pdd,
+                            func.curdate()),
+                    q_event_psd.c.psd
+                ) / 7
+            ) + 1 >= 38
+        ).order_by(
+            q_event_pdd.c.pdd
         )
 
         self.query = query

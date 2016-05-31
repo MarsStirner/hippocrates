@@ -2,25 +2,26 @@
 
 import calendar
 import datetime
-from collections import defaultdict
 import logging
+from collections import defaultdict
+
 
 from flask import abort, request
 from flask.ext.login import current_user
-
-from nemesis.systemwide import db, cache
+from nemesis.lib.apiutils import api_method
+from nemesis.lib.jsonify import ScheduleVisualizer, PersonTreeVisualizer
 from nemesis.lib.sphinx_search import SearchPerson
 from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt,
     safe_traverse_attrs, format_date, initialize_name, safe_int)
 from nemesis.lib.utils import public_endpoint
-from nemesis.lib.apiutils import api_method
-from ..app import module
-from ..lib.data import delete_schedules
-from nemesis.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
+from nemesis.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality, )
+
 from nemesis.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
     rbAttendanceType, QuotingByTime)
-from nemesis.lib.jsonify import ScheduleVisualizer, PersonTreeVisualizer
-
+from nemesis.systemwide import db, cache
+from ..app import module
+from ..lib.data import delete_schedules
+from ..lib.utils import person_contacts_for_errand
 
 __author__ = 'mmalkov'
 
@@ -369,6 +370,13 @@ def api_search_persons():
 def api_person_get(person_id=None):
     person = Person.query.get_or_404(person_id)
     return PersonTreeVisualizer().make_full_person(person)
+
+@module.route('/api/person_contacts/')
+@module.route('/api/person_contacts/<int:person_id>')
+@api_method
+def api_person_contacts_get(person_id=None):
+    return person_contacts_for_errand(person_id, delimiter=', ')
+
 
 
 # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
