@@ -2,8 +2,9 @@
 
 from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
+from nemesis.lib.html_utils import UIException
 
-from nemesis.lib.utils import roles_require
+from nemesis.lib.utils import roles_require, bail_out, parse_id
 from nemesis.models.client import Client
 from nemesis.lib.utils import breadcrumb
 from hippocrates.blueprints.schedule.app import module
@@ -16,22 +17,15 @@ from . import api_html, api_json
 
 @module.route('/')
 def index():
-    try:
-        return render_template('schedule/index.html')
-    except TemplateNotFound:
-        abort(404)
+    return render_template('schedule/index.html')
 
 
 @module.route('/appointment/')
 @breadcrumb(u'Запись на прием')
 def appointment():
-    try:
-        client_id = int(request.args['client_id'])
-    except (KeyError, ValueError):
-        return abort(404)
-    client = Client.query.get(client_id)
-    if not client:
-        return abort(404)
+    client_id = parse_id(request.args, 'client_id')
+    client_id is False and bail_out(UIException(400, u'Некорректное значение client_id'))
+    client = Client.query.get(client_id) or bail_out(UIException(404, u'Пациент не найден'))
     return render_template(
         'schedule/person_appointment.html',
         client=client
@@ -41,20 +35,14 @@ def appointment():
 @module.route('/person_month/')
 @roles_require(*UserProfileManager.ui_groups['registrator'])
 def person_schedule_monthview():
-    try:
-        return render_template('schedule/person_schedule_monthview.html')
-    except TemplateNotFound:
-        abort(404)
+    return render_template('schedule/person_schedule_monthview.html')
 
 
 @module.route('/doctor/')
 @roles_require(*UserProfileManager.ui_groups['doctor'])
 @breadcrumb(u'Приём пациентов')
 def doctor_schedule_day():
-    try:
-        return render_template('schedule/doctor_schedule_day.html')
-    except TemplateNotFound:
-        abort(404)
+    return render_template('schedule/doctor_schedule_day.html')
 
 
 @module.route('/day_free.html')

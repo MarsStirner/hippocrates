@@ -16,7 +16,8 @@ from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEv
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int)
+from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
+                               parse_id, bail_out)
 from nemesis.models.accounting import Service, Contract
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
 from nemesis.models.client import Client
@@ -29,17 +30,6 @@ from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 
 logger = logging.getLogger('simple')
-
-
-@module.errorhandler(EventSaveException)
-def handle_event_error(err):
-    base_msg = u'Ошибка сохранения данных обращения'
-    code = err.data and err.data.get('code') or 500
-    msg = err.message or base_msg
-    ext_msg = err.data and err.data.get('ext_msg') or ''
-    if ext_msg:
-        msg = u'%s: %s' % (msg, ext_msg)
-    return jsonify(None, code, msg)
 
 
 @module.route('/api/event_info.json')
@@ -73,6 +63,7 @@ def api_event_new_get():
 
 
 @module.route('/api/event_stationary_opened.json', methods=['GET'])
+@api_method
 def api_event_stationary_open_get():
     client_id = int(request.args['client_id'])
     events = Event.query.join(EventType, rbRequestType).filter(
@@ -82,7 +73,7 @@ def api_event_stationary_open_get():
         rbRequestType.code.in_(STATIONARY_EVENT_CODES)
     ).order_by(Event.setDate.desc())
     v = EventVisualizer()
-    return jsonify([v.make_short_event(event) for event in events])
+    return map(v.make_short_event, events)
 
 
 @module.route('api/event_save.json', methods=['POST'])
@@ -95,38 +86,32 @@ def api_event_save():
     event_id = event_data.get('id')
 
     event_ctrl = EventSaveController()
-    try:
-        if event_id:
-            event = Event.query.get(event_id)
-            if not event:
-                raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
-            event_data = all_data['event']
-            event = event_ctrl.update_base_info(event, event_data)
-            event_ctrl.store(event)
-        else:
-            event = Event()
-            event = event_ctrl.create_base_info(event, all_data)
-            event_ctrl.store(event)
-            event_id = int(event)
-            if request_type_kind == 'policlinic':
-                visit = Visit.make_default(event)
-                db.session.add(visit)
-                db.session.commit()
-        result['id'] = int(event)
+    if event_id:
+        event = Event.query.get(event_id)
+        if not event:
+            raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
+        event_data = all_data['event']
+        event = event_ctrl.update_base_info(event, event_data)
+        event_ctrl.store(event)
+    else:
+        event = Event()
+        event = event_ctrl.create_base_info(event, all_data)
+        event_ctrl.store(event)
+        event_id = int(event)
+        if request_type_kind == 'policlinic':
+            visit = Visit.make_default(event)
+            db.session.add(visit)
+            db.session.commit()
+    result['id'] = int(event)
 
-        update_executives(event)
+    update_executives(event)
 
-        if request_type_kind == 'stationary':
-            received_data = all_data['received']
-            quota_data = all_data['vmp_quoting']
-            received_save(event_id, received_data)
-            if quota_data:
-                client_quota_save(event, quota_data)
-    except EventSaveException:
-        raise
-    except Exception, e:
-        logger.error(u'Ошибка сохранения обращения', exc_info=True)
-        raise EventSaveException(e)
+    if request_type_kind == 'stationary':
+        received_data = all_data['received']
+        quota_data = all_data['vmp_quoting']
+        received_save(event_id, received_data)
+        if quota_data:
+            client_quota_save(event, quota_data)
     return result
 
 
@@ -280,6 +265,7 @@ def update_executives(event):
 
 
 @module.route('api/event_close.json', methods=['POST'])
+@api_method
 def api_event_close():
     all_data = request.json
     event_data = all_data['event']
@@ -288,22 +274,17 @@ def api_event_close():
 
     error_msg = {}
     if not UserUtils.can_close_event(event, error_msg):
-        return jsonify(None, 403, u'Невозможно закрыть обращение: %s.' % error_msg['message'])
+        raise ApiException(403, u'Невозможно закрыть обращение: %s.' % error_msg['message'])
 
     if not event_data['exec_date']:
         event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
-    try:
-        save_event(event_id, all_data)
-        save_executives(event_id)
-    except EventSaveException:
-        raise
-    except Exception, e:
-        logger.error(e, exc_info=True)
-        raise EventSaveException()
-    return jsonify(None, result_name=u'Обращение закрыто')
+    save_event(event_id, all_data)
+    save_executives(event_id)
+    return {'result_name': u'Обращение закрыто'}
 
 
 @module.route('/api/diagnosis.json', methods=['POST'])
+@api_method
 def api_diagnosis_save():
     current_datetime = datetime.datetime.now()
     data = request.json
@@ -356,10 +337,10 @@ def api_diagnosis_save():
     db.session.add(diagnostic)
 
     db.session.commit()
-    return jsonify(None)
 
 
 @module.route('/api/diagnosis.json', methods=['DELETE'])
+@api_method
 def api_diagnosis_delete():
     data = request.json
     if data['diagnosis_id']:
@@ -370,14 +351,16 @@ def api_diagnosis_delete():
 
 
 @module.route('/api/diagnosis', methods=['GET'])
+@api_method
 def api_diagnosis_get():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
     vis = EventVisualizer()
-    return jsonify(vis.make_diagnoses(event))
+    return vis.make_diagnoses(event)
 
 
 @module.route('/api/service/service_price.json', methods=['GET'])
+@api_method
 def api_search_services():
     query = request.args['q']
     client_id = request.args['client_id']
@@ -435,19 +418,20 @@ def api_search_services():
         if s is not None:
             matched.append(s)
 
-    return jsonify(matched)
+    return matched
 
 
 @module.route('/api/event_payment/previous_local_contracts.json', methods=['GET'])
+@api_method
 def api_prev_event_payment_info_get():
     try:
         client_id = int(request.args['client_id'])
         finance_id = int(request.args.get('finance_id'))
         event_set_date = safe_datetime(request.args.get('set_date'))
-        if event_set_date is None:
-            event_set_date = datetime.datetime.now()
-    except (KeyError, ValueError, TypeError):
-        return abort(400)
+    except (KeyError, ValueError, TypeError) as e:
+        raise ApiException(400, u'Ошибка при обработке запроса. %s' % e)
+
+    event_set_date = event_set_date or datetime.datetime.now()
     request_type_codes = ['policlinic', '4', 'diagnosis', 'diagnostic']
 
     event_list = Event.query.join(EventType, rbRequestType).filter(
@@ -460,23 +444,24 @@ def api_prev_event_payment_info_get():
 
     vis = EventVisualizer()
     res = vis.make_prev_events_contracts(event_list)
-    return jsonify(res)
+    return res
 
 
 @module.route('/api/event_payment/client_local_contract.json', methods=['GET'])
+@api_method
 def api_client_payment_info_get():
-    try:
-        client_id = int(request.args['client_id'])
-    except (KeyError, ValueError):
-        return abort(400)
+    client_id = parse_id(request.args, 'client_id')
+    if client_id is None:
+        raise ApiException(400, u'Аргумент client_id должен быть числом')
 
     client = Client.query.get(client_id)
     vis = EventVisualizer()
     res = vis.make_event_payment(None, client)
-    return jsonify(res)
+    return res
 
 
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
+@api_method
 def api_service_delete_service():
     # TODO: validations
     action_ids = request.json['action_id_list']
@@ -486,15 +471,14 @@ def api_service_delete_service():
                        synchronize_session=False)
         db.session.commit()
 
-    return jsonify(None)
-
 
 @module.route('api/delete_event.json', methods=['POST'])
+@api_method
 def api_delete_event():
-    event_id = request.json.get('event_id')
-    if not event_id:
-        return abort(404)
-    event = Event.query.get_or_404(event_id)
+    event_id = parse_id(request.json, 'event_id')
+    if event_id is None:
+        raise ApiException(400, u'event_id должен быть числом')
+    event = Event.query.get(event_id) or bail_out(ApiException(404, u'Обращение не найдено'))
 
     msg = {}
     if UserUtils.can_delete_event(event, msg):
@@ -522,9 +506,9 @@ def api_delete_event():
             Service.deleted: 1,
         }, synchronize_session=False)
         db.session.commit()
-        return jsonify(None)
+        return
 
-    return jsonify(None, 403, msg.get('message', ''))
+    raise ApiException(403, msg.get('message', ''))
 
 
 @module.route('/api/events.json', methods=["POST"])
@@ -538,10 +522,10 @@ def api_get_events():
     context = EventVisualizer()
     if 'id' in flt:
         event = base_query.filter(Event.id == flt['id']).first()
-        return jsonify({
+        return {
             'pages': 1,
             'items': [context.make_short_event(event)] if event else []
-        })
+        }
     if 'external_id' in flt:
         base_query = base_query.filter(Event.externalId == flt['external_id'])
     if 'client_id' in flt:
@@ -642,6 +626,7 @@ def api_get_events():
 
 
 @module.route('/api/search.json', methods=['GET'])
+@api_method
 def api_event_search():
     query = request.args['q']
     result = SearchEvent.search(query)
@@ -650,7 +635,7 @@ def api_event_search():
     for event in result['result']['items']:
         event = Event.query.filter(Event.id == event['id']).first()
         events.append(viz.make_search_event_info(event))
-    return jsonify(events)
+    return events
 
 
 @module.route('/api/event_actions/')

@@ -2,7 +2,8 @@
 from flask import request
 
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_bool
+from nemesis.lib.html_utils import UIException
+from nemesis.lib.utils import safe_bool, bail_out
 from nemesis.models.actions import Action
 from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
@@ -21,7 +22,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 @module.route('/api/0/event_measure/generate/<int:action_id>')
 @api_method
 def api_0_event_measure_generate(action_id):
-    action = Action.query.get_or_404(action_id)
+    action = Action.query.get(action_id) or bail_out(UIException(404, u'Документ не найден'))
     measure_gen = EventMeasureGenerator(action)
     measure_gen.generate_measures()
     em_ctrl = EventMeasureController()
@@ -33,9 +34,7 @@ def api_0_event_measure_generate(action_id):
 @module.route('/api/0/event_measure/<int:event_measure_id>')
 @api_method
 def api_0_event_measure_get(event_measure_id=None):
-    em = EventMeasure.query.get(event_measure_id)
-    if not em:
-        raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+    em = EventMeasure.query.get(event_measure_id) or bail_out(ApiException(404, u'Не найдено EM с id = %s' % event_measure_id))
     return EventMeasureRepr().represent_em_full(em)
 
 
@@ -43,7 +42,7 @@ def api_0_event_measure_get(event_measure_id=None):
 @module.route('/api/0/event_measure/remove/<int:action_id>', methods=['POST'])
 @api_method
 def api_0_event_measure_remove(action_id):
-    action = Action.query.get_or_404(action_id)
+    action = Action.query.get(action_id) or bail_out(UIException(404, u'Документ не найден'))
     measure_gen = EventMeasureGenerator(action)
     measure_gen.clear_existing_measures()
     return []
@@ -53,7 +52,7 @@ def api_0_event_measure_remove(action_id):
 @module.route('/api/0/event_measure/execute/<int:event_measure_id>', methods=['POST'])
 @api_method
 def api_0_event_measure_execute(event_measure_id):
-    em = EventMeasure.query.get_or_404(event_measure_id)
+    em = EventMeasure.query.get(event_measure_id) or bail_out(UIException(404, u'Не найдено мероприятие'))
     em_ctrl = EventMeasureController()
     em_ctrl.execute(em)
     em_ctrl.store(em)
@@ -64,7 +63,7 @@ def api_0_event_measure_execute(event_measure_id):
 @module.route('/api/0/event_measure/cancel/<int:event_measure_id>', methods=['POST'])
 @api_method
 def api_0_event_measure_cancel(event_measure_id):
-    em = EventMeasure.query.get_or_404(event_measure_id)
+    em = EventMeasure.query.get(event_measure_id) or bail_out(UIException(404, u'Не найдено мероприятие'))
     em_ctrl = EventMeasureController()
     em_ctrl.cancel(em)
     em_ctrl.store(em)

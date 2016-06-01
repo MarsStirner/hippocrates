@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import request, abort
+from nemesis.lib.html_utils import UIException
 from ..app import module
 from nemesis.lib.settings import Settings
 
@@ -18,4 +19,4 @@ def before_risar_request():
         'config_js' in request.endpoint or
         settings.getBool('RISAR.Enabled', False)
     ):
-        abort(403)
+        raise UIException(403, u'Поддержка РИСАР не включена')

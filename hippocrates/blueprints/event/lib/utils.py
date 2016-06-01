@@ -24,9 +24,15 @@ from nemesis.systemwide import db
 logger = logging.getLogger('simple')
 
 
-class EventSaveException(Exception):
+class EventSaveException(ApiException):
     def __init__(self, message=u'', data=None):
-        super(EventSaveException, self).__init__(message)
+        base_msg = u'Ошибка сохранения данных обращения'
+        code = data and data.get('code') or 500
+        msg = message or base_msg
+        ext_msg = data and data.get('ext_msg') or ''
+        if ext_msg:
+            msg = u'%s: %s' % (msg, ext_msg)
+        super(EventSaveException, self).__init__(code, msg)
         self.data = data
 
 

@@ -7,12 +7,15 @@ import logging
 
 from flask import abort, request
 from flask.ext.login import current_user
+from nemesis.lib.html_utils import UIException
 
 from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
-from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool)
+from nemesis.lib.utils import (safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool,
+                               bail_out)
 from nemesis.lib.utils import public_endpoint
 from nemesis.lib.apiutils import api_method, ApiException
+from sqlalchemy.orm import joinedload
 from ..app import module
 from ..lib.data import delete_schedules
 from nemesis.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
@@ -27,6 +30,7 @@ logger = logging.getLogger('simple')
 
 
 @module.route('/api/schedule.json')
+@api_method
 @public_endpoint
 def api_schedule():
     person_id_s = request.args.get('person_ids')
@@ -43,7 +47,7 @@ def api_schedule():
             end_date = start_date + datetime.timedelta(weeks=1)
         client_id = int(client_id_s) if client_id_s else None
     except ValueError:
-        return abort(400)
+        raise ApiException(400, u'Проблемы с параметрами')
 
     result = {
         'schedules': [],
@@ -66,7 +70,7 @@ def api_schedule():
 
     if related:
         if not client_id:
-            return abort(400)
+            raise ApiException(400, u'client_id должен быть указан, если related')
         persons = Person.query.\
             join(ScheduleClientTicket.ticket, ScheduleTicket.schedule, Schedule.person).\
             filter(start_date <= Schedule.date, Schedule.date <= end_date).\
@@ -82,65 +86,65 @@ def api_schedule():
         schedules = context.make_persons_schedule(persons, start_date, end_date)
         result['schedules'] = schedules
 
-    return jsonify(result)
+    return result
 
 
 @module.route('/api/schedule-description.json', methods=['GET'])
+@api_method
 def api_schedule_description():
     person_id = parse_id(request.args, 'person_id')
-    if person_id is False:
-        return abort(400)
+    person_id is False and bail_out(ApiException(400, u'Некорректное значение person_id'))
     start_date_s = request.args.get('start_date')
     try:
         start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
         end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
     except ValueError:
-        return abort(400)
+        raise ApiException(400, u'Некорректная дата')
 
     context = ScheduleVisualizer()
-    person = Person.query.get(person_id)
-    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+    person = Person.query.get(person_id) or bail_out(ApiException(404, u'Врач не найден'))
+    return context.make_person_schedule_description(person, start_date, end_date)
 
 
 @module.route('/api/copy_schedule_description.json', methods=['GET'])
+@api_method()
 def api_copy_schedule_description():
     person_id = parse_id(request.args, 'person_id')
-    if person_id is False:
-        return abort(400)
+    person_id is False and bail_out(ApiException(400, u'Некорректное значение person_id'))
     from_start_date = safe_date(request.args.get('from_start_date'))
     from_end_date = safe_date(request.args.get('from_end_date'))
     to_start_date = safe_date(request.args.get('to_start_date'))
     to_end_date = safe_date(request.args.get('to_end_date'))
     if not (from_start_date and from_end_date and to_start_date and to_end_date):
-        return abort(400)
+        raise ApiException(400, u'Все параметры должны быть указаны: from_start_date, from_end_date, to_start_date, to_end_date')
 
     context = ScheduleVisualizer()
-    person = Person.query.get(person_id)
-    return jsonify(context.make_copy_schedule_description(person, from_start_date, from_end_date, to_start_date, to_end_date))
+    person = Person.query.get(person_id) or bail_out(ApiException(404, u'Врач не найден'))
+    return context.make_copy_schedule_description(person, from_start_date, from_end_date, to_start_date, to_end_date)
 
 
 @module.route('/api/day_schedule.json', methods=['GET'])
+@api_method
 def api_day_schedule():
     person_id = parse_id(request.args, 'person_id')
     proc_office_id = parse_id(request.args, 'proc_office_id')
-    if person_id is False:
-        return abort(400)
+    person_id is False and bail_out(ApiException(400, u'Некорректное значение person_id'))
     try:
         start_date = datetime.datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
         end_date = start_date + datetime.timedelta(days=1)
     except ValueError:
-        return abort(400)
+        raise ApiException(400, u'Некорректная дата')
 
     viz = ScheduleVisualizer()
-    person = Person.query.get(person_id)
+    person = Person.query.get(person_id) or bail_out(ApiException(404, u'Врач не найден'))
     if proc_office_id:
-        result = viz.make_procedure_office_schedule_description(proc_office_id, start_date, end_date, person)
+        return viz.make_procedure_office_schedule_description(proc_office_id, start_date, end_date, person)
     else:
-        result = viz.make_person_schedule_description(person, start_date, end_date)
-    return jsonify(result)
+        return viz.make_person_schedule_description(person, start_date, end_date)
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
+@api_method()
 def api_schedule_description_post():
     # TODO: validations
 
@@ -187,7 +191,7 @@ def api_schedule_description_post():
     if schedule:
         ok, msg = delete_schedules(dates, person_id)
         if not ok:
-            return jsonify({}, 422, msg)
+            raise ApiException(422, msg)
 
     for day_desc in schedule:
         date = safe_date(day_desc['date'])
@@ -217,17 +221,14 @@ def api_schedule_description_post():
                 new_sched.finance_id = safe_traverse(sub_sched, 'finance', 'id')
                 office_id = safe_traverse(sub_sched, 'office', 'id')
                 if not office_id and safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':
-                    return jsonify({}, 422, u'На %s не указан кабинет' % format_date(date))
+                    raise ApiException(422, u'На %s не указан кабинет' % format_date(date))
                 new_sched.office_id = office_id
                 new_sched.numTickets = sub_sched.get('planned', 0)
 
                 planned_count = sub_sched.get('planned')
                 if not planned_count:
-                    return jsonify({}, 422, u'На %s указаны интервалы с нулевым планом' % format_date(date))
-                make_tickets(new_sched,
-                             planned_count,
-                             sub_sched.get('extra', 0),
-                             sub_sched.get('CITO', 0))
+                    raise ApiException(422, u'На %s указаны интервалы с нулевым планом' % format_date(date))
+                make_tickets(new_sched, planned_count, sub_sched.get('extra', 0), sub_sched.get('CITO', 0))
 
     for quota_desc in quotas:
         date = safe_date(quota_desc['date'])
@@ -249,17 +250,23 @@ def api_schedule_description_post():
     start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
     end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
     context = ScheduleVisualizer()
-    person = Person.query.get(person_id)
-    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+    person = Person.query.get(person_id) or bail_out(ApiException(404, u'Врач не найден'))
+    return context.make_person_schedule_description(person, start_date, end_date)
 
 
 @module.route('/api/all_persons_tree.json')
+@api_method
 def api_all_persons_tree():
     sub_result = defaultdict(list)
-    persons = Person.query.\
-        filter(Person.deleted == 0).\
-        filter(Person.speciality).\
-        order_by(Person.lastName, Person.firstName)
+    persons = Person.query.filter(
+        Person.deleted == 0,
+        Person.speciality,
+    ).order_by(
+        Person.lastName, Person.firstName
+    ).options(
+        joinedload(Person.org_structure),
+        joinedload(Person.speciality),
+    )
     for person in persons:
         sub_result[person.speciality_id].append({
             'id': person.id,
@@ -267,42 +274,42 @@ def api_all_persons_tree():
             'nameFull': [person.lastName, person.firstName, person.patrName],
             'org_structure': safe_traverse_attrs(person, 'org_structure', 'name')
         })
+    rbSpecialityDict = rbSpeciality.cache().dict('id')
     result = [
         {
             'speciality': {
                 'id': spec_id,
-                'name': rbSpeciality.query.get(spec_id).name,
+                'name': rbSpecialityDict.get(spec_id).name,
             },
             'persons': person_list,
         } for spec_id, person_list in sub_result.iteritems()
     ]
-    return jsonify(result)
+    return result
 
 
 @module.route('/api/person/persons_tree_schedule_info.json')
+@api_method
 def api_persons_tree_schedule_info():
     beg_date = safe_date(request.args.get('beg_date'))
     end_date = safe_date(request.args.get('end_date'))
     if not (beg_date and end_date):
-        return abort(404)
+        raise ApiException(400, u'параметры beg_date и end_date должны быть указаны')
     result = db.session.query(Schedule.person_id).filter(
         Schedule.deleted == 0,
         Schedule.reasonOfAbsence_id.is_(None),
         beg_date <= Schedule.date,
         Schedule.date <= end_date
     ).distinct()
-    return jsonify({
+    return {
         'persons_with_scheds': [row[0] for row in result]
-    })
+    }
 
 
 @module.route('/api/search_persons.json')
+@api_method
 def api_search_persons():
-    try:
-        query_string = request.args['q']
-        only_doctors = safe_bool(request.args.get('only_doctors', True))
-    except (KeyError, ValueError):
-        return abort(404)
+    query_string = request.args.get('q') or bail_out(ApiException(400, u'Параметр "q" должен быть указан'))
+    only_doctors = safe_bool(request.args.get('only_doctors', True))
     try:
         result = SearchPerson.search(query_string)
 
@@ -346,14 +353,14 @@ def api_search_persons():
                 vrbPersonWithSpeciality.orgStructure_id != None
             )
         data = data.all()
-    return jsonify(data)
+    return data
 
 
 @module.route('/api/person/')
 @module.route('/api/person/<int:person_id>')
 @api_method
 def api_person_get(person_id=None):
-    person = Person.query.get_or_404(person_id)
+    person = Person.query.get(person_id) or bail_out(ApiException(404, u'Врач не найден'))
     return PersonTreeVisualizer().make_full_person(person)
 
 
@@ -450,14 +457,17 @@ def api_appointment():
 
 
 @module.route('/api/schedule_lock.json', methods=['POST'])
+@api_method
 def api_schedule_lock():
     j = request.json
+    person_id = parse_id(j, 'person_id')
+    person_id is False and bail_out(ApiException(400, u'person_id должен быть числом'))
+    'roa' not in j and bail_out(ApiException(400, u'roa должен быть указан'))
+    roa = j['roa']
     try:
-        person_id = j['person_id']
         date = datetime.datetime.strptime(j['date'], '%Y-%m-%d')
-        roa = j['roa']
     except (ValueError, KeyError):
-        return abort(418)
+        raise ApiException(400, u'Ошибка в дате')
     scheds = Schedule.query.filter(
         Schedule.person_id == person_id,
         Schedule.date == date,
@@ -469,13 +479,15 @@ def api_schedule_lock():
         }, synchronize_session=False)
     else:
         reasonOfAbsence = rbReasonOfAbsence.query.filter(rbReasonOfAbsence.code == roa).first()
-        if not scheds.count() or not reasonOfAbsence:
-            return abort(404)
+
+        if not scheds.count():
+            raise ApiException(404, u'Нечего блокировать')
+        if not reasonOfAbsence:
+            raise ApiException(404, u'Нет причины отсутствия с таким кодом')
         scheds.update({
             Schedule.reasonOfAbsence_id: reasonOfAbsence.id
         }, synchronize_session=False)
     db.session.commit()
-    return ''
 
 
 @module.route('/api/move_client.json', methods=['POST'])

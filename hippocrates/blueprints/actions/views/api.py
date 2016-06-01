@@ -337,10 +337,10 @@ def api_action_post(action_id=None):
 def api_get_action_ped():
     at_id = parse_id(request.args, 'action_type_id')
     if at_id is False:
-        return abort(404)
+        raise ApiException(404, u'Некорректное значение параметра action_type_id')
     at = ActionType.query.get(at_id)
     if not at:
-        return abort(404)
+        raise ApiException(404, u'Не найден тип действия ActionType.id = %s' % at_id)
     return {
         'ped': get_planned_end_datetime(at_id)
     }
@@ -391,7 +391,7 @@ def api_atl_get():
     # not used?
     at_class = int(request.args['at_class'])
     if not (0 <= at_class < 4):
-        return abort(401)
+        raise ApiException(404, u'Класс типа действия должен быть 0, 1, 2, или 3. Получен %s' % at_class)
 
     result = int_get_atl(at_class)
 
@@ -404,7 +404,7 @@ def api_atl_get_flat():
     at_class = int(request.args['at_class'])
     event_type_id = parse_id(request.args, 'event_type_id') or None
     if not (0 <= at_class < 4):
-        return abort(401)
+        raise ApiException(404, u'Класс типа действия должен быть 0, 1, 2, или 3. Получен %s' % at_class)
     result = int_get_atl_flat(at_class, event_type_id)
 
     return result
@@ -545,11 +545,13 @@ def api_action_template_save(type_id, id_=None):
 @module.route('/api/search_rls.json')
 @api_method
 def api_search_rls():
+    if 'q' not in request.args:
+        raise ApiException(400, u'Текст запроса должен быть указан в аргументе "q"')
+    query_string = request.args['q']
     try:
-        query_string = request.args['q']
         limit = int(request.args.get('limit', 100))
-    except (KeyError, ValueError):
-        return abort(404)
+    except ValueError:
+        raise ApiException(400, u'Аргумент "limit" должен быть числом')
 
     base_query = rlsNomen.query
 

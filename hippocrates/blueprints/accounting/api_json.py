@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import request
+from nemesis.lib.apiutils import api_method
 from sqlalchemy import func
 
 from .app import module
@@ -18,6 +19,7 @@ def api_event_make_payment():
     pay_data = request.json
     event_id = parse_id(pay_data, 'event_id')
     if not event_id:
+        # К такому меня жизнь не готовила
         return jsonify(u'Отсутствует номер обращения event_id', 422, 'ERROR')
     payment_date = safe_date(pay_data.get('payment_date'))
     if not payment_date:
@@ -59,6 +61,7 @@ def api_event_make_payment():
 
 
 @module.route('/api/event_payment/get_payments.json', methods=["POST"])
+@api_method
 def api_get_event_payments():
     flt = request.get_json()
     base_query = EventPayment.query.join(Event).filter(EventPayment.deleted == 0, Event.deleted == 0)
@@ -142,7 +145,7 @@ def api_get_event_payments():
     page = int(flt.get('page', 1))
     paginate = base_query.paginate(page, per_page, False)
     all_payment_id_list = base_query.with_entities(EventPayment.id).all()
-    return jsonify({
+    return {
         'pages': paginate.pages,
         'metrics': metrics,
         'items': [
@@ -150,4 +153,4 @@ def api_get_event_payments():
             for event in paginate.items
         ],
         'all_payment_id_list': all_payment_id_list
-    })
+    }

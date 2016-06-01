@@ -76,12 +76,14 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
 
         function watch_with_reload(n, o) {
+            if (angular.equals(n, o)) return;
             if ($scope.filter.lab && $scope.filter.status != 2) {
                 $scope.filter.lab = null;
             }
             $scope.get_data().then(_.passThrough($scope.set_current_records));
         }
         function watch_without_reload(n, o) {
+            if (angular.equals(n, o)) return;
             if ($scope.filter.lab && $scope.filter.status != 2) {
                 $scope.filter.lab = null;
             }

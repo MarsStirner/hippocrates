@@ -8,6 +8,7 @@ from nemesis.lib.settings import Settings
 from nemesis.models.event import Event
 from nemesis.models.exists import rbLaboratory, rbTest, rbLaboratory_TestAssoc, rbTestTubeType
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 
 from ..app import module
 from ..lib.utils import TTJVisualizer
@@ -40,7 +41,9 @@ def api_get_ttj_records():
     )
     if biomaterial:
         query = query.filter(TakenTissueJournal.tissueType_id == biomaterial['id'])
-    query = query.with_entities(
+    query = query.options(
+        joinedload(TakenTissueJournal.tissueType),
+    ).with_entities(
         TakenTissueJournal.id,
         TakenTissueJournal,
         Action,

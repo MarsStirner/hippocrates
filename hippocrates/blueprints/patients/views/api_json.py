@@ -4,12 +4,12 @@ import datetime
 import logging
 import os
 
-from flask import abort, request
+from flask import request
 
 from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import jsonify, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
+from nemesis.lib.utils import parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs, bail_out
 from hippocrates.blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
@@ -22,7 +22,7 @@ from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, Cli
     add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
     add_or_update_work_soc_status, store_file_locally
 )
-
+from sqlalchemy.orm import joinedload
 
 __author__ = 'mmalkov'
 
@@ -30,12 +30,13 @@ logger = logging.getLogger('simple')
 
 
 @module.route('/api/search_clients.json')
+@api_method
 def api_search_clients():
+    query_string = request.args.get('q') or bail_out(ApiException(400, u'Параметр "q" должен быть указан и содержать строку'))
     try:
-        query_string = request.args['q']
-        limit = int(request.args.get('limit', 100))
-    except (KeyError, ValueError):
-        return abort(404)
+        limit = int(request.args.get('limit', 100)) or bail_out(ApiException(400, u'Параметр limit должен быть положительным'))
+    except ValueError:
+        raise ApiException(400, u'Параметр limit должен быть числом')
 
     base_query = Client.query.outerjoin(ClientPolicy, ClientDocument, ClientContact)
     id_list = []
@@ -46,39 +47,38 @@ def api_search_clients():
         if id_list:
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
-            return jsonify([])
+            return []
     clients = base_query.order_by(db.func.field(Client.id, *id_list)).all()
     context = ClientVisualizer()
     if 'short' in request.args:
-        return jsonify(map(context.make_short_client_info, clients))
+        return map(context.make_short_client_info, clients)
     else:
-        return jsonify(map(context.make_search_client_info, clients))
+        return map(context.make_search_client_info, clients)
 
 
 @module.route('/api/patient.json')
+@api_method
 def api_patient_get():
     client_id = parse_id(request.args, 'client_id')
     if client_id is False:
-        return abort(404)
+        raise ApiException(400, u'Неверное значение параметра client_id')
     context = ClientVisualizer()
     if client_id:
-        client = Client.query.get(client_id)
-        if not client:
-            return abort(404)
+        client = Client.query.get(client_id) or bail_out(ApiException(404, u'Пациент не найден'))
 
         if 'for_servicing' in request.args:
-            return jsonify(context.make_client_info_for_servicing(client))
+            return context.make_client_info_for_servicing(client)
         elif 'short' in request.args:
-            return jsonify(context.make_short_client_info(client))
-        return jsonify({
+            return context.make_short_client_info(client)
+        return {
             'client_data': context.make_client_info(client)
-        })
+        }
     else:
         client = Client()
         # db.session.add(client)  # требуется привязанный к сессии клиент для доступа к некоторым атрибутам (documents)
-        return jsonify({
+        return {
             'client_data': context.make_client_info(client)
-        })
+        }
 
 
 @module.route('/api/patient_events.json', methods=['GET'])
@@ -86,7 +86,7 @@ def api_patient_get():
 def api_patient_events_get():
     client_id = parse_id(request.args, 'client_id')
     vsl = ClientVisualizer()
-    client = Client.query.get(client_id)
+    client = Client.query.get(client_id) or bail_out(ApiException(404, u'Пациент не найден'))
     return {
         'info': client,
         'events': vsl.make_events(client)
@@ -94,19 +94,18 @@ def api_patient_events_get():
 
 
 @module.route('/api/appointments.json')
+@api_method
 @public_endpoint
 def api_patient_appointments():
     client_id = parse_id(request.args, 'client_id')
     every = request.args.get('every', False)
     if client_id is False:
-        return abort(404)
+        raise ApiException(400, u'Неверное значение client_id')
+    if client_id is None:
+        raise ApiException(400, u'Параметр client_id должен быть указан')
     context = ClientVisualizer()
-    if client_id:
-        if Client.query.filter(Client.id == client_id).count():
-            return jsonify(context.make_appointments(client_id, every))
-        else:
-            return abort(404)
-    return jsonify(None, 400, 'Can\'t!')
+    Client.query.filter(Client.id == client_id).count() or bail_out(ApiException(404, u'Пациент не найден'))
+    return context.make_appointments(client_id, every)
 
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
@@ -223,22 +222,28 @@ def api_patient_save():
 
 # for tests without external kladr
 @module.route('/api/kladr_city.json', methods=['GET'])
+@api_method
 def api_kladr_city_get():
     from nemesis.models.kladr_models import Kladr
     val = request.args['city']
     res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
-    return jsonify([{'name': r.NAME,
-                    'code': r.CODE} for r in res])
+    return [
+        {'name': r.NAME, 'code': r.CODE}
+        for r in res
+    ]
 
 
 @module.route('/api/kladr_street.json', methods=['GET'])
+@api_method
 def api_kladr_street_get():
     from nemesis.models.kladr_models import Street
     city = request.args['city']
     street = request.args['street']
     res = Street.query.filter(Street.CODE.startswith(city[:-2]), Street.NAME.startswith(street)).all()
-    return jsonify([{'name': r.NAME,
-                    'code': r.CODE} for r in res])
+    return [
+        {'name': r.NAME, 'code': r.CODE}
+        for r in res
+    ]
 
 
 @module.route('/api/client_file_attach.json')

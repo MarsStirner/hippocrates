@@ -414,7 +414,7 @@ def represent_action_diagnoses(action):
     diagnosis_ids = [diagnostic.diagnosis_id for diagnostic in diagnostics]
 
     # По умолчанию все диагнозы сопутствующие, если не указано иного
-    associated_kind = rbDiagnosisKind.query.filter(rbDiagnosisKind.code == 'associated').first()
+    associated_kind = rbDiagnosisKind.cache().by_code().get('associated').first()
     types_info = {
         diag_type.code: associated_kind
         for diag_type in action.actionType.diagnosis_types

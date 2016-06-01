@@ -6,7 +6,7 @@ from flask.ext.login import current_user
 from nemesis.app import app
 from nemesis.lib.html_utils import UIException
 from ..app import module
-from nemesis.lib.utils import breadcrumb
+from nemesis.lib.utils import breadcrumb, bail_out, parse_id
 from nemesis.models.event import Event
 from nemesis.lib.user import UserProfileManager
 
@@ -40,11 +40,8 @@ def html_event_info():
 @module.route('/event_new.html')
 @breadcrumb(u'Создание обращения')
 def new_event():
-    try:
-        requestType_kind = request.args['requestType_kind']
-        client_id = int(request.args['client_id'])
-    except (KeyError, ValueError):
-        return abort(400)
+    requestType_kind = request.args.get('requestType_kind') or bail_out(UIException(400, u'Не указан параметр requestType_kind'))
+    client_id = parse_id(request.args, 'client_id') or bail_out(UIException(400, u'Параметр client_id должен быть числом'))
     return get_event_form(event=None, requestType_kind=requestType_kind, client_id=client_id)
 
 
@@ -60,15 +57,12 @@ def get_event_form(**kwargs):
             return render_template('event/event_info_stationary.html', **kwargs)
         elif (event and event.is_policlinic) or requestType_kind == 'policlinic':
             return render_template('event/event_info_policlinic.html', **kwargs)
-    return abort(403)
+    raise UIException(403, u'Для данной роли запрещён доступ к обращениям')
 
 
 @module.route('/event_group_choose.html')
 def request_type_kind_choose():
-    try:
-        client_id = int(request.args['client_id'])
-    except (KeyError, ValueError):
-        return abort(400)
+    client_id = parse_id(request.args, 'client_id') or bail_out(UIException(400, u'Параметр client_id должен быть числом'))
     return render_template('event/request_type_kind_choose.html', client_id=client_id)
 
 
