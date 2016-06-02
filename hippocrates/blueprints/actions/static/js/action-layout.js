@@ -181,8 +181,8 @@ angular.module('WebMis20')
                                     break;
                                 case 'OrgStructure': // Без фильтров
                                     inner_template =
-                                        '<wm-custom-dropdown ng-model="{0}.value">\
-                                            <wm-org-structure-tree></wm-org-structure-tree>\
+                                        '<wm-custom-dropdown>\
+                                            <wm-org-structure-tree ng-model="{0}.value"></wm-org-structure-tree>\
                                         </wm-custom-dropdown>';
                                     break;
                                 case 'ReferenceRb':

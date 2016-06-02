@@ -1,6 +1,6 @@
 WebMis20.controller('BiomaterialsIndexCtrl', [
-    '$scope', '$modal', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'MessageBox',
-    function ($scope, $modal, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, MessageBox) {
+    '$scope', '$modal', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'MessageBox', 'CurrentUser',
+    function ($scope, $modal, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, MessageBox, CurrentUser) {
         $scope.selected_records = new SelectAll([]);
         $scope.TTJStatus = RefBookService.get('TTJStatus');
         $scope.rbLaboratory = RefBookService.get('rbLaboratory');
@@ -16,7 +16,8 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
         $scope.filter = {
             execDate: new Date(),
-            status: null
+            status: null,
+            org_struct: CurrentUser.info.org_structure
         };
         $scope.current_result = [];
         $scope.set_current_records = function () {

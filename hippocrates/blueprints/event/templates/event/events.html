@@ -75,8 +75,8 @@
                             custom-name="rbResultFormatter" order-by="rbResultFormatter"></rb-select>
 
                         <label for="filter-org-struct">Подразделение</label>
-                        <wm-custom-dropdown id="filter-org-struct" ng-model="flt.org_struct">
-                            <wm-org-structure-tree nodes-selectable="true"></wm-org-structure-tree>
+                        <wm-custom-dropdown id="filter-org-struct">
+                            <wm-org-structure-tree ng-model="flt.org_struct" nodes-selectable="true"></wm-org-structure-tree>
                         </wm-custom-dropdown>
 
                         <label for="filter-diag-mkb">МКБ диагноза</label>
