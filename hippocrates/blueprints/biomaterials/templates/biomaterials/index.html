@@ -96,7 +96,9 @@
                             <td ng-click="open_info(record)">[[record.client.birth_date | asDate]]</td>
                             <td ng-click="open_info(record)"><div ng-repeat="person in record.set_persons">[[person.short_name]]</div></td>
                             <td ng-click="open_info(record)">[[record.tissueType.name]] ([[record.actions.length]])</td>
-                            <td ng-click="open_info(record)"><div ng-repeat="action in record.actions">[[action.action_type.title]]</div></td>
+                            <td><div ng-repeat="action in record.actions">
+                                <a href="#" ng-click="open_action(action.id)" ng-bind="action.action_type.title"></a>
+                            </div></td>
                             <td><span ng-if="record.isUrgent" class="label label-warning">CITO</span></td>
                         </tr>
                     </tbody>

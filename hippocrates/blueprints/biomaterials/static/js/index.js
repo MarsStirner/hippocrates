@@ -1,6 +1,6 @@
 WebMis20.controller('BiomaterialsIndexCtrl', [
-    '$scope', '$modal', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'MessageBox', 'CurrentUser',
-    function ($scope, $modal, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, MessageBox, CurrentUser) {
+    '$scope', '$modal', '$window', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'MessageBox', 'CurrentUser',
+    function ($scope, $modal, $window, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, MessageBox, CurrentUser) {
         $scope.selected_records = new SelectAll([]);
         $scope.TTJStatus = RefBookService.get('TTJStatus');
         $scope.rbLaboratory = RefBookService.get('rbLaboratory');
@@ -74,6 +74,9 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 scope: scope,
                 size: 'lg'
             })
+        };
+        $scope.open_action = function (action_id) {
+            $window.open(url_for_schedule_html_action + '?action_id=' + action_id)
         };
 
         function watch_with_reload(n, o) {
