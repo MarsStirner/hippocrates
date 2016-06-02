@@ -8,6 +8,7 @@ from flask import request, abort, url_for
 from flask.ext.login import current_user
 
 from hippocrates.blueprints.actions.lib.models import ActionAutoSave, ActionAutoSaveUnsaved
+from sqlalchemy.orm import joinedload
 from ..app import module
 from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
@@ -18,7 +19,7 @@ from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict, safe_bool
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict, safe_bool, bail_out
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
@@ -89,7 +90,13 @@ def api_action_new_get(action_type_id, event_id):
 @api_method
 def api_action_get(action_id):
     with db.session.no_autoflush:
-        action = Action.query.get(action_id)
+        action = Action.query.options(
+            joinedload(Action.actionType),
+            joinedload(Action.event),
+            joinedload(Action.person),
+            joinedload(Action.properties),
+            joinedload(Action.medication_prescriptions),
+        ).filter(Action.id == action_id).first() or bail_out(ApiException(404, u'Документ не найден'))
         v = ActionVisualizer()
         if is_template_action(action):
             return v.make_action_wo_sensitive_props(action)
