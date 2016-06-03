@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog, PersonTreeUpdater) {
+var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog, PersonTreeUpdater, WMConfig) {
     $scope.modal = {};
     $scope.max_tickets = [];
     $scope.person_schedules = [];
@@ -74,7 +74,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
 
     $scope.loadData = function () {
         $http.get(
-            url_schedule_api_schedule, {
+            WMConfig.url.schedule.schedule, {
                 params: {
                     client_id: $scope.client_id,
                     start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
@@ -165,7 +165,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
     $scope.$watch('user_selected', function (new_value, old_value) {
         var new_ids = new_value.filter(aux.func_not_in(old_value + $scope.data_selected));
         if (new_ids.length) {
-            $http.get(url_schedule_api_schedule, {
+            $http.get(WMConfig.url.schedule.schedule, {
                 params: {
                     client_id: $scope.client_id,
                     person_ids: new_ids[0],
@@ -189,4 +189,4 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
 
     $scope.monthChanged();
 };
-WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', 'PersonTreeUpdater', PersonAppointmentCtrl]);
+WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', 'PersonTreeUpdater', 'WMConfig', PersonAppointmentCtrl]);

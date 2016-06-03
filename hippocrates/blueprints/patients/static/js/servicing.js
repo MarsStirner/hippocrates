@@ -61,7 +61,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
     };
 
     $scope.new_appointment = function(client_id) {
-        var url = url_schedule_appointment_html + '?client_id=' + client_id;
+        var url = WMConfig.url.schedule.html.appointment + '?client_id=' + client_id;
         WMWindowSync.openTab(url, $scope.reload_client);
     };
 

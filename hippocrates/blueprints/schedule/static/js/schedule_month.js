@@ -119,7 +119,7 @@ var DayFreeModalCtrl = function ($scope, $modalInstance, roa) {
         $scope.model.roa = null;
     };
 };
-var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpdater, $location) {
+var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpdater, $location, WMConfig) {
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
     $scope.rbTimeQuotingType = new RefBook('rbTimeQuotingType');
@@ -148,7 +148,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
     $scope.reloadSchedule = function () {
         if ($scope.person_id) {
             $http.get(
-                url_schedule_api_schedule_description, {
+                WMConfig.url.schedule.schedule_description, {
                     params: {
                         person_id: $scope.person_id,
                         start_date: $scope.monthDate.format('YYYY-MM'),
@@ -239,7 +239,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
 
     $scope.finish_editing = function () {
         $http.post(
-            url_schedule_api_schedule_description_post, {
+            WMConfig.url.schedule.schedule_description, {
                 person_id: $scope.person_id,
                 schedule: $scope.schedules.filter(function (day) {
                     return day.altered;
@@ -447,13 +447,13 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
             }
         });
         instance.result.then(function (roa) {
-            $http.post(url_schedule_api_schedule_lock, {
+            $http.post(WMConfig.url.schedule.schedule_lock, {
                 person_id: $scope.person_id,
                 date: day.date,
                 roa: roa
             }).success(function () {
                 if (roa) {
-                    window.open(url_schedule_api_html_day_free +
+                    window.open(WMConfig.url.schedule.html.day_free +
                     '?person_id=' + $scope.person_id +
                     '&date=' + day.date,
                         '_self');
@@ -478,7 +478,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
             to_end_date = $scope.monthDate.clone().endOf('month');
 
         $http.get(
-            url_api_copy_schedule_description, {
+            WMConfig.url.schedule.copy_schedule_description, {
                 params: {
                     person_id: $scope.person_id,
                     from_start_date: from_start_date.format('YYYY-MM-DD'),
@@ -547,4 +547,4 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
         return text;
     };
 };
-WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', 'PersonTreeUpdater', '$location', ScheduleMonthCtrl]);
+WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', 'PersonTreeUpdater', '$location', 'WMConfig', ScheduleMonthCtrl]);

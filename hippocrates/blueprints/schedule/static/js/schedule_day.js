@@ -1,5 +1,5 @@
 var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $anchorScroll, WMClient,
-        PrintingService, WMAppointmentDialog, WMProcedureOffices, CurrentUser) {
+        PrintingService, WMAppointmentDialog, WMProcedureOffices, CurrentUser, WMConfig) {
     $scope.client_id = null;
     $scope.client = null;
     $scope.person = {};
@@ -24,7 +24,7 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
         var person_id = CurrentUser.get_main_user().id,
             proc_office_id = safe_traverse($scope.proc_office, ['selected', 'id']);
         $http.get(
-            url_schedule_api_day_schedule, {
+            WMConfig.url.schedule.day_schedule, {
                 params: {
                     person_id: person_id,
                     proc_office_id: proc_office_id,
@@ -134,7 +134,7 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
     };
 
     $scope.new_appointment = function(client_id) {
-        $scope.child_window = window.open(url_schedule_appointment_html + '?client_id=' + client_id, '_blank');
+        $scope.child_window = window.open(WMConfig.url.schedule.html.appointment + '?client_id=' + client_id, '_blank');
     };
 
     $scope.get_full_schedule_url = function () {
@@ -142,9 +142,9 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
             safe_traverse($scope.proc_office, ['selected', 'id']) :
             $scope.person.id;
         if (id_) {
-            return '{0}?person_id={1}'.format(url_schedule_index, id_);
+            return '{0}?person_id={1}'.format(WMConfig.url.schedule.html.index, id_);
         }
-        return url_schedule_index;
+        return WMConfig.url.schedule.html.index;
     };
 
     var interval;
@@ -168,4 +168,4 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
     });
 };
 WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$filter', '$interval', '$location', '$anchorScroll',
-    'WMClient', 'PrintingService', 'WMAppointmentDialog', 'WMProcedureOffices', 'CurrentUser', ScheduleDayCtrl]);
+    'WMClient', 'PrintingService', 'WMAppointmentDialog', 'WMProcedureOffices', 'CurrentUser', 'WMConfig', ScheduleDayCtrl]);

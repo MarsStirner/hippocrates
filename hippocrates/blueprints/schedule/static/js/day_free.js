@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
+var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater, WMConfig) {
     $scope.aux = aux;
     var params = aux.getQueryParams(location.search);
 
@@ -20,7 +20,7 @@ var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
 
     $scope.reloadSchedule = function () {
         if (! $scope.destinationPerson) return;
-        $http.get(url_schedule_api_schedule, {
+        $http.get(WMConfig.url.schedule.schedule, {
             params: {
                 person_ids: $scope.destinationPerson,
                 start_date: moment($scope.destinationDate).format('YYYY-MM-DD'),
@@ -42,7 +42,7 @@ var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
     };
 
     var loadSchedule = function () {
-        $http.get(url_schedule_api_schedule, {
+        $http.get(WMConfig.url.schedule.schedule, {
             params: {
                 person_ids: params.person_id,
                 start_date: $scope.sourceDate.format('YYYY-MM-DD'),
@@ -70,7 +70,7 @@ var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
     $scope.pasteSourceTicket = function (ticket) {
         if (!$scope.selectedSourceTicket) return;
         if (ticket.status !== 'free') return;
-        $http.post(url_schedule_api_move_client, {
+        $http.post(WMConfig.url.schedule.move_client, {
             ticket_id: $scope.selectedSourceTicket.id,
             destination_ticket_id: ticket.id
         })
@@ -95,9 +95,9 @@ var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
     };
 
     $scope.back2monthview = function () {
-        window.open(url_schedule_html_person_schedule_monthview + '?person_id=' + params.person_id, '_self')
+        window.open(WMConfig.url.schedule.html.person_monthview + '?person_id=' + params.person_id, '_self')
     };
 
     loadSchedule();
 };
-WebMis20.controller('DayFreeCtrl', ['$scope', '$http', 'PersonTreeUpdater', DayFreeCtrl]);
+WebMis20.controller('DayFreeCtrl', ['$scope', '$http', 'PersonTreeUpdater', 'WMConfig', DayFreeCtrl]);

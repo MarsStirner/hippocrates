@@ -61,7 +61,7 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
         var forced = arguments[0] === true;
         if ($scope.person_id) {
             $http.get(
-                url_schedule_api_schedule,
+                WMConfig.url.schedule.schedule,
                 {
                     params: {
                         person_ids: $scope.person_id,
