@@ -2,7 +2,7 @@
  * Created by mmalkov on 11.07.14.
  */
 var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonTreeUpdater, WMAppointmentDialog,
-                             PrintingService, PrintingDialog, MessageBox, CurrentUser) {
+                             PrintingService, PrintingDialog, MessageBox, CurrentUser, WMConfig) {
     $scope.aux = aux;
     var params = aux.getQueryParams();
     $scope.person_id = params.person_id;
@@ -149,8 +149,8 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
 
     $scope.view_patient_info = function (ticket) {
         var url = CurrentUser.current_role_in('admin', 'clinicRegistrator') ?
-            url_client_html :
-            url_for_patien_info_full;
+            WMConfig.url.patients.client_html :
+            WMConfig.url.patients.client_info_full;
         url += '?client_id=' + ticket.record.client_id;
         $window.open(url);
     };
@@ -191,4 +191,4 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
     //}
 };
 WebMis20.controller('ScheduleCtrl', ['$scope', '$http', '$window', '$location', 'RefBook', 'PersonTreeUpdater',
-    'WMAppointmentDialog', 'PrintingService', 'PrintingDialog', 'MessageBox', 'CurrentUser', ScheduleCtrl]);
+    'WMAppointmentDialog', 'PrintingService', 'PrintingDialog', 'MessageBox', 'CurrentUser', 'WMConfig', ScheduleCtrl]);

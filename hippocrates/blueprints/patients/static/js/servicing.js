@@ -9,7 +9,7 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
         $modalInstance.close(true);
     };
 };
-var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, PrintingService, WMWindowSync, client) {
+var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, PrintingService, WMWindowSync, client, WMConfig) {
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.alerts = [];
@@ -71,7 +71,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
     };
 
     $scope.open_client = function (client_id) {
-        var url = url_client_html + '?client_id=' + client_id;
+        var url = WMConfig.url.patients.client_html + '?client_id=' + client_id;
         WMWindowSync.openTab(url, $scope.reload_client);
     };
 
@@ -146,5 +146,5 @@ var ClientSearch = function ($scope, WMClient, $modal, CurrentUser) {
 };
 WebMis20.controller('ClientSearch', ['$scope', 'WMClient', '$modal', 'CurrentUser', ClientSearch]);
 WebMis20.controller('ClientModalCtrl', ['$scope', '$modalInstance', '$filter', '$modal', 'PrintingService',
-    'WMWindowSync', 'client', ClientModalCtrl]);
+    'WMWindowSync', 'client', 'WMConfig', ClientModalCtrl]);
 

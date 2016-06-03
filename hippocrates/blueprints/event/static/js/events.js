@@ -2,7 +2,7 @@
  * Created by mmalkov on 21.07.14.
  */
 
-var EventListCtrl = function ($scope, $http, $window, $q, MessageBox) {
+var EventListCtrl = function ($scope, $http, $window, $q, MessageBox, WMConfig) {
     function get_model(page) {
         var model = {
             page: page
@@ -63,7 +63,7 @@ var EventListCtrl = function ($scope, $http, $window, $q, MessageBox) {
     };
     $scope.get_clients = function (query) {
         if (!query) return;
-        return $http.get(url_client_search, {
+        return $http.get(WMConfig.url.patients.client_search, {
             params: {
                 q: query,
                 short: true,
@@ -154,4 +154,4 @@ var EventListCtrl = function ($scope, $http, $window, $q, MessageBox) {
 
     $scope.clear_all();
 };
-WebMis20.controller('EventListCtrl', ['$scope', '$http', '$window', '$q', 'MessageBox', EventListCtrl]);
+WebMis20.controller('EventListCtrl', ['$scope', '$http', '$window', '$q', 'MessageBox', 'WMConfig', EventListCtrl]);
