@@ -100,15 +100,15 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             $scope.action.end_date = null;
         }
     };
-    $scope.$watch('action.end_date', function (newVal, oldVal) {
-        if (newVal) {
+    $scope.on_enddate_changed = function () {
+        if ($scope.action.end_date) {
             if ($scope.action.status.code !== 'finished') {
                 $scope.action.status = $scope.ActionStatus.get_by_code('finished');
             }
         } else {
             $scope.action.status = $scope.ActionStatus.get_by_code('started');
         }
-    });
+    };
 
     $scope.save_action = function (need_to_print) {
         var was_new = $scope.action.is_new();
