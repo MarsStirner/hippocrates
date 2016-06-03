@@ -19,7 +19,9 @@ from .views import *
 def fc_urls():
     return {
         'url': {
-            'api_get_ttj_records': url_for('biomaterials.api_get_ttj_records'),
-            'api_ttj_update_status': url_for('biomaterials.api_ttj_change_status')
+            'biomaterials': {
+                'api_get_ttj_records': url_for('biomaterials.api_get_ttj_records'),
+                'api_ttj_update_status': url_for('biomaterials.api_ttj_change_status')
+            }
         }
     }

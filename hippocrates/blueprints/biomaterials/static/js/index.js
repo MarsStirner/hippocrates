@@ -49,7 +49,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         $scope.get_data = function () {
             return ApiCalls.wrapper(
                 'POST',
-                WMConfig.url.api_get_ttj_records, {}, {filter: $scope.filter}
+                WMConfig.url.biomaterials.api_get_ttj_records, {}, {filter: $scope.filter}
             ).then(_.passThrough(function (res) {
                 $scope.result = res;
                 $scope.set_current_records();
@@ -58,7 +58,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         $scope.change_status = function (status) {
             ApiCalls.wrapper(
                 'POST',
-                WMConfig.url.api_ttj_update_status, {},
+                WMConfig.url.biomaterials.api_ttj_update_status, {},
                 {
                     ids: $scope.selected_records.selected(),
                     status: $scope.TTJStatus.get_by_code(status)
