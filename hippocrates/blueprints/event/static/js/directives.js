@@ -387,7 +387,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
 </table>'
     }
 }])
-.service('LabDynamicsModal', ['$modal', '$http', function ($modal, $http) {
+.service('LabDynamicsModal', ['$modal', '$http', 'WMConfig', function ($modal, $http, WMConfig) {
         return {
         openLabDynamicsModal: function (event, action) {
             var LabResDynamicsCtrl = function ($scope) {
@@ -396,10 +396,10 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 $scope.dynamics = [];
                 $scope.xAxisTickFormat = function(d){
                     return moment(d).format('DD.MM.YYYY');
-                }
+                };
                 $scope.get_dynamics_data = function() {
                     $http.get(
-                        url_lab_res_dynamics, {
+                        WMConfig.url.event.lab_res_dynamics, {
                             params: {
                                 event_id: event.event_id,
                                 action_type_id: action.type.id,
@@ -408,7 +408,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                             }
                         }
                     ).success(function (data) {
-                        $scope.dates_list = data.result[0]
+                        $scope.dates_list = data.result[0];
                         $scope.dynamics = data.result[1];
                     })
                     };

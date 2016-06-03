@@ -78,7 +78,7 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
         $scope.results = [];
     };
     $scope.open_event = function (event_id) {
-        $window.open(url_for_event_html_event_info + '?event_id=' + event_id);
+        $window.open(WMConfig.url.event.html.event_info + '?event_id=' + event_id);
     };
     $scope.reset_sorting = function () {
         $scope.current_sorting = {

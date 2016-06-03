@@ -126,11 +126,11 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
         if (ticket_id){
             query += '&ticket_id=' + ticket_id;
         }
-        $scope.child_window = window.open(url_request_type_kind_html + query, '_blank');
+        $scope.child_window = window.open(WMConfig.url.event.html.request_type_kind + query, '_blank');
     };
 
     $scope.open_event = function(event_id) {
-        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
+        $scope.child_window = window.open(WMConfig.url.event.html.event_info + '?event_id=' + event_id, '_blank');
     };
 
     $scope.new_appointment = function(client_id) {

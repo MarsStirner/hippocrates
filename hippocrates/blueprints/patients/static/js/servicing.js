@@ -56,7 +56,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
         if (ticket_id) {
             query += '&ticket_id=' + ticket_id;
         }
-        var url = url_request_type_kind_html + query;
+        var url = WMConfig.url.event.html.request_type_kind + query;
         WMWindowSync.openTab(url, $scope.reload_client);
     };
 
@@ -66,7 +66,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
     };
 
     $scope.open_event = function(event_id) {
-        var url = url_for_event_html_event_info + '?event_id=' + event_id;
+        var url = WMConfig.url.event.html.event_info + '?event_id=' + event_id;
         WMWindowSync.openTab(url, $scope.reload_client);
     };
 

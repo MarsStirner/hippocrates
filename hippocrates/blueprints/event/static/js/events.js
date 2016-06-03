@@ -49,7 +49,7 @@ var EventListCtrl = function ($scope, $http, $window, $q, MessageBox, WMConfig) 
                 if ($scope.current_sorting) {
                     flt.sorting_params = $scope.current_sorting;
                 }
-                $http.post(url_event_api_get_events, flt)
+                $http.post(WMConfig.url.event.get_events, flt)
                     .success(function (data) {
                         $scope.page = page;
                         $scope.pages = data.result.pages;
@@ -126,7 +126,7 @@ var EventListCtrl = function ($scope, $http, $window, $q, MessageBox, WMConfig) 
         $scope.results = [];
     };
     $scope.open_event = function (event_id) {
-        $window.open(url_for_event_html_event_info + '?event_id=' + event_id);
+        $window.open(WMConfig.url.event.html.event_info + '?event_id=' + event_id);
     };
     $scope.rbResultFormatter = function (selected) {
         return selected ? '{0} ({1})'.format(selected.name, selected.event_purpose.name) : undefined;

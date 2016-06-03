@@ -335,13 +335,13 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService) {
 
 };
 
-var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
+var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConfig) {
     $scope.OrgStructure = RefBookService.get('OrgStructure');
     $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
 
     $scope.moving_save = function (moving){
-        return ApiCalls.wrapper('POST', url_moving_save, {}, moving)
-    }
+        return ApiCalls.wrapper('POST', WMConfig.url.event.moving_save, {}, moving)
+    };
     $scope.create_moving = function(){
         var scope = $scope.$new();
         scope.model = {
@@ -359,14 +359,14 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
                 $scope.event.movings.push(result[1]);
             });
         });
-    }
+    };
 
     $scope.close_last_moving = function(){
-        var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null
-        ApiCalls.wrapper('POST', url_moving_close, {}, moving).then(function(result){
+        var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null;
+        ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
             $scope.event.movings[$scope.event.movings.length - 1] = result;
         })
-    }
+    };
 
     $scope.create_hospitalBed = function(moving){
         var scope = $scope.$new();
@@ -383,22 +383,23 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
                 });
             });
         })
-    }
+    };
 
     $scope.org_struct_changed = function(model){
         var hb_id = model.HospitalBed ? model.HospitalBed.id : null;
-        return ApiCalls.wrapper('GET', url_hosp_beds_get, {org_str_id : model.orgStructStay.value.id,
-                                                           hb_id: hb_id})
-            .then(function (result) {
-                model.hosp_beds = result;
-                model.hospitalBedProfile.value = null;
-            })
-    }
+        return ApiCalls.wrapper('GET', WMConfig.url.event.hosp_beds, {
+            org_str_id : model.orgStructStay.value.id,
+            hb_id: hb_id
+        }).then(function (result) {
+            model.hosp_beds = result;
+            model.hospitalBedProfile.value = null;
+        })
+    };
 
     $scope.choose_hb = function(moving, hb){
         moving.hosp_beds.map(function(hbed){
             hbed.chosen = false;
-        })
+        });
         moving.hospitalBed.value = hb;
         moving.hospitalBedProfile.value = hb.profile;
         hb.chosen = true;
@@ -543,7 +544,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService,
-        $filter, $modal, WMEventServices, WMEventFormState, MessageBox) {
+        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig) {
     $scope.aux = aux;
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -600,10 +601,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 if ($scope.event.is_new()) {
                     if (result.error_text) {
                         MessageBox.info('Внимание!', result.error_text).then(function () {
-                            $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
+                            $window.open(WMConfig.url.event.html.event_info + '?event_id=' + result.event_id, '_self');
                         });
                     } else {
-                        $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
+                        $window.open(WMConfig.url.event.html.event_info + '?event_id=' + result.event_id, '_self');
                     }
                 } else {
                     if (result.error_text) {
@@ -685,7 +686,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
 };
-var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, $q, RisarApi, ApiCalls, WMStationaryEvent) {
+var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, $q, RisarApi, ApiCalls, WMStationaryEvent, WMConfig) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
@@ -813,9 +814,11 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
             $q.all(
                 _.filter(
                     _.map(models, function (model) {
-                        var data = {client_id: $scope.$parent.event.info.client_id,
-                                    blood_type_info: model}
-                        return ApiCalls.wrapper('POST', url_blood_history_save, {}, data)
+                        var data = {
+                            client_id: $scope.$parent.event.info.client_id,
+                            blood_type_info: model
+                        };
+                        return ApiCalls.wrapper('POST', WMConfig.url.event.blood_history, {}, data)
                     }),
                     function (deferred) {
                         return deferred !== undefined
@@ -874,11 +877,11 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
     'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
-WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
+WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
-    'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+    'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', 'WMConfig', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$filter', '$controller', '$modal', '$http', '$q',
-    'RisarApi', 'ApiCalls', 'WMStationaryEvent', StationaryEventInfoCtrl]);
+    'RisarApi', 'ApiCalls', 'WMStationaryEvent', 'WMConfig', StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);

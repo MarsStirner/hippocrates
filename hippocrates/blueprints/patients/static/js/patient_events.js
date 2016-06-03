@@ -13,8 +13,8 @@ var PatientEventsCtrl = function ($scope, $http, WMConfig) {
         })
     };
     $scope.open_event = function(event_id) {
-         window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
+         window.open(WMConfig.url.event.html.event_info + '?event_id=' + event_id, '_blank');
     };
     $scope.initialize();
-}
+};
 WebMis20.controller('PatientEventsCtrl', ['$scope', '$http', 'WMConfig', PatientEventsCtrl]);

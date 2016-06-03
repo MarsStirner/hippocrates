@@ -5,28 +5,6 @@
     <script src="{{ url_for('static', filename='js/services/webmis.api.js', v=nemesis_version) }}"></script>
     <script>
     var
-        url_event_get = '{{ url_for('event.api_event_info') }}',
-        url_event_new = '{{ url_for('event.api_event_new_get') }}',
-        url_event_save = '{{ url_for('event.api_event_save') }}',
-        url_event_close = '{{ url_for('event.api_event_close') }}',
-        url_event_search = '{{ url_for('event.api_event_search') }}',
-        url_moving_save = '{{ url_for('event.api_moving_save') }}',
-        url_moving_close = '{{ url_for('event.api_event_moving_close') }}',
-        url_hosp_beds_get = '{{ url_for('event.api_hosp_beds_get') }}',
-        url_lab_res_dynamics = '{{ url_for('event.api_event_lab_res_dynamics') }}',
-        url_blood_history_save = '{{ url_for('event.api_blood_history_save') }}',
-        url_for_event_html_event_info = '{{ url_for('event.html_event_info') }}',
-        url_event_new_event_html = '{{ url_for('event.new_event') }}',
-        url_request_type_kind_html = '{{ url_for('event.request_type_kind_choose') }}',
-        url_api_event_stationary_open_get = '{{ url_for('event.api_event_stationary_open_get') }}',
-        url_for_event_api_diagnosis_save = '{{ url_for('event.api_diagnosis_save') }}',
-        url_api_diagnosis_get = '{{ url_for('event.api_diagnosis_get') }}',
-        url_api_client_payment_info_get = '{{ url_for('event.api_client_payment_info_get') }}',
-        url_api_prev_event_payment_info_get = '{{ url_for('event.api_prev_event_payment_info_get') }}',
-        url_for_event_api_search_services = '{{ url_for('event.api_search_services') }}',
-        url_for_event_api_service_delete_service = '{{ url_for('event.api_service_delete_service') }}',
-        url_for_delete_event = '{{ url_for('event.api_delete_event') }}',
-        url_event_api_get_events = '{{ url_for('event.api_get_events') }}',
         url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}',
     </script>
 {% endblock -%}
