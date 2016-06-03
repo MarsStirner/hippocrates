@@ -76,7 +76,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             })
         };
         $scope.open_action = function (action_id) {
-            $window.open(url_for_schedule_html_action + '?action_id=' + action_id)
+            $window.open(WMConfig.url.actions.action_html + '?action_id=' + action_id)
         };
 
         function watch_with_reload(n, o) {

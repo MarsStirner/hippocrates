@@ -287,7 +287,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 return scope.event.can_create_actions[at_class[scope.actionTypeGroup]];
             };
             scope.open_action = function (action_id) {
-                var url = url_for_schedule_html_action + '?action_id=' + action_id;
+                var url = WMConfig.url.actions.action_html + '?action_id=' + action_id;
                 WMWindowSync.openTab(url, scope.update_event);
             };
             scope.open_action_tree = function (at_class) {

@@ -118,7 +118,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             return $scope.action.save()
                 .then(function (action) {
                     if (was_new) {
-                        $window.open(url_for_schedule_html_action + '?action_id=' + action.id, '_self');
+                        $window.open(WMConfig.url.actions.action_html + '?action_id=' + action.id, '_self');
                     } else {
                         NotificationService.notify(
                             200,
@@ -386,7 +386,7 @@ WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$
     'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
     'WMConfig', 'AccountingService', ActionEditorCtrl]);
 
-WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, ApiCalls, EzekielLock) {
+WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
@@ -445,7 +445,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     /* class methods */
     Action.get = function (id) {
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
-        return ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(id)).then(
+        return ApiCalls.wrapper('GET', WMConfig.url.actions.action_get.format(id)).then(
             function (result) {
                 var action = (new Action()).merge(result, true);
                 if (!arguments[1] && !action.ro) {
@@ -475,7 +475,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         var action = new Action();
         action.event_id = event_id;
         action.action_type_id = action_type_id;
-        return ApiCalls.wrapper('GET', '/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (result) {
+        return ApiCalls.wrapper('GET', WMConfig.url.actions.action_new.format(action_type_id, event_id)).then(function (result) {
             var retval = action.merge(result);
             retval.readonly = result.ro;
             return retval;
@@ -485,7 +485,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         var dest = new Action();
         return ApiCalls.wrapper(
             'GET',
-            '/actions/api/action/query/previous', {
+            WMConfig.url.actions.action_previous, {
                 client_id: action.client.id,
                 at_id: action.action_type_id || action.action_type.id,
                 id: action.id
@@ -527,7 +527,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         data.id = self.id;
         return ApiCalls.wrapper(
             'POST',
-            '/actions/api/action/{0}'.format(this.id || ''), undefined, data
+            WMConfig.url.actions.action_get.format(this.id || ''), undefined, data
         )
             .then(function (result) {
                 return self.merge(result);
@@ -546,12 +546,12 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
             data.id = self.id;
             return ApiCalls.wrapper(
                 'POST',
-                '/actions/api/action/{0}/autosave/'.format(this.id), undefined, data
+                WMConfig.url.actions.autosave_normal.format(this.id), undefined, data
             )
         } else {
             return ApiCalls.wrapper(
                 'POST',
-                '/actions/api/action/new/autosave/{0}/{1}/'.format(
+                WMConfig.url.actions.autosave_new.format(
                     self.event_id,
                     self.action_type_id || self.action_type.id
                 ), undefined, data
@@ -560,11 +560,11 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     };
     Action.prototype.discard = function () {
         if (this.id && !_.isNaN(this.id)) {
-            return ApiCalls.wrapper('DELETE', '/actions/api/action/{0}/autosave/'.format(this.id))
+            return ApiCalls.wrapper('DELETE', WMConfig.url.actions.autosave_normal.format(this.id))
         } else {
             return ApiCalls.wrapper(
                 'DELETE',
-                '/actions/api/action/new/autosave/{0}/{1}/'.format(
+                WMConfig.url.actions.autosave_new.format(
                     this.event_id,
                     this.action_type_id || this.action_type.id
                 )
@@ -574,7 +574,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     Action.prototype.reload = function () {
         var self = this;
         if (self.is_new()) {return}
-        ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(self.id)).then(function (result) {
+        ApiCalls.wrapper('GET', WMConfig.url.actions.action_get.format(self.id)).then(function (result) {
             return self.merge(result);
         })
     };
