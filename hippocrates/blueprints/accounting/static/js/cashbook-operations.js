@@ -1,6 +1,6 @@
 'use strict';
 
-var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, PrintingService) {
+var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, PrintingService, WMConfig) {
     function get_model(page) {
         var model = {
             page: page
@@ -37,7 +37,7 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
         if ($scope.current_sorting) {
             flt.sorting_params = $scope.current_sorting;
         }
-        $http.post(url_api_get_event_payments, flt)
+        $http.post(WMConfig.url.accounting.get_event_payments, flt)
         .success(function (data) {
             $scope.page = page;
             $scope.pages = data.result.pages;
@@ -105,5 +105,5 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
 
     $scope.clear_all();
 };
-WebMis20.controller('CashBookOperationsCtrl', ['$scope', '$http', '$window', 'RefBookService', 'PrintingService',
+WebMis20.controller('CashBookOperationsCtrl', ['$scope', '$http', '$window', 'RefBookService', 'PrintingService', 'WMConfig',
     CashBookOperationsCtrl]);

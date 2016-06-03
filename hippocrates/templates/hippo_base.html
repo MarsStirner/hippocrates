@@ -28,7 +28,5 @@
         url_for_delete_event = '{{ url_for('event.api_delete_event') }}',
         url_event_api_get_events = '{{ url_for('event.api_get_events') }}',
         url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}',
-        url_api_event_make_payment = '{{ url_for('accounting.api_event_make_payment') }}',
-        url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}'
     </script>
 {% endblock -%}
