@@ -14,6 +14,7 @@ from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
 from blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list)
 from blueprints.risar.lib.prev_children import get_previous_children
+from blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk_rate
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.models.fetus import RisarFetusState
 from blueprints.risar.models.risar import RisarEpicrisis_Children
@@ -112,6 +113,7 @@ def represent_event(event):
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
         ] if card_attrs_action['pregnancy_pathology_list'].value else [],
         'card_fill_rates': represent_event_cfrs(card_attrs_action),
+        'radz_risk_rate': get_radz_risk_rate(card.radz_risk),
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': represent_event_diagnoses(event),
         'has_diseases': check_disease(all_diagnostics)

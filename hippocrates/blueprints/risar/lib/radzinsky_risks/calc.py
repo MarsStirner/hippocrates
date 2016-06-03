@@ -28,6 +28,10 @@ def get_radz_risk(event, create=False):
     return radz_risk
 
 
+def get_radz_risk_rate(radz_risk):
+    return RadzinskyRiskRate(radz_risk.risk_rate_id) if radz_risk.risk_rate_id else None
+
+
 def reevaluate_radzinsly_risk_rate(card, radz_risk):
     final_sum = 0
     risk_rate = None
@@ -81,7 +85,7 @@ def reevaluate_radzinsky_risks(card):
         intranatal_totalsum = intranatal_sum + after33week_sum
         intranatal_growth = float(intranatal_sum) / after33week_sum * 100
 
-    radz_risk = get_radz_risk(card.event, True)
+    radz_risk = card.radz_risk
     radz_risk.anamnestic_points = anamnestic_sum
     if before32week_sum is not None:
         radz_risk.before32week_points = before32week_sum
@@ -96,15 +100,16 @@ def reevaluate_radzinsky_risks(card):
 
     # TODO: check
     cur_factors = radz_risk.factors_assoc
-    triggered_codes = set(triggers)
+    triggers = set(triggers)
     for cur_factor in cur_factors:
-        if cur_factor.risk_factor_code not in triggered_codes:
+        k = (cur_factor.risk_factor_id, cur_factor.stage_id)
+        if k not in triggers:
             db.session.delete(cur_factor)
         else:
-            triggered_codes.remove(cur_factor.risk_factor_code)
-    for code in triggered_codes:
+            triggers.remove(k)
+    for factor_id, stage_id in triggers:
         trig_factor = RisarRadzinskyRisks_FactorsAssoc(
-            radz_risk=radz_risk, risk_factor_code=code
+            radz_risk=radz_risk, risk_factor_id=factor_id, stage_id=stage_id
         )
         radz_risk.factors_assoc.append(trig_factor)
 
@@ -116,10 +121,11 @@ def calc_factor_points(card, factor_stage):
     triggered_factors = []
     rb_slice = get_filtered_risk_factors(factor_stage.code)
     for factor in rb_slice:
-        handler, points = get_handler(factor['code'])
+        points = factor['points']
+        handler = get_handler(factor['code'])
         if handler(card):
             points_sum += points
-            triggered_factors.append(factor['code'])
+            triggered_factors.append((factor['id'], factor_stage.value))
     return points_sum, triggered_factors
 
 
@@ -140,19 +146,57 @@ def get_filtered_risk_factors(stage_codes=None, group_codes=None):
     return filtered
 
 
-def get_event_radzinsky_risks_info(event):
-    radz_risks = get_radz_risk(event)
-    factor_codes = set([assoc.risk_factor_code for assoc in radz_risks.factors_assoc])
+def get_event_radzinsky_risks_info(radz_risk):
+    event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in radz_risk.factors_assoc}
     rb_stage_factors = radzinsky_risk_factors()
+    stage_points = {}
+    stage_sum = stage_maximum = 0
     for stage_code, groups in rb_stage_factors.iteritems():
         for group_code, factors in groups.iteritems():
             for factor in factors:
-                factor['triggered'] = factor['code'] in factor_codes
-                factor['points'] = 0
+                k = (factor['id'], RadzinskyStage.getId(stage_code))
+                if k in event_factor_stages:
+                    factor['triggered'] = True
+                    stage_sum += factor['points']
+                else:
+                    factor['triggered'] = False
+                stage_maximum += factor['points']
+        stage_points[stage_code] = {
+            'maximum': stage_maximum,
+            'sum': stage_sum
+        }
+
+    general_info = safe_dict(radz_risk)
+    max_points = 0
+    total_sum_points = 0
+    for stage_code, stage_info in stage_points.items():
+        max_points += stage_info['maximum']
+        stage_sum_rb = stage_info['sum']
+        stage_sum_calc = _get_stage_calculated_points(radz_risk, stage_code)
+        if stage_sum_calc != stage_sum_rb:
+            logger.warning((u'В карте {0} рассчитанное значение суммы баллов по стадии {1} '
+                            u'отличается от справочного'.format(radz_risk.event_id, stage_code)))
+        stage_info['sum'] = stage_sum_calc
+        total_sum_points += stage_sum_calc
+    general_info['maximum_points'] = max_points
+    general_info['total_sum_points'] = total_sum_points
     return {
-        'general_info': safe_dict(radz_risks),
-        'stage_factors': rb_stage_factors
+        'general_info': general_info,
+        'stage_factors': rb_stage_factors,
+        'stage_points': stage_points
     }
+
+
+def _get_stage_calculated_points(radz_risk, stage_code):
+    stage_id = RadzinskyStage.getId(stage_code)
+    if stage_id == RadzinskyStage.anamnestic[0]:
+        return radz_risk.anamnestic_points
+    elif stage_id == RadzinskyStage.before32[0]:
+        return radz_risk.before32week_points
+    elif stage_id == RadzinskyStage.after33[0]:
+        return radz_risk.after33week_points
+    elif stage_id == RadzinskyStage.intranatal[0]:
+        return radz_risk.intranatal_points
 
 
 # @cache.memoize()
@@ -161,12 +205,18 @@ def radzinsky_risk_factors():
         rbRadzRiskFactor_StageAssoc, rbRadzRiskFactor, rbRadzRiskFactorGroup
     ).options(
         # TODO: worth it?
-        joinedload(rbRadzStage.risk_factors).joinedload(rbRadzRiskFactor.group)
+        joinedload(rbRadzStage.stage_factor_assoc).
+        joinedload(rbRadzRiskFactor_StageAssoc.factor).
+        joinedload(rbRadzRiskFactor.group)
     )
 
     grouped = defaultdict(dict)
     for stage in query:
-        for factor in stage.risk_factors:
-            grouped[stage.code].setdefault(factor.group.code, []).append(safe_dict(factor))
+        for factor_stage in stage.stage_factor_assoc:
+            factor_info = safe_dict(factor_stage.factor)
+            factor_info.update(points=factor_stage.points)
+            grouped[stage.code].setdefault(
+                factor_stage.factor.group.code, []
+            ).append(factor_info)
 
     return grouped

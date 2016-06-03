@@ -10,26 +10,17 @@
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
-{#        <div class="box box-primary">#}
-{#            <div class="box-body">#}
-{#                <tabset vertical="true" type="pills">#}
-{#                    <tab heading="Vertical 1">Vertical content 1</tab>#}
-{#                    <tab heading="Vertical 2">Vertical content 2</tab>#}
-{#                </tabset>#}
-{#            </div>#}
-{#        </div>#}
-
         <div class="row">
         <div class="col-md-4">
             <div class="list-group">
                 <a href="javascript:void(0);" class="list-group-item"
                     ng-class="{'active': isStageSelected()}" ng-click="selectStage()">
-                    <span class="badge">14 / 30</span>
+                    <span class="badge">[[ risks.general_info.total_sum_points ]] / [[ risks.general_info.maximum_points ]]</span>
                     Итоговые результаты
                 </a>
                 <a href="javascript:void(0);" class="list-group-item" ng-repeat="stage in rbRadzStage.objects"
                     ng-class="{'active': isStageSelected(stage)}" ng-click="selectStage(stage)">
-                    <span class="badge">14 / 30</span>
+                    <span class="badge">[[ risks.stage_points[stage.code].sum ]] / [[ risks.stage_points[stage.code].maximum ]]</span>
                     [[ stage.name ]]
                 </a>
             </div>
@@ -38,19 +29,58 @@
         <div class="col-md-8">
             <div class="box box-solid" ng-show="isStageSelected()">
                 <div class="box-header with-border">
-                    <h3 class="box-title">_ степень риска</h3>
+                    <h3 class="box-title"><span ng-bind="risks.general_info.risk_rate.name" ng-class="getRiskRateTextClass()"></span> степень риска</h3>
                 </div>
                 <div class="box-body">
-                    <p>test</p>
+                    <p>
+                        Сумма баллов анамнестических факторов: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.anamnestic_points"></span>
+                    </p>
+                    <p>
+                        Сумма баллов факторов до 32 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.before32week_points"></span>
+                    </p>
+                    <p>
+                        Общая сумма баллов факторов до 32 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.before32week_totalpoints"></span>
+                    </p>
+                    <p>
+                        Сумма баллов факторов после 33 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.after33week_points"></span>
+                    </p>
+                    <p>
+                        Общая сумма баллов факторов после 33 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.after33week_totalpoints"></span>
+                    </p>
+                    <p>
+                        Сумма баллов интранатальных факторов: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.intranatal_points"></span>
+                    </p>
+                    <p>
+                        Общая сумма баллов с учётом интранатальных факторов: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.intranatal_totalpoints"></span>
+                    </p>
+                    <p>
+                        Интранатальный прирост: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.intranatal_growth"></span> <b>%</b>
+                    </p>
                 </div>
             </div>
 
             <div class="box box-solid" ng-repeat="stage in rbRadzStage.objects" ng-show="isStageSelected(stage)">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Сумма баллов _</h3>
+                    <h3 class="box-title">Сумма баллов [[ risks.stage_points[stage.code].sum ]]</h3>
                 </div>
-                <div class="box-body">
-                    test [[stage.name]]
+                <div class="box-body novpadding">
+                    <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th>Факторы</th>
+                            <th width="10%" class="text-right">Баллы</th>
+                        </tr>
+                        <tr ng-repeat-start="(group_code, factors) in risks.stage_factors[stage.code]"
+                            class="text-center">
+                            <td ng-bind="rbRadzRiskFactorGroup.get_by_code(group_code).name" colspan="2"></td>
+                        </tr>
+                        <tr ng-repeat="factor in factors" ng-repeat-end
+                            ng-class="{'bg-info': factor.triggered}">
+                            <td ng-bind="factor.name"></td>
+                            <td ng-bind="factor.points" class="text-right"></td>
+                        </tr>
+                    </tbody>
+                    </table>
                 </div>
             </div>
         </div>

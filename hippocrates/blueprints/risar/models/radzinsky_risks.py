@@ -26,7 +26,6 @@ class RisarRadzinskyRisks(db.Model):
 
     event = db.relationship('Event')
     risk_rate = db.relationship('rbRadzinskyRiskRate')
-    # factors = db.relationship('rbRadzRiskFactor', secondary='RisarRadzinskyRisks_Factors', viewonly=True)
     factors_assoc = db.relationship('RisarRadzinskyRisks_FactorsAssoc', backref='radz_risk')
 
     def __json__(self):
@@ -54,7 +53,7 @@ class RisarRadzinskyRisks_FactorsAssoc(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     risk_id = db.Column(db.ForeignKey('RisarRadzinskyRisks.id'), nullable=False)
-    risk_factor_code = db.Column(db.String(250), nullable=False)
+    risk_factor_id = db.Column(db.ForeignKey('rbRadzRiskFactor.id'), nullable=False)
+    stage_id = db.Column(db.ForeignKey('rbRadzStage.id'), nullable=False)
 
-    # radz_risk = db.relationship('RisarRadzinskyRisks')
-    # risk_factor = db.relationship('rbRadzRiskFactor')
+    risk_factor = db.relationship('rbRadzRiskFactor')

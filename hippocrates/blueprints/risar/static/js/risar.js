@@ -471,6 +471,11 @@ WebMis20
             return wrapper('GET', Config.url.api_concilium_get.format(event_id) + concilium_id);
         }
     };
+    this.radzinsky_risks = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_radzinsky_risks.format(event_id));
+        }
+    };
 }])
 .service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
     var event_source = new OneWayEvent(),
@@ -688,6 +693,32 @@ WebMis20
             };
             scope.open = function () {
                 $window.open('{0}?event_id={1}'.format(Config.url.card_fill_history, scope.eventId), '_self');
+            };
+        }
+    }
+}])
+.directive('radzRiskRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span style="font-size: 65%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    >РАД</span>\
+',
+        scope: {
+            radzRiskRateIcon: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.radzRiskRateIcon) return;
+                var r = scope.radzRiskRateIcon;
+                if (r.code === 'low') return 'label-success';
+                else if (r.code === 'medium') return 'label-warning';
+                else if (r.code === 'high') return 'label-danger';
+                return 'label-default';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.radzRiskRateIcon) return;
+                return scope.radzRiskRateIcon.name;
             };
         }
     }

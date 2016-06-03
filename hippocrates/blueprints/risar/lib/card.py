@@ -133,6 +133,11 @@ class PregnancyCard(object):
     def epicrisis(self):
         return get_action(self.event, risar_epicrisis, True)
 
+    @lazy
+    def radz_risk(self):
+        from blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
+        return get_radz_risk(self.event, True)
+
     @property
     def attrs(self):
         return self.get_card_attrs_action()
@@ -174,6 +179,16 @@ class PregnancyCard(object):
             reevaluate_risk_groups(self)
             reevaluate_card_fill_rate_all(self)
             reevaluate_radzinsky_risks(self)
+
+    @lazy
+    def unclosed_mkbs(self):
+        # TODO: diag
+        diagnostics = self.get_client_diagnostics(self.event.setDate, self.event.execDate)
+        return set(
+            d.MKB
+            for d in diagnostics
+            if d.endDate is None
+        )
 
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):
