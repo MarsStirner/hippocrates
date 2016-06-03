@@ -322,7 +322,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     ).then(function () {
                         scope.update_event();
                     }, function () {
-                        alert('Ошибка удаления действия. Свяжитесь с администратором.');
+                        alert('Ошибка удаления действия');
                     });
                 });
             };
