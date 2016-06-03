@@ -20,7 +20,7 @@
         <td>[[ record.note ]]</td>
         <td width="1%">
             {% if user_profiles_mng.has_ui_registrator() %}
-                <button ng-if="!record.event_id" ng-click="new_event(client_id, record.id)" class="btn btn-sm btn-success" title="Создать обращение">
+                <button ng-if="!record.event_id" ng-click="new_event(client.info.id, record.id)" class="btn btn-sm btn-success" title="Создать обращение">
                     <span class="glyphicon glyphicon-plus"></span>
                 </button>
             {% endif %}
