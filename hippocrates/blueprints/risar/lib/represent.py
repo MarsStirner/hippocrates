@@ -16,7 +16,7 @@ from blueprints.risar.lib.utils import (get_action, action_apt_values, get_actio
 from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk_rate
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
-from blueprints.risar.models.fetus import RisarFetusState
+from blueprints.risar.lib.fetus import get_fetuses
 from blueprints.risar.models.risar import RisarEpicrisis_Children
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
@@ -848,10 +848,7 @@ def represent_event_cfrs(card_attrs_action):
 
 def represent_action_fetuses(action):
     res = []
-    fetus_states = RisarFetusState.query.filter(
-        RisarFetusState.action_id == action.id,
-        RisarFetusState.deleted == 0,
-    ).order_by(RisarFetusState.id)
+    fetus_states = get_fetuses(action.id)
     for fetus_state in fetus_states:
         res.append({
             'state': {

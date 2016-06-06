@@ -36,11 +36,11 @@ def reevaluate_radzinsly_risk_rate(card, radz_risk):
     final_sum = 0
     risk_rate = None
     preg_week = get_pregnancy_week(card.event)
-    if card.epicrisis:
+    if card.epicrisis.action.id:
         final_sum = radz_risk.intranatal_totalpoints or 0
     elif preg_week <= 32:
         final_sum = radz_risk.before32week_totalpoints or 0
-    elif preg_week >= 32:
+    elif preg_week >= 33:
         final_sum = radz_risk.after33week_totalpoints or 0
 
     if 0 <= final_sum <= 14:
@@ -53,19 +53,23 @@ def reevaluate_radzinsly_risk_rate(card, radz_risk):
 
 
 def reevaluate_radzinsky_risks(card):
-    stages = [RadzinskyStage(RadzinskyStage.anamnestic[0]), ]
+    calc_stages = [RadzinskyStage(RadzinskyStage.anamnestic[0]), ]
+    clear_stage_ids = set()
     preg_week = get_pregnancy_week(card.event)
     if preg_week <= 32:
-        stages.append(RadzinskyStage(RadzinskyStage.before32[0]))
-    elif preg_week >= 32:
-        stages.append(RadzinskyStage(RadzinskyStage.after33[0]))
-    if card.epicrisis:
-        stages.append(RadzinskyStage(RadzinskyStage.intranatal[0]))
+        calc_stages.append(RadzinskyStage(RadzinskyStage.before32[0]))
+        clear_stage_ids.add(RadzinskyStage.after33[0])
+    elif preg_week >= 33:
+        calc_stages.append(RadzinskyStage(RadzinskyStage.after33[0]))
+    if card.epicrisis.action.id:
+        calc_stages.append(RadzinskyStage(RadzinskyStage.intranatal[0]))
+    else:
+        clear_stage_ids.add(RadzinskyStage.intranatal[0])
 
     anamnestic_sum = before32week_sum = after33week_sum = intranatal_sum = before32week_totalsum = \
         after33week_totalsum = intranatal_totalsum = intranatal_growth = None
-    triggers = []
-    for stage in stages:
+    triggers = defaultdict(set)
+    for stage in calc_stages:
         points, triggered_factors = calc_factor_points(card, stage)
         if stage.value == RadzinskyStage.anamnestic[0]:
             anamnestic_sum = points
@@ -75,43 +79,47 @@ def reevaluate_radzinsky_risks(card):
             after33week_sum = points
         elif stage.value == RadzinskyStage.intranatal[0]:
             intranatal_sum = points
-        triggers.extend(triggered_factors)
+        triggers[stage.value].update(triggered_factors)
 
     if before32week_sum is not None:
         before32week_totalsum = anamnestic_sum + before32week_sum
     if after33week_sum is not None:
         after33week_totalsum = anamnestic_sum + after33week_sum
-    if intranatal_sum is not None and after33week_sum is not None:
-        intranatal_totalsum = intranatal_sum + after33week_sum
-        intranatal_growth = float(intranatal_sum) / after33week_sum * 100
+    if intranatal_sum is not None and (after33week_sum is not None or before32week_sum is not None):
+        stage_sum = after33week_sum if after33week_sum is not None else before32week_sum
+        intranatal_totalsum = intranatal_sum + stage_sum
+        intranatal_growth = round(float(intranatal_sum) / stage_sum * 100, 2)
 
     radz_risk = card.radz_risk
     radz_risk.anamnestic_points = anamnestic_sum
     if before32week_sum is not None:
         radz_risk.before32week_points = before32week_sum
         radz_risk.before32week_totalpoints = before32week_totalsum
-    if after33week_sum is not None:
+    if after33week_sum is not None or RadzinskyStage.after33[0] in clear_stage_ids:
         radz_risk.after33week_points = after33week_sum
         radz_risk.after33week_totalpoints = after33week_totalsum
-    if intranatal_sum is not None and after33week_sum is not None:
+    if intranatal_sum is not None and intranatal_growth is not None or \
+            RadzinskyStage.intranatal[0] in clear_stage_ids:
         radz_risk.intranatal_points = intranatal_sum
         radz_risk.intranatal_totalpoints = intranatal_totalsum
         radz_risk.intranatal_growth = intranatal_growth
 
-    # TODO: check
     cur_factors = radz_risk.factors_assoc
-    triggers = set(triggers)
     for cur_factor in cur_factors:
-        k = (cur_factor.risk_factor_id, cur_factor.stage_id)
-        if k not in triggers:
+        stage_id = cur_factor.stage_id
+        if stage_id in clear_stage_ids:
             db.session.delete(cur_factor)
-        else:
-            triggers.remove(k)
-    for factor_id, stage_id in triggers:
-        trig_factor = RisarRadzinskyRisks_FactorsAssoc(
-            radz_risk=radz_risk, risk_factor_id=factor_id, stage_id=stage_id
-        )
-        radz_risk.factors_assoc.append(trig_factor)
+        elif stage_id in triggers:
+            if cur_factor.risk_factor_id in triggers[stage_id]:
+                triggers[cur_factor.stage_id].remove(cur_factor.risk_factor_id)
+            else:
+                db.session.delete(cur_factor)
+    for stage_id, factor_list in triggers.iteritems():
+        for factor_id in factor_list:
+            trig_factor = RisarRadzinskyRisks_FactorsAssoc(
+                radz_risk=radz_risk, risk_factor_id=factor_id, stage_id=stage_id
+            )
+            radz_risk.factors_assoc.append(trig_factor)
 
     reevaluate_radzinsly_risk_rate(card, radz_risk)
 
@@ -125,7 +133,7 @@ def calc_factor_points(card, factor_stage):
         handler = get_handler(factor['code'])
         if handler(card):
             points_sum += points
-            triggered_factors.append((factor['id'], factor_stage.value))
+            triggered_factors.append(factor['id'])
     return points_sum, triggered_factors
 
 
@@ -150,8 +158,8 @@ def get_event_radzinsky_risks_info(radz_risk):
     event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in radz_risk.factors_assoc}
     rb_stage_factors = radzinsky_risk_factors()
     stage_points = {}
-    stage_sum = stage_maximum = 0
     for stage_code, groups in rb_stage_factors.iteritems():
+        stage_sum = stage_maximum = 0
         for group_code, factors in groups.iteritems():
             for factor in factors:
                 k = (factor['id'], RadzinskyStage.getId(stage_code))
@@ -190,21 +198,20 @@ def get_event_radzinsky_risks_info(radz_risk):
 def _get_stage_calculated_points(radz_risk, stage_code):
     stage_id = RadzinskyStage.getId(stage_code)
     if stage_id == RadzinskyStage.anamnestic[0]:
-        return radz_risk.anamnestic_points
+        return radz_risk.anamnestic_points or 0
     elif stage_id == RadzinskyStage.before32[0]:
-        return radz_risk.before32week_points
+        return radz_risk.before32week_points or 0
     elif stage_id == RadzinskyStage.after33[0]:
-        return radz_risk.after33week_points
+        return radz_risk.after33week_points or 0
     elif stage_id == RadzinskyStage.intranatal[0]:
-        return radz_risk.intranatal_points
+        return radz_risk.intranatal_points or 0
 
 
-# @cache.memoize()
+@cache.memoize()
 def radzinsky_risk_factors():
     query = db.session.query(rbRadzStage).join(
         rbRadzRiskFactor_StageAssoc, rbRadzRiskFactor, rbRadzRiskFactorGroup
     ).options(
-        # TODO: worth it?
         joinedload(rbRadzStage.stage_factor_assoc).
         joinedload(rbRadzRiskFactor_StageAssoc.factor).
         joinedload(rbRadzRiskFactor.group)

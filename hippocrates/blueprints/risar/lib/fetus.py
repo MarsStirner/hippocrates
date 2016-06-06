@@ -28,3 +28,12 @@ def create_or_update_fetuses(action, fetuses):
                 if sd_key == 'id':
                     continue
                 setattr(fetus_state, sd_key, sd_val)
+
+
+def get_fetuses(action_id):
+    if not action_id:
+        return []
+    return RisarFetusState.query.filter(
+        RisarFetusState.action_id == action_id,
+        RisarFetusState.deleted == 0,
+    ).order_by(RisarFetusState.id).all()

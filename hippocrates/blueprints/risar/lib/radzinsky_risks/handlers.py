@@ -22,14 +22,14 @@ def mother_older_40(card):
 
 def father_older_40(card):
     anamnesis = card.anamnesis.father
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['age'].value is not None and anamnesis['age'].value >= 40
     return False
 
 
 def mother_professional_properties(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['professional_properties'].value is not None and \
                anamnesis['professional_properties'].value_raw != 'psychic_tension'
     return False
@@ -37,59 +37,59 @@ def mother_professional_properties(card):
 
 def father_professional_properties(card):
     anamnesis = card.anamnesis.father
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['professional_properties'].value is not None
     return False
 
 
 def mother_smoking(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return safe_bool(anamnesis['smoking'].value)
     return False
 
 
 def mother_alcohol(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return safe_bool(anamnesis['alcohol'].value)
     return False
 
 
 def father_alcohol(card):
     anamnesis = card.anamnesis.father
-    if anamnesis:
+    if anamnesis.id:
         return safe_bool(anamnesis['alcohol'].value)
     return False
 
 
 def emotional_stress(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['professional_properties'].value_raw == 'psychic_tension'
     return False
 
 
 def height_less_150(card):
-    fi = card.first_inspection
+    fi = card.primary_inspection
     if fi:
-        return fi['height'].value is not None and \
-               fi['height'].value <= 150
+        return fi.action['height'].value is not None and \
+               fi.action['height'].value <= 150
     return False
 
 
 def overweight(card):
-    fi = card.first_inspection
+    fi = card.primary_inspection
     if fi:
-        weight = fi['weight'].value
-        height = fi['height'].value
+        weight = fi.action['weight'].value
+        height = fi.action['height'].value
         return weight is not None and height is not None and float(height - 100) * 1.25 < weight
     return False
 
 
 def not_married(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['marital_status'].value_raw in ('01', '02', '05', '06')
     return False
 
@@ -130,7 +130,7 @@ def abortion_after_last_delivery_more_3(card):
 
 def intrauterine_operations(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return safe_bool(anamnesis['intrauterine'].value)
     return False
 
@@ -200,7 +200,7 @@ def abnormal_child_weight(card):
 
 def infertility_less_4(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         if anamnesis['infertility'].value and anamnesis['infertility_period'].value is not None:
             return 2 <= anamnesis['infertility_period'].value <= 4
     return False
@@ -208,7 +208,7 @@ def infertility_less_4(card):
 
 def infertility_more_5(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         if anamnesis['infertility'].value and anamnesis['infertility_period'].value is not None:
             return 5 <= anamnesis['infertility_period'].value
     return False
@@ -242,7 +242,7 @@ def chronic_inflammation(card):
         return True
 
     anamnesis = card.anamnesis.mother
-    if anamnesis and '2' in anamnesis['contraception'].value_raw:
+    if anamnesis.id and '2' in anamnesis['contraception'].value_raw:
         return True
 
     return any(itertools.ifilter(
@@ -258,14 +258,14 @@ def tubal_pregnancy(card):
 
 def extracorporal_fertilization(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['fertilization_type'].value_raw == '01'
     return False
 
 
 def intracytoplasmic_sperm_injection(card):
     anamnesis = card.anamnesis.mother
-    if anamnesis:
+    if anamnesis.id:
         return anamnesis['fertilization_type'].value_raw == '03'
     return False
 
@@ -333,8 +333,11 @@ def obesity(card):
     На форме «Первичный осмотр» значение атрибута «Индекс массы тела» >=30
     или на форме "Диагнозы случая" присутствует хоть один диагноз из группы E65-E68
     """
-    # TODO: first_inspection
-    return _mkb_match(card.unclosed_mkbs, needles=u'E65.99-E68.99')
+    inspection = card.primary_inspection
+    if inspection and inspection.action['BMI'].value is not None and \
+            inspection.action['BMI'].value >= 30:
+        return True
+    return _mkb_match(card.unclosed_mkbs, needles=u'E65-E68.99')
 
 
 def anemia_90(card):
@@ -381,4 +384,231 @@ def antiphospholipid_antibodies_IgG(card):
 
 def antiphospholipid_antibodies_IgM(card):
     # TODO: measures
+    return False
+
+
+def early_pregnancy_toxemia(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O21.0, O21.1')
+
+
+def recurrent_threatened_miscarriage(card):
+    # TODO:
+    return False  #_mkb_match(card.unclosed_mkbs, needles=u'O20.0')
+
+
+def edema_disease(card):
+    if _mkb_match(card.unclosed_mkbs, needles=u'O12.0'):
+        return True
+    latest_inspection = card.latest_inspection
+    if latest_inspection:
+        return latest_inspection.action['complaints'].value_raw is not None and \
+            'oteki' in latest_inspection.action['complaints'].value_raw
+    return False
+
+
+def gestosis_mild_case(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O13-013.99')
+
+
+def gestosis_moderately_severe(card):
+    return _mkb_match(card.unclosed_mkbs, u'O14.0')
+
+
+def gestosis_severe(card):
+    return _mkb_match(card.unclosed_mkbs, u'O14.1')
+
+
+def preeclampsia(card):
+    return _mkb_match(card.unclosed_mkbs, u'O14.9')
+
+
+def eclampsia(card):
+    return _mkb_match(card.unclosed_mkbs, u'O15.0')
+
+
+def renal_disease_exacerbation(card):
+    return _mkb_match(card.unclosed_mkbs, u'O23.0')
+
+
+def emerging_infection_diseases(card):
+    return _mkb_match(
+        card.unclosed_mkbs,
+        needles=(u'A51.0-A64.99, B00.0-B09.99, B15.0-B17.8, B25.0-B34.9, B50.0-B64.99, '
+                 u'J00-J06.9, J10-J11.9, N30.0, N34.0-N34.99, O85-O85.99, O86.0-O86.8, '
+                 u'A34-A34.99, O75.3, O98.9, O23.1-O23.9')
+    )
+
+
+def bleeding_1(card):
+    return _mkb_match(card.unclosed_mkbs, u'O20.8')
+
+
+def bleeding_2(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O46-O46.99')
+
+
+def Rh_hypersusceptibility(card):
+    return _mkb_match(card.unclosed_mkbs, u'O36.0')
+
+
+def ABO_hypersusceptibility(card):
+    return _mkb_match(card.unclosed_mkbs, u'O36.1')
+
+
+def hydramnion(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O40-O40.99')
+
+
+def oligohydramnios(card):
+    return _mkb_match(card.unclosed_mkbs, u'O41.0')
+
+
+def pelvic_station(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O32.1, O33-O33.99')
+
+
+def multiple_pregnancy(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O30-O30.99')
+
+
+def prolonged_pregnancy(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O48-O48.99')
+
+
+def abnormal_fetus_position(card):
+    return _mkb_match(card.unclosed_mkbs, u'O32.2')
+
+
+def maternal_passages_immaturity(card):
+    # TODO: after ticket
+    # epicrisis = card.epicrisis
+    # if epicrisis:
+    #     return epicrisis['<code>'].value_row == ''
+    return False
+
+
+def beta_HCG_increase(card):
+    # later
+    return False
+
+
+def beta_HCG_decrease(card):
+    # later
+    return False
+
+
+def alpha_fetoprotein_increase(card):
+    # later
+    return False
+
+
+def alpha_fetoprotein_decrease(card):
+    # later
+    return False
+
+
+def PAPP_A_increase(card):
+    # later
+    return False
+
+
+def PAPP_A_decrease(card):
+    # later
+    return False
+
+
+def small_gestational_age_fetus_1(card):
+    """
+    В последнем повторном осмотре акушером-гинекологом значение атрибута
+    "Задержка роста плода" = до 2 недель
+    """
+    latest_inspection = card.latest_rep_inspection
+    if latest_inspection:
+        return any(fetus.delay_code == '01' for fetus in latest_inspection.fetuses)
+    return False
+
+
+def small_gestational_age_fetus_2(card):
+    """
+    В последнем повторном осмотре акушером-гинекологом значение атрибута
+    "Задержка роста плода" = от 2 до 4 недель
+    """
+    latest_inspection = card.latest_rep_inspection
+    if latest_inspection:
+        return any(fetus.delay_code == '03' for fetus in latest_inspection.fetuses)
+    return False
+
+
+def small_gestational_age_fetus_3(card):
+    """
+    В последнем повторном осмотре акушером-гинекологом значение атрибута
+    "Задержка роста плода" = более 4 недель
+    """
+    latest_inspection = card.latest_rep_inspection
+    if latest_inspection:
+        return any(fetus.delay_code == '02' for fetus in latest_inspection.fetuses)
+    return False
+
+
+def chronical_placental_insufficiency(card):
+    return _mkb_match(card.unclosed_mkbs, u'O36.3')
+
+
+def cardiotocography_more_7(card):
+    # TODO: after ticket
+    return False
+
+
+def cardiotocography_6(card):
+    # TODO: after ticket
+    return False
+
+
+def cardiotocography_5(card):
+    # TODO: after ticket
+    return False
+
+
+def cardiotocography_4(card):
+    # TODO: after ticket
+    return False
+
+
+def cardiotocography_less_4(card):
+    # TODO: after ticket
+    return False
+
+
+def meconium_amniotic_fluid(card):
+    epicrisis = card.epicrisis
+    if epicrisis.action.id:
+        return safe_bool(epicrisis.action['meconium_colouring'].value)
+    return False
+
+
+def predelivery_amniorrhea_before_labour(card):
+    epicrisis = card.epicrisis
+    if epicrisis.action.id:
+        return safe_bool(epicrisis.action['pre_birth_delivery_waters'].value)
+    return False
+
+
+def pathological_preliminary_period(card):
+    epicrisis = card.epicrisis
+    if epicrisis.action.id:
+        return safe_bool(epicrisis.action['patologicsl_preliminal_period'].value)
+    return False
+
+
+def labour_anomaly(card):
+    epicrisis = card.epicrisis
+    if epicrisis.action.id:
+        return safe_bool(epicrisis.action['labor_anomalies'].value)
+    return False
+
+
+def chorioamnionitis(card):
+    epicrisis = card.epicrisis
+    if epicrisis.action.id:
+        return safe_bool(epicrisis.action['chorioamnionit'].value)
     return False

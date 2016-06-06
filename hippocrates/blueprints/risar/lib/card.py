@@ -9,8 +9,10 @@ from weakref import WeakKeyDictionary, WeakValueDictionary
 
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.lib.prev_children import get_previous_children
+from blueprints.risar.lib.fetus import get_fetuses
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
-    risar_anamnesis_pregnancy, risar_epicrisis, first_inspection_code
+    risar_anamnesis_pregnancy, risar_epicrisis, first_inspection_code, second_inspection_code, \
+    pc_inspection_code
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -71,6 +73,37 @@ class PreviousPregnancy(object):
         return get_previous_children(self._action.id)
 
 
+class PrimaryInspection(object):
+    def __init__(self, action):
+        self._action = action
+
+    @property
+    def action(self):
+        return self._action
+
+
+class RepeatedInspection(object):
+    def __init__(self, action):
+        self._action = action
+
+    @property
+    def action(self):
+        return self._action
+
+    @lazy
+    def fetuses(self):
+        return get_fetuses(self._action.id)
+
+
+class Epicrisis(object):
+    def __init__(self, event):
+        self._event = event
+
+    @property
+    def action(self):
+        return get_action(self._event, risar_epicrisis, True)
+
+
 class LocalCache(object):
     def __init__(self):
         self._cache = WeakKeyDictionary()
@@ -106,6 +139,7 @@ class PregnancyCard(object):
         self._cached = {}
         self.event = event
         self._anamnesis = Anamnesis(event)
+        self._epicrisis = Epicrisis(event)
         self._card_attrs_action = None
 
     @property
@@ -117,10 +151,25 @@ class PregnancyCard(object):
         return get_action_list(self.event, checkup_flat_codes).order_by(Action.begDate).all()
 
     @lazy
-    def first_inspection(self):
+    def primary_inspection(self):
         for checkup in self.checkups:
             if checkup.actionType.flatCode == first_inspection_code:
-                return checkup
+                return PrimaryInspection(checkup)
+
+    @lazy
+    def latest_inspection(self):
+        if self.checkups:
+            checkup = self.checkups[-1]
+            if checkup.actionType.flatCode == first_inspection_code:
+                return PrimaryInspection(checkup)
+            elif checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
+                return RepeatedInspection(checkup)
+
+    @lazy
+    def latest_rep_inspection(self):
+        for checkup in reversed(self.checkups):
+            if checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
+                return RepeatedInspection(checkup)
 
     @lazy
     def prev_pregs(self):
@@ -131,7 +180,7 @@ class PregnancyCard(object):
 
     @lazy
     def epicrisis(self):
-        return get_action(self.event, risar_epicrisis, True)
+        return self._epicrisis
 
     @lazy
     def radz_risk(self):
@@ -168,17 +217,26 @@ class PregnancyCard(object):
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, \
             reevaluate_card_fill_rate_all
         from .radzinsky_risks.calc import reevaluate_radzinsky_risks
-
+        import time
+        start = time.clock()
         with db.session.no_autoflush:
             action = self.attrs
             check_card_attrs_action_integrity(action)
+            print '- ', time.clock() - start
             reevaluate_risk_rate(self)
+            print '- ', time.clock() - start
             reevaluate_pregnacy_pathology(self)
+            print '- ', time.clock() - start
             reevaluate_dates(self)
+            print '- ', time.clock() - start
             reevaluate_preeclampsia_rate(self)
+            print '- ', time.clock() - start
             reevaluate_risk_groups(self)
+            print '- ', time.clock() - start
             reevaluate_card_fill_rate_all(self)
+            print '- ', time.clock() - start
             reevaluate_radzinsky_risks(self)
+            print '- ', time.clock() - start
 
     @lazy
     def unclosed_mkbs(self):
