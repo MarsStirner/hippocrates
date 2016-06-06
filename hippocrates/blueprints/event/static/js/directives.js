@@ -233,7 +233,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
 
             scope.reload = function () {
                 var url = '{0}{1}/{2}/{3}/{4}/{5}/{6}/'.format(
-                    WMConfig.url.api_event_actions,
+                    WMConfig.url.event.event_actions,
                     scope.event.event_id,
                     scope.actionTypeGroup,
                     scope.pager.current_page,

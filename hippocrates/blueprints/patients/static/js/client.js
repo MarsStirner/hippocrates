@@ -179,7 +179,7 @@ angular.module('WebMis20.controllers').
                             var promise;
                             pages.push(new Image());
                             var idx = pages.length - 1;
-                            promise = $http.get(WMConfig.url.api_patient_file_attach, {
+                            promise = $http.get(WMConfig.url.patients.file_attach.get, {
                                 params: {
                                     file_meta_id: fileMeta.id
                                 }

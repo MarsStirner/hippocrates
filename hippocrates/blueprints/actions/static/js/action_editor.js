@@ -44,7 +44,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                 $scope.$watch('action.lock.locker', function (newVal, oldVal) {
                     if (!$scope.action.lock.success && newVal) {
                         var locker_id = $scope.action.lock.locker;
-                        $http.get(WMConfig.url.api_person_get + locker_id)
+                        $http.get(WMConfig.url.schedule.person + locker_id)
                             .success(function (data) {
                                 $scope.locker_person = data.result;
                             })

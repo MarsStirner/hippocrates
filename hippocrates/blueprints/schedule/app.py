@@ -40,6 +40,7 @@ def fc_urls():
                 'persons_tree_schedule_info': url_for('schedule.api_persons_tree_schedule_info'),
                 'search_persons': url_for('schedule.api_search_persons'),
                 'procedure_offices': url_for('schedule.api_procedure_offices_get'),
+                'person': url_for("schedule.api_person_get"),
             }
         }
     }
