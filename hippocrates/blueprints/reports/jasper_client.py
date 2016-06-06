@@ -113,7 +113,7 @@ class JasperRestV2Client(object):
             'JASPER_URL', 'http://10.1.2.11:8080/jasperserver-pro'
         )
         self.jasper_lg = app.config.get('JASPER_LOGIN', 'jasperadmin')
-        self.jasper_pw = app.config.get('JASPER_PASSWORD', '')
+        self.jasper_pw = app.config.get('JASPER_PASSWORD', 'jasperadmin')
         self._params = params
         self._cookies = None
 

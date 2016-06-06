@@ -35,11 +35,11 @@ class InputPrepare(object):
                 context[name] = string_to_datetime(value).date() if value else None
             elif typeName == 'Time':
                 context[name] = datetime.datetime.strptime(value, '%H:%M').time() if value else None
-            elif typeName in (
-                'MultiRefBook', 'MultiOrganisation', 'MultiOrgStructure',
-                'MultiPerson', 'MultiService', 'MultiMKB', 'MultiArea',
-            ):
+            elif typeName in ('MultiRefBook', 'MultiOrganisation', 'MultiOrgStructure',
+                              'MultiPerson', 'MultiService', 'MultiMKB',):
                 context[name] = ','.join((str(x['id']) for x in value)) if value else None
+            elif typeName in ('MultiArea',):
+                context[name] = ','.join((str(x['code']) for x in value)) if value else None
             # elif typeName == 'Organisation':
             #     context[name] = Organisation.query.get(int(value)) if value else None
             # elif typeName == 'Person':
