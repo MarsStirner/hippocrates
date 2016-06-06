@@ -89,7 +89,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
     };
 
     $scope.create_stationary_event = function (client_id) {
-        var url = url_wm10_create_event.format(client_id);
+        var url = WMConfig.url.webmis_1_0.create_event.format(client_id);
         WMWindowSync.openTab(url, $scope.reload_client);
     };
     $scope.reload_client = function () {
