@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import collections
 
+import blinker as blinker
+
 import requests
 from flask import request
 from nemesis.app import app
@@ -113,6 +115,25 @@ def api_get_ttj_records():
     return result
 
 
+def core_notify_takentissuejournal(sender, ids):
+    core_integration_address = Settings.getString('appPrefs.CoreWS.LIS-1022')
+    if not core_integration_address or not ids:
+        return
+
+    auth_token_cookie = app.config.get('CASTIEL_AUTH_TOKEN')
+    sess = requests.session()
+    sess.cookies[auth_token_cookie] = request.cookies[auth_token_cookie]
+    try:
+        sess.put(
+            core_integration_address,
+            json={'ids': ids}
+        )
+    except requests.ConnectionError:
+        raise ApiException(500, u'Cannot connect to core')
+
+blinker.signal('Core.Notify.TakenTissueJournal').connect(core_notify_takentissuejournal)
+
+
 @module.route('/api/ttj_change_status.json', methods=['POST'])
 @api_method
 def api_ttj_change_status():
@@ -125,16 +146,7 @@ def api_ttj_change_status():
         raise ApiException(400, u'Invalid request. `ids` must be non-empty list')
     core_integration_address = Settings.getString('appPrefs.CoreWS.LIS-1022')
     if status['code'] == 'finished' and core_integration_address:
-        auth_token_cookie = app.config.get('CASTIEL_AUTH_TOKEN')
-        sess = requests.session()
-        sess.cookies[auth_token_cookie] = request.cookies[auth_token_cookie]
-        try:
-            sess.put(
-                core_integration_address,
-                json={'ids': ids}
-            )
-        except requests.ConnectionError:
-            raise ApiException(500, u'Cannot connect to core')
+        core_notify_takentissuejournal(None, ids=ids)
     else:
         TakenTissueJournal.query.filter(
             TakenTissueJournal.id.in_(ids)
