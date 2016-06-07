@@ -279,10 +279,9 @@ def heart_disease_circulatory_embarrassment(card):
     На форме "Анамнез пациентки" поставлен флажок "Пороки сердца с нарушением кровообращения"
     или на форме "Диагнозы случая" есть хотя бы один незакрытый диагноз из узлов I26-I28.
     """
-    # TODO: after anamnesis ticket
-    # anamnesis = card.anamnesis.mother
-    # if anamnesis:
-    #     return safe_bool(anamnesis[<code>].value)
+    anamnesis = card.anamnesis.mother
+    if anamnesis:
+        return safe_bool(anamnesis['heart_disease'].value)
     return _mkb_match(card.unclosed_mkbs, needles=u'I26-I28.99')
 
 

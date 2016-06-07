@@ -28,7 +28,7 @@ mother_codes = [
     'menstruation_last_date', 'marital_status',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
     'intrauterine', 'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income',
-    'preeclampsia', 'multifetation'] + common_codes
+    'preeclampsia', 'multifetation', 'heart_disease'] + common_codes
 father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + common_codes
 
 first_inspection_code = 'risarFirstInspection'
