@@ -3,6 +3,8 @@
 import datetime
 import logging
 
+import collections
+
 from hippocrates.blueprints.event.app import module
 from hippocrates.blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
                                         save_executives, EventSaveController, MovingController, received_close)
@@ -19,11 +21,12 @@ from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
                                parse_id, bail_out)
 from nemesis.models.accounting import Service, Contract
-from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed, \
+    Action_TakenTissueJournalAssoc, TakenTissueJournal
 from nemesis.models.client import Client
 from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
-from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
+from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB, rbTest
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from sqlalchemy import desc, func
@@ -76,7 +79,7 @@ def api_event_stationary_open_get():
     return map(v.make_short_event, events)
 
 
-@module.route('api/event_save.json', methods=['POST'])
+@module.route('/api/event_save.json', methods=['POST'])
 @api_method
 def api_event_save():
     result = {}
@@ -115,7 +118,7 @@ def api_event_save():
     return result
 
 
-@module.route('api/event_moving_save.json', methods=['POST'])
+@module.route('/api/event_moving_save.json', methods=['POST'])
 @api_method
 def api_moving_save():
     vis = StationaryEventVisualizer()
@@ -136,7 +139,7 @@ def api_moving_save():
     return result
 
 
-@module.route('api/event_moving_close.json', methods=['POST'])
+@module.route('/api/event_moving_close.json', methods=['POST'])
 @api_method
 def api_event_moving_close():
     vis = StationaryEventVisualizer()
@@ -180,44 +183,57 @@ def api_event_moving_close():
 #     return dynamics
 
 
-@module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+@module.route('/api/event_lab-res-dynamics.json', methods=['GET'])
 @api_method
 def api_event_lab_res_dynamics():
     # динамика по тестам в действиях с одинаковым ActionType
-    event_id = request.args.get('event_id')
-    action_type_id = request.args.get('action_type_id')
-    from_date = safe_date(request.args.get('from_date'))
-    to_date = safe_date(request.args.get('to_date'))
+    event_id = request.args.get('event_id') or bail_out(ApiException(400, u'event_id должен быть указан'))
+    action_type_id = request.args.get('action_type_id') or bail_out(ApiException(400, u'action_type_id должен быть указан'))
+    from_date = safe_date(request.args.get('from_date', datetime.date.today() - datetime.timedelta(5)))
+    to_date = safe_date(request.args.get('to_date', datetime.date.today()))
 
-    test_ids = db.session.query(ActionPropertyType.test_id,).select_from(ActionPropertyType).join(ActionType).\
-        filter(ActionType.id == action_type_id, ActionPropertyType.test_id.isnot(None)).all()
-    test_ids = [row[0] for row in test_ids]
+    query = ActionProperty.query.join(
+        ActionPropertyType,
+        Action,
+        ActionType,
+    ).filter(
+        Action.actionType_id == action_type_id,
+        Action.event_id == event_id,
+        Action.deleted == 0,
+        func.date(Action.begDate) >= from_date,
+        func.date(Action.begDate) <= to_date,
+        ActionProperty.deleted == 0,
+        ActionProperty.isAssigned == 1,
+        ActionPropertyType.test_id.isnot(None)
+    ).order_by(Action.begDate)
 
-    properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(Action.event_id == event_id,
-                                                                                          Action.deleted == 0,
-                                                                                          func.date(Action.begDate) >= from_date,
-                                                                                          func.date(Action.begDate) <= to_date,
-                                                                                          ActionProperty.deleted == 0,
-                                                                                          ActionProperty.isAssigned == 1,
-                                                                                          ActionPropertyType.test_id.in_(test_ids)).\
-        order_by(Action.begDate)
-    dynamics = {}
-    dates = []
-    for property in properties:
-        test_id = property.type.test_id
-        if property.value:
-            date = property.action.takenTissueJournal.datetimeTaken.strftime('%d.%m.%Y %H:%M')
-            if date not in dates:
-                dates.append(date)
-            if test_id in dynamics:
-                dynamics[test_id]['values'][date] = property.value
-            else:
-                dynamics[test_id] = {'test_name': property.type.test.name,
-                                     'values': {date: property.value}}
-    return dates, dynamics
+    tissues = TakenTissueJournal.query.join(
+        Action_TakenTissueJournalAssoc
+    ).filter(
+        Action_TakenTissueJournalAssoc.action_id.in_(
+            query.with_entities(ActionProperty.action_id).subquery()
+        )
+    ).with_entities(
+        Action_TakenTissueJournalAssoc.action_id,
+        TakenTissueJournal.datetimeTaken
+    )
+    tissue_dict = collections.defaultdict(list)
+    for (action_id, dtt) in tissues:
+        tissue_dict[action_id].append(dtt)
+
+    dynamics = collections.defaultdict(lambda: {'test_name': '', 'values': {}})
+    dates = set()
+    for prop in query:
+        test_id = prop.type.test_id
+        if prop.value:
+            date = min(tissue_dict[prop.action_id]).strftime('%d.%m.%Y %H:%M')
+            dates.add(date)
+            dynamics[test_id]['test_name'] = prop.type.test.name
+            dynamics[test_id]['values'][date] = prop.value
+    return sorted(dates), dynamics
 
 
-@module.route('api/event_hosp_beds_get.json', methods=['GET'])
+@module.route('/api/event_hosp_beds_get.json', methods=['GET'])
 @api_method
 def api_hosp_beds_get():
     vis = StationaryEventVisualizer()
@@ -236,7 +252,7 @@ def api_hosp_beds_get():
     return map(vis.make_hosp_bed, all_hb)
 
 
-@module.route('api/blood_history_save.json', methods=['POST'])
+@module.route('/api/blood_history_save.json', methods=['POST'])
 @api_method
 def api_blood_history_save():
     vis = StationaryEventVisualizer()
@@ -264,7 +280,7 @@ def update_executives(event):
         db.session.commit()
 
 
-@module.route('api/event_close.json', methods=['POST'])
+@module.route('/api/event_close.json', methods=['POST'])
 @api_method
 def api_event_close():
     all_data = request.json
@@ -472,7 +488,7 @@ def api_service_delete_service():
         db.session.commit()
 
 
-@module.route('api/delete_event.json', methods=['POST'])
+@module.route('/api/delete_event.json', methods=['POST'])
 @api_method
 def api_delete_event():
     event_id = parse_id(request.json, 'event_id')
