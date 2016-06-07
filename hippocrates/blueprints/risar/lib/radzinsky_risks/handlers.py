@@ -479,10 +479,9 @@ def abnormal_fetus_position(card):
 
 
 def maternal_passages_immaturity(card):
-    # TODO: after ticket
-    # epicrisis = card.epicrisis
-    # if epicrisis:
-    #     return epicrisis['<code>'].value_row == ''
+    epicrisis = card.epicrisis
+    if epicrisis.action.id:
+        return safe_bool(epicrisis.action['immaturity'].value)
     return False
 
 
