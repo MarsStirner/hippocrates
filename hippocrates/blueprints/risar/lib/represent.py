@@ -866,6 +866,8 @@ def represent_action_fetuses(action):
                 'deceleration': fetus_state.deceleration,
                 'heart_rate': fetus_state.heart_rate,
                 'ktg_input': fetus_state.ktg_input,
+                'fisher_ktg_points': fetus_state.fisher_ktg_points,
+                'fisher_ktg_rate': fetus_state.fisher_ktg_rate
             },
         })
     return res

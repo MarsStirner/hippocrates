@@ -50,6 +50,10 @@ class RisarFetusState(db.Model):
 
     heart_rate = db.Column(db.Integer, nullable=True)
     ktg_input = db.Column(db.Boolean, nullable=False, server_default=u"'0'", default=0)
+    fisher_ktg_points = db.Column(db.Integer)
+    fisher_ktg_rate_id = db.Column(db.ForeignKey('rbFisherKTGRate.id'))
+
+    fisher_ktg_rate = db.relationship('rbFisherKTGRate')
 
     @property
     def heartbeat(self):

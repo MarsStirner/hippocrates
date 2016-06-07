@@ -419,6 +419,15 @@
                                                                     <rb-select ng-model="child.state.deceleration" ref-book="rbRisarDeceleration"
                                                                                ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
                                                             </tr>
+                                                            <tr>
+                                                                <th class="text-right">Оценка КТГ по Фишеру </th>
+                                                                <td><div class="row"><div class="col-md-8">
+                                                                    <input type="text" disabled class="form-control" ng-model="child.state.fisher_ktg_points">
+                                                                    <span class="help-block" ng-if="child.state.fisher_ktg_rate"
+                                                                          ng-bind="child.state.fisher_ktg_rate.name"></span>
+                                                                    </div></div>
+                                                                </td>
+                                                            </tr>
                                                         </tbody>
                                                     </table>
                                                 </div>

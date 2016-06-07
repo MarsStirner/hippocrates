@@ -406,7 +406,7 @@ def edema_disease(card):
 
 
 def gestosis_mild_case(card):
-    return _mkb_match(card.unclosed_mkbs, needles=u'O13-013.99')
+    return _mkb_match(card.unclosed_mkbs, needles=u'O13-O13.99')
 
 
 def gestosis_moderately_severe(card):
