@@ -22,8 +22,8 @@ def fc_urls():
         'url': {
             'actions': {
                 'action_get': uf_placeholders('actions.api_action_get', ['action_id']),
-                'action_new': uf_placeholders('actions.api_action_new_get', ['event_id', 'action_type_id']),
-                'action_save': url_for('actions.api_action_post'),
+                'action_new': uf_placeholders('actions.api_action_new_get', ['action_type_id', 'event_id']),
+                'action_save': uf_placeholders('actions.api_action_post', ['action_id']),
                 'action_previous': url_for('actions.api_find_previous'),
                 'autosave_normal': uf_placeholders('actions.api_action_autosave', ['action_id']),
                 'autosave_new': uf_placeholders('actions.api_action_autosave_unsaved', ['event_id', 'action_type_id']),

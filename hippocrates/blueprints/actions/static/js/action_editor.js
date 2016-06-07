@@ -527,7 +527,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
         data.id = self.id;
         return ApiCalls.wrapper(
             'POST',
-            WMConfig.url.actions.action_get.format(this.id || ''), undefined, data
+            WMConfig.url.actions.action_save.format(this.id || ''), undefined, data
         )
             .then(function (result) {
                 return self.merge(result);
