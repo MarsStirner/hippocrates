@@ -17,7 +17,7 @@ def mother_younger_18(card):
 
 
 def mother_older_40(card):
-    return card.event.client.age_tuple()[3] >= 18
+    return card.event.client.age_tuple()[3] >= 40
 
 
 def father_older_40(card):

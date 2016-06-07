@@ -14,7 +14,7 @@ from blueprints.risar.lib.represent import represent_event, represent_chart_for_
     group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history, \
     represent_chart_for_close_event
-from blueprints.risar.lib.utils import get_last_checkup_date
+from blueprints.risar.lib.utils import get_last_checkup_date, get_patient_risar_event
 from blueprints.risar.risar_config import attach_codes, request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
@@ -90,12 +90,7 @@ def api_0_chart(event_id=None):
             client_id = ticket.client_id
             if not event or event.deleted:
                 # проверка наличия у пациентки открытого обращения, созданного по одному из прошлых записей на приём
-                event = Event.query.join(EventType, rbRequestType).filter(
-                    Event.client_id == client_id,
-                    Event.deleted == 0,
-                    rbRequestType.code == request_type_pregnancy,
-                    Event.execDate.is_(None)
-                ).order_by(Event.setDate.desc()).first()
+                event = get_patient_risar_event(client_id)
         else:  # client_id is not None
             event = None
             ticket = None
