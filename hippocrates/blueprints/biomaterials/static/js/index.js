@@ -20,6 +20,20 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             org_struct: CurrentUser.info.org_structure
         };
         $scope.current_result = [];
+        $scope.count_all_records = function () {
+            return _.chain($scope.result).mapObject(
+                function (value) { return value.records.length }
+            ).values().reduce(
+                function (a, b) { return a + b }
+            ).value();
+        };
+        $scope.count_finished_records = function () {
+            return _.chain($scope.result).mapObject(
+                function (value, key) { return ['finished', 'sent_to_lab', 'fail_to_lab'].has(key)?value.records.length:0 }
+            ).values().reduce(
+                function (a, b) { return a + b }
+            ).value();
+        };
         $scope.set_current_records = function () {
             if ($scope.filter.status !== null) {
                 $scope.current_result = $scope.result[$scope.TTJStatus.get($scope.filter.status).code]

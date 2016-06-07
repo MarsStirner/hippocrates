@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import collections
 
+import datetime
+
 import blinker as blinker
 
 import requests
@@ -9,13 +11,14 @@ from nemesis.app import app
 from nemesis.lib.settings import Settings
 from nemesis.models.event import Event
 from nemesis.models.exists import rbLaboratory, rbTest, rbLaboratory_TestAssoc, rbTestTubeType
+from nemesis.models.utils import safe_current_user_id
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from ..app import module
 from ..lib.utils import TTJVisualizer
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_date
+from nemesis.lib.utils import safe_date, bail_out
 from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournalAssoc, Action, ActionPropertyType, \
     ActionProperty
 from nemesis.models.enums import TTJStatus
@@ -39,7 +42,7 @@ def api_get_ttj_records():
     ).filter(
         Action.deleted == 0,
         ActionProperty.isAssigned == 1,
-        func.date(TakenTissueJournal.datetimeTaken) == exec_date,
+        func.date(TakenTissueJournal.datetimePlanned) == exec_date,
     )
     if biomaterial:
         query = query.filter(TakenTissueJournal.tissueType_id == biomaterial['id'])
@@ -126,10 +129,11 @@ def core_notify_takentissuejournal(sender, ids):
     try:
         sess.put(
             core_integration_address,
-            json={'ids': ids}
+            json={'ids': ids},
+            timeout=10,
         )
     except requests.ConnectionError:
-        raise ApiException(500, u'Cannot connect to core')
+        raise ApiException(500, u'Не удалось связаться с ядром')
 
 blinker.signal('Core.Notify.TakenTissueJournal').connect(core_notify_takentissuejournal)
 
@@ -138,20 +142,20 @@ blinker.signal('Core.Notify.TakenTissueJournal').connect(core_notify_takentissue
 @api_method
 def api_ttj_change_status():
     data = request.json
-    status = data.get('status')
-    ids = data.get('ids')
-    if not status:
-        raise ApiException(400, u'Invalid request. `status` must be set')
-    if not ids:
-        raise ApiException(400, u'Invalid request. `ids` must be non-empty list')
-    core_integration_address = Settings.getString('appPrefs.CoreWS.LIS-1022')
-    if status['code'] == 'finished' and core_integration_address:
-        core_notify_takentissuejournal(None, ids=ids)
-    else:
-        TakenTissueJournal.query.filter(
-            TakenTissueJournal.id.in_(ids)
-        ).update(
-            {TakenTissueJournal.statusCode: status['id']},
-            synchronize_session=False
-        )
-        db.session.commit()
+    status = data.get('status') or bail_out(ApiException(400, u'Invalid request. `status` must be set'))
+    ids = data.get('ids') or bail_out(ApiException(400, u'Invalid request. `ids` must be non-empty list'))
+    if status['code'] in ['sent_to_lab', 'fail_to_lab']:
+        raise ApiException(403, u'Только ядро умеет право устанавливать этот статус: %s' % status['code'])
+    if status['code'] not in ['waiting', 'in_progress', 'finished']:
+        raise ApiException(400, u'Неизвестный код: %s' % status['code'])
+    rule = {TakenTissueJournal.statusCode: status['id']}
+    if status['code'] == 'finished':
+        rule[TakenTissueJournal.execPerson_id] = safe_current_user_id()
+        rule[TakenTissueJournal.datetimeTaken] = datetime.datetime.now()
+    TakenTissueJournal.query.filter(
+        TakenTissueJournal.statusCode < 2,  # Не менять статусы уже законченных
+        TakenTissueJournal.id.in_(ids),
+    ).update(rule, synchronize_session=False)
+    db.session.commit()
+    if status['code'] == 'finished':
+        blinker.signal('Core.Notify.TakenTissueJournal').send(None, ids=ids)

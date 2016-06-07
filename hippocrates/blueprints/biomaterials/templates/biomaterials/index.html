@@ -38,7 +38,7 @@
             <div class="col-md-12 col-lg-12">
                 <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = null"
                         ng-class="{'btn-info': filter.status != null, 'btn-primary': filter.status == null}">
-                    Все <span title="" class="badge bg-white">[[ result.waiting.records.length + result.in_progress.records.length + result.finished.records.length ]]</span>
+                    Все <span title="" class="badge bg-white">[[ count_all_records() ]]</span>
                 </button>
                 <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 0"
                         ng-class="{'btn-info': filter.status != 0, 'btn-primary': filter.status == 0}">
@@ -48,13 +48,9 @@
                         ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">
                     Выполняется <span title="" class="badge bg-white">[[ result.in_progress.records.length ]]</span>
                 </button>
-{#                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 3"#}
-{#                        ng-class="{'btn-info': filter.status != 3, 'btn-primary': filter.status == 3}">#}
-{#                    Отправка в лаб. <span title="" class="badge bg-white">[[ number_by_status.sending_to_lab ]]</span>#}
-{#                </button>#}
                 <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 2"
-                        ng-class="{'btn-info': filter.status != 2, 'btn-primary': filter.status == 2}">
-                    Закончено <span title="" class="badge bg-white">[[ result.finished.records.length ]]</span>
+                        ng-class="{'btn-info': filter.status <= 2, 'btn-primary': filter.status >= 2}">
+                    Закончено <span title="" class="badge bg-white">[[ count_finished_records() ]]</span>
                 </button>
             </div>
         </div>
@@ -69,6 +65,10 @@
                 <button type="button" class="btn btn-primary" ng-click="change_status('finished')"
                         ng-disabled="!selected_records.any()" ng-if="filter.status == 1">
                     Отправить в лабораторию
+                </button>
+                <button type="button" class="btn btn-primary" ng-click="change_status('finished')"
+                        ng-disabled="!selected_records.any()" ng-if="filter.status > 1">
+                    Переотправить в лабораторию
                 </button>
             </div>
             </div>
@@ -90,7 +90,15 @@
                     <tbody>
                         <tr ng-repeat="record in current_result.records">
                             <td><wm-checkbox select-all="selected_records" key="record.id"></wm-checkbox></td>
-                            <td ng-click="open_info(record)">[[record.datetime | asDateTime]]</td>
+                            <td ng-click="open_info(record)">
+                                <div ng-if="['finished', 'sent_to_lab', 'fail_to_lab'].has(record.status.code)">
+                                    [[record.datetime_taken | asDateTime]]<br/>
+                                    (план: [[record.datetime_planned | asDateTime]])
+                                </div>
+                                <div ng-if="!['finished', 'sent_to_lab', 'fail_to_lab'].has(record.status.code)">
+                                    [[record.datetime_planned | asDateTime]]
+                                </div>
+                            </td>
                             <td ng-click="open_info(record)">[[record.client.full_name]]</td>
                             <td ng-click="open_info(record)">[[record.client.sex.name]]</td>
                             <td ng-click="open_info(record)">[[record.client.birth_date | asDate]]</td>
@@ -99,7 +107,12 @@
                             <td><div ng-repeat="action in record.actions">
                                 <a href="#" ng-click="open_action(action.id)" ng-bind="action.action_type.title"></a>
                             </div></td>
-                            <td><span ng-if="record.isUrgent" class="label label-warning">CITO</span></td>
+                            <td>
+                                <span ng-if="record.isUrgent" class="label label-warning">CITO</span>
+                                <span ng-if="record.status.code == 'finished'" class="label label-warning" tooltip="Ожидает отправку в ЛИС">ЛИС</span>
+                                <span ng-if="record.status.code == 'sent_to_lab'" class="label label-success" tooltip="Отправлено в ЛИС">ЛИС</span>
+                                <span ng-if="record.status.code == 'fail_to_lab'" class="label label-danger" tooltip="Не отправлено в ЛИС">ЛИС</span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

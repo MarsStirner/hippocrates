@@ -22,7 +22,8 @@ class TTJVisualizer(object):
         return {
             'id': ttj.id,
             'externalId': externalId,
-            'datetime': ttj.datetimeTaken,
+            'datetime_planned': ttj.datetimePlanned,
+            'datetime_taken': ttj.datetimeTaken,
             'client': ttj.client,
             'execPerson': ttj.execPerson,
             'tissueType': ttj.tissueType,
