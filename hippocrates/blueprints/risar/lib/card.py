@@ -217,26 +217,26 @@ class PregnancyCard(object):
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, \
             reevaluate_card_fill_rate_all
         from .radzinsky_risks.calc import reevaluate_radzinsky_risks
-        import time
-        start = time.clock()
+        #import time
+        #start = time.clock()
         with db.session.no_autoflush:
             action = self.attrs
             check_card_attrs_action_integrity(action)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_risk_rate(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_pregnacy_pathology(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_dates(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_preeclampsia_rate(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_risk_groups(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_card_fill_rate_all(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
             reevaluate_radzinsky_risks(self)
-            print '- ', time.clock() - start
+            #print '- ', time.clock() - start
 
     @lazy
     def unclosed_mkbs(self):

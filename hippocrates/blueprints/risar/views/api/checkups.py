@@ -32,8 +32,8 @@ def api_0_checkup(event_id):
 
     if not flat_code:
         raise ApiException(400, 'flat_code required')
-    import time
-    start = time.clock()
+    #import time
+    #start = time.clock()
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     action = get_action_by_id(checkup_id, event, flat_code, True)
@@ -49,24 +49,24 @@ def api_0_checkup(event_id):
         if code in action.propsByCode:
             action.propsByCode[code].value = value
 
-    end = time.clock()
-    print 'action props', (end - start)
+    #end = time.clock()
+    #print 'action props', (end - start)
     create_or_update_diagnoses(action, diagnoses)
-    end = time.clock()
-    print 'diagnoses', (end - start)
+    #end = time.clock()
+    #print 'diagnoses', (end - start)
     create_or_update_fetuses(action, fetuses)
-    end = time.clock()
-    print 'fetuses', (end - start)
+    #end = time.clock()
+    #print 'fetuses', (end - start)
 
     db.session.commit()
-    end = time.clock()
-    print 'first commit', (end - start)
+    #end = time.clock()
+    #print 'first commit', (end - start)
     card.reevaluate_card_attrs()
-    end = time.clock()
-    print 'all attrs reevaluated', (end - start)
+    #end = time.clock()
+    #print 'all attrs reevaluated', (end - start)
     db.session.commit()
-    end = time.clock()
-    print 'second commit', (end - start)
+    #end = time.clock()
+    #print 'second commit', (end - start)
 
     em_ctrl = EventMeasureController()
     em_error = None
@@ -74,8 +74,8 @@ def api_0_checkup(event_id):
         em_ctrl.regenerate(action)
     except EMGenerateException:
         em_error = u'Произошла ошибка формирования списка мероприятий'
-    end = time.clock()
-    print 'measures saved', (end - start)
+    #end = time.clock()
+    #print 'measures saved', (end - start)
     return represent_checkup(action, True, em_error)
 
 
