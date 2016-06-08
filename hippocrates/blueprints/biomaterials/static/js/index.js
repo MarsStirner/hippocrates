@@ -35,14 +35,23 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             ).value();
         };
         $scope.set_current_records = function () {
-            if ($scope.filter.status !== null) {
-                $scope.current_result = $scope.result[$scope.TTJStatus.get($scope.filter.status).code]
-            } else {
-                var result = {
-                    records: [],
-                    tubes: {}
-                };
-                _.each($scope.result, function (value) {
+            var display_map = {
+                null: ['waiting', 'in_progress', 'finished', 'sent_to_lab', 'fail_to_lab'],
+                waiting: ['waiting'],
+                in_progress: ['in_progress'],
+                finished: ['finished', 'sent_to_lab', 'fail_to_lab']
+            };
+            var result = {
+                records: [],
+                tubes: {}
+            };
+            var status = $scope.filter.status ? $scope.TTJStatus.get($scope.filter.status).code : 'null';
+            var cats = display_map[status];
+            _.chain($scope.result)
+                .filter(function (value, key) {
+                    return cats.has(key)
+                })
+                .each(function (value) {
                     result.records = result.records.concat(value.records);
                     _.each(value.tubes, function (tube_value, tube_key) {
                         if (_.has(result.tubes, tube_key)) {
@@ -55,8 +64,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                         }
                     })
                 });
-                $scope.current_result = result;
-            }
+            $scope.current_result = result;
             $scope.selected_records.setSource(_.pluck($scope.current_result.records, 'id'));
             $scope.selected_records.selectNone();
         };
