@@ -3,8 +3,4 @@
 {%- block modules_js %}
     {{ super() }}
     <script src="{{ url_for('static', filename='js/services/webmis.api.js', v=nemesis_version) }}"></script>
-    <script>
-    var
-        url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}';
-    </script>
 {% endblock -%}
