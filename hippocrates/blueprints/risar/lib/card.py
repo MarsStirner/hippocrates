@@ -14,6 +14,7 @@ from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_a
     risar_anamnesis_pregnancy, risar_epicrisis, first_inspection_code, second_inspection_code, \
     pc_inspection_code
 from nemesis.lib.data import create_action
+from nemesis.lib.utils import safe_bool
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
 from nemesis.models.diagnosis import Diagnostic
@@ -170,6 +171,16 @@ class PregnancyCard(object):
         for checkup in reversed(self.checkups):
             if checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
                 return RepeatedInspection(checkup)
+
+    @lazy
+    def latest_inspection_fetus_ktg(self):
+        """Последний повторный осмотр, где были заполнены данные КТГ для плода"""
+        for checkup in reversed(self.checkups):
+            if checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
+                inspection = RepeatedInspection(checkup)
+                for fetus in inspection.fetuses:
+                    if safe_bool(fetus.ktg_input):
+                        return inspection
 
     @lazy
     def prev_pregs(self):

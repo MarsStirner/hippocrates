@@ -553,27 +553,87 @@ def chronical_placental_insufficiency(card):
 
 
 def cardiotocography_more_7(card):
-    # TODO: after ticket
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов >7
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return min(fetuses_ktg_points) > 7
     return False
 
 
 def cardiotocography_6(card):
-    # TODO: after ticket
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов = 6
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return min(fetuses_ktg_points) == 6
     return False
 
 
 def cardiotocography_5(card):
-    # TODO: after ticket
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов = 5
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return min(fetuses_ktg_points) == 5
     return False
 
 
 def cardiotocography_4(card):
-    # TODO: after ticket
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов = 4
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return min(fetuses_ktg_points) == 4
     return False
 
 
 def cardiotocography_less_4(card):
-    # TODO: after ticket
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов < 4
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return min(fetuses_ktg_points) < 4
     return False
 
 
