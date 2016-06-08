@@ -390,8 +390,18 @@ def early_pregnancy_toxemia(card):
 
 
 def recurrent_threatened_miscarriage(card):
-    # TODO:
-    return False  #_mkb_match(card.unclosed_mkbs, needles=u'O20.0')
+    """
+    Если у пациентки на форме "Диагнозы случая" есть диагноз с кодом МКБ «O20.0»:
+     * открытый, повторяющийся в 2 и более осмотрах акушером-гинекологом/специалистом ПЦ подряд
+     * либо есть один и более закрытых и один открытый
+     * либо 2 и более закрытых
+    """
+    inspection_diagnoses = card.get_inspection_diagnoses()
+    inspections_by_mkb = {}
+    for action_id, mkbs in inspection_diagnoses.iteritems():
+        for mkb in mkbs:
+            inspections_by_mkb.setdefault(mkb, set()).add(action_id)
+    return 'O20.0' in inspections_by_mkb and len(inspections_by_mkb['O20.0']) >= 2
 
 
 def edema_disease(card):

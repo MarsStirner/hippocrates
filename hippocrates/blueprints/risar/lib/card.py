@@ -6,6 +6,8 @@ import functools
 import sqlalchemy
 
 from weakref import WeakKeyDictionary, WeakValueDictionary
+from collections import defaultdict
+from sqlalchemy import and_, func
 
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.lib.prev_children import get_previous_children
@@ -345,6 +347,42 @@ class PregnancyCard(object):
         query = query.with_entities(sqlalchemy.func.max(Diagnostic.id).label('zid')).subquery()
         query = db.session.query(Diagnostic).join(query, query.c.zid == Diagnostic.id)
         return query.all()
+
+    @cache.cached_call
+    def get_inspection_diagnoses(self):
+        """МКБ, присутствовавшие на каждом осмотре"""
+        # все версии диагнозов пациента
+        diag_q = db.session.query(Diagnostic).join(
+            Diagnosis
+        ).filter(
+            Diagnosis.deleted == 0,
+            Diagnostic.deleted == 0,
+            Diagnosis.client_id == self.event.client_id
+        ).with_entities(
+            Diagnosis.id,
+            Diagnosis.setDate.label('beg_date'),
+            func.coalesce(Diagnosis.endDate, func.curdate()).label('end_date'),
+            Diagnostic.MKB.label('mkb')
+        ).subquery('ClientDiagnostics')
+
+        # осмотры, попадающие в интервалы действия диагнозов
+        action_mkb_q = db.session.query(Action).join(
+            ActionType
+        ).join(
+            diag_q, and_(func.date(Action.begDate) <= func.coalesce(diag_q.c.end_date, func.curdate()),
+                         func.date(func.coalesce(Action.endDate, func.curdate())) >= diag_q.c.beg_date)
+        ).filter(
+            Action.deleted == 0,
+            Action.event_id == self.event.id,
+            ActionType.flatCode.in_(checkup_flat_codes)
+        ).with_entities(
+            Action.id.label('action_id').distinct(), diag_q.c.mkb.label('mkb')
+        )
+
+        res = defaultdict(set)
+        for action_id, mkb in action_mkb_q:
+            res[action_id].add(mkb)
+        return res
 
     @classmethod
     def get_for_event(cls, event):
