@@ -30,15 +30,14 @@ def father_older_40(card):
 def mother_professional_properties(card):
     anamnesis = card.anamnesis.mother
     if anamnesis.id:
-        return anamnesis['professional_properties'].value is not None and \
-               anamnesis['professional_properties'].value_raw != 'psychic_tension'
+        return anamnesis['professional_properties'].value_raw not in (None, 'psychic_tension', 'no')
     return False
 
 
 def father_professional_properties(card):
     anamnesis = card.anamnesis.father
     if anamnesis.id:
-        return anamnesis['professional_properties'].value is not None
+        return anamnesis['professional_properties'].value_raw not in (None, 'no')
     return False
 
 

@@ -15,12 +15,12 @@
             <div class="list-group">
                 <a href="javascript:void(0);" class="list-group-item"
                     ng-class="{'active': isStageSelected()}" ng-click="selectStage()">
-                    <span class="badge">[[ risks.general_info.total_sum_points ]] / [[ risks.general_info.maximum_points ]]</span>
+                    <span class="badge">[[ risks.general_info.total_sum_points ]]</span>
                     Итоговые результаты
                 </a>
                 <a href="javascript:void(0);" class="list-group-item" ng-repeat="stage in rbRadzStage.objects"
                     ng-class="{'active': isStageSelected(stage)}" ng-click="selectStage(stage)">
-                    <span class="badge">[[ risks.stage_points[stage.code].sum ]] / [[ risks.stage_points[stage.code].maximum ]]</span>
+                    <span class="badge">[[ risks.stage_points[stage.code].sum ]]</span>
                     [[ stage.name ]]
                 </a>
             </div>
