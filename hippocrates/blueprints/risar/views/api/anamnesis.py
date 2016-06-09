@@ -3,7 +3,7 @@ import datetime
 import logging
 
 from flask import request
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id

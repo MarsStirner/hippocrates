@@ -3,7 +3,7 @@
 import datetime
 import logging
 
-from flask.ext.login import current_user
+from flask_login import current_user
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from nemesis.models.utils import safe_current_user_id
 from sqlalchemy import func

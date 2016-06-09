@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import render_template, request, redirect, url_for
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity, reevaluate_card_fill_rate_all

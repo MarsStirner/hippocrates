@@ -5,7 +5,7 @@ import logging
 
 from flask import request, abort, url_for
 
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from hippocrates.blueprints.actions.lib.models import ActionAutoSave, ActionAutoSaveUnsaved
 from sqlalchemy.orm import joinedload

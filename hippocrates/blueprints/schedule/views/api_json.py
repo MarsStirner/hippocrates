@@ -6,7 +6,7 @@ from collections import defaultdict
 import logging
 
 from flask import abort, request
-from flask.ext.login import current_user
+from flask_login import current_user
 from nemesis.lib.html_utils import UIException
 
 from nemesis.systemwide import db, cache
