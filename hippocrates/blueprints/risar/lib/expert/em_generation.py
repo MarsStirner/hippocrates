@@ -4,6 +4,7 @@ import datetime
 import logging
 
 from collections import defaultdict
+from sqlalchemy.orm import joinedload
 
 from nemesis.lib.data import get_client_diagnostics
 from nemesis.lib.utils import safe_date, safe_int, safe_datetime
@@ -255,6 +256,11 @@ class EventMeasureGenerator(object):
         ).order_by(
             EventMeasure.begDateTime,
             EventMeasure.id
+        ).options(
+            (joinedload(EventMeasure._scheme_measure, innerjoin=True).
+             joinedload('schedule', innerjoin=True).
+             joinedload('apply_type', innerjoin=True)
+             )
         )
         for em in query:
             self.existing_em_list[em.schemeMeasure_id].append(em)
@@ -558,21 +564,21 @@ class MeasureGeneratorRisarContext(object):
         self.all_existing_mkb = set(
             d.MKB
             for d in diagnostics
-            if not (d.action == self.source_action and d == d.diagnosis.diagnostics[0])
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0])
         )
 
         # Все незакрытые диагнозы, действовавшие на период действия, кроме созданных в нём
         self.actual_existing_mkb = set(
             d.MKB
             for d in diagnostics
-            if not (d.action == self.source_action and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
         )
 
         # Все диагнозы, созданные в этом действии
         self.actual_action_mkb = set(
             d.MKB
             for d in diagnostics
-            if (d.action == self.source_action and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+            if (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
         )
 
     def is_sm_apply_event_after_each_visit(self, sm):
@@ -598,7 +604,7 @@ class MeasureGeneratorRisarContext(object):
                 acceptable = self._check_st_lfv(sm, mkb_code)
             elif st_code == 'in_presence_diag':
                 acceptable = self._check_st_ipd(sm, mkb_code)
-            elif st_code in ('in_presence_diag', 'text', 'recommended'):
+            elif st_code in ('upon_med_indication', 'text', 'recommended'):
                 acceptable = True
             if not acceptable:
                 return False
@@ -705,5 +711,9 @@ class ActionMkbSpawner(object):
             ExpertScheme.deleted == 0,
             ExpertSchemeMeasureAssoc.deleted == 0,
             MKB.DiagID == self.mkb_code
+        ).options(
+            joinedload('schedule', innerjoin=True).joinedload('apply_type', innerjoin=True),
+            joinedload('schedule', innerjoin=True).joinedload('schedule_types'),
+            joinedload('schedule', innerjoin=True).joinedload('additional_mkbs')
         )
-        self.scheme_measures = [sm for sm in query.all()]
+        self.scheme_measures = query.all()
