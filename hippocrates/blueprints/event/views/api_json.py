@@ -183,6 +183,7 @@ def api_event_moving_close():
 #     return dynamics
 
 
+# noinspection PyPep8Naming
 @module.route('/api/event_lab-res-dynamics.json', methods=['GET'])
 @api_method
 def api_event_lab_res_dynamics():
@@ -192,17 +193,29 @@ def api_event_lab_res_dynamics():
     from_date = safe_date(request.args.get('from_date', datetime.date.today() - datetime.timedelta(5)))
     to_date = safe_date(request.args.get('to_date', datetime.date.today()))
 
+    rb_tests_subquery = rbTest.query.join(
+        ActionPropertyType
+    ).filter(
+        ActionPropertyType.actionType_id == action_type_id
+    ).with_entities(rbTest.id).subquery()
+
+    EventSelf = db.aliased(Event)
+
     query = ActionProperty.query.join(
         ActionPropertyType,
         Action,
+        Event,
+    ).join(
+        EventSelf, db.and_(
+            EventSelf.client_id == Event.client_id,
+            EventSelf.id == event_id,
+        ),
     ).filter(
-        Action.actionType_id == action_type_id,
-        Action.event_id == event_id,
         Action.deleted == 0,
         func.date(Action.begDate) >= from_date,
         func.date(Action.begDate) <= to_date,
         ActionProperty.deleted == 0,
-        ActionPropertyType.test_id.isnot(None)
+        ActionPropertyType.test_id.in_(rb_tests_subquery),
     )
 
     tissue_query = Action.query.outerjoin(
@@ -225,7 +238,14 @@ def api_event_lab_res_dynamics():
 
     dynamics = collections.defaultdict(lambda: {'test_name': '', 'values': {}})
     dates = set()
-    result = query.join(Action.actionType).join(ActionPropertyType.test).order_by(Action.begDate).with_entities(ActionProperty, rbTest)
+    result = query.join(
+        Action.actionType,
+        ActionPropertyType.test,
+    ).order_by(Action.begDate).with_entities(
+        ActionProperty,
+        rbTest
+    )
+
     for (prop, test) in result:
         if prop.value and tissue_dict[prop.action_id]:
             date = tissue_dict[prop.action_id].strftime('%d.%m.%Y %H:%M')
