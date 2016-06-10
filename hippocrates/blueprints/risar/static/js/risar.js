@@ -701,8 +701,8 @@ WebMis20
     return {
         restrict: 'A',
         template: '\
-<span style="font-size: 65%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
-    >РАД</span>\
+<span style="font-size: 60%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    >Р</span>\
 ',
         scope: {
             radzRiskRateIcon: '='

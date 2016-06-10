@@ -27,36 +27,59 @@
         </div>
 
         <div class="col-md-8">
-            <div class="box box-solid" ng-show="isStageSelected()">
+            <div class="box box-solid" ng-show="isStageSelected()" ng-class="getRiskRateHeaderClass()">
                 <div class="box-header with-border">
-                    <h3 class="box-title"><span ng-bind="risks.general_info.risk_rate.name" ng-class="getRiskRateTextClass()"></span> степень риска</h3>
+                    <h3 class="box-title"><span ng-bind="risks.general_info.risk_rate.name"></span> степень риска</h3>
                 </div>
                 <div class="box-body">
-                    <p>
-                        Сумма баллов анамнестических факторов: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.anamnestic_points"></span>
-                    </p>
-                    <p>
-                        Сумма баллов факторов до 32 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.before32week_points"></span>
-                    </p>
-                    <p>
-                        Общая сумма баллов факторов до 32 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.before32week_totalpoints"></span>
-                    </p>
-                    <p>
-                        Сумма баллов факторов после 33 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.after33week_points"></span>
-                    </p>
-                    <p>
-                        Общая сумма баллов факторов после 33 недель: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.after33week_totalpoints"></span>
-                    </p>
-                    <p>
-                        Сумма баллов интранатальных факторов: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.intranatal_points"></span>
-                    </p>
-                    <p>
-                        Общая сумма баллов с учётом интранатальных факторов: <span class="empty-value text-center lmargin20 text-bold" ng-bind="risks.general_info.intranatal_totalpoints"></span>
-                    </p>
-                    <p>
-                        Интранатальный прирост: <span class="empty-value text-center lmargin20 text-bold"
-                            style="width: 40px" ng-bind="risks.general_info.intranatal_growth"></span> <b>%</b>
-                    </p>
+                    <div class="row marginal">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов анамнестических факторов:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.anamnestic_points"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов факторов до 32 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.before32week_points"></span>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-sm-6 col-md-5 text-right">Общая сумма баллов факторов до 32 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.before32week_totalpoints"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов факторов после 33 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.after33week_points"></span>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-sm-6 col-md-5 text-right">Общая сумма баллов факторов после 33 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.after33week_totalpoints"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов интранатальных факторов:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.intranatal_points"></span>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-sm-6 col-md-5 text-right">Общая сумма баллов с учётом интранатальных факторов:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.intranatal_totalpoints"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Интранатальный прирост:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.intranatal_growth"></span><b ng-if="risks.general_info.intranatal_growth">%</b>
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -39,12 +39,12 @@ WebMis20.controller('RadzinskyRisksCtrl', ['$scope', '$q', 'RisarApi', 'RefBookS
         $scope.selectStage = function (stage) {
             return $scope.selectedStage.id = stage !== undefined ? stage.id : stage;
         };
-        $scope.getRiskRateTextClass = function () {
+        $scope.getRiskRateHeaderClass = function () {
             var r = safe_traverse($scope.risks, ['general_info', 'risk_rate']);
-            if (!r) return 'empty-value';
-            if (r.code === 'low') return 'text-green';
-            else if (r.code === 'medium') return 'text-warning';
-            else if (r.code === 'high') return 'text-danger';
+            if (!r) return '';
+            if (r.code === 'low') return 'box-success';
+            else if (r.code === 'medium') return 'box-warning';
+            else if (r.code === 'high') return 'box-danger';
             else return '';
         };
 

@@ -319,7 +319,7 @@ def neurometabolic_endocrine_syndrome(card):
 
 
 def diabetes(card):
-    return _mkb_match(card.unclosed_mkbs, needles=u'E10.0-E14.9, O24.0-O24.4, О24.9')
+    return _mkb_match(card.unclosed_mkbs, needles=u'E10.0-E14.9, O24.0-O24.4, O24.9')
 
 
 def thyroid_disorders(card):

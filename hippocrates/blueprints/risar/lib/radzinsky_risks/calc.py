@@ -89,18 +89,28 @@ def reevaluate_radzinsky_risks(card):
     if after33week_sum is not None:
         after33week_totalsum = anamnestic_sum + after33week_sum
     if intranatal_sum is not None and (after33week_sum is not None or before32week_sum is not None):
-        stage_sum = after33week_sum if after33week_sum is not None else before32week_sum
+        stage_sum = after33week_totalsum if after33week_sum is not None else before32week_totalsum
         intranatal_totalsum = intranatal_sum + stage_sum
         intranatal_growth = round(float(intranatal_sum) / stage_sum * 100, 2)
 
     radz_risk = card.radz_risk
+    # анамнестические пересчитываются всегда
     radz_risk.anamnestic_points = anamnestic_sum
+    # факторы до 32 пересчитываются до 33 недели беременности, также меняется общая сумма до 32
     if before32week_sum is not None:
         radz_risk.before32week_points = before32week_sum
         radz_risk.before32week_totalpoints = before32week_totalsum
+    else:
+        # а еще общая сумма может пересчитываться и после 32 недели,
+        # если изменились анамнестические факторы
+        radz_risk.before32week_totalpoints = anamnestic_sum + (radz_risk.before32week_points or 0)
+    # факторы после 33 пересчитываются с 33 недели беременности, также меняется общая сумма после 33;
+    # кроме того эти суммы очищаются, если неделя беременности до 33
     if after33week_sum is not None or RadzinskyStage.after33[0] in clear_stage_ids:
         radz_risk.after33week_points = after33week_sum
         radz_risk.after33week_totalpoints = after33week_totalsum
+    # интранатальные пересчитываются при наличии эпикриза, также меняется общая сумма интранатальных
+    # и прирост; кроме того эти суммы очищаются, если эпикриза нет
     if intranatal_sum is not None and intranatal_growth is not None or \
             RadzinskyStage.intranatal[0] in clear_stage_ids:
         radz_risk.intranatal_points = intranatal_sum
