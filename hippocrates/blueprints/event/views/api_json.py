@@ -195,7 +195,6 @@ def api_event_lab_res_dynamics():
     query = ActionProperty.query.join(
         ActionPropertyType,
         Action,
-        ActionType,
     ).filter(
         Action.actionType_id == action_type_id,
         Action.event_id == event_id,
@@ -205,31 +204,35 @@ def api_event_lab_res_dynamics():
         ActionProperty.deleted == 0,
         ActionProperty.isAssigned == 1,
         ActionPropertyType.test_id.isnot(None)
-    ).order_by(Action.begDate)
-
-    tissues = TakenTissueJournal.query.join(
-        Action_TakenTissueJournalAssoc
-    ).filter(
-        Action_TakenTissueJournalAssoc.action_id.in_(
-            query.with_entities(ActionProperty.action_id).subquery()
-        )
-    ).with_entities(
-        Action_TakenTissueJournalAssoc.action_id,
-        TakenTissueJournal.datetimeTaken
     )
-    tissue_dict = collections.defaultdict(list)
-    for (action_id, dtt) in tissues:
-        tissue_dict[action_id].append(dtt)
+
+    tissue_query = Action.query.outerjoin(
+        Action_TakenTissueJournalAssoc, Action_TakenTissueJournalAssoc.action_id == Action.id
+    ).join(
+        TakenTissueJournal, TakenTissueJournal.id.in_([
+            Action_TakenTissueJournalAssoc.takenTissueJournal_id,
+            Action.takenTissueJournal_id,
+        ])
+    ).filter(
+        Action.id.in_(query.group_by(ActionProperty.action_id).with_entities(ActionProperty.action_id).subquery())
+    ).group_by(
+        Action.id
+    ).with_entities(
+        Action.id,
+        func.coalesce(TakenTissueJournal.datetimeTaken, TakenTissueJournal.datetimePlanned, Action.plannedEndDate)
+    )
+
+    tissue_dict = dict(tissue_query)
 
     dynamics = collections.defaultdict(lambda: {'test_name': '', 'values': {}})
     dates = set()
-    for prop in query:
-        test_id = prop.type.test_id
-        if prop.value:
-            date = min(tissue_dict[prop.action_id]).strftime('%d.%m.%Y %H:%M')
+    result = query.join(Action.actionType).join(ActionPropertyType.test).order_by(Action.begDate).with_entities(ActionProperty, rbTest)
+    for (prop, test) in result:
+        if prop.value and tissue_dict[prop.action_id]:
+            date = tissue_dict[prop.action_id].strftime('%d.%m.%Y %H:%M')
             dates.add(date)
-            dynamics[test_id]['test_name'] = prop.type.test.name
-            dynamics[test_id]['values'][date] = prop.value
+            dynamics[test.id]['test_name'] = test.name
+            dynamics[test.id]['values'][date] = prop.value
     return sorted(dates), dynamics
 
 
