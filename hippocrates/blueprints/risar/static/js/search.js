@@ -40,7 +40,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_from: $scope.query.bdate_from || undefined,
             bdate_to: $scope.query.bdate_to || undefined,
             risk: get_risk_list(), //$scope.query.risk.id,
-            closed: $scope.query.closed.value
+            closed: $scope.query.closed.value,
+            client_workgroup: $scope.query.client_workgroup,
+            age_max: $scope.query.age_max,
+            age_min: $scope.query.age_min
+
         };
     };
     var perform = function (set_page) {
@@ -99,7 +103,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.doctors = default_docs.concat(result);
             $scope.query.person = $scope.doctors[0];
         });
-    };
+    }; 
+
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
 
     $scope.reset_filters = function () {
@@ -113,7 +118,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_from: null,
             bdate_to: null,
             risk: [],
-            closed: $scope.closed_items[0]
+            closed: $scope.closed_items[0],
+            client_work_group: {},
+            age_min: null,
+            age_max: null
         };
         return $scope.refresh_areas();
     };

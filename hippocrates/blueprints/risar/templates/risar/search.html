@@ -69,6 +69,23 @@
                     <input class="form-control" ng-model="query.fio">
                 </div>
                 <div class="form-group">
+                    <label>Социальный статус</label>
+                    <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>
+                </div>
+
+                <div class="form-group">
+
+                    <label>Возраст</label>
+                    <div class="row center-block">
+                        <div class="input-group col-md-10">
+                            <span  class="input-group-addon" id="age_min">От</span>
+                            <input type="number" ng-model="query.age_min" class="form-control" min="1" max="90" placeholder="от" aria-describedby="age_min">
+                            <span  class="input-group-addon" id="age_max">До</span>
+                            <input type="number" ng-model="query.age_max" class="form-control" min="5" max="100" placeholder="до" aria-describedby="age_max">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Степень риска</label>
                     <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding">
                         [[ item.name ]]
@@ -136,6 +153,7 @@
                                 <th>ФИО</th>
                                 <th>Врач</th>
                                 <th>Срок</th>
+                                <th>Соц. статус</th>
                                 <th>Последнее<br>изменение</th>
                                 <th>Куратор</th>
                             </tr>
@@ -144,9 +162,10 @@
                             <tr ng-repeat="row in results">
                                 <td risk-rate-icon="row.risk"></td>
                                 <td>[[ row.external_id ]]</td>
-                                <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a></td>
+                                <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a> [[row.literal_age]]</td>
                                 <td>[[ row.exec_person_name ]]</td>
                                 <td>[[ row.week ]]</td>
+                                <td>[[ row.client_workgroup ]]</td>
                                 <td>[[ row.mdate | asDate ]]</td>
                                 <td>[[ row.curators ]]</td>
                             </tr>
