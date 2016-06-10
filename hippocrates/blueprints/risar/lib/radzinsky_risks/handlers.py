@@ -339,17 +339,62 @@ def obesity(card):
 
 
 def anemia_90(card):
-    # TODO: measures
+    """
+    В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
+    0010, 0035, 0284, 0128 (среди некольких взять самое актуальное) и в данном мероприятии
+    есть свойство с кодом hemoglobin и его значение меньше или равно 90 г/л
+    """
+    measure_codes = ['0010', '0035', '0284', '0128']
+    em_by_code = card.latest_measures_with_result
+    theone = None
+    for code in measure_codes:
+        if code in em_by_code:
+            rival = em_by_code[code]
+            if theone is None or rival.begDateTime > theone.begDateTime:
+                theone = rival
+    if theone:
+        val = theone.result_action['hemoglobin'].value
+        return val is not None and val <= 90
     return False
 
 
 def anemia_100(card):
-    # TODO: measures
+    """
+    В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
+    0010, 0035, 0284, 0128 (среди некольких взять самое актуальное) и в данном мероприятии
+    есть свойство с кодом hemoglobin и его значение больше 90 г/л, но меньше или равно 100 г/л
+    """
+    measure_codes = ['0010', '0035', '0284', '0128']
+    em_by_code = card.latest_measures_with_result
+    theone = None
+    for code in measure_codes:
+        if code in em_by_code:
+            rival = em_by_code[code]
+            if theone is None or rival.begDateTime > theone.begDateTime:
+                theone = rival
+    if theone:
+        val = theone.result_action['hemoglobin'].value
+        return val is not None and 90 < val <= 100
     return False
 
 
 def anemia_110(card):
-    # TODO: measures
+    """
+    В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
+    0010, 0035, 0284, 0128 (среди некольких взять самое актуальное) и в данном мероприятии
+    есть свойство с кодом hemoglobin и его значение больше 100 г/л, но меньше или равно 110 г/л
+    """
+    measure_codes = ['0010', '0035', '0284', '0128']
+    em_by_code = card.latest_measures_with_result
+    theone = None
+    for code in measure_codes:
+        if code in em_by_code:
+            rival = em_by_code[code]
+            if theone is None or rival.begDateTime > theone.begDateTime:
+                theone = rival
+    if theone:
+        val = theone.result_action['hemoglobin'].value
+        return val is not None and 100 < val <= 110
     return False
 
 

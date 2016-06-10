@@ -203,6 +203,12 @@ def api_0_measure_list(event_id):
     if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
 
+    # TODO: test and delete
+    if 'latest_in_event' in data:
+        from blueprints.risar.lib.card import PregnancyCard
+        card = PregnancyCard.get_for_event(event)
+        return card.latest_measures_with_result
+
     paginate = safe_bool(data.get('paginate', True))
     em_ctrl = EventMeasureController()
     data = em_ctrl.get_measures_in_event(event, data, paginate)

@@ -12,6 +12,7 @@ from sqlalchemy import and_, func
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.lib.prev_children import get_previous_children
 from blueprints.risar.lib.fetus import get_fetuses
+from blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, risar_epicrisis, first_inspection_code, second_inspection_code, \
     pc_inspection_code
@@ -243,7 +244,6 @@ class PregnancyCard(object):
 
     @lazy
     def unclosed_mkbs(self):
-        # TODO: diag
         diagnostics = self.get_client_diagnostics(self.event.setDate, self.event.execDate)
         return set(
             d.MKB
@@ -372,6 +372,14 @@ class PregnancyCard(object):
         res = defaultdict(set)
         for action_id, mkb in action_mkb_q:
             res[action_id].add(mkb)
+        return res
+
+    @lazy
+    def latest_measures_with_result(self):
+        em_list = get_latest_measures_in_event(self.event.id, with_result=True)
+        res = {}
+        for em in em_list:
+            res[em.measure.code] = em
         return res
 
     @classmethod

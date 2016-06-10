@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy.orm import aliased, joinedload, subqueryload
+from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
 
 from blueprints.risar.lib.utils import format_action_data
