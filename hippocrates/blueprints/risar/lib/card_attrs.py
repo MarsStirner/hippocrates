@@ -9,7 +9,7 @@ from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, s
     belongs_to_mkbgroup
 from blueprints.risar.models.risar import RisarRiskGroup
 from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
-    first_inspection_code
+    first_inspection_code, pc_inspection_code
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
@@ -445,7 +445,8 @@ def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True
     """
     first_inspection = None
     last_inspection = card.latest_inspection
-    if last_inspection is not None and last_inspection.action.actionType.flatCode == first_inspection_code:
+    if last_inspection is not None and \
+            last_inspection.action.actionType.flatCode in (first_inspection_code, pc_inspection_code):
         first_inspection = last_inspection
 
     ri_fr = CardFillRate.not_required[0]

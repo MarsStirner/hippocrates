@@ -17,7 +17,7 @@ from blueprints.risar.lib.expert.utils import (em_final_status_list, em_garbage_
     is_em_cancellable, is_em_touched, is_em_in_final_status)
 from blueprints.risar.lib.utils import is_event_late_first_visit
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
-from blueprints.risar.risar_config import first_inspection_code
+from blueprints.risar.risar_config import first_inspection_code, pc_inspection_code
 from blueprints.risar.lib.time_converter import DateTimeUtil
 from blueprints.risar.lib.datetime_interval import DateTimeInterval, get_intersection_type, IntersectionType
 
@@ -546,7 +546,7 @@ class MeasureGeneratorRisarContext(object):
     def load(self):
         self.inspection_date = safe_date(self.source_action.begDate)
         self.inspection_datetime = safe_datetime(self.source_action.begDate)
-        self.is_first_inspection = self.source_action.actionType.flatCode == first_inspection_code
+        self.is_first_inspection = self.source_action.actionType.flatCode in (first_inspection_code, pc_inspection_code)
         self.is_late_first_visit = is_event_late_first_visit(self.source_action.event)
         self.pregnancy_start_date = get_pregnancy_start_date(self.source_action.event)
         assert isinstance(self.pregnancy_start_date, datetime.date), 'No pregnancy start date in event'

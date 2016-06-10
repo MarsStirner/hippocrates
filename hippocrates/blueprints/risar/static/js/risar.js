@@ -203,6 +203,11 @@ WebMis20
     this.fetus = {
         get_fetus_list: function (event_id) {
             return wrapper('GET', Config.url.api_fetus_list + event_id);
+        },
+        calc_fisher_ktg: function (fetus_data) {
+            return wrapper('POST', Config.url.api_fetus_calc_fisher_ktg, {}, fetus_data, {
+                silent: true
+            });
         }
     };
     this.gravidograma = {

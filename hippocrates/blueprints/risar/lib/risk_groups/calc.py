@@ -4,7 +4,6 @@ import datetime
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.risk_groups.needles_haystacks import any_thing, mkb_from_mkb, hay_check, explode_needles
 from blueprints.risar.lib.utils import get_action_list
-from blueprints.risar.risar_config import first_inspection_code
 from nemesis.models.actions import Action
 from nemesis.models.client import BloodHistory
 from nemesis.models.diagnosis import rbDiagnosisKind

@@ -30,16 +30,16 @@ def create_or_update_fetuses(action, fetuses):
                 if sd_key == 'id' or sd_key == 'fisher_ktg_rate':
                     continue
                 setattr(fetus_state, sd_key, sd_val)
-            if state_data.get('ktg_input'):
-                points, rate = calc_fisher_ktg_info(state_data)
-                fetus_state.fisher_ktg_points = points
-                fetus_state.fisher_ktg_rate_id = rate.value if rate else None
-            else:
-                fetus_state.fisher_ktg_points = None
-                fetus_state.fisher_ktg_rate_id = None
+            points, rate = calc_fisher_ktg_info(state_data)
+            fetus_state.fisher_ktg_points = points
+            fetus_state.fisher_ktg_rate_id = rate.value if rate else None
 
 
 def calc_fisher_ktg_info(fetus_data):
+    ktg_enabled = fetus_data.get('ktg_input') or False
+    if not ktg_enabled:
+        return None, None
+
     total_points = 0
     if 'basal' in fetus_data:
         basal_code = safe_traverse(fetus_data, 'basal', 'code')

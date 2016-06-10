@@ -156,29 +156,29 @@ class PregnancyCard(object):
     @lazy
     def primary_inspection(self):
         for checkup in self.checkups:
-            if checkup.actionType.flatCode == first_inspection_code:
+            if checkup.actionType.flatCode in (first_inspection_code, pc_inspection_code):
                 return PrimaryInspection(checkup)
 
     @lazy
     def latest_inspection(self):
         if self.checkups:
             checkup = self.checkups[-1]
-            if checkup.actionType.flatCode == first_inspection_code:
+            if checkup.actionType.flatCode in (first_inspection_code, pc_inspection_code):
                 return PrimaryInspection(checkup)
-            elif checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
+            elif checkup.actionType.flatCode == second_inspection_code:
                 return RepeatedInspection(checkup)
 
     @lazy
     def latest_rep_inspection(self):
         for checkup in reversed(self.checkups):
-            if checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
+            if checkup.actionType.flatCode == second_inspection_code:
                 return RepeatedInspection(checkup)
 
     @lazy
     def latest_inspection_fetus_ktg(self):
         """Последний повторный осмотр, где были заполнены данные КТГ для плода"""
         for checkup in reversed(self.checkups):
-            if checkup.actionType.flatCode in (second_inspection_code, pc_inspection_code):
+            if checkup.actionType.flatCode == second_inspection_code:
                 inspection = RepeatedInspection(checkup)
                 for fetus in inspection.fetuses:
                     if safe_bool(fetus.ktg_input):

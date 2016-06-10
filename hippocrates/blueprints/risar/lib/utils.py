@@ -14,7 +14,7 @@ from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
-    puerpera_inspection_code, request_type_pregnancy
+    puerpera_inspection_code, request_type_pregnancy, pc_inspection_code
 from blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
@@ -289,7 +289,7 @@ def risk_mkbs():
 
 def is_event_late_first_visit(event):
     result = False
-    fi = get_action(event, first_inspection_code)
+    fi = get_action(event, (first_inspection_code, pc_inspection_code))
     if fi:
         preg_week = fi[inspection_preg_week_code].value
         if preg_week is not None:

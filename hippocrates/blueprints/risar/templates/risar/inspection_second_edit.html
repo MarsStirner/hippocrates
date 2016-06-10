@@ -387,37 +387,43 @@
                                                             <tr>
                                                                 <th class="text-right">Данные КТГ <span>&nbsp;</span></th>
                                                                 <td><div class="row"><div class="col-md-3">
-                                                                    <input type="checkbox" ng-model="child.state.ktg_input"></div></div></td>
+                                                                    <input type="checkbox" ng-model="child.state.ktg_input"
+                                                                        ng-change="calcFetusFisherKtgInfo(child.state)"></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Базальный ритм <span class="text-danger">*</span></th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.basal" ref-book="rbRisarBasal"
-                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"
+                                                                               ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Вариабельность (амплитуда) <span class="text-danger">*</span></th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.variability_range" ref-book="rbRisarVariabilityRange"
-                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"
+                                                                               ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Вариабельность (частота в минуту) <span class="text-danger">*</span></th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.frequency_per_minute" ref-book="rbRisarFrequencyPerMinute"
-                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"
+                                                                               ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Акселерации за 30 минут <span class="text-danger">*</span></th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.acceleration" ref-book="rbRisarAcceleration"
-                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"
+                                                                               ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Децелерации за 30 минут <span class="text-danger">*</span></th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.deceleration" ref-book="rbRisarDeceleration"
-                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"></rb-select></div></div></td>
+                                                                               ng-disabled="!child.state.ktg_input" ng-required="child.state.ktg_input"
+                                                                               ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Оценка КТГ по Фишеру </th>
