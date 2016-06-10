@@ -202,13 +202,12 @@ def api_event_lab_res_dynamics():
         func.date(Action.begDate) >= from_date,
         func.date(Action.begDate) <= to_date,
         ActionProperty.deleted == 0,
-        ActionProperty.isAssigned == 1,
         ActionPropertyType.test_id.isnot(None)
     )
 
     tissue_query = Action.query.outerjoin(
         Action_TakenTissueJournalAssoc, Action_TakenTissueJournalAssoc.action_id == Action.id
-    ).join(
+    ).outerjoin(
         TakenTissueJournal, TakenTissueJournal.id.in_([
             Action_TakenTissueJournalAssoc.takenTissueJournal_id,
             Action.takenTissueJournal_id,
@@ -219,7 +218,7 @@ def api_event_lab_res_dynamics():
         Action.id
     ).with_entities(
         Action.id,
-        func.coalesce(TakenTissueJournal.datetimeTaken, TakenTissueJournal.datetimePlanned, Action.plannedEndDate)
+        func.coalesce(TakenTissueJournal.datetimeTaken, TakenTissueJournal.datetimePlanned, Action.plannedEndDate, Action.endDate, Action.begDate)
     )
 
     tissue_dict = dict(tissue_query)
