@@ -337,7 +337,10 @@ def reevaluate_preeclampsia_rate(card):
                     res = 'heavy'
 
     # TODO: REDO !
-    last_inspection_diags = get_diagnoses_from_action(last_inspection.action, open=False)
+    if last_inspection:
+        last_inspection_diags = get_diagnoses_from_action(last_inspection.action, open=False)
+    else:
+        last_inspection_diags = []
 
     action['preeclampsia_susp'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == res).first().__json__()
     confirmed_rate = max(map(preec_diag, last_inspection_diags), key=lambda x: x[0]) if last_inspection_diags else (1, 'unknown')
