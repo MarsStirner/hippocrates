@@ -3,13 +3,13 @@
 import itertools
 
 from .utils import (
-    _iter_preg_child, _mkb_match,
+    _iter_preg_child, _mkb_match, _theone_measure,
     _filter_child_abnormal_weight, _filter_child_cong_prev_preg, _filter_child_death,
     _filter_child_miscarriage, _filter_child_neuro_prev_preg, _filter_misbirth_prev_preg,
     _filter_parity_prev_preg, _filter_premature_prev_preg, _filter_prev_preg_compl,
     _filter_prev_preg_tubal
 )
-from nemesis.lib.utils import safe_bool
+from nemesis.lib.utils import safe_bool, safe_decimal
 
 
 def mother_younger_18(card):
@@ -345,14 +345,8 @@ def anemia_90(card):
     есть свойство с кодом hemoglobin и его значение меньше или равно 90 г/л
     """
     measure_codes = ['0010', '0035', '0284', '0128']
-    em_by_code = card.latest_measures_with_result
-    theone = None
-    for code in measure_codes:
-        if code in em_by_code:
-            rival = em_by_code[code]
-            if theone is None or rival.begDateTime > theone.begDateTime:
-                theone = rival
-    if theone:
+    theone = _theone_measure(card, measure_codes)
+    if theone and 'hemoglobin' in theone.result_action.propsByCode:
         val = theone.result_action['hemoglobin'].value
         return val is not None and val <= 90
     return False
@@ -365,14 +359,8 @@ def anemia_100(card):
     есть свойство с кодом hemoglobin и его значение больше 90 г/л, но меньше или равно 100 г/л
     """
     measure_codes = ['0010', '0035', '0284', '0128']
-    em_by_code = card.latest_measures_with_result
-    theone = None
-    for code in measure_codes:
-        if code in em_by_code:
-            rival = em_by_code[code]
-            if theone is None or rival.begDateTime > theone.begDateTime:
-                theone = rival
-    if theone:
+    theone = _theone_measure(card, measure_codes)
+    if theone and 'hemoglobin' in theone.result_action.propsByCode:
         val = theone.result_action['hemoglobin'].value
         return val is not None and 90 < val <= 100
     return False
@@ -385,14 +373,8 @@ def anemia_110(card):
     есть свойство с кодом hemoglobin и его значение больше 100 г/л, но меньше или равно 110 г/л
     """
     measure_codes = ['0010', '0035', '0284', '0128']
-    em_by_code = card.latest_measures_with_result
-    theone = None
-    for code in measure_codes:
-        if code in em_by_code:
-            rival = em_by_code[code]
-            if theone is None or rival.begDateTime > theone.begDateTime:
-                theone = rival
-    if theone:
+    theone = _theone_measure(card, measure_codes)
+    if theone and 'hemoglobin' in theone.result_action.propsByCode:
         val = theone.result_action['hemoglobin'].value
         return val is not None and 100 < val <= 110
     return False
@@ -416,17 +398,44 @@ def persistent_infection(card):
 
 
 def lupus_anticoagulant_positive(card):
-    # TODO: measures
+    """
+    В мероприятиях пациентки есть мероприятие, у которого код 0062
+    (среди некольких взять самое актуальное) и в данном мероприятии есть свойство
+    с кодом lupus_anticoagulant  и его значение = "положительно"
+    """
+    measure_codes = ['0062']
+    theone = _theone_measure(card, measure_codes)
+    if theone and 'lupus_anticoagulant' in theone.result_action.propsByCode:
+        val = theone.result_action['lupus_anticoagulant'].value
+        return val == u'положительно'
     return False
 
 
 def antiphospholipid_antibodies_IgG(card):
-    # TODO: measures
+    """
+    В мероприятиях пациентки есть мероприятие, у которого код 0062
+    (среди нескольких взять самое актуальное) и в данном мероприятии есть свойство
+    с кодом anti_phosphotide_G , значение которого больше, либо равно 9,99
+    """
+    measure_codes = ['0062']
+    theone = _theone_measure(card, measure_codes)
+    if theone and 'anti_phosphotide_G' in theone.result_action.propsByCode:
+        val = theone.result_action['anti_phosphotide_G'].value
+        return val is not None and val >= safe_decimal('9.99')
     return False
 
 
 def antiphospholipid_antibodies_IgM(card):
-    # TODO: measures
+    """
+    В мероприятиях пациентки есть мероприятие, у которого код 0062
+    (среди нескольких взять самое актуальное) и в данном мероприятии есть свойство
+    с кодом anti_phosphotide_M , значение которого больше, либо равно 9,99
+    """
+    measure_codes = ['0062']
+    theone = _theone_measure(card, measure_codes)
+    if theone and 'anti_phosphotide_M' in theone.result_action.propsByCode:
+        val = theone.result_action['anti_phosphotide_M'].value
+        return val is not None and val >= safe_decimal('9.99')
     return False
 
 

@@ -17,6 +17,7 @@ from blueprints.risar.lib.expert.em_manipulation import EventMeasureController, 
 from blueprints.risar.lib.represent import represent_checkups_shortly
 from blueprints.risar.lib.utils import get_action_by_id
 from blueprints.risar.risar_config import request_type_pregnancy
+from blueprints.risar.lib.card import PregnancyCard
 
 
 @module.route('/api/0/event_measure/generate/')
@@ -186,6 +187,9 @@ def api_0_event_measure_result_save(event_measure_id, em_result_id=None):
         em_ctrl.store(em, em_result)
     else:
         raise ApiException(404, u'`appointment_id` required')
+    card = PregnancyCard.get_for_event(em.event)
+    card.reevaluate_card_attrs()
+    db.session.commit()
     return EmResultRepr().represent_em_result(em_result)
 
 
@@ -202,12 +206,6 @@ def api_0_measure_list(event_id):
         raise ApiException(404, u'Обращение не найдено')
     if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
-
-    # TODO: test and delete
-    if 'latest_in_event' in data:
-        from blueprints.risar.lib.card import PregnancyCard
-        card = PregnancyCard.get_for_event(event)
-        return card.latest_measures_with_result
 
     paginate = safe_bool(data.get('paginate', True))
     em_ctrl = EventMeasureController()

@@ -9,6 +9,12 @@ from nemesis.systemwide import db
 
 
 def get_latest_measures_in_event(event_id, upto_date=None, with_result=False):
+    """Самые последние мероприятия случая на дату upto_date или текщую дату.
+
+    По одному EventMeasure на каждый тип мероприятия Measure.
+    При этом берутся как автоматически созданные мероприятия на основе схем
+    (schemeMeasure_id is not null), так и создаваемые вручную (measure_id is not null).
+    """
     if not upto_date:
         upto_date = datetime.date.today()
     elif isinstance(upto_date, datetime.datetime):

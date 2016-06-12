@@ -126,3 +126,18 @@ def _filter_prev_preg_tubal(prev_preg):
     if mkbs:
         return _mkb_match(mkbs, needles=u'O00-O99.99')
     return False
+
+
+def _theone_measure(card, measure_codes):
+    """
+    В мероприятиях пациентки есть любое мероприятие, у которого код среди measure_codes
+    (среди некольких взять самое актуальное)
+    """
+    em_by_code = card.latest_measures_with_result
+    theone = None
+    for code in measure_codes:
+        if code in em_by_code:
+            rival = em_by_code[code]
+            if theone is None or rival.begDateTime > theone.begDateTime:
+                theone = rival
+    return theone
