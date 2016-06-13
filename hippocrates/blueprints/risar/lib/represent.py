@@ -22,7 +22,7 @@ from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_p
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
-from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool, safe_bool_none
+from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool, safe_bool_none, safe_int
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
@@ -896,3 +896,18 @@ def represent_concilium_member(member):
         'doctor': member.person,
         'opinion': member.opinion
     }
+
+
+def represent_age(age):
+    age = safe_int(age)
+    if age:
+        template = ''
+        if 11 <= age <= 14:
+            template = u"(%s л.)"
+        elif age < 110 and int(str(age)[-1]) in (1, 2, 3, 4):
+            template = u"(%s г.)"
+        else:
+            template = u"(%s л.)"
+        return template % age
+    return ''
+

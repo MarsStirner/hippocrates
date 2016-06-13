@@ -5,6 +5,8 @@ import math
 import time
 
 from blueprints.reports.jasper_client import JasperReport
+from blueprints.risar.lib.represent import represent_age
+from blueprints.risar.lib.search import get_workgroupname_by_code
 from flask import request, make_response
 from flask.ext.login import current_user
 
@@ -17,6 +19,7 @@ from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+
 
 __author__ = 'mmalkov'
 
@@ -72,6 +75,18 @@ def search_events(paginated=True, **kwargs):
         query = query.filter(checkups__gte=sphinx_local_days(kwargs['checkup_date_from']))
     if 'checkup_date_to' in kwargs:
         query = query.filter(checkups__lte=sphinx_local_days(kwargs['checkup_date_to']))
+    client_workgroup = kwargs.get('client_workgroup')
+    if client_workgroup:
+        work_code = client_workgroup.get('code')
+        if work_code:
+            query = query.match('@client_work_code %s' % work_code, raw=True)
+    age_min = safe_int(kwargs.get('age_min'))
+    if age_min:
+        query = query.filter(client_age__gte=age_min)
+    age_max = safe_int(kwargs.get('age_max'))
+    if age_max:
+        query = query.filter(client_age__lte=age_max)
+    
     if 'closed' in kwargs:
         if kwargs['closed']:
             query = query.filter(exec_date__neq=0)
@@ -113,6 +128,7 @@ def search_events_ambulance(**kwargs):
     return result
 
 
+
 @module.route('/api/0/search/', methods=['POST', 'GET'])
 @api_method
 def api_0_event_search():
@@ -138,6 +154,9 @@ def api_0_event_search():
                 'exec_date': datetime.date.fromtimestamp(row['exec_date']) if row['exec_date'] else None,
                 'external_id': row['external_id'],
                 'exec_person_name': row['person_name'],
+                'client_age': row.get('client_age', 0),
+                'client_workgroup': get_workgroupname_by_code(row.get('client_work_code', '')),
+                'literal_age': represent_age(row.get('client_age', 0)),
                 'risk': PerinatalRiskRate(row['risk']),
                 'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if 'card_modify_date' in row else None,
                 'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
