@@ -663,7 +663,7 @@ class CheckupsXForm(ExternalXForm):
         return res
 
 
-from nemesis.models.expert_protocol import EventMeasure, Measure
+from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureStatus
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from nemesis.models.enums import MeasureStatus
 
@@ -684,6 +684,12 @@ class MeasuresResultsXForm(ExternalXForm):
     def get_properties_data(self, data):
         return data
 
+    def update_measure_data(self, data):
+        status = data.get('status')
+        if status:
+            self.em.status = self.rb_validate(rbMeasureStatus, status, 'code')
+
+
     def update_target_obj(self, data):
         self.prepare_params(data)
 
@@ -697,6 +703,7 @@ class MeasuresResultsXForm(ExternalXForm):
         properties_data = self.get_properties_data(data)
         self.set_properties(properties_data)
         update_patient_diagnoses(old_event_measure_diag, self.target_obj)
+        self.update_measure_data(data)
         self.save_external_data()
 
     def get_event_measure(self, event_measure_id, measure_code, beg_date, end_date):

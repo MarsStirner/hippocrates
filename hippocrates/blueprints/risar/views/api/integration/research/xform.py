@@ -64,6 +64,7 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'result_action_id': self.target_obj.id,
             'external_id': self.external_id,
             'measure_id': self.em.id,
+            'measure_status': self.em.literal_status,
             'measure_type_code': self.em.measure.code,
             'realization_date': an_props['RealizationDate'].value,
             'analysis_number': an_props['AnalysisNumber'].value or '',

@@ -69,6 +69,7 @@ def fc_urls():
         'url': {
             'doctor_to_assist': url_for("doctor_to_assist"),
             'api_person_get': url_for("schedule.api_person_get"),
+            'api_person_contacts_get': url_for("schedule.api_person_contacts_get"),
             'api_patient_file_attach': url_for("patients.api_patient_file_attach"),
             'api_patient_file_attach_save': url_for("patients.api_patient_file_attach_save"),
             'api_patient_file_attach_delete': url_for("patients.api_patient_file_attach_delete"),

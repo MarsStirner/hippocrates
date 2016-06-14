@@ -40,6 +40,14 @@
                         </div>
                     </td>
                 </tr>
+                 <tr ng-show="model.communications.length || model.is_author">
+                    <th class="text-right">Контактные данные</th>
+                    <td>
+                        <div class="col-md-12">
+                            <textarea rows="4" style="border-radius:0.2em!important;" ng-disabled="!model.is_author" id="communications" name="communications" class="form-control col-md-12" rows="3" ng-model="model.communications"></textarea>
+                        </div>
+                    </td>
+                </tr>
                 <tr>
                     <th class="text-right">Выполнить до <span class="text-danger">*</span></th>
                     <td>
@@ -93,6 +101,7 @@
             </tbody>
         </table>
         </ng-form>
+
     </div>
 </div>
 <div class="modal-footer">

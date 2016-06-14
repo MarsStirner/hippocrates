@@ -64,6 +64,10 @@ class ErrandListSchema(Schema):
                         "description": "Врач автор поручения (код врача)",
                         "type": "string"
                     },
+                    "communication": {
+                        "description": "Контактные данные автора поручения",
+                        "type": "string"
+                    },
                     "date": {
                         "description": "Плановая дата выполнения",
                         "type": "string",

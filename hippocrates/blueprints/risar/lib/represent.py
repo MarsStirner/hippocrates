@@ -525,7 +525,7 @@ def represent_checkup(action, with_measures=True, measures_error=None):
 
     result['diagnoses'] = represent_action_diagnoses(action)
     result['diagnosis_types'] = action.actionType.diagnosis_types
-    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
+    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     result['fetuses'] = represent_action_fetuses(action)
 
     if with_measures:
@@ -620,7 +620,7 @@ def represent_checkup_shortly(action):
         'person': action.person,
         'flat_code': action.actionType.flatCode,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
-        'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
+        'calculated_pregnancy_week': get_pregnancy_week(action.event, date=action.begDate),
         'diag': represent_diag_shortly(diagnostic) if diagnostic else None
     }
     return result
@@ -820,6 +820,7 @@ def represent_errand(errand_info):
         'set_person': errand_info.setPerson,
         'exec_person': errand_info.execPerson,
         'text': errand_info.text,
+        'communications': errand_info.communications,
         'planned_exec_date': errand_info.plannedExecDate,
         'exec_date': errand_info.execDate,
         'event': {'id': errand_info.event.id,

@@ -112,6 +112,7 @@ def api_errand_edit(errand_id):
         errand.plannedExecDate = string_to_datetime(data['planned_exec_date'])
         errand.deleted = data.get('deleted', 0)
         errand.result = data['result']
+        errand.communications = data.get('communications')
         if data.get('exec', 0):
             if errand.plannedExecDate.date() >= now.date():
                 errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == u'executed').first()

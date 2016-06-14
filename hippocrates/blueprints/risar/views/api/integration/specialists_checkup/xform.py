@@ -55,6 +55,7 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             'external_id': self.external_id,
             'result_action_id': self.target_obj.id,
             'measure_id': self.em.id,
+            'measure_status': self.em.literal_status,
             'measure_type_code': self.em.measure.code,
             'checkup_date': an_props['CheckupDate'].value,
             'lpu_code': self.person.organisation and self.person.organisation.TFOMSCode or '',

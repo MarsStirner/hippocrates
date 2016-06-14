@@ -10,6 +10,7 @@ from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, s
 from blueprints.risar.models.risar import RisarRiskGroup
 from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
     first_inspection_code, pc_inspection_code
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
@@ -23,27 +24,6 @@ logger = logging.getLogger('simple')
 
 
 __author__ = 'viruzzz-kun'
-
-
-def get_pregnancy_week(event, action, date=None):
-    """
-    :type event: application.models.event.Event
-    :type date: datetime.date | None
-    :param event: Карточка пациентки
-    :param date: Интересующая дата или None (тогда - дата окончания беременности)
-    :return: число недель от начала беременности на дату
-    """
-    if action is None:
-        action = PregnancyCard.get_for_event(event).attrs
-    start_date = action['pregnancy_start_date'].value
-    if date is None:
-        date = action['predicted_delivery_date'].value
-    if start_date:  # assume that date is not None
-        if isinstance(date, datetime.datetime):
-            date = date.date()
-        if isinstance(start_date, datetime.datetime):
-            start_date = start_date.date()
-        return (min(date, datetime.date.today()) - start_date).days / 7 + 1
 
 
 def check_card_attrs_action_integrity(action):
@@ -276,7 +256,6 @@ def reevaluate_preeclampsia_rate(card):
     и отображение преэклампсии установленной врачом
     :type card: PregnancyCard
     """
-    from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 
     def preec_diag(diag):
         DiagID = diag._diagnostic.MKB
