@@ -91,7 +91,7 @@ def api_get_ttj_records():
         r['ttt'].add(record.rbTestTubeType)
 
     all_records = mapping.values()
-    all_records.sort(key=lambda x: x['ttj'].datetimeTaken)
+    all_records.sort(key=lambda x: x['ttj'].datetimePlanned)
 
     ttj_by_status = {
         ttj_status_code: [
