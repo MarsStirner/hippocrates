@@ -36,15 +36,8 @@ def get_radz_risk_rate(radz_risk):
 
 
 def reevaluate_radzinsly_risk_rate(card, radz_risk):
-    final_sum = 0
+    final_sum = _get_final_sum(card, radz_risk)
     risk_rate = None
-    preg_week = get_pregnancy_week(card.event)
-    if card.epicrisis.action.id:
-        final_sum = radz_risk.intranatal_totalpoints or 0
-    elif preg_week <= 32:
-        final_sum = radz_risk.before32week_totalpoints or 0
-    elif preg_week >= 33:
-        final_sum = radz_risk.after33week_totalpoints or 0
 
     if 0 <= final_sum <= 14:
         risk_rate = RadzinskyRiskRate.low[0]
@@ -167,7 +160,7 @@ def get_filtered_risk_factors(stage_codes=None, group_codes=None):
     return filtered
 
 
-def get_event_radzinsky_risks_info(radz_risk):
+def get_event_radzinsky_risks_info(radz_risk, card):
     event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in radz_risk.factors_assoc}
     rb_stage_factors = radzinsky_risk_factors()
     stage_points = {}
@@ -201,11 +194,24 @@ def get_event_radzinsky_risks_info(radz_risk):
         total_sum_points += stage_sum_calc
     general_info['maximum_points'] = max_points
     general_info['total_sum_points'] = total_sum_points
+    general_info['final_sum_points'] = _get_final_sum(card, radz_risk)
     return {
         'general_info': general_info,
         'stage_factors': rb_stage_factors,
         'stage_points': stage_points
     }
+
+
+def _get_final_sum(card, radz_risk):
+    final_sum = 0
+    preg_week = get_pregnancy_week(card.event)
+    if card.epicrisis.action.id:
+        final_sum = radz_risk.intranatal_totalpoints or 0
+    elif preg_week <= 32:
+        final_sum = radz_risk.before32week_totalpoints or 0
+    elif preg_week >= 33:
+        final_sum = radz_risk.after33week_totalpoints or 0
+    return final_sum
 
 
 def _get_stage_calculated_points(radz_risk, stage_code):

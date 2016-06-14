@@ -354,7 +354,7 @@ def api_0_chart_radzinsky_risks(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
 
-    return get_event_radzinsky_risks_info(card.radz_risk)
+    return get_event_radzinsky_risks_info(card.radz_risk, card)
 
 
 @module.route('/api/0/rb_radzinsky_risks')
