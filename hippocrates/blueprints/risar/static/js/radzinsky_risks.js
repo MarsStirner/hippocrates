@@ -48,5 +48,13 @@ WebMis20.controller('RadzinskyRisksCtrl', ['$scope', '$q', 'RisarApi', 'RefBookS
             else return '';
         };
 
+        $scope.printRadz = function (format) {
+            var data = {
+                event_idm: $scope.event_id,
+                extension: format
+            };
+            RisarApi.radzinsky_risks.print(data);
+        }
+
         reloadChart();
     }]);
