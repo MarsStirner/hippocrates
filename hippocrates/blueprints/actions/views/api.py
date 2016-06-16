@@ -354,67 +354,14 @@ def api_get_action_ped():
     }
 
 
-@cache.memoize(86400)
-def int_get_atl(at_class):
-    # not used?
-    atypes = ActionType.query.filter(
-        ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0
-    )
-    at = dict((item.id, (item.name, item.group_id, item.code, set())) for item in atypes)
-    for item_id, (name, gid, code, children) in at.iteritems():
-        if gid in at:
-            at[gid][3].add(item_id)
-
-    def render_node(node_id):
-        node = at[node_id]
-        return {
-            'id': node_id,
-            'name': node[0],
-            'code': node[2],
-            'children': [render_node(child_id) for child_id in node[3]] if node[3] else None
-        }
-
-    result = {
-        'id': None,
-        'name': None,
-        'code': None,
-        'children': [
-            render_node(item_id) for item_id, (name, gid, code, children) in at.iteritems() if not gid
-        ]
-    }
-
-    def res_sort(node):
-        if node['children']:
-            node['children'].sort(key=lambda nd: nd['code'])
-            for nd in node['children']:
-                res_sort(nd)
-
-    res_sort(result)
-    return result
-
-
-@module.route('/api/action-type-list.json')
+@module.route('/api/action-types/flat/')
+@module.route('/api/action-types/flat/<int:at_class>/')
+@module.route('/api/action-types/flat/<int:at_class>/<int:event_type_id>/')
 @api_method
-def api_atl_get():
-    # not used?
-    at_class = int(request.args['at_class'])
+def api_atl_get_flat(at_class, event_type_id=None):
     if not (0 <= at_class < 4):
         raise ApiException(404, u'Класс типа действия должен быть 0, 1, 2, или 3. Получен %s' % at_class)
-
-    result = int_get_atl(at_class)
-
-    return result
-
-
-@module.route('/api/action-type-list-flat.json')
-@api_method
-def api_atl_get_flat():
-    at_class = int(request.args['at_class'])
-    event_type_id = parse_id(request.args, 'event_type_id') or None
-    if not (0 <= at_class < 4):
-        raise ApiException(404, u'Класс типа действия должен быть 0, 1, 2, или 3. Получен %s' % at_class)
-    result = int_get_atl_flat(at_class, event_type_id)
-
+    result = map(tuple, int_get_atl_flat(at_class, event_type_id).values())
     return result
 
 

@@ -29,7 +29,6 @@ def fc_urls():
                 'autosave_new': uf_placeholders('actions.api_action_autosave_unsaved', ['event_id', 'action_type_id']),
                 'rls_search': url_for('actions.api_search_rls'),
                 'action_delete': uf_placeholders('actions.api_delete_action', ['action_id']),
-                'atl_get': url_for('actions.api_atl_get'),
                 'atl_get_flat': url_for('actions.api_atl_get_flat'),
                 'action_html': url_for('actions.html_action'),
                 'create_lab_direction': url_for('actions.api_create_lab_direction'),
