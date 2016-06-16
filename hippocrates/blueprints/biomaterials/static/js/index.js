@@ -45,7 +45,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 records: [],
                 tubes: {}
             };
-            var status = $scope.filter.status ? $scope.TTJStatus.get($scope.filter.status).code : 'null';
+            var status = $scope.filter.status !== null ? $scope.TTJStatus.get($scope.filter.status).code : 'null';
             var cats = display_map[status];
             _.chain($scope.result)
                 .filter(function (value, key) {
