@@ -12,12 +12,14 @@ WebMis20.controller('FileUploadFormCtrl', ['$scope', '$http', 'Upload', function
         });
     };
     $scope.setFileName = function (file) {
-        var orig_name = file.file.name,
-            ext_idx = orig_name.lastIndexOf('.');
-        if (ext_idx !== -1) {
-            orig_name = orig_name.substring(0, ext_idx);
+        if (file.file) {
+            var orig_name = file.file.name,
+                ext_idx = orig_name.lastIndexOf('.');
+            if (ext_idx !== -1) {
+                orig_name = orig_name.substring(0, ext_idx);
+            }
+            file.name = orig_name;
         }
-        file.name = orig_name;
     };
 
     //$scope.upload = function (file) {

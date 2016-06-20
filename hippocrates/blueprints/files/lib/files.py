@@ -39,7 +39,7 @@ def save_new_file(file, file_info=None):
     db.session.add(fmeta)
     db.session.commit()
 
-    fullpath = get_file_path(f_uuid.hex)
+    fullpath = get_full_file_path(f_uuid.hex)
     dirname = os.path.dirname(fullpath)
     try:
         if not os.path.exists(dirname):
@@ -63,10 +63,14 @@ def get_file_extension(filename):
     return os.path.splitext(filename)[1][1:].strip().lower()
 
 
-def get_file_path(uuid_hex):
+def get_full_file_path(uuid_hex):
+    return os.path.join(app.config['FILE_STORAGE_PATH'], make_file_path(uuid_hex))
+
+
+def make_file_path(uuid_hex):
     directory = '{0}/{1}'.format(uuid_hex[0:2], uuid_hex[2:4])
     filename = uuid_hex
-    return os.path.join(app.config['FILE_STORAGE_PATH'], directory, filename)
+    return os.path.join(directory, filename)
 
 
 def get_file_info(uuid_hex):
@@ -85,7 +89,7 @@ def get_file_info(uuid_hex):
                     fname = u'{0}.{1}'.format(fname, ext)
             return {
                 'name': fname,
-                'path': get_file_path(uuid_hex)
+                'path': make_file_path(uuid_hex)
             }
 
 

@@ -3,7 +3,7 @@
 from flask import render_template, send_file
 
 from ..app import module
-from blueprints.files.lib.files import get_file_info
+from blueprints.files.lib.files import get_file_info, get_full_file_path
 
 
 @module.route('/upload_form.html')
@@ -17,6 +17,6 @@ def serve_file(fileid):
         fileinfo = get_file_info(fileid)
         if not fileinfo:
             raise IOError
-        return send_file(fileinfo['path'], as_attachment=True, attachment_filename=fileinfo['name'])
+        return send_file(get_full_file_path(fileid), as_attachment=True, attachment_filename=fileinfo['name'])
     except IOError:
         return u'Файл не найден'
