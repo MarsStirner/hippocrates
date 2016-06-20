@@ -165,7 +165,8 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         res['person'] = self.person.__json__()
 
         maternity_hospital = self.find_org(part.get('maternity_hospital'))
-        curation_hospital = self.find_org(part.get('curation_hospital'))
+        curation_hospital = part.get('curation_hospital')
+        curation_hospital = self.find_org(curation_hospital) if curation_hospital is not None else None
         res.update({
             'LPU': maternity_hospital,
             'newborn_LPU': curation_hospital,
