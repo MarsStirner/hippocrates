@@ -54,6 +54,7 @@ class ErrandXForm(ErrandSchema, XForm):
     def as_json(self):
         return {
             'errands_id': self.target_obj.id,
+            'communication': self.target_obj.communications,
             'status': self.or_undefined(self.from_rb(self.target_obj.status)),
             'execution_date': self.or_undefined(safe_date(self.target_obj.execDate)),
             'execution_comment': self.or_undefined(self.target_obj.result),
@@ -97,5 +98,6 @@ class ErrandListXForm(ErrandListSchema, XForm):
                 'execution_hospital': self.from_org_rb(errand.execPerson and errand.execPerson.organisation),
                 'execution_doctor': self.from_person_rb(errand.execPerson),
                 'status': self.from_rb(errand.status),
+                'communication': "\\n".join(errand.communications.split('\n')),
             })
         return res

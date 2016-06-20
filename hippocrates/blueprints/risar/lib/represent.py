@@ -523,7 +523,7 @@ def represent_checkup(action, with_measures=True, measures_error=None):
 
     result['diagnoses'] = represent_action_diagnoses(action)
     result['diagnosis_types'] = action.actionType.diagnosis_types
-    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
+    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     result['fetuses'] = represent_action_fetuses(action)
 
     if with_measures:
@@ -618,7 +618,7 @@ def represent_checkup_shortly(action):
         'person': action.person,
         'flat_code': action.actionType.flatCode,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
-        'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
+        'calculated_pregnancy_week': get_pregnancy_week(action.event, date=action.begDate),
         'diag': represent_diag_shortly(diagnostic) if diagnostic else None
     }
     return result
@@ -702,7 +702,14 @@ def make_epicrisis_info(epicrisis):
     try:
         info = u'Беременность закончилась '
         pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
-        week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
+        pregnancy_duration = epicrisis.get('pregnancy_duration')
+        week = ''
+        if pregnancy_duration:
+            if 5 <= pregnancy_duration <= 20:
+                week = u'недель'
+            else:
+                week = u'недел' + week_postfix[pregnancy_duration % 10]
+
         is_dead = bool(epicrisis['death_date'] or epicrisis['reason_of_death'])
         is_complications = bool(epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or
                                 epicrisis['eclampsia'] or epicrisis['funiculus'] or epicrisis['afterbirth'])
@@ -722,9 +729,12 @@ def make_epicrisis_info(epicrisis):
 
         if is_complications:
             info += u' <b>с осложнениями</b>'
-        info += u' при сроке <b>{0} {1}</b>'.format(epicrisis['pregnancy_duration'], week)
-
-        info += u' - <b>{0} {1}</b>.<br>'.format(epicrisis['delivery_date'].strftime("%d.%m.%Y"), epicrisis['delivery_time'].strftime("%H:%M"))
+        if pregnancy_duration:
+            info += u' при сроке <b>{0} {1}</b>'.format(pregnancy_duration, week)
+        delivery_date = epicrisis.get('delivery_date')
+        delivery_time = epicrisis.get('delivery_time')
+        if delivery_date and delivery_time:
+            info += u' - <b>{0} {1}</b>.<br>'.format(delivery_date.strftime("%d.%m.%Y"), delivery_time.strftime("%H:%M"))
 
         if pregnancy_final == u'родами':
             info += u"Место родоразрешения: <b>{0}</b>.<br>".format(epicrisis['LPU'].shortName)
@@ -748,6 +758,7 @@ def make_epicrisis_info(epicrisis):
             info += ', '.join(children_info) + '.'
     except Exception as exc:
         info = u'Произошла ошибка. Свяжитесь с администратором системы'
+
     return info
 
 
