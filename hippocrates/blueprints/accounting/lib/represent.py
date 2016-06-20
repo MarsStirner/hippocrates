@@ -502,8 +502,9 @@ class InvoiceRepr(object):
         data = self.represent_invoice(invoice)
         inv_ctrl = InvoiceController()
         cont_repr = ContractRepr()
+        event = inv_ctrl.get_invoice_event(invoice)
         data.update({
-            'event_id': inv_ctrl.get_invoice_event(invoice).id,
+            'event_id': event.id if event else None,
             'total_sum': format_money(invoice.total_sum),
             'sum_with_refunds': format_money(invoice.sum_),
             'contract': cont_repr.represent_contract_for_invoice(invoice.contract),
