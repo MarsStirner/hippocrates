@@ -700,10 +700,10 @@ def represent_intolerance(obj):
 
 def make_epicrisis_info(epicrisis):
     try:
-        info = u'Беременность закончилась '
+        ended_pregnancy = u'Беременность закончилась '
+        info = week = ''
         pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
         pregnancy_duration = epicrisis.get('pregnancy_duration')
-        week = ''
         if pregnancy_duration:
             if 5 <= pregnancy_duration <= 20:
                 week = u'недель'
@@ -725,7 +725,8 @@ def make_epicrisis_info(epicrisis):
             elif pregnancy_final == u'абортом':
                 info += u'аборте'
         else:
-            info += u'<b>' + pregnancy_final + u'</b>'
+            if pregnancy_final:
+                info += u'<b>' + pregnancy_final + u'</b>'
 
         if is_complications:
             info += u' <b>с осложнениями</b>'
@@ -756,9 +757,12 @@ def make_epicrisis_info(epicrisis):
                 else:
                     children_info.append(u'<b>девочка - ' + (u'живая</b>' if child['alive'] else u'мертвая</b>'))
             info += ', '.join(children_info) + '.'
+        if info.strip():
+            info = ended_pregnancy + info
+        else:
+            info = u"Эпикриз ещё не создан"
     except Exception as exc:
         info = u'Произошла ошибка. Свяжитесь с администратором системы'
-
     return info
 
 
