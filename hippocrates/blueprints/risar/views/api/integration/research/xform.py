@@ -43,20 +43,14 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
     def get_properties_data(self, data):
-        res = {
+        return {
             'Results': data.get('results'),
             'RealizationDate': safe_date(data.get('realization_date')),
-            'LPURealization': self.person.organisation,
             'AnalysisNumber': data.get('analysis_number'),
-
+            'LPURealization': self.person.organisation if self.person else None,
+            'Doctor': self.person,
             'Comment': data.get('comment'),
         }
-
-        if self.person:
-            res['LPURealization'] = self.person.organisation
-            res['Doctor'] = self.person
-
-        return res
 
     def as_json(self):
         an_props = self.target_obj.propsByCode
@@ -73,7 +67,9 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
         }
 
         if self.person:
-            res['lpu_code'] = self.person.organisation and self.person.organisation.TFOMSCode or ''
             res['doctor_code'] = self.person.regionalCode
+            res['lpu_code'] = ''
+            if self.person.organisation:
+                res['lpu_code'] = self.person.organisation.TFOMSCode or ''
 
         return res
