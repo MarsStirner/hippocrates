@@ -66,6 +66,7 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'comment': an_props['Comment'].value or '',
         }
 
+
         if self.person:
             res['doctor_code'] = self.person.regionalCode
             res['lpu_code'] = ''
