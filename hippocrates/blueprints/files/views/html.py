@@ -17,6 +17,10 @@ def serve_file(fileid):
         fileinfo = get_file_info(fileid)
         if not fileinfo:
             raise IOError
-        return send_file(get_full_file_path(fileid), as_attachment=True, attachment_filename=fileinfo['name'])
+        return send_file(
+            get_full_file_path(fileid),
+            as_attachment=True,
+            attachment_filename=fileinfo['name'].encode('utf-8')
+        )
     except IOError:
         return u'Файл не найден'

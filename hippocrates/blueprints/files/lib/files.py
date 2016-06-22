@@ -138,5 +138,7 @@ def represent_file_meta(fmeta):
 def make_file_url(fmeta):
     if fmeta.uuid:
         return u'{0}{1}'.format(
-            app.config['HIPPO_URL'], url_for('.api_0_file_download', fileid=fmeta.uuid.hex)
+            app.config['HIPPO_URL'],
+            url_for('.api_0_file_download', fileid=fmeta.uuid.hex)
+            # url_for('.serve_file', fileid=fmeta.uuid.hex)
         )

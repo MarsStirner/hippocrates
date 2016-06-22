@@ -5,6 +5,8 @@ import datetime
 import itertools
 from collections import defaultdict
 
+from flask import url_for
+
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.card_attrs import check_disease
 from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
@@ -22,7 +24,7 @@ from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_p
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
-from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool, safe_bool_none
+from nemesis.lib.utils import safe_traverse_attrs, safe_date, safe_bool, safe_bool_none, safe_dict
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
@@ -831,6 +833,77 @@ def represent_errand(errand_info):
         'status': ErrandStatus(errand_info.status_id),
         'progress': progress
     }
+
+
+def represent_errand_summary(errand):
+    return {
+        'id': errand.id,
+        'number': errand.number,
+        'event': {
+            'id': errand.event.id,
+            'external_id':  errand.event.externalId,
+            'client_name': errand.event.client.shortNameText,
+        },
+        'status': ErrandStatus(errand.status_id),
+    }
+
+
+def represent_errand_shortly(errand):
+    return {
+        'id': errand.id,
+        'create_datetime': errand.createDatetime,
+        'number': errand.number,
+        'set_person_id': errand.setPerson_id,
+        'exec_person_id': errand.execPerson_id,
+        'text': errand.text,
+        'communications': errand.communications,
+        'planned_exec_date': errand.plannedExecDate,
+        'exec_date': errand.execDate,
+        'event_id': errand.event_id,
+        'result': errand.result,
+        'reading_date': errand.readingDate,
+        'status': ErrandStatus(errand.status_id)
+    }
+
+
+def represent_errand_edit(errand):
+    res = represent_errand_shortly(errand)
+    res.update({
+        'set_person': errand.setPerson,
+        'exec_person': errand.execPerson,
+        'errand_files': [
+            represent_errand_file(ea)
+            for ea in errand.attach_files
+        ]
+    })
+    return res
+
+
+def represent_errand_file(errand_attach):
+    res = safe_dict(errand_attach)
+    res.update({
+        'file_meta': represent_file_meta(errand_attach.file_meta)
+    })
+    return res
+
+
+def represent_file_meta(fmeta):
+    return {
+        'id': fmeta.id,
+        'name': fmeta.name,
+        'mimetype': fmeta.mimetype,
+        'note': fmeta.note,
+        'url': make_file_url(fmeta)
+    }
+
+
+def make_file_url(fmeta):
+    if fmeta.uuid:
+        return u'{0}{1}'.format(
+            app.config['HIPPO_URL'],
+            url_for('.api_0_file_download', fileid=fmeta.uuid.hex)
+            # url_for('files.serve_file', fileid=fmeta.uuid.hex)
+        )
 
 
 def represent_event_cfrs(card_attrs_action):

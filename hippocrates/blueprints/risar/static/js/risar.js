@@ -5,8 +5,8 @@
 
 WebMis20
 .service('RisarApi', [
-    'Config', 'NotificationService', '$window', 'ApiCalls',
-    function (Config, NotificationService, $window, ApiCalls) {
+        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls',
+        function ($q, Config, NotificationService, $window, ApiCalls) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
     this.file_get = function (verb, url, data, target) {
@@ -61,11 +61,6 @@ WebMis20
     this.search_event_ambulance = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search_ambulance, {}, query)
-        }
-    };
-    this.urgent_errands = {
-        get: function(){
-            return wrapper('GET', Config.url.api_stats_urgent_errands)
         }
     };
     this.recent_charts = {
@@ -451,6 +446,9 @@ WebMis20
         },
         get_risk_group_distribution: function (person_id, curation_level_code) {
             return wrapper('GET', Config.url.api_stats_risk_group_distribution + person_id, {curation_level_code: curation_level_code});
+        },
+        urgent_errands: function() {
+            return wrapper('GET', Config.url.api_stats_urgent_errands)
         }
     };
     this.card_fill_rate = {
@@ -476,13 +474,42 @@ WebMis20
             return wrapper('GET', Config.url.api_person_contacts_get.format(person_id))
         }
     };
+    this.errands = {
+        get: function (errand_id) {
+            return wrapper('GET', Config.url.api_errand_get + errand_id);
+        },
+        save: function (errand_id, data) {
+            if (errand_id === undefined) {
+                return wrapper('POST', Config.url.api_errand_save, {}, data)
+                    .then(function (result) {
+                        NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);
+                        return result;
+                    }, function (result) {
+                        NotificationService.notify(undefined, 'Не удалось создать поручение', 'danger', 5000);
+                        return $q.reject(result);
+                    });
+            } else {
+                return wrapper('POST', Config.url.api_errand_save + errand_id, {}, data);
+            }
+        },
+        del: function (errand) {
+            return wrapper('DELETE', Config.url.api_errand_delete.format(errand.id), {}, errand)
+        },
+        list: function (args, data) {
+            return wrapper('POST', Config.url.api_errands_get, args, data);
+        },
+        mark_as_read: function (errand) {
+            return wrapper('POST', Config.url.api_errand_mark_as_read.format(errand.id), {}, errand)
+        },
+        execute: function (errand) {
+            return wrapper('POST', Config.url.api_errand_execute.format(errand.id), {}, errand)
+        }
+    };
 }])
-.service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
-    var event_source = new OneWayEvent(),
-        get_errands_url = Config.url.api_errands;
-    if (!get_errands_url) {
-        throw 'ВСЁ ПРОПАЛО!'
-    }
+.service('UserErrand', [
+        'Simargl', 'RisarApi', 'ApiCalls', 'Config', 'OneWayEvent',
+        function (Simargl, RisarApi, ApiCalls, Config, OneWayEvent) {
+    var event_source = new OneWayEvent();
     function get_errands_summary (pass) {
         ApiCalls.wrapper('GET', Config.url.api_errands_summary).then(_.partial(event_source.send, 'unread'));
         return pass;
@@ -502,51 +529,24 @@ WebMis20
 
     this.subscribe = event_source.eventSource.subscribe;
 
-    this.edit_errand = function (errand, exec) {
-        var current_date = new Date();
-        errand.exec = exec;
-        if (errand.is_author){
-            errand.reading_date = null;
-        } else if (!errand.reading_date){
-            errand.reading_date =  current_date;
-        }
-        return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
-    };
-    this.mark_as_read = function (errand){
+    this.mark_as_read = function (errand) {
         errand.reading_date =  new Date();
-        return ApiCalls.wrapper('POST', Config.url.api_errand_mark_as_read.format(errand.id), {}, errand).then(get_errands_summary);
+        return RisarApi.errands.mark_as_read(errand).then(get_errands_summary);
+    };
+    this.execute = function (errand) {
+        errand.exec_date =  new Date();
+        return RisarApi.errands.execute(errand).then(get_errands_summary);
     };
     this.delete_errand = function (errand) {
-        errand.deleted = 1;
-        return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
+        return RisarApi.errands.del(errand).then(get_errands_summary);
     };
-    this.get_errands = function (per_page, page, filters) {
-        return ApiCalls.wrapper('POST', get_errands_url, {
-            per_page: per_page,
-            page: page
-        }, filters)
+    this.create_errand = function (errand) {
+        return RisarApi.errands.save(undefined, errand).then(get_errands_summary);
     };
-    this.create_errand = function (recipient, text, event_id, status, planned_exec_date, communications) {
-        Simargl.send_msg({
-            topic: 'errand:new',
-            recipient: recipient.id,
-            sender: CurrentUser.id,
-            data: { text: text,
-                    event_id: event_id,
-                    status: status,
-                    planned_exec_date: planned_exec_date,
-                    communications: communications
-            },
-            ctrl: true
-        }).then(function (result) {
-            NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);
-            return result;
-        }, function (result) {
-            NotificationService.notify(undefined, 'Не удалось создать поручение', 'danger', 5000);
-            return result;
-        });
+    this.edit_errand = function (errand) {
+        return RisarApi.errands.save(errand.id, errand).then(get_errands_summary);
     };
-})
+}])
 .filter('underlineNoVal', function () {
     return function(value, label) {
         if (value !== 0 && !value) {
@@ -717,6 +717,45 @@ WebMis20
                     return value.code == kind && [].has.apply(types, [key]);
                 });
             })
+        }
+    }
+}])
+.service('ErrandModalService', ['$modal', 'RisarApi', function ($modal, RisarApi) {
+    return {
+        openNew: function (errand, is_author) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/RISAR/modal/errand.html',
+                controller: ErrandModalCtrl,
+                size: 'lg',
+                resolve: {
+                    model: function () {
+                        return errand
+                    },
+                    is_author: function () {
+                        return is_author;
+                    }
+                }
+            });
+            return instance.result;
+        },
+        openEdit: function (errand, is_author) {
+            return RisarApi.errands.get(errand.id)
+                .then(function (errand) {
+                    var instance = $modal.open({
+                    templateUrl: '/WebMis20/RISAR/modal/errand.html',
+                    controller: ErrandModalCtrl,
+                    size: 'lg',
+                    resolve: {
+                        model: function () {
+                            return errand
+                        },
+                        is_author: function () {
+                            return is_author;
+                        }
+                    }
+                });
+                return instance.result;
+            });
         }
     }
 }])
