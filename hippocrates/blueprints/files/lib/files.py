@@ -5,7 +5,6 @@ import mimetypes
 import uuid
 import logging
 
-from werkzeug.utils import secure_filename
 from flask import url_for
 
 from blueprints.files.models.files import FileMeta, ErrandFileAttach
@@ -27,7 +26,7 @@ def save_new_file(file, file_info=None):
         file_info = {}
     if file.filename == '':
         raise FileSaveException('no file')
-    filename = secure_filename(file.filename)
+    filename = file.filename
     f_name = file_info.get('name') or filename
     extension = get_file_extension(filename)
     mimetype, _ = mimetypes.guess_type(filename)
