@@ -24,7 +24,6 @@ class HippoUsagiClient(TsukinoUsagiClient):
         from blueprints.actions.app import module as actions_module
         from blueprints.useraccount.app import module as useraccount_module
         from blueprints.risar.app import module as risar_module
-        from blueprints.files.app import module as files_module
 
         app.register_blueprint(accounting_module, url_prefix='/accounting')
         app.register_blueprint(reports_module, url_prefix='/reports')
@@ -36,4 +35,3 @@ class HippoUsagiClient(TsukinoUsagiClient):
         app.register_blueprint(actions_module, url_prefix='/actions')
         app.register_blueprint(useraccount_module, url_prefix='/user')
         app.register_blueprint(risar_module, url_prefix='/risar')
-        app.register_blueprint(files_module, url_prefix='/files')

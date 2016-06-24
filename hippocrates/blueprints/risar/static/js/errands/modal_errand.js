@@ -138,7 +138,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             <td><input type="text" class="form-control" ng-model="attach.file_meta.note"\
                                 ng-disabled="!canEditFileInfo(attach)"></td>\
                             <td>\
-                                <a ng-href="[[attach.file_meta.url]]" class="btn btn-sm btn-primary" title="Скачать"\
+                                <a ng-href="[[attach.file_meta.url]]" target="_blank" class="btn btn-sm btn-primary" title="Скачать"\
                                     ng-disabled="!canDownloadFile(attach)">\
                                     <i class="fa fa-download"></i>\
                                 </a>\
@@ -176,7 +176,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUser, UserErrand, Upload, model, is_author) {
+var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUser, UserErrand, Upload,
+                                WMConfig, model, is_author) {
     $scope.model = model;
     $scope.is_author = is_author !== undefined ?
         is_author :
@@ -215,7 +216,7 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
     $scope.uploadFiles = function (files, attach_data) {
         if (files && files.length) {
             return Upload.upload({
-                url: '/files/api/0/upload',  // TODO: url
+                url: WMConfig.url.devourer.upload,
                 data: {
                     files: _.pluck($scope.new_files, 'file'),
                     info:  Upload.json({
@@ -306,4 +307,4 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
 
 
 WebMis20.controller('ErrandModalCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'CurrentUser',
-    'UserErrand', 'Upload', ErrandModalCtrl]);
+    'UserErrand', 'Upload', 'WMConfig', ErrandModalCtrl]);

@@ -898,11 +898,11 @@ def represent_file_meta(fmeta):
 
 
 def make_file_url(fmeta):
+    devourer_url = app.config['DEVOURER_URL'].rstrip('/') + '/'
     if fmeta.uuid:
         return u'{0}{1}'.format(
-            app.config['HIPPO_URL'],
-            url_for('files.api_0_file_download', fileid=fmeta.uuid.hex)
-            # url_for('files.serve_file', fileid=fmeta.uuid.hex)
+            devourer_url,
+            u'api/0/download/{0}'.format(fmeta.uuid.hex)
         )
 
 

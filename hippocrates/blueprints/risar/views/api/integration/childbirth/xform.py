@@ -15,7 +15,7 @@ from blueprints.risar.views.api.integration.childbirth.schemas import \
     ChildbirthSchema
 from blueprints.risar.views.api.integration.xform import CheckupsXForm, \
     ALREADY_PRESENT_ERROR
-from hitsl_utils.api import ApiException
+from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_time
 from nemesis.models.actions import ActionType, Action
