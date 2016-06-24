@@ -187,7 +187,6 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
 
     $scope.saveAndClose = function () {
         $scope.save_errand().then(function () {
-            console.log($scope.model);
             $scope.$close({
                 status: 'ok',
                 errand: $scope.model
@@ -219,12 +218,13 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
                 url: WMConfig.url.devourer.upload,
                 data: {
                     files: _.pluck($scope.new_files, 'file'),
-                    info:  Upload.json({
+                    info: Upload.json({
                         attach_data: attach_data,
                         files_info: _.map($scope.new_files, function (f) { return _.pick(f, 'name', 'note') })
                     })
                 },
-                arrayKey: ''
+                arrayKey: '',
+                withCredentials: true
             });
         }
     };
