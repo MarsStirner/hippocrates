@@ -80,7 +80,7 @@
                           <ul class="menu">
                               <li ng-repeat="errand in errands"><!-- Task item -->
                                   <a href="{{ url_for('risar.html_errands_list') }}?number=[[ errand.number ]]">
-                                      Поручение по карте [[ errand.event.external_id ]] ([[ errand.event.client ]])
+                                      Поручение по карте [[ errand.event.external_id ]] ([[ errand.event.client_name ]])
                                   </a>
                               </li><!-- end task item -->
                           </ul>

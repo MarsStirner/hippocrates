@@ -5,7 +5,7 @@
 'use strict';
 
 var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser,
-                          UserErrand, RefBookService, Config) {
+                          UserErrand, RefBookService, Config, ErrandModalService) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var client_id = params.client_id;
@@ -76,39 +76,23 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
         }
     };
     $scope.create_errand = function () {
-        var model = {
+        var errand = {
+            event_id: $scope.chart.id,
             set_person: CurrentUser.info,
             communications: '',
             exec_person: $scope.chart.person,
-            is_author: true,
             event: {external_id: $scope.chart.external_id},
             status: $scope.rbErrandStatus.get_by_code('waiting')
         };
 
-        RisarApi.utils.get_person_contacts(model.set_person.id).then(function (contacts) {
-            model.communications = contacts;
-            open_edit_errand(model).result.then(function (rslt) {
-                var result = rslt[0],
-                    restart = rslt[1];
-                UserErrand.create_errand(result.exec_person, result.text, $scope.chart.id, result.status, result.planned_exec_date, result.communications);
-            });
+        RisarApi.utils.get_person_contacts(errand.set_person.id).then(function (contacts) {
+            errand.communications = contacts;
+            ErrandModalService.openNew(errand, true)
+                .then()
         });
-
     };
     $scope.add_inspection = function() {
         $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
-    };
-    var open_edit_errand = function(e){
-        var scope = $scope.$new();
-        scope.model = e;
-        return $modal.open({
-            templateUrl: '/WebMis20/RISAR/modal/create_errand.html',
-            scope: scope,
-            resolve: {
-                model: function () {return e}
-            },
-            size: 'lg'
-        })
     };
     $scope.close_event = function() {
         var model = {};
@@ -244,7 +228,7 @@ var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
 };
 
 WebMis20.controller('ChartCtrl', ['$scope', '$modal', '$window', 'RisarApi', 'PrintingService', 'PrintingDialog',
-    'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', 'Config', ChartCtrl]);
+    'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', 'Config', 'ErrandModalService', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     'RefBookService', InspectionViewCtrl]);
 WebMis20.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', InspectionFetusViewCtrl]);

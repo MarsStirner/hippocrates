@@ -1,7 +1,8 @@
 
 'use strict';
 
-var ErrandsListCtrl = function ($scope, $window, $modal, $timeout, UserErrand, CurrentUser) {
+var ErrandsListCtrl = function ($scope, $window, $timeout, RisarApi, UserErrand,
+        CurrentUser, ErrandModalService, TimeoutCallback) {
     var params = aux.getQueryParams($window.location.search);
     $scope.unread = 0;
     $scope.errands = [];
@@ -12,9 +13,6 @@ var ErrandsListCtrl = function ($scope, $window, $modal, $timeout, UserErrand, C
         pages: 1,
         record_count: 0
     };
-    UserErrand.subscribe('unread', reset_errands);
-    UserErrand.subscribe('ready', reload_errands);
-    UserErrand.subscribe('new:id', reload_errands);
 
     $scope.reset_filters = function () {
         if (Object.keys(params).length){
@@ -26,7 +24,39 @@ var ErrandsListCtrl = function ($scope, $window, $modal, $timeout, UserErrand, C
             }
         }
     };
-    function reset_errands (result) {
+    $scope.onPageChanged = function () {
+        reload_errands($scope.pager.current_page);
+    };
+    $scope.edit_errand = function (errand) {
+        var is_author = CurrentUser.id == errand.set_person.id;
+        ErrandModalService.openEdit(errand, is_author)
+            .then(function () {
+                reload_errands($scope.pager.current_page);
+            });
+    };
+    $scope.delete_errand = function (errand) {
+        UserErrand.delete_errand(errand).then(function () {
+            reload_errands($scope.pager.current_page);
+        });
+    };
+
+    var _unread_sbscr = false;
+    var reload_errands = function (page) {
+        var args = {
+            per_page: 10,
+            page: page ? page : ($scope.pager.current_page || 1)
+        };
+        RisarApi.errands.list(args, $scope.query).then(function (result) {
+            reset_errands(result);
+            if (!_unread_sbscr) {
+                _unread_sbscr = true;
+                UserErrand.subscribe('unread', function () {
+                    tc.start();
+                });
+            }
+        });
+    };
+    var reset_errands = function (result) {
         if (result) {
             $scope.errands = result.errands;
             $scope.pager.pages = result.total_pages;
@@ -37,51 +67,24 @@ var ErrandsListCtrl = function ($scope, $window, $modal, $timeout, UserErrand, C
                 var slices = [errand.progress, 100-errand.progress];
                 $('.progress#'+errand.id).sparkline(slices, {type: 'pie', sliceColors: ['green', 'red']} );
             })
-
         }, 0);
-    }
-    function reload_errands (page) {
-        page = page ? page : 1;
-        UserErrand.get_errands(10, page, $scope.query).then(reset_errands);
-    }
-    $scope.onPageChanged = function () {
-        reload_errands($scope.pager.current_page);
     };
 
-    $scope.edit_errand = function (errand, is_author) {
-        errand.is_author = is_author;
-        open_edit_errand(errand).result.then(
-            function (rslt) {
-            var result = rslt[0],
-                exec = rslt[1];
-            UserErrand.edit_errand(result, exec).then(reload_errands);
-        },
-            function(){
-            if (!is_author && !errand.reading_date){
-            UserErrand.mark_as_read(errand).then(reload_errands);
-            }
-        })
+    var tc = new TimeoutCallback(reload_errands, 600);
+    $scope.reload_errands = function () {
+        tc.start();
     };
 
-    $scope.delete_errand = function (errand) {
-        UserErrand.delete_errand(errand).then(reload_errands);
-    };
-
-    var open_edit_errand = function(e){
-        var scope = $scope.$new();
-        scope.model = e;
-        return $modal.open({
-            templateUrl: '/WebMis20/RISAR/modal/create_errand.html',
-            scope: scope,
-            resolve: {
-                model: function () {return e}
-            },
-            size: 'lg'
-        })
-    }
+    // start
     $scope.reset_filters();
-    $scope.reload_errands = reload_errands;
     $scope.$watchCollection('query', function () {
-        reload_errands();
+        tc.start();
     });
-}
+    UserErrand.subscribe('new:id', function () {
+        tc.start();
+    });
+};
+
+
+WebMis20.controller('ErrandsListCtrl', ['$scope', '$window', '$timeout', 'RisarApi', 'UserErrand',
+    'CurrentUser', 'ErrandModalService', 'TimeoutCallback', ErrandsListCtrl]);
