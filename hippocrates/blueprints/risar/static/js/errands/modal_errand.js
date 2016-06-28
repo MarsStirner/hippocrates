@@ -34,8 +34,13 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <tr>\
                     <th class="text-right">Описание <span class="text-danger">*</span></th>\
                     <td>\
-                        <div class="col-md-12"><wysiwyg ng-disabled="!isAuthor()" contenteditable="isAuthor()"\
-                                                        ng-model="model.text" ng-required="true" /></div>\
+                        <div class="col-md-12">\
+                            <wysiwyg ng-disabled="!isAuthor()" ng-if="isAuthor()" ng-model="model.text"\
+                                ng-required="true" />\
+                            <textarea rows="3" style="border-radius:0.2em!important;" ng-if="!isAuthor()"\
+                                ng-disabled="true" class="form-control col-md-12"\
+                                ng-model="model.text"></textarea>\
+                        </div>\
                     </td>\
                 </tr>\
                 <tr>\
@@ -50,8 +55,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <th class="text-right">Контактные данные</th>\
                     <td>\
                         <div class="col-md-12">\
-                            <textarea rows="4" style="border-radius:0.2em!important;" ng-disabled="!isAuthor()"\
-                                id="communications" name="communications" class="form-control col-md-12" rows="3"\
+                            <textarea rows="3" style="border-radius:0.2em!important;" ng-disabled="!isAuthor()"\
+                                id="communications" name="communications" class="form-control col-md-12"\
                                 ng-model="model.communications"></textarea>\
                         </div>\
                     </td>\
@@ -91,11 +96,13 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             </thead>\
             <tbody>\
                 <tr>\
-                    <th class="text-right">Ответ </th>\
+                    <th class="text-right">Ответ <span class="text-danger">*</span></th>\
                     <td>\
                         <div class="col-md-12">\
-                            <span ng-show="isExecutor()"><wysiwyg ng-model="model.result"/></span>\
-                            <span ng-show="isAuthor()">[[model.result]]</span>\
+                            <wysiwyg ng-model="model.result" ng-if="isExecutor()" ng-required="isExecutor()"/></span>\
+                            <textarea rows="3" style="border-radius:0.2em!important;" ng-if="!isExecutor()"\
+                                ng-disabled="true" class="form-control col-md-12"\
+                                ng-model="model.result"></textarea>\
                         </div>\
                     </td>\
                 </tr>\
@@ -142,6 +149,10 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                                     ng-disabled="!canDownloadFile(attach)">\
                                     <i class="fa fa-download"></i>\
                                 </a>\
+                                <button type="button" class="btn btn-sm btn-danger" ng-click=removeFile($index)\
+                                    title="Удалить" ng-if="canDeleteFile(attach)">\
+                                    <i class="fa fa-trash"></i>\
+                                </button>\
                             </td>\
                             <td></td>\
                         </tr>\
@@ -210,7 +221,8 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
         return $scope.uploadFiles($scope.new_files, attach_data);
     };
     $scope.executeErrand = function () {
-        UserErrand.execute($scope.model).then(reload);
+        UserErrand.execute($scope.model)
+            .then($scope.processNewFiles).then(reload);
     };
     $scope.uploadFiles = function (files, attach_data) {
         if (files && files.length) {
@@ -254,6 +266,9 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
     $scope.removeNewFile = function (idx) {
         $scope.new_files.splice(idx, 1);
     };
+    $scope.removeFile = function (idx) {
+        $scope.model.errand_files.splice(idx, 1);
+    };
     $scope.setFileName = function (file) {
         if (file.file) {
             var orig_name = file.file.name,
@@ -284,6 +299,9 @@ var ErrandModalCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUse
     };
     $scope.canDownloadFile = function (attach) {
         return $scope.isAuthor() || $scope.isExecutor() || CurrentUser.current_role_in('admin');
+    };
+    $scope.canDeleteFile = function (attach) {
+        return attach.set_person_id === CurrentUser.id || CurrentUser.current_role_in('admin');
     };
 
     var reload = function () {
