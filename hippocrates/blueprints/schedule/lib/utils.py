@@ -51,7 +51,7 @@ def person_contacts_for_errand(person_id,
                 phones.append(any_phone)
 
         if phones:
-            template += u"Телефоны: %s \n" % "{0}".format(delimiter).join(phones)
+            template += u"Тел.: %s \n" % "{0}".format(delimiter).join(phones)
 
         if emails:
             template += u"Email: %s \n" % emails

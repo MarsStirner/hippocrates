@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
-import datetime
+
 from flask import request
 from sqlalchemy.orm import joinedload
 
 from ...app import module
-from nemesis.models.risar import Errand, rbErrandStatus
+from nemesis.models.risar import Errand
 from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_int, string_to_datetime
-from blueprints.risar.lib.represent import represent_errand
+from nemesis.lib.utils import safe_int
+from blueprints.risar.lib.errand import (create_errand, edit_errand, mark_errand_as_read, execute_errand,
+    notify_errand_change, cur_user_is_errand_author, delete_errand)
+from blueprints.risar.lib.represent import (represent_errand, represent_errand_edit, represent_errand_shortly,
+    represent_errand_summary)
 from sqlalchemy import func
 
 __author__ = 'viruzzz-kun'
 
 
-@module.route('/api/errands/summary/')
+@module.route('/api/0/errands/summary/')
 @api_method
-def api_errands_summary():
+def api_0_errands_summary():
     query = Errand.query.filter(
         Errand.execPerson_id == safe_current_user_id(),
         Errand.deleted == 0
@@ -25,8 +28,10 @@ def api_errands_summary():
     count = query.count()
     query = query.filter(Errand.readingDate.is_(None))
     unread = query.count()
-    query = query.limit(10)
-    errands = [represent_errand(errand) for errand in query.all()]
+    query = query.limit(10).options(
+        joinedload(Errand.event, innerjoin=True).joinedload('client', innerjoin=True)
+    )
+    errands = [represent_errand_summary(errand) for errand in query.all()]
     return {
         'count': count,
         'unread': unread,
@@ -34,9 +39,9 @@ def api_errands_summary():
     }
 
 
-@module.route('/api/errands/', methods=["POST"])
+@module.route('/api/0/errands/', methods=["POST"])
 @api_method
-def api_errands_get():
+def api_0_errands_get():
     per_page = safe_int(request.args.get('per_page', 5))
     page = safe_int(request.args.get('page', 1))
     filters = request.get_json() or {}
@@ -98,39 +103,67 @@ def api_errands_get():
     result['errands'] = [represent_errand(errand) for errand in pagination.items]
     return result
 
-@module.route('/api/errands/edit/', methods=["POST"])
-@module.route('/api/errands/edit/<int:errand_id>', methods=["POST"])
+
+@module.route('/api/0/errand/', methods=["GET"])
+@module.route('/api/0/errand/<int:errand_id>', methods=["GET"])
 @api_method
-def api_errand_edit(errand_id):
-    now = datetime.datetime.now()
-    data = request.get_json()
+def api_0_errand_get(errand_id):
     errand = Errand.query.get(errand_id)
-    if data:
-        errand.execPerson_id = data['exec_person']['id']
-        errand.readingDate = string_to_datetime(data['reading_date'])
-        errand.text = data['text']
-        errand.plannedExecDate = string_to_datetime(data['planned_exec_date'])
-        errand.deleted = data.get('deleted', 0)
-        errand.result = data['result']
-        errand.communications = data.get('communications')
-        if data.get('exec', 0):
-            if errand.plannedExecDate.date() >= now.date():
-                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == u'executed').first()
-            else:
-                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == u'late_execution').first()
-            errand.execDate = data['exec_date'] if data['exec_date'] else now
-        db.session.add(errand)
-        db.session.commit()
+    return represent_errand_edit(errand)
 
 
-@module.route('/api/errands/mark_as_read/', methods=["POST"])
-@module.route('/api/errands/mark_as_read/<int:errand_id>', methods=["POST"])
+@module.route('/api/0/errand/', methods=["POST"])
+@module.route('/api/0/errand/<int:errand_id>', methods=["POST"])
 @api_method
-def api_errand_mark_as_read(errand_id):
+def api_0_errand_save(errand_id=None):
     data = request.get_json()
-    reading_date = data.get('reading_date', '')
-    errand = Errand.query.get(errand_id)
-    errand.readingDate = string_to_datetime(reading_date) if reading_date else datetime.datetime.now()
+    if not errand_id:
+        errand = create_errand(data)
+    else:
+        errand = Errand.query.get(errand_id)
+        errand = edit_errand(errand, data)
     db.session.add(errand)
     db.session.commit()
+    if not errand_id:
+        notify_errand_change(errand, 'new')
+    elif cur_user_is_errand_author(errand):
+        notify_errand_change(errand, 'markread')
+    return represent_errand_edit(errand)
 
+
+@module.route('/api/0/errands/mark_as_read/', methods=["POST"])
+@module.route('/api/0/errands/mark_as_read/<int:errand_id>', methods=["POST"])
+@api_method
+def api_0_errand_mark_as_read(errand_id):
+    data = request.get_json()
+    errand = Errand.query.get(errand_id)
+    errand = mark_errand_as_read(errand, data)
+    db.session.add(errand)
+    db.session.commit()
+    notify_errand_change(errand, 'markread')
+    return represent_errand_shortly(errand)
+
+
+@module.route('/api/0/errands/execute/', methods=["POST"])
+@module.route('/api/0/errands/execute/<int:errand_id>', methods=["POST"])
+@api_method
+def api_0_errand_execute(errand_id):
+    data = request.get_json()
+    errand = Errand.query.get(errand_id)
+    errand = execute_errand(errand, data)
+    db.session.add(errand)
+    db.session.commit()
+    notify_errand_change(errand, 'execute')
+    return represent_errand_shortly(errand)
+
+
+@module.route('/api/0/errands/delete/', methods=["DELETE"])
+@module.route('/api/0/errands/delete/<int:errand_id>', methods=["DELETE"])
+@api_method
+def api_0_errand_delete(errand_id):
+    errand = Errand.query.get(errand_id)
+    errand = delete_errand(errand)
+    db.session.add(errand)
+    db.session.commit()
+    notify_errand_change(errand, 'delete')
+    return represent_errand_shortly(errand)
