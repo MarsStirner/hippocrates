@@ -72,8 +72,8 @@ def execute_errand(errand, data):
             errand.status_id = ErrandStatus.late_execution[0]
     exec_date = data.get('exec_date') or now
     errand.execDate = safe_datetime(exec_date)
-    if 'text' in data:
-        errand.text = data['text']
+    if 'result' in data:
+        errand.result = data['result']
     return errand
 
 
