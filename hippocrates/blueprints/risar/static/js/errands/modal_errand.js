@@ -180,8 +180,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     </div>\
 </div>\
 <div class="modal-footer">\
-    <button class="btn btn-success" ng-click="executeErrand()" ng-if="canExecute()">Выполнить</button>\
-    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid" >Сохранить</button>\
+    <button class="btn btn-success" ng-click="executeErrand()" ng-if="canExecute()" ng-disabled="createErrandForm.$invalid">Выполнить</button>\
+    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid">Сохранить</button>\
     <button class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
 </div>');
 }]);
