@@ -6,6 +6,8 @@
 @date: 22.03.2016
 
 """
+import datetime
+
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
@@ -115,6 +117,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
     def update_target_obj(self, data):
         self.find_parent_obj(self.parent_obj_id)
         self.set_pcard()
+        self.target_obj = get_action_by_id(self.target_obj_id, self.parent_obj, second_inspection_code, True)
         form_data = self.mapping_as_form(data)
         self.update_form(form_data)
         self.save_external_data()
@@ -175,36 +178,50 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         mr = data.get('medical_report', {})
         self.mapping_part(self.REPORT_MAP, mr, res)
 
+        diag_data = []
+        if 'diagnosis_osn' in mr:
+            diag_data.append({
+                'kind': 'main',
+                'mkbs': [mr['diagnosis_osn']]
+            })
+        if 'diagnosis_osl' in mr:
+            diag_data.append({
+                'kind': 'complication',
+                'mkbs': mr['diagnosis_osl']
+            })
+        if 'diagnosis_sop' in mr:
+            diag_data.append({
+                'kind': 'associated',
+                'mkbs': mr['diagnosis_sop']
+            })
+        old_action_data = {
+            'begDate': self.target_obj.begDate,
+            'person': self.target_obj.person
+        }
         res.update({
-            'get_diagnoses_func': lambda: self.get_diagnoses((
-                (mr, self.DIAG_KINDS_MAP, 'final'),
-            ), res.get('person'), res.get('beg_date'))
+            'get_diagnoses_func': lambda: self.get_diagnoses(diag_data, 'final', old_action_data)
         })
 
     def update_form(self, data):
         # like blueprints.risar.views.api.checkups.api_0_checkup
 
         event_id = self.parent_obj_id
-        event = self.parent_obj
-        checkup_id = self.target_obj_id
-        flat_code = second_inspection_code
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         get_diagnoses_func = data.pop('get_diagnoses_func')
         fetuses = data.pop('fetuses', [])
 
-        action = get_action_by_id(checkup_id, event, flat_code, True)
+        if self.new:
+            close_open_checkups(event_id, beg_date - datetime.timedelta(seconds=1))
 
-        self.target_obj = action
-        diagnoses = get_diagnoses_func()
-
-        if not checkup_id:
-            close_open_checkups(event_id)
+        action = self.target_obj
 
         self.set_pcard()
         notify_checkup_changes(self.pcard, action, data.get('pregnancy_continuation'))
 
+        old_beg_date = action.begDate
         action.begDate = beg_date
+        self._change_end_date(old_beg_date)
         action.setPerson = self.person
         action.person = self.person
 
@@ -212,24 +229,11 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
             if code in action.propsByCode:
                 action.propsByCode[code].value = value
 
+        diagnoses, changed_diags = get_diagnoses_func()
+        self._changed.extend(changed_diags)
+
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_fetuses(action, fetuses)
-
-    def close_diags(self):
-        # Роман:
-        # сначала найти открытые диагнозы пациента (это будут просто диагнозы без типа), затем среди них определить какие являются основными,
-        # осложнениями и пр. - это значит, что Diagnosis связывается с осмотром через Action_Diagnosis, где указывается его тип, т.е. диагноз
-        # пациента в рамках какого-то осмотра будет иметь определенный тип. *Все открытые диагнозы пациента, для которых не указан тип в связке
-        # с экшеном являются сопотствующими неявно*.
-        # тут надо понять логику работы с диагнозами (четкого описания нет), после этого нужно доработать механизм диагнозов - из того, что я знаю,
-        # сейчас проблема как раз с определением тех диагнозов пациента, которые относятся к текущему случаю. Для этого нужно исправлять запрос,
-        # выбирающий диагнозы по датам с учетом дат Event'а. После этого уже интегрировать.
-
-        # Action_Diagnosis
-        # Diagnostic.query.filter(Diagnosis.id == diagnosis)
-        # q = Diagnosis.query.filter(Diagnosis.client == self.parent_obj.client)
-        # q.update({'deleted': 1})
-        raise
 
     def delete_target_obj(self):
         #  Евгений: Пока диагнозы можешь не закрывать и не удалять.

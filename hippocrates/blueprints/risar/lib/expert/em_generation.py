@@ -290,7 +290,7 @@ class EventMeasureGenerator(object):
         # TODO: доработать описание
         """
         # TODO: check and think
-        current_dt_point = DateTimeInterval(self.context.inspection_datetime, None)
+        current_dt_point = DateTimeInterval(self.context.inspection_datetime, is_point=True)
         renew_sm_id_list = set([sm.id for sm in sm_to_exist_list])
         result = []
         for sm_id, em_list in self.existing_em_list.iteritems():
@@ -437,7 +437,7 @@ class EventMeasureGenerator(object):
     def _process_past_new_em_list(self, em_to_create):
         """Пометить EM в списке создаваемых, которые заканчиваются ранее даты текущего
         осмотра, как недействительные."""
-        current_dt_point = DateTimeInterval(self.context.inspection_datetime, None)
+        current_dt_point = DateTimeInterval(self.context.inspection_datetime, is_point=True)
         for em in em_to_create:
             intersect = get_intersection_type(
                 DateTimeInterval(em.begDateTime, em.endDateTime),

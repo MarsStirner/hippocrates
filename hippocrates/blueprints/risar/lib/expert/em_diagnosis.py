@@ -9,11 +9,12 @@
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.risar_config import general_hospitalizations, \
     general_specialists_checkups
-from nemesis.lib.diagnosis import create_or_update_diagnoses, \
-    diagnosis_using_by_next_checkups
+from blueprints.risar.risar_config import checkup_flat_codes
+from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.models.exists import MKB
 from nemesis.models.person import Person
 from nemesis.models.utils import safe_current_user_id
+from nemesis.systemwide import db
 
 
 def update_patient_diagnoses(old_diag_id, new_em_result):
@@ -79,3 +80,13 @@ def get_event_measure_doctor(em_result):
 
     prop_type_code = get_measure_diag_prop_code(em_result)
     return prop_type_code and em_result.propsByCode[prop_type_code].value
+
+
+def diagnosis_using_by_next_checkups(action):
+    q = Action.query.join(ActionType).filter(
+        Action.begDate > action.begDate,
+        ActionType.flatCode.in_(checkup_flat_codes),
+        Action.event == action.event,
+        Action.deleted == 0,
+    )
+    return db.session.query(q.exists()).scalar()

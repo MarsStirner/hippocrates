@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 
 class IntersectionType(object):
     none_left = 0  # () [___] Интервалы не пересекаются: 1-ый лежит левее
@@ -20,28 +22,34 @@ class IntersectionType(object):
 
 
 class DateTimeInterval(object):
-    def __init__(self, beg, end):
+    def __init__(self, beg, end=None, is_point=False):
+        self.is_point = is_point
         self.beg = beg
-        self.end = end
+        self.end = end if not is_point else beg
+        if self.beg == self.end:
+            self.is_point = True
 
 
 def get_intersection_type(interval, other_interval):
-    """Возвращает тип пересечения интервала назначения с диапазоном
+    """Возвращает тип пересечения интервала с другим интервалом
     @param interval: тестируемый интервал (DateTimeInterval)
     @param other_interval: временной интервал (DateTimeInterval)
     @rtype: int
-    @return: тип пересечения:
-        0 - не пересекает
-        1 - пересекает слева, но не справа
-        2 - перекрывает
-        3 - попадает внутрь
-        4 - пересекает справа
-        5 - входное значение не интервал, но попадает во временной интервал
+    @return: тип пересечения из IntersectionType
     """
+    inf_end_date = max(interval.beg,
+                       interval.end if interval.end is not None else interval.beg,
+                       other_interval.beg) + datetime.timedelta(seconds=1)
     if not other_interval.end:
-        other_interval = DateTimeInterval(other_interval.beg, other_interval.beg)
+        other_interval = DateTimeInterval(other_interval.beg, inf_end_date)
     if not interval.end:
-        if other_interval.beg <= interval.beg < other_interval.end:
+        interval = DateTimeInterval(interval.beg, inf_end_date)
+
+    if interval.is_point:
+        if other_interval.beg <= interval.beg <= other_interval.end:
+            return IntersectionType.point
+    elif other_interval.is_point:
+        if interval.beg <= other_interval.beg <= interval.end:
             return IntersectionType.point
     elif interval.beg < other_interval.beg:
         if interval.end > other_interval.end:

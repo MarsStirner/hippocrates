@@ -169,6 +169,8 @@ class StatsSelecter(BaseSelecter):
         q_latest_checkups_id = self.model_provider.get_query('Action').join(
             q_action_begdates, and_(q_action_begdates.c.max_beg_date == Action.begDate,
                                     q_action_begdates.c.event_id == Action.event_id)
+        ).filter(
+            Action.deleted == 0, ActionType.flatCode.in_(checkup_flat_codes)
         ).with_entities(
             func.max(Action.id).label('action_id'), Action.event_id.label('event_id')
         ).group_by(
