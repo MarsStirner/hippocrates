@@ -69,11 +69,19 @@ class MeasureListXForm(MeasureListSchema, XForm):
         return map(self._represent_measure, self.measure_list)
 
     def _represent_measure(self, measure):
-        return {
+        dc = {
             'measure_id': measure.id,
             'measure_type_code': measure.measure.code,
             'begin_datetime': safe_date(measure.begDateTime),
             'end_datetime': safe_date(measure.endDateTime),
             'status': unicode(MeasureStatus(measure.status)),
             'result_action_id': self.or_undefined(measure.resultAction_id),
+            'indications': ''
         }
+        try:
+            dc['indications'] = measure.scheme_measure.schedule.additionalText
+        except Exception as e:
+            #blank indications
+            pass
+
+        return dc
