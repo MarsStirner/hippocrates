@@ -40,6 +40,10 @@ class MeasureListSchema(Schema):
                 "result_action_id": {
                     "description": "Результаты мероприятия, ссылка на {Action}",
                     "type": "string"
+                },
+                "indications": {
+                    "description": "Показания к госпитализации",
+                    "type": "string"
                 }
             },
             "required": ["measure_id", "measure_type_code", "begin_datetime", "end_datetime", "status"]

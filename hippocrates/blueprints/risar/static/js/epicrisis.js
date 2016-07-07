@@ -1,9 +1,10 @@
 'use strict';
-var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, PrintingService, PrintingDialog) {
+var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.allMedicos = RefBookService.get('Person');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
     $scope.ps_epicrisis = new PrintingService("risar");
@@ -34,7 +35,12 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
         });
         RisarApi.epicrisis.get(event_id)
             .then(function (result) {
+                $scope.groupedMedicos = _.groupBy($scope.allMedicos.objects, function(obj){
+                        return obj.organisation != undefined ? obj.organisation.id: null
+                });
+
                 $scope.epicrisis = result.epicrisis;
+                $scope.loadOwnMedicos();
                 $scope.chart = result.chart;
                 $scope.mother_death = $scope.epicrisis ? Boolean($scope.epicrisis.death_date) : false;
                 if (!$scope.epicrisis) {
@@ -105,6 +111,20 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
         return res;
     };
 
+    $scope.loadOwnMedicos = function(){
+        var orgId = safe_traverse($scope, ['epicrisis', 'LPU', 'id']);
+        var medicoOrgId = safe_traverse($scope, ['epicrisis', 'maternity_hosp_medico', 'organisation', 'id']);
+        var isSameOrganisation = medicoOrgId === orgId;
+
+        if (!isSameOrganisation) {
+            this.epicrisis.maternity_hosp_medico = null;
+        }
+        $scope.filteredMedicos = safe_traverse($scope, ['groupedMedicos', orgId]);
+    };
+    $scope.chooseNativeLpu = function(){
+        $scope.loadOwnMedicos();
+    };
+
     $scope.newborn_inspection_delete = function (inspection) {
         if (inspection.id) {
             RisarApi.epicrisis.newborn_inspections.delete(inspection.id)
@@ -162,7 +182,9 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
         if (hash) {
             hash.match('child') ? open_tab('#sixth') : open_tab(hash);
         }
-        reload_epicrisis();
+        $q.all([$scope.allMedicos.loading]).then(function () {
+            reload_epicrisis();
+        });
     };
 
     $scope.open_print_window = function () {

@@ -126,7 +126,7 @@
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.LPU.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
-                                                    <ui-select ng-model="epicrisis.LPU" theme="select2" class="form-control" name="LPU"
+                                                    <ui-select ng-model="epicrisis.LPU" ng-change="loadOwnMedicos()" theme="select2" class="form-control" name="LPU"
                                                                ref-book="Organisation" autocomplete="off" ng-required="epicrisis.pregnancy_final.code =='rodami'">
                                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
                                                         <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
@@ -141,9 +141,15 @@
                                             <th class="text-right">Лечащий врач роддома<span>&nbsp;</span></th>
                                             <td>
                                                 <div class="row">
-                                                <div class="col-md-5  col-lg-5">
-                                                    <input ng-model="epicrisis.maternity_hosp_doctor" class="form-control" name="maternity_hosp_doctor">
-                                                </div>
+                                                    <div class="col-md-7">
+                                                        <ui-select ng-model="epicrisis.maternity_hosp_medico"  theme="select2" class="form-control" name="maternity_hosp_medico"
+                                                                   ref-book="Person" autocomplete="off" ng-change="chooseNativeLpu()">
+                                                            <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
+                                                            <ui-select-choices repeat="item in filteredMedicos | filter: $select.search | limitTo: 50">
+                                                                <span ng-bind-html="item.full_name | highlight: $select.search"></span>
+                                                            </ui-select-choices>
+                                                        </ui-select>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
