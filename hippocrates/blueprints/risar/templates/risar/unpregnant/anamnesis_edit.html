@@ -21,9 +21,50 @@
                 </thead>
                 <tbody>
                  <tr>
-                    <th class="text-right">Образование <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="anamnesis_mother.education" ref-book="rbRisarEducation" autofocus="autofocus"></rb-select></td>
+                    <td class="text-right"><strong>Менструальная функция</strong> <span>&nbsp;</span></td>
+                    <td></td>
                 </tr>
+                <tr>
+                    <td class="text-right">С возраста <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.age" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td class="text-right">Длительность <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.duration" class="form-control"></div></div></td>
+                </tr>
+                <tr><!-- example of input Integer, String-->
+                    <td class="text-right">Продолжительность цикла <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.period_duration" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <!-- example of checkbox boolean-->
+                    <td class="text-right">Нарушения<span>&nbsp;</span></td>
+                    <td><input ng-model="anamnesis_mother.menstruation_disorders" class="checkbox" type="checkbox"></td>
+                </tr>
+                <tr>
+                    <!-- example of select ExtReferenceRb-->
+                    <td class="text-right">Характер<span>&nbsp;</span></td>
+                    <td><rb-select ng-model="anamnesis_mother.menstrual_character" ref-book="rbRisarMenstruationCharacter"></rb-select></td>
+                </tr>
+                <tr>
+                    <td class="text-right">Межменструальные выделения <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.intermenstrual_spotting" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td class="text-right">Менструальные боли <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstrual_pain" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td class="text-right">Межменструальные выделения <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.intermenstrual_spotting" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td class="text-right"><strong>Менопауза</strong> <span>&nbsp;</span></td>
+                    <td><input ng-model="anamnesis_mother.menopause" class="checkbox" type="checkbox"></td>
+                </tr>
+                <tr>
+                <td class="text-right">С возраста<span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menopause_age" class="form-control"></div></div></td></tr>
                 <!-- existed before me-->
                 <tr>
                     <th class="text-right">Образование <span>&nbsp;</span></th>
