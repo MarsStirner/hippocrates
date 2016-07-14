@@ -53,7 +53,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Характер</div>
+                            <div class="col-sm-5 col-md-5 text-right">Характер менструаций</div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span class="atr_vl" ng-bind-html="anamnesis.mother.menstrual_character">! </span>
                             </div>
@@ -108,19 +108,19 @@
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Заболевания</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.mother.menstrual_pain"></span>
+                                <span class="atr_vl"></span>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">! ЗППП</div>
+                            <div class="col-sm-5 col-md-5 text-right">ЗППП</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.mother.std"></span>
+                                <span class="atr_vl" ng-bind-html="anamnesis.mother.std.name"></span>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">! Гинекологические</div>
+                            <div class="col-sm-5 col-md-5 text-right">Гинекологические</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.mother.gynecopathy"></span>
+                                <span class="atr_vl" ng-bind-html="anamnesis.mother.gynecopathy.name"></span>
                             </div>
                         </div>
                         <div class="row">
@@ -144,7 +144,7 @@
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>! Наследственность</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.mother.hereditary"></span>
+                                <span class="atr_vl" ng-bind-html="anamnesis.mother.hereditary.name"></span>
                             </div>
                         </div>
                         <div class="row">
@@ -184,7 +184,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>! Эпидемиологический анамнез</strong></div>
+                            <div class="col-sm-5 col-md-5 text-right"><strong>!! его нет -> Эпидемиологический анамнез</strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span class="atr_vl" ng-bind-html="anamnesis.mother.menstrual_pain"></span>
                             </div>
@@ -204,7 +204,7 @@
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>! Группа крови</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                               <span class="atr_vl" ng-bind-html="anamnesis.mother.menstrual_pain">[[ warnings.blood_type ]]/span>
+                               <span class="atr_vl" ng-bind-html="anamnesis.mother.blood_type.name">[[ warnings.blood_type ]]/span>
                             </div>
                         </div>
                         <div class="row">
