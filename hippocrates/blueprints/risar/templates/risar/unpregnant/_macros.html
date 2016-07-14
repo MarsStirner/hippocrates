@@ -5,22 +5,13 @@
 {% macro navigation_unpreg(event_id_repl, endpoints, ext_header=None) %}
     <div class="novmargin">
         <div class="btn-group">
+            <!-- todo: replace urls_for -->
             <a ng-href="{{ url_for('.html_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_chart']) }}>Карта пациентки</a>
             <a ng-href="{{ url_for('.html_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_anamnesis', '.html_anamnesis_father_edit', '.html_anamnesis_mother_edit']) }}>Анамнез</a>
-            <div class="btn-group">
-                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Осмотры <span class="fa fa-caret-down"></span></button>
-                <ul role="menu" class="dropdown-menu">
-                    <li><a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}">Осмотры беременной</a></li>
-                    <li><a ng-href="{{ url_for('.html_inspection_puerpera') }}?event_id={{ event_id_repl }}">Осмотры родильницы</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр акушером-гинекологом</a></li>
-                    <li><a ng-href="{{ url_for('.html_inspection_pc_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр специалистом ПЦ</a></li>
-                    <li><a ng-href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр родильницы</a></li>
-                </ul>
-            </div>
+            <a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection',]) }}>Осмотры</a>
             <a ng-href="{{ url_for('.html_concilium_list') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_concilium_list', '.html_concilium']) }}>Консилиумы</a>
             <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-            <a ng-class="{hidden: '{{ ext_header }}' != 'chart'}" ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
+            <a  ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
             <div class="btn-group">
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Взять на диспансерный учёт <span class="fa fa-caret-down"></span></button>
                 <ul role="menu" class="dropdown-menu">

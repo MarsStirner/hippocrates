@@ -14,11 +14,11 @@
 <div ng-controller="AnamnesisCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.unpregnant_page_title_n('Анамнез пациентки') }}
-        {{ rimacros.navigation('[[ event_id ]]') }}
+        {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
     </section>
     <section class="content">
         <tabset justified="true" class="nav-tabs-custom">
-            <tab  heading="Сведения о пациентке" active="tabs.motherfather" ng-controller="MotherFatherCtrl">
+            <tab  heading="Сведения о пациентке" active="tabs.motherfather">
                 <div class="row">
                      <a style="margin-right: 10% !important;" class="pull-right pseudo-btn" ng-href="{{ url_for('.html_anamnesis_mother_edit') }}?event_id=[[ event_id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                 </div>
@@ -100,7 +100,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>! Семейное положение</strong></div>
+                            <div class="col-sm-5 col-md-5 text-right"><strong>Семейное положение</strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span class="atr_vl" ng-bind-html="anamnesis.mother.marital_status"></span>
                             </div>
@@ -142,7 +142,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>! Наследственность</strong></div>
+                            <div class="col-sm-5 col-md-5 text-right"><strong>Наследственность</strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span class="atr_vl" ng-bind-html="anamnesis.mother.hereditary.name"></span>
                             </div>
@@ -201,10 +201,11 @@
                                 <span class="atr_vl" ng-bind-html="anamnesis.mother.operations"></span>
                             </div>
                         </div>
+                        <!--search ref-books by .name -->
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>! Группа крови</strong></div>
+                            <div class="col-sm-5 col-md-5 text-right"><strong>Группа крови</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                               <span class="atr_vl" ng-bind-html="anamnesis.mother.blood_type.name">[[ warnings.blood_type ]]/span>
+                               <span class="atr_vl" ng-bind-html="anamnesis.mother.blood_type.name"></span>
                             </div>
                         </div>
                         <div class="row">

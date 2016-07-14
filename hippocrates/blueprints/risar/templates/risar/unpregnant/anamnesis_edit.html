@@ -4,13 +4,13 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-<div ng-controller="AnamnesisMotherEditCtrl" ng-cloak>
+<div ng-controller="AnamnesisUnpregnantEditCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.unpregnant_page_title_n('Ввод данных о пациентке') }}
         {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
     </section>
     <section class="content">
-            <ng-form name="anamnesisMotherForm" id="anamnesisMotherForm" role="form" novalidate>
+            <ng-form name="anamnesisUnpregnantForm" id="anamnesisUnpregnantForm" role="form" novalidate>
             <div class="box-body">
             <table class="table table-condensed title-right">
                 <thead>
@@ -26,45 +26,45 @@
                     </tr>
                     <tr>
                         <td class="text-right">С возраста <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="number" ng-model="anamnesis_mother.age" class="form-control"></div></div></td>
+                        <td><div class="row"><div class="col-md-4"><input type="number" min="1" ng-model="anamnesis_unpregnant.age" class="form-control"></div></div></td>
                     </tr>
                     <tr>
                         <td class="text-right">Длительность <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="number" ng-model="anamnesis_mother.duration" class="form-control"></div></div></td>
+                        <td><div class="row"><div class="col-md-4"><input type="number" min="0" ng-model="anamnesis_unpregnant.duration" class="form-control"></div></div></td>
                     </tr>
                     <tr><!-- example of input Integer, String-->
                         <td class="text-right">Продолжительность цикла <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="number" ng-model="anamnesis_mother.period_duration" class="form-control"></div></div></td>
+                        <td><div class="row"><div class="col-md-4"><input type="number" min="0" ng-model="anamnesis_unpregnant.period_duration" class="form-control"></div></div></td>
                     </tr>
                     <tr>
                         <!-- example of checkbox boolean-->
                         <td class="text-right">Нарушения<span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.disorder" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
                         <!-- example of select ExtReferenceRb-->
                         <td class="text-right">Характер менструаций<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.menstrual_character" ref-book="rbRisarMenstruationCharacter"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.menstrual_character" ref-book="rbRisarMenstruationCharacter"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right">Межменструальные выделения <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.intermenstrual_spotting" class="form-control"></td>
+                        <td><input ng-model="anamnesis_unpregnant.intermenstrual_spotting" class="form-control"></td>
                     </tr>
                     <tr>
                         <td class="text-right">Менструальные боли <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.menstrual_pain" class="form-control"></td>
+                        <td><input ng-model="anamnesis_unpregnant.menstrual_pain" class="form-control"></td>
                     </tr>
                 
                     <tr>
                         <td class="text-right"><strong>Менопауза</strong> <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.menopause" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
                     <td class="text-right">С возраста<span>&nbsp;</span></td>
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <input type="number" ng-model="anamnesis_mother.menopause_age" class="form-control" ng-disabled="!anamnesis_mother.menopause">
+                                    <input type="number" min="1" ng-model="anamnesis_unpregnant.menopause_age" class="form-control" ng-disabled="!anamnesis_unpregnant.menopause">
                                 </div>
                             </div>
                         </td>
@@ -75,16 +75,16 @@
                     </tr>
                     <tr>
                      <td class="text-right">С возраста<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="number" ng-model="anamnesis_mother.sex_life_age" class="form-control"></div></div></td>
+                        <td><div class="row"><div class="col-md-4"><input type="number" min="1" ng-model="anamnesis_unpregnant.sex_life_age" class="form-control"></div></div></td>
                     </tr>
                     <tr>
                         <td class="text-right">Количество половых партнеров<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="number" ng-model="anamnesis_mother.intercourse_partner_number" class="form-control"></div></div>
+                        <td><div class="row"><div class="col-md-4"><input type="number" min="0" ng-model="anamnesis_unpregnant.intercourse_partner_number" class="form-control"></div></div>
                         </td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Семейное положение</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.marital_status" ref-book="rbRisarMarital_Status"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.marital_status" ref-book="rbRisarMarital_Status"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Заболевания</strong><span>&nbsp;</span></td>
@@ -92,68 +92,68 @@
                     </tr>
                     <tr>
                         <td class="text-right">ЗППП<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.std" ref-book="rbRisarSTD"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.std" ref-book="rbRisarSTD"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right">Гинекологические<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.gynecopathy" ref-book="rbRisarSTD"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarSTD"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right">Гепатит<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.hepatitis" class="form-control"></div></div>
+                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_unpregnant.hepatitis" class="form-control"></div></div>
                         </td>
                     </tr>
                     <tr>
                         <td class="text-right">Туберкулез<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.tuberculosis" class="form-control"></div></div>
+                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_unpregnant.tuberculosis" class="form-control"></div></div>
                         </td>
                     </tr>
                     <tr>
                         <td class="text-right">Соматические<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.somatic_disease" class="form-control"></div></div>
+                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_unpregnant.somatic_disease" class="form-control"></div></div>
                         </td>
                     </tr>
                     <tr>
                         <td class="text-right">Наследственность<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
                     </tr>
                     
                     <tr>
                         <td class="text-right">Оперативные вмешательства на половых органах <span>&nbsp;</span></td>
-                        <td><wysiwyg ng-model="anamnesis_mother.gyn_operation" /></td>
+                        <td><wysiwyg ng-model="anamnesis_unpregnant.gyn_operation" /></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Бесплодие</strong><span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.infertility" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"></td>
                     </tr>
                      <tr>
                         <td class="text-right">Вид<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.infertility_kind" ref-book="rbRisarInfertilityKind" ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.infertility_kind" ref-book="rbRisarInfertilityKind" ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
-                        <td><input type="number" ng-model="anamnesis_mother.infertility_duration" class="form-control" type="number" valid-number ng-disabled="!anamnesis_mother.infertility"></td>
+                        <td><input type="number" ng-model="anamnesis_unpregnant.infertility_duration" class="form-control" type="number" min="0" valid-number ng-disabled="!anamnesis_unpregnant.infertility"></td>
                     </tr>
                     <tr>
                         <td class="text-right">Причины <span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_mother.infertility_etiology"
-                            ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
+                        <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_unpregnant.infertility_etiology"
+                            ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right">Лечение <span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ref-book="rbRisarInfertilityTreatment" ng-model="anamnesis_mother.infertility_treatment"
-                            ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
+                        <td><rb-select multiple="true" ref-book="rbRisarInfertilityTreatment" ng-model="anamnesis_unpregnant.infertility_treatment"
+                            ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                      <tr>
                         <td class="text-right">Травмы<span>&nbsp;</span></td>
                         <td>
-                            <wysiwyg ng-model="anamnesis_mother.traumas" />  
+                            <wysiwyg ng-model="anamnesis_unpregnant.traumas" />  
                         </td>
                     </tr>
                     <tr>
                         <td class="text-right">Операции (кроме гинекологических)<span>&nbsp;</span></td>
                         <td>
-                            <wysiwyg ng-model="anamnesis_mother.operations" />
+                            <wysiwyg ng-model="anamnesis_unpregnant.operations" />
                         </td>
                     </tr>
                     <tr>
@@ -161,7 +161,7 @@
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <rb-select multiple="true" ref-book="rbBloodType" ng-model="anamnesis_mother.blood_type"></rb-select>
+                                    <rb-select multiple="true" ref-book="rbBloodType" ng-model="anamnesis_unpregnant.blood_type"></rb-select>
                                 </div>
                             </div>
                         </td>
@@ -173,31 +173,31 @@
                     </tr>
                     <tr>
                         <td class="text-right">Алкоголь <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.alcohol" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
                         <td class="text-right">Курение <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.smoking" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
                         <td class="text-right">Токсические вещества <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.toxic" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
                         <td class="text-right">Наркотики <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_mother.drugs" class="checkbox" type="checkbox"></td>
+                        <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Общественно-профилактическая группа</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.work_group" ref-book="rbRisarWork_Group" ></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.work_group" ref-book="rbRisarWork_Group" ></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Профессиональные вредности</strong> <span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_mother.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
+                        <td><rb-select ng-model="anamnesis_unpregnant.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Дополнительная информация</strong> <span>&nbsp;</span></td>
-                        <td> <wysiwyg ng-model="anamnesis_mother.additional_info" /></td>
+                        <td> <wysiwyg ng-model="anamnesis_unpregnant.additional_info" /></td>
                     </tr>
                 </tbody>
             </table>
@@ -206,7 +206,7 @@
             <div class="box-footer text-right">
                 <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
                 <button class="btn btn-success"
-                        tooltip="[[anamnesisMotherForm.$invalid && submit_attempt ? 'Заполните все обязательные поля': '']]"
+                        tooltip="[[anamnesisUnpregnantForm.$invalid && submit_attempt ? 'Заполните все обязательные поля': '']]"
                         ng-click="save()">Сохранить</button>
             </div>
     </section>
