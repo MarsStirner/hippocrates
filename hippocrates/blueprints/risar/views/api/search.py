@@ -4,11 +4,11 @@ import json
 import math
 import time
 
-from blueprints.reports.jasper_client import JasperReport
-from blueprints.risar.lib.represent import represent_age
-from blueprints.risar.lib.search import get_workgroupname_by_code
 from flask import request, make_response
-from flask.ext.login import current_user
+from flask_login import current_user
+from hippocrates.blueprints.reports.jasper_client import JasperReport
+from hippocrates.blueprints.risar.lib.represent import represent_age
+from hippocrates.blueprints.risar.lib.search import get_workgroupname_by_code
 
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
@@ -16,7 +16,7 @@ from nemesis.lib.utils import safe_int
 from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
-from blueprints.risar.app import module
+from hippocrates.blueprints.risar.app import module
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 
@@ -86,7 +86,7 @@ def search_events(paginated=True, **kwargs):
     age_max = safe_int(kwargs.get('age_max'))
     if age_max:
         query = query.filter(client_age__lte=age_max)
-    
+
     if 'closed' in kwargs:
         if kwargs['closed']:
             query = query.filter(exec_date__neq=0)

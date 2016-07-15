@@ -8,10 +8,10 @@
 """
 from flask import request
 
-from blueprints.risar.app import module
-from blueprints.risar.views.api.integration.errands.xform import \
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.views.api.integration.errands.xform import \
     ErrandXForm, ErrandListXForm
-from blueprints.risar.views.api.integration.logformat import hook
+from hippocrates.blueprints.risar.views.api.integration.logformat import hook
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import public_endpoint
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from nemesis.models.event import Event
-from blueprints.risar.lib.represent import represent_card_attributes
+from hippocrates.blueprints.risar.lib.represent import represent_card_attributes
 
 
 def get_debug_data(request_args):

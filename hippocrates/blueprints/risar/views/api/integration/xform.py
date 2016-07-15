@@ -5,7 +5,7 @@ import jsonschema
 from datetime import datetime
 from decimal import Decimal
 from abc import ABCMeta, abstractmethod
-from blueprints.risar.lib.expert.em_diagnosis import update_patient_diagnoses, \
+from hippocrates.blueprints.risar.lib.expert.em_diagnosis import update_patient_diagnoses, \
     get_event_measure_diag
 
 from nemesis.lib.apiutils import ApiException
@@ -14,7 +14,7 @@ from nemesis.lib.diagnosis import diagnosis_using_by_next_checkups
 from nemesis.views.rb import check_rb_value_exists
 from nemesis.lib.vesta import Vesta
 from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
-from blueprints.risar.models.risar import ActionIdentification
+from hippocrates.blueprints.risar.models.risar import ActionIdentification
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from nemesis.lib.vesta import VestaNotFoundException
@@ -540,7 +540,7 @@ class ExternalXForm(XForm):
 
 from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
     rbDiagnosisTypeN
-from blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
 
 class CheckupsXForm(ExternalXForm):
     __metaclass__ = ABCMeta
@@ -664,7 +664,7 @@ class CheckupsXForm(ExternalXForm):
 
 
 from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureStatus
-from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from nemesis.models.enums import MeasureStatus
 
 class MeasuresResultsXForm(ExternalXForm):

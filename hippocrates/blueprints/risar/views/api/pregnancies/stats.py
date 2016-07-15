@@ -2,13 +2,13 @@
 import collections
 import datetime
 
-from blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
+from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
 from flask import request
 from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
     Diagnosis, Diagnostic, Action_Diagnosis
 from sqlalchemy import func
 
-from blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_int, safe_unicode
@@ -22,13 +22,13 @@ from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.systemwide import db
-from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_chart_short, represent_errand
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
-from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
-from blueprints.risar.lib.card_fill_rate import CFRController
-from blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent import represent_chart_short, represent_errand
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
+from hippocrates.blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
+from hippocrates.blueprints.risar.lib.card_fill_rate import CFRController
+from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
 
 
 def get_rate_for_regions(regions, rate_code):

@@ -6,8 +6,8 @@
 @date: 22.04.2016
 
 """
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.risar_config import general_hospitalizations, \
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.risar_config import general_hospitalizations, \
     general_specialists_checkups
 from nemesis.lib.diagnosis import create_or_update_diagnoses, \
     diagnosis_using_by_next_checkups

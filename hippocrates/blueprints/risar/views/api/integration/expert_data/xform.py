@@ -6,11 +6,11 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.models.risar import RisarRiskGroup
-from blueprints.risar.views.api.integration.expert_data.schemas import \
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.views.api.integration.expert_data.schemas import \
     ExpertDataSchema
-from blueprints.risar.views.api.integration.xform import XForm
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm
 from nemesis.models.event import Event, EventType
 from nemesis.models.risar import rbPerinatalRiskRateMkbAssoc
 from nemesis.models.enums import PregnancyPathology

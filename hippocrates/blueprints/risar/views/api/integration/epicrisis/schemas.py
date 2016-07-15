@@ -6,7 +6,7 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.views.api.integration.schemas import Schema
+from hippocrates.blueprints.risar.views.api.integration.schemas import Schema
 
 
 class EpicrisisSchema(Schema):

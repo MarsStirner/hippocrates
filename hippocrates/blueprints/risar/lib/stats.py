@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
 from sqlalchemy import func, and_, or_

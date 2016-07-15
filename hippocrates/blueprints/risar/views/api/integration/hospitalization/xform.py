@@ -6,10 +6,10 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.risar_config import general_hospitalizations
-from blueprints.risar.views.api.integration.hospitalization.schemas import \
+from hippocrates.blueprints.risar.risar_config import general_hospitalizations
+from hippocrates.blueprints.risar.views.api.integration.hospitalization.schemas import \
     HospitalizationSchema
-from blueprints.risar.views.api.integration.xform import MeasuresResultsXForm
+from hippocrates.blueprints.risar.views.api.integration.xform import MeasuresResultsXForm
 from nemesis.lib.utils import safe_int, safe_date
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.event import Event

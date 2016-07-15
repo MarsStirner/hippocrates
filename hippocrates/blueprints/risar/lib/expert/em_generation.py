@@ -12,13 +12,13 @@ from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, 
     ExpertSchemeMeasureAssoc)
 from nemesis.models.exists import MKB
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
-from blueprints.risar.lib.expert.utils import (em_final_status_list, em_garbage_status_list,
+from hippocrates.blueprints.risar.lib.expert.utils import (em_final_status_list, em_garbage_status_list,
     is_em_cancellable, is_em_touched, is_em_in_final_status)
-from blueprints.risar.lib.utils import is_event_late_first_visit
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
-from blueprints.risar.risar_config import first_inspection_code
-from blueprints.risar.lib.time_converter import DateTimeUtil
-from blueprints.risar.lib.datetime_interval import DateTimeInterval, get_intersection_type, IntersectionType
+from hippocrates.blueprints.risar.lib.utils import is_event_late_first_visit
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
+from hippocrates.blueprints.risar.risar_config import first_inspection_code
+from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
+from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval, get_intersection_type, IntersectionType
 
 logger = logging.getLogger('simple')
 

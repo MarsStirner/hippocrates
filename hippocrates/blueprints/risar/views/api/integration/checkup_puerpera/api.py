@@ -9,11 +9,11 @@
 import logging
 from flask import request
 
-from blueprints.risar.app import module
-from blueprints.risar.views.api.integration.checkup_puerpera.xform import \
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.views.api.integration.checkup_puerpera.xform import \
     CheckupPuerperaXForm
-from blueprints.risar.views.api.integration.logformat import hook
-from blueprints.risar.views.api.integration.const import (
+from hippocrates.blueprints.risar.views.api.integration.logformat import hook
+from hippocrates.blueprints.risar.views.api.integration.const import (
     card_attrs_save_error_code, measures_save_error_code,
     err_card_attrs_save_msg, err_measures_save_msg
 )

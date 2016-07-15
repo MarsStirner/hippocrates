@@ -5,10 +5,10 @@ import logging
 from ..xform import XForm, wrap_simplify, none_default, ALREADY_PRESENT_ERROR, Undefined
 from .schemas import AnamnesisMotherSchema, AnamnesisFatherSchema, AnamnesisPrevPregSchema
 
-from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, risar_anamnesis_pregnancy
-from blueprints.risar.lib.utils import get_action, get_action_by_id
-from blueprints.risar.lib.prev_children import create_or_update_prev_children, get_previous_children
-from blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, risar_anamnesis_pregnancy
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_by_id
+from hippocrates.blueprints.risar.lib.prev_children import create_or_update_prev_children, get_previous_children
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
 
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import ApiException

@@ -22,7 +22,7 @@
                 <th>Дата редактирования</th>
             </tr>
             <tr ng-repeat="row in recently_modified_charts">
-                <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.id ]]">[[
+                <td><a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ row.id ]]">[[
                     row.client.full_name ]]</a></td>
                 <td><span class="label"
                           ng-class="{'label-default': row.risk_rate.code == 'undefined',

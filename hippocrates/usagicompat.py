@@ -14,16 +14,16 @@ class HippoUsagiClient(TsukinoUsagiClient):
         app.config.update(configuration)
         bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
 
-        from blueprints.accounting.app import module as accounting_module
-        from blueprints.reports.app import module as reports_module
-        from blueprints.anareports.app import module as anareports_module
-        from blueprints.biomaterials.app import module as biomaterials_module
-        from blueprints.event.app import module as event_module
-        from blueprints.patients.app import module as patients_module
-        from blueprints.schedule.app import module as schedule_module
-        from blueprints.actions.app import module as actions_module
-        from blueprints.useraccount.app import module as useraccount_module
-        from blueprints.risar.app import module as risar_module
+        from hippocrates.blueprints.accounting.app import module as accounting_module
+        from hippocrates.blueprints.reports.app import module as reports_module
+        from hippocrates.blueprints.anareports.app import module as anareports_module
+        from hippocrates.blueprints.biomaterials.app import module as biomaterials_module
+        from hippocrates.blueprints.event.app import module as event_module
+        from hippocrates.blueprints.patients.app import module as patients_module
+        from hippocrates.blueprints.schedule.app import module as schedule_module
+        from hippocrates.blueprints.actions.app import module as actions_module
+        from hippocrates.blueprints.useraccount.app import module as useraccount_module
+        from hippocrates.blueprints.risar.app import module as risar_module
 
         app.register_blueprint(accounting_module, url_prefix='/accounting')
         app.register_blueprint(reports_module, url_prefix='/reports')

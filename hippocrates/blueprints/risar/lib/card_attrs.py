@@ -2,18 +2,20 @@
 import datetime
 import logging
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.time_converter import DateTimeUtil
-from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
-    tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, notify_risk_rate_changes, \
-    belongs_to_mkbgroup
-from blueprints.risar.models.risar import RisarRiskGroup
-from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
-    first_inspection_code
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
+    tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, belongs_to_mkbgroup
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
+    first_inspection_code, rtc_2_atc
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
+from nemesis.models.event import EventType
+from nemesis.models.exists import rbRequestType
+from nemesis.models.refbooks import rbFinance
 from nemesis.models.enums import PregnancyPathology, PerinatalRiskRate, CardFillRate
 from nemesis.models.risar import rbPreEclampsiaRate
 from nemesis.models.utils import safe_current_user_id
@@ -59,39 +61,30 @@ def create_property(action, apt_code):
     action.properties.append(prop)
 
 
-def default_AT_Heuristic():
+def default_AT_Heuristic(event_type):
     """
     Получение ActionType, соответствующего атрибутам карточки
-    :rtype: ActionType | None
+    @type event_type: EventType
+    @rtype: ActionType | None
     """
-    return ActionType.query.filter(ActionType.flatCode == u'cardAttributes').first()
+    rtc = event_type.requestType.code
+    atc = rtc_2_atc[rtc]
+    return ActionType.query.filter(ActionType.flatCode == atc).first()
 
 
-def get_all_diagnoses(event):
+def default_ET_Heuristic(request_type_code):
     """
-    Получание всех диагнозов по событию
-    :param event: Событие
-    :type event: nemesis.models.event.Event
-    :return: list of DiagIDs
+    Получение EventType, соответствующего ситуации
+    @type request_type_code: str | unicode
+    @rtype: EventType | None
     """
-    result = []
-    evis = EventVisualizer()
-    for action in event.actions:
-        for prop in action.properties:
-            if prop.type.typeName == u'Diagnosis' and prop.value:
-                if prop.type.isVector:
-                    for diagnostic in prop.value:
-                        diag = evis.make_diagnostic_record(diagnostic)
-                        diag['action_property'] = {'name': prop.type.name,
-                                                   'code': prop.type.code}
-                        result.append(diag)
-                else:
-                    diag = evis.make_diagnostic_record(prop.value)
-                    diag['action_property'] = {'name': prop.type.name,
-                                               'code': prop.type.code}
-                    result.append(diag)
-    result.sort(key=lambda x: x['set_date'])
-    return result
+    return EventType.query.join(
+        rbRequestType, rbFinance
+    ).filter(
+        rbRequestType.code == request_type_code,  # Случай беременности
+        rbFinance.code == '2',  # ОМС
+        EventType.deleted == 0,
+    ).order_by(EventType.createDatetime.desc()).first()
 
 
 def get_diagnoses_from_action(action, open=False):
@@ -500,7 +493,7 @@ def reevaluate_risk_groups(card):
     :param card:
     :return:
     """
-    from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
+    from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
     existing_groups = card.event.risk_groups
     found_groups = set(calc_risk_groups(card))
     for rg_record in existing_groups:

@@ -52,7 +52,7 @@
                                                              'label-success': row.risk_rate.code == 'low',
                                                              'label-warning': row.risk_rate.code == 'medium',
                                                              'label-danger': row.risk_rate.code == 'high'}">[[ row.risk_rate.name ]]</span></td>
-                                        <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.id ]]">[[
+                                        <td><a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ row.id ]]">[[
                                             row.client.full_name ]]</a></td>
                                         <td>[[ row.pregnancy_week ]]<i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
                                     </tr>

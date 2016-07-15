@@ -6,7 +6,7 @@
 @date: 06.04.2016
 
 """
-from blueprints.risar.views.api.integration.hospitalization.test_data import \
+from hippocrates.blueprints.risar.views.api.integration.hospitalization.test_data import \
     test_hospitalization_data
 from ..test import make_api_request, make_login
 

@@ -131,9 +131,6 @@ WebMis20
         },
         close_event: function (event_id, data) {
             return wrapper('POST', Config.url.api_chart_close.format(event_id), {}, data);
-        },
-        save_diagnoses: function(event_id, data){
-            return wrapper('POST', Config.url.api_diagnoses_save.format(event_id), {}, data);
         }
     };
     this.event_routing = {

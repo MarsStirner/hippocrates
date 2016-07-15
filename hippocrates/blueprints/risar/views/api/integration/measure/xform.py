@@ -5,8 +5,8 @@ import logging
 from ..xform import XForm, wrap_simplify, VALIDATION_ERROR
 from .schemas import MeasureListSchema
 
-from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from blueprints.risar.lib.expert.utils import em_cancelled_all, em_status_all
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.expert.utils import em_cancelled_all, em_status_all
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_date

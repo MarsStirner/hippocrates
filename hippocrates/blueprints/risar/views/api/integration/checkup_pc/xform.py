@@ -6,15 +6,15 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.lib.fetus import create_or_update_fetuses
-from blueprints.risar.lib.represent import represent_checkup
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
+from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
+from hippocrates.blueprints.risar.lib.represent import represent_checkup
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     notify_checkup_changes
-from blueprints.risar.models.fetus import RisarFetusState
-from blueprints.risar.risar_config import pc_inspection_code
-from blueprints.risar.views.api.integration.checkup_pc.schemas import \
+from hippocrates.blueprints.risar.models.fetus import RisarFetusState
+from hippocrates.blueprints.risar.risar_config import pc_inspection_code
+from hippocrates.blueprints.risar.views.api.integration.checkup_pc.schemas import \
     CheckupPCSchema
-from blueprints.risar.views.api.integration.xform import CheckupsXForm
+from hippocrates.blueprints.risar.views.api.integration.xform import CheckupsXForm
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action

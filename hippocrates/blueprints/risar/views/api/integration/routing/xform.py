@@ -6,11 +6,11 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.lib.represent import get_lpu_attached, \
+from hippocrates.blueprints.risar.lib.represent import get_lpu_attached, \
     group_orgs_for_routing, represent_mkbs_for_routing
-from blueprints.risar.views.api.integration.routing.schemas import \
+from hippocrates.blueprints.risar.views.api.integration.routing.schemas import \
     RoutingSchema
-from blueprints.risar.views.api.integration.xform import XForm
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.event import Event, EventType
 from nemesis.models.organisation import Organisation, \

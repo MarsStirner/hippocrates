@@ -2,29 +2,27 @@
 from datetime import datetime
 
 from flask import request
-from flask.ext.login import current_user
+from flask_login import current_user
 from nemesis.models.organisation import OrganisationBirthCareLevel
 from nemesis.models.risar import rbPerinatalRiskRate
 
-from blueprints.risar.app import module
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, check_card_attrs_action_integrity, \
-    reevaluate_dates
-from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, check_card_attrs_action_integrity, \
+    reevaluate_dates, default_ET_Heuristic
+from hippocrates.blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history, \
     represent_chart_for_close_event
-from blueprints.risar.lib.utils import get_last_checkup_date
-from blueprints.risar.risar_config import attach_codes, request_type_pregnancy
+from hippocrates.blueprints.risar.lib.utils import get_last_checkup_date, bail_out
+from hippocrates.blueprints.risar.risar_config import attach_codes, request_type_pregnancy, request_type_gynecological
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
-from nemesis.lib.diagnosis import create_or_update_diagnosis
 from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
-from nemesis.models.actions import Action
 from nemesis.models.client import Client, ClientAttach
 from nemesis.models.enums import EventPrimary, EventOrder, PerinatalRiskRate
 from nemesis.models.event import Event, EventType
-from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
+from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, MKB
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 
@@ -49,125 +47,186 @@ def api_0_chart_delete(ticket_id):
     db.session.commit()
 
 
-def default_ET_Heuristic():
-    return EventType.query \
-        .join(rbRequestType, rbFinance) \
-        .filter(
-            rbRequestType.code == request_type_pregnancy,  # Случай беременности
-            rbFinance.code == '2',  # ОМС
-            EventType.deleted == 0,
-        ) \
-        .order_by(EventType.createDatetime.desc())\
-        .first()
+class ChartCreator(object):
+    def __init__(self, client_id, ticket_id, event_id):
+        self.automagic = False
+        self.event = None
+        self.ticket = None
+        self.action = None
+        self.client = None
+        self.ticket_id = ticket_id
+        self.client_id = client_id
+        self.event_id = event_id
+
+    def _fill_new_event(self):
+        at = default_AT_Heuristic(self.event.eventType) or bail_out(
+            ApiException(500, u'Не найден подходящий тип действия для типа обращения %s' % self.event.eventType.name)
+        )
+
+        exec_person_id = self.ticket.ticket.schedule.person_id if self.ticket else current_user.get_main_user().id
+        exec_person = Person.query.get(exec_person_id)
+        self.event.execPerson = exec_person
+        self.event.orgStructure = exec_person.org_structure
+        self.event.organisation = exec_person.organisation
+
+        self.event.isPrimaryCode = EventPrimary.primary[0]
+        self.event.order = EventOrder.planned[0]
+
+        note = self.ticket.note if self.ticket else ''
+        self.event.client = self.client
+        self.event.setDate = datetime.now()
+        self.event.note = note
+        self.event.externalId = get_new_event_ext_id(self.event.eventType.id, self.client_id)
+        self.event.payStatus = 0
+        db.session.add(self.event)
+        self.action = create_action(at, self.event)
+        db.session.add(self.action)
+
+    def __call__(self):
+        if not self.event_id and not (self.ticket_id or self.client_id):
+            raise ApiException(400, u'Должен быть указан параметр event_id или (ticket_id или client_id)')
+
+        if self.event_id:
+            # Вариант 1: к нам пришли с event_id - мы точно знаем, какой Event от нас хотят
+            self.event = Event.query.filter(Event.id == self.event_id, Event.deleted == 0).first() or bail_out(ApiException(404, u'Обращение не найдено'))
+            self._perform_stored_event_checks()
+
+        else:
+            if self.ticket_id:
+                # Вариант 2: К нам пришли с ticket_id. есть талончик на приём, по которому можно точно определить
+                # Client.id и, возможно, вытащить Event. Он у нас главный в этом плане.
+                self.ticket = ScheduleClientTicket.query.get(self.ticket_id) or bail_out(ApiException(404, u'Талончик на приём не найден'))
+                self.event = self.ticket.event
+                self.client_id = self.ticket.client_id
+
+            if not self.event or self.event.deleted:
+                # Вариант 3 или 2.1: к нам пришли без ticket_id, либо ScheduleClientTicket ещё не связан с Event.
+                # Мы надеемся, что к нам пришли с client_id, если пришли без ticket_id
+                # Если это повторный приём по нашему типу обращения, то мы его найдём следующей функцией. Если нет, то
+                # сработает последний вариант - далее
+                self._find_appropriate_event()
+
+            if not self.event:
+                # Вариант 4 или 2.2: Мы так и не нашли подходящего обращения, и пытаемся его создать.
+                self.event = Event()
+                self.client = Client.query.get(self.client_id)
+                self._create_appropriate_event()
+                self._fill_new_event()
+                self.automagic = True
+
+            if self.ticket:
+                # Аппендикс к варианту 2: К нам пришли с тикетом, и нам надо его связать с обращением.
+                self.ticket.event = self.event
+                db.session.add(self.ticket)
+
+            db.session.commit()
+            self._perform_post_create_event_checks()
+
+    def _perform_stored_event_checks(self):
+        pass
+
+    def _find_appropriate_event(self):
+        pass
+
+    def _create_appropriate_event(self):
+        pass
+
+    def _perform_post_create_event_checks(self):
+        pass
+
+
+class PregnancyChartCreator(ChartCreator):
+    def _find_appropriate_event(self):
+        # проверка наличия у пациентки открытого обращения, созданного по одному из прошлых записей на приём
+        self.event = Event.query.join(EventType, rbRequestType).filter(
+            Event.client_id == self.client_id,
+            Event.deleted == 0,
+            rbRequestType.code == request_type_pregnancy,
+            Event.execDate.is_(None)
+        ).order_by(Event.setDate.desc()).first()
+
+    def _create_appropriate_event(self):
+        event_type = default_ET_Heuristic(request_type_pregnancy) or bail_out(
+            ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
+        )
+        self.event.eventType = event_type
+
+    def _perform_stored_event_checks(self):
+        if self.event.eventType.requestType.code != request_type_pregnancy:
+            raise ApiException(400, u'Обращение не является случаем беременности')
+        card = PregnancyCard.get_for_event(self.event)
+        self.action = card.attrs
+        check_card_attrs_action_integrity(self.action)
+
+    def _perform_post_create_event_checks(self):
+        card = PregnancyCard.get_for_event(self.event)
+        if self.action:
+            card._card_attrs_action = self.action
+        card.reevaluate_card_attrs()
+        db.session.commit()
+
+
+class GynecologicCardCreator(ChartCreator):
+    def _find_appropriate_event(self):
+        # проверка наличия у пациентки открытого обращения, созданного по одному из прошлых записей на приём
+        self.event = Event.query.join(EventType, rbRequestType).filter(
+            Event.client_id == self.client_id,
+            Event.deleted == 0,
+            rbRequestType.code == request_type_gynecological,
+            Event.execDate.is_(None)
+        ).order_by(Event.setDate.desc()).first()
+
+    def _create_appropriate_event(self):
+        event_type = default_ET_Heuristic(request_type_gynecological) or bail_out(
+            ApiException(500, u'Не настроен тип события - Гинекологический Приём ОМС')
+        )
+        self.event.eventType = event_type
+
+    def _perform_stored_event_checks(self):
+        if self.event.eventType.requestType.code != request_type_gynecological:
+            raise ApiException(400, u'Обращение не является гинекологиечским приёмом')
+        card = PregnancyCard.get_for_event(self.event)
+        self.action = card.attrs
+        check_card_attrs_action_integrity(self.action)
+
+    def _perform_post_create_event_checks(self):
+        card = PregnancyCard.get_for_event(self.event)
+        if self.action:
+            card._card_attrs_action = self.action
+        card.reevaluate_card_attrs()
+        db.session.commit()
 
 
 @module.route('/api/0/chart/')
 @module.route('/api/0/chart/<int:event_id>')
 @api_method
 def api_0_chart(event_id=None):
-    automagic = False
     ticket_id = request.args.get('ticket_id')
     client_id = request.args.get('client_id')
-    if not event_id and not (ticket_id or client_id):
-        raise ApiException(400, u'Должен быть указан параметр event_id или (ticket_id или client_id)')
 
-    if event_id:
-        event = Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
-        if not event:
-            raise ApiException(404, u'Обращение не найдено')
-        card = PregnancyCard.get_for_event(event)
-        action = card.attrs
-        if not action:
-            action = card.get_card_attrs_action(True)
-        check_card_attrs_action_integrity(action)
-    else:
-        ext = None
-        if ticket_id:
-            ticket = ScheduleClientTicket.query.get(ticket_id)
-            if not ticket:
-                raise ApiException(404, u'Талончик на приём не найден')
-            event = ticket.event
-            client_id = ticket.client_id
-            if not event or event.deleted:
-                # проверка наличия у пациентки открытого обращения, созданного по одному из прошлых записей на приём
-                event = Event.query.join(EventType, rbRequestType).filter(
-                    Event.client_id == client_id,
-                    Event.deleted == 0,
-                    rbRequestType.code == request_type_pregnancy,
-                    Event.execDate.is_(None)
-                ).order_by(Event.setDate.desc()).first()
-        else:  # client_id is not None
-            event = None
-            ticket = None
-        if not event:
-            event = Event()
-            at = default_AT_Heuristic()
-            if not at:
-                raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
-            ET = default_ET_Heuristic()
-            if ET is None:
-                raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
-            event.eventType = ET
+    chart_creator = PregnancyChartCreator(client_id, ticket_id, event_id)
+    chart_creator()
 
-            exec_person_id = ticket.ticket.schedule.person_id if ticket else current_user.get_main_user().id
-            exec_person = Person.query.get(exec_person_id)
-            event.execPerson = exec_person
-            event.orgStructure = exec_person.org_structure
-            event.organisation = exec_person.organisation
-
-            event.isPrimaryCode = EventPrimary.primary[0]
-            event.order = EventOrder.planned[0]
-
-            note = ticket.note if ticket else ''
-            event.client = Client.query.get(client_id)
-            event.setDate = datetime.now()
-            event.note = note
-            event.externalId = get_new_event_ext_id(event.eventType.id, client_id)
-            event.payStatus = 0
-            db.session.add(event)
-            ext = create_action(at.id, event)
-            db.session.add(ext)
-            automagic = True
-        if ticket:
-            ticket.event = event
-            db.session.add(ticket)
-        db.session.commit()
-        card = PregnancyCard.get_for_event(event)
-        if ext:
-            card._card_attrs_action = ext
-        card.reevaluate_card_attrs()
-        db.session.commit()
-
-    if event.eventType.requestType.code != request_type_pregnancy:
-        raise ApiException(400, u'Обращение не является случаем беременности')
     return {
-        'event': represent_event(event),
-        'automagic': automagic
+        'event': represent_event(chart_creator.event),
+        'automagic': chart_creator.automagic
     }
 
 
-@module.route('/api/0/save_diagnoses/', methods=['POST'])
-@module.route('/api/0/save_diagnoses/<int:event_id>', methods=['POST'])
+@module.route('/api/0/gyn-chart/')
+@module.route('/api/0/gyn-chart/<int:event_id>')
 @api_method
-def api_0_save_diagnoses(event_id=None):
-    diagnoses = request.get_json()
-    if not event_id:
-        raise ApiException(400, u'Должен быть указан параметр event_id')
-    event = Event.query.get(event_id)
-    card = PregnancyCard(event)
-    if not event:
-        raise ApiException(404, u'Обращение не найдено')
-    for diagnosis in diagnoses:
-        diag = create_or_update_diagnosis(event, diagnosis)
-        if diagnosis['deleted']:
-            action = Action.query.get(diagnosis['action_id'])
-            property_code = diagnosis['action_property']['code']
-            action[property_code].value = [diag for diag in action[property_code].value if diag.id != diagnosis['id']]
-        db.session.add(diag)
-    db.session.commit()
-    card.reevaluate_card_attrs()
-    db.session.commit()
-    return list(get_all_diagnoses(event))
+def api_0_gyn_chart(event_id=None):
+    ticket_id = request.args.get('ticket_id')
+    client_id = request.args.get('client_id')
+
+    chart_creator = GynecologicCardCreator(client_id, ticket_id, event_id)
+    chart_creator()
+
+    return {
+        'event': represent_event(chart_creator.event),
+        'automagic': chart_creator.automagic,
+    }
 
 
 @module.route('/api/0/mini_chart/')

@@ -6,9 +6,9 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.views.api.integration.epicrisis.schemas import \
+from hippocrates.blueprints.risar.views.api.integration.epicrisis.schemas import \
     EpicrisisSchema
-from blueprints.risar.views.api.integration.xform import XForm
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm
 from nemesis.lib.utils import safe_date
 from nemesis.models.event import Event
 

@@ -6,7 +6,7 @@
 @date: 19.04.2016
 
 """
-from blueprints.risar.models.risar import RisarEpicrisis_Children
+from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from nemesis.systemwide import db
 
 

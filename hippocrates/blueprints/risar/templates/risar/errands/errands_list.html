@@ -113,7 +113,7 @@
                                             [[errand.status.name]]
                                         </span>
                                     </td>
-                                    <td ng-class="{'bold':!errand.reading_date}"><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ errand.event.id ]]">[[errand.event.external_id]]</a></td>
+                                    <td ng-class="{'bold':!errand.reading_date}"><a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ errand.event.id ]]">[[errand.event.external_id]]</a></td>
                                     <td ng-class="{'bold':!errand.reading_date}">[[errand.exec_person.name]]</td>
                                     <td style="text-align: center;">
                                         <span class="progress" id="[[errand.id]]">Загрузка..</span>

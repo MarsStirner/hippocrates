@@ -7,7 +7,8 @@ from collections import defaultdict
 
 
 from flask import abort, request
-from flask.ext.login import current_user
+from flask_login import current_user
+
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.jsonify import ScheduleVisualizer, PersonTreeVisualizer
 from nemesis.lib.sphinx_search import SearchPerson

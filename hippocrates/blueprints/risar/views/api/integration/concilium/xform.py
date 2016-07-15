@@ -6,8 +6,8 @@ from ..xform import (XForm, wrap_simplify, VALIDATION_ERROR, ALREADY_PRESENT_ERR
      NOT_FOUND_ERROR, MIS_BARS_CODE, Undefined)
 from .schemas import ConciliumSchema
 
-from blueprints.risar.lib.concilium import get_concilium_by_id, update_concilium
-from blueprints.risar.models.risar import RisarConcilium, RisarConcilium_Identification
+from hippocrates.blueprints.risar.lib.concilium import get_concilium_by_id, update_concilium
+from hippocrates.blueprints.risar.models.risar import RisarConcilium, RisarConcilium_Identification
 
 from nemesis.lib.utils import safe_date, safe_bool_none, safe_int
 from nemesis.lib.apiutils import ApiException

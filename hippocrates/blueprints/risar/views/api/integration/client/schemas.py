@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from blueprints.risar.views.api.integration.schemas import Schema
+from hippocrates.blueprints.risar.views.api.integration.schemas import Schema
 
 __author__ = 'viruzzz-kun'
 

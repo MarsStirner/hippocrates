@@ -2,7 +2,7 @@
 
 from flask import request, abort
 
-from blueprints.risar.app import module
+from hippocrates.blueprints.risar.app import module
 from celery_tasks import test_task, test_db_task, update_card_attrs_cfrs
 from nemesis.app import app
 

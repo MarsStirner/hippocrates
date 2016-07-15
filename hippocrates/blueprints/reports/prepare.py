@@ -9,7 +9,7 @@
 
 import datetime
 
-from blueprints.reports.models import rbRisarPrintTemplateMeta
+from hippocrates.blueprints.reports.models import rbRisarPrintTemplateMeta
 from nemesis.lib.utils import string_to_datetime
 
 

@@ -5,12 +5,12 @@ from collections import deque
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.time_converter import DateTimeUtil
-from blueprints.risar.lib.utils import get_action, get_action_list
-from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
+from hippocrates.blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
     first_inspection_code, second_inspection_code)
-from blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.lib.utils import safe_date, initialize_name
 from nemesis.models.actions import Action

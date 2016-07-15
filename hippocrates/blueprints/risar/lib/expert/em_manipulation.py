@@ -5,9 +5,9 @@ import logging
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import func, and_, or_
 
-from blueprints.risar.lib.utils import format_action_data
-from blueprints.risar.lib.expert.utils import em_stats_status_list
-from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from hippocrates.blueprints.risar.lib.utils import format_action_data
+from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list
+from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime

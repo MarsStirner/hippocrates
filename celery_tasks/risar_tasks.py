@@ -8,9 +8,9 @@ from nemesis.models.celery_tasks import TaskInfo
 from nemesis.models.event import Event
 from nemesis.lib.apiutils import json_dumps
 from nemesis.lib.utils import safe_dict
-from blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.represent import represent_event_cfrs
-from blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
+from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
 
 
 logger = get_task_logger(__name__)

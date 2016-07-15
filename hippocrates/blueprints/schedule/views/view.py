@@ -6,7 +6,7 @@ from jinja2 import TemplateNotFound
 from nemesis.lib.utils import roles_require
 from nemesis.models.client import Client
 from nemesis.lib.utils import breadcrumb
-from blueprints.schedule.app import module
+from hippocrates.blueprints.schedule.app import module
 from nemesis.lib.user import UserProfileManager
 
 
