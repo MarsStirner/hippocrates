@@ -114,12 +114,12 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right">Наследственность<span>&nbsp;</span></td>
+                        <td class="text-right"><strong>Наследственность</strong><span>&nbsp;</span></td>
                         <td><rb-select ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
                     </tr>
                     
                     <tr>
-                        <td class="text-right">Оперативные вмешательства на половых органах <span>&nbsp;</span></td>
+                        <td class="text-right"><strong>Оперативные вмешательства на половых органах</strong> <span>&nbsp;</span></td>
                         <td><wysiwyg ng-model="anamnesis_unpregnant.gyn_operation" /></td>
                     </tr>
                     <tr>
@@ -145,19 +145,24 @@
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                      <tr>
-                        <td class="text-right">Травмы<span>&nbsp;</span></td>
+                        <td class="text-right"><strong>Эпидемиологический анамнез</strong><span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_unpregnant.epidemic" class="form-control"></div></div>
+                        </td>
+                    </tr>
+                     <tr>
+                        <td class="text-right"><strong>Травмы</strong><span>&nbsp;</span></td>
                         <td>
                             <wysiwyg ng-model="anamnesis_unpregnant.traumas" />  
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right">Операции (кроме гинекологических)<span>&nbsp;</span></td>
+                        <td class="text-right"><strong>Операции (кроме гинекологических)</strong><span>&nbsp;</span></td>
                         <td>
                             <wysiwyg ng-model="anamnesis_unpregnant.operations" />
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right">Группа крови <span>&nbsp;</span></td>
+                        <td class="text-right"><strong>Группа крови </strong><span>&nbsp;</span></td>
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
