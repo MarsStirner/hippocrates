@@ -3,6 +3,7 @@
 __author__ = 'mmalkov'
 
 request_type_pregnancy = 'pregnancy'
+request_type_gynecological = 'gynecological'
 
 risar_mother_anamnesis = 'risar_mother_anamnesis'
 risar_father_anamnesis = 'risar_father_anamnesis'
@@ -11,6 +12,9 @@ risar_newborn_inspection = 'risar_newborn_inspection'
 
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
+
+pregnancy_card_attrs = 'cardAttributes'
+gynecological_card_attrs = 'gynecologicalAttributes'
 
 pregnancy_apt_codes = [
     'year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'pregnancy_pathology',
@@ -46,3 +50,9 @@ attach_codes = {'plan_lpu': '10', 'extra_lpu': '11'}
 general_hospitalizations = 'general_hospitalizations'
 general_specialists_checkups = 'general_specialists_checkups'
 general_results = 'general_results'
+
+
+rtc_2_atc = {
+    request_type_pregnancy: pregnancy_card_attrs,
+    request_type_gynecological: gynecological_card_attrs,
+}

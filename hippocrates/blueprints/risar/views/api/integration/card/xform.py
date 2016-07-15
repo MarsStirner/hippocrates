@@ -5,10 +5,9 @@ import logging
 from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
 from .schemas import CardSchema
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity
-from blueprints.risar.views.api.chart import default_AT_Heuristic, default_ET_Heuristic
-from blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity, default_ET_Heuristic, default_AT_Heuristic
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import get_new_event_ext_id, safe_datetime, safe_date
@@ -82,7 +81,7 @@ class CardXForm(CardSchema, XForm):
 
     def create_event(self, data):
         event = self.target_obj
-        et = default_ET_Heuristic()
+        et = default_ET_Heuristic(request_type_pregnancy)
         if et is None:
             raise ApiException(INTERNAL_ERROR, u'Не настроен тип события - Случай беременности ОМС')
         event.eventType = et
@@ -115,10 +114,11 @@ class CardXForm(CardSchema, XForm):
         self._changed.append(self.pcard.attrs)
 
     def create_ca_action(self):
-        at = default_AT_Heuristic()
+        self.pcard = PregnancyCard.get_for_event(self.target_obj)
+        at = default_AT_Heuristic(self.target_obj.eventType)
         if not at:
-            raise ApiException(INTERNAL_ERROR, u'Нет типа действия с flatCode = "cardAttributes"')
-        ca_action = create_action(at.id, self.target_obj)
+            raise ApiException(INTERNAL_ERROR, u'Нет типа действия с flatCode = cardAttributes')
+        ca_action = create_action(at, self.target_obj)
         self.pcard._card_attrs_action = ca_action
 
     def delete_target_obj(self):

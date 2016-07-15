@@ -2,7 +2,7 @@
 
 import itertools
 
-from blueprints.risar.models.risar import RisarPreviousPregnancy_Children
+from hippocrates.blueprints.risar.models.risar import RisarPreviousPregnancy_Children
 from nemesis.lib.utils import safe_int, safe_bool_none, safe_double
 from nemesis.systemwide import db
 

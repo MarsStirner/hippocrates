@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-from weakref import WeakKeyDictionary, WeakValueDictionary
-
 import datetime
+from weakref import WeakValueDictionary
 
-import functools
 import sqlalchemy
 
-from blueprints.risar.lib.utils import get_action, get_action_list
-from blueprints.risar.lib.prev_children import get_previous_children
-from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
-    risar_anamnesis_pregnancy
+from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
+from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
+from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
+    risar_anamnesis_pregnancy, pregnancy_card_attrs
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -18,30 +17,6 @@ from nemesis.models.event import Event
 from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
-
-
-class lazy(object):
-    cache = WeakKeyDictionary()
-
-    def __init__(self, func):
-        """
-        :type func: types.MethodType
-        :param func:
-        :return:
-        """
-        self.func = func
-        self.name = func.__name__
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        if instance not in self.cache:
-            self.cache[instance] = {}
-        if self.name not in self.cache[instance]:
-            result = self.func(instance)
-            self.cache[instance][self.name] = result
-            return result
-        return self.cache[instance][self.name]
 
 
 class Anamnesis(object):
@@ -70,42 +45,67 @@ class PreviousPregnancy(object):
         return get_previous_children(self._action.id)
 
 
-class LocalCache(object):
-    def __init__(self):
-        self._cache = WeakKeyDictionary()
-
-    def cached_call(self, func):
-        name = func.__name__
-
-        @functools.wraps(func)
-        def wrapper(this, *args, **kwargs):
-
-            if this not in self._cache:
-                cache = self._cache[this] = {}
-            else:
-                cache = self._cache[this]
-
-            frozen_kwargs = tuple(kwargs.items())
-            if (name, args, frozen_kwargs) not in cache:
-                result = cache[(name, args, frozen_kwargs)] = func(this, *args, **kwargs)
-            else:
-                result = cache[(name, args, frozen_kwargs)]
-            return result
-
-        return wrapper
-
-    def clean(self, this):
-        self._cache[this] = {}
-
-
-class PregnancyCard(object):
+class AbstractCard(object):
     cache = LocalCache()
+    action_type_attrs = None
 
     def __init__(self, event):
         self._cached = {}
         self.event = event
-        self._anamnesis = Anamnesis(event)
         self._card_attrs_action = None
+
+    @property
+    def attrs(self):
+        return self.get_card_attrs_action()
+
+    def get_card_attrs_action(self, auto=False):
+        if self._card_attrs_action is None:
+            from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic
+
+            action = Action.query.join(ActionType).filter(
+                Action.event == self.event,
+                Action.deleted == 0,
+                ActionType.flatCode == self.action_type_attrs,
+            ).first()
+            if action is None and auto:
+                action = create_action(default_AT_Heuristic(self.event.eventType), self.event)
+                self._card_attrs_action = action
+                self.reevaluate_card_attrs()
+                db.session.add(action)
+                db.session.commit()
+            self._card_attrs_action = action
+        return self._card_attrs_action
+
+    def reevaluate_card_attrs(self):
+        pass
+
+    @classmethod
+    def get_for_event(cls, event):
+        """
+        :rtype: PregnancyCard
+        :param event:
+        :return:
+        """
+        from flask import g
+        if not hasattr(g, '_card_cache'):
+            g._card_cache = WeakValueDictionary()
+        if event.id not in g._card_cache:
+            result = g._card_cache[event.id] = cls(event)
+        else:
+            result = g._card_cache[event.id]
+        return result
+
+
+class PregnancyCard(AbstractCard):
+    """
+    @type event: nemesis.models.event.Event
+    """
+    cache = LocalCache()
+    action_type_attrs = pregnancy_card_attrs
+
+    def __init__(self, event):
+        super(PregnancyCard, self).__init__(event)
+        self._anamnesis = Anamnesis(event)
 
     @property
     def anamnesis(self):
@@ -123,26 +123,16 @@ class PregnancyCard(object):
         ]
 
     @property
-    def attrs(self):
-        return self.get_card_attrs_action()
+    def anamnesis(self):
+        return self._anamnesis
 
-    def get_card_attrs_action(self, auto=False):
-        if self._card_attrs_action is None:
-            from blueprints.risar.lib.card_attrs import default_AT_Heuristic
+    @lazy
+    def checkups(self):
+        return get_action_list(self.event, checkup_flat_codes).all()
 
-            action = Action.query.join(ActionType).filter(
-                Action.event == self.event,
-                Action.deleted == 0,
-                ActionType.flatCode == 'cardAttributes',
-            ).first()
-            if action is None and auto:
-                action = create_action(default_AT_Heuristic().id, self.event)
-                self._card_attrs_action = action
-                self.reevaluate_card_attrs()
-                db.session.add(action)
-                db.session.commit()
-            self._card_attrs_action = action
-        return self._card_attrs_action
+    @lazy
+    def prev_pregs(self):
+        return get_action_list(self.event, risar_anamnesis_pregnancy).all()
 
     def reevaluate_card_attrs(self):
         """
@@ -248,19 +238,4 @@ class PregnancyCard(object):
         query = db.session.query(Diagnostic).join(query, query.c.zid == Diagnostic.id)
         return query.all()
 
-    @classmethod
-    def get_for_event(cls, event):
-        """
-        :rtype: PregnancyCard
-        :param event:
-        :return:
-        """
-        from flask import g
-        if not hasattr(g, '_pregnancy_card_cache'):
-            g._pregnancy_card_cache = WeakValueDictionary()
-        if event.id not in g._pregnancy_card_cache:
-            result = g._pregnancy_card_cache[event.id] = cls(event)
-        else:
-            result = g._pregnancy_card_cache[event.id]
-        return result
 

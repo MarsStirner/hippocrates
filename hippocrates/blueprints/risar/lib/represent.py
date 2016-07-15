@@ -7,19 +7,19 @@ from collections import defaultdict
 
 from flask import url_for
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import check_disease
-from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
-from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
-from blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list)
-from blueprints.risar.lib.prev_children import get_previous_children
-from blueprints.risar.lib.utils import week_postfix, get_action_property_value
-from blueprints.risar.models.fetus import RisarFetusState
-from blueprints.risar.models.risar import RisarEpicrisis_Children
-from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card_attrs import check_disease
+from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
+from hippocrates.blueprints.risar.lib.utils import (get_action, action_apt_values, get_action_type_id, get_action_list)
+from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
+from hippocrates.blueprints.risar.lib.utils import week_postfix, get_action_property_value
+from hippocrates.blueprints.risar.models.fetus import RisarFetusState
+from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
+from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, attach_codes, puerpera_inspection_code
 from nemesis.app import app

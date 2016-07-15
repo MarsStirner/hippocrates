@@ -11,9 +11,9 @@ from flask import make_response, request
 from nemesis.lib.utils import jsonify, public_endpoint
 from nemesis.app import app
 
-from blueprints.reports.jasper_client import JasperReport
-from blueprints.reports.models import rbRisarPrintTemplateMeta
-from blueprints.reports.prepare import InputPrepare
+from hippocrates.blueprints.reports.jasper_client import JasperReport
+from hippocrates.blueprints.reports.models import rbRisarPrintTemplateMeta
+from hippocrates.blueprints.reports.prepare import InputPrepare
 from .app import module
 
 

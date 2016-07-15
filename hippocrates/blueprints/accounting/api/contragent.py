@@ -5,7 +5,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data_ctrl.accounting.contract import ContragentController
-from blueprints.accounting.lib.represent import ContragentRepr
+from hippocrates.blueprints.accounting.lib.represent import ContragentRepr
 
 
 @module.route('/api/0/contragent/list/', methods=['GET', 'POST'])

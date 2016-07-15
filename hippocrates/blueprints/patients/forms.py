@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask.ext.wtf import Form
+from flask_wtf import Form
 from wtforms import StringField, SelectField, TextAreaField, DateField
 from wtforms.widgets import TextInput, Select
 from wtforms.validators import DataRequired, Required

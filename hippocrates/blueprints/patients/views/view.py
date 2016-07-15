@@ -4,7 +4,7 @@ from flask import render_template, abort, request, session
 from jinja2 import TemplateNotFound
 
 from nemesis.models.client import Client
-from blueprints.patients.app import module
+from hippocrates.blueprints.patients.app import module
 from nemesis.lib.utils import breadcrumb, parse_id, roles_require
 from nemesis.lib.user import UserProfileManager
 

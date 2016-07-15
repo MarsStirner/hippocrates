@@ -8,7 +8,7 @@
 """
 
 # coding: utf-8
-from blueprints.risar.views.api.integration.childbirth.test_data import \
+from hippocrates.blueprints.risar.views.api.integration.childbirth.test_data import \
     test_childbirth_data
 from ..test import make_api_request, make_login
 

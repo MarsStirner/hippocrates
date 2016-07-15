@@ -6,7 +6,7 @@ from flask import url_for
 from nemesis.app import app
 from nemesis.lib.frontend import frontend_config
 from usagicompat import HippoUsagiClient
-from blueprints.risar.risar_version import version as risar_version
+from hippocrates.blueprints.risar.risar_version import version as risar_version
 
 __author__ = 'viruzzz-kun'
 

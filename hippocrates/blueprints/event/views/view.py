@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 from flask import request, render_template, abort, redirect
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from nemesis.app import app
 from ..app import module

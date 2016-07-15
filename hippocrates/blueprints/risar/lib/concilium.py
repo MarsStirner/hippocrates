@@ -2,7 +2,7 @@
 
 import itertools
 
-from blueprints.risar.models.risar import RisarConcilium, RisarConcilium_Members
+from hippocrates.blueprints.risar.models.risar import RisarConcilium, RisarConcilium_Members
 
 
 def get_concilium_by_id(concilium_id, event=None, create=False):

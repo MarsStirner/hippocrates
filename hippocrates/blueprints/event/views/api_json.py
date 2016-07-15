@@ -4,7 +4,7 @@ import datetime
 import logging
 
 from flask import request, abort
-from flask.ext.login import current_user
+from flask_login import current_user
 from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 
@@ -23,10 +23,10 @@ from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
-from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
+from hippocrates.blueprints.event.app import module
+from hippocrates.blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
                                         save_executives, EventSaveController, ReceivedController, MovingController)
-from blueprints.patients.lib.utils import add_or_update_blood_type
+from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx

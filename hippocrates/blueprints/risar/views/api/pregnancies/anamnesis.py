@@ -4,23 +4,23 @@ import logging
 import itertools
 
 from flask import request
-from flask.ext.login import current_user
+from flask_login import current_user
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
-from blueprints.risar.models.risar import RisarRiskGroup
-from blueprints.risar.lib.prev_children import create_or_update_prev_children
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.lib.prev_children import create_or_update_prev_children
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, create_action_property
-from nemesis.lib.utils import safe_traverse, safe_date, safe_time, safe_int, safe_bool, safe_double
+from nemesis.lib.utils import safe_traverse
 from nemesis.models.actions import Action
 from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from nemesis.models.event import Event
 from nemesis.systemwide import db
-from ...app import module
-from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
     represent_pregnancy, represent_anamnesis
-from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
 
 logger = logging.getLogger('simple')

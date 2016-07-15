@@ -1,17 +1,17 @@
 # -*- encoding: utf-8 -*-
-from blueprints.risar.lib.epicrisis_children import create_or_update_newborns
+from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from flask import request
 
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.models.actions import Action
 from nemesis.models.event import Event
 from nemesis.systemwide import db
-from ...app import module
-from ...lib.represent import represent_epicrisis, represent_chart_for_epicrisis
-from ...risar_config import risar_epicrisis, risar_newborn_inspection
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent import represent_epicrisis, represent_chart_for_epicrisis
+from hippocrates.blueprints.risar.risar_config import risar_epicrisis, risar_newborn_inspection
 
 
 @module.route('/api/0/chart/<int:event_id>/epicrisis', methods=['GET', 'POST'])

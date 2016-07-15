@@ -6,7 +6,7 @@ from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
-from blueprints.accounting.lib.represent import InvoiceRepr
+from hippocrates.blueprints.accounting.lib.represent import InvoiceRepr
 
 
 @module.route('/api/0/invoice/', methods=['GET', 'POST'])

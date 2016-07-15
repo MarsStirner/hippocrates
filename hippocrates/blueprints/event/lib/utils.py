@@ -3,7 +3,7 @@
 import datetime
 import logging
 
-from flask.ext.login import current_user
+from flask_login import current_user
 from sqlalchemy import func
 
 from nemesis.lib.data import create_new_action, update_action, ActionException, create_action
@@ -97,7 +97,7 @@ class ReceivedController():
         event = Event.query.get(event_id)
         action_type = ActionType.query.filter(ActionType.flatCode == u'received').first()
 
-        received = create_action(action_type.id, event)
+        received = create_action(action_type, event)
         received = self.update_received_data(received, received_info)
         return received
 
@@ -137,7 +137,7 @@ class MovingController():
         event = Event.query.get(event_id)
         action_type = ActionType.query.filter(ActionType.flatCode == u'moving').first()
 
-        moving = create_action(action_type.id, event)
+        moving = create_action(action_type, event)
         prev_action = self.get_prev_action(moving_info.get('event_id'))
         moving.propsByCode['orgStructReceived'].value = prev_action['orgStructStay'].value
         moving = self.update_moving_data(moving, moving_info)

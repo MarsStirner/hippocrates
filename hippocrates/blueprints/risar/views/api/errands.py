@@ -9,9 +9,9 @@ from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_int
-from blueprints.risar.lib.errand import (create_errand, edit_errand, mark_errand_as_read, execute_errand,
+from hippocrates.blueprints.risar.lib.errand import (create_errand, edit_errand, mark_errand_as_read, execute_errand,
     notify_errand_change, cur_user_is_errand_author, delete_errand)
-from blueprints.risar.lib.represent import (represent_errand, represent_errand_edit, represent_errand_shortly,
+from hippocrates.blueprints.risar.lib.represent import (represent_errand, represent_errand_edit, represent_errand_shortly,
     represent_errand_summary)
 from sqlalchemy import func
 

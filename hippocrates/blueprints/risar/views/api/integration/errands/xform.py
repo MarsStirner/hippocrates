@@ -6,9 +6,9 @@
 @date: 22.03.2016
 
 """
-from blueprints.risar.views.api.integration.errands.schemas import \
+from hippocrates.blueprints.risar.views.api.integration.errands.schemas import \
     ErrandSchema, ErrandListSchema
-from blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
 from nemesis.lib.utils import safe_date
 from nemesis.models.event import Event
 from nemesis.models.risar import Errand, rbErrandStatus

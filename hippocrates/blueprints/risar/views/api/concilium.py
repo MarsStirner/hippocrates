@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 
-from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_concilium
-from blueprints.risar.lib.concilium import get_concilium_list, get_concilium_by_id
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent import represent_concilium
+from hippocrates.blueprints.risar.lib.concilium import get_concilium_list, get_concilium_by_id
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.event import Event
 

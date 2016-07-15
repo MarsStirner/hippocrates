@@ -6,7 +6,7 @@
 @date: 25.03.2016
 
 """
-from blueprints.risar.models.fetus import RisarFetusState
+from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from nemesis.systemwide import db
 
 

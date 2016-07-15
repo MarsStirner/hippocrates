@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from flask import request
 
-from blueprints.risar.app import module
-from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.represent import represent_checkups_puerpera, represent_checkup_puerpera
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.represent import represent_checkups_puerpera, represent_checkup_puerpera
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -42,7 +42,7 @@ def api_0_checkup_puerpera(event_id):
     create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
-    from blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
+    from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
     reevaluate_card_fill_rate_all(card)
     db.session.commit()
 

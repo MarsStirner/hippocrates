@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from flask import render_template, request, redirect, url_for, abort
-from flask.ext.login import current_user
+from flask_login import current_user
 
-from blueprints.risar.lib.debug import get_debug_data
+from hippocrates.blueprints.risar.lib.debug import get_debug_data
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
+from nemesis.models.exists import rbRequestType
+from nemesis.models.event import EventType, Event
+from nemesis.models.schedule import ScheduleClientTicket
+from nemesis.systemwide import db
+
 from ..app import module
 
 __author__ = 'mmalkov'
@@ -44,10 +50,77 @@ def html_routing():
     return render_template('risar/event_routing.html')
 
 
-@module.route('/chart.html')
-def html_chart():
+@module.route('/pregnancy-chart.html')
+def html_pregnancy_chart():
     debug_data = get_debug_data(request.args)
     return render_template('risar/chart.html', debug_data=debug_data)
+
+
+@module.route('/gynecological-chart.html')
+def html_gynecological_chart():
+    debug_data = get_debug_data(request.args)
+    return render_template('risar/unpregnant/chart.html', debug_data=debug_data)
+
+
+chart_mapping = {
+    request_type_pregnancy: '.html_pregnancy_chart',
+    request_type_gynecological: '.html_gynecological_chart',
+}
+
+
+@module.route('/auto-chart.html')
+def html_auto_chart():
+    if 'event_id' in request.args:
+        event_id, request_type_code = request.args['event_id'], None
+    elif 'ticket_id' in request.args:
+        (event_id, request_type_code) = db.session.query(
+            Event.id, rbRequestType.code
+        ).join(
+            Event, rbRequestType
+        ).filter(
+            ScheduleClientTicket.id == request.args['ticket_id']
+        ).first() or (None, None)
+    elif 'client_id' in request.args:
+        client_id = request.args['client_id']
+        # У нас есть незакрытый случай беременности?
+        (event_id, request_type_code) = db.session.query(
+            Event.id, rbRequestType.code
+        ).join(
+            EventType, rbRequestType
+        ).filter(
+            rbRequestType.code == request_type_pregnancy,
+            Event.client_id == client_id,
+            Event.deleted == 0,
+        ).first() or (None, None)
+        if not event_id:
+            # Может, у нас есть незакрытая карта гинеколо?
+            (event_id, request_type_code) = db.session.query(
+                Event.id, rbRequestType.code
+            ).join(
+                EventType, rbRequestType
+            ).filter(
+                rbRequestType.code == request_type_gynecological,
+                Event.client_id == client_id,
+                Event.deleted == 0,
+            ).first() or (None, None)
+    else:
+        raise abort(400, 'We are totally fucked up')
+
+    if event_id:
+        if not request_type_code:
+            request_type_code, = db.session.query(rbRequestType.code).join(EventType, Event).filter(
+                Event.id == event_id,
+                Event.deleted == 0,
+            ).first() or (None,)
+            if not request_type_code:
+                raise abort(404, 'Event not found')
+        kwargs = {'event_id': event_id}
+    else:
+        kwargs = dict(request.args)
+
+    if request_type_code not in chart_mapping:
+        raise abort(500, 'We are totally fucked up')
+    return redirect(url_for(chart_mapping[request_type_code], **kwargs))
 
 
 @module.route('/anamnesis.html')

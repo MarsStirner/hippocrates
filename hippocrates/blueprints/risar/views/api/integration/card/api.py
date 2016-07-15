@@ -4,7 +4,7 @@ import logging
 from flask import request
 
 from nemesis.lib.utils import public_endpoint
-from blueprints.risar.views.api.integration.const import (
+from hippocrates.blueprints.risar.views.api.integration.const import (
     card_attrs_save_error_code, err_card_attrs_save_msg
 )
 from nemesis.lib.apiutils import api_method, RawApiResult

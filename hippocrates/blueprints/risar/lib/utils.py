@@ -11,9 +11,9 @@ from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
-from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
     puerpera_inspection_code
-from blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
@@ -338,3 +338,8 @@ def notify_risk_rate_changes(card, new_prr):
             cur_prr is None or cur_prr.order < new_prr.order):
         event = RiskRateRiseEvent(card, new_prr)
         NotificationQueue.add_events(event)
+
+
+def bail_out(exc):
+    # TODO: DELETE ME, когда я буду в nemesis
+    raise exc
