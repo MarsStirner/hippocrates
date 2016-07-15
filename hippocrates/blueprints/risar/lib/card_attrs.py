@@ -4,8 +4,9 @@ import logging
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
-from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
-    tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, belongs_to_mkbgroup
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, \
+    hepatitis_diags, tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, \
+    belongs_to_mkbgroup, notify_risk_rate_changes
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
     first_inspection_code, rtc_2_atc
