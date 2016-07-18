@@ -6,8 +6,8 @@
     <div class="novmargin">
         <div class="btn-group">
             <!-- todo: replace urls_for -->
-            <a ng-href="{{ url_for('.html_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_chart']) }}>Карта пациентки</a>
-            <a ng-href="{{ url_for('.html_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_anamnesis', '.html_anamnesis_father_edit', '.html_anamnesis_mother_edit']) }}>Анамнез</a>
+            <a ng-href="{{ url_for('.html_gynecological_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_chart']) }}>Карта пациентки</a>
+            <a ng-href="{{ url_for('.html_gynecological_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_anamnesis', '.html_anamnesis_father_edit', '.html_anamnesis_mother_edit']) }}>Анамнез</a>
             <a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection',]) }}>Осмотры</a>
             <a ng-href="{{ url_for('.html_concilium_list') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_concilium_list', '.html_concilium']) }}>Консилиумы</a>
             <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
@@ -77,7 +77,7 @@
             {% elif ext_header == 'inspection' %}
                 <div class="text-right" style="height: 34px;">
                     <a class="btn-link text-center" href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]"><i class="fa fa-table" tooltip="Осмотры акушером-гинекологом" style="width: 32px"></i></a>
-                    <a class="btn-link text-center" href="{{ url_for('.html_gravidograma') }}?event_id=[[ header.event.id ]]"><i class="fa fa-line-chart" tooltip="Гравидограмма" style="width: 32px"></i></a>
+                    <a class="btn-link text-center" href="{{ url_for('.1') }}?event_id=[[ header.event.id ]]"><i class="fa fa-line-chart" tooltip="Гравидограмма" style="width: 32px"></i></a>
                 </div>
             {% endif -%}
         </div>
