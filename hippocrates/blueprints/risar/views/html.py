@@ -257,6 +257,10 @@ def html_ambulance_patient_info():
 def html_event_measure():
     return render_template('risar/event_measure_list.html')
 
+@module.route('/gynecological-measure_list.html')
+def html_gynecological_event_measure():
+    return render_template('risar/event_measure_list.html', unpregnant=True)
+
 
 @module.route('/stats/org-birth-care/')
 def html_stats_org_birth_care():

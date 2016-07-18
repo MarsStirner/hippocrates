@@ -22,8 +22,8 @@
             <div class="btn-group">
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
                 <ul role="menu" class="dropdown-menu">
-                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">Диагнозы случая</a></li>
-                    <li><a ng-href="{#{{ url_for('.html_event_measure') }}?event_id={{ event_id_repl }}#}">-Мероприятия случая</a></li>
+                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">-Диагнозы пациентки</a></li>
+                    <li><a ng-href="{{ url_for('.html_gynecological_event_measure') }}?event_id={{ event_id_repl }}">Мероприятия пациентки</a></li>
                     <li><a ng-href="{#{{ url_for('.html_card_fill_history') }}?event_id={{ event_id_repl }}#}">-Случаи беременности</a></li>
                 </ul>
             </div>
