@@ -127,10 +127,18 @@ def html_auto_chart():
 def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
 
+@module.route('/gynecological-anamnesis.html')
+def html_gynecological_anamnesis():
+    return render_template('risar/unpregnant/anamnesis_view.html')
+
 
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
-    return render_template('risar/anamnesis_mother_edit.html')
+    return render_template('risar/anamnesis_mother_edit.html')\
+
+@module.route('/gynecological-anamnesis/edit.html')
+def html_gynecological_anamnesis_edit():
+    return render_template('risar/unpregnant/anamnesis_edit.html')
 
 
 @module.route('/anamnesis/father_edit.html')
