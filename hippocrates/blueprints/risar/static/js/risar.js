@@ -83,56 +83,89 @@ WebMis20
             return wrapper('GET', Config.url.api_pregnancy_final_stats);
         }
     };
-    this.chart = {
-        get_header: function (event_id) {
-            return wrapper('GET', Config.url.api_chart_header + event_id);
-        },
-        get: function (event_id, ticket_id, client_id) {
-            return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {
-                ticket_id: ticket_id,
-                client_id: client_id
-            }).then(function (event_info) {
-                var chart = event_info.event,
-                    automagic = event_info.automagic;
-                if (client_id) {
-                    $window.location.replace(Config.url.chart_html + '?event_id=' + chart.id);
-                    return chart;
-                }
-                if (automagic) {
-                    NotificationService.notify(
-                        200,
-                        [
-                            'Пациентка поставлена на учёт: ',
-                            {
-                                bold: true,
-                                text: chart.person.name
-                            }, '. ',
-                            {
-                                link: '#',
-                                text: 'Изменить'
-                            }, ' ',
-                            {
-                                click: function () {
-                                    self.chart.delete(ticket_id).then(function success() {
-                                        $window.location.replace(Config.url.index_html);
-                                    })
-                                },
-                                text: 'Отменить'
-                            }
-                        ],
-                        'success'
-                    );
-                }
-                return chart;
-            });
-        },
-        delete: function (ticket_id) {
-            return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);
-        },
-        close_event: function (event_id, data) {
-            return wrapper('POST', Config.url.api_chart_close.format(event_id), {}, data);
+    function Chart (urls) {
+        var self = this;
+
+        function on_event_created (ticket_id, event) {
+            NotificationService.notify(
+                200,
+                [
+                    'Пациентка поставлена на учёт: ',
+                    {bold: true, text: event.person.name},
+                    '. ',
+                    {link: '#', text: 'Изменить'},
+                    ' ',
+                    {
+                        click: function () {
+                            self.delete(ticket_id).then(function success() {
+                                $window.location.replace(urls.back);
+                            })
+                        },
+                        text: 'Отменить'
+                    }
+                ],
+                'success'
+            );
         }
-    };
+        function create (ticket_id, client_id) {
+            return wrapper(
+                'POST',
+                urls.get,
+                {ticket_id: ticket_id, client_id: client_id}
+            ).then(function (event) {
+                if (event.automagic) {
+                    on_event_created(ticket_id, event);
+                } else {
+                    $window.location.replace(urls.html + '?event_id=' + event.id);
+                }
+                return event;
+            })
+        }
+
+        this.get_header = function (event_id) {
+            return wrapper('GET', urls.header + event_id);
+        };
+        this.delete = function (ticket_id) {
+            return wrapper('DELETE', urls.delete + ticket_id);
+        };
+        this.close_event = function (event_id, data) {
+            return wrapper('POST', urls.close.format(event_id), {}, data);
+        };
+        this.get = function (event_id, ticket_id, client_id) {
+            if (event_id) {
+                return wrapper('GET', urls.get + event_id)
+            } else {
+                var deferred = $q.defer();
+                wrapper('GET', urls.get, {ticket_id: ticket_id, client_id: client_id}).then(
+                    deferred.resolve,
+                    function () {
+                        create(ticket_id, client_id).then(
+                            deferred.resolve,
+                            deferred.reject
+                        )
+                    }
+                );
+                return deferred.promise;
+            }
+        };
+        this._create = create;
+    }
+    this.chart = new Chart({
+        get: Config.url.api_chart,
+        header: Config.url.api_chart_header,
+        delete: Config.url.api_chart_delete,
+        close: Config.url.api_chart_close,
+        html: Config.url.chart_pregnancy_html,
+        back: Config.url.index_html
+    });
+    this.gynecologic_chart = new Chart({
+        get: Config.url.gyn.chart,
+        header: Config.url.gyn.header,
+        delete: Config.url.gyn.delete,
+        close: Config.url.gyn.close,
+        html: Config.url.chart_pregnancy_html,
+        back: Config.url.index_html
+    });
     this.event_routing = {
         get_destinations: function (diagnoses, client_id) {
             return wrapper('POST', Config.url.api_event_routing, {}, {

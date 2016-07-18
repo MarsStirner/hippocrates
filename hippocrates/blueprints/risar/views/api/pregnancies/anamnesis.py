@@ -279,7 +279,7 @@ def api_0_intolerances_post(i_type, object_id=None):
     return represent_intolerance(obj)
 
 
-@module.route('/api/0/chart/<int:event_id>/anamnesis', methods=['GET'])
+@module.route('/api/0/pregnancy/chart/<int:event_id>/anamnesis', methods=['GET'])
 @api_method
 def api_0_chart_anamnesis(event_id):
     event = Event.query.get(event_id)
@@ -289,7 +289,7 @@ def api_0_chart_anamnesis(event_id):
     }
 
 
-@module.route('/api/0/chart/<int:event_id>/mother', methods=['GET', 'POST'])
+@module.route('/api/0/pregnancy/chart/<int:event_id>/mother', methods=['GET', 'POST'])
 @api_method
 def api_0_chart_mother(event_id):
     event = Event.query.get(event_id)
@@ -318,7 +318,7 @@ def api_0_chart_mother(event_id):
     return represent_mother_action(event, action)
 
 
-@module.route('/api/0/chart/<int:event_id>/father', methods=['GET', 'POST'])
+@module.route('/api/0/pregnancy/chart/<int:event_id>/father', methods=['GET', 'POST'])
 @api_method
 def api_0_chart_father(event_id):
     event = Event.query.get(event_id)
@@ -341,7 +341,7 @@ def api_0_chart_father(event_id):
     return represent_father_action(event, action)
 
 
-@module.route('/api/0/chart/<int:event_id>/risks')
+@module.route('/api/0/pregnancy/chart/<int:event_id>/risks')
 @api_method
 def api_0_chart_risks(event_id):
     return RisarRiskGroup.query.filter(RisarRiskGroup.event_id == event_id, RisarRiskGroup.deleted == 0).all()

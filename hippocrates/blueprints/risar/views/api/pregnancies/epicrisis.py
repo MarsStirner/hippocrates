@@ -14,7 +14,7 @@ from hippocrates.blueprints.risar.lib.represent import represent_epicrisis, repr
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis, risar_newborn_inspection
 
 
-@module.route('/api/0/chart/<int:event_id>/epicrisis', methods=['GET', 'POST'])
+@module.route('/api/0/pregnancy/chart/<int:event_id>/epicrisis', methods=['GET', 'POST'])
 @api_method
 def api_0_chart_epicrisis(event_id):
     event = Event.query.get(event_id)

@@ -65,59 +65,72 @@ def represent_header(event):
     }
 
 
+def represent_event_client(client):
+    return {
+        'id': client.id,
+        'first_name': client.firstName,
+        'last_name': client.lastName,
+        'patr_name': client.patrName,
+        'birth_date': client.birthDate,
+        'sex': Gender(client.sexCode) if client.sexCode is not None else None,
+        'snils': client.formatted_SNILS,
+        'full_name': client.nameText,
+        'notes': client.notes,
+        'age_tuple': client.age_tuple(),
+        'age': client.age,
+        'sex_raw': client.sexCode,
+        'cmi_policy': client.policy,
+        'attach_lpu': get_lpu_attached(client.attachments),
+        'phone': client.contacts.first()
+    }
+
+
+def safe_action_property(action, prop_name, default=None):
+    prop = action.propsByCode.get(prop_name)
+    return prop.value if prop else default
+
+
 def represent_event(event):
-    """
-    :type event: application.models.event.Event
-    """
-    card = PregnancyCard.get_for_event(event)
-    client = event.client
-    all_diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
-    card_attrs_action = card.get_card_attrs_action(auto=True)
-    em_ctrl = EventMeasureController()
     return {
         'id': event.id,
-        'client': {
-            'id': client.id,
-            'first_name': client.firstName,
-            'last_name': client.lastName,
-            'patr_name': client.patrName,
-            'birth_date': client.birthDate,
-            'sex': Gender(client.sexCode) if client.sexCode is not None else None,
-            'snils': client.formatted_SNILS,
-            'full_name': client.nameText,
-            'notes': client.notes,
-            'age_tuple': client.age_tuple(),
-            'age': client.age,
-            'sex_raw': client.sexCode,
-            'cmi_policy': client.policy,
-            'attach_lpu': get_lpu_attached(client.attachments),
-            'phone': client.contacts.first()
-        },
+        'client': represent_event_client(event.client),
         'set_date': event.setDate,
         'exec_date': event.execDate,
         'person': event.execPerson,
         'external_id': event.externalId,
         'type': event.eventType,
+        'diagnoses': represent_event_diagnoses(event),
+    }
+
+
+def represent_pregnancy_event(event):
+    """
+    :type event: application.models.event.Event
+    """
+    card = PregnancyCard.get_for_event(event)
+    all_diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
+    card_attrs_action = card.get_card_attrs_action(auto=True)
+    em_ctrl = EventMeasureController()
+    represent = represent_event(event)
+    represent.update({
         'em_progress': em_ctrl.calc_event_measure_stats(event),
-        'card_attributes': represent_card_attributes(event),
+        'card_attributes': represent_pregnancy_card_attributes(event),
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups_shortly(event),
         'checkups_puerpera': represent_checkups_puerpera_shortly(event),
         'risk_rate': card_attrs_action['prenatal_risk_572'].value,
-        'preeclampsia_susp_rate': card_attrs_action['preeclampsia_susp'].value if
-            card_attrs_action.propsByCode.get('preeclampsia_susp') else None,
-        'preeclampsia_confirmed_rate': card_attrs_action['preeclampsia_comfirmed'].value if
-            card_attrs_action.propsByCode.get('preeclampsia_comfirmed') else None,
+        'preeclampsia_susp_rate': safe_action_property(card_attrs_action, 'preeclampsia_susp'),
+        'preeclampsia_confirmed_rate': safe_action_property(card_attrs_action, 'preeclampsia_comfirmed'),
         'pregnancy_pathologies': [
             PregnancyPathology(pathg)
-            for pathg in card_attrs_action['pregnancy_pathology_list'].value
-        ] if card_attrs_action['pregnancy_pathology_list'].value else [],
+            for pathg in safe_action_property(card_attrs_action, 'pregnancy_pathology_list')
+        ],
         'card_fill_rates': represent_event_cfrs(card_attrs_action),
         'pregnancy_week': get_pregnancy_week(event),
-        'diagnoses': represent_event_diagnoses(event),
         'has_diseases': check_disease(all_diagnostics)
-    }
+    })
+    return represent
 
 
 def represent_chart_short(event):
@@ -278,8 +291,8 @@ def group_orgs_for_routing(orgs, client):
             c_kladr_code = None
     else:
         c_kladr_code = None
-    c_district_codes = set([c_kladr_code[:5]]) if c_kladr_code else set()
-    c_region_codes = set([code[:2] for code in risar_regions])
+    c_district_codes = {c_kladr_code[:5]} if c_kladr_code else set()
+    c_region_codes = {code[:2] for code in risar_regions}
     # special cases
     # 1) Ленинградская Область 47 000 000 000 (00) и Санкт-Петербург Город 78 000 000 000 (00)
     # 2) Московская Область 50 000 000 000 (00) и Москва Город 77 000 000 000 (00)
@@ -311,18 +324,33 @@ def get_lpu_attached(attachments):
     }
 
 
-def represent_card_attributes(event):
+def represent_pregnancy_card_attributes(event):
     action = PregnancyCard.get_for_event(event).attrs
     return {
-        'pregnancy_start_date': action['pregnancy_start_date'].value,
-        'predicted_delivery_date': action['predicted_delivery_date'].value,
+        'pregnancy_start_date': safe_action_property(action, 'pregnancy_start_date'),
+        'predicted_delivery_date': safe_action_property(action, 'predicted_delivery_date'),
     }
 
 
 def represent_pregnancies(event):
-    prev_pregnancies = [represent_pregnancy(action) for action in event.actions
-                        if action.actionType_id == get_action_type_id(risar_anamnesis_pregnancy)]
-    return prev_pregnancies
+    query = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == risar_anamnesis_pregnancy,
+    )
+    return map(represent_pregnancy, query)
+
+
+def represent_transfusions(event):
+    query = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == risar_anamnesis_transfusion,
+    )
+    return [
+        dict(action_apt_values(action, transfusion_apt_codes), id=action.id)
+        for action in query
+    ]
 
 
 def represent_pregnancy(action):
@@ -333,9 +361,8 @@ def represent_pregnancy(action):
 
 
 def represent_anamnesis_newborn_inspections(prev_children):
-    result = []
-    for child in prev_children:
-        result.append({
+    return [
+        {
             'id': child.id,
             'weight': child.weight,
             'alive': safe_bool(child.alive),
@@ -343,8 +370,9 @@ def represent_anamnesis_newborn_inspections(prev_children):
             'died_at': child.died_at,
             'abnormal_development': safe_bool(child.abnormal_development),
             'neurological_disorders': safe_bool(child.neurological_disorders),
-        })
-    return result
+        }
+        for child in prev_children
+    ]
 
 
 def represent_anamnesis(event):
@@ -354,11 +382,7 @@ def represent_anamnesis(event):
         'mother': represent_mother_action(event),
         'father': represent_father_action(event),
         'pregnancies': represent_pregnancies(event),
-        'transfusions': [
-            dict(action_apt_values(action, transfusion_apt_codes), id=action.id)
-            for action in event.actions
-            if action.actionType_id == get_action_type_id(risar_anamnesis_transfusion)
-        ],
+        'transfusions': represent_transfusions(event),
         'intolerances': [
             represent_intolerance(obj)
             for obj in itertools.chain(event.client.allergies, event.client.intolerances)

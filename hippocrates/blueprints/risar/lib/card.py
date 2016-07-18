@@ -8,7 +8,7 @@ from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
-    risar_anamnesis_pregnancy, pregnancy_card_attrs
+    risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -17,19 +17,6 @@ from nemesis.models.event import Event
 from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
-
-
-class Anamnesis(object):
-    def __init__(self, event):
-        self._event = event
-
-    @lazy
-    def mother(self):
-        return get_action(self._event, risar_mother_anamnesis, True)
-
-    @lazy
-    def father(self):
-        return get_action(self._event, risar_father_anamnesis, True)
 
 
 class PreviousPregnancy(object):
@@ -103,9 +90,21 @@ class PregnancyCard(AbstractCard):
     cache = LocalCache()
     action_type_attrs = pregnancy_card_attrs
 
+    class Anamnesis(object):
+        def __init__(self, event):
+            self._event = event
+
+        @lazy
+        def mother(self):
+            return get_action(self._event, risar_mother_anamnesis, True)
+
+        @lazy
+        def father(self):
+            return get_action(self._event, risar_father_anamnesis, True)
+
     def __init__(self, event):
         super(PregnancyCard, self).__init__(event)
-        self._anamnesis = Anamnesis(event)
+        self._anamnesis = self.Anamnesis(event)
 
     @property
     def anamnesis(self):
@@ -239,3 +238,6 @@ class PregnancyCard(AbstractCard):
         return query.all()
 
 
+class GynecologicCard(AbstractCard):
+    cache = LocalCache()
+    action_type_attrs = gynecological_card_attrs
