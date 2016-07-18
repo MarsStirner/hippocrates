@@ -7,7 +7,7 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.event import Event
 
 
-@module.route('/api/0/chart/<int:event_id>concilium/list')
+@module.route('/api/0/pregnancy/chart/<int:event_id>concilium/list')
 @api_method
 def api_0_concilium_list_get(event_id):
     event = Event.query.get(event_id)
@@ -20,8 +20,8 @@ def api_0_concilium_list_get(event_id):
     ]
 
 
-@module.route('/api/0/chart/<int:event_id>concilium/')
-@module.route('/api/0/chart/<int:event_id>concilium/<int:concilium_id>')
+@module.route('/api/0/pregnancy/chart/<int:event_id>concilium/')
+@module.route('/api/0/pregnancy/chart/<int:event_id>concilium/<int:concilium_id>')
 @api_method
 def api_0_concilium_get(event_id, concilium_id=None):
     event = Event.query.get(event_id)
