@@ -6,7 +6,7 @@
 @date: 22.03.2016
 
 """
-from hippocrates.blueprints.risar.lib.represent import represent_checkup_puerpera
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_checkup_puerpera
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
 from hippocrates.blueprints.risar.risar_config import puerpera_inspection_code
 from hippocrates.blueprints.risar.views.api.integration.checkup_puerpera.schemas import \

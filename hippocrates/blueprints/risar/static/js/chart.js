@@ -212,6 +212,7 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
 var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
+    $scope.fetuses = [];
 
     var reload = function () {
         RisarApi.chart.get_header(event_id).
@@ -219,8 +220,8 @@ var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
                 $scope.header = data.header;
             });
         RisarApi.fetus.get_fetus_list(event_id)
-            .then(function (data) {
-                $scope.checkup = data;
+            .then(function (fetuses) {
+                $scope.fetuses = fetuses;
             });
     };
 

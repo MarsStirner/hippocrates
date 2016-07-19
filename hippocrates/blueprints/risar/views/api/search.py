@@ -6,20 +6,19 @@ import time
 
 from flask import request, make_response
 from flask_login import current_user
-from hippocrates.blueprints.reports.jasper_client import JasperReport
-from hippocrates.blueprints.risar.lib.represent import represent_age
-from hippocrates.blueprints.risar.lib.search import get_workgroupname_by_code
 
+from hippocrates.blueprints.reports.jasper_client import JasperReport
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent.common import represent_age
+from hippocrates.blueprints.risar.lib.search import get_workgroupname_by_code
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
 from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
-from hippocrates.blueprints.risar.app import module
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
-
 
 __author__ = 'mmalkov'
 

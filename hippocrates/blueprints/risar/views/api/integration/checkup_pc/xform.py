@@ -7,7 +7,7 @@
 
 """
 from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
-from hippocrates.blueprints.risar.lib.represent import represent_checkup
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_checkup
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     notify_checkup_changes
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState

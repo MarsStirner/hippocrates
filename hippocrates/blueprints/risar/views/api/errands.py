@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from flask import request
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
-from ...app import module
-from nemesis.models.risar import Errand
-from nemesis.lib.apiutils import api_method
-from nemesis.models.utils import safe_current_user_id
-from nemesis.systemwide import db
-from nemesis.lib.utils import safe_int
 from hippocrates.blueprints.risar.lib.errand import (create_errand, edit_errand, mark_errand_as_read, execute_errand,
     notify_errand_change, cur_user_is_errand_author, delete_errand)
-from hippocrates.blueprints.risar.lib.represent import (represent_errand, represent_errand_edit, represent_errand_shortly,
-    represent_errand_summary)
-from sqlalchemy import func
+from hippocrates.blueprints.risar.lib.represent.errand import represent_errand, represent_errand_summary, \
+    represent_errand_shortly, represent_errand_edit
+from nemesis.lib.apiutils import api_method
+from nemesis.lib.utils import safe_int
+from nemesis.models.risar import Errand
+from nemesis.models.utils import safe_current_user_id
+from nemesis.systemwide import db
+from ...app import module
 
 __author__ = 'viruzzz-kun'
 
