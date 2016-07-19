@@ -1,15 +1,14 @@
 # -*- encoding: utf-8 -*-
-from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
+from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from hippocrates.blueprints.risar.lib.represent import represent_checkup, represent_checkups, \
-    represent_fetuses
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_checkup, represent_fetuses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -98,8 +97,9 @@ def api_0_checkup_new(event_id):
 @api_method
 def api_0_checkup_list(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': represent_checkups(event)
+        'checkups': map(represent_checkup, card.checkups)
     }
 
 
@@ -108,4 +108,5 @@ def api_0_checkup_list(event_id):
 @api_method
 def api_0_fetus_list(event_id):
     event = Event.query.get(event_id)
-    return represent_fetuses(event)
+    card = PregnancyCard.get_for_event(event)
+    return represent_fetuses(card)

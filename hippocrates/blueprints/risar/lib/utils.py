@@ -147,6 +147,7 @@ def get_action_list(event, flat_code, all=False):
         return
     else:
         raise TypeError('flat_code must be list|tuple|basestring|None')
+    query = query.order_by(Action.begDate.asc())
     if all:
         return query.all()
     return query

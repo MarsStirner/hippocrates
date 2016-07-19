@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 import datetime
-import itertools
 
 from flask import request
-
-from nemesis.lib.apiutils import api_method
-from nemesis.models.schedule import Schedule
-from nemesis.models.utils import safe_current_user_id
-from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.represent import represent_ticket
-from nemesis.systemwide import db
-from nemesis.models.event import Event
-from nemesis.models.schedule import ScheduleTicket, ScheduleClientTicket
-from sqlalchemy import or_, and_
 from sqlalchemy import func
+from sqlalchemy import or_, and_
+
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.represent.common import represent_ticket
+from nemesis.lib.apiutils import api_method
+from nemesis.models.event import Event
+from nemesis.models.schedule import Schedule
+from nemesis.models.schedule import ScheduleTicket, ScheduleClientTicket
+from nemesis.models.utils import safe_current_user_id
+from nemesis.systemwide import db
 
 __author__ = 'mmalkov'
 

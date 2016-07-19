@@ -2,13 +2,16 @@
 import datetime
 from weakref import WeakValueDictionary
 
+import itertools
 import sqlalchemy
 
 from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
+from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
-    risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs
+    risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
+    puerpera_inspection_code
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -63,13 +66,21 @@ class AbstractCard(object):
             self._card_attrs_action = action
         return self._card_attrs_action
 
+    @lazy
+    def transfusions(self):
+        return get_action_list(self.event, risar_anamnesis_transfusion).all()
+
+    @lazy
+    def intolerances(self):
+        return list(itertools.chain(self.event.client.allergies, self.event.client.intolerances))
+
     def reevaluate_card_attrs(self):
         pass
 
     @classmethod
     def get_for_event(cls, event):
         """
-        :rtype: PregnancyCard
+        :rtype: AbstractCard
         :param event:
         :return:
         """
@@ -81,74 +92,6 @@ class AbstractCard(object):
         else:
             result = g._card_cache[event.id]
         return result
-
-
-class PregnancyCard(AbstractCard):
-    """
-    @type event: nemesis.models.event.Event
-    """
-    cache = LocalCache()
-    action_type_attrs = pregnancy_card_attrs
-
-    class Anamnesis(object):
-        def __init__(self, event):
-            self._event = event
-
-        @lazy
-        def mother(self):
-            return get_action(self._event, risar_mother_anamnesis, True)
-
-        @lazy
-        def father(self):
-            return get_action(self._event, risar_father_anamnesis, True)
-
-    def __init__(self, event):
-        super(PregnancyCard, self).__init__(event)
-        self._anamnesis = self.Anamnesis(event)
-
-    @property
-    def anamnesis(self):
-        return self._anamnesis
-
-    @lazy
-    def checkups(self):
-        return get_action_list(self.event, checkup_flat_codes).all()
-
-    @lazy
-    def prev_pregs(self):
-        return [
-            PreviousPregnancy(action)
-            for action in get_action_list(self.event, risar_anamnesis_pregnancy).all()
-        ]
-
-    @property
-    def anamnesis(self):
-        return self._anamnesis
-
-    @lazy
-    def checkups(self):
-        return get_action_list(self.event, checkup_flat_codes).all()
-
-    @lazy
-    def prev_pregs(self):
-        return get_action_list(self.event, risar_anamnesis_pregnancy).all()
-
-    def reevaluate_card_attrs(self):
-        """
-        Пересчёт атрибутов карточки беременной
-        """
-        from .card_attrs import check_card_attrs_action_integrity, reevaluate_risk_rate, \
-            reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, reevaluate_card_fill_rate_all
-
-        with db.session.no_autoflush:
-            action = self.attrs
-            check_card_attrs_action_integrity(action)
-            reevaluate_risk_rate(self)
-            reevaluate_pregnacy_pathology(self)
-            reevaluate_dates(self)
-            reevaluate_preeclampsia_rate(self)
-            reevaluate_risk_groups(self)
-            reevaluate_card_fill_rate_all(self)
 
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):
@@ -194,9 +137,10 @@ class PregnancyCard(AbstractCard):
         :type beg_date: datetime.date
         :type end_date: datetime.date | NoneType
         :type including_closed: bool
+        :type kind_ids: list<int|long>
         :param beg_date:
         :param end_date:
-        :param kinds:
+        :param kind_ids:
         :param including_closed:
         :return:
         """
@@ -204,7 +148,7 @@ class PregnancyCard(AbstractCard):
             Diagnosis
         ).join(
             Event, Event.client_id == Diagnosis.client_id,
-        ).filter(
+                   ).filter(
             Event.id == self.event.id,
             Event.execDate.is_(None),
             Event.deleted == 0,
@@ -236,6 +180,95 @@ class PregnancyCard(AbstractCard):
         query = query.with_entities(sqlalchemy.func.max(Diagnostic.id).label('zid')).subquery()
         query = db.session.query(Diagnostic).join(query, query.c.zid == Diagnostic.id)
         return query.all()
+
+
+class PregnancyCard(AbstractCard):
+    """
+    @type event: nemesis.models.event.Event
+    """
+    cache = LocalCache()
+    action_type_attrs = pregnancy_card_attrs
+
+    class Anamnesis(object):
+        def __init__(self, event):
+            self._event = event
+
+        @lazy
+        def mother(self):
+            return get_action(self._event, risar_mother_anamnesis, True)
+
+        @lazy
+        def father(self):
+            return get_action(self._event, risar_father_anamnesis, True)
+
+    class Fetus(object):
+        def __init__(self, action):
+            self._action = action
+
+        @lazy
+        def states(self):
+            return RisarFetusState.query.filter(
+                RisarFetusState.action == self._action,
+                RisarFetusState.deleted == 0,
+            ).order_by(RisarFetusState.id).all()
+
+        @property
+        def action(self):
+            return self._action
+
+    def __init__(self, event):
+        super(PregnancyCard, self).__init__(event)
+        self._anamnesis = self.Anamnesis(event)
+
+    @property
+    def anamnesis(self):
+        return self._anamnesis
+
+    @lazy
+    def checkups(self):
+        return get_action_list(self.event, checkup_flat_codes).all()
+
+    @lazy
+    def checkups_puerpera(self):
+        return get_action_list(self.event, puerpera_inspection_code).all()
+
+    @lazy
+    def prev_pregs(self):
+        return [
+            PreviousPregnancy(action)
+            for action in get_action_list(self.event, risar_anamnesis_pregnancy).all()
+        ]
+
+    @property
+    def anamnesis(self):
+        return self._anamnesis
+
+    @lazy
+    def checkups(self):
+        return get_action_list(self.event, checkup_flat_codes).all()
+
+    @lazy
+    def prev_pregs(self):
+        return get_action_list(self.event, risar_anamnesis_pregnancy).all()
+
+    def reevaluate_card_attrs(self):
+        """
+        Пересчёт атрибутов карточки беременной
+        """
+        from .card_attrs import check_card_attrs_action_integrity, reevaluate_risk_rate, \
+            reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, reevaluate_card_fill_rate_all
+
+        with db.session.no_autoflush:
+            action = self.attrs
+            check_card_attrs_action_integrity(action)
+            reevaluate_risk_rate(self)
+            reevaluate_pregnacy_pathology(self)
+            reevaluate_dates(self)
+            reevaluate_preeclampsia_rate(self)
+            reevaluate_risk_groups(self)
+            reevaluate_card_fill_rate_all(self)
+
+
 
 
 class GynecologicCard(AbstractCard):

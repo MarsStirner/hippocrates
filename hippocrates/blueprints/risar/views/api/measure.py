@@ -1,22 +1,23 @@
 # -*- encoding: utf-8 -*-
-from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_event_measure_diag, \
-    update_patient_diagnoses
 from flask import request
 
+from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
+from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_event_measure_diag, \
+    update_patient_diagnoses
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
+from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
+from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_shortly
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool
 from nemesis.models.actions import Action
 from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
 from nemesis.systemwide import db
-from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
-from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
-from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
-from hippocrates.blueprints.risar.lib.represent import represent_checkups_shortly
-from hippocrates.blueprints.risar.lib.utils import get_action_by_id
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 
 
 @module.route('/api/0/event_measure/generate/')
@@ -217,6 +218,7 @@ def api_0_measure_list(event_id):
 @api_method
 def api_0_event_measure_checkups(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': represent_checkups_shortly(event)
+        'checkups': map(represent_pregnancy_checkup_shortly, card.checkups)
     }

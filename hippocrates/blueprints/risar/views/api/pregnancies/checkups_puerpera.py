@@ -3,7 +3,7 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
-from hippocrates.blueprints.risar.lib.represent import represent_checkups_puerpera, represent_checkup_puerpera
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_checkup_puerpera
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -78,6 +78,7 @@ def api_0_checkup_puerpera_new(event_id):
 @api_method
 def api_0_checkup_puerpera_list(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': represent_checkups_puerpera(event)
+        'checkups': map(represent_checkup_puerpera, card.checkups_puerpera)
     }

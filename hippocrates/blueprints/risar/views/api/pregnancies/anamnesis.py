@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
-import itertools
 
 from flask import request
 from flask_login import current_user
 
+from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.prev_children import create_or_update_prev_children
+from hippocrates.blueprints.risar.lib.represent.common import represent_intolerance, represent_pregnancy
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_anamnesis, represent_mother_action, \
+    represent_father_action
 from hippocrates.blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
-from hippocrates.blueprints.risar.lib.prev_children import create_or_update_prev_children
+from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, create_action_property
 from nemesis.lib.utils import safe_traverse
@@ -17,11 +22,6 @@ from nemesis.models.actions import Action
 from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from nemesis.models.event import Event
 from nemesis.systemwide import db
-from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
-    represent_pregnancy, represent_anamnesis
-from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
 
 logger = logging.getLogger('simple')
 
@@ -29,6 +29,7 @@ logger = logging.getLogger('simple')
 __author__ = 'mmalkov'
 
 # Беременности
+
 
 @module.route('/api/0/anamnesis/pregnancies/')
 @module.route('/api/0/anamnesis/pregnancies/<int:action_id>', methods=['GET'])
@@ -283,9 +284,10 @@ def api_0_intolerances_post(i_type, object_id=None):
 @api_method
 def api_0_chart_anamnesis(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
         'client_id': event.client.id,
-        'anamnesis': represent_anamnesis(event),
+        'anamnesis': represent_pregnancy_anamnesis(card),
     }
 
 
@@ -315,7 +317,7 @@ def api_0_chart_mother(event_id):
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()
-    return represent_mother_action(event, action)
+    return represent_mother_action(action)
 
 
 @module.route('/api/0/pregnancy/chart/<int:event_id>/father', methods=['GET', 'POST'])
@@ -338,7 +340,7 @@ def api_0_chart_father(event_id):
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()
-    return represent_father_action(event, action)
+    return represent_father_action(action)
 
 
 @module.route('/api/0/pregnancy/chart/<int:event_id>/risks')

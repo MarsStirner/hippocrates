@@ -4,13 +4,13 @@ from datetime import datetime
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.chart_creator import PregnancyChartCreator, GynecologicCardCreator
+from hippocrates.blueprints.risar.chart_creator import PregnancyChartCreator
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_dates
-from hippocrates.blueprints.risar.lib.represent import represent_pregnancy_event, represent_chart_for_routing, represent_header, \
-    group_orgs_for_routing, represent_checkups, represent_pregnancy_card_attributes, \
-    represent_chart_for_card_fill_rate_history, \
-    represent_chart_for_close_event
+from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_event, group_orgs_for_routing, \
+    represent_pregnancy_card_attributes, represent_checkup, represent_chart_for_routing, \
+    represent_chart_for_card_fill_rate_history
 from hippocrates.blueprints.risar.lib.utils import get_last_checkup_date
 from hippocrates.blueprints.risar.risar_config import attach_codes, request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
@@ -81,35 +81,6 @@ def api_1_pregnancy_chart_create():
     client_id = request.args.get('client_id')
 
     chart_creator = PregnancyChartCreator(client_id, ticket_id)
-    chart_creator(create=True)
-    return dict(
-        represent_pregnancy_event(chart_creator.event),
-        automagic=chart_creator.automagic,
-    )
-
-
-@module.route('/api/1/gynecological/chart/', methods=['GET'])
-@module.route('/api/1/gynecological/chart/<int:event_id>', methods=['GET'])
-@api_method
-def api_1_gyn_chart(event_id=None):
-    ticket_id = request.args.get('ticket_id')
-    client_id = request.args.get('client_id')
-
-    chart_creator = GynecologicCardCreator(client_id, ticket_id, event_id)
-    try:
-        chart_creator()
-        return represent_pregnancy_event(chart_creator.event)
-    except GynecologicCardCreator.DoNotCreate:
-        raise ApiException(404, 'Must explicitly create event first')
-
-
-@module.route('/api/1/gynecological/chart/', methods=['POST'])
-@api_method
-def api_1_gyn_chart_create():
-    ticket_id = request.args.get('ticket_id')
-    client_id = request.args.get('client_id')
-
-    chart_creator = GynecologicCardCreator(client_id, ticket_id)
     chart_creator(create=True)
     return dict(
         represent_pregnancy_event(chart_creator.event),
@@ -336,7 +307,8 @@ def api_0_mini_attach_lpu(client_id):
 @api_method
 def api_0_gravidograma(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': represent_checkups(event),
-        'card_attributes': represent_pregnancy_card_attributes(event)
+        'checkups': map(represent_checkup, card.checkups),
+        'card_attributes': represent_pregnancy_card_attributes(card.attrs)
     }
