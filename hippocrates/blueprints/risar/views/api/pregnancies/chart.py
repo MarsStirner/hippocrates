@@ -9,7 +9,7 @@ from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_dates
 from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_event, group_orgs_for_routing, \
-    represent_pregnancy_card_attributes, represent_checkup, represent_chart_for_routing, \
+    represent_pregnancy_card_attributes, represent_pregnancy_checkup_wm, represent_chart_for_routing, \
     represent_chart_for_card_fill_rate_history
 from hippocrates.blueprints.risar.lib.utils import get_last_checkup_date
 from hippocrates.blueprints.risar.risar_config import attach_codes, request_type_pregnancy
@@ -309,6 +309,6 @@ def api_0_gravidograma(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': map(represent_checkup, card.checkups),
+        'checkups': map(represent_pregnancy_checkup_wm, card.checkups),
         'card_attributes': represent_pregnancy_card_attributes(card.attrs)
     }

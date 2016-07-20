@@ -11,7 +11,7 @@ from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
-    puerpera_inspection_code
+    puerpera_inspection_code, risar_gyn_general_anamnesis_code, risar_gyn_checkup_codes
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -32,7 +32,7 @@ class PreviousPregnancy(object):
 
     @lazy
     def newborn_inspections(self):
-        return get_previous_children(self._action.id)
+        return get_previous_children(self._action)
 
 
 class AbstractCard(object):
@@ -73,6 +73,10 @@ class AbstractCard(object):
     @lazy
     def intolerances(self):
         return list(itertools.chain(self.event.client.allergies, self.event.client.intolerances))
+
+    @lazy
+    def prev_pregs(self):
+        return map(PreviousPregnancy, get_action_list(self.event, risar_anamnesis_pregnancy))
 
     def reevaluate_card_attrs(self):
         pass
@@ -232,25 +236,6 @@ class PregnancyCard(AbstractCard):
     def checkups_puerpera(self):
         return get_action_list(self.event, puerpera_inspection_code).all()
 
-    @lazy
-    def prev_pregs(self):
-        return [
-            PreviousPregnancy(action)
-            for action in get_action_list(self.event, risar_anamnesis_pregnancy).all()
-        ]
-
-    @property
-    def anamnesis(self):
-        return self._anamnesis
-
-    @lazy
-    def checkups(self):
-        return get_action_list(self.event, checkup_flat_codes).all()
-
-    @lazy
-    def prev_pregs(self):
-        return get_action_list(self.event, risar_anamnesis_pregnancy).all()
-
     def reevaluate_card_attrs(self):
         """
         Пересчёт атрибутов карточки беременной
@@ -269,8 +254,18 @@ class PregnancyCard(AbstractCard):
             reevaluate_card_fill_rate_all(self)
 
 
-
-
 class GynecologicCard(AbstractCard):
     cache = LocalCache()
     action_type_attrs = gynecological_card_attrs
+
+    def __init__(self, event):
+        super(GynecologicCard, self).__init__(event)
+
+    @lazy
+    def anamnesis(self):
+        return get_action(self.event, risar_gyn_general_anamnesis_code)
+
+    @lazy
+    def checkups(self):
+        return get_action_list(self.event, risar_gyn_checkup_codes).all()
+

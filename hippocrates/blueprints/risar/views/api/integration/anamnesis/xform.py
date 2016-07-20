@@ -373,7 +373,7 @@ class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
 
     @none_default
     def _represent_children(self):
-        prev_children = get_previous_children(self.target_obj.id)
+        prev_children = get_previous_children(self.target_obj)
         return self.or_undefined([
             {
                 'is_alive': self.or_undefined(child.alive),

@@ -8,13 +8,12 @@ from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import check_disease
 from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from hippocrates.blueprints.risar.lib.represent.common import represent_prop_value, safe_action_property, \
-    represent_event, represent_action_diagnoses, represent_diag_shortly, represent_intolerance, represent_fetus, \
-    represent_transfusion, represent_pregnancy
+from hippocrates.blueprints.risar.lib.represent.common import represent_event, represent_action_diagnoses, represent_intolerance, represent_fetus, \
+    represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures
 from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
-from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix
+from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix, \
+    represent_prop_value, safe_action_property
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import mother_codes, father_codes, risar_epicrisis, attach_codes
 from nemesis.app import app
@@ -22,7 +21,6 @@ from nemesis.lib.utils import safe_traverse_attrs, safe_date
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
-from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import PregnancyPathology, CardFillRate, Gender
 from nemesis.models.exists import rbAttachType
 from nemesis.models.risar import rbPerinatalRiskRate, rbPerinatalRiskRateMkbAssoc
@@ -239,44 +237,21 @@ def represent_father_action(action):
     return represent_father
 
 
-def represent_checkup(action, with_measures=True, measures_error=None):
-    result = dict(
-        (code, prop.value)
-        for (code, prop) in action.propsByCode.iteritems()
-    )
-    result['beg_date'] = action.begDate
-    result['end_date'] = action.endDate
-    result['person'] = action.person
-    result['flat_code'] = action.actionType.flatCode
-    result['id'] = action.id
-
-    result['diagnoses'] = represent_action_diagnoses(action)
-    result['diagnosis_types'] = action.actionType.diagnosis_types
+def represent_pregnancy_checkup(action):
+    result = represent_checkup(action)
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
-
-    if with_measures:
-        em_ctrl = EventMeasureController()
-        measures = em_ctrl.get_measures_in_action(action)
-        result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
-    if measures_error:
-        result['em_error'] = measures_error
     return result
 
 
-def represent_checkup_puerpera(action, with_measures=True):
-    result = dict(
-        (code, prop.value)
-        for (code, prop) in action.propsByCode.iteritems()
-    )
-    result['beg_date'] = action.begDate
-    result['end_date'] = action.endDate
-    result['person'] = action.person
-    result['flat_code'] = action.actionType.flatCode
-    result['id'] = action.id
+def represent_pregnancy_checkup_wm(action):
+    result = represent_pregnancy_checkup(action)
+    result['measures'] = represent_measures(action)
+    return result
 
-    result['diagnoses'] = represent_action_diagnoses(action)
-    result['diagnosis_types'] = action.actionType.diagnosis_types
+
+def represent_pregnancy_checkup_puerpera(action):
+    result = represent_checkup(action)
 
     # if with_measures:
     #     em_ctrl = EventMeasureController()
@@ -286,64 +261,15 @@ def represent_checkup_puerpera(action, with_measures=True):
 
 
 def represent_pregnancy_checkup_shortly(action):
-    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
-
-    card = PregnancyCard.get_for_event(action.event)
-    # Получим диагностики, актуальные на начало действия (Diagnostic JOIN Diagnosis)
-    diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
-    diagnosis_ids = [
-        diagnostic.diagnosis_id for diagnostic in diagnostics
-    ]
-    # Ограничим диагностиками, связанными с действием как "Основной диагноз"
-    diagnostic = Diagnostic.query.join(
-        Action_Diagnosis, Action_Diagnosis.diagnosis_id == Diagnostic.diagnosis_id
-    ).join(
-        rbDiagnosisKind,
-    ).filter(
-        Action_Diagnosis.action == action,
-        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
-        rbDiagnosisKind.code == 'main',
-    ).first()
-
     pregnancy_week = get_action_property_value(action.id, 'pregnancy_week')
-    result = {
-        'id': action.id,
-        'beg_date': action.begDate,
-        'end_date': action.endDate,
-        'person': action.person,
-        'flat_code': action.actionType.flatCode,
-        'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
-        'calculated_pregnancy_week': get_pregnancy_week(action.event, date=action.begDate),
-        'diag': represent_diag_shortly(diagnostic) if diagnostic else None
-    }
+    result = represent_checkup_shortly(action)
+    result['pregnancy_week'] = pregnancy_week.value if pregnancy_week else None
+    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     return result
 
 
 def represent_checkup_puerpera_shortly(action):
-    from nemesis.models.diagnosis import Action_Diagnosis
-
-    card = PregnancyCard.get_for_event(action.event)
-    # Получим диагностики, актуальные на начало действия (Diagnostic JOIN Diagnosis)
-    diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
-    diagnosis_ids = [
-        diagnostic.diagnosis_id for diagnostic in diagnostics
-    ]
-    diagnostic = Diagnostic.query.join(
-        Action_Diagnosis, Action_Diagnosis.diagnosis_id == Diagnostic.diagnosis_id
-    ).filter(
-        Action_Diagnosis.action == action,
-        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
-    ).first()
-
-    result = {
-        'id': action.id,
-        'beg_date': action.begDate,
-        'end_date': action.endDate,
-        'person': action.person,
-        'flat_code': action.actionType.flatCode,
-        'diag': represent_diag_shortly(diagnostic) if diagnostic else None
-    }
-    return result
+    return represent_checkup_shortly(action)
 
 
 def represent_pregnancy_epicrisis(event, action=None):
