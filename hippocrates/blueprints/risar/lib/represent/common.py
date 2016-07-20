@@ -2,27 +2,23 @@
 import collections
 import copy
 
-from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard, AbstractCard
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
-from hippocrates.blueprints.risar.lib.utils import action_apt_values
+from hippocrates.blueprints.risar.lib.utils import action_as_dict
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_int, safe_bool
+from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import Gender, IntoleranceType, AllergyPower
 from nemesis.models.event import Event
 from nemesis.models.exists import rbAttachType
 from nemesis.models.schedule import ScheduleTicket
 
 __author__ = 'viruzzz-kun'
-
-
-def represent_prop_value(prop):
-    if prop.value is None:
-        return [] if prop.type.isVector else None
-    else:
-        return prop.value
 
 
 def represent_header(event):
@@ -61,11 +57,6 @@ def represent_event_client(client):
         'attach_lpu': get_lpu_attached(client.attachments),
         'phone': client.contacts.first()
     }
-
-
-def safe_action_property(action, prop_name, default=None):
-    prop = action.propsByCode.get(prop_name)
-    return prop.value if prop else default
 
 
 def represent_event(event):
@@ -119,7 +110,7 @@ def represent_event_diagnoses(event):
 def represent_action_diagnoses(action):
     from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
 
-    card = PregnancyCard.get_for_event(action.event)
+    card = AbstractCard.get_for_event(action.event)
 
     # Сперва достаём диагностики на время действия
     diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
@@ -271,14 +262,20 @@ def represent_chart_for_close_event(event):
 
 
 def represent_transfusion(action):
-    return dict(action_apt_values(action, transfusion_apt_codes), id=action.id)
-
-
-def represent_pregnancy(action):
     return dict(
-        action_apt_values(action, pregnancy_apt_codes),
-        newborn_inspections=map(represent_anamnesis_newborn_inspection, get_previous_children(action.id)),
+        action_as_dict(action, transfusion_apt_codes),
         id=action.id
+    )
+
+
+def represent_pregnancy(pregnancy):
+    return dict(
+        action_as_dict(pregnancy.action, pregnancy_apt_codes),
+        newborn_inspections=map(
+            represent_anamnesis_newborn_inspection,
+            get_previous_children(pregnancy.action)
+        ),
+        id=pregnancy.action.id
     )
 
 
@@ -292,3 +289,58 @@ def represent_anamnesis_newborn_inspection(child):
         'abnormal_development': safe_bool(child.abnormal_development),
         'neurological_disorders': safe_bool(child.neurological_disorders),
     }
+
+
+def represent_checkup(action):
+    result = action_as_dict(action)
+    result['beg_date'] = action.begDate
+    result['end_date'] = action.endDate
+    result['person'] = action.person
+    result['flat_code'] = action.actionType.flatCode
+    result['id'] = action.id
+
+    result['diagnoses'] = represent_action_diagnoses(action)
+    result['diagnosis_types'] = action.actionType.diagnosis_types
+    return result
+
+
+def represent_checkup_shortly(action):
+    """
+    This is a base for any checkups
+    @type action: Action
+    @param action:
+    @return:
+    """
+    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
+
+    card = AbstractCard.get_for_event(action.event)
+    # Получим диагностики, актуальные на начало действия (Diagnostic JOIN Diagnosis)
+    diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
+    diagnosis_ids = [
+        diagnostic.diagnosis_id for diagnostic in diagnostics
+    ]
+    # Ограничим диагностиками, связанными с действием как "Основной диагноз"
+    diagnostic = Diagnostic.query.join(
+        Action_Diagnosis, Action_Diagnosis.diagnosis_id == Diagnostic.diagnosis_id
+    ).join(
+        rbDiagnosisKind,
+    ).filter(
+        Action_Diagnosis.action == action,
+        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
+        rbDiagnosisKind.code == 'main',
+    ).first()
+    result = {
+        'id': action.id,
+        'beg_date': action.begDate,
+        'end_date': action.endDate,
+        'person': action.person,
+        'flat_code': action.actionType.flatCode,
+        'diag': represent_diag_shortly(diagnostic) if diagnostic else None
+    }
+    return result
+
+
+def represent_measures(action):
+    return EventMeasureRepr().represent_listed_event_measures_in_action(
+        EventMeasureController().get_measures_in_action(action)
+    )

@@ -7,18 +7,18 @@ from nemesis.lib.utils import safe_int, safe_bool_none, safe_double
 from nemesis.systemwide import db
 
 
-def get_previous_children(action_id):
-    if not action_id:
+def get_previous_children(action):
+    if not action:
         return []
     return db.session.query(RisarPreviousPregnancy_Children).filter(
-        RisarPreviousPregnancy_Children.action_id == action_id
+        RisarPreviousPregnancy_Children.action == action
     ).order_by(
         RisarPreviousPregnancy_Children.id
     ).all()
 
 
 def create_or_update_prev_children(action, newborn_inspections_data):
-    existing_prev_children = get_previous_children(action.id)
+    existing_prev_children = get_previous_children(action)
     children = []
     deleted_children = []
     for new_data, exist_child in itertools.izip_longest(newborn_inspections_data, existing_prev_children):
