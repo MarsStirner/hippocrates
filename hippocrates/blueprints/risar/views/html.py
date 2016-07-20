@@ -148,7 +148,7 @@ def html_anamnesis_father_edit():
 
 @module.route('/inspection.html')
 def html_inspection():
-    return render_template('risar/inspection_view.html')
+    return render_template('risar/unpregnant/inspection_view.html')
 
 
 @module.route('/inspection/gravidograma.html')
@@ -183,10 +183,11 @@ def html_inspection_edit():
         first_inspection = Action.query.join(ActionType).filter(Action.event_id == event_id, Action.deleted == 0,
                                                                ActionType.flatCode == 'risarFirstInspection').first()
         flat_code = 'risarSecondInspection' if first_inspection else 'risarFirstInspection'
-    if flat_code == 'risarFirstInspection':
-        return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
-    elif flat_code == 'risarSecondInspection':
-        return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
+    return render_template('risar/unpregnant/inspection_edit.html', debug_data=debug_data)
+    # if flat_code == 'risarFirstInspection':
+    #     return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
+    # elif flat_code == 'risarSecondInspection':
+    #     return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
 
 
 @module.route('/inspection_pc_read.html')

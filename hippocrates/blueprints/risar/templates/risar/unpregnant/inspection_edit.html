@@ -45,7 +45,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="vagina" href="#vagina" data-toggle="tab">
+                                    <a aria-controls="bimanual" href="#bimanual" data-toggle="tab">
                                         <span class="badge">5</span>
                                         <span>Бимануальное исследование</span>
                                     </a>
@@ -121,7 +121,7 @@
                                         <td class="text-right col-md-4">Особенности</td>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': commonForm.last_menstruation_features.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
-                                            <rb-select name="state" ng-model="checkup.last_menstruation_features" ref-book="rbRisarLastMenstruationFeatures"
+                                            <rb-select name="last_menstruation_features" ng-model="checkup.last_menstruation_features" ref-book="rbRisarLastMenstruationFeatures"
                                                        ng-required="true"></rb-select>
                                             </div>
                                         </div></td>
@@ -463,8 +463,7 @@
                                         <td class="text-right col-md-4">Половой партнер</td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="intercourse_partner" ng-model="checkup.intercourse_partner" 
-                                                       ng-required="true"></rb-select>
+                                            <rb-select name="intercourse_partner" ng-model="checkup.intercourse_partner" ng-required="true" ref-book="rbRisarIntercoursePartner"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -516,37 +515,338 @@
                                         <th class="text-right">Примечания <span>&nbsp;</span></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.comments" /></div></div></td>
                                     </tr>
+                                    
                                     <!-- END OBJECTIVE-->
-                                    <!-- START GENITALS-->
-                                     <!-- END GENITALS-->
+                                    
+                                    <!-- START GENITALS-->                                    
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Характер оволосения</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis" 
+                                                      ref-book="rbRisarVulvaPilosis" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Региональные паховые лимфоузлы</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="vulva_pilosis" ng-model="checkup.groin_glands" 
+                                                      ref-book="rbRisarVulvaPilosis" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right">Состояние кожи <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vulva_skin" ref-book="rbRisarVulvaSkin">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right"></td>
+                                        <td><input ng-disabled="true" ng-model="checkup.vulva_skin_adds" class="form-control"></td>
+                                    </tr>
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right">Состояние слизистой <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vulva_mucous" ref-book="rbRisarMucous">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right"></td>
+                                        <td><input ng-disabled="true" ng-model="checkup.vulva_mucous_adds" class="form-control"></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Степень развития наружных половых органов</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" 
+                                                      ref-book="rbRisarVulvaGermination" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right">Область уретры <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.urethra.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="urethra" refbook-checkbox ng-model="checkup.urethra" ref-book="rbRisarUrethra">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right"></td>
+                                        <td><input ng-disabled="true" ng-model="checkup.urethra_adds" class="form-control"></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right">Перианальная область <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.perianal_zona.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.perianal_zona" ref-book="rbRisarPerianalZona">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right col-md-4">Выделения</th>
+                                        <td class="col-md-8">
+    
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                    <!-- example multiple -->
+                                        <td class="text-right">Консистенция</td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.vulva_discharge_consistency"></rb-select></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Цвет</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="discharge_colour" ng-model="checkup.vulva_discharge_colour" ref-book="rbRisarDischargeColour"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Количество</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="discharge_quantity" ng-model="checkup.vulva_discharge_quantity" ref-book="rbRisarDischargeQuantity"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Запах</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="discharge_smell" ng-model="checkup.vulva_discharge_smell" ref-book="rbRisarDischargeSmell"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                        <tr>
+                                        <!-- example text -->
+                                        <th class="text-right">Дополнительная информация <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.vulva_comments" /></div></div></td>
+                                    </tr>
+                                    
+                                    <!-- END GENITALS-->
+                                    
+                                    <!-- START MIRRORS-->
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Влагалище</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors" 
+                                                      ref-book="rbRisarVaginaGenVisit" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right"></td>
+                                        <td><input ng-disabled="true" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
+                                    </tr> 
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Стенки влагалища</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors" 
+                                                      ref-book="rbRisarVaginaParies" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right"></td>
+                                        <td><input ng-disabled="true" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                   
+                                    <tr>
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4">Шейка матки</th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" 
+                                                      ref-book="rbRisarCervixUteri" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4">Размеры</th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="cervix_uteri_size_mirrors" ng-model="checkup.cervix_uteri_size_mirrors" 
+                                                      ref-book="rbRisarCervixUteriSize" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>  
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4">Форма</th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="cervix_uteri_shape_mirrors" ng-model="checkup.cervix_uteri_shape_mirrors" 
+                                                      ref-book="rbRisarCervixUteriShape" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example checkbox -->
+                                        <td class="text-right">Эрозия</td>
+                                        <td><input ng-model="checkup.ectropion_mirrors" class="checkbox" type="checkbox"></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example checkbox -->
+                                        <td class="text-right">Эрозированный эктропион</td>
+                                        <td><input ng-model="checkup.anabrosis_mirrors" class="checkbox" type="checkbox"></td>
+                                    </tr>
+                                     <tr>  
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Наружный зев</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="uterus_external_orifice_mirrors" ng-model="checkup.uterus_external_orifice_mirrors" 
+                                                      ref-book="rbRisarUterusExternalOrifice" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <td class="text-right">Своды влагалища </td>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vaginal_fornix_mirrors.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vaginal_fornix_mirrors" ref-book="rbRisarVaginalFornix">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
 
                                     <tr>
-                                        <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
-                                        <td><div class="row"
-                                                 ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
-                                            <div class="col-md-2">
-                                                <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
-                                            </div>
-                                            </div>
+                                        <!-- example short_string -->
+                                        <td class="text-right"></td>
+                                        <td><input ng-disabled="true" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <th class="text-right col-md-4">Выделения</th>
+                                        <td class="col-md-8">
+    
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Массо-ростовой коэффициент (МРК) <span>&nbsp;</span></th>
-                                        <td><div class="row">
-                                            <div class="col-md-2">
-                                                <input disabled ng-model="checkup.hw_ratio" class="form-control">
-                                            </div>
-                                            </div>
-                                        </td>
+                                    <!-- example multiple -->
+                                        <td class="text-right">Консистенция</td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.discharge_consistency_mirrors"></rb-select></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Индекс массы тела <span>&nbsp;</span></th>
-                                        <td><div class="row">
-                                            <div class="col-md-2">
-                                                <input disabled ng-model="checkup.BMI" class="form-control">
-                                            </div></div>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Цвет</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="discharge_colour_mirrors" ng-model="checkup.discharge_colour_mirrors" ref-book="rbRisarDischargeColour"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Количество</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity_mirrors" ref-book="rbRisarDischargeQuantity"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Запах</td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-4">
+                                            <rb-select name="discharge_smell" ng-model="checkup.discharge_smell_mirrors" ref-book="rbRisarDischargeSmell"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                        <tr>
+                                        <!-- example text -->
+                                        <th class="text-right">Дополнительная информация <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.comments_mirrors" /></div></div></td>
+                                    </tr>
+
+                                    <!-- END MIRRORS-->
+                                    
+
+
+                                    <!-- START BIMANUAL -->
+                                    
+                                    Тело матки   ExtReferenceRb  rbRisarUterusBodyGenVisit   bimanual_uterus_body    Да
+
+                                     Маточные трубы слева String      bimanual_uterine_tubes_left  
+                                     Маточные трубы справа    String      bimanual_uterine_tubes_right     
+                                     Положение    ExtReferenceRb  rbRisarUteriPositionGenVisit    bimanual_uteri_position Да
+                                     Размеры  ExtReferenceRb  rbRisarBody_Of_Womb_Size    bimanual_body_of_womb_size   
+                                     Размеры. Увеличены до    String      bimanual_body_of_womb_enlarged   
+                                     Своды влагалища  ExtReferenceRb  rbRisarVaginalFornix    bimanual_vaginal_fornix Да
+                                     Яичники слева.Другое String      bimanual_ovary_left_oher     
+                                     Яичники справа.Другое    String      bimanual_ovary_right_oher    
+                                    Дополнительная информация Text        bimanual_comments    
+                                    Яичники слева ExtReferenceRb   rbRisarOvary   bimanual_ovary_left Да
+                                    Яичники справа    ExtReferenceRb   rbRisarOvary   bimanual_ovary_right    Да
+                                    <tr>
+                                        <th class="text-right col-md-4">Матка</th>
+                                        <td class="col-md-8">
+    
                                         </td>
                                     </tr>
+    
+
+                                    <tr>
+                                        <th class="text-right">Шейка матки <span class="text-danger">*</span></th>
+                                        <td><div class="row" ng-class="{'has-error': bimanualForm.bimanual_cervix_uteri.$invalid && vaginaForm.submit_attempt}">
+                                            <div class="col-md-4"><rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervix" ng-required="true"></rb-select></div>
+                                        </div></td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class="text-right">Консистенция<span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-4">
+                                            <rb-select ng-model="checkup.bimanual_cervix_consistency`" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
+                                    </tr>
+    
+    
+
+                                    <tr>
+                                    <!-- example multiple -->
+                                        <td class="text-right">Характер </td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.bimanual_uterus_body"></rb-select></td>
+                                    </tr>                                   
+
+                                    <!-- END BIMANUAL -->
+
+                                    
                                 </tbody>
                             </table>
                         </div>

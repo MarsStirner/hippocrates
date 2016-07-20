@@ -30,6 +30,55 @@
         </div>
     </div>
 {% endmacro %}
+{% macro print_table_row(prop_name, prop_type, prop_value, refbook=None, model="checkup", is_vector=False, bold=False, required=False, add_field_name=None) %}
+    {%-  if prop_type == "String" %}
+        <tr>
+            <!-- example short_string -->
+            <td class="text-right">{{ prop_name }}</td>
+            <td><input ng-disabled="true" ng-model="{{ model }}.{{prop_value}}" class="form-control"></td>
+        </tr>
+    {%  elif prop_type == "ExtReferenceRb" %}
+        {%-  if is_vector == "Да" %}
+            <tr>
+                <!-- example multiple -->
+                <td class="text-right">{{ prop_name }}</td>
+                <td><rb-select multiple="true" ref-book="{{ refbook }}" ng-model="{{model}}.{{prop_value}}"></rb-select></td>
+            </tr>
+
+        {% else %}
+
+            <tr>
+            <!-- example select -->
+                <td class="text-right col-md-4">{{ prop_name }}</td>
+                {# ng-class="{'has-error': commonForm.last_menstruation_features.$invalid && somaticForm.submit_attempt}" #}
+                <td class="col-md-8"><div class="row" >
+                    <div class="col-md-4">
+                    <rb-select name="{{prop_value}}" ng-model="{{model}}.{{prop_value}}" ref-book="{{ refbook }}"
+                               {{  ng-required="true" if required else '' }}></rb-select>
+                    </div>
+                </div></td>
+            </tr>
+
+        {% endif -%}
+
+    {%  elif prop_type == "Text" %}
+         <tr>
+            <!-- example text -->
+            <th class="text-right">{{ prop_name }}   <span>&nbsp;</span></th>
+            <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="{{model}}.{{prop_value}}" /></div></div></td>
+        </tr>
+
+    {%  elif prop_type == "Boolean" %}
+        <tr>
+            <!-- example checkbox -->
+            <td class="text-right">{{ prop_name }}</td>
+            <td><input ng-model="{{model}}.{{prop_value}}" class="checkbox" type="checkbox"></td>
+        </tr>
+
+    {%  elif prop_type == "Date" %}
+    {%  elif prop_type == "Double" %}
+    {% endif -%}
+{% endmacro %}
 
 
 {% macro unpregnant_page_title_n(title) %}
