@@ -127,10 +127,18 @@ def html_auto_chart():
 def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
 
+@module.route('/gynecological-anamnesis.html')
+def html_gynecological_anamnesis():
+    return render_template('risar/unpregnant/anamnesis_view.html')
+
 
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
-    return render_template('risar/anamnesis_mother_edit.html')
+    return render_template('risar/anamnesis_mother_edit.html')\
+
+@module.route('/gynecological-anamnesis/edit.html')
+def html_gynecological_anamnesis_edit():
+    return render_template('risar/unpregnant/anamnesis_edit.html')
 
 
 @module.route('/anamnesis/father_edit.html')
@@ -140,7 +148,7 @@ def html_anamnesis_father_edit():
 
 @module.route('/inspection.html')
 def html_inspection():
-    return render_template('risar/inspection_view.html')
+    return render_template('risar/unpregnant/inspection_view.html')
 
 
 @module.route('/inspection/gravidograma.html')
@@ -175,10 +183,11 @@ def html_inspection_edit():
         first_inspection = Action.query.join(ActionType).filter(Action.event_id == event_id, Action.deleted == 0,
                                                                ActionType.flatCode == 'risarFirstInspection').first()
         flat_code = 'risarSecondInspection' if first_inspection else 'risarFirstInspection'
-    if flat_code == 'risarFirstInspection':
-        return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
-    elif flat_code == 'risarSecondInspection':
-        return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
+    return render_template('risar/unpregnant/inspection_edit.html', debug_data=debug_data)
+    # if flat_code == 'risarFirstInspection':
+    #     return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
+    # elif flat_code == 'risarSecondInspection':
+    #     return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
 
 
 @module.route('/inspection_pc_read.html')
@@ -248,6 +257,10 @@ def html_ambulance_patient_info():
 @module.route('/measure_list.html')
 def html_event_measure():
     return render_template('risar/event_measure_list.html')
+
+@module.route('/gynecological-measure_list.html')
+def html_gynecological_event_measure():
+    return render_template('risar/event_measure_list.html', unpregnant=True)
 
 
 @module.route('/stats/org-birth-care/')

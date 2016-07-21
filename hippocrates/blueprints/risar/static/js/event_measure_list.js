@@ -134,6 +134,7 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
         $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
             then(function () {
                 $scope.setViewMode('table');
+                $scope.excl_rbMeasureStatus = _.reject($scope.rbMeasureStatus.objects, function(item){return _.include($scope.without_statuses, item.code)});
             });
         RisarApi.measure.get_checkups($scope.event_id).then(function (data) {
              $scope.model.checkups = data.checkups;

@@ -372,6 +372,36 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
     };
     reload_anamnesis();
 };
+var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi) {
+    $controller('AnamnesisBaseCtrl', {$scope: $scope});
+
+    $scope.menstruation_max_date= new Date();
+    $scope.menstruation_max_date.setDate($scope.menstruation_max_date.getDate() - 1);
+
+    var reload_anamnesis = function () {
+        $scope.reload_header();
+        RisarApi.anamnesis.unpregnant.get($scope.event_id)
+        .then(function (anamnesis_unpregnant) {
+            $scope.anamnesis_unpregnant = anamnesis_unpregnant ? anamnesis_unpregnant : {finished_diseases: [],
+                current_diseases: []};
+        })
+    };
+    $scope.save = function () {
+        $scope.submit_attempt = true;
+        var form = $scope.anamnesisUnpregnantForm;
+        if (form.$invalid) {
+            var formelm = $('#anamnesisUnpregnantForm').find('.ng-invalid:not(ng-form):first');
+            $document.scrollToElement(formelm, 100, 1500);
+            return false;
+        }
+        var model = $scope.anamnesis_unpregnant;
+        RisarApi.anamnesis.mother.save($scope.event_id, model)
+        .then(function (data) {
+            $scope.anamnesis_unpregnant = data;
+        })
+    };
+    reload_anamnesis();
+};
 var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
     var reload_anamnesis = function () {

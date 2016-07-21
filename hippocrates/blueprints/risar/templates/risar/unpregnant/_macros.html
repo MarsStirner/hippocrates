@@ -1,0 +1,144 @@
+{% extends 'risar/_macros.html'%}
+
+{# ^ Ниже описываем то, что отличается от карты беременной, если будет отличаться всё - удалить! #}
+
+{% macro navigation_unpreg(event_id_repl, endpoints, ext_header=None) %}
+    <div class="novmargin">
+        <div class="btn-group">
+            <!-- todo: replace urls_for -->
+            <a ng-href="{{ url_for('.html_gynecological_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_chart']) }}>Карта пациентки</a>
+            <a ng-href="{{ url_for('.html_gynecological_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_anamnesis', '.html_anamnesis_father_edit', '.html_anamnesis_mother_edit']) }}>Анамнез</a>
+            <a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection',]) }}>Осмотры</a>
+            <a ng-href="{{ url_for('.html_concilium_list') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_concilium_list', '.html_concilium']) }}>Консилиумы</a>
+            <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+            <a  ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Взять на диспансерный учёт <span class="fa fa-caret-down"></span></button>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a ng-href="{#{{ url_for('.html_event_diagnoses') }}#}?event_id={{ event_id_repl }}">-По беременности</a></li>
+                    <li><a ng-href="{#{{ url_for('.html_event_measure') }}#}?event_id={{ event_id_repl }}">-По заболеванию</a></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">-Диагнозы пациентки</a></li>
+                    <li><a ng-href="{{ url_for('.html_gynecological_event_measure') }}?event_id={{ event_id_repl }}">Мероприятия пациентки</a></li>
+                    <li><a ng-href="{#{{ url_for('.html_card_fill_history') }}?event_id={{ event_id_repl }}#}">-Случаи беременности</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+{% macro print_table_row(prop_name, prop_type, prop_value, refbook=None, model="checkup", is_vector=False, bold=False, required=False, add_field_name=None) %}
+    {%-  if prop_type == "String" %}
+        <tr>
+            <!-- example short_string -->
+            <td class="text-right">{{ prop_name }}</td>
+            <td><input ng-disabled="true" ng-model="{{ model }}.{{prop_value}}" class="form-control"></td>
+        </tr>
+    {%  elif prop_type == "ExtReferenceRb" %}
+        {%-  if is_vector == "Да" %}
+            <tr>
+                <!-- example multiple -->
+                <td class="text-right">{{ prop_name }}</td>
+                <td><rb-select multiple="true" ref-book="{{ refbook }}" ng-model="{{model}}.{{prop_value}}"></rb-select></td>
+            </tr>
+
+        {% else %}
+
+            <tr>
+            <!-- example select -->
+                <td class="text-right col-md-4">{{ prop_name }}</td>
+                {# ng-class="{'has-error': commonForm.last_menstruation_features.$invalid && somaticForm.submit_attempt}" #}
+                <td class="col-md-8"><div class="row" >
+                    <div class="col-md-4">
+                    <rb-select name="{{prop_value}}" ng-model="{{model}}.{{prop_value}}" ref-book="{{ refbook }}"
+                               {{  ng-required="true" if required else '' }}></rb-select>
+                    </div>
+                </div></td>
+            </tr>
+
+        {% endif -%}
+
+    {%  elif prop_type == "Text" %}
+         <tr>
+            <!-- example text -->
+            <th class="text-right">{{ prop_name }}   <span>&nbsp;</span></th>
+            <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="{{model}}.{{prop_value}}" /></div></div></td>
+        </tr>
+
+    {%  elif prop_type == "Boolean" %}
+        <tr>
+            <!-- example checkbox -->
+            <td class="text-right">{{ prop_name }}</td>
+            <td><input ng-model="{{model}}.{{prop_value}}" class="checkbox" type="checkbox"></td>
+        </tr>
+
+    {%  elif prop_type == "Date" %}
+    {%  elif prop_type == "Double" %}
+    {% endif -%}
+{% endmacro %}
+
+
+{% macro unpregnant_page_title_n(title) %}
+<h1>
+    {{ title }}
+    ([[ header.event.external_id ]])
+    <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+</h1>
+<div class="row vmargin10">
+    <div class="col-md-12 col-lg-12 col-sm-12">
+        <div class="alert-warning">Под наблюдением в <b>[[ header.event.person.organisation.short_name ]]</b>
+            у <b>[[ header.event.person.name ]]</b>
+            с <b>[[ header.event.set_date | asDate ]]</b>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro unpregnant_page_title_ext_n(title, ext_header=None) %}
+    {%- if ext_header == 'chart' %}
+        {% set w1 = 8 %} {% set w2 = 4 %}
+    {%  elif ext_header == 'inspection' %}
+        {% set w1 = 10 %} {% set w2 = 2 %}
+    {% endif -%}
+    <div class="row">
+    <div class="col-md-8 col-lg-8 col-sm-12">
+    <h1>
+        {{ title }}
+        ([[ header.event.external_id ]])
+        <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+    </h1>
+    </div>
+    <div class="col-md-4 col-lg-4 col-sm-12">
+    {#    <div class="col-md-{{ w2 }} col-sm-12 achievements">#}
+        <div class="achievements">
+            {%- if ext_header == 'chart' %}
+                <span class="pull-right" style="padding-right: 20px;">
+                    <i pregnancy-week-icon="chart.pregnancy_week" pregnancy-start-date="chart.card_attributes.pregnancy_start_date"></i>
+                    <i risk-rate-icon="chart.risk_rate"></i>
+                    <i preeclampsia-susp-icon="chart.preeclampsia_susp_rate"></i>
+                    <i preeclampsia-confirmed-icon="chart.preeclampsia_confirmed_rate"></i>
+                    <i card-fill-rate-icon="chart.card_fill_rates" event-id="header.event.id"></i>
+                </span>
+            {% elif ext_header == 'inspection' %}
+                <div class="text-right" style="height: 34px;">
+                    <a class="btn-link text-center" href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]"><i class="fa fa-table" tooltip="Осмотры акушером-гинекологом" style="width: 32px"></i></a>
+                    <a class="btn-link text-center" href="{{ url_for('.html_gravidograma') }}?event_id=[[ header.event.id ]]"><i class="fa fa-line-chart" tooltip="Гравидограмма" style="width: 32px"></i></a>
+                </div>
+            {% endif -%}
+        </div>
+    </div>
+    </div>
+    <div class="row vmargin10">
+        <div class="col-md-12 col-lg-12 col-sm-12">
+            <div class="alert-warning">Под наблюдением в <b>[[ header.event.person.organisation.short_name ]]</b>
+                у <b>[[ header.event.person.name ]]</b>
+                {# {{ url_for('.html_anamnesis') } #}
+                <b><a ng-href="?event_id=[[ chart.id ]]">изменить</a></b>
+            </div>
+        </div>
+    </div>
+{% endmacro %}

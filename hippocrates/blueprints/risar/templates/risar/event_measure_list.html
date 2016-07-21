@@ -1,13 +1,15 @@
 {% extends 'risar/base/base.html' %}
-{% import 'risar/_macros.html' as rimacros %}
+{% import 'risar/unpregnant/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
+
+<!--//todo: ^think about how to set it -->
 <div ng-controller="EventMeasureListCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title_n('Мероприятия случая') }}
-        {{ rimacros.navigation('[[ event_id ]]') }}
+        {{ rimacros.unpregnant_page_title_n('Мероприятия Пациентки') if unpregnant else rimacros.page_title_n('Мероприятия случая') }}
+        {{ rimacros.navigation_unpreg('[[ event_id ]]')  if unpregnant else rimacros.navigation('[[ event_id ]]')}}
     </section>
     <section class="content">
         <div class="row">
@@ -48,6 +50,7 @@
                         </div>
                     </div>
                 </div>
+                {%- if not unpregnant %}
 
                 <div class="form-group" ng-show="!isCalendarMode()">
                     <label>Дата окончания</label>
@@ -61,9 +64,17 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div  class="form-group">
                     <label>Статус мероприятия</label>
                     <div fs-checkbox="" items="rbMeasureStatus.objects" ng-model="query.status" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                {%endif -%}
+
+                <div ng-init="without_statuses=['overdue', 'cancelled_changed_data']" class="form-group">
+                    <label>Статус мероприятия</label>
+                    <div fs-checkbox="" items="excl_rbMeasureStatus" ng-model="query.status" class="nopadding">
                         [[ item.name ]]
                     </div>
                 </div>
@@ -90,8 +101,11 @@
                                 <th>Тип</th>
                                 <th>Название</th>
                                 <th>Статус</th>
+
                                 <th>Дата начала</th>
+                                {%- if not unpregnant %}
                                 <th>Дата окончания</th>
+                                {%- endif %}
                                 <th width="1%"></th>
                             </tr>
                             </thead>
@@ -108,7 +122,7 @@
                                     <event-measure-status status="em.data.status"></event-measure-status>
                                 </td>
                                 <td>[[ em.data.beg_datetime | asDate ]]</td>
-                                <td>[[ em.data.end_datetime | asDate ]]</td>
+                                 {%- if not unpregnant %}<td>[[ em.data.end_datetime | asDate ]]</td> {%- endif %}
                                 <td class="nowrap">
                                     <div class="btn-group" style="min-width: 125px">
                                         <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">

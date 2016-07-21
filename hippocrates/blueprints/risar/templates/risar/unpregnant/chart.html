@@ -1,0 +1,307 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/unpregnant/_macros.html' as rimacros %}
+
+{% block title %}> Карта пациентки{% endblock %}
+
+{% block main %}
+<div ng-controller="ChartCtrl" ng-cloak>
+    <section class="content-header">
+        <div alert-notify></div>
+        {% if debug_data %}<pre>{{ debug_data.ca }}</pre>{% endif %}
+        {{ rimacros.unpregnant_page_title_ext_n('Медицинская карта амбулаторного пациента' + "<br>"|safe, 'chart') }}
+        {{ rimacros.navigation_unpreg('[[ chart.id ]]', undefined, 'chart') }}
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-lg-8 col-md-8">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Личные данные</h3>
+                    </div>
+                    <table class="table table-condensed table-personal-data">
+                        <tbody>
+                        <tr>
+                            <td class="col-lg-2 col-md-2 text-right">Дата рождения:</td>
+                            <td class="col-lg-10 col-md-10">[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])</td>
+                        </tr>
+                        <tr ng-if="chart.client.snils">
+                            <td class="text-right">СНИЛС:</td>
+                            <td>[[ chart.client.snils ]]</td>
+                        </tr>
+                        <tr ng-if="chart.client.cmi_policy">
+                            <td class="text-right">Полис ОМС:</td>
+                            <td>Номер [[ chart.client.cmi_policy.serial ]] [[ chart.client.cmi_policy.number ]], выдан [[ chart.client.cmi_policy.insurer.short_name ]] [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
+                        </tr>
+                        <tr ng-if="chart.anamnesis.father.phone || chart.client.phone">
+                            <td class="text-right">Контактные данные:</td>
+                            <td>пациентки: [[chart.client.phone.contact_text]], отца ребёнка: <span tooltip="[[chart.anamnesis.father.name]]" class="bottom_dotted">[[ chart.anamnesis.father.phone ]]</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="box box-primary">
+                     <div class="box-header">
+                        <h3 class="box-title with-border">Анамнез (<a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
+                        <div class="box-tools">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary" ng-click="#change_anamnesis()">Изменить</button>
+                            </div>
+                        </div>
+                     </div>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td class="col-lg-2 col-md-2 text-right">Беременности:</td>
+                                <td class="col-lg-1 col-md-1">Предыдущие</br>
+                                Многоплодные
+                                </td>
+                                <td class="col-lg-9 col-md-9"><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a></br>
+                                [[chart.anamnesis.mother.multifetation ? 'да' : 'нет']]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-right">Заболевания:</td>
+                                <td>Перенесенные</td>
+                                <td>
+                                    <span ng-repeat="mkb in chart.anamnesis.mother.finished_diseases" tooltip="[[ mkb.name ]]">
+                                        <span class="bottom_dotted">[[mkb.code]]</span>[[$last ? '' : ', ']]
+                                    </span>
+                                    <span ng-if="chart.anamnesis.mother.finished_diseases.length"><br></span>[[chart.anamnesis.mother.finished_diseases_text]]
+                                    [[!chart.anamnesis.mother.finished_diseases.length && !chart.anamnesis.mother.finished_diseases_text ? 'нет' : '']]</br>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Текущие</td>
+                                <td>
+                                    <span ng-repeat="mkb in chart.anamnesis.mother.current_diseases" tooltip="[[ mkb.name ]]">
+                                        <span class="bottom_dotted">[[mkb.code]]</span>[[$last ? '' : ', ']]
+                                    </span>
+                                    <span ng-if="chart.anamnesis.mother.current_diseases.length"><br></span>[[chart.anamnesis.mother.current_diseases_text]]
+                                    [[!chart.anamnesis.mother.current_diseases.length  && !chart.anamnesis.mother.current_diseases_text ? 'нет' : '']]
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-right">Вредные привычки:</td>
+                                <td>[[(!chart.anamnesis.mother.alcohol && !chart.anamnesis.mother.smoking && !chart.anamnesis.mother.toxic && !chart.anamnesis.mother.drugs) ? 'нет': '' ]]
+                                    <span ng-repeat="h in chart.bad_habits_mother | filter:{value: true} ">[[h.text]][[$last ? '' : ', ']]</span></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title with-border">Осмотры (<a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" title="">подробнее</a>)</h3>
+                        <div class="box-tools">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary" ng-click="change_anamnesis()">+ Добавить</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                {# <th>#</th> #}
+                                <th>Дата</th>
+                                <th>Диагноз</th>
+                                <th>Врач</th>
+                            </tr>
+                            </thead>
+                            <tr ng-repeat="checkup in chart.checkups">
+                                {#<td>[[ $index + 1 ]]</td>#}
+                                <td ng-if="checkup.flat_code != 'risarPCCheckUp'"><a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                                <td ng-if="checkup.flat_code == 'risarPCCheckUp'"><a ng-href="{{ url_for('.html_inspection_pc_read') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                                <td><span class="bottom_dotted" tooltip="[[ checkup.diag.mkb.name ]]">[[ checkup.diag.mkb.code ]]</span></td>
+                                <td>[[ checkup.person.name ]]</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="box box-danger">
+                    <div class="box-header">
+                        <h3 class="box-title">Особенности</h3>
+                    </div>
+                    <table class="table table.condensed">
+                        <tbody>
+                            <tr>
+                                <td class="col-md-6 text-right">Группа крови:</td>
+                                <td class="col-md-6">[[chart.anamnesis.mother.blood_type.name]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">ВИЧ:</td>
+                                <td class="col-md-6" ng-style="chart.has_diseases.has_HIV && {'font-weight': 'bold'}"
+                                    ng-class="{'text-danger': chart.has_diseases.has_HIV}">[[has_desease(chart.has_diseases.has_HIV)]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Сифилис:</td>
+                                <td class="col-md-6" ng-style="chart.has_diseases.has_syphilis && {'font-weight': 'bold'}"
+                                    ng-class="{'text-danger': chart.has_diseases.has_syphilis}">[[has_desease(chart.has_diseases.has_syphilis)]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Гепатит:</td>
+                                <td class="col-md-6" ng-style="chart.has_diseases.has_hepatitis && {'font-weight': 'bold'}"
+                                    ng-class="{'text-danger': chart.has_diseases.has_hepatitis}">[[has_desease(chart.has_diseases.has_hepatitis)]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Туберкулез:</td>
+                                <td class="col-md-6" ng-style="chart.has_diseases.has_tuberculosis && {'font-weight': 'bold'}"
+                                    ng-class="{'text-danger': chart.has_diseases.has_tuberculosis}">[[has_desease(chart.has_diseases.has_tuberculosis)]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Чесотка:</td>
+                                <td class="col-md-6" ng-style="chart.has_diseases.has_scabies && {'font-weight': 'bold'}"
+                                    ng-class="{'text-danger': chart.has_diseases.has_scabies}">[[has_desease(chart.has_diseases.has_scabies)]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Педикулез:</td>
+                                <td class="col-md-6" ng-style="chart.has_diseases.has_pediculosis && {'font-weight': 'bold'}"
+                                    ng-class="{'text-danger': chart.has_diseases.has_pediculosis}">[[has_desease(chart.has_diseases.has_pediculosis)]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Аллергия:</td>
+                                <td class="col-md-6">
+                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'allergy'}}" class="danger text-danger">
+                                    <b ng-if="['high', 'strict'].has(char.power.code)" ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-5 text-right">Непереносимости:</td>
+                                <td class="col-md-7">
+                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'medicine'}}" class="danger text-danger">
+                                    <b ng-if="['high', 'strict'].has(char.power.code)" ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-5 text-right">Патологии:</td>
+                                <td class="col-md-7">
+                                    <div ng-repeat="pathg in chart.pregnancy_pathologies">
+                                        <span ng-bind="pathg.name"></span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-primary">
+                    <div class="box-header"><h3 class="box-title">ЛПУ родоразрешения</h3></div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td class="col-md-3 text-right">Экстренное:</td>
+                            <td class="col-md-6">
+                                <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
+                                    [[chart.client.attach_lpu.extra_lpu.org.short_name]]
+                                </span>
+                            </td>
+                            <td class="col-md-3"><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1">Изменить</a></td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Плановое:</td>
+                            <td>
+                                <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
+                                    [[chart.client.attach_lpu.plan_lpu.org.short_name]]
+                                </span>
+                            </td>
+                            <td><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]">Изменить</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Мероприятия(<a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
+                        <div class="box-tools">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-primary" ng-click="close_event()">+ Добавить</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td class="col-md-6 text-right">Лабораторные исследования:</td>
+                            <td class="col-md-6">
+                                <span ng-if="chart.em_progress.lab.complete === 0">[[ chart.em_progress.lab.complete ]]/[[ chart.em_progress.lab.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.lab.complete !== 0" class="progress" value="chart.em_progress.lab.percent">
+                                    <span>[[ chart.em_progress.lab.complete ]]/[[ chart.em_progress.lab.total ]]</span>
+                                </progressbar>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Функциональные исследования:</td>
+                            <td>
+                                <span ng-if="chart.em_progress.func.complete === 0">[[ chart.em_progress.func.complete ]]/[[ chart.em_progress.func.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.func.complete !== 0" class="progress" value="chart.em_progress.func.percent">
+                                    [[ chart.em_progress.func.complete ]]/[[ chart.em_progress.func.total ]]
+                                </progressbar>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Осмотры врачами:</td>
+                            <td>
+                                <span ng-if="chart.em_progress.checkups.complete === 0">[[ chart.em_progress.checkups.complete ]]/[[ chart.em_progress.checkups.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.checkups.complete !== 0" class="progress" value="chart.em_progress.checkups.percent">
+                                    [[ chart.em_progress.checkups.complete ]]/[[ chart.em_progress.checkups.total ]]
+                                </progressbar>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Госпитализации:</td>
+                            <td>
+                                <span ng-if="chart.em_progress.hosp.complete === 0">[[ chart.em_progress.hosp.complete ]]/[[ chart.em_progress.hosp.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.hosp.complete !== 0" class="progress" value="chart.em_progress.hosp.percent">
+                                    [[ chart.em_progress.hosp.complete ]]/[[ chart.em_progress.hosp.total ]]
+                                </progressbar>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Закрытие случая
+                            <span ng-if="header.event.exec_date">(Случай закрыт)</span>
+                        </h3>
+                        <div class="box-tools">
+                            <div class="btn-group" role="group" ng-if="!header.event.exec_date">
+                                <button type="button" class="btn btn-primary" ng-click="close_event()">Закрыть случай</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td class="col-md-6 text-right">Дата закрытия случая:</td>
+                            <td class="col-md-6">
+                                [[ header.event.exec_date | asDate ]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Заведующая ЖК:</td>
+                            <td>
+                                [[ header.event.manager.short_name ]]
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/edit_epicrisis.html">{% include 'risar/modals/_modal_epicrisis.html' %}</script>
+{% endblock %}
