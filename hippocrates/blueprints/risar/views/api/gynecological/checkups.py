@@ -4,8 +4,8 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
-from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup, represent_gyn_checkup_wm
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -53,15 +53,11 @@ def api_0_gyn_checkup(event_id):
     db.session.commit()
 
     em_ctrl = EventMeasureController()
-    em_error = None
-    try:
-        em_ctrl.regenerate(action)
-    except EMGenerateException:
-        em_error = u'Произошла ошибка формирования списка мероприятий'
+    em_ctrl.regenerate(action)
 
     result = represent_gyn_checkup_wm(action)
-    if em_error:
-        result['em_error'] = em_error
+    if em_ctrl.exception:
+        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
     return result
 
 
