@@ -3,16 +3,23 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.chart_creator import GynecologicCardCreator
+from hippocrates.blueprints.risar.lib.represent.common import represent_header
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_event
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_chart_for_routing
+from hippocrates.blueprints.risar.risar_config import request_type_gynecological
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.models.event import Event
+from nemesis.models.schedule import ScheduleClientTicket
+from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
 
+_base = '/api/0/gyn/'
 
-@module.route('/api/1/gynecological/chart/', methods=['GET'])
-@module.route('/api/1/gynecological/chart/<int:event_id>', methods=['GET'])
+
+@module.route(_base + '<int:event_id>', methods=['GET'])
 @api_method
-def api_1_gyn_chart(event_id=None):
+def api_0_gyn_chart(event_id=None):
     ticket_id = request.args.get('ticket_id')
     client_id = request.args.get('client_id')
 
@@ -24,9 +31,9 @@ def api_1_gyn_chart(event_id=None):
         raise ApiException(404, 'Must explicitly create event first')
 
 
-@module.route('/api/1/gynecological/chart/', methods=['POST'])
+@module.route(_base, methods=['POST'])
 @api_method
-def api_1_gyn_chart_create():
+def api_0_gyn_chart_create():
     ticket_id = request.args.get('ticket_id')
     client_id = request.args.get('client_id')
 
@@ -36,5 +43,46 @@ def api_1_gyn_chart_create():
         represent_gyn_event(chart_creator.event),
         automagic=chart_creator.automagic,
     )
+
+
+@module.route(_base + '<int:event_id>/mini', methods=['GET'])
+@api_method
+def api_0_gyn_chart_mini(event_id=None):
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != request_type_gynecological:
+        raise ApiException(400, u'Обращение не является случаем беременности')
+    return {
+        'header': represent_header(event),
+        'chart': represent_chart_for_routing(event)
+    }
+
+
+@module.route(_base + '<int:event_id>/chart_header')
+@api_method
+def api_0_gyn_chart_header(event_id=None):
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != request_type_gynecological:
+        raise ApiException(400, u'Обращение не является случаем беременности')
+    return represent_header(event)
+
+
+@module.route('/api/0/gyn/chart-by-ticket/<int:ticket_id>', methods=['DELETE'])
+@api_method
+def api_0_gyn_chart_delete(ticket_id):
+    ticket = ScheduleClientTicket.query.get(ticket_id)
+    if not ticket:
+        raise ApiException(404, 'Ticket not found')
+    if not ticket.event:
+        raise ApiException(404, 'Event not found')
+    if ticket.event.deleted:
+        raise ApiException(400, 'Event already deleted')
+    ticket.event.deleted = 1
+    ticket.event = None
+    db.session.commit()
+
 
 

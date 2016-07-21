@@ -56,6 +56,7 @@ def represent_gyn_checkup_shortly(action):
 
 def represent_gyn_anamnesis(card):
     return {
+        'client_id': card.event.client_id,
         'general': represent_general_anamnesis_action(card.anamnesis),
         'pregnancies': map(represent_pregnancy, card.prev_pregs),
         'transfusions': map(represent_transfusion, card.transfusions),

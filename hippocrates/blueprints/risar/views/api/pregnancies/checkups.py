@@ -3,7 +3,7 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_wm, represent_fetuses
@@ -55,15 +55,11 @@ def api_0_pregnancy_checkup(event_id):
     db.session.commit()
 
     em_ctrl = EventMeasureController()
-    em_error = None
-    try:
-        em_ctrl.regenerate(action)
-    except EMGenerateException:
-        em_error = u'Произошла ошибка формирования списка мероприятий'
+    em_ctrl.regenerate(action)
 
     result = represent_pregnancy_checkup_wm(action)
-    if em_error:
-        result['em_error'] = em_error
+    if em_ctrl.exception:
+        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
     return result
 
 

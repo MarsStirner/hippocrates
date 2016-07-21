@@ -6,7 +6,7 @@ from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
 from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_event_measure_diag, \
     update_patient_diagnoses
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_shortly
@@ -26,10 +26,9 @@ from nemesis.systemwide import db
 def api_0_event_measure_generate(action_id):
     action = Action.query.get_or_404(action_id)
     em_ctrl = EventMeasureController()
-    try:
-        em_ctrl.regenerate(action)
-    except EMGenerateException, e:
-        raise ApiException(500, unicode(e))
+    em_ctrl.regenerate(action)
+    if em_ctrl.exception:
+        raise ApiException(500, unicode(em_ctrl.exception))
     measures = em_ctrl.get_measures_in_action(action)
     return EventMeasureRepr().represent_listed_event_measures_in_action(measures)
 
