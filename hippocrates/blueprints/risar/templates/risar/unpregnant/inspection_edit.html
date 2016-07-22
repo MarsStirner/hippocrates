@@ -812,7 +812,7 @@
                                         </td>
                                     </tr>
     
-                                    {% set print_table_row = rimacros.print_table_row %}
+                                   
                     
                                      <tr>
                                     <!-- example select -->
@@ -914,13 +914,13 @@
                                     <tr>
                                     <!-- example short_string -->
                                     <td class="text-right">Маточные трубы справа</td>
-                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_uterine_tubes_right" class="form-control"></td>
+                                    <td><input ng-model="checkup.bimanual_uterine_tubes_right" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
                                     <!-- example short_string -->
                                     <td class="text-right">Маточные трубы слева</td>
-                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_uterine_tubes_left" class="form-control"></td>
+                                    <td><input ng-model="checkup.bimanual_uterine_tubes_left" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
@@ -942,9 +942,152 @@
 
 
                                     <!-- END BIMANUAL -->
-
-
                                     
+                                    <!-- START RECTOVAGINAL -->
+
+                                    <tr>
+                                        <th class="text-right col-md-4">Матка</th>
+                                        <td class="col-md-8">
+                                        </td>
+                                    </tr>    
+                                   
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Шейка матки</td>
+                                        
+                                        <td class="col-md-8"><div class="row" >
+                                            <div class="col-md-4">
+                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri"
+                                                       ></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4">Консистенция шейки матки</td>
+                                        
+                                        <td class="col-md-8"><div class="row" >
+                                            <div class="col-md-4">
+                                            <rb-select name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency"
+                                                       ></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+
+                                
+                                                            
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right">Тело матки</td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body"></rb-select></td>
+                                    </tr>
+
+                                
+                                                            
+
+                                    <tr>
+                                    <!-- example select -->
+                                        <td class="text-right col-md-4">Размеры</td>
+                                        
+                                        <td class="col-md-8"><div class="row" >
+                                            <div class="col-md-4">
+                                            <rb-select name="rectovaginal_body_of_womb_size" ng-model="checkup.rectovaginal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"
+                                                       ></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+
+                                
+                                                            
+                                <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
+                                </tr>
+                                                            
+                                <tr>
+                                    <!-- example multiple -->
+                                    <td class="text-right">Положение</td>
+                                    <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position"></rb-select></td>
+                                </tr>
+                                
+                                <tr>
+                                    <!-- example multiple -->
+                                    <td class="text-right">Параметрическая область широких связок матки</td>
+                                    <td><rb-select multiple="true" ref-book="rbRisarParametrium1" ng-model="checkup.rectovaginal_parametrium"></rb-select></td>
+                                </tr>
+                             
+                                <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_parametrium_other" class="form-control"></td>
+                                </tr>
+
+                                <tr>
+                                    <th class="text-right col-md-4">Придатки</th>
+                                    <td class="col-md-8"></td>
+                                </tr>
+                       
+                                <tr>
+                                    <!-- example multiple -->
+                                    <td class="text-right">Яичники справа</td>
+                                    <td><rb-select multiple="true" ref-book="rbRisarOvary" ng-model="checkup.rectovaginal_ovary_right"></rb-select></td>
+                                </tr>
+                         
+                                <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_ovary_right_oher" class="form-control"></td>
+                                </tr>
+                                                            
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right">Яичники слева</td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarOvary" ng-model="checkup.rectovaginal_ovary_left"></rb-select></td>
+                                    </tr>
+
+                                
+                                                            
+                                <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_ovary_left_oher" class="form-control"></td>
+                                </tr>
+                                                            
+                                <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right">Маточные трубы справа</td>
+                                    <td><input ng-model="checkup.rectovaginal_uterine_tubes_right" class="form-control"></td>
+                                </tr>
+                                                            
+                                <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right">Маточные трубы слева</td>
+                                    <td><input ng-model="checkup.rectovaginal_uterine_tubes_left" class="form-control"></td>
+                                </tr>
+                                                            
+                                <tr>
+                                    <!-- example multiple -->
+                                    <td class="text-right">Своды влагалища</td>
+                                    <td><rb-select multiple="true" ref-book="rbRisarVaginalFornix" ng-model="checkup.rectovaginal_vaginal_fornix"></rb-select></td>
+                                </tr>
+                        
+                                 <tr>
+                                    <!-- example text -->
+                                    <th class="text-right">Дополнительная информация   <span>&nbsp;</span></th>
+                                    <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.rectovaginal_comments" /></div></div></td>
+                                </tr>
+
+                                <!-- END RECTOVAGINAL -->
+                                
+                                <!-- START RECTAL -->
+
+
+                                
+                                
+                                <!-- END RECTAL -->
+      
                                 </tbody>
                             </table>
                         </div>
@@ -958,139 +1101,7 @@
                                 <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
-                                    <tr>
-                                        <th class="text-right col-md-4">Общее состояние <span class="text-danger">*</span></th>
-                                        <td class="col-md-8"><div class="row" ng-class="{'has-error': somaticForm.state.$invalid && somaticForm.submit_attempt}">
-                                            <div class="col-md-4">
-                                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState"
-                                                       ng-required="true"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.complaints.$invalid && somaticForm.submit_attempt}">
-                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Язык <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.tongue.$invalid && somaticForm.submit_attempt}">
-                                            <div name="tongue" refbook-checkbox ref-book="rbRisarTongue" ng-model="checkup.tongue" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Подкожно-жировая клетчатка <span class="text-danger">*</span></th>
-                                        <td><div class="row" ng-class="{'has-error': somaticForm.subcutaneous_fat.$invalid && somaticForm.submit_attempt}">
-                                            <div class="col-md-4">
-                                            <rb-select name="subcutaneous_fat" ng-model="checkup.subcutaneous_fat"
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Состояние вен <span class="text-danger">*</span></th>
-                                        <td><div class="row" ng-class="{'has-error': somaticForm.vein.$invalid && somaticForm.submit_attempt}">
-                                            <div class="col-md-4">
-                                            <rb-select name="vein" ng-model="checkup.vein" ref-book="rbRisarVein"
-                                                       ng-required="true"></rb-select>
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Отеки <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
-                                    </tr>
-                                    
-                                   
-                                    <tr>
-                                        <th class="text-right">ССС: пульс <span class="text-danger">*</span></th>
-                                        <td><div class="row"
-                                                 ng-class="{'has-error': somaticForm.heart_rate.$invalid && somaticForm.submit_attempt}">
-                                            <div class="col-md-2">
-                                                <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control" type="number" valid-number ng-required="true" />
-                                            </div></div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Пульс <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.pulse.$invalid}">
-                                            <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    
-                                    
-                                    <tr>
-                                        <th class="text-right">Тоны сердца <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.heart_tones.$invalid && somaticForm.submit_attempt}">
-                                            <div name="heart_tones" refbook-checkbox ng-model="checkup.heart_tones"
-                                                 ref-book="rbRisarHeart_Tones" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                   
-                                    
-                                    <tr>
-                                        <th class="text-right">Органы дыхания <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.breathe.$invalid && somaticForm.submit_attempt}">
-                                            <div name="breathe" refbook-checkbox ng-model="checkup.breathe" ref-book="rbRisarBreathe" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Органы брюшной полости <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.stomach.$invalid && somaticForm.submit_attempt}">
-                                            <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomach" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Печень <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.liver.$invalid && somaticForm.submit_attempt}">
-                                            <div name="liver" refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Мочевыводящая система <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.urinoexcretory.$invalid && somaticForm.submit_attempt}">
-                                            <div name="urinoexcretory" refbook-checkbox ng-model="checkup.urinoexcretory" ref-book="rbRisarUrinoexcretory" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Полость рта <span class="text-danger">*</span></th>
-                                        <td><div class="row" ng-class="{'has-error': somaticForm.mouth.$invalid && somaticForm.submit_attempt}">
-                                            <div class="col-md-4">
-                                            <rb-select name="mouth" ng-model="checkup.mouth" ref-book="rbRisarMouth"
-                                                       ng-required="true"></rb-select>
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Физиологические отправления</th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
-                                    </tr>
+                                
                                 </tbody>
                             </table>
                             </div>
