@@ -801,20 +801,10 @@
 
 
                                     <!-- START BIMANUAL -->
-                                    
-                                    Тело матки   ExtReferenceRb  rbRisarUterusBodyGenVisit   bimanual_uterus_body    Да
+                                   
 
-                                     Маточные трубы слева String      bimanual_uterine_tubes_left  
-                                     Маточные трубы справа    String      bimanual_uterine_tubes_right     
-                                     Положение    ExtReferenceRb  rbRisarUteriPositionGenVisit    bimanual_uteri_position Да
-                                     Размеры  ExtReferenceRb  rbRisarBody_Of_Womb_Size    bimanual_body_of_womb_size   
-                                     Размеры. Увеличены до    String      bimanual_body_of_womb_enlarged   
-                                     Своды влагалища  ExtReferenceRb  rbRisarVaginalFornix    bimanual_vaginal_fornix Да
-                                     Яичники слева.Другое String      bimanual_ovary_left_oher     
-                                     Яичники справа.Другое    String      bimanual_ovary_right_oher    
-                                    Дополнительная информация Text        bimanual_comments    
-                                    Яичники слева ExtReferenceRb   rbRisarOvary   bimanual_ovary_left Да
-                                    Яичники справа    ExtReferenceRb   rbRisarOvary   bimanual_ovary_right    Да
+                                    
+                                   
                                     <tr>
                                         <th class="text-right col-md-4">Матка</th>
                                         <td class="col-md-8">
@@ -822,29 +812,137 @@
                                         </td>
                                     </tr>
     
-
-                                    <tr>
-                                        <th class="text-right">Шейка матки <span class="text-danger">*</span></th>
-                                        <td><div class="row" ng-class="{'has-error': bimanualForm.bimanual_cervix_uteri.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervix" ng-required="true"></rb-select></div>
+                                    {% set print_table_row = rimacros.print_table_row %}
+                    
+                                     <tr>
+                                    <!-- example select -->
+                                        <td class="text-right col-md-4">Шейка матки</td>
+                                        
+                                        <td class="col-md-8"><div class="row" >
+                                            <div class="col-md-4">
+                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri"
+                                                       ></rb-select>
+                                            </div>
                                         </div></td>
                                     </tr>
 
-                                    <tr>
-                                        <th class="text-right">Консистенция<span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.bimanual_cervix_consistency`" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
-                                    </tr>
-    
-    
+
+                                                            
 
                                     <tr>
-                                    <!-- example multiple -->
-                                        <td class="text-right">Характер </td>
+                                    <!-- example select -->
+                                        <td class="text-right col-md-4">Консистенция</td>
+                                        
+                                        <td class="col-md-8"><div class="row" >
+                                            <div class="col-md-4">
+                                            <rb-select name="bimanual_cervix_consistency" ng-model="checkup.bimanual_cervix_consistency" ref-book="rbRisarCervix_Consistency"
+                                                       ></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                          
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right">Тело матки</td>
                                         <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.bimanual_uterus_body"></rb-select></td>
-                                    </tr>                                   
+                                    </tr>
+
+                                    <tr>
+                                    <!-- example select -->
+                                        <td class="text-right col-md-4">Размеры</td>
+                                        
+                                        <td class="col-md-8"><div class="row" >
+                                            <div class="col-md-4">
+                                            <rb-select name="bimanual_body_of_womb_size" ng-model="checkup.bimanual_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"
+                                                       ></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                           
+                                    <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right">Положение</td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.bimanual_uteri_position"></rb-select></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right col-md-4">Придатки</th>
+                                        <td class="col-md-8">
+    
+                                        </td>
+                                    </tr>
+                                                    
+                                    <tr>
+                                    <!-- example few_checkboxes -->
+                                    <td class="text-right">Яичники справа</td>
+                                    <td><div >
+                                        <div name="bimanual_ovary_right" refbook-checkbox ng-model="checkup.bimanual_ovary_right" ref-book=" rbRisarOvary">
+                                            [[ item.name ]]
+                                        </div>
+                                        </div>
+                                    </td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_ovary_right_oher" class="form-control"></td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example few_checkboxes -->
+                                    <td class="text-right">Яичники слева</td>
+                                    <td><div >
+                                        <div name="bimanual_ovary_left" refbook-checkbox ng-model="checkup.bimanual_ovary_left" ref-book=" rbRisarOvary">
+                                            [[ item.name ]]
+                                        </div>
+                                        </div>
+                                    </td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right"></td>
+                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_ovary_left_oher" class="form-control"></td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right">Маточные трубы справа</td>
+                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_uterine_tubes_right" class="form-control"></td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example short_string -->
+                                    <td class="text-right">Маточные трубы слева</td>
+                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_uterine_tubes_left" class="form-control"></td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example few_checkboxes -->
+                                    <td class="text-right">Своды влагалища</td>
+                                    <td><div >
+                                        <div name="bimanual_vaginal_fornix" refbook-checkbox ng-model="checkup.bimanual_vaginal_fornix" ref-book="rbRisarVaginalFornix">
+                                            [[ item.name ]]
+                                        </div>
+                                        </div>
+                                    </td>
+                                    </tr>
+                                                            
+                                    <tr>
+                                    <!-- example text -->
+                                    <th class="text-right">Дополнительная информация   <span>&nbsp;</span></th>
+                                    <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bimanual_comments" /></div></div></td>
+                                    </tr>
+
 
                                     <!-- END BIMANUAL -->
+
 
                                     
                                 </tbody>
