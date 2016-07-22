@@ -3,7 +3,7 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
-from hippocrates.blueprints.risar.lib.represent import represent_checkups_puerpera, represent_checkup_puerpera
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_puerpera
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -15,7 +15,7 @@ from nemesis.systemwide import db
 @module.route('/api/0/checkup_puerpera/', methods=['POST'])
 @module.route('/api/0/checkup_puerpera/<int:event_id>', methods=['POST'])
 @api_method
-def api_0_checkup_puerpera(event_id):
+def api_0_pregnancy_checkup_puerpera(event_id):
     data = request.get_json()
     checkup_id = data.pop('id', None)
     flat_code = data.pop('flat_code', None)
@@ -46,38 +46,39 @@ def api_0_checkup_puerpera(event_id):
     reevaluate_card_fill_rate_all(card)
     db.session.commit()
 
-    return represent_checkup_puerpera(action)
+    return represent_pregnancy_checkup_puerpera(action)
 
 
 @module.route('/api/0/checkup_puerpera/')
 @module.route('/api/0/checkup_puerpera/<int:checkup_id>')
 @api_method
-def api_0_checkup_puerpera_get(checkup_id=None):
+def api_0_pregnancy_checkup_puerpera_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     if not action:
         raise ApiException(404, 'Action with id {0} not found'.format(checkup_id))
-    return represent_checkup_puerpera(action)
+    return represent_pregnancy_checkup_puerpera(action)
 
 
 @module.route('/api/0/checkup_puerpera/new/', methods=['POST'])
 @module.route('/api/0/checkup_puerpera/new/<int:event_id>', methods=['POST'])
 @api_method
-def api_0_checkup_puerpera_new(event_id):
+def api_0_pregnancy_checkup_puerpera_new(event_id):
     data = request.get_json()
     flat_code = data.get('flat_code')
     if not flat_code:
         raise ApiException(400, 'flat_code required')
     event = Event.query.get(event_id)
     action = get_action_by_id(None, event, flat_code, True)
-    result = represent_checkup_puerpera(action)
+    result = represent_pregnancy_checkup_puerpera(action)
     return result
 
 
 @module.route('/api/0/checkup_puerpera_list/')
 @module.route('/api/0/checkup_puerpera_list/<int:event_id>')
 @api_method
-def api_0_checkup_puerpera_list(event_id):
+def api_0_pregnancy_checkup_puerpera_list(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': represent_checkups_puerpera(event)
+        'checkups': map(represent_pregnancy_checkup_puerpera, card.checkups_puerpera)
     }

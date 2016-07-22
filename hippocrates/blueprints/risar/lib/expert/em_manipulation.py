@@ -17,11 +17,9 @@ from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 logger = logging.getLogger('simple')
 
 
-class EMGenerateException(Exception):
-    pass
-
-
 class EventMeasureController(BaseModelController):
+    error_message = None
+    exception = None
 
     def get_selecter(self):
         return EventMeasureSelecter()
@@ -32,7 +30,8 @@ class EventMeasureController(BaseModelController):
             gen.generate_measures()
         except Exception, e:
             logger.error(u'Ошибка генерации мероприятий для action с id={0}'.format(action.id), exc_info=True)
-            raise EMGenerateException(u'Ошибка генерации мероприятий')
+            self.error_message = u'Ошибка генерации мероприятий'
+            self.exception = e
 
     def delete_in_action(self, action):
         gen = EventMeasureGenerator(action)

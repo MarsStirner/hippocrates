@@ -147,6 +147,7 @@ def get_action_list(event, flat_code, all=False):
         return
     else:
         raise TypeError('flat_code must be list|tuple|basestring|None')
+    query = query.order_by(Action.begDate.asc())
     if all:
         return query.all()
     return query
@@ -343,3 +344,42 @@ def notify_risk_rate_changes(card, new_prr):
 def bail_out(exc):
     # TODO: DELETE ME, когда я буду в nemesis
     raise exc
+
+
+def represent_prop_value(prop):
+    if prop.value is None:
+        return [] if prop.type.isVector else None
+    else:
+        return prop.value
+
+
+def action_as_dict(action, prop_filter=None):
+    """
+    @type action: nemesis.models.actions.Action
+    @param action:
+    @param prop_filter: set|list
+    @return:
+    """
+    if prop_filter is None:
+        return {
+            p.type.code: p.value
+            for p in action.properties
+            if p.type.code
+        }
+    else:
+        result = {
+            p.type.code: p.value
+            for p in action.properties
+            if p.type.code and p.type.code in prop_filter
+        }
+        result.update({
+            code: None
+            for code in prop_filter
+            if code not in result
+        })
+        return result
+
+
+def safe_action_property(action, prop_name, default=None):
+    prop = action.propsByCode.get(prop_name)
+    return prop.value if prop else default

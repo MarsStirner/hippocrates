@@ -6,8 +6,9 @@
 @date: 22.03.2016
 
 """
-from hippocrates.blueprints.risar.lib.represent import get_lpu_attached, \
-    group_orgs_for_routing, represent_mkbs_for_routing
+from hippocrates.blueprints.risar.lib.represent.common import get_lpu_attached
+
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_mkbs_for_routing, group_orgs_for_routing
 from hippocrates.blueprints.risar.views.api.integration.routing.schemas import \
     RoutingSchema
 from hippocrates.blueprints.risar.views.api.integration.xform import XForm

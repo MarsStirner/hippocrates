@@ -6,7 +6,7 @@
 @date: 22.03.2016
 
 """
-from hippocrates.blueprints.risar.lib.represent import represent_checkup_puerpera
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_puerpera
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
 from hippocrates.blueprints.risar.risar_config import puerpera_inspection_code
 from hippocrates.blueprints.risar.views.api.integration.checkup_puerpera.schemas import \
@@ -87,7 +87,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
         })
 
     def update_form(self, data):
-        # like blueprints.risar.views.api.checkups_puerpera.api_0_checkup_puerpera
+        # like blueprints.risar.views.api.checkups_puerpera.api_0_pregnancy_checkup_puerpera
 
         event_id = self.parent_obj_id
         event = self.parent_obj
@@ -150,7 +150,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
         self.delete_external_data()
 
     def as_json(self):
-        data = represent_checkup_puerpera(self.target_obj, False)
+        data = represent_pregnancy_checkup_puerpera(self.target_obj)
         res = {
             "exam_puerpera_id": self.target_obj.id,
             "external_id": self.external_id,

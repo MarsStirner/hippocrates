@@ -7,7 +7,7 @@
 
 """
 from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
-from hippocrates.blueprints.risar.lib.represent import represent_checkup
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     notify_checkup_changes
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
@@ -202,7 +202,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         })
 
     def update_form(self, data):
-        # like blueprints.risar.views.api.checkups.api_0_checkup
+        # like blueprints.risar.views.api.checkups.api_0_pregnancy_checkup
 
         event_id = self.parent_obj_id
         event = self.parent_obj
@@ -273,7 +273,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         ).delete()
 
     def as_json(self):
-        data = represent_checkup(self.target_obj, False)
+        data = represent_pregnancy_checkup(self.target_obj)
         return {
             "exam_obs_id": self.target_obj.id,
             "external_id": self.external_id,

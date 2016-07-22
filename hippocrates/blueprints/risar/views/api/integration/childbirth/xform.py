@@ -7,7 +7,7 @@
 
 """
 from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
-from hippocrates.blueprints.risar.lib.represent import represent_epicrisis
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis
 from hippocrates.blueprints.risar.lib.utils import close_open_checkups, get_action
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
@@ -279,7 +279,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         ).delete()
 
     def as_json(self):
-        data = represent_epicrisis(self.parent_obj, self.target_obj)
+        data = represent_pregnancy_epicrisis(self.parent_obj, self.target_obj)
         return {
             "childbirth_id": self.target_obj.id,
             "general_info": self._represent_general_info(data),

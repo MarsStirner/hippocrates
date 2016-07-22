@@ -2,33 +2,34 @@
 import collections
 import datetime
 
-from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
 from flask import request
-from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
-    Diagnosis, Diagnostic, Action_Diagnosis
 from sqlalchemy import func
 
+from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card_fill_rate import CFRController
+from hippocrates.blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.lib.represent.errand import represent_errand
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_chart_short
+from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
+from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_int, safe_unicode
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
     ActionProperty_Date, ActionProperty_ExtReferenceRb
+from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
+    Diagnosis, Diagnostic, Action_Diagnosis
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
-from nemesis.models.utils import safe_current_user_id
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
+from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
-from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.represent import represent_chart_short, represent_errand
-from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
-from hippocrates.blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
-from hippocrates.blueprints.risar.lib.card_fill_rate import CFRController
-from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
 
 
 def get_rate_for_regions(regions, rate_code):
@@ -140,7 +141,7 @@ def api_0_recent_charts():
     return {
         'count': pagination.total,
         'total_pages': pagination.pages,
-        'events': [represent_chart_short(event) for event in pagination.items]}
+        'events': [represent_pregnancy_chart_short(event) for event in pagination.items]}
 
 
 @module.route('/api/0/recently_modified_charts.json', methods=['POST'])
@@ -170,7 +171,7 @@ def api_0_recently_modified_charts():
     per_page = safe_int(j.get('per_page', 5))
     page = safe_int(j.get('page', 1))
     pagination = query.order_by(Event.setDate.desc()).paginate(page, per_page)
-    events = [represent_chart_short(event) for event in pagination.items]
+    events = [represent_pregnancy_chart_short(event) for event in pagination.items]
     events.sort(key=lambda x: x['modify_date'], reverse=True)
     return {
         'count': pagination.total,
@@ -189,8 +190,8 @@ def api_0_need_hospitalization(person_id=None):
     stats_ctrl = StatsController()
     events = stats_ctrl.get_cards_urgent_hosp(person_id)
     return [
-        represent_chart_short(event) for event in events
-    ]
+        represent_pregnancy_chart_short(event) for event in events
+        ]
 
 
 @module.route('/api/0/stats/pregnancy_week_diagram/')

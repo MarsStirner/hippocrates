@@ -1,15 +1,14 @@
 # -*- encoding: utf-8 -*-
-from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from hippocrates.blueprints.risar.lib.represent import represent_checkup, represent_checkups, \
-    represent_fetuses
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_wm, represent_fetuses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController, EMGenerateException
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -18,10 +17,10 @@ from nemesis.models.event import Event
 from nemesis.systemwide import db
 
 
-@module.route('/api/0/checkup/', methods=['POST'])
-@module.route('/api/0/checkup/<int:event_id>', methods=['POST'])
+@module.route('/api/0/pregnancy/checkup/', methods=['POST'])
+@module.route('/api/0/pregnancy/checkup/<int:event_id>', methods=['POST'])
 @api_method
-def api_0_checkup(event_id):
+def api_0_pregnancy_checkup(event_id):
     data = request.get_json()
     checkup_id = data.pop('id', None)
     flat_code = data.pop('flat_code', None)
@@ -56,29 +55,28 @@ def api_0_checkup(event_id):
     db.session.commit()
 
     em_ctrl = EventMeasureController()
-    em_error = None
-    try:
-        em_ctrl.regenerate(action)
-    except EMGenerateException:
-        em_error = u'Произошла ошибка формирования списка мероприятий'
+    em_ctrl.regenerate(action)
 
-    return represent_checkup(action, True, em_error)
+    result = represent_pregnancy_checkup_wm(action)
+    if em_ctrl.exception:
+        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
+    return result
 
 
-@module.route('/api/0/checkup/')
-@module.route('/api/0/checkup/<int:checkup_id>')
+@module.route('/api/0/pregnancy/checkup/')
+@module.route('/api/0/pregnancy/checkup/<int:checkup_id>')
 @api_method
-def api_0_checkup_get(checkup_id=None):
+def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     if not action:
         raise ApiException(404, 'Action with id {0} not found'.format(checkup_id))
-    return represent_checkup(action)
+    return represent_pregnancy_checkup_wm(action)
 
 
-@module.route('/api/0/checkup/new/', methods=['POST'])
-@module.route('/api/0/checkup/new/<int:event_id>', methods=['POST'])
+@module.route('/api/0/pregnancy/checkup/new/', methods=['POST'])
+@module.route('/api/0/pregnancy/checkup/new/<int:event_id>', methods=['POST'])
 @api_method
-def api_0_checkup_new(event_id):
+def api_0_pregnancy_checkup_new(event_id):
     data = request.get_json()
     flat_code = data.get('flat_code')
     if not flat_code:
@@ -88,24 +86,26 @@ def api_0_checkup_new(event_id):
     copy_attrs_from_last_action(event, flat_code, action, (
         'fetus_first_movement_date',
     ))
-    result = represent_checkup(action)
+    result = represent_pregnancy_checkup_wm(action)
     result['pregnancy_week'] = get_pregnancy_week(event)
     return result
 
 
-@module.route('/api/0/checkup_list/')
-@module.route('/api/0/checkup_list/<int:event_id>')
+@module.route('/api/0/pregnancy/checkup_list/')
+@module.route('/api/0/pregnancy/checkup_list/<int:event_id>')
 @api_method
-def api_0_checkup_list(event_id):
+def api_0_pregnancy_checkup_list(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': represent_checkups(event)
+        'checkups': map(represent_pregnancy_checkup_wm, card.checkups)
     }
 
 
-@module.route('/api/0/fetus_list/')
-@module.route('/api/0/fetus_list/<int:event_id>')
+@module.route('/api/0/pregnancy/fetus_list/')
+@module.route('/api/0/pregnancy/fetus_list/<int:event_id>')
 @api_method
 def api_0_fetus_list(event_id):
     event = Event.query.get(event_id)
-    return represent_fetuses(event)
+    card = PregnancyCard.get_for_event(event)
+    return represent_fetuses(card)

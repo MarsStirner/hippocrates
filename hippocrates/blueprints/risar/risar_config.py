@@ -13,6 +13,9 @@ risar_newborn_inspection = 'risar_newborn_inspection'
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
 
+risar_gyn_general_anamnesis_code = 'gynecological_visit_general_anamnesis'
+risar_gyn_checkup_codes = ('gynecological_visit_general_checkUp',)
+
 pregnancy_card_attrs = 'cardAttributes'
 gynecological_card_attrs = 'gynecologicalAttributes'
 
