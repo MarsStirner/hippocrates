@@ -90,13 +90,16 @@
                         <td class="text-right"><strong>Заболевания</strong><span>&nbsp;</span></td>
                         <td></td>
                     </tr>
-                    <tr>
+                     <tr>
                         <td class="text-right">ЗППП<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.std" ref-book="rbRisarSTD"></rb-select></td>
+                        <td>
+                            <rb-select multiple="true" ref-book="rbRisarSTD" ng-model="anamnesis_unpregnant.std"></rb-select>
+                        </td>
+
                     </tr>
                     <tr>
                         <td class="text-right">Гинекологические<span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarSTD"></rb-select></td>
+                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarSTD"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right">Гепатит<span>&nbsp;</span></td>
@@ -115,7 +118,7 @@
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Наследственность</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
+                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
                     </tr>
                     
                     <tr>
@@ -166,7 +169,7 @@
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <rb-select multiple="true" ref-book="rbBloodType" ng-model="anamnesis_unpregnant.blood_type"></rb-select>
+                                    <rb-select ref-book="rbBloodType" ng-model="anamnesis_unpregnant.blood_type"></rb-select>
                                 </div>
                             </div>
                         </td>
