@@ -9,7 +9,7 @@ WebMis20
             /* TODO: Понемногу выносить УРЛы */
             chart:'{{ url_for('.api_0_gyn_chart', event_id=-99).replace('-99', '{0}') }}',
             mini_chart: '{{ url_for('.api_0_gyn_chart_mini', event_id=-99).replace('-99', '{0}') }}',
-            header: '{{ url_for('.api_0_gyn_chart_header', event_id=-99).replace('-99', '{0}') }}',
+            header: '{{ url_for('.api_0_chart_header', event_id=-99).replace('-99', '{0}') }}',
             delete: '{{ url_for('.api_0_gyn_chart_delete', ticket_id=-99).replace('-99', '{0}') }}',
             close: '{{ url_for('.api_0_gyn_chart_close', event_id=-99).replace('-99', '{0}') }}',
             anamnesis: '{{ url_for('.api_0_gyn_anamnesis', event_id=-99).replace('-99', '{0}') }}',
@@ -22,7 +22,7 @@ WebMis20
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',
         api_stats_pregnancy_week_diagram: '{{ url_for('.api_1_stats_pregnancy_week_diagram') }}',
-        api_chart: '{{ url_for('.api_1_pregnancy_chart') }}',
+        api_chart: '{{ url_for('.api_1_pregnancy_chart', event_id=-99).replace('-99', '{0}') }}',
         api_mini_chart: '{{ url_for('.api_0_mini_chart') }}',
         api_event_routing: '{{ url_for('.api_0_event_routing') }}',
         api_chart_delete: '{{ url_for('.api_0_chart_delete') }}',

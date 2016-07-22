@@ -4,13 +4,8 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser,
-                          UserErrand, RefBookService, Config, ErrandModalService) {
-    var params = aux.getQueryParams(window.location.search);
-    var ticket_id = params.ticket_id;
-    var client_id = params.client_id;
-    var event_id = params.event_id;
-
+WebMis20.controller('BaseChartCtrl', ['$scope', 'RisarApi', 'PrintingService', 'PrintingDialog', 'NotificationService', 'CurrentUser', 'RefBookService', 'ErrandModalService',
+function ($scope, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser, RefBookService, ErrandModalService) {
     $scope.rbErrandStatus = RefBookService.get('ErrandStatus');
     $scope.ps_talon = new PrintingService("risar");
     $scope.ps_talon.set_context("risar_talon");
@@ -21,53 +16,24 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
     };
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
-    $scope.has_desease = function(has_diag){
-        if ($scope.chart){
-            if (has_diag){
+    $scope.has_desease = function (has_diag) {
+        if ($scope.chart) {
+            if (has_diag) {
                 return 'Положительно'
-            } else if ($scope.chart.checkups.length){
+            } else if ($scope.chart.checkups.length) {
                 return 'Отрицательно'
             }
         }
         return 'Нет данных'
     };
 
-    var reload_chart = function () {
-        if (event_id) {
-            RisarApi.chart.get_header(event_id).
-                then(function (data) {
-                    $scope.header = data.header;
-                });
-        }
-        RisarApi.chart.get(event_id, ticket_id, client_id)
-            .then(function (event) {
-                $scope.chart = event;
-                var mother_anamnesis = $scope.chart.anamnesis.mother;
-                $scope.chart.bad_habits_mother = [{value:mother_anamnesis ? mother_anamnesis.alcohol: false, text: 'алкоголь'},
-                    {value:mother_anamnesis ? mother_anamnesis.smoking: false, text: 'курение'},
-                    {value:mother_anamnesis ? mother_anamnesis.toxic: false, text: 'токсические вечества'},
-                    {value:mother_anamnesis ? mother_anamnesis.drugs: false,text: 'наркотики'}];
-                //$scope.chart.bad_habits_father = [{value:$scope.chart.anamnesis.father.alcohol, text: 'алкоголь'},
-                //    {value:$scope.chart.anamnesis.father.smoking, text: 'курение'},
-                //    {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},
-                //    {value:$scope.chart.anamnesis.father.drugs,text: 'наркотики'}];
-
-                if (ticket_id || client_id) {
-                    RisarApi.chart.get_header($scope.chart.id).
-                        then(function (data) {
-                            $scope.header = data.header;
-                        });
-                }
-            });
-    };
-
     $scope.$on('printing_error', function (event, error) {
         NotificationService.notify(
-                        error.code,
-                        error.text,
-                        'error',
-                        5000
-                    );
+            error.code,
+            error.text,
+            'error',
+            5000
+        );
     });
 
     $scope.open_print_window = function () {
@@ -91,50 +57,17 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
                 .then()
         });
     };
-    $scope.add_inspection = function() {
-        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
-    };
-    $scope.close_event = function() {
-        var model = {};
-        _.extend(model, $scope.header.event);
-        open_edit_epicrisis(model).result.then(function (rslt) {
-            var result = rslt[0];
-            RisarApi.chart.close_event($scope.chart.id, result).then(function (data) {
-                _.extend($scope.header.event, data);
-                var notify_id = NotificationService.notify(
-                    200,
-                    [
-                        'Случай беременности закрыт',
-                        {
-                            bold: false,
-                            text: ''
-                        }, '. ',
-                        {
-                            click: function () {
-                                $scope.close_event();
-                                close_notify();
-                            },
-                            text: 'Изменить'
-                        }, ' ',
-                        {
-                            click: function () {
-                                RisarApi.chart.close_event($scope.chart.id, {cancel: true}).then(function(data){
-                                    _.extend($scope.header.event, data);
-                                });
-                                close_notify();
-                            },
-                            text: 'Отменить'
-                        }
-                    ],
-                    'success'
-                );
-                var close_notify = function() {
-                    NotificationService.dismiss(notify_id);
-                };
-            });
-        })
-    };
-    var open_edit_epicrisis = function(e){
+}
+])
+.controller('PregnancyChartCtrl', ['$scope', '$controller', '$window', 'RisarApi', 'Config', '$modal', 'NotificationService',
+function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationService) {
+    $controller('BaseChartCtrl', {$scope: $scope});
+    var params = aux.getQueryParams(window.location.search);
+    var ticket_id = params.ticket_id;
+    var client_id = params.client_id;
+    var event_id = params.event_id;
+
+    $scope.open_edit_epicrisis = function(e){
         var scope = $scope.$new();
         scope.model = e;
         return $modal.open({
@@ -146,10 +79,109 @@ var ChartCtrl = function ($scope, $modal, $window, RisarApi, PrintingService, Pr
             size: 'lg'
         })
     };
-    reload_chart();
-};
 
-var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
+    $scope.add_inspection = function() {
+        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
+    };
+    var load_header = function (event_id) {
+        RisarApi.chart.get_header(event_id).then(function (data) {
+            $scope.header = data.header;
+        });
+    };
+    var reload_chart = function () {
+        if (event_id) {
+            load_header(event_id)
+        }
+        RisarApi.chart.get(
+            event_id, ticket_id, client_id
+        ).then(function (event) {
+            $scope.chart = event;
+            var mother_anamnesis = $scope.chart.anamnesis.mother;
+            $scope.chart.bad_habits_mother = [{value:mother_anamnesis ? mother_anamnesis.alcohol: false, text: 'алкоголь'},
+                {value:mother_anamnesis ? mother_anamnesis.smoking: false, text: 'курение'},
+                {value:mother_anamnesis ? mother_anamnesis.toxic: false, text: 'токсические вечества'},
+                {value:mother_anamnesis ? mother_anamnesis.drugs: false,text: 'наркотики'}];
+            //$scope.chart.bad_habits_father = [{value:$scope.chart.anamnesis.father.alcohol, text: 'алкоголь'},
+            //    {value:$scope.chart.anamnesis.father.smoking, text: 'курение'},
+            //    {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},
+            //    {value:$scope.chart.anamnesis.father.drugs,text: 'наркотики'}];
+
+            if (ticket_id || client_id) {
+                load_header($scope.chart.id)
+            }
+        });
+    };
+
+    $scope.close_event = function() {
+        var model = _.extend({}, $scope.header.event);
+        $scope.open_edit_epicrisis(model).result.then(function (rslt) {
+            var result = rslt[0],
+                edit_callback = function (data) {
+                    $scope.close_event();
+                },
+                cancel_callback = function (data) {
+                RisarApi.chart.close_event(
+                    $scope.chart.id, {cancel: true}
+                ).then(function(data) {
+                    _.extend($scope.header.event, data);
+                });
+            };
+            RisarApi.chart.close_event(
+                $scope.chart.id, result, edit_callback, cancel_callback
+            ).then(function (data) {
+                _.extend($scope.header.event, data);
+            });
+        })
+    };
+    reload_chart();
+}])
+.controller('GynecologicalChartCtrl', ['$scope', '$controller', '$window', 'RisarApi', 'Config', '$modal',
+function ($scope, $controller, $window, RisarApi, Config, $modal) {
+    $controller('BaseChartCtrl', {$scope: $scope});
+    var params = aux.getQueryParams(window.location.search);
+    var ticket_id = params.ticket_id;
+    var client_id = params.client_id;
+    var event_id = params.event_id;
+
+    $scope.open_edit_epicrisis = function(e){
+        var scope = $scope.$new();
+        scope.model = e;
+        return $modal.open({
+            templateUrl: '/WebMis20/RISAR/modal/edit_epicrisis.html',
+            scope: scope,
+            resolve: {
+                model: function () {return e}
+            },
+            size: 'lg'
+        })
+    };
+
+    $scope.add_inspection = function() {
+        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
+    };
+    
+    var load_header = function (event_id) {
+        RisarApi.gynecologic_chart.get_header(event_id).then(function (data) {
+            $scope.header = data.header;
+        });
+    };
+    var reload_chart = function () {
+        if (event_id) {
+            load_header(event_id)
+        }
+        RisarApi.gynecologic_chart.get(
+            event_id, ticket_id, client_id
+        ).then(function (event) {
+            $scope.chart = event;
+            if (ticket_id || client_id) {
+                load_header($scope.chart.id)
+            }
+        });
+    };
+    reload_chart();
+}])
+.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
+function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
     $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
@@ -207,9 +239,8 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
         }
     };
     reload();
-};
-
-var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
+}])
+.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', function ($scope, $modal, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
     $scope.fetuses = [];
@@ -226,10 +257,5 @@ var InspectionFetusViewCtrl = function ($scope, $modal, RisarApi) {
     };
 
     reload();
-};
-
-WebMis20.controller('ChartCtrl', ['$scope', '$modal', '$window', 'RisarApi', 'PrintingService', 'PrintingDialog',
-    'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', 'Config', 'ErrandModalService', ChartCtrl]);
-WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
-    'RefBookService', InspectionViewCtrl]);
-WebMis20.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', InspectionFetusViewCtrl]);
+}])
+;

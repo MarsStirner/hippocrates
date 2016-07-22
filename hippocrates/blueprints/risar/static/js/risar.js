@@ -110,7 +110,7 @@ WebMis20
         function create (ticket_id, client_id) {
             return wrapper(
                 'POST',
-                urls.get,
+                urls.get.format(''),
                 {ticket_id: ticket_id, client_id: client_id}
             ).then(function (event) {
                 if (event.automagic) {
@@ -123,27 +123,58 @@ WebMis20
         }
 
         this.get_header = function (event_id) {
-            return wrapper('GET', urls.header + event_id);
+            return wrapper('GET', urls.header.format(event_id));
         };
         this.delete = function (ticket_id) {
-            return wrapper('DELETE', urls.delete + ticket_id);
+            return wrapper('DELETE', urls.delete.format(ticket_id));
         };
-        this.close_event = function (event_id, data) {
-            return wrapper('POST', urls.close.format(event_id), {}, data);
+        this.close_event = function (event_id, data, edit_callback, cancel_callback) {
+            return wrapper(
+                'POST', urls.close.format(event_id), {}, data
+            ).then(function (data) {
+                var notify_id = NotificationService.notify(
+                    200,
+                    [
+                        'Случай беременности закрыт. ',
+                        {
+                            click: function () {
+                                edit_callback(data);
+                                close_notify();
+                            },
+                            text: 'Изменить'
+                        }, ' ',
+                        {
+                            click: function () {
+                                cancel_callback(data);
+                                close_notify();
+                            },
+                            text: 'Отменить'
+                        }
+                    ],
+                    'success'
+                );
+                var close_notify = function() {
+                    NotificationService.dismiss(notify_id);
+                };
+            })
         };
         this.get = function (event_id, ticket_id, client_id) {
             if (event_id) {
-                return wrapper('GET', urls.get + event_id)
+                return wrapper('GET', urls.get.format(event_id))
             } else {
                 var deferred = $q.defer();
-                wrapper('GET', urls.get, {ticket_id: ticket_id, client_id: client_id}).then(
-                    deferred.resolve,
-                    function () {
-                        create(ticket_id, client_id).then(
-                            deferred.resolve,
-                            deferred.reject
-                        )
-                    }
+                wrapper('GET', urls.get.format(''), {ticket_id: ticket_id, client_id: client_id}).then(
+                    function (data) {
+                        if (!data) {
+                            create(ticket_id, client_id).then(
+                                deferred.resolve,
+                                deferred.reject
+                            )
+                        } else {
+                            deferred.resolve(data);
+                        }
+                    },
+                    deferred.reject
                 );
                 return deferred.promise;
             }
@@ -285,7 +316,7 @@ WebMis20
     };
     this.gynecological_anamnesis = _.extend({}, _anamnesis_base, {
         get: function (event_id) {
-            var url = Config.url.api_anamnesis.format(event_id);
+            var url = Config.url.gyn.anamnesis.format(event_id);
             return wrapper('GET', url);
         },
         general: {

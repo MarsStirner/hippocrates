@@ -4,7 +4,7 @@
 {% block title %}> Карта пациентки{% endblock %}
 
 {% block main %}
-<div ng-controller="ChartCtrl" ng-cloak>
+<div ng-controller="GynecologicalChartCtrl" ng-cloak>
     <section class="content-header">
         <div alert-notify></div>
         {% if debug_data %}<pre>{{ debug_data.ca }}</pre>{% endif %}
@@ -42,11 +42,9 @@
 
                 <div class="box box-primary">
                      <div class="box-header">
-                        <h3 class="box-title with-border">Анамнез (<a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
+                        <h3 class="box-title with-border">Анамнез (<a ng-href="{{ url_for('.html_gynecological_anamnesis') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
                         <div class="box-tools">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-primary" ng-click="#change_anamnesis()">Изменить</button>
-                            </div>
+                            <a class="pseudo-btn" ng-href="{{ url_for('.html_gynecological_anamnesis_edit') }}?event_id=[[ chart.id ]]">Изменить</a>
                         </div>
                      </div>
                     <table class="table">

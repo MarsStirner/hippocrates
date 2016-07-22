@@ -263,7 +263,7 @@ class GynecologicCard(AbstractCard):
 
     @lazy
     def anamnesis(self):
-        return get_action(self.event, risar_gyn_general_anamnesis_code)
+        return get_action(self.event, risar_gyn_general_anamnesis_code, True)
 
     @lazy
     def checkups(self):

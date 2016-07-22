@@ -18,6 +18,7 @@ __author__ = 'viruzzz-kun'
 _base = '/api/0/gyn/'
 
 
+@module.route(_base, methods=['GET'])
 @module.route(_base + '<int:event_id>', methods=['GET'])
 @api_method
 def api_0_gyn_chart(event_id=None):
@@ -29,7 +30,7 @@ def api_0_gyn_chart(event_id=None):
         chart_creator()
         return represent_gyn_event(chart_creator.event)
     except GynecologicCardCreator.DoNotCreate:
-        raise ApiException(404, 'Must explicitly create event first')
+        raise ApiException(200, 'Must explicitly create event first')
 
 
 @module.route(_base, methods=['POST'])
@@ -58,17 +59,6 @@ def api_0_gyn_chart_mini(event_id=None):
         'header': represent_header(event),
         'chart': represent_chart_for_routing(event)
     }
-
-
-@module.route(_base + '<int:event_id>/chart_header')
-@api_method
-def api_0_gyn_chart_header(event_id=None):
-    event = Event.query.get(event_id)
-    if not event:
-        raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != request_type_gynecological:
-        raise ApiException(400, u'Обращение не является случаем беременности')
-    return represent_header(event)
 
 
 @module.route('/api/0/gyn/chart-by-ticket/<int:ticket_id>', methods=['DELETE'])

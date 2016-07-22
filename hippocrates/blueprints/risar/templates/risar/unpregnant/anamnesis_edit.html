@@ -209,7 +209,7 @@
             </div>
             </ng-form>
             <div class="box-footer text-right">
-                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
+                <a class="pseudo-btn" ng-href="{{ url_for('.html_gynecological_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
                 <button class="btn btn-success"
                         tooltip="[[anamnesisUnpregnantForm.$invalid && submit_attempt ? 'Заполните все обязательные поля': '']]"
                         ng-click="save()">Сохранить</button>

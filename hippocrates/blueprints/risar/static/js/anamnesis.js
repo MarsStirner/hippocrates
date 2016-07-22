@@ -380,9 +380,9 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
 
     var reload_anamnesis = function () {
         $scope.reload_header();
-        RisarApi.anamnesis.unpregnant.get($scope.event_id)
-        .then(function (anamnesis_unpregnant) {
-            $scope.anamnesis_unpregnant = anamnesis_unpregnant ? anamnesis_unpregnant : {
+        RisarApi.gynecological_anamnesis.general.get($scope.event_id)
+        .then(function (data) {
+            $scope.anamnesis_unpregnant = data ? data : {
                 finished_diseases: [],
                 current_diseases: []
             };
@@ -397,7 +397,7 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
             return false;
         }
         var model = $scope.anamnesis_unpregnant;
-        RisarApi.anamnesis.mother.save($scope.event_id, model)
+        RisarApi.gynecological_anamnesis.general.save($scope.event_id, model)
         .then(function (data) {
             $scope.anamnesis_unpregnant = data;
         })

@@ -76,9 +76,10 @@ def html_auto_chart():
         (event_id, request_type_code) = db.session.query(
             Event.id, rbRequestType.code
         ).join(
-            Event, rbRequestType
+            EventType, rbRequestType, ScheduleClientTicket,
         ).filter(
-            ScheduleClientTicket.id == request.args['ticket_id']
+            rbRequestType.code.in_([request_type_pregnancy, request_type_gynecological]),
+            ScheduleClientTicket.id == request.args['ticket_id'],
         ).first() or (None, None)
     elif 'client_id' in request.args:
         client_id = request.args['client_id']
@@ -116,7 +117,8 @@ def html_auto_chart():
                 raise abort(404, 'Event not found')
         kwargs = {'event_id': event_id}
     else:
-        kwargs = dict(request.args)
+        kwargs = request.args.to_dict()
+        request_type_code = request_type_gynecological
 
     if request_type_code not in chart_mapping:
         raise abort(500, 'We are totally fucked up')

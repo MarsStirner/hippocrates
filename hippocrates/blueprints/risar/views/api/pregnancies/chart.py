@@ -71,7 +71,7 @@ def api_1_pregnancy_chart(event_id=None):
         chart_creator()
         return represent_pregnancy_event(chart_creator.event)
     except PregnancyChartCreator.DoNotCreate:
-        raise ApiException(404, 'Must explicitly create event first')
+        raise ApiException(201, 'Must explicitly create event first')
 
 
 @module.route('/api/1/pregnancy/chart/', methods=['POST'])

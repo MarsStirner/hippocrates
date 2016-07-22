@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask.ext.login import current_user
 
-from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic, \
     check_card_attrs_action_integrity
 from hippocrates.blueprints.risar.lib.utils import bail_out
@@ -167,12 +167,12 @@ class GynecologicCardCreator(ChartCreator):
     def _perform_stored_event_checks(self):
         if self.event.eventType.requestType.code != request_type_gynecological:
             raise ApiException(400, u'Обращение не является гинекологиечским приёмом')
-        card = PregnancyCard.get_for_event(self.event)
+        card = GynecologicCard.get_for_event(self.event)
         self.action = card.attrs
         check_card_attrs_action_integrity(self.action)
 
     def _perform_post_create_event_checks(self):
-        card = PregnancyCard.get_for_event(self.event)
+        card = GynecologicCard.get_for_event(self.event)
         if self.action:
             card._card_attrs_action = self.action
         card.reevaluate_card_attrs()
