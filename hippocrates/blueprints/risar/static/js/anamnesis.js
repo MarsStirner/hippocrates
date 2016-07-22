@@ -29,7 +29,7 @@ var AnamnesisBaseCtrl = function ($scope, RisarApi, RefBookService, PrintingServ
     };
 };
 
-var AnamnesisCtrl = function ($scope, $controller, RisarApi) {
+var BaseAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
     var tabs = $scope.tabs = {
@@ -45,19 +45,35 @@ var AnamnesisCtrl = function ($scope, $controller, RisarApi) {
             tabs[hash] = true
         }
     }
-    var reload_anamnesis = function () {
-        $scope.reload_header();
-        RisarApi.anamnesis.get($scope.event_id)
-        .then(function (data) {
-            $scope.client_id = data.client_id;
-            $scope.anamnesis = data.anamnesis;
-        })
-    };
     $scope.format_multiple = function (obj, attr) {
         if (!obj) { return '' }
         return _.map(obj, function (o) { return o[attr]; }).join(', ');
     };
+};
 
+var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
+    $controller('BaseAnamnesisCtrl', {$scope: $scope});
+    var reload_anamnesis = function () {
+        $scope.reload_header();
+        RisarApi.anamnesis.get($scope.event_id)
+            .then(function (data) {
+                $scope.client_id = data.client_id;
+                $scope.anamnesis = data.anamnesis;
+            })
+    };
+    reload_anamnesis();
+};
+
+var GynecologicalAnamnesisCtrl = function ($scope, $controller, RisarApi) {
+    $controller('BaseAnamnesisCtrl', {$scope: $scope});
+    var reload_anamnesis = function () {
+        $scope.reload_header();
+        RisarApi.gynecological_anamnesis.get($scope.event_id)
+            .then(function (data) {
+                $scope.client_id = data.client_id;
+                $scope.anamnesis = data;
+            })
+    };
     reload_anamnesis();
 };
 
