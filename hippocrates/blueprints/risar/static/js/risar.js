@@ -242,12 +242,10 @@ WebMis20
         },
         unpregnant: {
             get: function (event_id) {
-                //todo: change url
-                return wrapper('GET', Config.url.api_anamnesis_mother.format(event_id));
+                return wrapper('GET', Config.url.gyn.anamnesis_general.format(event_id));
             },
             save: function (event_id, data) {
-                //todo: change url
-                return wrapper('POST', Config.url.api_anamnesis_mother.format(event_id), {}, data);
+                return wrapper('POST', Config.url.gyn.anamnesis_general.format(event_id), {}, data);
             }
         },
         mother: {

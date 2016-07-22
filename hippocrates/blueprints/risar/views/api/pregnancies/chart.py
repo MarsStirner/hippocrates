@@ -129,20 +129,6 @@ def api_0_chart_card_fill_history(event_id=None):
     return represent_chart_for_card_fill_rate_history(event)
 
 
-@module.route('/api/0/chart_header/')
-@module.route('/api/0/chart_header/<int:event_id>')
-@api_method
-def api_0_chart_header(event_id=None):
-    event = Event.query.get(event_id)
-    if not event:
-        raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != request_type_pregnancy:
-        raise ApiException(400, u'Обращение не является случаем беременности')
-    return {
-        'header': represent_header(event),
-    }
-
-
 @module.route('/api/0/event_routing', methods=['POST'])
 @api_method
 def api_0_event_routing():

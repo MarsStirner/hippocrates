@@ -382,8 +382,10 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
         $scope.reload_header();
         RisarApi.anamnesis.unpregnant.get($scope.event_id)
         .then(function (anamnesis_unpregnant) {
-            $scope.anamnesis_unpregnant = anamnesis_unpregnant ? anamnesis_unpregnant : {finished_diseases: [],
-                current_diseases: []};
+            $scope.anamnesis_unpregnant = anamnesis_unpregnant ? anamnesis_unpregnant : {
+                finished_diseases: [],
+                current_diseases: []
+            };
         })
     };
     $scope.save = function () {

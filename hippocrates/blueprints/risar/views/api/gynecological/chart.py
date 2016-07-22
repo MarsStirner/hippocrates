@@ -3,11 +3,12 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.chart_creator import GynecologicCardCreator
-from hippocrates.blueprints.risar.lib.represent.common import represent_header
+from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_event
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_chart_for_routing
 from hippocrates.blueprints.risar.risar_config import request_type_gynecological
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.utils import safe_datetime
 from nemesis.models.event import Event
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
@@ -83,6 +84,25 @@ def api_0_gyn_chart_delete(ticket_id):
     ticket.event.deleted = 1
     ticket.event = None
     db.session.commit()
+
+
+@module.route('/api/0/chart_close/')
+@module.route('/api/0/chart_close/<int:event_id>', methods=['POST'])
+@api_method
+def api_0_gyn_chart_close(event_id=None):
+    if not event_id:
+        raise ApiException(400, u'Either event_id must be provided')
+    else:
+        event = Event.query.get(event_id)
+        data = request.get_json()
+        if data.get('cancel'):
+            event.execDate = None
+            event.manager_id = None
+        else:
+            event.execDate = safe_datetime(data['exec_date'])
+            event.manager_id = data['manager']['id']
+        db.session.commit()
+    return represent_chart_for_close_event(event)
 
 
 
