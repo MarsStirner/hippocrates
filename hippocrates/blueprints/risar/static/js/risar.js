@@ -235,49 +235,7 @@ WebMis20
             return wrapper('GET', Config.url.api_gravidograma + event_id);
         }
     };
-    this.anamnesis = {
-        get: function (event_id) {
-            var url = Config.url.api_anamnesis.format(event_id);
-            return wrapper('GET', url);
-        },
-        unpregnant: {
-            get: function (event_id) {
-                return wrapper('GET', Config.url.gyn.anamnesis_general.format(event_id));
-            },
-            save: function (event_id, data) {
-                return wrapper('POST', Config.url.gyn.anamnesis_general.format(event_id), {}, data);
-            }
-        },
-        mother: {
-            get: function (event_id) {
-                return wrapper('GET', Config.url.api_anamnesis_mother.format(event_id));
-            },
-            save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_anamnesis_mother.format(event_id), {}, data);
-            }
-        },
-        father: {
-            get: function (event_id) {
-                return wrapper('GET', Config.url.api_anamnesis_father.format(event_id));
-            },
-            save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_anamnesis_father.format(event_id), {}, data);
-            }
-        },
-        pregnancies: {
-            get: function (id) {
-                return wrapper('GET', Config.url.api_anamnesis_pregnancies + id);
-            },
-            delete: function (id) {
-                return wrapper('DELETE', Config.url.api_anamnesis_pregnancies + id);
-            },
-            undelete: function (id) {
-                return wrapper('POST', Config.url.api_anamnesis_pregnancies + id + '/undelete');
-            },
-            save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_anamnesis_pregnancies + (data.id||''), {event_id: event_id}, data);
-            }
-        },
+    var _anamnesis_base = {
         transfusions: {
             get: function (id) {
                 return wrapper('GET', Config.url.api_anamnesis_transfusions + id);
@@ -309,8 +267,58 @@ WebMis20
                 var url = '{0}{1}/{2}'.format(Config.url.api_anamnesis_intolerances, data.type.code, (data.id||''));
                 return wrapper('POST', url, {client_id: client_id}, data);
             }
+        },
+        pregnancies: {
+            get: function (id) {
+                return wrapper('GET', Config.url.api_anamnesis_pregnancies + id);
+            },
+            delete: function (id) {
+                return wrapper('DELETE', Config.url.api_anamnesis_pregnancies + id);
+            },
+            undelete: function (id) {
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies + id + '/undelete');
+            },
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies + (data.id||''), {event_id: event_id}, data);
+            }
         }
     };
+    this.gynecological_anamnesis = _.extend({}, _anamnesis_base, {
+        get: function (event_id) {
+            var url = Config.url.api_anamnesis.format(event_id);
+            return wrapper('GET', url);
+        },
+        general: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.gyn.anamnesis_general.format(event_id));
+            },
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.gyn.anamnesis_general.format(event_id), {}, data);
+            }
+        }
+    });
+    this.anamnesis = _.extend({}, _anamnesis_base, {
+        get: function (event_id) {
+            var url = Config.url.api_anamnesis.format(event_id);
+            return wrapper('GET', url);
+        },
+        mother: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.api_anamnesis_mother.format(event_id));
+            },
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_anamnesis_mother.format(event_id), {}, data);
+            }
+        },
+        father: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.api_anamnesis_father.format(event_id));
+            },
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_anamnesis_father.format(event_id), {}, data);
+            }
+        }
+    });
     this.epicrisis = {
         get: function (event_id) {
             return wrapper('GET', Config.url.api_epicrisis.format(event_id));
