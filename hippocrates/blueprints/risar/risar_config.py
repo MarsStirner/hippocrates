@@ -14,7 +14,8 @@ risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
 
 risar_gyn_general_anamnesis_code = 'gynecological_visit_general_anamnesis'
-risar_gyn_checkup_codes = ('gynecological_visit_general_checkUp',)
+risar_gyn_checkup_code = 'gynecological_visit_general_checkUp'
+risar_gyn_checkup_codes = (risar_gyn_checkup_code,)
 
 pregnancy_card_attrs = 'cardAttributes'
 gynecological_card_attrs = 'gynecologicalAttributes'
@@ -43,6 +44,7 @@ first_inspection_code = 'risarFirstInspection'
 second_inspection_code = 'risarSecondInspection'
 pc_inspection_code = 'risarPCCheckUp'
 puerpera_inspection_code = 'risarPuerperaCheckUp'
+
 checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspection_code]
 
 # inspection properties

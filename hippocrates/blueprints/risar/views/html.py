@@ -4,7 +4,8 @@ from flask import render_template, request, redirect, url_for, abort
 from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.debug import get_debug_data
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
+    first_inspection_code, second_inspection_code, risar_gyn_checkup_code, pc_inspection_code, puerpera_inspection_code
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
@@ -129,6 +130,7 @@ def html_auto_chart():
 def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
 
+
 @module.route('/gynecological-anamnesis.html')
 def html_gynecological_anamnesis():
     return render_template('risar/unpregnant/anamnesis_view.html')
@@ -137,6 +139,7 @@ def html_gynecological_anamnesis():
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
     return render_template('risar/anamnesis_mother_edit.html')\
+
 
 @module.route('/gynecological-anamnesis/edit.html')
 def html_gynecological_anamnesis_edit():
@@ -148,9 +151,19 @@ def html_anamnesis_father_edit():
     return render_template('risar/anamnesis_father_edit.html')
 
 
+@module.route('/gyn/inspection.html')
+def html_gyn_inspection():
+    return render_template('risar/unpregnant/inspection_view.html')
+
+
+@module.route('/gyn/inspection_edit.html')
+def html_gyn_inspection_edit():
+    return render_template('risar/unpregnant/inspection_edit.html')
+
+
 @module.route('/inspection.html')
 def html_inspection():
-    return render_template('risar/unpregnant/inspection_view.html')
+    return render_template('risar/inspection_view.html')
 
 
 @module.route('/inspection/gravidograma.html')
@@ -160,15 +173,32 @@ def html_gravidograma():
 
 @module.route('/inspection_read.html')
 def html_inspection_read():
-    flat_code = None
     checkup_id = request.args.get('checkup_id')
-    if checkup_id:
-        checkup = Action.query.get(checkup_id)
-        flat_code = checkup.actionType.flatCode
-    if flat_code == 'risarFirstInspection':
+    if not checkup_id:
+        raise abort(404)
+
+    checkup = Action.query.join(
+        ActionType
+    ).filter(
+        Action.id == checkup_id
+    ).with_entities(
+        ActionType.flatCode
+    ).first()
+
+    if not checkup:
+        abort(404)
+    flat_code = checkup[0]
+
+    if flat_code == first_inspection_code:
         return render_template('risar/inspection_first_read.html')
-    elif flat_code == 'risarSecondInspection':
+    elif flat_code == second_inspection_code:
         return render_template('risar/inspection_second_read.html')
+    elif flat_code == risar_gyn_checkup_code:
+        return render_template('risar/unpregnant/inspection_read.html')
+    elif flat_code == pc_inspection_code:
+        return render_template('risar/inspection_pc_read.html')
+    elif flat_code == puerpera_inspection_code:
+        return render_template('risar/inspection_puerpera_read.html')
 
 
 @module.route('/inspection_edit.html')
@@ -177,25 +207,35 @@ def html_inspection_edit():
     event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
-        checkup = Action.query.get(checkup_id)
-        flat_code = checkup.actionType.flatCode
-        if checkup.endDate:
+        checkup = Action.query.join(
+            ActionType
+        ).filter(
+            Action.id == checkup_id
+        ).with_entities(
+            ActionType.flatCode, Action.endDate
+        ).first()
+
+        if not checkup:
+            abort(404)
+
+        if checkup[1]:
             return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
+
+        flat_code = checkup[0]
     else:
-        first_inspection = Action.query.join(ActionType).filter(Action.event_id == event_id, Action.deleted == 0,
-                                                               ActionType.flatCode == 'risarFirstInspection').first()
-        flat_code = 'risarSecondInspection' if first_inspection else 'risarFirstInspection'
-    return render_template('risar/unpregnant/inspection_edit.html', debug_data=debug_data)
-    # if flat_code == 'risarFirstInspection':
-    #     return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
-    # elif flat_code == 'risarSecondInspection':
-    #     return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
-
-
-@module.route('/inspection_pc_read.html')
-def html_inspection_pc_read():
-    return render_template('risar/inspection_pc_read.html')
-
+        first_inspection_exists = Action.query.join(ActionType).filter(
+            Action.event_id == event_id, 
+            Action.deleted == 0,
+            ActionType.flatCode == first_inspection_code,
+        ).exist()
+        flat_code = second_inspection_code if first_inspection_exists else first_inspection_code
+    
+    if flat_code == first_inspection_code:
+        return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
+    
+    elif flat_code == second_inspection_code:
+        return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
+    
 
 @module.route('/inspection_pc_edit.html')
 def html_inspection_pc_edit():
@@ -203,9 +243,17 @@ def html_inspection_pc_edit():
     event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
-        checkup = Action.query.get(checkup_id)
-        if checkup.endDate:
-            return redirect(url_for('.html_inspection_pc_read', event_id=event_id, checkup_id=checkup_id))
+        checkup = Action.query.filter(
+            Action.id == checkup_id
+        ).with_entities(
+            Action.endDate
+        ).first()
+
+        if not checkup:
+            abort(404)
+
+        if checkup[0]:
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
     return render_template('risar/inspection_pc_edit.html', debug_data=debug_data)
 
 
@@ -214,20 +262,23 @@ def html_inspection_puerpera():
     return render_template('risar/inspection_puerpera_view.html')
 
 
-@module.route('/inspection_puerpera_read.html')
-def html_inspection_puerpera_read():
-    return render_template('risar/inspection_puerpera_read.html')
-
-
 @module.route('/inspection_puerpera_edit.html')
 def html_inspection_puerpera_edit():
     debug_data = get_debug_data(request.args)
     event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
-        checkup = Action.query.get(checkup_id)
-        if checkup.endDate:
-            return redirect(url_for('.html_inspection_puerpera_read', event_id=event_id, checkup_id=checkup_id))
+        checkup = Action.query.filter(
+            Action.id == checkup_id
+        ).with_entities(
+            Action.endDate
+        ).first()
+
+        if not checkup:
+            abort(404)
+
+        if checkup[0]:
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
     return render_template('risar/inspection_puerpera_edit.html', debug_data=debug_data)
 
 
@@ -259,6 +310,7 @@ def html_ambulance_patient_info():
 @module.route('/measure_list.html')
 def html_event_measure():
     return render_template('risar/event_measure_list.html')
+
 
 @module.route('/gynecological-measure_list.html')
 def html_gynecological_event_measure():

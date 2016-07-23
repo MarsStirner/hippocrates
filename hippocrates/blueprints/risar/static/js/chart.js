@@ -173,6 +173,13 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
             event_id, ticket_id, client_id
         ).then(function (event) {
             $scope.chart = event;
+            var general_anamnesis = event.anamnesis.general;
+            $scope.chart.bad_habits = [
+                {value:general_anamnesis ? general_anamnesis.alcohol: false, text: 'алкоголь'},
+                {value:general_anamnesis ? general_anamnesis.smoking: false, text: 'курение'},
+                {value:general_anamnesis ? general_anamnesis.toxic: false, text: 'токсические вечества'},
+                {value:general_anamnesis ? general_anamnesis.drugs: false,text: 'наркотики'}
+            ];
             if (ticket_id || client_id) {
                 load_header($scope.chart.id)
             }

@@ -17,7 +17,7 @@
                 <tr>
                     <th width="10%" nowrap>Данные осмотра </th>
                     <th width="10%" nowrap ng-repeat="checkup in checkups">
-                        <a ng-href="{{ url_for('.html_inspection_puerpera_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
+                        <a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
                             <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
