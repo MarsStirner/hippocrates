@@ -862,8 +862,9 @@
                                                             
                                     <tr>
                                     <!-- example short_string -->
+                                    <pre>[[|json]]</pre>
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_ovary_right_oher" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.bimanual_ovary_right.attr" ng-model="checkup.bimanual_ovary_right_oher" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
@@ -1232,7 +1233,32 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
-                               
+                                    <tr>
+                                        <th class="text-right col-md-4">Диагнозы <span>&nbsp;</span></th>
+                                        <td class="col-md-8">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
+                                        </td>
+                                    </tr>
+                                        </tr>
+                                </tbody>
+                            </table>
+                                <table class="table table-condensed">
+                                <tbody>
+                                    <tr >
+                                        <th>Примечания <span>&nbsp;</span></th>
+                                        <td><wysiwyg ng-model="checkup.encompassing_comments" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Лечение <span>&nbsp;</span></th>
+                                        <td><wysiwyg ng-model="checkup.encompassing_treatment" /></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Рекомендации <span>&nbsp;</span></th>
+                                        <td><wysiwyg ng-model="checkup.treatment_recommendations" /></td>
+                                    </tr>
                                 </tbody>
                             </table>
                             </div>
