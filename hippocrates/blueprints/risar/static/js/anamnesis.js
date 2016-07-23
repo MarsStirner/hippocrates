@@ -110,7 +110,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
                 restart = rslt[1];
             result.newborn_inspections = result.newborn_inspections.filter(function(inspection){
                 return !inspection.deleted || inspection.id
-            })
+            });
             RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
                 angular.extend(p, result);
             });
@@ -122,7 +122,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
 
     $scope.remove = function (p) {
         if (p.id) {
-            RisarApi.anamnesis.pregnancies.delete(p.id).then(function () {
+            RisarApi.anamnesis.pregnancies.delete($scope.event_id, p.id).then(function () {
                 p.deleted = 1;
             });
         } else {
@@ -131,7 +131,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     };
     $scope.restore = function (p) {
         if (p.id) {
-            RisarApi.anamnesis.pregnancies.undelete(p.id).then(function () {
+            RisarApi.anamnesis.pregnancies.undelete($scope.event_id, p.id).then(function () {
                 p.deleted = 0;
             });
         } else {

@@ -291,8 +291,8 @@ def represent_anamnesis_newborn_inspection(child):
     }
 
 
-def represent_checkup(action):
-    result = action_as_dict(action)
+def represent_checkup(action, codes=None):
+    result = action_as_dict(action, codes)
     result['beg_date'] = action.begDate
     result['end_date'] = action.endDate
     result['person'] = action.person

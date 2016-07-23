@@ -2,6 +2,7 @@
 
 import datetime
 
+import six
 from sqlalchemy.orm import lazyload, joinedload
 
 from nemesis.lib.data import create_action
@@ -197,6 +198,20 @@ def action_apt_values(action, codes):
     return dict((key, safe_traverse_attrs(action.propsByCode.get(key), 'value')) for key in codes)
 
 
+def set_action_apt_values(action, values, hooks=None):
+    if not hooks:
+        hooks = {}
+    props = action.propsByCode
+    for code, value in six.iteritems(values):
+        if code not in props:
+            continue
+        prop = props[code]
+        if code in hooks:
+            hooks[code](prop, code)
+        else:
+            prop.value = value
+
+
 @cache.memoize()
 def get_action_type_id(flat_code):
     """
@@ -361,17 +376,24 @@ def action_as_dict(action, prop_filter=None):
     @return:
     """
     if prop_filter is None:
+        if not action:
+            return {}
         return {
             p.type.code: p.value
             for p in action.properties
             if p.type.code
         }
     else:
-        result = {
-            p.type.code: p.value
-            for p in action.properties
-            if p.type.code and p.type.code in prop_filter
-        }
+        prop_filter = set(prop_filter)
+        if action:
+            result = {
+                p.type.code: p.value
+                for p in action.properties
+                if p.type.code and p.type.code in prop_filter
+            }
+        else:
+            result = {}
+
         result.update({
             code: None
             for code in prop_filter

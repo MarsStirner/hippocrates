@@ -300,17 +300,17 @@ WebMis20
             }
         },
         pregnancies: {
-            get: function (id) {
-                return wrapper('GET', Config.url.api_anamnesis_pregnancies + id);
+            get: function (event_id, id) {
+                return wrapper('GET', Config.url.api_anamnesis_pregnancies.format(event_id, id));
             },
-            delete: function (id) {
-                return wrapper('DELETE', Config.url.api_anamnesis_pregnancies + id);
+            delete: function (event_id, id) {
+                return wrapper('DELETE', Config.url.api_anamnesis_pregnancies.format(event_id, id));
             },
-            undelete: function (id) {
-                return wrapper('POST', Config.url.api_anamnesis_pregnancies + id + '/undelete');
+            undelete: function (event_id, id) {
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies_undelete.format(event_id, id));
             },
             save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_anamnesis_pregnancies + (data.id||''), {event_id: event_id}, data);
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies.format(event_id, data.id || ''), data);
             }
         }
     };

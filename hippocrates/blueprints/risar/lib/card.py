@@ -11,7 +11,8 @@ from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
-    puerpera_inspection_code, risar_gyn_general_anamnesis_code, risar_gyn_checkup_codes
+    puerpera_inspection_code, risar_gyn_general_anamnesis_code, risar_gyn_checkup_codes, request_type_pregnancy, \
+    request_type_gynecological
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
@@ -88,11 +89,12 @@ class AbstractCard(object):
         :param event:
         :return:
         """
+        klass = classes.get(event.eventType.requestType.code, cls)
         from flask import g
         if not hasattr(g, '_card_cache'):
             g._card_cache = WeakValueDictionary()
         if event.id not in g._card_cache:
-            result = g._card_cache[event.id] = cls(event)
+            result = g._card_cache[event.id] = klass(event)
         else:
             result = g._card_cache[event.id]
         return result
@@ -269,3 +271,8 @@ class GynecologicCard(AbstractCard):
     def checkups(self):
         return get_action_list(self.event, risar_gyn_checkup_codes).all()
 
+
+classes = {
+    request_type_pregnancy: PregnancyCard,
+    request_type_gynecological: GynecologicCard,
+}
