@@ -31,55 +31,55 @@
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">С возраста</div>
                             <div class="col-sm-7 col-md-7">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.age"></span>
+                                <span ng-bind="anamnesis.general.age"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Длительность</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.duration"></span>
+                                <span ng-bind="anamnesis.general.duration"></span>
                             </div>
                         </div><div class="row">
                             <div class="col-sm-5 
                             col-md-5 text-right">Продолжительность цикла</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.period_duration"></span>
+                                <span ng-bind="anamnesis.general.period_duration"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Нарушения</div>
                             <div class="col-sm-7 col-md-7" >
-                                <span class="atr_vl">[[ anamnesis.general.disorder ? 'Да' : 'Нет']]</span>
+                                <span>[[ anamnesis.general.disorder | danet ]]</span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Характер менструаций</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.menstrual_character">! </span>
+                                <span ng-bind="anamnesis.general.menstrual_character.name"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Межменструальные выделения</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.intermenstrual_spotting"></span>
+                                <span ng-bind="anamnesis.general.intermenstrual_spotting"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Менструальные боли</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.menstrual_pain"></span>
+                                <span ng-bind="anamnesis.general.menstrual_pain"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Менопауза</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" >[[ anamnesis.general.menopause ? 'Да' : 'Нет']]</span>
+                                <span >[[ anamnesis.general.menopause | danet ]]</span>
                             </div>
                         </div>
                         <div class="row" ng-show="anamnesis.general.menopause">
                             <div class="col-sm-5 col-md-5 text-right">С возраста</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.menopause_age"></span>
+                                <span ng-bind="anamnesis.general.menopause_age"></span>
                             </div>
                         </div>
                         <div class="row">
@@ -90,173 +90,168 @@
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">С возраста</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.sex_life_age"></span>
+                                <span ng-bind="anamnesis.general.sex_life_age"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Количество половых партнёров</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.intercourse_partner_number"></span>
+                                <span ng-bind="anamnesis.general.intercourse_partner_number"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Семейное положение</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.marital_status"></span>
+                                <span ng-bind="anamnesis.general.marital_status.name"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Заболевания</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl"></span>
+                                <span></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">ЗППП</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.std.name"></span>
+                                <span ng-bind="anamnesis.general.std | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Гинекологические</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.gynecopathy.name"></span>
+                                <span ng-bind="anamnesis.general.gynecopathy | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Гепатит</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.hepatitis"></span>
+                                <span ng-bind="anamnesis.general.hepatitis"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Туберкулез</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.tuberculosis"></span>
+                                <span ng-bind="anamnesis.general.tuberculosis"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Соматические</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.somatic_disease"></span>
+                                <span ng-bind="anamnesis.general.somatic_disease"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Наследственность</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.hereditary.name"></span>
+                                <span ng-bind="anamnesis.general.hereditary | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Оперативные вмешательства на половых органах</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.gyn_operation"></span>
+                                <span ng-bind-html="anamnesis.general.gyn_operation"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Бесплодие</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl">[[ anamnesis.general.infertility ? 'Да' : 'Нет']]</span>
+                                <span>[[ anamnesis.general.infertility | danet ]]</span>
                             </div>
                         </div>
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right">Вид</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.infertility_kind"></span>
+                                <span ng-bind="anamnesis.general.infertility_kind.name"></span>
                             </div>
                         </div>
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right">Длительность, лет</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.infertility_duration"></span>
+                                <span ng-bind="anamnesis.general.infertility_duration"></span>
                             </div>
                         </div>
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right">Причины</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.infertility_etiology"></span>
+                                <span ng-bind="anamnesis.general.infertility_etiology | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right">Лечение</div>
                             <div class="col-sm-7 col-md-7 ">
-                               <span class="atr_vl" ng-bind-html="anamnesis.general.infertility_treatment"></span>
+                               <span ng-bind="anamnesis.general.infertility_treatment | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Эпидемиологический анамнез</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.epidemic"></span>
+                                <span ng-bind="anamnesis.general.epidemic"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Травмы</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.traumas"></span>
+                                <span ng-bind-html="anamnesis.general.traumas"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Операции (кроме гинекологических)</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.operations"></span>
+                                <span ng-bind-html="anamnesis.general.operations"></span>
                             </div>
                         </div>
                         <!--search ref-books by .name -->
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Группа крови</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                               <span class="atr_vl" ng-bind-html="anamnesis.general.blood_type.name"></span>
+                               <span ng-bind="anamnesis.general.blood_type.name"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Вредные привычки</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl"></span>
-                            </div>
+                            <div class="col-sm-7 col-md-7 "></div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Алкоголь</div><div class="col-sm-7 col-md-7 ng-binding">
-                            <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.alcohol, 'fa-check text-danger': anamnesis.general.alcohol}"></i>
+                            <div class="col-sm-5 col-md-5 text-right">Алкоголь</div>
+                            <div class="col-sm-7 col-md-7 ng-binding">
+                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.alcohol, 'fa-check text-danger': anamnesis.general.alcohol}"></i>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Курение</div>
                            <div class="col-sm-7 col-md-7">
-                                <span class="atr_vl">
-                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.smoking, 'fa-check text-danger': anamnesis.general.smoking}"></i></span>
+                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.smoking, 'fa-check text-danger': anamnesis.general.smoking}"></i>
                            </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Токсичные вещества</div>
                             <div class="col-sm-7 col-md-7">
-                                <span class="atr_vl">
-                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.toxic, 'fa-check text-danger': anamnesis.general.toxic}"></i>    </span>
+                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.toxic, 'fa-check text-danger': anamnesis.general.toxic}"></i>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Наркотики</div>
                             <div class="col-sm-7 col-md-7">
-                                <span class="atr_vl">
-                                    <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.drugs, 'fa-check text-danger': anamnesis.general.drugs}"></i>
-                                </span>
+                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.drugs, 'fa-check text-danger': anamnesis.general.drugs}"></i>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Общественно-профилактическая группа</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.work_group.name"></span>
+                                <span ng-bind="anamnesis.general.work_group.name"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Профессиональные вредности</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.professional_properties.name"></span>
+                                <span ng-bind="anamnesis.general.professional_properties.name"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Дополнительная информация</strong></div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span class="atr_vl" ng-bind-html="anamnesis.general.additional_info"></span>
+                                <span ng-bind-html="anamnesis.general.additional_info"></span>
                             </div>
                         </div>
 
