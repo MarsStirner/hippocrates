@@ -33,6 +33,7 @@ def represent_gyn_event(event):
 
 
 def represent_gyn_checkup_wm(action):
+    # TODO: На самом деле, это корявое решение, но ничего более умного мне в голову не приходит
     result = represent_gyn_checkup(action)
     result['measures'] = represent_measures(action)
     return result

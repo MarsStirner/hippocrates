@@ -245,6 +245,7 @@ def represent_pregnancy_checkup(action):
 
 
 def represent_pregnancy_checkup_wm(action):
+    # TODO: На самом деле, это корявое решение, но ничего более умного мне в голову не приходит
     result = represent_pregnancy_checkup(action)
     result['measures'] = represent_measures(action)
     return result

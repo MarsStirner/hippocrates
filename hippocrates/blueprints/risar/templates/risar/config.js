@@ -18,6 +18,8 @@ WebMis20
             checkup_list: '{{ url_for('.api_0_gyn_checkup_list', event_id=-99).replace('-99', '{0}') }}',
             checkup_new: '{{ url_for('.api_0_gyn_checkup_get_new', event_id=-99, flat_code='-98').replace('-99', '{0}').replace('-98', '{1}') }}',
             checkup_post: '{{ url_for('.api_0_gyn_checkup', event_id=-99).replace('-99', '{0}') }}',
+            inpection_read_html:'{{ url_for('.html_inspection_read') }}',
+            inpection_edit_html:'{{ url_for('.html_gyn_inspection_edit') }}',
         },
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',

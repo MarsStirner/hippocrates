@@ -256,6 +256,20 @@ WebMis20
             return wrapper('POST', Config.url.api_checkup_puerpera_save.format(event_id), {}, data);
         }
     };
+    this.checkup_gyn = {
+        get_list: function (event_id) {
+            return wrapper('GET', Config.url.gyn.checkup_list + event_id);
+        },
+        get: function (event_id, checkup_id) {
+            return wrapper('GET', Config.url.gyn.checkup.format(event_id, checkup_id));
+        },
+        create: function (event_id, flat_code) {
+            return wrapper('GET', Config.url.gyn.checkup_new.format(event_id, flat_code));
+        },
+        save: function (event_id, data) {
+            return wrapper('POST', Config.url.gyn.checkup_post.format(event_id), {}, data);
+        }
+    };
     this.fetus = {
         get_fetus_list: function (event_id) {
             return wrapper('GET', Config.url.api_fetus_list + event_id);

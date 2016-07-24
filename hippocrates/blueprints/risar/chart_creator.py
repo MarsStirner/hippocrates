@@ -2,7 +2,7 @@
 # TODO: Refactor me
 from datetime import datetime
 
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic, \

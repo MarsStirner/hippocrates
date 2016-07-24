@@ -1,7 +1,7 @@
-
-'use strict';
-
-WebMis20.controller('CheckupPCEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config', 
+/**
+ * Created by mmalkov on 24.07.16.
+ */
+WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
@@ -34,7 +34,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 if($scope.checkup.id){
                     $scope.checkup = data;
                 } else {
-                    $window.open(Config.url.inspection_pc_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
+                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
                 }
             });
     };
@@ -50,12 +50,11 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                     } else {
                         $scope.rc.sampleWizard.forward();
                         var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
-                        $window.open(Config.url.inspection_pc_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
+                        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
                     }
                 });
         }
     };
-
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
     var event_id = $scope.event_id = params.event_id;
@@ -66,7 +65,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             $scope.header = data.header;
         });
         if (!checkup_id) {
-            RisarApi.checkup.create(event_id, 'risarPCCheckUp').
+            RisarApi.checkup.create(event_id, 'risarFirstInspection').
             then(function (checkup) {
                 $scope.checkup = checkup;
                 if(!$scope.checkup.fetuses.length) {
