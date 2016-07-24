@@ -4,7 +4,7 @@
 {% block title %}> Повторный осмотр{% endblock %}
 
 {% block main %}
-<div ng-controller="CheckupFirstEditCtrl" ng-cloak>
+<div ng-controller="CheckupGynEditCtrl" ng-cloak>
     <section class="content-header">
          {{ rimacros.unpregnant_page_title_n('Осмотр') }}
         {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
@@ -34,7 +34,7 @@
                                     <div class="col-sm-6 col-md-6  text-right">Дата</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.last_menstruation_date|asDateTime]]</div>
                                 </div>
-                                <!-- example multiple --> 
+                                <!-- example multiple -->
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Особенности</div>
                                     <div class="col-sm-6 col-md-6"><span ng-bind="checkup.last_menstruation_features | pluck:'name' | join:', '"></span></div>
@@ -76,7 +76,7 @@
                                         <div class="col-sm-6 col-md-6 text-right"><b>Боли</b></div>
                                         <div class="col-sm-6 col-md-6"></div>
                                 </div>
-                                 <!-- example single --> 
+                                 <!-- example single -->
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Локализация боли</div>
                                         <div class="col-sm-6 col-md-6">[[checkup.pain_location]]</div>
@@ -234,7 +234,7 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Половой партнер</div>
                                     <div class="col-sm-6 col-md-6"><span ng-bind="checkup.intercourse_partner | pluck:'name' | join:', '"></span></div>
-                                </div> 
+                                </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Подкожно-жировая клетчатка</div>
                                     <div class="col-sm-6 col-md-6"><span ng-bind="checkup.subcutaneous_fat | pluck:'name' | join:', '"></span></div>
@@ -259,7 +259,7 @@
                                         <div class="col-sm-6 col-md-6 text-right">Примечания</div>
                                         <div class="col-sm-6 col-md-6">[[checkup.comments]]</div>
                                 </div>
-                            
+
                             </div>
                         </div>
                     </div>
@@ -271,35 +271,75 @@
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_genitals">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="box-body">
-                                <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right"><b>Антропометрические данные</b></div>
-                                        <div class="col-sm-6 col-md-6"></div>
-                                </div>
-                                <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Масса</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.weight]]</div>
-                                </div>
-                               
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">АД правая рука</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.ad_right_high]]/[[checkup.ad_right_low]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">АД левая рука</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.ad_left_high]]/[[checkup.ad_left_low]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Кожа</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.skin | pluck:'name' | join:', '"></span></div>
 
-                                </div>
-                               
-                                 <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Примечания</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.comments]]</div>
-                                </div>
-                            
+                            <div class="box-body">
+
+
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Характер оволосения</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_pilosis | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Региональные паховые лимфоузлы</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.groin_glands | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Состояние кожи</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_skin | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row" ng-show="checkup.vulva_skin_adds">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.vulva_skin_adds]]</span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Состояние слизистой</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_mucous | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row" ng-show="checkup.vulva_mucous_adds">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.vulva_mucous_adds]]</span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Степень развития наружных половых органов</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_germination | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Область уретры</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.urethra | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row" ng-show="checkup.urethra_adds">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.urethra_adds]]</span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Перианальная область</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.perianal_zona | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right"><b>Выделения</b></div>
+                                        <div class="col-sm-6 col-md-6"></div>
+                            </div>
+                             <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Консистенция</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_consistency | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Цвет</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_colour | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Количество</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_quantity | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Запах</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_smell | pluck:'name' | join:', '"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.vulva_comments]]</div>
+                            </div>
+
                             </div>
                         </div>
                     </div>
@@ -312,7 +352,7 @@
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
-                               
+
 
                                                      <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Влагалище</div>
@@ -394,76 +434,262 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="box box-primary">
                             <div class="box-header with-border">
-                                <h3 class="box-title">Заключение</h3>
+                                <h3 class="box-title">Бимануальное исследование</h3>
                                 <a class="print_link pull-right" ng-if="!checkup.end_date"
-                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_conclusion">
+                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_bimanual">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
 
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
-                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
-                                        </div>
+                                    <div class="col-sm-6 col-md-6 text-right"><b>Матка</b></div>
+                                    <div class="col-sm-6 col-md-6"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Консистенция</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_cervix_consistency| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Тело матки</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_uterus_body| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Размеры</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row" ng-show="checkup.bimanual_body_of_womb_size">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Положение</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_uteri_position| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right"><b>Придатки</b></div>
+                                    <div class="col-sm-6 col-md-6"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Яичники справа</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_ovary_right| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row" ng-show="checkup.bimanual_ovary_right_oher">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_ovary_right_oher]]></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Яичники слева</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_ovary_left| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row" ng-show="checkup.bimanual_ovary_left">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_ovary_left]]></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Маточные трубы справа</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_uterine_tubes_right]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Маточные трубы слева</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_uterine_tubes_left]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Своды влагалища</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_vaginal_fornix | pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_comments]]</div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Ректовагинальное исследование</h3>
+                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_rectovaginal">
+                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="box-body">
+                                
+
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right"><b>Матка</b></div>
+                                    <div class="col-sm-6 col-md-6"></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                 <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Консистенция шейки матки</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_consistency| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Тело матки</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_uterus_body| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Размеры</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                </div> 
+                                <div class="row" ng-show="checkup.rectovaginal_body_of_womb_enlarged">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_body_of_womb_enlarged]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Положение</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_uteri_position]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Параметрическая область широких связок матки</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_parametrium| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row" ng-show="checkup.rectovaginal_parametrium_other">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_parametrium_other]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right"><b>Придатки</b></div>
+                                    <div class="col-sm-6 col-md-6"></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Яичники справа</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_ovary_right| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row" ng-show="checkup.rectovaginal_ovary_right_oher">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_ovary_right_oher]]</div>
+                                </div>
+                                 <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Яичники слева</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_ovary_left| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row" ng-show="checkup.rectovaginal_ovary_left_oher">
+                                    <div class="col-sm-6 col-md-6 text-right"></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_ovary_left_oher]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Маточные трубы справа</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_uterine_tubes_right]]</div>
+                                </div> 
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Маточные трубы слева</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_uterine_tubes_left]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Яичники слева</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_vaginal_fornix| pluck:'name' | join:', '"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_comments]]</div>
+                                </div>
+
+                                <!-- END RECTOVAGINAL -->
+
+                            </div>
+                        </div>
+                    </div>
+                   <div class="col-md-4">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Ректальное исследование</h3>
+                                <a class="print_link pull-right" ng-if="checkup.end_date"
+                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_rectal">
+                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="box-body">
+                                
+                                 <!-- START RECTAL -->
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Перианальная область</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_perianal_zona| pluck:'name' | join:', '"></span></div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
-                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
-                                        </div>
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Прямая кишка</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_rectum| pluck:'name' | join:', '"></span></div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
-                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
-                                        </div>
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                    </div> 
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Консистенция</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_cervix_consistency| pluck:'name' | join:', '"></span></div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Срок беременности:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.pregnancy_week]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Возможность сохранения беременности:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation ? 'да': 'нет']]</div>
-                                </div>
-                                <div class="row" ng-show="!pregContRefusalDisabled()">
-                                    <div class="col-sm-6 col-md-6  text-right">Отказ от прерывания:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation_refusal ? 'да': 'нет']]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Витаминизация:</div>
-                                    <div class="col-md-6 long-words" ng-bind-html="checkup.fortification"></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Коррекция питания:</div>
-                                    <div class="col-md-6 long-words" ng-bind-html="checkup.nutrition"></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Лечение:</div>
-                                    <div class="col-md-6 long-words" ng-bind-html="checkup.treatment"></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Плановая дата следующей явки:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.next_date|asDate]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Примечания:</div>
-                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.notes"></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Рекомендации:</div>
-                                    <div class="col-md-6 long-words" ng-bind-html="checkup.recommendations"></div>
-                                </div>
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Тело матки</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_uterus_body| pluck:'name' | join:', '"></span></div>
+                                    </div>
+                                   <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Размеры</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                    </div>
+                                     <div class="row" ng-show="checkup.rectal_body_of_womb_enlarged">
+                                                <div class="col-sm-6 col-md-6 text-right"></div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_body_of_womb_enlarged]]</div>
+                                    </div>
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Положение</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_uteri_position| pluck:'name' | join:', '"></span></div>
+                                    </div>
+                                    <div class="row">
+                                            <div class="col-sm-6 col-md-6 text-right">Параметрическая область широких связок матки</div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_parametrium| pluck:'name' | join:', '"></span></div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Другое</div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_parametrium_other]]</div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Яичники справа</div>
+                                                <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_ovary_right| pluck:'name' | join:', '"></span></div>
+                                    </div>
+                                    <div class="row" ng-show="checkup.rectal_ovary_right_oher">
+                                                <div class="col-sm-6 col-md-6 text-right"></div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_ovary_right_oher]]</div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Яичники слева</div>
+                                                <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_ovary_left| pluck:'name' | join:', '"></span></div>
+                                    </div>
+                                    <div class="row" ng-show="checkup.rectal_ovary_left_oher">
+                                                <div class="col-sm-6 col-md-6 text-right"></div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_ovary_left_oher]]</div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Маточные трубы справа</div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_uterine_tubes_right]]</div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Маточные трубы слева</div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_uterine_tubes_left]]</div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Своды влагалища</div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_vaginal_fornix]]</div>
+                                    </div>
+                                    <div class="row">
+                                                <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
+                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_comments]]</div>
+                                    </div>
+                                <!-- END RECTAL -->
+
+
                             </div>
                         </div>
                     </div>
@@ -502,100 +728,7 @@
                     </div>
                 </div>
             </tab>
-            <tab heading="Данные плода">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="box box-primary">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Общие данные</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
-                                   href="{{ url_for('html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_fetus">
-                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                            </div>
-                            <div class="box-body">
-                                <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Дата первого шевеления:</div>
-                                    <div class="col-sm-9 col-md-9">[[checkup.fetus_first_movement_date|asDate]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Шевеление:</div>
-                                    <div class="col-sm-9 col-md-9">[[checkup.fetus_movement]]</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                         ng-repeat="child in checkup.fetuses | flt_not_deleted">
-                        <div class="col-md-6">
-                            <div class="box box-primary">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Плод [[$index+1]]</h3>
-                                    <a class="print_link pull-right" ng-if="!checkup.end_date"
-                                       href="{{ url_for('html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_fetus">
-                                        <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                                </div>
-                                <div class="box-body">
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Положение:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.position.name]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Позиция:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.position_2.name]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Вид плода:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.type.name]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Предлежание:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.presenting_part.name]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Задержка в развитии:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.delay.name]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">Сердцебиение:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-repeat="elem in child.state.heartbeat" >[[elem.name]][[$last ? '' : ', ']]</span></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">ЧСС, уд/мин:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.heart_rate]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right"><b>[[child.state.ktg_input ? 'Данные КТГ': 'Данные КТГ:']]</b></div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.ktg_input ? '': 'нет данных']]</div>
-                                    </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
-                                        <div class="col-sm-6 col-md-6 text-right">Базальный ритм:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.basal.name]]</div>
-                                    </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
-                                        <div class="col-sm-6 col-md-6 text-right">Вариабельность (амплитуда):</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.variability_range.name]]</div>
-                                    </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
-                                        <div class="col-sm-6 col-md-6 text-right">Вариабельность (частота в минуту):</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.frequency_per_minute.name]]</div>
-                                    </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
-                                        <div class="col-sm-6 col-md-6 text-right">Акселерации за 30 минут:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.acceleration.name]]</div>
-                                    </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
-                                        <div class="col-sm-6 col-md-6 text-right">Децелерации за 30 минут:</div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.deceleration.name]]</div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12">&nbsp;</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </tab>
+            
         </tabset>
     </section>
 </div>
@@ -604,6 +737,7 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/checkup.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/checkup_gyn.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/em_action_view.js', v=app_version) }}"></script>
 {% endblock %}
