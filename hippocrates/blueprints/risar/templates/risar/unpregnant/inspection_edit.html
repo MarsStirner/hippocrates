@@ -317,8 +317,11 @@
                                         <td class="text-right">В течение</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="pregnancy_failure_period" name="pregnancy_failure_period" ng-model="checkup.pregnancy_failure_period"
-                                                       class="form-control"  autofocus>
+                                                <input type="number" min="0" id="pregnancy_failure_period"
+                                                       name="pregnancy_failure_period"
+                                                       ng-model="checkup.pregnancy_failure_period"
+                                                       class="form-control" ng-disabled="!checkup.pregnancy_failure"
+                                                       autofocus>
                                             </div>
                                             </div>
                                         </td>
@@ -405,8 +408,8 @@
                                         <td class="text-right">МРК</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="mrk" name="mrk" ng-model="checkup.mrk"
-                                                       class="form-control" autofocus>
+                                                <input min="0" id="mrk" name="mrk" ng-model="checkup.mrk"
+                                                       disabled class="form-control" autofocus>
                                             </div>
                                             </div>
                                         </td>
@@ -415,8 +418,8 @@
                                         <td class="text-right">ИМТ</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="imt" name="imt" ng-model="checkup.imt"
-                                                       class="form-control" autofocus>
+                                                <input min="0" id="imt" name="imt" ng-model="checkup.imt"
+                                                       disabled class="form-control" autofocus>
                                             </div>
                                             </div>
                                         </td>
@@ -597,7 +600,7 @@
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="!_.contains(_.pluck(checkup.vulva_skin, 'code'), 'other')" ng-model="checkup.vulva_skin_adds" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.vulva_skin | filter:{code:'other'} | count | negate" ng-model="checkup.vulva_skin_adds" class="form-control"></td>
                                     </tr>
                                      <tr>
                                         <!-- example few_checkboxes -->
@@ -612,7 +615,7 @@
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="checkup.vulva_mucous.code !== 'other'" ng-model="checkup.vulva_mucous_adds" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.vulva_mucous | filter:{code:'other'} | count | negate" ng-model="checkup.vulva_mucous_adds" class="form-control"></td>
                                     </tr>
                                     <tr>
                                         <!-- example select -->
@@ -628,16 +631,14 @@
                                         <!-- example few_checkboxes -->
                                         <th class="text-right">Область уретры <span class="text-danger">*</span></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.urethra.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="urethra" refbook-checkbox ng-model="checkup.urethra" ref-book="rbRisarUrethra">
-                                                [[ item.name ]]
-                                            </div>
+                                            <rb-select name="urethra" ng-model="checkup.urethra" ref-book="rbRisarUrethra"></rb-select>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="true" ng-model="checkup.urethra_adds" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.urethra.code != 'other'" ng-model="checkup.urethra_adds" class="form-control"></td>
                                     </tr>
                                     
                                     <tr>
@@ -728,7 +729,7 @@
                                                         <tr>
                                                             <!-- example short_string -->
                                                             <td class="text-right"></td>
-                                                            <td><input ng-disabled="true" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
+                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code != 'other'" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
                                                         </tr>
                                                         <tr>
                                                             <!-- example select -->
@@ -743,7 +744,7 @@
                                                         <tr>
                                                             <!-- example short_string -->
                                                             <td class="text-right"></td>
-                                                            <td><input ng-disabled="true" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
+                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code != 'other'" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
                                                         </tr>
 
                                                         <tr>
@@ -756,7 +757,7 @@
                                                                 </div>
                                                             </div></td>
                                                         </tr>
-                                                        <tr>
+                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Размеры</th>
                                                             <td class="col-md-8"><div class="row">
@@ -766,7 +767,7 @@
                                                                 </div>
                                                             </div></td>
                                                         </tr>
-                                                        <tr>  
+                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">  
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Форма</th>
                                                             <td class="col-md-8"><div class="row">
@@ -776,17 +777,17 @@
                                                                 </div>
                                                             </div></td>
                                                         </tr>
-                                                        <tr>
+                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">
                                                             <!-- example checkbox -->
                                                             <td class="text-right">Эрозия</td>
                                                             <td><input ng-model="checkup.ectropion_mirrors" class="checkbox" type="checkbox"></td>
                                                         </tr>
-                                                        <tr>
+                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">
                                                             <!-- example checkbox -->
                                                             <td class="text-right">Эрозированный эктропион</td>
                                                             <td><input ng-model="checkup.anabrosis_mirrors" class="checkbox" type="checkbox"></td>
                                                         </tr>
-                                                         <tr>  
+                                                         <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">  
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Наружный зев</td>
                                                             <td class="col-md-8"><div class="row">
@@ -811,7 +812,7 @@
                                                         <tr>
                                                             <!-- example short_string -->
                                                             <td class="text-right"></td>
-                                                            <td><input ng-disabled="true" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
+                                                            <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
                                                         </tr>
 
                                                         <tr>
@@ -893,8 +894,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
-                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri"
-                                                       ></rb-select>
+                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -909,7 +909,7 @@
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
                                             <rb-select name="bimanual_cervix_consistency" ng-model="checkup.bimanual_cervix_consistency" ref-book="rbRisarCervix_Consistency"
-                                                       ></rb-select>
+                                            ng-disabled="checkup.bimanual_cervix_uteri.code == 'missing'"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -927,7 +927,7 @@
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
                                             <rb-select name="bimanual_body_of_womb_size" ng-model="checkup.bimanual_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"
-                                                       ></rb-select>
+                                                       ng-disabled="checkup.bimanual_uterus_body | pluck:'code' | contains:['missing', 'not determined']"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -935,13 +935,13 @@
                                     <tr>
                                     <!-- example short_string -->
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
+                                    <td><input ng-disabled="['missing', 'not determined'].has(checkup.bimanual_uterus_body) || checkup.bimanual_body_of_womb_size.code != 'enlarged'" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Положение</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.bimanual_uteri_position"></rb-select></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.bimanual_uteri_position" ng-disabled="['missing', 'not determined'].has(checkup.bimanual_uterus_body)"></rb-select></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right col-md-4">Придатки</th>
@@ -965,7 +965,7 @@
                                     <!-- example short_string -->
                                     
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="checkup.bimanual_ovary_right.code === 'other'" ng-model="checkup.bimanual_ovary_right_oher" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.bimanual_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_ovary_right_oher" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
@@ -982,7 +982,7 @@
                                     <tr>
                                     <!-- example short_string -->
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.bimanual_ovary_left_oher" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.bimanual_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_ovary_left_oher" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
@@ -1055,7 +1055,8 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
-                                            <rb-select name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
+                                            <rb-select ng-disabled="checkup.rectovaginal_cervix_uteri.code == 'missing'"
+                                                    name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1077,7 +1078,8 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
-                                            <rb-select name="rectovaginal_body_of_womb_size" ng-model="checkup.rectovaginal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
+                                            <rb-select name="rectovaginal_body_of_womb_size" ng-disabled="checkup.rectovaginal_cervix_uteri | pluck:'code' | contains:['missing', 'not determined']"
+                                                       ng-model="checkup.rectovaginal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1087,13 +1089,13 @@
                                 <tr>
                                     <!-- example short_string -->
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
                                 </tr>
                                                             
                                 <tr>
                                     <!-- example multiple -->
                                     <td class="text-right">Положение</td>
-                                    <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position"></rb-select></td>
+                                    <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position" ng-disabled="['missing', 'not determined'].has(checkup.rectovaginal_uterus_body)"></rb-select></td>
                                 </tr>
                                 
                                 <tr>
@@ -1105,7 +1107,7 @@
                                 <tr>
                                     <!-- example short_string -->
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_parametrium_other" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.rectovaginal_parametrium | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_parametrium_other" class="form-control"></td>
                                 </tr>
 
                                 <tr>
@@ -1122,7 +1124,7 @@
                                 <tr>
                                     <!-- example short_string -->
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_ovary_right_oher" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.rectovaginal_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_ovary_right_oher" class="form-control"></td>
                                 </tr>
                                                             
                                     <tr>
@@ -1136,7 +1138,7 @@
                                 <tr>
                                     <!-- example short_string -->
                                     <td class="text-right"></td>
-                                    <td><input ng-disabled="true" ng-model="checkup.rectovaginal_ovary_left_oher" class="form-control"></td>
+                                    <td><input ng-disabled="checkup.rectovaginal_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_ovary_left_oher" class="form-control"></td>
                                 </tr>
                                                             
                                 <tr>
@@ -1205,7 +1207,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
-                                            <rb-select name="rectal _cervix_uteri" ng-model="checkup.rectal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
+                                            <rb-select name="rectal_cervix_uteri" ng-model="checkup.rectal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1215,7 +1217,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
-                                            <rb-select name="rectal _cervix_consistency" ng-model="checkup.rectal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
+                                            <rb-select ng-disabled="checkup.rectal_cervix_uteri.code == 'missing'" name="rectal_cervix_consistency" ng-model="checkup.rectal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>                                                            
@@ -1230,19 +1232,19 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-4">
-                                            <rb-select name="rectal _body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
+                                            <rb-select ng-disabled="checkup.rectal_uterus_body | pluck:'code' | contains:['missing', 'not determined']" name="rectal_body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="true" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.rectal_body_of_womb_size.code =='enlarged'" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
                                     </tr>                   
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Положение</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectal_uteri_position"></rb-select></td>
+                                        <td><rb-select multiple="true" ng-disabled="checkup.rectal_uterus_body | pluck:'code' | contains:'missing'" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectal_uteri_position"></rb-select></td>
                                     </tr>
                                     <tr>
                                         <!-- example few_checkboxes -->
@@ -1257,7 +1259,7 @@
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right">Другое</td>
-                                        <td><input ng-disabled="true" ng-model="checkup.rectal_parametrium_other" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.rectal_parametrium | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_parametrium_other" class="form-control"></td>
                                     </tr>                   
                                     <tr>
                                         <!-- example few_checkboxes -->
@@ -1272,7 +1274,7 @@
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="true" ng-model="checkup.rectal_ovary_right_oher" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.rectal_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_ovary_right_oher" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
@@ -1289,19 +1291,19 @@
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="true" ng-model="checkup.rectal_ovary_left_oher" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.rectal_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_ovary_left_oher" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right">Маточные трубы справа</td>
-                                        <td><input ng-disabled="true" ng-model="checkup.rectal_uterine_tubes_right" class="form-control"></td>
+                                        <td><input ng-model="checkup.rectal_uterine_tubes_right" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right">Маточные трубы слева</td>
-                                        <td><input ng-disabled="true" ng-model="checkup.rectal_uterine_tubes_left" class="form-control"></td>
+                                        <td><input ng-model="checkup.rectal_uterine_tubes_left" class="form-control"></td>
                                     </tr>
                                                             
                                     <tr>
@@ -1343,7 +1345,6 @@
                                             <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
                                         </td>
                                     </tr>
-                                        </tr>
                                 </tbody>
                             </table>
                                 <table class="table table-condensed">

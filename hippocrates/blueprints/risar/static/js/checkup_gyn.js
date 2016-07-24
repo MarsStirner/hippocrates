@@ -1,15 +1,28 @@
 /**
  * Created by mmalkov on 24.07.16.
  */
+"use strict";
 WebMis20
 .controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
+    var update_auto = function () {
+        if (!$scope.checkup) return;
+        try {
+            $scope.checkup.mrk = Math.round(($scope.checkup.weight/$scope.checkup.height)*100);
+            $scope.checkup.imt = ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1);
+        } catch (e) {
+            $scope.checkup.mrk = NaN;
+            $scope.checkup.imt = NaN;
+        }
+    };
+    $scope.$watch('checkup.height', update_auto);
+    $scope.$watch('checkup.weight', update_auto);
     $scope.save = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            return RisarApi.checkup.save($scope.event_id, $scope.checkup)
+            return RisarApi.checkup_gyn.save($scope.event_id, $scope.checkup)
                 .then(function (data) {
                     if ($scope.checkup.id){
                         $scope.checkup = data;
@@ -22,7 +35,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     $scope.save_forward = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            RisarApi.checkup.save($scope.event_id, $scope.checkup)
+            RisarApi.checkup_gyn.save($scope.event_id, $scope.checkup)
                 .then(function (data) {
                     if($scope.checkup.id){
                         $scope.checkup = data;
@@ -46,21 +59,9 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             $scope.header = data.header;
         });
         if (!checkup_id) {
-            RisarApi.checkup.create(event_id, 'gynecological_visit_general_checkUp').
-            then(function (checkup) {
-                $scope.checkup = checkup;
-                if(!$scope.checkup.fetuses.length) {
-                    $scope.add_child();
-                }
-            });
+            RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp').then(function (checkup) {$scope.checkup = checkup});
         } else {
-            RisarApi.checkup.get(checkup_id)
-                .then(function (checkup) {
-                    $scope.checkup = checkup;
-                    if(!$scope.checkup.fetuses.length) {
-                        $scope.add_child();
-                    }
-                });
+            RisarApi.checkup_gyn.get(checkup_id).then(function (checkup) {$scope.checkup = checkup});
         }
     };
 

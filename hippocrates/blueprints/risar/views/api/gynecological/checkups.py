@@ -79,6 +79,7 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
 
 
 @module.route(_base + 'new/<flat_code>', methods=['GET'])
+@api_method
 def api_0_gyn_checkup_get_new(event_id, flat_code):
     event = Event.query.get(event_id) or bail_out(ApiException(404, 'Event with id {0} not found'.format(event_id)))
     action = get_action_by_id(None, event, flat_code, True)
