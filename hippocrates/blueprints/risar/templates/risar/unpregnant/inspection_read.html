@@ -693,6 +693,61 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Заключение</h3>
+                                <a class="print_link pull-right" ng-if="checkup.end_date"
+                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_conclusion">
+                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="box-body">
+                            <!-- START CONCLUSION -->
+                                 <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                               <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Примечания:</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.encompassing_comments"></div>
+                                </div>
+
+                               <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Лечение:</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.encompassing_treatment"></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Рекомендации:</div>
+                                    <div class="col-md-6 long-words" ng-bind-html="checkup.treatment_recommendations"></div>
+                                </div>
+
+                            <!-- END CONCLUSION -->
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-12">
                         <div class="box box-primary">
                             <div class="box-header with-border">
