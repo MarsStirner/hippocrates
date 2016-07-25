@@ -185,6 +185,8 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
             }
         });
     };
+    $scope.ps.set_context("risar_gyn");
+
     reload_chart();
 }])
 .controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
