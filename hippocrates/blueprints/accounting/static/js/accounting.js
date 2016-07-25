@@ -207,9 +207,10 @@ WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisAp
     this.get_new_contingent = function (args) {
         return WebMisApi.contingent.get(undefined, args);
     };
-    this.get_pricelists = function (finance_id) {
+    this.get_pricelists = function (finance_id, date) {
         return WebMisApi.pricelist.get_list({
-            finance_id: finance_id
+            finance_id: finance_id,
+            for_date: date
         });
     };
     this.search_mis_action_services = function (query, client_id, contract_id) {

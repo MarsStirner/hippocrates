@@ -21,7 +21,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                         ng-class="{\'has-error\': contractForm.finance.$invalid}">\
                         <label for="finance" class="control-label">Источник финансирования</label>\
                         <rb-select ref-book="rbFinance" ng-model="contract.finance" id="finance" name="finance"\
-                            ng-required="true"></rb-select>\
+                            ng-required="true" ng-change="onFinanceChanged()"></rb-select>\
                     </div>\
                     <div class="row">\
                         <div class="col-md-6"\
@@ -347,6 +347,22 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     $scope.onPriceListSelected = function () {
         var selected_ids = $scope.contract.pricelist_list.map(function (pl) { return pl.id; });
         $scope.new_pricelist.dupl = selected_ids.has($scope.new_pricelist.pl.id);
+    };
+
+    $scope.onFinanceChanged = function () {
+        var new_finance_id = $scope.contract.finance.id;
+        // delete mismatched pricelists
+        $scope.contract.pricelist_list = $scope.contract.pricelist_list.filter(function (pl) {
+            return pl.finance.id === new_finance_id;
+        });
+
+        if (!$scope.contract.pricelist_list.length) {
+            var date = aux.format_date(new Date());
+            AccountingService.get_pricelists(new_finance_id, date)
+                .then(function (pl_list) {
+                    $scope.contract.pricelist_list = pl_list;
+                });
+        }
     };
 
     // contingent
