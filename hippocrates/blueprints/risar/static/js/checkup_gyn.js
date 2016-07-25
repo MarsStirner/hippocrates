@@ -10,8 +10,12 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     var update_auto = function () {
         if (!$scope.checkup) return;
         try {
-            $scope.checkup.mrk = Math.round(($scope.checkup.weight/$scope.checkup.height)*100);
-            $scope.checkup.imt = ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1);
+            if (! $scope.checkup.height || ! $scope.checkup.weight || $scope.checkup.height < 10 || $scope.checkup.weight < 10) {
+                //noinspection ExceptionCaughtLocallyJS
+                throw NaN;
+            }
+            $scope.checkup.mrk = Math.round(100 * $scope.checkup.weight / $scope.checkup.height);
+            $scope.checkup.imt = ($scope.checkup.weight / Math.pow($scope.checkup.height/100, 2) ).toFixed(1);
         } catch (e) {
             $scope.checkup.mrk = NaN;
             $scope.checkup.imt = NaN;
@@ -27,7 +31,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                     if ($scope.checkup.id){
                         $scope.checkup = data;
                     } else {
-                        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
+                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
                     }
                 });
         }
@@ -44,7 +48,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                     } else {
                         $scope.rc.sampleWizard.forward();
                         var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
-                        $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
+                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
                     }
                 });
         }
@@ -61,7 +65,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         if (!checkup_id) {
             RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp').then(function (checkup) {$scope.checkup = checkup});
         } else {
-            RisarApi.checkup_gyn.get(checkup_id).then(function (checkup) {$scope.checkup = checkup});
+            RisarApi.checkup_gyn.get(event_id, checkup_id).then(function (checkup) {$scope.checkup = checkup});
         }
     };
 

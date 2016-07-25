@@ -107,11 +107,11 @@
                                         <td class="text-right col-md-4">Дата</td>
                                         <td class="col-md-2">
                                             <wm-date  name="osmotr_date"
-                                                     ng-model="checkup.osmotr_date" style="width: 250px" ></wm-date>
+                                                     ng-model="checkup.beg_date" style="width: 250px" ></wm-date>
                                         </td>
                                         <td class="text-right">Время осмотра</td>
                                         <td><wm-time  name="beg_time"
-                                                     ng-model="checkup.osmotr_time" style="width: 200px" ></wm-time>
+                                                     ng-model="checkup.beg_time" style="width: 200px" ></wm-time>
                                         </td>
                                     </tr>
                                 <tbody>
@@ -178,7 +178,7 @@
                                         <td class="text-right col-md-4">Половой акт</td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="sexual_intercourse" ng-model="checkup.sexual_intercourse" ref-book="rbRisarSexualIntercourse"
+                                            <rb-select multiple="true" name="sexual_intercourse" ng-model="checkup.sexual_intercourse" ref-book="rbRisarSexualIntercourse"
                                                        ng-required="true"></rb-select>
                                             </div>
                                         </div></td>
@@ -188,7 +188,7 @@
                                         <td class="text-right col-md-4">Контрацепция</td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="contraception" ng-model="checkup.contraception" ref-book="rbContraception"
+                                            <rb-select multiple="true" name="contraception" ng-model="checkup.contraception" ref-book="rbContraception"
                                                        ng-required="true"></rb-select>
                                             </div>
                                         </div></td>
@@ -231,7 +231,7 @@
                                         <td class="text-right">Повышение температуры до </td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="36" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
+                                                <input valid-number valid-number-float min-val="36" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
                                                        class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -296,7 +296,7 @@
                                         <td class="text-right col-md-4">Характер</td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="itch_character" ng-model="checkup.itch_character" ref-book="rbRisarItchCharacter"></rb-select>
+                                            <rb-select multiple="true" name="itch_character" ng-model="checkup.itch_character" ref-book="rbRisarItchCharacter"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -317,7 +317,7 @@
                                         <td class="text-right">В течение</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="pregnancy_failure_period"
+                                                <input id="pregnancy_failure_period"
                                                        name="pregnancy_failure_period"
                                                        ng-model="checkup.pregnancy_failure_period"
                                                        class="form-control" ng-disabled="!checkup.pregnancy_failure"
@@ -386,7 +386,7 @@
                                         <td class="text-right">Масса</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="weight" name="weight" ng-model="checkup.weight"
+                                                <input valid-number min-val="0" id="weight" name="weight" ng-model="checkup.weight"
                                                        class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -397,7 +397,7 @@
                                         <td class="text-right">Рост</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="height" name="height" ng-model="checkup.height"
+                                                <input valid-number min-val="0" id="height" name="height" ng-model="checkup.height"
                                                        class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -408,7 +408,7 @@
                                         <td class="text-right">МРК</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input min="0" id="mrk" name="mrk" ng-model="checkup.mrk"
+                                                <input valid-number valid-number-float id="mrk" name="mrk" ng-model="checkup.mrk"
                                                        disabled class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -418,7 +418,7 @@
                                         <td class="text-right">ИМТ</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input min="0" id="imt" name="imt" ng-model="checkup.imt"
+                                                <input valid-number valid-number-float id="imt" name="imt" ng-model="checkup.imt"
                                                        disabled class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -428,7 +428,7 @@
                                         <td class="text-right">Температура тела</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="temperature" name="temperature" ng-model="checkup.temperature"
+                                                <input valid-number valid-number-float min-val="32" id="temperature" name="temperature" ng-model="checkup.temperature"
                                                        class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -438,7 +438,7 @@
                                         <td class="text-right">ЧСС</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" min="0" id="heart_rate" name="heart_rate" ng-model="checkup.heart_rate"
+                                                <input valid-number min-val="0" id="heart_rate" name="heart_rate" ng-model="checkup.heart_rate"
                                                        class="form-control" autofocus>
                                             </div>
                                             </div>
@@ -449,10 +449,10 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (objectiveForm.ad_right_high.$invalid || objectiveForm.ad_right_low.$invalid)  && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input name="ad_right_high" ng-model="checkup.ad_right_high"
+                                                <input name="ad_right_high" ng-model="checkup.AD_right_high"
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                                 <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.ad_right_low"
+                                                <input name="ad_right_low" ng-model="checkup.AD_right_low"
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                             </div>
                                             </div>
@@ -463,10 +463,10 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (objectiveForm.ad_left_high.$invalid || objectiveForm.ad_left_low.$invalid) && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
+                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.AD_left_high"
                                                        class="form-control blood_presure" ng-required="true">
                                                 <span>/</span>
-                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
+                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.AD    _left_low"
                                                        class="form-control blood_presure" ng-required="true">
                                             </div>
                                         </div></td>
@@ -583,7 +583,7 @@
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-4">
                                             <rb-select name="groin_glands" ng-model="checkup.groin_glands"
-                                                      ref-book="rbRisarVulvaPilosis" ng-required="true"></rb-select>
+                                                      ref-book="rbRisarGroinGlands" ng-required="true"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -744,7 +744,7 @@
                                                         <tr>
                                                             <!-- example short_string -->
                                                             <td class="text-right"></td>
-                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code != 'other'" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
+                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code != 'other'" ng-model="checkup.vagina_paries_mirrors_other" class="form-control"></td>
                                                         </tr>
 
                                                         <tr>
@@ -752,12 +752,12 @@
                                                             <th class="text-right col-md-4">Шейка матки</th>
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-4">
-                                                                <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri"
+                                                                <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.cervix_uteri_mirrors"
                                                                           ref-book="rbRisarCervixUteri" ng-required="true"></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
-                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">
+                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Размеры</th>
                                                             <td class="col-md-8"><div class="row">
@@ -767,7 +767,7 @@
                                                                 </div>
                                                             </div></td>
                                                         </tr>
-                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">  
+                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">  
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Форма</th>
                                                             <td class="col-md-8"><div class="row">
@@ -777,17 +777,17 @@
                                                                 </div>
                                                             </div></td>
                                                         </tr>
-                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">
+                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
                                                             <!-- example checkbox -->
                                                             <td class="text-right">Эрозия</td>
                                                             <td><input ng-model="checkup.ectropion_mirrors" class="checkbox" type="checkbox"></td>
                                                         </tr>
-                                                        <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">
+                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
                                                             <!-- example checkbox -->
                                                             <td class="text-right">Эрозированный эктропион</td>
                                                             <td><input ng-model="checkup.anabrosis_mirrors" class="checkbox" type="checkbox"></td>
                                                         </tr>
-                                                         <tr ng-if="checkup.rectovaginal_cervix_uteri.code == 'in_place'">  
+                                                         <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">  
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Наружный зев</td>
                                                             <td class="col-md-8"><div class="row">
@@ -1239,7 +1239,7 @@
                                     <tr>
                                         <!-- example short_string -->
                                         <td class="text-right"></td>
-                                        <td><input ng-disabled="checkup.rectal_body_of_womb_size.code =='enlarged'" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                        <td><input ng-disabled="checkup.rectal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
                                     </tr>                   
                                     <tr>
                                         <!-- example multiple -->

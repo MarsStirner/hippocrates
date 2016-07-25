@@ -9,7 +9,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_measures
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, bail_out, \
     set_action_apt_values
-from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
+from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -28,17 +28,13 @@ _base = '/api/0/gyn/<int:event_id>/checkups/'
 def api_0_gyn_checkup(event_id):
     data = request.get_json()
     checkup_id = data.pop('id', None)
-    flat_code = data.pop('flat_code', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
     person = data.pop('person', None)
     diagnoses = data.pop('diagnoses', [])
 
-    if not flat_code:
-        raise ApiException(400, 'flat_code required')
-
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)
-    action = get_action_by_id(checkup_id, event, flat_code, True)
+    action = get_action_by_id(checkup_id, event, risar_gyn_checkup_code, True)
 
     if not checkup_id:
         close_open_checkups(event_id)
@@ -46,26 +42,28 @@ def api_0_gyn_checkup(event_id):
     action.begDate = beg_date
 
     def set_ticket(prop, value):
+        return
         ticket = get_action_by_id(prop.value, event, gynecological_ticket_25, True)
         set_action_apt_values(ticket, value)
         ticket.begDate = value.get('beg_date')
         ticket.endDate = value.get('end_date')
 
-    set_action_apt_values(action, data, {'ticket_25': set_ticket})
+    with db.session.no_autoflush:
+        set_action_apt_values(action, data, {'ticket_25': set_ticket})
 
-    create_or_update_diagnoses(action, diagnoses)
+        create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
     card.reevaluate_card_attrs()
     db.session.commit()
 
-    em_ctrl = EventMeasureController()
-    em_ctrl.regenerate(action)
+    # em_ctrl = EventMeasureController()
+    # em_ctrl.regenerate(action)
 
     result = represent_gyn_checkup(action)
-    result['measures'] = represent_measures(action)
-    if em_ctrl.exception:
-        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
+    # result['measures'] = represent_measures(action)
+    # if em_ctrl.exception:
+    #     result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
     return result
 
 
