@@ -161,7 +161,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <div class="row">\
                 <div class="col-md-9">\
                     <ui-select ng-model="new_pricelist.pl" ext-select-price-list-search finance="contract.finance"\
-                        theme="select2" append-to-body="true" placeholder="Выберите подходящий прайс-лист">\
+                        theme="select2" append-to-body="true" placeholder="Выберите подходящий прайс-лист"\
+                        ng-change="onPriceListSelected()">\
                     </ui-select>\
                 </div>\
                 <div class="col-md-3">\
@@ -229,7 +230,8 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
         client: null
     };
     $scope.new_pricelist = {
-        pl: null
+        pl: null,
+        dupl: false
     };
 
     $scope.saveAndClose = function () {
@@ -334,12 +336,17 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     $scope.addNewPricelist = function () {
         $scope.contract.pricelist_list.push($scope.new_pricelist.pl);
         $scope.new_pricelist.pl = null;
+        $scope.new_pricelist.dupl = false;
     };
     $scope.removePricelist = function (idx) {
         $scope.contract.pricelist_list.splice(idx, 1);
     };
     $scope.btnAddPricelistDisabled = function () {
-        return !safe_traverse($scope.new_pricelist, ['pl', 'id']);
+        return !safe_traverse($scope.new_pricelist, ['pl', 'id']) || $scope.new_pricelist.dupl;
+    };
+    $scope.onPriceListSelected = function () {
+        var selected_ids = $scope.contract.pricelist_list.map(function (pl) { return pl.id; });
+        $scope.new_pricelist.dupl = selected_ids.has($scope.new_pricelist.pl.id);
     };
 
     // contingent
