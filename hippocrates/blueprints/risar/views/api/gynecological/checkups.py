@@ -12,7 +12,7 @@ from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime
+from nemesis.lib.utils import safe_datetime, safe_traverse, safe_traverse_attrs
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 
@@ -41,12 +41,17 @@ def api_0_gyn_checkup(event_id):
 
     action.begDate = beg_date
 
+    ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
+    db.session.add(ticket)
+    if not ticket.id:
+        # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
+        db.session.commit()
+
     def set_ticket(prop, value):
-        return
-        ticket = get_action_by_id(prop.value, event, gynecological_ticket_25, True)
         set_action_apt_values(ticket, value)
-        ticket.begDate = value.get('beg_date')
-        ticket.endDate = value.get('end_date')
+        ticket.begDate = safe_datetime(value.get('beg_date'))
+        ticket.endDate = safe_datetime(value.get('end_date'))
+        prop.set_value(ticket.id, True)
 
     with db.session.no_autoflush:
         set_action_apt_values(action, data, {'ticket_25': set_ticket})

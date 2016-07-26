@@ -41,8 +41,13 @@ def represent_gyn_checkup_wm(action):
 
 def represent_ticket_25(action):
     if not action:
+        print(u'no ticket25')
         return {}
-    return action_as_dict(action)
+    return dict(
+        action_as_dict(action),
+        beg_date=action.begDate,
+        end_date=action.endDate,
+    )
 
 
 def represent_gyn_checkup(action):

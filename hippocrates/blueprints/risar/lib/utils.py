@@ -207,7 +207,7 @@ def set_action_apt_values(action, values, hooks=None):
             continue
         prop = props[code]
         if code in hooks:
-            hooks[code](prop, code)
+            hooks[code](prop, value)
         else:
             prop.value = value
 
