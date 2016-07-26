@@ -30,7 +30,7 @@ def api_jr_templates():
         u'/reports/Hippocrates/Analytics/RIMIS_1022': 'INF_PREG_REFUSED_CALL',
         u'/reports/Hippocrates/Analytics/report_diseases': 'PATIENTS_BY_DISEASE_CALL',
         u'/reports/Hippocrates/Analytics/inducpregnan': 'PREG_MONIT_CALL',
-        u'/reports/Hippocrates/Analytics/report_med_interrupts': 'ANALISIS_PREG_ABORTS_CALL'
+        u'/reports/Hippocrates/Analytics/report_med_interrupts': 'ANALYSIS_PREG_ABORTS_CALL'
     }
     ext_url = app.config['BARS_MIS_URL'].rstrip('/') + u'/ws/cas_risar?page='
 
