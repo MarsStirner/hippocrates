@@ -39,7 +39,8 @@
                 </div>
                 <div class="form-group">
                     <label>Куратор</label>
-                    <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control">
+                    <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control"
+                            ng-disabled="!canChangeCurator()">
                         <ui-select-match placeholder="Выберите кураторов">[[ $item.lastName + ' ' + $item.firstName + ', ' + $item.name ]]</ui-select-match>
                         <ui-select-choices repeat="curator in curators | filter: {name: $select.search} | limitTo:50">
                             <div ng-bind-html="curator.lastName + ' ' + curator.firstName + ', ' + curator.name | highlight: $select.search"></div>
@@ -57,7 +58,7 @@
                 </div>
                 <div class="form-group">
                     <label>Врач</label>
-                    <ui-select ng-model="query.person" theme="select2" class="form-control">
+                    <ui-select ng-model="query.person" theme="select2" class="form-control" ng-disabled="!canChangeDoctor()">
                         <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
                         <ui-select-choices repeat="doc in doctors | filter: {full_name: $select.search} | limitTo:50">
                             <div ng-bind-html="doc.full_name | highlight: $select.search"></div>

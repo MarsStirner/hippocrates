@@ -77,5 +77,8 @@ var IndexCtrl = function ($scope, $modal, JasperPrintingService) {
                 outer_print([prepare_data()], angular.noop);
             }
         });
-    }
+    };
+    $scope.isRedirected = function (template) {
+        return Boolean(template.redirect_to);
+    };
 };

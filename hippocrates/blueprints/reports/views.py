@@ -23,10 +23,22 @@ def api_jr_templates():
     data = request.args
     locate_reports = data.get('folder')
     templates = JasperReport.get_reports(locate_reports)
+
+    # these will be redirected to external system
+    redirect_map = {
+        u'/reports/Hippocrates/Analytics/Social_analytics': 'ANALYSIS_SOCIAL_PREG_CALL',
+        u'/reports/Hippocrates/Analytics/RIMIS_1022': 'INF_PREG_REFUSED_CALL',
+        u'/reports/Hippocrates/Analytics/report_diseases': 'PATIENTS_BY_DISEASE_CALL',
+        u'/reports/Hippocrates/Analytics/inducpregnan': 'PREG_MONIT_CALL',
+        u'/reports/Hippocrates/Analytics/report_med_interrupts': 'ANALYSIS_PREG_ABORTS_CALL'
+    }
+    ext_url = app.config['BARS_MIS_URL'].rstrip('/') + u'/ws/cas_risar?page='
+
     return jsonify([{
         'id': t['uri'],
         'code': t['label'],
         'name': t['description'],
+        'redirect_to': ext_url + redirect_map[t['uri']] if t['uri'] in redirect_map else None
     } for t in templates])
 
 
