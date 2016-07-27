@@ -99,61 +99,31 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Масса тела</th>
+                    <th>Назначенные мероприятия</th>
                     <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Прибавка в массе</th>
-                    <td ng-repeat="checkup in checkups">
-                        <span tooltip="Прибавка в массе на расчётный срок [[ checkup.pregnancy_week ]] [[declOfNum(checkup.pregnancy_week, ['неделя', 'недели', 'недель'])]]">
-                            [[checkup.weight-first_checkup.weight]]</span>/<span tooltip="Прибавка в массе за [[ checkup.weight_gain[1] ]] [[declOfNum(checkup.weight_gain[1], ['день', 'дня', 'дней'])]]">[[ checkup.weight_gain[0] ]]</span></td>
+                    <th>Медицинские услуги</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Молочные железы</th>
-                    <td ng-repeat="checkup in checkups"><p ng-repeat="item in checkup.breast">[[ item | format:'{name}' ]]</p></td>
+                    <th>Манипуляции и исследования</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Соски</th>
-                    <td ng-repeat="checkup in checkups"><p ng-repeat="item in checkup.nipples">[[ item | format:'{name}' ]]</p></td>
+                    <th>Операции</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Отёки</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.if_edema ]]</td>
+                    <th>Лечение</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>
-                <tr>
-                    <th>АД левая рука</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_left_high ]]/[[ checkup.ad_left_low ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>АД правая рука</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_right_high ]]/[[ checkup.ad_right_low ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Окружность живота</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.abdominal ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Матка</th>
-                    <td colspan="[[ checkups.length + 1 ]]"></td>
-                </tr>
-                <tr>
-                    <td>Высота дна</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.fundal_height ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Состояние</td>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.metra_state.name ]]</td>
-                    <td></td>
-                </tr>
+
             </tbody>
         </table>
         </div>
