@@ -1,4 +1,6 @@
 {% extends 'risar/_macros.html'%}
+{% set cur_page = request.endpoint[5:] %}
+
 
 {# ^ Ниже описываем то, что отличается от карты беременной, если будет отличаться всё - удалить! #}
 
@@ -6,8 +8,8 @@
     <div class="novmargin">
         <div class="btn-group">
             <!-- todo: replace urls_for -->
-            <a ng-href="{{ url_for('.html_gynecological_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_chart']) }}>Карта пациентки</a>
-            <a ng-href="{{ url_for('.html_gynecological_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_anamnesis', '.html_anamnesis_father_edit', '.html_anamnesis_mother_edit']) }}>Анамнез</a>
+            <a ng-href="{{ url_for('.html_gynecological_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_gynecological_chart']) }}>Карта пациентки</a>
+            <a ng-href="{{ url_for('.html_gynecological_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_gynecological_anamnesis']) }}>Анамнез</a>
              <div class="btn-group">
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Осмотры <span class="fa fa-caret-down"></span></button>
                 <ul role="menu" class="dropdown-menu">
