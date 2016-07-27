@@ -258,7 +258,7 @@ WebMis20
     };
     this.checkup_gyn = {
         get_list: function (event_id) {
-            return wrapper('GET', Config.url.gyn.checkup_list + event_id);
+            return wrapper('GET', Config.url.gyn.checkup_list.format(event_id));
         },
         get: function (event_id, checkup_id) {
             return wrapper('GET', Config.url.gyn.checkup.format(event_id, checkup_id));
