@@ -29,7 +29,6 @@ def fc_urls():
                 'event_new': url_for('event.api_event_new_get'),
                 'event_save': url_for('event.api_event_save'),
                 'event_close': url_for('event.api_event_close'),
-                'event_search': url_for('event.api_event_search'),
                 'event_actions': url_for('event.api_event_actions'),
                 'moving_save': url_for('event.api_moving_save'),
                 'moving_close': url_for('event.api_event_moving_close'),

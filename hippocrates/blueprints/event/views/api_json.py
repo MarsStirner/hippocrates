@@ -99,6 +99,9 @@ def api_event_save():
     else:
         event = Event()
         event = event_ctrl.create_base_info(event, all_data)
+        error_msg = {}
+        if not UserUtils.can_create_event(event, error_msg):
+            raise ApiException(403, u'Невозможно создать обращение: %s.' % error_msg['message'])
         event_ctrl.store(event)
         event_id = int(event)
         if request_type_kind == 'policlinic':
@@ -459,45 +462,6 @@ def api_search_services():
     return matched
 
 
-@module.route('/api/event_payment/previous_local_contracts.json', methods=['GET'])
-@api_method
-def api_prev_event_payment_info_get():
-    try:
-        client_id = int(request.args['client_id'])
-        finance_id = int(request.args.get('finance_id'))
-        event_set_date = safe_datetime(request.args.get('set_date'))
-    except (KeyError, ValueError, TypeError) as e:
-        raise ApiException(400, u'Ошибка при обработке запроса. %s' % e)
-
-    event_set_date = event_set_date or datetime.datetime.now()
-    request_type_codes = ['policlinic', '4', 'diagnosis', 'diagnostic']
-
-    event_list = Event.query.join(EventType, rbRequestType).filter(
-        rbRequestType.code.in_(request_type_codes),
-        EventType.finance_id == finance_id,
-        Event.client_id == client_id,
-        Event.deleted == 0,
-        Event.setDate < event_set_date
-    ).order_by(Event.setDate.desc())
-
-    vis = EventVisualizer()
-    res = vis.make_prev_events_contracts(event_list)
-    return res
-
-
-@module.route('/api/event_payment/client_local_contract.json', methods=['GET'])
-@api_method
-def api_client_payment_info_get():
-    client_id = parse_id(request.args, 'client_id')
-    if client_id is None:
-        raise ApiException(400, u'Аргумент client_id должен быть числом')
-
-    client = Client.query.get(client_id)
-    vis = EventVisualizer()
-    res = vis.make_event_payment(None, client)
-    return res
-
-
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 @api_method
 def api_service_delete_service():
@@ -661,19 +625,6 @@ def api_get_events():
             for event in paginate.items
         ]
     }
-
-
-@module.route('/api/search.json', methods=['GET'])
-@api_method
-def api_event_search():
-    query = request.args['q']
-    result = SearchEvent.search(query)
-    viz = EventVisualizer()
-    events = []
-    for event in result['result']['items']:
-        event = Event.query.filter(Event.id == event['id']).first()
-        events.append(viz.make_search_event_info(event))
-    return events
 
 
 @module.route('/api/event_actions/')
