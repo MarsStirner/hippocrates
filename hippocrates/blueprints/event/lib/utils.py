@@ -63,6 +63,8 @@ class EventSaveController():
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
         event.setDate = safe_datetime(event_data['set_date'])
+        if UserUtils.can_set_event_exec_date(event):
+            event.execDate = safe_datetime(event_data['exec_date'])
         if exec_person_id and not event.is_diagnostic:
             event.execPerson = Person.query.get(exec_person_id)
         if event.is_stationary:
