@@ -104,13 +104,12 @@ WebMis20
     </div>\
     <div class="row">\
         <div class="col-md-4">Лечащий врач</div>\
-        <div class="col-md-8"><wm-person-select ng-model="model.beg_date" /></div>\
+        <div class="col-md-8"><wm-person-select ng-model="model.person" /></div>\
     </div>\
 </div>\
 <div class="modal-footer">\
-    <button class="btn btn-success" ng-click="executeErrand()" ng-if="canExecute()" ng-disabled="createErrandForm.$invalid">Выполнить</button>\
-    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid">Сохранить</button>\
-    <button class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
+    <button class="btn btn-success" ng-click="$close()">Сохранить</button>\
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
 </div>',
                 controller: function ($scope, $modalInstance) {
                     $scope.$model = model
