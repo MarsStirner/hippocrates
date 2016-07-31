@@ -5,8 +5,8 @@
 
 WebMis20
 .service('RisarApi', [
-        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls',
-        function ($q, Config, NotificationService, $window, ApiCalls) {
+        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', '$modal',
+        function ($q, Config, NotificationService, $window, ApiCalls, $modal) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
     this.file_get = function (verb, url, data, target) {
@@ -86,6 +86,48 @@ WebMis20
     function Chart (urls) {
         var self = this;
 
+        function on_change_clicked (event) {
+            var model = {
+                beg_date: event.set_date,
+                person: event.person
+            };
+            $modal.open({
+                template: '\
+<div class="modal-header">\
+    <h3 class="modal-title">Поручение [[model.number]] по карте [[model.event.external_id]]</h3>\
+</div>\
+<div class="modal-body">\
+    <h1>Изменение данных карты</h1>\
+    <div class="row">\
+        <div class="col-md-4">Дата создания карты</div>\
+        <div class="col-md-8"><wm-date ng-model="model.beg_date" /></div>\
+    </div>\
+    <div class="row">\
+        <div class="col-md-4">Лечащий врач</div>\
+        <div class="col-md-8"><wm-person-select ng-model="model.beg_date" /></div>\
+    </div>\
+</div>\
+<div class="modal-footer">\
+    <button class="btn btn-success" ng-click="executeErrand()" ng-if="canExecute()" ng-disabled="createErrandForm.$invalid">Выполнить</button>\
+    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid">Сохранить</button>\
+    <button class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
+</div>',
+                controller: function ($scope, $modalInstance) {
+                    $scope.$model = model
+                },
+                size: 'lg'
+            }).result.then(function () {
+                wrapper(
+                    'PATCH',
+                    urls.get.format(event.id),
+                    undefined,
+                    model
+                ).then(function (ret_event) {
+                    _.extend(event, ret_event)
+                })
+            })
+        }
+
         function on_event_created (ticket_id, event) {
             NotificationService.notify(
                 200,
@@ -93,7 +135,10 @@ WebMis20
                     'Пациентка поставлена на учёт: ',
                     {bold: true, text: event.person.name},
                     '. ',
-                    {link: '#', text: 'Изменить'},
+                    {
+                        click: on_change_clicked,
+                        text: 'Изменить'
+                    },
                     ' ',
                     {
                         click: function () {

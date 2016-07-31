@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import six
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -10,6 +11,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_gynecological
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_datetime
 from nemesis.models.event import Event
+from nemesis.models.person import Person
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 
@@ -34,13 +36,20 @@ def api_0_gyn_chart(event_id=None):
 
 
 @module.route(_base, methods=['POST'])
+@module.route(_base + '<int:event_id>', methods=['PATCH'])
 @api_method
-def api_0_gyn_chart_create():
+def api_0_gyn_chart_create(event_id=None):
     ticket_id = request.args.get('ticket_id')
     client_id = request.args.get('client_id')
 
-    chart_creator = GynecologicCardCreator(client_id, ticket_id)
+    chart_creator = GynecologicCardCreator(client_id, ticket_id, event_id)
     chart_creator(create=True)
+
+    if request.method == 'PATCH' and request.json:
+        chart_creator.event.setDate = safe_datetime(request.json['beg_date'])
+        chart_creator.event.execPerson_id = request.json['person']['id']
+        db.session.commit()
+
     return dict(
         represent_gyn_event(chart_creator.event),
         automagic=chart_creator.automagic,
