@@ -249,6 +249,53 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
     };
     reload();
 }])
+.controller('InspectionGynViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
+    function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
+        // Поскольку времени на то, чтобы с этим разбираться нет от слова "совсем", делаем тупую копипасту.
+        // В будущем наши потомки, проклиная нас, буду разбирать этот код...
+        // Но нам плевать. У нас проект горит.
+        // Синем пламенем.
+        // Пусть горит.
+        var params = aux.getQueryParams(window.location.search);
+        var event_id = params.event_id;
+        $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
+        $scope.ps = new PrintingService("risar");
+        $scope.ps.set_context("risar");
+
+        $scope.ps_fi = new PrintingService("risar_inspection");
+        $scope.ps_fi.set_context("risar_osm1_talon");
+        $scope.ps_si = new PrintingService("risar_inspection");
+        $scope.ps_si.set_context("risar_osm2_talon");
+        $scope.ps_resolve = function (checkup_id) {
+            return {
+                event_id: $scope.header.event.id,
+                action_id: checkup_id
+            }
+        };
+
+        $scope.declOfNum = function (number, titles) {
+            var cases = [2, 0, 1, 1, 1, 2];
+            return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
+        };
+
+        var reload = function () {
+            RisarApi.gynecologic_chart.get_header(event_id).then(
+                function (data) {
+                    $scope.header = data.header;
+                });
+            RisarApi.checkup_gyn.get_list(event_id)
+                .then(function (data) {
+                    $scope.checkups = data.checkups;
+                });
+        };
+
+        $scope.open_print_window = function (ps, checkup_id) {
+            if (ps.is_available()){
+                PrintingDialog.open(ps, $scope.ps_resolve(checkup_id));
+            }
+        };
+        reload();
+    }])
 .controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', function ($scope, $modal, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;

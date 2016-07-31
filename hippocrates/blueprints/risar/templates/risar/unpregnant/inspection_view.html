@@ -4,7 +4,7 @@
 {% block title %}> Осмотры акушером-гинекологом беременной{% endblock %}
 
 {% block main %}
-<div ng-controller="InspectionViewCtrl" ng-cloak>
+<div ng-controller="InspectionGynViewCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.unpregnant_page_title_ext_n('Осмотры пациентки гинекологом', 'inspection') }}
         {{ rimacros.navigation_unpreg('[[ header.event.id ]]') }}
@@ -56,11 +56,6 @@
             </thead>
             <tbody>
                 <tr>
-                    <th>Срок беременности (расчётный)</th>
-                    <td ng-repeat="checkup in checkups">[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
-                    <td></td>
-                </tr>
-                <tr>
                     <th>Диагнозы</th>
                     <td colspan="[[ checkups.length + 1 ]]"></td>
                 </tr>
@@ -100,30 +95,38 @@
                 </tr>
                 <tr>
                     <th>Назначенные мероприятия</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
+                    <td ng-repeat="checkup in checkups">
+                        <div ng-repeat="m in checkup.measures | deep_filter:{'data.status.code': 'assigned'}"
+                             ng-bind="m.data.measure.name" />
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Медицинские услуги</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
+                    <td ng-repeat="checkup in checkups">
+                        <div ng-repeat="m in checkup.ticket_25.services" ng-bind="m.service.name"></div>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Манипуляции и исследования</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
+                    <td ng-repeat="checkup in checkups">
+                        <div ng-repeat="m in checkup.ticket_25.manipulations" ng-bind="m.service.name"></div>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Операции</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
+                    <td ng-repeat="checkup in checkups">
+                        <div ng-repeat="m in checkup.ticket_25.operations" ng-bind="m.service.name"></div>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Лечение</th>
-                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
+                    <th>Рекомендации</th>
+                    <td ng-repeat="checkup in checkups" ng-bind="checkup.treatment_recommendations"></td>
                     <td></td>
                 </tr>
-
             </tbody>
         </table>
         </div>
