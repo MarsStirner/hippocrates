@@ -135,7 +135,7 @@ WebMis20
                     {bold: true, text: event.person.name},
                     '. ',
                     {
-                        click: on_change_clicked,
+                        click: function () {on_change_clicked(event)},
                         text: 'Изменить'
                     },
                     ' ',
