@@ -5,8 +5,8 @@
 
 WebMis20
 .service('RisarApi', [
-        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', '$modal',
-        function ($q, Config, NotificationService, $window, ApiCalls, $modal) {
+        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService',
+        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
     this.file_get = function (verb, url, data, target) {
@@ -86,47 +86,6 @@ WebMis20
     function Chart (urls) {
         var self = this;
 
-        function on_change_clicked (event) {
-            var model = {
-                beg_date: event.set_date,
-                person: event.person
-            };
-            $modal.open({
-                template: '\
-<div class="modal-header">\
-    <h3 class="modal-title">Поручение [[model.number]] по карте [[model.event.external_id]]</h3>\
-</div>\
-<div class="modal-body">\
-    <h1>Изменение данных карты</h1>\
-    <div class="row">\
-        <div class="col-md-4">Дата создания карты</div>\
-        <div class="col-md-8"><wm-date ng-model="model.beg_date" /></div>\
-    </div>\
-    <div class="row">\
-        <div class="col-md-4">Лечащий врач</div>\
-        <div class="col-md-8"><wm-person-select ng-model="model.person" /></div>\
-    </div>\
-</div>\
-<div class="modal-footer">\
-    <button class="btn btn-success" ng-click="$close()">Сохранить</button>\
-    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
-</div>',
-                controller: function ($scope, $modalInstance) {
-                    $scope.$model = model
-                },
-                size: 'lg'
-            }).result.then(function () {
-                wrapper(
-                    'PATCH',
-                    urls.get.format(event.id),
-                    undefined,
-                    model
-                ).then(function (ret_event) {
-                    _.extend(event, ret_event)
-                })
-            })
-        }
-
         function on_event_created (ticket_id, event) {
             NotificationService.notify(
                 200,
@@ -135,7 +94,7 @@ WebMis20
                     {bold: true, text: event.person.name},
                     '. ',
                     {
-                        click: function () {on_change_clicked(event)},
+                        click: function () {RisarEventControlService.open_edit_modal(event)},
                         text: 'Изменить'
                     },
                     ' ',
@@ -891,6 +850,50 @@ WebMis20
                 });
                 return instance.result;
             });
+        }
+    }
+}])
+.service('RisarEventControlService', ['$modal', 'RisarApi', function ($modal, RisarApi) {
+    return {
+        open_edit_modal: function (event) {
+            var model = {
+                beg_date: event.set_date,
+                person: event.person
+            };
+            $modal.open({
+                template: '\
+<div class="modal-header">\
+    <h3 class="modal-title">Поручение [[model.number]] по карте [[model.event.external_id]]</h3>\
+</div>\
+<div class="modal-body">\
+    <h1>Изменение данных карты</h1>\
+    <div class="row">\
+        <div class="col-md-4">Дата создания карты</div>\
+        <div class="col-md-8"><wm-date ng-model="model.beg_date" /></div>\
+    </div>\
+    <div class="row">\
+        <div class="col-md-4">Лечащий врач</div>\
+        <div class="col-md-8"><wm-person-select ng-model="model.person" /></div>\
+    </div>\
+</div>\
+<div class="modal-footer">\
+    <button class="btn btn-success" ng-click="$close()">Сохранить</button>\
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
+</div>',
+                controller: function ($scope, $modalInstance) {
+                    $scope.$model = model
+                },
+                size: 'lg'
+            }).result.then(function () {
+                wrapper(
+                    'PATCH',
+                    urls.get.format(event.id),
+                    undefined,
+                    model
+                ).then(function (ret_event) {
+                    _.extend(event, ret_event)
+                })
+            })
         }
     }
 }])
