@@ -853,7 +853,7 @@ WebMis20
         }
     }
 }])
-.service('RisarEventControlService', ['$modal', 'RisarApi', function ($modal, RisarApi) {
+.service('RisarEventControlService', ['$modal', function ($modal) {
     return {
         open_edit_modal: function (event) {
             var model = {
