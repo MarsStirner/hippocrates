@@ -11,7 +11,7 @@
     </section>
 
     <section class="content">
-        <div class="row ">
+        {# <div class="row ">
             <div style="margin-left:1% !important;" >
                 <div class="form-group" ng-show="!isCalendarMode()">
                     <label>&nbsp;Дата осмотра</label>
@@ -26,8 +26,10 @@
                 </div>
             </div>
         </div>
+         #}
         <div class="box box-primary">
         <div class="box-body">
+
 
 
 
@@ -36,7 +38,7 @@
                 <tr>
                     <th width="10%" nowrap>Данные осмотра </th>
                     <th width="10%" nowrap ng-repeat="checkup in checkups">
-                        <a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
+                        <a ng-href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
                             <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
@@ -132,9 +134,11 @@
         </div>
         </div>
         <div class="box-footer">
+             {#
             <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
                         max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true">
             </pagination>
+            #}
         </div>
     </section>
 </div>
