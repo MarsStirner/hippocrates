@@ -23,7 +23,7 @@
                             <div class="box-header with-border">
                                 <h3 class="box-title">Общая информация</h3>
                                 <a class="print_link pull-right" ng-if="!checkup.end_date"
-                                   href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_common">
+                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_common">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
@@ -818,10 +818,10 @@
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      <tr>
-                                        <td>usluga.nazvanie</td>
-                                        <td>usluga.kod</td>
-                                        <td>usluga.vrach</td>
+                                      <tr ng-repeat="$row in checkup.ticket_25.services">
+                                        <td ng-bind="$row.service.name"></td>
+                                        <td ng-bind="$row.service.code"></td>
+                                        <td ng-bind="$row.person.full_name"></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -842,12 +842,12 @@
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      <tr>
-                                        <td>oper.nazvanie</td>
-                                        <td>oper.kod</td>
-                                        <td>oper.anestezia</td>
-                                        <td>oper.apparatura</td>
-                                        <td>oper.vrach</td>
+                                      <tr ng-repeat="$row in checkup.ticket_25.operations">
+                                        <td ng-bind="$row.service.name"></td>
+                                        <td ng-bind="$row.service.code"></td>
+                                        <td ng-bind="$row.anesthetization.name"></td>
+                                        <td ng-bind="$row.equipment.name"></td>
+                                        <td ng-bind="$row.person.full_name"></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -866,10 +866,10 @@
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      <tr>
-                                        <td>manip.nazvanie</td>
-                                        <td>manip.kod</td>
-                                        <td>manip.vrach</td>
+                                      <tr ng-repeat="$row in checkup.ticket_25.manipulations">
+                                        <td ng-bind="$row.service.name">manip.nazvanie</td>
+                                        <td ng-bind="$row.service.code">manip.kod</td>
+                                        <td ng-bind="$row.person.full_name">manip.vrach</td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -889,11 +889,11 @@
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      <tr>
-                                        <td>netrudosp.kind</td>
-                                        <td>netrudosp.reason</td>
-                                        <td>netrudosp.issued_date</td>
-                                        <td>netrudosp.close_date</td>
+                                      <tr ng-repeat="$row in checkup.ticket_25.temp_disability">
+                                        <td ng-bind="$row.type.name"></td>
+                                        <td ng-bind="$row.reason.name"></td>
+                                        <td ng-bind="$row.beg_date|asDate"></td>
+                                        <td ng-bind="$row.end_date|asDate"></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -902,6 +902,7 @@
                             </div>
                         </div>
                     </div>
+                    {#
                     <div class="col-md-12">
                         <div class="box box-primary">
                             <div class="box-header with-border">
@@ -935,7 +936,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>#}
     </section>
 </div>
 {% endblock %}
