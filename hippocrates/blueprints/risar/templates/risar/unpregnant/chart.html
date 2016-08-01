@@ -61,7 +61,7 @@
                         </tr>
                         <tr>
                             <td class="text-right">Заболевания:</td>
-                            <td>Гинекологические</td>
+                            <td style="">Гинекологические</td>
                             <td><span ng-bind="chart.anamnesis.general.gynecopathy | pluck:'name' | join:', '"></span></td>
                         </tr>
                         <tr>
@@ -75,8 +75,9 @@
                             <td><span ng-bind="chart.anamnesis.general.somatic_disease"></span></td>
                         </tr>
                         <tr>
-                            <td class="col-lg-2 col-md-2 text-right">Предыдущие беременности:</td>
-                            <td class="col-lg-9 col-md-9">
+                            <td></td>
+                            <td>Предыдущие беременности:</td>
+                            <td>
                                 <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a>
                             </td>
                         </tr>
