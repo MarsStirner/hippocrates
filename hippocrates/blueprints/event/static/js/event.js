@@ -426,7 +426,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
         if (!set_page) {
             $scope.pager.current_page = 1;
         }
-        AccountingService.get_paginated_services(
+        return AccountingService.get_paginated_services(
             $scope.event.event_id, $scope.pager.current_page, $scope.pager.per_page
         )
             .then(function (paged_data) {
@@ -438,7 +438,16 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
             });
     };
     $scope.onPageChanged = function () {
-        $scope.refreshServiceList(true);
+        $scope.refreshServiceList(true)
+            .then(function () {
+                if ($scope.inInvoiceEditMode()) {
+                    angular.forEach($scope.event.services, function (service) {
+                        service.in_new_invoice = $scope.newInvoiceServiceList.some(function (s) {
+                            return s.id === service.id;
+                        });
+                    });
+                }
+            });
     };
 
     $scope.controlsAvailable = function () {
@@ -478,6 +487,12 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     };
     $scope.startEditingInvoice = function () {
         $scope.editingInvoice = true;
+        angular.forEach($scope.event.services, function (service) {
+            if (!service.in_invoice) {
+                service.in_new_invoice = true;
+                $scope.newInvoiceServiceList.push(service);
+            }
+        });
     };
     $scope.cancelEditingInvoice = function () {
         $scope.editingInvoice = false;

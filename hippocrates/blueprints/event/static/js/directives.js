@@ -43,7 +43,6 @@ angular.module('WebMis20')
         },
         link: function(scope, elm, attrs) {
             scope.formstate = WMEventFormState;
-            scope.inNewInvoice = false;
 
             scope.getLevelMarkClass = function () {
                 if (scope.service.ui_attrs.is_expandable) {
@@ -130,23 +129,17 @@ angular.module('WebMis20')
                 }
             };
             scope.isInNewInvoice = function () {
-                return scope.inNewInvoice;
+                return scope.service.in_new_invoice;
             };
             scope.addServiceToInvoice = function () {
                 scope.newInvoice.push(scope.service);
-                scope.inNewInvoice = true;
+                scope.service.in_new_invoice = true;
             };
             scope.removeServiceFromInvoice = function () {
                 var idx = _.indexOf(scope.newInvoice, scope.service);
                 scope.newInvoice.splice(idx, 1);
-                scope.inNewInvoice = false;
+                scope.service.in_new_invoice = false;
             };
-            scope.$watch('editInvoiceMode', function (newVal, oldVal) {
-                if (newVal !== oldVal && !scope.service.in_invoice && scope.service.ui_attrs.level === 0) {
-                    if (newVal) scope.addServiceToInvoice();
-                    else scope.removeServiceFromInvoice();
-                }
-            });
             scope.invoiceControlsVisible = function () {
                 return scope.editInvoiceMode;
             };
@@ -168,12 +161,6 @@ angular.module('WebMis20')
             scope.btnLabTestModalDisabled = function () {
                 return !scope.editMode || !scope.service.access.can_edit;
             };
-            var init = function () {
-                scope.inNewInvoice = scope.newInvoice.some(function (s) {
-                    return s.id === scope.service.id;
-                });
-            };
-            init();
         },
         template:
 '<tr ng-show="isVisible()" ng-class="getRowClass()">\
