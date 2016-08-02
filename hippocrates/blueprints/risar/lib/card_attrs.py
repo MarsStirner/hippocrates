@@ -6,11 +6,12 @@ from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, \
     hepatitis_diags, tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, \
-    belongs_to_mkbgroup, notify_risk_rate_changes
+    belongs_to_mkbgroup, notify_risk_rate_changes, bail_out
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
     first_inspection_code, rtc_2_atc
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from nemesis.lib.apiutils import ApiException
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
@@ -29,28 +30,15 @@ logger = logging.getLogger('simple')
 __author__ = 'viruzzz-kun'
 
 
-def check_card_attrs_action_integrity(action):
-    """
-    Проверка, что в action, соответствующего атрибутам карточки, существуют
-    все необходимые свойства.
-    :param action: действие с атрибутами
-    :type action: nemesis.models.actions.Action
-    :return: None
-    """
-    property_type_codes = [
-        'pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed',
-        'card_fill_rate', 'card_fill_rate_anamnesis', 'card_fill_rate_first_inspection',
-        'card_fill_rate_repeated_inspection', 'card_fill_rate_epicrisis'
-    ]
-    for apt_code in property_type_codes:
-        if apt_code not in action.propsByCode:
-            create_property(action, apt_code)
-
-
 def create_property(action, apt_code):
     prop_type = action.actionType.property_types.filter(
         ActionPropertyType.deleted == 0, ActionPropertyType.code == apt_code
-    ).first()
+    ).first() or bail_out(
+        ApiException(
+            500,
+            u'Action.id = %s, ActionType.id = %s (%s), ActionPropertyType.code = %s. '
+            u'Свойство действия не обнаружено у этого типа действия' % (
+                action.id, action.actionType_id, action.actionType.name, apt_code)))
     prop = ActionProperty()
     prop.type = prop_type
     prop.action = action

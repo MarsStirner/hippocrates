@@ -45,9 +45,14 @@ class AbstractCard(object):
         self.event = event
         self._card_attrs_action = None
 
+    def check_card_attrs_action_integrity(self, action):
+        return
+
     @property
     def attrs(self):
-        return self.get_card_attrs_action()
+        result = self.get_card_attrs_action()
+        self.check_card_attrs_action_integrity(result)
+        return result
 
     def get_card_attrs_action(self, auto=False):
         if self._card_attrs_action is None:
@@ -226,6 +231,25 @@ class PregnancyCard(AbstractCard):
         super(PregnancyCard, self).__init__(event)
         self._anamnesis = self.Anamnesis(event)
 
+    def check_card_attrs_action_integrity(self, action):
+        """
+        Проверка, что в action, соответствующего атрибутам карточки, существуют
+        все необходимые свойства.
+        :param action: действие с атрибутами
+        :type action: nemesis.models.actions.Action
+        :return: None
+        """
+        from hippocrates.blueprints.risar.lib.card_attrs import create_property
+
+        property_type_codes = [
+            'pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed',
+            'card_fill_rate', 'card_fill_rate_anamnesis', 'card_fill_rate_first_inspection',
+            'card_fill_rate_repeated_inspection', 'card_fill_rate_epicrisis'
+        ]
+        for apt_code in property_type_codes:
+            if apt_code not in action.propsByCode:
+                create_property(action, apt_code)
+
     @property
     def anamnesis(self):
         return self._anamnesis
@@ -242,12 +266,10 @@ class PregnancyCard(AbstractCard):
         """
         Пересчёт атрибутов карточки беременной
         """
-        from .card_attrs import check_card_attrs_action_integrity, reevaluate_risk_rate, \
+        from .card_attrs import reevaluate_risk_rate, \
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, reevaluate_card_fill_rate_all
 
         with db.session.no_autoflush:
-            action = self.attrs
-            check_card_attrs_action_integrity(action)
             reevaluate_risk_rate(self)
             reevaluate_pregnacy_pathology(self)
             reevaluate_dates(self)

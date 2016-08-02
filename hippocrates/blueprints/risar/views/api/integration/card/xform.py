@@ -6,7 +6,7 @@ from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR,
 from .schemas import CardSchema
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
-from hippocrates.blueprints.risar.lib.card_attrs import check_card_attrs_action_integrity, default_ET_Heuristic, default_AT_Heuristic
+from hippocrates.blueprints.risar.lib.card_attrs import default_ET_Heuristic, default_AT_Heuristic
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 
 from nemesis.lib.apiutils import ApiException
@@ -108,8 +108,6 @@ class CardXForm(CardSchema, XForm):
         self.pcard = PregnancyCard.get_for_event(self.target_obj)
         if self.new:
             self.create_ca_action()
-        else:
-            check_card_attrs_action_integrity(self.pcard.attrs)
         self.pcard.reevaluate_card_attrs()
         self._changed.append(self.pcard.attrs)
 

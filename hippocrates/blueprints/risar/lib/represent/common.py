@@ -8,15 +8,14 @@ from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.utils import action_as_dict
-from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes, \
+    risar_gyn_checkup_codes
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_int, safe_bool
 from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import Gender, IntoleranceType, AllergyPower
-from nemesis.models.event import Event
 from nemesis.models.exists import rbAttachType
-from nemesis.models.schedule import ScheduleTicket
 
 __author__ = 'viruzzz-kun'
 
@@ -159,31 +158,73 @@ def represent_diag_shortly(diagnostic):
     }
 
 
-def represent_ticket(ticket_event_ids):
+def _get_ckeckup_count(event, flat_codes):
     from nemesis.models.actions import Action, ActionType
-    event = Event.query.filter(Event.id == ticket_event_ids[1]).first()
-    ticket = ScheduleTicket.query.get(ticket_event_ids[0])
-    checkup_n = 0
+
     if event:
-        checkup_n = Action.query\
-            .join(ActionType)\
-            .filter(
-                Action.event_id == event.id,
-                Action.deleted == 0,
-                ActionType.flatCode.in_(checkup_flat_codes))\
-            .count()
+        return Action.query.join(
+            ActionType
+        ).filter(
+            Action.event == event,
+            Action.deleted == 0,
+            ActionType.flatCode.in_(flat_codes)
+        ).count()
+
+    return 0
+
+
+def represent_pregnancy_ticket(ticket, event):
     return {
+        'ticket_type': 'pregnancy',
         'schedule_id': ticket.schedule_id,
         'ticket_id': ticket.id,
         'client_ticket_id': ticket.client_ticket.id if ticket.client_ticket else None,
         'client': ticket.client,
         'beg_time': ticket.begDateTime,
-        'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
+        'event_id': event.id,
         'note': ticket.client_ticket.note if ticket.client else None,
-        'checkup_n': checkup_n,
+        'checkup_n': _get_ckeckup_count(event, checkup_flat_codes),
         'risk_rate': PregnancyCard.get_for_event(event).attrs['prenatal_risk_572'].value if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
+
+
+def represent_gynecological_ticket(ticket, event):
+    return {
+        'ticket_type': 'gynecological',
+        'schedule_id': ticket.schedule_id,
+        'ticket_id': ticket.id,
+        'client_ticket_id': ticket.client_ticket.id if ticket.client_ticket else None,
+        'client': ticket.client,
+        'beg_time': ticket.begDateTime,
+        'event_id': event.id,
+        'note': ticket.client_ticket.note if ticket.client else None,
+        'checkup_n': _get_ckeckup_count(event, risar_gyn_checkup_codes),
+    }
+
+
+def represent_empty_ticket(ticket):
+    return {
+        'ticket_type': 'empty',
+        'schedule_id': ticket.schedule_id,
+        'ticket_id': ticket.id,
+        'client_ticket_id': ticket.client_ticket.id if ticket.client_ticket else None,
+        'client': ticket.client,
+        'beg_time': ticket.begDateTime,
+        'event_id': None,
+        'note': ticket.client_ticket.note if ticket.client else None,
+        'checkup_n': 0,
+    }
+
+
+def represent_ticket(ticket_event_tuple):
+    ticket, event = ticket_event_tuple
+    if event:
+        if event.eventType.requestType.code == 'pregnancy':
+            return represent_pregnancy_ticket(ticket, event)
+        elif event.eventType.requestType.code == 'gynecological':
+            return represent_gynecological_ticket(ticket, event)
+    return represent_empty_ticket(ticket)
 
 
 def represent_intolerance(obj):

@@ -66,6 +66,6 @@ def api_0_schedule(person_id=None):
     )
     if not all_tickets:
         query = query.filter(ScheduleClientTicket.id.isnot(None))
-    ticket_event_ids_list = query.values(ScheduleTicket.id, Event.id)
+    ticket_event_list = query.with_entities(ScheduleTicket, Event)
 
-    return map(represent_ticket, ticket_event_ids_list)
+    return map(represent_ticket, ticket_event_list)

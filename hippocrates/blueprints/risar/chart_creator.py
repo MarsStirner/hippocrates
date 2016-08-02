@@ -5,8 +5,7 @@ from datetime import datetime
 from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
-from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic, \
-    check_card_attrs_action_integrity
+from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic
 from hippocrates.blueprints.risar.lib.utils import bail_out
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
 from nemesis.lib.apiutils import ApiException
@@ -138,7 +137,6 @@ class PregnancyChartCreator(ChartCreator):
             raise ApiException(400, u'Обращение не является случаем беременности')
         card = PregnancyCard.get_for_event(self.event)
         self.action = card.attrs
-        check_card_attrs_action_integrity(self.action)
 
     def _perform_post_create_event_checks(self):
         card = PregnancyCard.get_for_event(self.event)
