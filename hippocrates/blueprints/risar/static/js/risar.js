@@ -327,7 +327,7 @@ WebMis20
                 return wrapper('POST', Config.url.api_anamnesis_pregnancies_undelete.format(event_id, id));
             },
             save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_anamnesis_pregnancies.format(event_id, data.id || ''), data);
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies.format(event_id, data.id || ''), undefined, data);
             }
         }
     };
@@ -819,7 +819,7 @@ WebMis20
         openNew: function (errand, is_author) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/RISAR/modal/errand.html',
-                controller: ErrandModalCtrl,
+                controller: 'ErrandModalCtrl',
                 size: 'lg',
                 resolve: {
                     model: function () {
@@ -837,7 +837,7 @@ WebMis20
                 .then(function (errand) {
                     var instance = $modal.open({
                     templateUrl: '/WebMis20/RISAR/modal/errand.html',
-                    controller: ErrandModalCtrl,
+                    controller: 'ErrandModalCtrl',
                     size: 'lg',
                     resolve: {
                         model: function () {

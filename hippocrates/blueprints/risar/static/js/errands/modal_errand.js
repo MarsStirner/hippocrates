@@ -187,9 +187,10 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-WebMis20.controller('ErrandModalCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'CurrentUser',
-    'UserErrand', 'Upload', 'WMConfig', function ($scope, $q, RisarApi, RefBookService, CurrentUser, UserErrand, Upload,
-                                WMConfig, model, is_author) {
+WebMis20.controller(
+    'ErrandModalCtrl', [
+        '$scope', '$q', 'RisarApi', 'RefBookService', 'CurrentUser', 'UserErrand', 'Upload', 'WMConfig', 'model', 'is_author',
+        function ($scope, $q, RisarApi, RefBookService, CurrentUser, UserErrand, Upload, WMConfig, model, is_author) {
     $scope.model = model;
     $scope.is_author = is_author !== undefined ?
         is_author :

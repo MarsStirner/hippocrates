@@ -2,7 +2,7 @@
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.card import AbstractCard
+from hippocrates.blueprints.risar.lib.card import AbstractCard, PreviousPregnancy
 from hippocrates.blueprints.risar.lib.prev_children import create_or_update_prev_children
 from hippocrates.blueprints.risar.lib.represent.common import represent_pregnancy
 from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_action_type_id, bail_out
@@ -98,4 +98,4 @@ def api_0_pregnancies_post(event_id, action_id=None):
 
     card.reevaluate_card_attrs()
     db.session.commit()
-    return represent_pregnancy(action)
+    return represent_pregnancy(PreviousPregnancy(action))

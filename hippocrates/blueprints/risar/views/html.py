@@ -227,7 +227,7 @@ def html_inspection_edit():
             Action.event_id == event_id, 
             Action.deleted == 0,
             ActionType.flatCode == first_inspection_code,
-        ).exist()
+        ).count() > 0
         flat_code = second_inspection_code if first_inspection_exists else first_inspection_code
     
     if flat_code == first_inspection_code:
