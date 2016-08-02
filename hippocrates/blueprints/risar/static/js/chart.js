@@ -185,6 +185,30 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
             }
         });
     };
+
+     $scope.close_event = function() {
+        var model = _.extend({}, $scope.header.event);
+        $scope.open_edit_epicrisis(model).result.then(function (rslt) {
+            var result = rslt[0],
+                edit_callback = function (data) {
+                    $scope.close_event();
+                },
+                cancel_callback = function (data) {
+                RisarApi.gynecologic_chart.cl1ose_event(
+                    $scope.chart.id, {cancel: true}
+                ).then(function(data) {
+                    _.extend($scope.header.event, data);
+                });
+            };
+            RisarApi.gynecologic_chart.close_event(
+                $scope.chart.id, result, edit_callback, cancel_callback
+            ).then(function (data) {
+                _.extend($scope.header.event, data);
+            });
+        })
+    };
+
+
     $scope.ps.set_context("risar_gyn");
 
     reload_chart();
