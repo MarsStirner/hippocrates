@@ -412,8 +412,34 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     $scope.search_processed = false;
     $scope.editing = false;
     $scope.editingInvoice = false;
+    $scope.pager = {
+        current_page: 1,
+        per_page: 10,
+        max_pages: 10,
+        pages: null,
+        record_count: null
+    };
     $scope.newInvoiceServiceList = [];
     $scope.ps_invoice = new PrintingService("invoice");
+
+    $scope.refreshServiceList = function (set_page) {
+        if (!set_page) {
+            $scope.pager.current_page = 1;
+        }
+        AccountingService.get_paginated_services(
+            $scope.event.event_id, $scope.pager.current_page, $scope.pager.per_page
+        )
+            .then(function (paged_data) {
+                $scope.event.services = paged_data.service_list;
+                $scope.pager.record_count = paged_data.count;
+                $scope.pager.pages = paged_data.total_pages;
+
+                $scope.hideLabSubservices();
+            });
+    };
+    $scope.onPageChanged = function () {
+        $scope.refreshServiceList(true);
+    };
 
     $scope.controlsAvailable = function () {
         return !$scope.event.ro;
@@ -427,23 +453,20 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     $scope.cancelEditing = function () {
         $scope.query_clear();
         $scope.editing = false;
-        $scope.refreshServiceList();
+        $scope.refreshServiceList(true);
     };
     $scope.finishEditing = function () {
-        AccountingService.save_service_list($scope.event.event_id, $scope.event.services)
-            .then(function (service_data) {
-                $scope.event.services = service_data;
+        AccountingService.save_service_list(
+            $scope.event.event_id, $scope.event.services, $scope.pager.current_page, $scope.pager.per_page
+        )
+            .then(function (paged_data) {
+                $scope.event.services = paged_data.service_list;
+                $scope.pager.record_count = paged_data.count;
+                $scope.pager.pages = paged_data.total_pages;
+
                 $scope.query_clear();
                 $scope.editing = false;
-                $rootScope.$broadcast('serviceListChanged');
-                $scope.hideLabSubservices();
-            });
-    };
-    $scope.refreshServiceList = function () {
-        AccountingService.get_listed_services($scope.event.event_id)
-            .then(function (service_data) {
-                $scope.event.services = service_data;
-                $rootScope.$broadcast('serviceListChanged');
+                $rootScope.$broadcast('servicesDataChanged');
                 $scope.hideLabSubservices();
             });
     };
@@ -466,7 +489,8 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
-                $scope.refreshServiceList();
+                $scope.refreshServiceList(true);
+                $rootScope.$broadcast('servicesDataChanged');
             });
     };
     $scope.openInvoice = function (idx) {
@@ -476,10 +500,10 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
                 var status = result.status;
                 if (status === 'ok') {
                     $scope.event.invoices.splice(idx, 1, result.invoice);
-                    $scope.refreshServiceList();
+                    $scope.refreshServiceList(true);
                 } else if (status === 'del') {
                     $scope.event.invoices.splice(idx, 1);
-                    $scope.refreshServiceList();
+                    $scope.refreshServiceList(true);
                 }
             });
     };
@@ -536,7 +560,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
 
     $scope.$on('event_loaded', function() {
         $scope.query_clear();
-        $scope.hideLabSubservices();
+        $scope.refreshServiceList();
     });
     $scope.$on('eventFormStateChanged', function() {
         $scope.query_clear();

@@ -80,6 +80,13 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="box-footer clearfix">
+                <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
+                    max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true"
+                    class="pagination pagination-sm no-margin pull-right">
+                </pagination>
+            </div>
         </div>
     </div>
 
@@ -100,6 +107,7 @@
             </li>
         </ul>
     </div>
+    <pre>[[ newInvoiceServiceList.length | json ]] / [[ newInvoiceServiceList | json ]]</pre>
     </div>
 
     </div>

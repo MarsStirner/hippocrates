@@ -332,18 +332,31 @@ class ServiceRepr(object):
     def represent_service_full(self, service):
         data = self.represent_service(service)
         service_ctrl = ServiceController()
-        in_invoice = service.in_invoice
         is_paid = service_ctrl.check_service_is_paid(service)
-        data['sum'] = format_money(service.sum_)
-        data['in_invoice'] = in_invoice
+        data['sum'] = format_money(service.sum)
+        data['in_invoice'] = service.in_invoice
         data['is_paid'] = is_paid
         data['access'] = {
-            'can_edit': service_ctrl.check_can_edit_service(service),
-            'can_delete': service_ctrl.check_can_delete_service(service)
+            'can_edit': service.can_edit,
+            'can_delete': service.can_delete
         }
         data['serviced_entity'] = self.represent_serviced_entity(service)
         data['subservice_list'] = [
-            self.represent_service_full(ss)  # represent_subservice for custom repr
+            self.represent_subservice(ss)
+            for ss in service.subservice_list
+        ]
+        return data
+
+    def represent_subservice(self, service):
+        data = self.represent_service(service)
+        data['sum'] = format_money(service.sum)
+        data['access'] = {
+            'can_edit': service.parent_service.can_edit,
+            'can_delete': False
+        }
+        data['serviced_entity'] = self.represent_serviced_entity(service)
+        data['subservice_list'] = [
+            self.represent_subservice(ss)
             for ss in service.subservice_list
         ]
         return data
@@ -409,6 +422,15 @@ class ServiceRepr(object):
             self.represent_service_full(service)
             for service in service_list
         ]
+
+    def represent_paginated_event_services(self, paginated_data):
+        return {
+            'count': paginated_data.total,
+            'total_pages': paginated_data.pages,
+            'service_list': [
+                self.represent_service_full(service) for service in paginated_data.items
+            ]
+        }
 
 
 class ServiceDiscountRepr(object):

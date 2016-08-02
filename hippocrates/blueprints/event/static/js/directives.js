@@ -43,6 +43,7 @@ angular.module('WebMis20')
         },
         link: function(scope, elm, attrs) {
             scope.formstate = WMEventFormState;
+            scope.inNewInvoice = false;
 
             scope.getLevelMarkClass = function () {
                 if (scope.service.ui_attrs.is_expandable) {
@@ -128,7 +129,6 @@ angular.module('WebMis20')
                     scope.event.services.splice(idx, 1);
                 }
             };
-            scope.inNewInvoice = false;
             scope.isInNewInvoice = function () {
                 return scope.inNewInvoice;
             };
@@ -142,7 +142,7 @@ angular.module('WebMis20')
                 scope.inNewInvoice = false;
             };
             scope.$watch('editInvoiceMode', function (newVal, oldVal) {
-                if (!scope.service.in_invoice && scope.service.ui_attrs.level === 0) {
+                if (newVal !== oldVal && !scope.service.in_invoice && scope.service.ui_attrs.level === 0) {
                     if (newVal) scope.addServiceToInvoice();
                     else scope.removeServiceFromInvoice();
                 }
@@ -168,6 +168,12 @@ angular.module('WebMis20')
             scope.btnLabTestModalDisabled = function () {
                 return !scope.editMode || !scope.service.access.can_edit;
             };
+            var init = function () {
+                scope.inNewInvoice = scope.newInvoice.some(function (s) {
+                    return s.id === scope.service.id;
+                });
+            };
+            init();
         },
         template:
 '<tr ng-show="isVisible()" ng-class="getRowClass()">\
@@ -257,7 +263,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.pager.pages = data.result.pages;
                 });
             };
-            scope.$on('serviceListChanged', function() {
+            scope.$on('servicesDataChanged', function() {
                 scope.reload();
             });
             scope.reset_sorting = function () {
