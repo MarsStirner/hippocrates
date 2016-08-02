@@ -162,7 +162,7 @@
                             <tr ng-repeat="row in results">
                                 <td risk-rate-icon="row.risk"></td>
                                 <td>[[ row.external_id ]]</td>
-                                <td><a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a> [[row.literal_age]]</td>
+                                <td><a ng-href="{{ url_for('.html_auto_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a> [[row.literal_age]]</td>
                                 <td>[[ row.exec_person_name ]]</td>
                                 <td>[[ row.week ]]</td>
                                 <td>[[ row.client_workgroup ]]</td>
