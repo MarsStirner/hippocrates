@@ -48,7 +48,7 @@
                             <a class="btn btn-primary" ng-href="{{ url_for('.html_gynecological_anamnesis_edit') }}?event_id=[[ chart.id ]]">Изменить</a>
                         </div>
                     </div>
-                    <table class="table">
+                    <table class="table-condensed">
                         <tbody>
                         <tr>
                             <td class="text-right">Менструации:</td>
@@ -75,8 +75,7 @@
                             <td><span ng-bind="chart.anamnesis.general.somatic_disease"></span></td>
                         </tr>
                         <tr>
-                            <td></td>
-                            <td>Предыдущие беременности:</td>
+                            <td class="text-right">Предыдущие беременности:</td>
                             <td>
                                 <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a>
                             </td>

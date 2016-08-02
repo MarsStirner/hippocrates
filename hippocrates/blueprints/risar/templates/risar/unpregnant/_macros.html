@@ -158,22 +158,7 @@
     </div>
     <div class="col-md-4 col-lg-4 col-sm-12">
     {#    <div class="col-md-{{ w2 }} col-sm-12 achievements">#}
-        <div class="achievements">
-            {%- if ext_header == 'chart' %}
-                <span class="pull-right" style="padding-right: 20px;">
-                    <i pregnancy-week-icon="chart.pregnancy_week" pregnancy-start-date="chart.card_attributes.pregnancy_start_date"></i>
-                    <i risk-rate-icon="chart.risk_rate"></i>
-                    <i preeclampsia-susp-icon="chart.preeclampsia_susp_rate"></i>
-                    <i preeclampsia-confirmed-icon="chart.preeclampsia_confirmed_rate"></i>
-                    <i card-fill-rate-icon="chart.card_fill_rates" event-id="header.event.id"></i>
-                </span>
-            {% elif ext_header == 'inspection' %}
-                <div class="text-right" style="height: 34px;">
-                    <a class="btn-link text-center" href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]"><i class="fa fa-table" tooltip="Осмотры акушером-гинекологом" style="width: 32px"></i></a>
-                    <a class="btn-link text-center" href="{{ url_for('.html_gravidograma') }}?event_id=[[ header.event.id ]]"><i class="fa fa-line-chart" tooltip="Гравидограмма" style="width: 32px"></i></a>
-                </div>
-            {% endif -%}
-        </div>
+
     </div>
     </div>
     <div class="row vmargin10">

@@ -136,9 +136,8 @@
                                     <!-- example select -->
                                         <td class="text-right col-md-4">Особенности</td>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': commonForm.last_menstruation_features.$invalid && commonForm.submit_attempt}">
-                                            <div class="col-md-4">
-                                            <rb-select name="last_menstruation_features" ng-model="checkup.last_menstruation_features" ref-book="rbRisarLastMenstruationFeatures"
-                                                       ng-required="true"></rb-select>
+                                            <div class="col-md-6">
+                                            <rb-select name="last_menstruation_features" ng-model="checkup.last_menstruation_features" ref-book="rbRisarLastMenstruationFeatures"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -157,9 +156,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Половое влечение</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="libido" ng-model="checkup.libido" ref-book="rbRisarLibido"
-                                                       ng-required="true"></rb-select>
+                                                       ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -167,9 +166,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Половой партнер</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="intercourse_partner" ng-model="checkup.intercourse_partner" ref-book="rbRisarIntercoursePartner"
-                                                       ng-required="true"></rb-select>
+                                                       ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -177,9 +176,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Половой акт</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select multiple="true" name="sexual_intercourse" ng-model="checkup.sexual_intercourse" ref-book="rbRisarSexualIntercourse"
-                                                       ng-required="true"></rb-select>
+                                                       ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -187,9 +186,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Контрацепция</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select multiple="true" name="contraception" ng-model="checkup.contraception" ref-book="rbContraception"
-                                                       ng-required="true"></rb-select>
+                                                       ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -262,7 +261,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Цвет</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="discharge_colour" ng-model="checkup.discharge_colour" ref-book="rbRisarDischargeColour"></rb-select>
                                             </div>
                                         </div></td>
@@ -271,7 +270,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Количество</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity" ref-book="rbRisarDischargeQuantity"></rb-select>
                                             </div>
                                         </div></td>
@@ -280,7 +279,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Запах</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="discharge_smell" ng-model="checkup.discharge_smell" ref-book="rbRisarDischargeSmell"></rb-select>
                                             </div>
                                         </div></td>
@@ -295,7 +294,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Характер</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select multiple="true" name="itch_character" ng-model="checkup.itch_character" ref-book="rbRisarItchCharacter"></rb-select>
                                             </div>
                                         </div></td>
@@ -450,10 +449,8 @@
                                                  ng-class="{'has-error': (objectiveForm.ad_right_high.$invalid || objectiveForm.ad_right_low.$invalid)  && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input name="ad_right_high" ng-model="checkup.AD_right_high"
-                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
-                                                <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.AD_right_low"
-                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                                       maxlength="3"  class="form-control blood_presure"> <span>/</span>
+                                                <input name="ad_right_low" ng-model="checkup.AD_right_low" maxlength="3" class="form-control blood_presure">
                                             </div>
                                             </div>
                                         </td>
@@ -464,10 +461,10 @@
                                                  ng-class="{'has-error': (objectiveForm.ad_left_high.$invalid || objectiveForm.ad_left_low.$invalid) && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input maxlength="3" name="ad_left_high" ng-model="checkup.AD_left_high"
-                                                       class="form-control blood_presure" ng-required="true">
+                                                       class="form-control blood_presure" >
                                                 <span>/</span>
                                                 <input maxlength="3" name="ad_left_low" ng-model="checkup.AD_left_low"
-                                                       class="form-control blood_presure" ng-required="true">
+                                                       class="form-control blood_presure" >
                                             </div>
                                         </div></td>
                                     </tr>
@@ -485,7 +482,7 @@
                                     <tr>
                                         <th class="text-right">Лимфоузлы <span class="text-danger">*</span></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.lymph.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" ng-required="true">
+                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" >
                                                 [[ item.name ]]
                                             </div>
                                             </div>
@@ -495,8 +492,8 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Половой партнер</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
-                                            <rb-select name="intercourse_partner" ng-model="checkup.intercourse_partner" ng-required="true" ref-book="rbRisarIntercoursePartner"></rb-select>
+                                            <div class="col-md-6">
+                                            <rb-select name="intercourse_partner" ng-model="checkup.intercourse_partner"  ref-book="rbRisarIntercoursePartner"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -504,7 +501,7 @@
                                     <tr>
                                         <td class="text-right">Подкожно-жировая клетчатка <span class="text-danger">*</span></td>
                                         <td><div class="row" ng-class="{'has-error': objectiveForm.subcutaneous_fat.$invalid && objectiveForm.submit_attempt}">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="subcutaneous_fat" ref-book="rbRisarSubcutaneous_Fat" ng-model="checkup.subcutaneous_fat"
                                             </div>
                                         </div></td>
@@ -570,9 +567,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Характер оволосения</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis" 
-                                                      ref-book="rbRisarVulvaPilosis" ng-required="true"></rb-select>
+                                                      ref-book="rbRisarVulvaPilosis" ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -581,9 +578,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Региональные паховые лимфоузлы</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="groin_glands" ng-model="checkup.groin_glands"
-                                                      ref-book="rbRisarGroinGlands" ng-required="true"></rb-select>
+                                                      ref-book="rbRisarGroinGlands" ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -621,9 +618,9 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Степень развития наружных половых органов</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" 
-                                                      ref-book="rbRisarVulvaGermination" ng-required="true"></rb-select>
+                                                      ref-book="rbRisarVulvaGermination" ></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -666,7 +663,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Цвет</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="discharge_colour" ng-model="checkup.vulva_discharge_colour" ref-book="rbRisarDischargeColour"></rb-select>
                                             </div>
                                         </div></td>
@@ -675,7 +672,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Количество</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="discharge_quantity" ng-model="checkup.vulva_discharge_quantity" ref-book="rbRisarDischargeQuantity"></rb-select>
                                             </div>
                                         </div></td>
@@ -684,7 +681,7 @@
                                         <!-- example select -->
                                         <td class="text-right col-md-4">Запах</td>
                                         <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="discharge_smell" ng-model="checkup.vulva_discharge_smell" ref-book="rbRisarDischargeSmell"></rb-select>
                                             </div>
                                         </div></td>
@@ -720,9 +717,9 @@
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Влагалище</td>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors"
-                                                                          ref-book="rbRisarVaginaGenVisit" ng-required="true"></rb-select>
+                                                                          ref-book="rbRisarVaginaGenVisit" ></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -735,9 +732,9 @@
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Стенки влагалища</td>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="vagina_paries_mirrors" ng-model="checkup.vagina_paries_mirrors"
-                                                                          ref-book="rbRisarVaginaParies" ng-required="true"></rb-select>
+                                                                          ref-book="rbRisarVaginaParies" ></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -751,9 +748,9 @@
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Шейка матки</th>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.cervix_uteri_mirrors"
-                                                                          ref-book="rbRisarCervixUteri" ng-required="true"></rb-select>
+                                                                          ref-book="rbRisarCervixUteri" ></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -761,9 +758,9 @@
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Размеры</th>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="cervix_uteri_size_mirrors" ng-model="checkup.cervix_uteri_size_mirrors"
-                                                                          ref-book="rbRisarCervixUteriSize" ng-required="true"></rb-select>
+                                                                          ref-book="rbRisarCervixUteriSize" ></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -771,9 +768,9 @@
                                                             <!-- example select -->
                                                             <th class="text-right col-md-4">Форма</th>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="cervix_uteri_shape_mirrors" ng-model="checkup.cervix_uteri_shape_mirrors"
-                                                                          ref-book="rbRisarCervixUteriShape" ng-required="true"></rb-select>
+                                                                          ref-book="rbRisarCervixUteriShape" ></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -791,9 +788,9 @@
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Наружный зев</td>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="uterus_external_orifice_mirrors" ng-model="checkup.uterus_external_orifice_mirrors"
-                                                                          ref-book="rbRisarUterusExternalOrifice" ng-required="true"></rb-select>
+                                                                          ref-book="rbRisarUterusExternalOrifice" ></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -830,7 +827,7 @@
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Цвет</td>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="discharge_colour_mirrors" ng-model="checkup.discharge_colour_mirrors" ref-book="rbRisarDischargeColour"></rb-select>
                                                                 </div>
                                                             </div></td>
@@ -839,7 +836,7 @@
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Количество</td>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity_mirrors" ref-book="rbRisarDischargeQuantity"></rb-select>
                                                                 </div>
                                                             </div></td>
@@ -848,7 +845,7 @@
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Запах</td>
                                                             <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-4">
+                                                                <div class="col-md-6">
                                                                 <rb-select name="discharge_smell" ng-model="checkup.discharge_smell_mirrors" ref-book="rbRisarDischargeSmell"></rb-select>
                                                                 </div>
                                                             </div></td>
@@ -893,7 +890,7 @@
                                         <td class="text-right col-md-4">Шейка матки</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
                                             </div>
                                         </div></td>
@@ -907,7 +904,7 @@
                                         <td class="text-right col-md-4">Консистенция</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="bimanual_cervix_consistency" ng-model="checkup.bimanual_cervix_consistency" ref-book="rbRisarCervix_Consistency"
                                             ng-disabled="checkup.bimanual_cervix_uteri.code == 'missing'"></rb-select>
                                             </div>
@@ -925,7 +922,7 @@
                                         <td class="text-right col-md-4">Размеры</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="bimanual_body_of_womb_size" ng-model="checkup.bimanual_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"
                                                        ng-disabled="checkup.bimanual_uterus_body | pluck:'code' | contains:['missing', 'not determined']"></rb-select>
                                             </div>
@@ -1043,7 +1040,7 @@
                                         <td class="text-right col-md-4">Шейка матки</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
                                             </div>
                                         </div></td>
@@ -1054,7 +1051,7 @@
                                         <td class="text-right col-md-4">Консистенция шейки матки</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select ng-disabled="checkup.rectovaginal_cervix_uteri.code == 'missing'"
                                                     name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
                                             </div>
@@ -1077,7 +1074,7 @@
                                         <td class="text-right col-md-4">Размеры</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="rectovaginal_body_of_womb_size" ng-disabled="checkup.rectovaginal_cervix_uteri | pluck:'code' | contains:['missing', 'not determined']"
                                                        ng-model="checkup.rectovaginal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
@@ -1206,7 +1203,7 @@
                                         <td class="text-right col-md-4">Шейка матки</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select name="rectal_cervix_uteri" ng-model="checkup.rectal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
                                             </div>
                                         </div></td>
@@ -1216,7 +1213,7 @@
                                         <td class="text-right col-md-4">Консистенция</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select ng-disabled="checkup.rectal_cervix_uteri.code == 'missing'" name="rectal_cervix_consistency" ng-model="checkup.rectal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
                                             </div>
                                         </div></td>
@@ -1231,7 +1228,7 @@
                                         <td class="text-right col-md-4">Размеры</td>
                                         
                                         <td class="col-md-8"><div class="row" >
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                             <rb-select ng-disabled="checkup.rectal_uterus_body | pluck:'code' | contains:['missing', 'not determined']" name="rectal_body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
                                         </div></td>
