@@ -11,7 +11,7 @@ WebMis20
             mini_chart: '{{ url_for('.api_0_gyn_chart_mini', event_id=-99).replace('-99', '{0}') }}',
             header: '{{ url_for('.api_0_chart_header', event_id=-99).replace('-99', '{0}') }}',
             delete: '{{ url_for('.api_0_gyn_chart_delete', ticket_id=-99).replace('-99', '{0}') }}',
-            close: '{{ url_for('.api_0_gyn_chart_close', event_id=-99).replace('-99', '{0}') }}',
+            close: '{{ url_for('.api_0_gyn_chart_close')}}{0}',
             anamnesis: '{{ url_for('.api_0_gyn_anamnesis', event_id=-99).replace('-99', '{0}') }}',
             anamnesis_general: '{{ url_for('.api_0_gyn_anamnesis_general', event_id=-99).replace('-99', '{0}') }}',
             checkup: '{{ url_for('.api_0_gyn_checkup_get', event_id=-99, checkup_id=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
