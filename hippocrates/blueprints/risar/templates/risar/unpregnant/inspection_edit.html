@@ -444,7 +444,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
+                                        <th class="text-right">АД правая рука </th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': (objectiveForm.ad_right_high.$invalid || objectiveForm.ad_right_low.$invalid)  && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
@@ -456,7 +456,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
+                                        <th class="text-right">АД левая рука </th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': (objectiveForm.ad_left_high.$invalid || objectiveForm.ad_left_low.$invalid) && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
@@ -480,7 +480,7 @@
                                     </tr>
                                     
                                     <tr>
-                                        <th class="text-right">Лимфоузлы <span class="text-danger">*</span></th>
+                                        <th class="text-right">Лимфоузлы </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.lymph.$invalid && objectiveForm.submit_attempt}">
                                             <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" >
                                                 [[ item.name ]]
@@ -499,7 +499,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td class="text-right">Подкожно-жировая клетчатка <span class="text-danger">*</span></td>
+                                        <td class="text-right">Подкожно-жировая клетчатка </td>
                                         <td><div class="row" ng-class="{'has-error': objectiveForm.subcutaneous_fat.$invalid && objectiveForm.submit_attempt}">
                                             <div class="col-md-6">
                                             <rb-select name="subcutaneous_fat" ref-book="rbRisarSubcutaneous_Fat" ng-model="checkup.subcutaneous_fat"
@@ -507,7 +507,7 @@
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Молочные железы <span class="text-danger">*</span></th>
+                                        <th class="text-right">Молочные железы </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.breast.$invalid && objectiveForm.submit_attempt}">
                                             <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
                                                 [[ item.name ]]
@@ -516,7 +516,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние сосков <span class="text-danger">*</span></th>
+                                        <th class="text-right">Состояние сосков </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.nipples.$invalid && objectiveForm.submit_attempt}">
                                             <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
                                                 [[ item.name ]]
@@ -526,7 +526,7 @@
                                     </tr>
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Живот <span class="text-danger">*</span></th>
+                                        <th class="text-right">Живот </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.stomach.$invalid && objectiveForm.submit_attempt}">
                                             <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomachGenVisit">
                                                 [[ item.name ]]
@@ -586,7 +586,7 @@
                                     </tr>
                                      <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Состояние кожи <span class="text-danger">*</span></th>
+                                        <th class="text-right">Состояние кожи </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
                                             <div name="vulva_skin" refbook-checkbox ng-model="checkup.vulva_skin" ref-book="rbRisarVulvaSkin">
                                                 [[ item.name ]]
@@ -601,7 +601,7 @@
                                     </tr>
                                      <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Состояние слизистой <span class="text-danger">*</span></th>
+                                        <th class="text-right">Состояние слизистой </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
                                             <div name="vulva_mucous" refbook-checkbox ng-model="checkup.vulva_mucous" ref-book="rbRisarMucous">
                                                 [[ item.name ]]
@@ -619,14 +619,13 @@
                                         <td class="text-right col-md-4">Степень развития наружных половых органов</td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" 
-                                                      ref-book="rbRisarVulvaGermination" ></rb-select>
+                                            <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" ref-book="rbRisarVulvaGermination"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Область уретры <span class="text-danger">*</span></th>
+                                        <th class="text-right">Область уретры </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.urethra.$invalid && objectiveForm.submit_attempt}">
                                             <rb-select name="urethra" ng-model="checkup.urethra" ref-book="rbRisarUrethra"></rb-select>
                                             </div>
@@ -640,7 +639,7 @@
                                     
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Перианальная область <span class="text-danger">*</span></th>
+                                        <th class="text-right">Перианальная область </th>
                                         <td><div ng-class="{'text-danger': objectiveForm.perianal_zona.$invalid && objectiveForm.submit_attempt}">
                                             <div name="vulva_skin" refbook-checkbox ng-model="checkup.perianal_zona" ref-book="rbRisarPerianalZona">
                                                 [[ item.name ]]
@@ -749,8 +748,7 @@
                                                             <th class="text-right col-md-4">Шейка матки</th>
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-6">
-                                                                <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.cervix_uteri_mirrors"
-                                                                          ref-book="rbRisarCervixUteri" ></rb-select>
+                                                                <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.cervix_uteri_mirrors" ref-book="rbRisarCervixUteri"></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -759,8 +757,7 @@
                                                             <th class="text-right col-md-4">Размеры</th>
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-6">
-                                                                <rb-select name="cervix_uteri_size_mirrors" ng-model="checkup.cervix_uteri_size_mirrors"
-                                                                          ref-book="rbRisarCervixUteriSize" ></rb-select>
+                                                                <rb-select name="cervix_uteri_size_mirrors" ng-model="checkup.cervix_uteri_size_mirrors" ref-book="rbRisarCervixUteriSize"></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -769,8 +766,7 @@
                                                             <th class="text-right col-md-4">Форма</th>
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-6">
-                                                                <rb-select name="cervix_uteri_shape_mirrors" ng-model="checkup.cervix_uteri_shape_mirrors"
-                                                                          ref-book="rbRisarCervixUteriShape" ></rb-select>
+                                                                <rb-select name="cervix_uteri_shape_mirrors" ng-model="checkup.cervix_uteri_shape_mirrors" ref-book="rbRisarCervixUteriShape"></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -789,8 +785,7 @@
                                                             <td class="text-right col-md-4">Наружный зев</td>
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-6">
-                                                                <rb-select name="uterus_external_orifice_mirrors" ng-model="checkup.uterus_external_orifice_mirrors"
-                                                                          ref-book="rbRisarUterusExternalOrifice" ></rb-select>
+                                                                <rb-select name="uterus_external_orifice_mirrors" ng-model="checkup.uterus_external_orifice_mirrors" ref-book="rbRisarUterusExternalOrifice"></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
