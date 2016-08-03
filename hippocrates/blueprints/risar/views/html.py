@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import functools
 from flask import render_template, request, redirect, url_for, abort
 from flask_login import current_user
 
@@ -51,13 +51,32 @@ def html_routing():
     return render_template('risar/event_routing.html')
 
 
+def redirect_chart_if_possible(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        r_args = request.args.to_dict()
+        ticket_id = r_args.pop('ticket_id', None)
+        if ticket_id is not None:
+            result = ScheduleClientTicket.query.filter(
+                ScheduleClientTicket.id == ticket_id
+            ).with_entities(
+                ScheduleClientTicket.event_id
+            ).first()
+            if result and result[0]:
+                return redirect(url_for(request.endpoint, event_id=result[0]))
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @module.route('/pregnancy-chart.html')
+@redirect_chart_if_possible
 def html_pregnancy_chart():
     debug_data = get_debug_data(request.args)
     return render_template('risar/chart.html', debug_data=debug_data)
 
 
 @module.route('/gynecological-chart.html')
+@redirect_chart_if_possible
 def html_gynecological_chart():
     debug_data = get_debug_data(request.args)
     return render_template('risar/unpregnant/chart.html', debug_data=debug_data)
