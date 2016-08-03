@@ -925,7 +925,7 @@
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Положение</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.bimanual_uteri_position" ng-disabled="['missing', 'not determined'].has(checkup.bimanual_uterus_body)"></rb-select></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.bimanual_uteri_position" ng-disabled="checkup.bimanual_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']"></rb-select></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right col-md-4">Придатки</th>
@@ -1062,7 +1062,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="rectovaginal_body_of_womb_size" ng-disabled="checkup.rectovaginal_cervix_uteri | pluck:'code' | contains:['missing', 'not determined']"
+                                            <rb-select name="rectovaginal_body_of_womb_size" ng-disabled="checkup.rectovaginal_uterus_body| pluck:'code' | intersects:['no_body', 'not determined']"
                                                        ng-model="checkup.rectovaginal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
                                         </div></td>
@@ -1079,13 +1079,19 @@
                                 <tr>
                                     <!-- example multiple -->
                                     <td class="text-right">Положение</td>
-                                    <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position" ng-disabled="['missing', 'not determined'].has(checkup.rectovaginal_uterus_body)"></rb-select></td>
+                                    <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position" ng-disabled="checkup.rectovaginal_uterus_body| pluck:'code' | intersects:['no_body', 'not determined']"></rb-select></td>
                                 </tr>
                                 
                                 <tr>
                                     <!-- example multiple -->
                                     <td class="text-right">Параметрическая область широких связок матки</td>
-                                    <td><rb-select multiple="true" ref-book="rbRisarParametrium1" ng-model="checkup.rectovaginal_parametrium"></rb-select></td>
+                                    <td>
+                                        <div>
+                                            <div name="rectovaginal_parametrium" refbook-checkbox ng-model="checkup.rectovaginal_parametrium" ref-book="rbRisarParametrium1">
+                                                [[ item.name ]]
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                              
                                 <tr>
@@ -1102,7 +1108,14 @@
                                 <tr>
                                     <!-- example multiple -->
                                     <td class="text-right">Яичники справа</td>
-                                    <td><rb-select multiple="true" ref-book="rbRisarOvary" ng-model="checkup.rectovaginal_ovary_right"></rb-select></td>
+                                    <td>
+                                        <div >
+                                            <div name="rectovaginal_ovary_right" refbook-checkbox ng-model="checkup.rectovaginal_ovary_right" ref-book="rbRisarOvary">
+                                                [[ item.name ]]
+                                            </div>
+                                        </div>
+                                    </td>
+
                                 </tr>
                          
                                 <tr>
@@ -1114,7 +1127,13 @@
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Яичники слева</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarOvary" ng-model="checkup.rectovaginal_ovary_left"></rb-select></td>
+                                        <td>
+                                            <div >
+                                                <div name="rectovaginal_ovary_left" refbook-checkbox ng-model="checkup.rectovaginal_ovary_left" ref-book="rbRisarOvary">
+                                                    [[ item.name ]]
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
 
                                 
