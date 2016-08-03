@@ -1210,6 +1210,12 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    
+                                    <tr>
+                                        <th class="text-right col-md-4">Матка</th>
+                                        <td class="col-md-8">
+                                        </td>
+                                    </tr>   
                                     <tr>
                                     <!-- example select -->
                                         <td class="text-right col-md-4">Шейка матки</td>
@@ -1241,7 +1247,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select ng-disabled="checkup.rectal_uterus_body | pluck:'code' | contains:['missing', 'not determined']" name="rectal_body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
+                                            <rb-select ng-disabled="checkup.rectal_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']" name="rectal_body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1253,7 +1259,7 @@
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Положение</td>
-                                        <td><rb-select multiple="true" ng-disabled="checkup.rectal_uterus_body | pluck:'code' | contains:'missing'" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectal_uteri_position"></rb-select></td>
+                                        <td><rb-select multiple="true" ng-disabled="checkup.rectal_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectal_uteri_position"></rb-select></td>
                                     </tr>
                                     <tr>
                                         <!-- example few_checkboxes -->
@@ -1269,7 +1275,12 @@
                                         <!-- example short_string -->
                                         <td class="text-right">Другое</td>
                                         <td><input ng-disabled="checkup.rectal_parametrium | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_parametrium_other" class="form-control"></td>
-                                    </tr>                   
+                                    </tr>
+
+                                    <tr>
+                                        <th class="text-right col-md-4">Придатки</th>
+                                        <td class="col-md-8"></td>
+                                    </tr>                  
                                     <tr>
                                         <!-- example few_checkboxes -->
                                         <td class="text-right">Яичники справа</td>
