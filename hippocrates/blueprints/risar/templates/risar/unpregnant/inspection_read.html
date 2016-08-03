@@ -37,12 +37,12 @@
                                 <!-- example date -->
                                  <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Дата</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.last_menstruation_date|asDateTime]]</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.last_menstruation_date|asDate]]</div>
                                 </div>
                                 <!-- example multiple -->
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Особенности</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.last_menstruation_features | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.last_menstruation_features.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Характер</div>
@@ -54,11 +54,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Половое влечение</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.libido | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.libido.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Половой партнер</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.intercourse_partner | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.intercourse_partner.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Половой акт</div>
@@ -71,7 +71,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Принимаемые медикаменты</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.medicament | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.medicament.name"></span></div>
                                 </div>
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right"><b>Жалобы</b></div>
@@ -98,7 +98,7 @@
 
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Повышение температуры до</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.checkup.temperature_rise]]</div>
+                                        <div class="col-sm-6 col-md-6">[[checkup.temperature_rise]]</div>
                                 </div>
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Озноб</div>
@@ -119,15 +119,15 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Цвет</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_colour | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_colour.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Количество</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_quantity | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_quantity.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Запах</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_smell | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_smell.name"></span></div>
                                 </div>
                                  <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right"><b>Зуд, жжение в области половых органов</b></div>
