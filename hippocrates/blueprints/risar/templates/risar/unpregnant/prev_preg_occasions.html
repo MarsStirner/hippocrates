@@ -1,0 +1,117 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="PrevPregOccasionsCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.unpregnant_page_title_ext_n('Предыдущие обращениях по беременности') }}
+        {{ rimacros.navigation_unpreg('[[ chart.id ]]', undefined, 'chart') }}
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Заполненность разделов карты</h3>
+            </div>
+            <div class="box-body">
+
+
+                <tr>
+                    <td>основной</td>
+                    <td ng-repeat="checkup in checkups">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>сопутствующие</td>
+                    <td ng-repeat="checkup in checkups">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>осложнения</td>
+                    <td ng-repeat="checkup in checkups">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
+                    <td></td>
+                </tr>
+
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th class="col-md-2">Год</th>
+                        <th class="col-md-2">Исход беременности</th>
+                        <th class="col-md-2">Диагнозы</th>
+                        <th class="col-md-2">Дети</th>
+                        <th class="col-md-4">№ карты беременной</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="preg in prev_preg_occasions">
+                        <td ng-bind="preg.year"></td>
+                        <td ng-bind="preg.ishod"></td>
+                        <td ng-bind="preg.diagnoses">
+
+                            <span>Основной:</span>
+                            <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                                <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                    [[ diag.diagnostic.mkb.code ]]
+                                </span>
+                            </p>
+
+                            <span>Осложнения</span>
+                            <td ng-repeat="checkup in checkups">
+                                <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                                    <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                        [[ diag.diagnostic.mkb.code ]]
+                                    </span>
+                                </p>
+                            </td>
+
+
+                            <span>Сопутствующие:</span>
+                            <td ng-repeat="checkup in checkups">
+                                <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                                    <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                        [[ diag.diagnostic.mkb.code ]]
+                                    </span>
+                                </p>
+                            </td>
+
+                           
+
+                        </td>
+                        <td ng-bind="preg.card_number"></td>
+                        <td simple-collapsable>
+                            <div ng-bind-html="preg.preg_group.conditions | trustHtml"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="box box-primary"></div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/card_fill_history.js', v=app_version) }}"></script>
+{% endblock %}
