@@ -14,7 +14,7 @@ from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action, ActionServiceException
+    get_patient_location, delete_action, ActionServiceException, fit_planned_end_date
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
@@ -348,8 +348,16 @@ def api_get_action_ped():
     at = ActionType.query.get(at_id)
     if not at:
         raise ApiException(404, u'Не найден тип действия ActionType.id = %s' % at_id)
+
+    ped = get_planned_end_datetime(at_id)
+
+    event_id = request.args.get('event_id')
+    if event_id:
+        event = db.session.query(Event).get(event_id)
+        ped = fit_planned_end_date(ped, event)
+
     return {
-        'ped': get_planned_end_datetime(at_id)
+        'ped': ped
     }
 
 
