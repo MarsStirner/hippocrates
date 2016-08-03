@@ -3,7 +3,7 @@ import collections
 import datetime
 import logging
 
-from flask import request, abort, url_for
+from flask import request, url_for
 
 from flask_login import current_user
 
@@ -14,19 +14,18 @@ from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action, ActionServiceException
+    get_patient_location, delete_action, ActionServiceException, fit_planned_end_date
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict, safe_bool, bail_out
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import rlsNomen, rlsTradeName
-from nemesis.models.enums import ActionStatus
-from nemesis.systemwide import db, cache
+from nemesis.systemwide import db
 
 
 __author__ = 'viruzzz-kun'
@@ -349,8 +348,16 @@ def api_get_action_ped():
     at = ActionType.query.get(at_id)
     if not at:
         raise ApiException(404, u'Не найден тип действия ActionType.id = %s' % at_id)
+
+    ped = get_planned_end_datetime(at_id)
+
+    event_id = request.args.get('event_id')
+    if event_id:
+        event = db.session.query(Event).get(event_id)
+        ped = fit_planned_end_date(ped, event)
+
     return {
-        'ped': get_planned_end_datetime(at_id)
+        'ped': ped
     }
 
 
