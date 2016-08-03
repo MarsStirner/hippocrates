@@ -12,7 +12,7 @@ from nemesis.lib.utils import jsonify, public_endpoint
 from nemesis.app import app
 
 from blueprints.reports.jasper_client import JasperReport
-from blueprints.reports.models import rbRisarPrintTemplateMeta
+from blueprints.reports.models import rbRisarPrintTemplateMeta, RisarReports
 from blueprints.reports.prepare import InputPrepare
 from .app import module
 
@@ -25,14 +25,10 @@ def api_jr_templates():
     templates = JasperReport.get_reports(locate_reports)
 
     # these will be redirected to external system
-    redirect_map = {
-        u'/reports/Hippocrates/Analytics/Social_analytics': 'ANALYSIS_SOCIAL_PREG_CALL',
-        u'/reports/Hippocrates/Analytics/RIMIS_1022': 'INF_PREG_REFUSED_CALL',
-        u'/reports/Hippocrates/Analytics/report_diseases': 'PATIENTS_BY_DISEASE_CALL',
-        u'/reports/Hippocrates/Analytics/inducpregnan': 'PREG_MONIT_CALL',
-        u'/reports/Hippocrates/Analytics/report_med_interrupts': 'ANALYSIS_PREG_ABORTS_CALL'
-    }
-    ext_url = app.config['BARS_MIS_URL'].rstrip('/') + u'/ws/cas_risar?page='
+    redirect_map = dict(RisarReports.query.values(
+        RisarReports.template_uri, RisarReports.redirect_url)
+    )
+    ext_url = app.config['BARS_MIS_URL'].rstrip('/')
 
     return jsonify([{
         'id': t['uri'],

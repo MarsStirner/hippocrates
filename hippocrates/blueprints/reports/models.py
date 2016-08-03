@@ -55,3 +55,11 @@ class rbRisarPrintTemplateMeta(db.Model):
             'default': default,
             'required': self.required,
         }
+
+
+class RisarReports(db.Model):
+    __tablename__ = 'RisarReports'
+
+    id = db.Column(db.Integer, primary_key=True)
+    template_uri = db.Column(db.String(255), nullable=False)
+    redirect_url = db.Column(db.String(512))
