@@ -693,7 +693,7 @@
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 4. Осмотр в зеркалах</h3>
                             </div>
-                            <div class="box-body">
+                            <div class="box-body">q
                                  <table class="table">
                                                         <thead>
                                                         <tr>
@@ -703,6 +703,7 @@
                                                         </thead>
                                                         <tbody>
                                                                                <!-- START MIRRORS-->
+
                                                         <tr>
                                                             <!-- example select -->
                                                             <td class="text-right col-md-4">Влагалище</td>
@@ -716,7 +717,7 @@
                                                         <tr>
                                                             <!-- example short_string -->
                                                             <td class="text-right"></td>
-                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code != 'other'" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
+                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code !== 'other'" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
                                                         </tr>
                                                         <tr>
                                                             <!-- example select -->
@@ -731,7 +732,7 @@
                                                         <tr>
                                                             <!-- example short_string -->
                                                             <td class="text-right"></td>
-                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code != 'other'" ng-model="checkup.vagina_paries_mirrors_other" class="form-control"></td>
+                                                            <td><input ng-disabled="checkup.vagina_paries_mirrors.code !== 'other'" ng-model="checkup.vagina_paries_mirrors_other" class="form-control"></td>
                                                         </tr>
 
                                                         <tr>
@@ -799,7 +800,7 @@
                                                         </tr>
 
                                                         <tr>
-                                                            <th class="text-right col-md-4">Выделения</th>
+                                                            <th class="text-right col-md-4">Выделения из половых путей</th>
                                                             <td class="col-md-8">
 
                                                             </td>
@@ -854,6 +855,7 @@
                                 <h3 class="box-title">Шаг 5. Бимануальное исследование</h3>
                             </div>
                             <div class="box-body">
+                            <div><pre>[[checkup.bimanual_uterus_body | pluck:'code'|json]]</pre></div>
                             <table class="table table-condensed">
                                 <tbody>
                                   
@@ -902,15 +904,14 @@
                                         <td class="text-right">Тело матки</td>
                                         <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.bimanual_uterus_body"></rb-select></td>
                                     </tr>
-
-                                    <tr>
+                                     <tr>
                                     <!-- example select -->
                                         <td class="text-right col-md-4">Размеры</td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
                                             <rb-select name="bimanual_body_of_womb_size" ng-model="checkup.bimanual_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"
-                                                       ng-disabled="checkup.bimanual_uterus_body | pluck:'code' | contains:['missing', 'not determined']"></rb-select>
+                                                       ng-disabled="checkup.bimanual_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
