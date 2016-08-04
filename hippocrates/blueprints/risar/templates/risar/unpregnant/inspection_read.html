@@ -358,7 +358,7 @@
 
                                                      <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Влагалище</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vagina_mirrors_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vagina_mirrors_mirrors.name"></span></div>
                                                     </div>
                                                     <div class="row" ng-show="checkup.vagina_mirrors_adds">
                                                         <div class="col-sm-6 col-md-6 text-right"></div>
@@ -366,23 +366,23 @@
                                                     </div>
                                                      <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Стенки влагалища</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vagina_paries_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vagina_paries_mirrors.name"></span></div>
                                                     </div>
-                                                     <div class="row" ng-show="checkup.vaginal_fornix_adds_mirrors">
+                                                     <div class="row" ng-show="checkup.vagina_paries_mirrors_other">
                                                         <div class="col-sm-6 col-md-6 text-right"></div>
-                                                        <div class="col-sm-6 col-md-6">[[checkup.vaginal_fornix_adds_mirrors]]</div>
+                                                        <div class="col-sm-6 col-md-6">[[checkup.vagina_paries_mirrors_other]]</div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.cervix_uteri_mirrors.name"></span></div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Размеры</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.cervix_uteri_size_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.cervix_uteri_size_mirrors.name"></span></div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Форма</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.cervix_uteri_shape_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.cervix_uteri_shape_mirrors.name"></span></div>
                                                     </div>
                                                      <div class="row" >
                                                         <div class="col-sm-6 col-md-6 text-right">Эрозия</div>
@@ -394,7 +394,7 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Наружный зев</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.uterus_external_orifice_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.uterus_external_orifice_mirrors.name"></span></div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Своды влагалища</div>
@@ -414,15 +414,15 @@
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Цвет</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_colour_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_colour_mirrors.name"></span></div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Количество</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_quantity_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_quantity_mirrors.name"></span></div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Запах</div>
-                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_smell_mirrors| pluck:'name' | join:', '"></span></div>
+                                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.discharge_smell_mirrors.name"></span></div>
                                                     </div>
                                                      <div class="row">
                                                         <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
@@ -451,11 +451,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_cervix_uteri.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Консистенция</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_cervix_consistency| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_cervix_consistency.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Тело матки</div>
@@ -463,11 +463,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Размеры</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_body_of_womb_size.name"></span></div>
                                 </div>
-                                <div class="row" ng-show="checkup.bimanual_body_of_womb_size">
+                                <div class="row" ng-show="checkup.bimanual_body_of_womb_enlarged">
                                     <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_body_of_womb_enlarged"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Положение</div>
@@ -483,15 +483,15 @@
                                 </div>
                                 <div class="row" ng-show="checkup.bimanual_ovary_right_oher">
                                     <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_ovary_right_oher]]></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_ovary_right_oher]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Яичники слева</div>
                                     <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_ovary_left| pluck:'name' | join:', '"></span></div>
                                 </div>
-                                <div class="row" ng-show="checkup.bimanual_ovary_left">
+                                <div class="row" ng-show="checkup.bimanual_ovary_left_oher">
                                     <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_ovary_left]]></div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_ovary_left_oher]]</div>
                                 </div>
 
                                 <div class="row">
