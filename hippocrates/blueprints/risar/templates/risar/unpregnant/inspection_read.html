@@ -217,11 +217,11 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">АД правая рука</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.ad_right_high]]/[[checkup.ad_right_low]]</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.AD_right_high]]/[[checkup.AD_right_low]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">АД левая рука</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.ad_left_high]]/[[checkup.ad_left_low]]</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.AD_left_high]]/[[checkup.AD_left_low]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Кожа</div>
@@ -239,7 +239,7 @@
 
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Подкожно-жировая клетчатка</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.subcutaneous_fat | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.subcutaneous_fat.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Молочные железы</div>
@@ -255,7 +255,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Характер оволосения</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.pilosis| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.pilosis"></span></div>
                                 </div>
                                  <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Примечания</div>
@@ -279,11 +279,11 @@
 
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Характер оволосения</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_pilosis | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_pilosis.name"></span></div>
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Региональные паховые лимфоузлы</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.groin_glands | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.groin_glands.name"></span></div>
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Состояние кожи</div>
@@ -303,11 +303,11 @@
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Степень развития наружных половых органов</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_germination | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_germination.name"></span></div>
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Область уретры</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.urethra | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.urethra.name"></span></div>
                             </div>
                             <div class="row" ng-show="checkup.urethra_adds">
                                     <div class="col-sm-6 col-md-6 text-right"></div>
@@ -327,15 +327,15 @@
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Цвет</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_colour | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_colour.name"></span></div>
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Количество</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_quantity | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_quantity.name"></span></div>
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Запах</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_smell | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_smell.name"></span></div>
                             </div>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
