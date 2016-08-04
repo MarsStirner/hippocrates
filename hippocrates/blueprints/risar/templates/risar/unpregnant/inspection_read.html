@@ -532,11 +532,11 @@
 
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_uteri.name"></span></div>
                                 </div>
                                  <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Консистенция</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_consistency| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_cervix_consistency.name"></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Тело матки</div>
@@ -544,7 +544,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Размеры</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_body_of_womb_size.name"></span></div>
                                 </div> 
                                 <div class="row" ng-show="checkup.rectovaginal_body_of_womb_enlarged">
                                     <div class="col-sm-6 col-md-6 text-right"></div>
@@ -552,7 +552,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Положение</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_uteri_position]]</div>
+                                    <span class="col-sm-6 col-md-6" ng-bind="checkup.rectovaginal_uteri_position| pluck:'name' | join:', '"></span>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Параметрическая область широких связок матки</div>
@@ -630,11 +630,11 @@
                                     </div>
                                     <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">Шейка матки</div>
-                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_cervix_uteri| pluck:'name' | join:', '"></span></div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_cervix_uteri.name"></span></div>
                                     </div> 
                                     <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">Консистенция</div>
-                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_cervix_consistency| pluck:'name' | join:', '"></span></div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_cervix_consistency.name"></span></div>
                                     </div>
                                     <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">Тело матки</div>
@@ -642,7 +642,7 @@
                                     </div>
                                    <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">Размеры</div>
-                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_body_of_womb_size| pluck:'name' | join:', '"></span></div>
+                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_body_of_womb_size.name"></span></div>
                                     </div>
                                      <div class="row" ng-show="checkup.rectal_body_of_womb_enlarged">
                                                 <div class="col-sm-6 col-md-6 text-right"></div>
@@ -690,7 +690,7 @@
                                     </div>
                                     <div class="row">
                                                 <div class="col-sm-6 col-md-6 text-right">Своды влагалища</div>
-                                                <div class="col-sm-6 col-md-6">[[checkup.rectal_vaginal_fornix]]</div>
+                                                <span class="col-sm-6 col-md-6" ng-bind="checkup.rectal_vaginal_fornix| pluck:'name' | join:', '"></span>
                                     </div>
                                     <div class="row">
                                                 <div class="col-sm-6 col-md-6 text-right">Дополнительная информация</div>
@@ -706,7 +706,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Заключение</h3>
-                                <a class="print_link pull-right" ng-if="checkup.end_date"
+                                <a class="print_link pull-right" ng-if="!checkup.end_date"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_conclusion">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -761,56 +761,60 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Талон посещения</h3>
-                                <a class="print_link pull-right" ng-if="checkup.end_date"
-                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_ticket25">
+                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#ticket_25">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
                             <!-- START TICKET 25 -->
 
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Дата открытия талона</div>
-                                    <div class="col-sm-6 col-md-6">[[ticket25.date_open|asDateTime]]</div>
+                                    <div class="col-sm-6 col-md-6  text-right">Дата открытия талона:</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.ticket_25.beg_date|asDate]]</div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Дата закрытия талона </div>
-                                    <div class="col-sm-6 col-md-6">[[ticket25.date_close|asDateTime]]</div>
+                                    <div class="col-sm-6 col-md-6  text-right">Дата закрытия талона:</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.ticket_25.end_date|asDate]]</div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Оказываемая медицинская помощь</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.medical_care | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Оказываемая медицинская помощь:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.medical_care.name"></span></div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Место обращения (посещения)</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.visit_place | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Место обращения (посещения):</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_place.name"></span></div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Посещение</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.visit_type | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Посещение:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_type.name"></span></div>
                             </div>
                              <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Обращение (цель)</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.visit_reason | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Обращение (цель):</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_reason.name"></span></div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Случай закончен</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.finished_treatment | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Случай закончен:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.finished_treatment.name"></span></div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Обращение</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.initial_treatment | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Обращение:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.initial_treatment.name"></span></div>
                             </div>
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Оплата за счет</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="ticket25.payment | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">Результат обращения:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.treatment_result.name"></span></div>
+                            </div>
+                            <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">Оплата за счет:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.payment.name"></span></div>
                             </div>
                              <div class="row">
-                                <div class="col-sm-6 col-md-6 text-right">&nbsp;</div>
+                                <div class="col-sm-6 col-md-6 text-right">&nbsp;<br></div>
                                 <div class="col-sm-6 col-md-6"></div>
                              </div>
                            
                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"><b>Медицинская услуга</b></div>
+                                    <div class="col-sm-6 col-md-6 text-right"><b>Медицинская услуги</b></div>
                                     <div class="col-sm-6 col-md-6"></div>
                             </div>
                             <div class="row">
@@ -831,6 +835,7 @@
                                     </tbody>
                                   </table>
                             </div>
+                            <br/>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right"><b>Операции</b></div>
                                     <div class="col-sm-6 col-md-6"></div>
@@ -857,6 +862,7 @@
                                     </tbody>
                                   </table>
                             </div>
+                            <br/>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right"><b>Манипуляция и исследования</b></div>
                                     <div class="col-sm-6 col-md-6"></div>
@@ -866,19 +872,20 @@
                                     <thead>
                                       <tr>
                                         <th>Название</th>
-                                        <th>Код</th>
+                                        <th>Количество</th>
                                         <th>Врач</th>
                                       </tr>
                                     </thead>
                                     <tbody>
                                       <tr ng-repeat="$row in checkup.ticket_25.manipulations">
-                                        <td ng-bind="$row.service.name">manip.nazvanie</td>
-                                        <td ng-bind="$row.service.code">manip.kod</td>
-                                        <td ng-bind="$row.person.full_name">manip.vrach</td>
+                                        <td ng-bind="$row.service.name"></td>
+                                        <td ng-bind="$row.amount"></td>
+                                        <td ng-bind="$row.person.full_name"></td>
                                       </tr>
                                     </tbody>
                                   </table>
                             </div>
+                            <br/>
                             <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right"><b>Документ временной нетрудоспособности</b></div>
                                     <div class="col-sm-6 col-md-6"></div>
@@ -889,6 +896,7 @@
                                       <tr>
                                         <th>Тип</th>
                                         <th>Повод выдачи</th>
+                                        <th>Кому</th>
                                         <th>Дата выдачи</th>
                                         <th>Дата закрытия</th>
                                       </tr>
@@ -897,6 +905,7 @@
                                       <tr ng-repeat="$row in checkup.ticket_25.temp_disability">
                                         <td ng-bind="$row.type.name"></td>
                                         <td ng-bind="$row.reason.name"></td>
+                                        <td ng-bind="$row.client"></td>
                                         <td ng-bind="$row.beg_date|asDate"></td>
                                         <td ng-bind="$row.end_date|asDate"></td>
                                       </tr>
