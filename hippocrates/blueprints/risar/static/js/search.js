@@ -18,6 +18,16 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         name: 'Открытые',
         value: false
     }];
+    $scope.rbRequestType = RefBookService.get('rbRequestType');
+    $scope.request_types = [];
+    
+    $scope.$watchCollection('rbRequestType.objects', function (n, o) {
+        if (!_.isArray(n) || _.isEqual(n, o)) return;
+        $scope.request_types = _.filter(n, function (i) {
+            return _.contains(['gynecological', 'pregnancy'], i.code)
+        })
+    });
+    
     $scope.results = [];
     $scope.pager = {
         current_page: 1,
@@ -39,12 +49,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             checkup_date_to: $scope.query.checkup_date_to || undefined,
             bdate_from: $scope.query.bdate_from || undefined,
             bdate_to: $scope.query.bdate_to || undefined,
-            risk: get_risk_list(), //$scope.query.risk.id,
+            risk: _.pluck($scope.query.risk, 'id') || undefined,
             closed: $scope.query.closed.value,
             client_workgroup: $scope.query.client_workgroup,
             age_max: $scope.query.age_max,
-            age_min: $scope.query.age_min
-
+            age_min: $scope.query.age_min,
+            request_types: _.pluck($scope.query.request_types, 'id') || undefined
         };
     };
     var perform = function (set_page) {
@@ -121,7 +131,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             closed: $scope.closed_items[0],
             client_work_group: {},
             age_min: null,
-            age_max: null
+            age_max: null,
+            request_types: []
         };
         return $scope.refresh_areas();
     };
@@ -131,11 +142,6 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     $scope.perform = function () {
         tc.start();
     };
-    function get_risk_list () {
-        if ($scope.query.risk.length) {
-            return _.pluck($scope.query.risk, 'id')
-        }
-    }
     $scope.onPageChanged = function () {
         perform(true);
     };
@@ -152,6 +158,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             tc.start()
         });
         $scope.$watchCollection('query.risk', function () {
+            tc.start()
+        });
+        $scope.$watchCollection('query.request_types', function () {
             tc.start()
         });
     });

@@ -64,6 +64,8 @@ def search_events(paginated=True, **kwargs):
         else:
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
+    if 'request_types' in kwargs and kwargs['request_types']:
+        query = query.filter(request_type_id__in=kwargs['request_types'])
     if 'bdate_from' in kwargs:
         query = query.filter(bdate__gte=sphinx_local_days(kwargs['bdate_from']))
     if 'bdate_to' in kwargs:
