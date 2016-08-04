@@ -12,8 +12,9 @@ from nemesis.lib.utils import jsonify, public_endpoint
 from nemesis.app import app
 
 from blueprints.reports.jasper_client import JasperReport
-from blueprints.reports.models import rbRisarPrintTemplateMeta
+from blueprints.reports.models import rbRisarPrintTemplateMeta, RisarReports
 from blueprints.reports.prepare import InputPrepare
+from blueprints.risar.lib.specific import SpecificsManager
 from .app import module
 
 
@@ -24,22 +25,24 @@ def api_jr_templates():
     locate_reports = data.get('folder')
     templates = JasperReport.get_reports(locate_reports)
 
+    ext_url = SpecificsManager.get_reports_redirect_url()
     # these will be redirected to external system
-    redirect_map = {
-        u'/reports/Hippocrates/Analytics/Social_analytics': 'ANALYSIS_SOCIAL_PREG_CALL',
-        u'/reports/Hippocrates/Analytics/RIMIS_1022': 'INF_PREG_REFUSED_CALL',
-        u'/reports/Hippocrates/Analytics/report_diseases': 'PATIENTS_BY_DISEASE_CALL',
-        u'/reports/Hippocrates/Analytics/inducpregnan': 'PREG_MONIT_CALL',
-        u'/reports/Hippocrates/Analytics/report_med_interrupts': 'ANALYSIS_PREG_ABORTS_CALL'
-    }
-    ext_url = app.config['BARS_MIS_URL'].rstrip('/') + u'/ws/cas_risar?page='
+    redirect_map = dict(RisarReports.query.values(
+        RisarReports.template_uri, RisarReports.redirect_url)
+    ) if ext_url is not None else {}
 
-    return jsonify([{
-        'id': t['uri'],
-        'code': t['label'],
-        'name': t['description'],
-        'redirect_to': ext_url + redirect_map[t['uri']] if t['uri'] in redirect_map else None
-    } for t in templates])
+    res = []
+    for t in templates:
+        t_data = {
+            'id': t['uri'],
+            'code': t['label'],
+            'name': t['description'],
+        }
+        if ext_url:
+            t_data['redirect_to'] = ext_url + redirect_map[t['uri']]\
+                if t['uri'] in redirect_map else None
+        res.append(t_data)
+    return jsonify(res)
 
 
 @module.route('/templates-meta')

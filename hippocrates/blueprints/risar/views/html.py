@@ -7,7 +7,9 @@ from blueprints.risar.lib.debug import get_debug_data
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
+from nemesis.lib.settings import Settings
 from ..app import module
+from blueprints.risar.lib.chart import get_event
 
 __author__ = 'mmalkov'
 
@@ -46,8 +48,10 @@ def html_routing():
 
 @module.route('/chart.html')
 def html_chart():
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
     debug_data = get_debug_data(request.args)
-    return render_template('risar/chart.html', debug_data=debug_data)
+    return render_template('risar/chart.html', event=event, debug_data=debug_data)
 
 
 @module.route('/anamnesis.html')
