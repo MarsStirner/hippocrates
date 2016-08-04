@@ -55,4 +55,4 @@ def get_sarbarsmis_card_url(event):
     if not ext_url:
         return None
     ext_id = event.client_id
-    return u'{0}/?page=DISEASECASE&form=1&agent_id={1}'.format(ext_url, ext_id)
+    return u'{0}/ws/cas_risar?page=DISEASECASE&form=1&risar_id={1}'.format(ext_url, ext_id)
