@@ -64,7 +64,7 @@ var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     reload_anamnesis();
 };
 
-var GynecologicalAnamnesisCtrl = function ($scope, $controller, RisarApi) {
+var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
     var reload_anamnesis = function () {
         $scope.reload_header();
@@ -72,9 +72,20 @@ var GynecologicalAnamnesisCtrl = function ($scope, $controller, RisarApi) {
             .then(function (data) {
                 $scope.client_id = data.client_id;
                 $scope.anamnesis = data;
-            })
+            });
+
     };
-    reload_anamnesis();
+    $scope.init = function () {
+        var hash = $location.url().replace('/', '');
+        if (hash === "pregnancies" ){
+            $timeout(function(){
+               $("li[active='tabs.pregnancies'] a").click();
+            }, 0);
+        }
+        reload_anamnesis();
+
+    }
+    $scope.init();
 };
 
 var MotherFatherCtrl = function ($scope) {
