@@ -112,11 +112,11 @@
                                         <td class="text-right col-md-4">Дата</td>
                                         <td class="col-md-2">
                                             <wm-date  name="osmotr_date"
-                                                     ng-model="checkup.beg_date" style="width: 250px" ></wm-date>
+                                                     ng-model="checkup.beg_date" style="width: 250px" autofocus></wm-date>
                                         </td>
                                         <td class="text-right">Время осмотра</td>
                                         <td><wm-time  name="beg_time"
-                                                     ng-model="checkup.beg_time" style="width: 200px" ></wm-time>
+                                                     ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
                                         </td>
                                     </tr>
                                 <tbody>
@@ -236,7 +236,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="number" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -325,7 +325,7 @@
                                                        name="pregnancy_failure_period"
                                                        ng-model="checkup.pregnancy_failure_period"
                                                        class="form-control" ng-disabled="!checkup.pregnancy_failure"
-                                                       autofocus>
+                                                       >
                                             </div>
                                             </div>
                                         </td>
@@ -402,7 +402,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="number" id="height" name="height" ng-model="checkup.height"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -413,7 +413,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input valid-number valid-number-float id="mrk" name="mrk" ng-model="checkup.mrk"
-                                                       disabled class="form-control" autofocus>
+                                                       disabled class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -423,7 +423,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input valid-number valid-number-float id="imt" name="imt" ng-model="checkup.imt"
-                                                       disabled class="form-control" autofocus>
+                                                       disabled class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -433,7 +433,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="number" id="temperature" name="temperature" ng-model="checkup.temperature"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -443,7 +443,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input id="heart_rate" type="number" name="heart_rate" ng-model="checkup.heart_rate"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -565,7 +565,7 @@
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis" 
-                                                      ref-book="rbRisarVulvaPilosis" ></rb-select>
+                                                      ref-book="rbRisarVulvaPilosis" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -715,7 +715,7 @@
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-6">
                                                                 <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors"
-                                                                          ref-book="rbRisarVaginaGenVisit" ></rb-select>
+                                                                          ref-book="rbRisarVaginaGenVisit" autofocus></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -884,7 +884,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
+                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1033,7 +1033,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
+                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1045,7 +1045,7 @@
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
                                             <rb-select ng-disabled="checkup.rectovaginal_cervix_uteri.code == 'missing'"
-                                                    name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
+                                                    name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1055,7 +1055,7 @@
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Тело матки</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body"></rb-select></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body" ></rb-select></td>
                                     </tr>
 
                                 
@@ -1199,7 +1199,7 @@
                                         <!-- example few_checkboxes -->
                                         <td class="text-right">Перианальная область</td>
                                         <td><div >
-                                            <div name="rectal_perianal_zona" refbook-checkbox ng-model="checkup.rectal_perianal_zona" ref-book="rbRisarPerianalZona">
+                                            <div name="rectal_perianal_zona" refbook-checkbox ng-model="checkup.rectal_perianal_zona" ref-book="rbRisarPerianalZona" autofocus>
                                                 [[ item.name ]]
                                             </div>
                                             </div>
@@ -1367,7 +1367,7 @@
                                     </tr>
                                     <tr>
                                         <td colspan="2">
-                                            <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
+                                            <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types" autofocus/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1403,7 +1403,7 @@
                                             <th class="text-right col-md-4">Даты открытия и закрытия талона</th>
                                             <td class="col-md-8">
                                                 <div class="row">
-                                                    <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date"></wm-date></div>
+                                                    <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date" autofocus></wm-date></div>
                                                     <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date"></wm-date></div>
                                                 </div>
                                             </td>
