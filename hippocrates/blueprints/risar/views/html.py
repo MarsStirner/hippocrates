@@ -43,7 +43,9 @@ def html_search():
 
 @module.route('/routing.html')
 def html_routing():
-    return render_template('risar/event_routing.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/event_routing.html', event=event)
 
 
 @module.route('/chart.html')
@@ -56,46 +58,59 @@ def html_chart():
 
 @module.route('/anamnesis.html')
 def html_anamnesis():
-    return render_template('risar/anamnesis_view.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/anamnesis_view.html', event=event)
 
 
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
-    return render_template('risar/anamnesis_mother_edit.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/anamnesis_mother_edit.html', event=event)
 
 
 @module.route('/anamnesis/father_edit.html')
 def html_anamnesis_father_edit():
-    return render_template('risar/anamnesis_father_edit.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/anamnesis_father_edit.html', event=event)
 
 
 @module.route('/inspection.html')
 def html_inspection():
-    return render_template('risar/inspection_view.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/inspection_view.html', event=event)
 
 
 @module.route('/inspection/gravidograma.html')
 def html_gravidograma():
-    return render_template('risar/gravidograma.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/gravidograma.html', event=event)
 
 
 @module.route('/inspection_read.html')
 def html_inspection_read():
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
     flat_code = None
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.get(checkup_id)
         flat_code = checkup.actionType.flatCode
     if flat_code == 'risarFirstInspection':
-        return render_template('risar/inspection_first_read.html')
+        return render_template('risar/inspection_first_read.html', event=event)
     elif flat_code == 'risarSecondInspection':
-        return render_template('risar/inspection_second_read.html')
+        return render_template('risar/inspection_second_read.html', event=event)
 
 
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
     debug_data = get_debug_data(request.args)
-    event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.get(checkup_id)
@@ -107,78 +122,98 @@ def html_inspection_edit():
                                                                ActionType.flatCode == 'risarFirstInspection').first()
         flat_code = 'risarSecondInspection' if first_inspection else 'risarFirstInspection'
     if flat_code == 'risarFirstInspection':
-        return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
+        return render_template('risar/inspection_first_edit.html', event=event, debug_data=debug_data)
     elif flat_code == 'risarSecondInspection':
-        return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
+        return render_template('risar/inspection_second_edit.html', event=event, debug_data=debug_data)
 
 
 @module.route('/inspection_pc_read.html')
 def html_inspection_pc_read():
-    return render_template('risar/inspection_pc_read.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/inspection_pc_read.html', event=event)
 
 
 @module.route('/inspection_pc_edit.html')
 def html_inspection_pc_edit():
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
     debug_data = get_debug_data(request.args)
-    event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.get(checkup_id)
         if checkup.endDate:
             return redirect(url_for('.html_inspection_pc_read', event_id=event_id, checkup_id=checkup_id))
-    return render_template('risar/inspection_pc_edit.html', debug_data=debug_data)
+    return render_template('risar/inspection_pc_edit.html', event=event, debug_data=debug_data)
 
 
 @module.route('/inspection_puerpera.html')
 def html_inspection_puerpera():
-    return render_template('risar/inspection_puerpera_view.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/inspection_puerpera_view.html', event=event)
 
 
 @module.route('/inspection_puerpera_read.html')
 def html_inspection_puerpera_read():
-    return render_template('risar/inspection_puerpera_read.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/inspection_puerpera_read.html', event=event)
 
 
 @module.route('/inspection_puerpera_edit.html')
 def html_inspection_puerpera_edit():
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
     debug_data = get_debug_data(request.args)
-    event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.get(checkup_id)
         if checkup.endDate:
             return redirect(url_for('.html_inspection_puerpera_read', event_id=event_id, checkup_id=checkup_id))
-    return render_template('risar/inspection_puerpera_edit.html', debug_data=debug_data)
+    return render_template('risar/inspection_puerpera_edit.html', event=event, debug_data=debug_data)
 
 
 @module.route('/inspection_fetus.html')
 def html_inspection_fetus():
-    return render_template('risar/inspection_fetus_view.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/inspection_fetus_view.html', event=event)
 
 
 @module.route('/epicrisis.html')
 def html_epicrisis():
-    return render_template('risar/epicrisis.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/epicrisis.html', event=event)
 
 
 @module.route('/epicrisis_edit.html')
 def html_epicrisis_edit():
-    return render_template('risar/epicrisis_edit.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/epicrisis_edit.html', event=event)
 
 
 @module.route('/event_diagnoses.html')
 def html_event_diagnoses():
-    return render_template('risar/event_diagnoses.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/event_diagnoses.html', event=event)
 
 
 @module.route('/ambulance_patient_info.html')
 def html_ambulance_patient_info():
-    return render_template('risar/ambulance_patient_info.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/ambulance_patient_info.html', event=event)
 
 
 @module.route('/measure_list.html')
 def html_event_measure():
-    return render_template('risar/event_measure_list.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/event_measure_list.html', event=event)
 
 
 @module.route('/stats/org-birth-care/')
@@ -202,19 +237,26 @@ def html_card_fill_history():
     event_id = safe_int(args.get('event_id'))
     if not event_id:
         raise abort(404)
-    return render_template('risar/card_fill_history.html')
+    event = get_event(event_id)
+    return render_template('risar/card_fill_history.html', event=event)
 
 
 @module.route('/risk_groups_list.html')
 def html_risk_groups_list():
-    return render_template('risar/risk_groups_list.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/risk_groups_list.html', event=event)
 
 
 @module.route('/concilium_list.html')
 def html_concilium_list():
-    return render_template('risar/concilium_list.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/concilium_list.html', event=event)
 
 
 @module.route('/concilium.html')
 def html_concilium():
-    return render_template('risar/concilium.html')
+    event_id = safe_int(request.args.get('event_id'))
+    event = get_event(event_id)
+    return render_template('risar/concilium.html', event=event)
