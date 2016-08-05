@@ -1,7 +1,9 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/unpregnant/_macros.html' as rimacros %}
 {%- block modules_css %}
+    {{ super() }}
 <style type="text/css">
+
     .extr_space .row {
         line-height: 2em !important;
     }
@@ -55,7 +57,7 @@
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">Характер менструаций</div>
                             <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.menstrual_character.name"></span>
+                                <span ng-bind="anamnesis.general.menstrual_character| pluck:'name' | join:', '"></span>
                             </div>
                         </div>
                         <div class="row">

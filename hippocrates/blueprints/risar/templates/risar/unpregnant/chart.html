@@ -51,12 +51,13 @@
                     <table class="table-condensed">
                         <tbody>
                         <tr>
+
                             <td class="text-right">Менструации:</td>
                             <td colspan="2">
                                 с [[ chart.anamnesis.general.age ]] лет,&nbsp;
                                 длительность [[ chart.anamnesis.general.duration ]],&nbsp;
                                 цикл [[ chart.anamnesis.general.period_duration ]],&nbsp;
-                                [[ (anamnesis.general.disorder) ? 'с нарушениями' : 'без нарушений' ]]
+                                [[ char.anamnesis.general.disorder ? 'с нарушениями' : 'без нарушений' ]]
                             </td>
                         </tr>
                         <tr>
