@@ -4,6 +4,7 @@ import datetime
 import logging
 
 from collections import defaultdict
+from sqlalchemy.orm import joinedload
 
 from nemesis.lib.data import get_client_diagnostics
 from nemesis.lib.utils import safe_date, safe_int, safe_datetime
@@ -16,7 +17,7 @@ from hippocrates.blueprints.risar.lib.expert.utils import (em_final_status_list,
     is_em_cancellable, is_em_touched, is_em_in_final_status)
 from hippocrates.blueprints.risar.lib.utils import is_event_late_first_visit
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
-from hippocrates.blueprints.risar.risar_config import first_inspection_code
+from hippocrates.blueprints.risar.risar_config import first_inspection_code, pc_inspection_code
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
 from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval, get_intersection_type, IntersectionType
 
@@ -255,6 +256,11 @@ class EventMeasureGenerator(object):
         ).order_by(
             EventMeasure.begDateTime,
             EventMeasure.id
+        ).options(
+            (joinedload(EventMeasure._scheme_measure, innerjoin=True).
+             joinedload('schedule', innerjoin=True).
+             joinedload('apply_type', innerjoin=True)
+             )
         )
         for em in query:
             self.existing_em_list[em.schemeMeasure_id].append(em)
@@ -540,7 +546,7 @@ class MeasureGeneratorRisarContext(object):
     def load(self):
         self.inspection_date = safe_date(self.source_action.begDate)
         self.inspection_datetime = safe_datetime(self.source_action.begDate)
-        self.is_first_inspection = self.source_action.actionType.flatCode == first_inspection_code
+        self.is_first_inspection = self.source_action.actionType.flatCode in (first_inspection_code, pc_inspection_code)
         self.is_late_first_visit = is_event_late_first_visit(self.source_action.event)
         self.pregnancy_start_date = get_pregnancy_start_date(self.source_action.event)
         assert isinstance(self.pregnancy_start_date, datetime.date), 'No pregnancy start date in event'
@@ -558,21 +564,21 @@ class MeasureGeneratorRisarContext(object):
         self.all_existing_mkb = set(
             d.MKB
             for d in diagnostics
-            if not (d.action == self.source_action and d == d.diagnosis.diagnostics[0])
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0])
         )
 
         # Все незакрытые диагнозы, действовавшие на период действия, кроме созданных в нём
         self.actual_existing_mkb = set(
             d.MKB
             for d in diagnostics
-            if not (d.action == self.source_action and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
         )
 
         # Все диагнозы, созданные в этом действии
         self.actual_action_mkb = set(
             d.MKB
             for d in diagnostics
-            if (d.action == self.source_action and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+            if (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
         )
 
     def is_sm_apply_event_after_each_visit(self, sm):
@@ -598,7 +604,7 @@ class MeasureGeneratorRisarContext(object):
                 acceptable = self._check_st_lfv(sm, mkb_code)
             elif st_code == 'in_presence_diag':
                 acceptable = self._check_st_ipd(sm, mkb_code)
-            elif st_code in ('in_presence_diag', 'text', 'recommended'):
+            elif st_code in ('upon_med_indication', 'text', 'recommended'):
                 acceptable = True
             if not acceptable:
                 return False
@@ -705,5 +711,9 @@ class ActionMkbSpawner(object):
             ExpertScheme.deleted == 0,
             ExpertSchemeMeasureAssoc.deleted == 0,
             MKB.DiagID == self.mkb_code
+        ).options(
+            joinedload('schedule', innerjoin=True).joinedload('apply_type', innerjoin=True),
+            joinedload('schedule', innerjoin=True).joinedload('schedule_types'),
+            joinedload('schedule', innerjoin=True).joinedload('additional_mkbs')
         )
-        self.scheme_measures = [sm for sm in query.all()]
+        self.scheme_measures = query.all()

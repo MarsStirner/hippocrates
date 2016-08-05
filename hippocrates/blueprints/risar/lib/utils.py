@@ -11,9 +11,11 @@ from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPro
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
+from nemesis.models.event import Event, EventType
+from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
-    puerpera_inspection_code
+    puerpera_inspection_code, request_type_pregnancy, pc_inspection_code
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
@@ -138,7 +140,7 @@ def get_action_list(event, flat_code, all=False):
     query = Action.query.join(ActionType).filter(
         Action.event == event, Action.deleted == 0
     ).options(
-        joinedload(Action.actionType)
+        joinedload(Action.actionType, innerjoin=True)
     )
     if isinstance(flat_code, (list, tuple)):
         query = query.filter(ActionType.flatCode.in_(flat_code))
@@ -169,7 +171,9 @@ def get_action_by_id(action_id, event=None, flat_code=None, create=False):
     """
     action = None
     if action_id:
-        query = Action.query.filter(Action.id == action_id, Action.deleted == 0)
+        query = Action.query.filter(Action.id == action_id, Action.deleted == 0).options(
+            joinedload(Action.actionType, innerjoin=True)
+        )
         action = query.first()
     elif create:
         action = create_action(get_action_type_id(flat_code), event)
@@ -301,12 +305,21 @@ def risk_mkbs():
 
 def is_event_late_first_visit(event):
     result = False
-    fi = get_action(event, first_inspection_code)
+    fi = get_action(event, (first_inspection_code, pc_inspection_code))
     if fi:
-        preg_week = fi[inspection_preg_week_code]
+        preg_week = fi[inspection_preg_week_code].value
         if preg_week is not None:
             result = preg_week >= 10
     return result
+
+
+def get_patient_risar_event(client_id):
+    return Event.query.join(EventType, rbRequestType).filter(
+        Event.client_id == client_id,
+        Event.deleted == 0,
+        rbRequestType.code == request_type_pregnancy,
+        Event.execDate.is_(None)
+    ).order_by(Event.setDate.desc()).first()
 
 
 def format_action_data(json_data):

@@ -35,6 +35,17 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 });
         }
     };
+    $scope.calcFetusFisherKtgInfo = function (fetus_data) {
+        RisarApi.fetus.calc_fisher_ktg(fetus_data)
+            .then(function (result) {
+                fetus_data.fisher_ktg_points = result.points;
+                fetus_data.fisher_ktg_rate = result.fisher_ktg_rate;
+                if (result.points === 0) {
+                    fetus_data.fisher_ktg_points = null;
+                    fetus_data.fisher_ktg_rate = null;
+                }
+            });
+    };
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
     var event_id = $scope.event_id = params.event_id;

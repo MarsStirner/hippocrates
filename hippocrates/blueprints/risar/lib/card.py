@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 import datetime
-from weakref import WeakValueDictionary
-
 import itertools
 import sqlalchemy
+
+from weakref import WeakValueDictionary
+from collections import defaultdict
+from sqlalchemy import and_, func
 
 from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
+from hippocrates.blueprints.risar.lib.fetus import get_fetuses
+from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
     puerpera_inspection_code, risar_gyn_general_anamnesis_code, risar_gyn_checkup_codes, request_type_pregnancy, \
-    request_type_gynecological
+    request_type_gynecological, risar_epicrisis, first_inspection_code, second_inspection_code, pc_inspection_code
 from nemesis.lib.data import create_action
+from nemesis.lib.utils import safe_bool
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
 from nemesis.models.diagnosis import Diagnostic
@@ -193,6 +198,37 @@ class AbstractCard(object):
         return query.all()
 
 
+class PrimaryInspection(object):
+    def __init__(self, action):
+        self._action = action
+
+    @property
+    def action(self):
+        return self._action
+
+
+class RepeatedInspection(object):
+    def __init__(self, action):
+        self._action = action
+
+    @property
+    def action(self):
+        return self._action
+
+    @lazy
+    def fetuses(self):
+        return get_fetuses(self._action.id)
+
+
+class Epicrisis(object):
+    def __init__(self, event):
+        self._event = event
+
+    @lazy
+    def action(self):
+        return get_action(self._event, risar_epicrisis, True)
+
+
 class PregnancyCard(AbstractCard):
     """
     @type event: nemesis.models.event.Event
@@ -230,6 +266,7 @@ class PregnancyCard(AbstractCard):
     def __init__(self, event):
         super(PregnancyCard, self).__init__(event)
         self._anamnesis = self.Anamnesis(event)
+        self._epicrisis = Epicrisis(event)
 
     def check_card_attrs_action_integrity(self, action):
         """
@@ -256,18 +293,60 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def checkups(self):
-        return get_action_list(self.event, checkup_flat_codes).all()
+        return get_action_list(self.event, checkup_flat_codes).order_by(Action.begDate).all()
+
+    @lazy
+    def primary_inspection(self):
+        for checkup in self.checkups:
+            if checkup.actionType.flatCode in (first_inspection_code, pc_inspection_code):
+                 return PrimaryInspection(checkup)
+
+    @lazy
+    def latest_inspection(self):
+        if self.checkups:
+            checkup = self.checkups[-1]
+            if checkup.actionType.flatCode in (first_inspection_code, pc_inspection_code):
+                return PrimaryInspection(checkup)
+            elif checkup.actionType.flatCode == second_inspection_code:
+                return RepeatedInspection(checkup)
+
+    @lazy
+    def latest_rep_inspection(self):
+        for checkup in reversed(self.checkups):
+            if checkup.actionType.flatCode == second_inspection_code:
+                return RepeatedInspection(checkup)
+
+    @lazy
+    def latest_inspection_fetus_ktg(self):
+        """Последний повторный осмотр, где были заполнены данные КТГ для плода"""
+        for checkup in reversed(self.checkups):
+            if checkup.actionType.flatCode == second_inspection_code:
+                inspection = RepeatedInspection(checkup)
+                for fetus in inspection.fetuses:
+                    if safe_bool(fetus.ktg_input):
+                        return inspection
 
     @lazy
     def checkups_puerpera(self):
         return get_action_list(self.event, puerpera_inspection_code).all()
+
+    @lazy
+    def epicrisis(self):
+        return self._epicrisis
+
+    @lazy
+    def radz_risk(self):
+        from blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
+        return get_radz_risk(self.event, True)
 
     def reevaluate_card_attrs(self):
         """
         Пересчёт атрибутов карточки беременной
         """
         from .card_attrs import reevaluate_risk_rate, \
-            reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate, reevaluate_risk_groups, reevaluate_card_fill_rate_all
+            reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate,\
+            reevaluate_risk_groups, reevaluate_card_fill_rate_all
+        from .radzinsky_risks.calc import reevaluate_radzinsky_risks
 
         with db.session.no_autoflush:
             reevaluate_risk_rate(self)
@@ -276,6 +355,60 @@ class PregnancyCard(AbstractCard):
             reevaluate_preeclampsia_rate(self)
             reevaluate_risk_groups(self)
             reevaluate_card_fill_rate_all(self)
+            reevaluate_radzinsky_risks(self)
+
+    @lazy
+    def unclosed_mkbs(self):
+        diagnostics = self.get_client_diagnostics(self.event.setDate, self.event.execDate)
+        return set(
+            d.MKB
+            for d in diagnostics
+            if d.endDate is None
+        )
+
+    @cache.cached_call
+    def get_inspection_diagnoses(self):
+        """МКБ, присутствовавшие на каждом осмотре"""
+        # все версии диагнозов пациента
+        diag_q = db.session.query(Diagnostic).join(
+            Diagnosis
+        ).filter(
+            Diagnosis.deleted == 0,
+            Diagnostic.deleted == 0,
+            Diagnosis.client_id == self.event.client_id
+        ).with_entities(
+            Diagnosis.id,
+            Diagnosis.setDate.label('beg_date'),
+            func.coalesce(Diagnosis.endDate, func.curdate()).label('end_date'),
+            Diagnostic.MKB.label('mkb')
+        ).subquery('ClientDiagnostics')
+
+        # осмотры, попадающие в интервалы действия диагнозов
+        action_mkb_q = db.session.query(Action).join(
+            ActionType
+        ).join(
+            diag_q, and_(func.date(Action.begDate) <= func.coalesce(diag_q.c.end_date, func.curdate()),
+                         func.date(func.coalesce(Action.endDate, func.curdate())) >= diag_q.c.beg_date)
+        ).filter(
+            Action.deleted == 0,
+            Action.event_id == self.event.id,
+            ActionType.flatCode.in_(checkup_flat_codes)
+        ).with_entities(
+            Action.id.label('action_id').distinct(), diag_q.c.mkb.label('mkb')
+        )
+
+        res = defaultdict(set)
+        for action_id, mkb in action_mkb_q:
+            res[action_id].add(mkb)
+        return res
+
+    @lazy
+    def latest_measures_with_result(self):
+        em_list = get_latest_measures_in_event(self.event.id, with_result=True)
+        res = {}
+        for em in em_list:
+            res[em.measure.code] = em
+        return res
 
 
 class GynecologicCard(AbstractCard):

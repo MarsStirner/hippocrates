@@ -89,3 +89,20 @@ def api_0_chart_father(event_id):
 @api_method
 def api_0_chart_risks(event_id):
     return RisarRiskGroup.query.filter(RisarRiskGroup.event_id == event_id, RisarRiskGroup.deleted == 0).all()
+
+
+@module.route('/api/0/chart/<int:event_id>/radzinsky_risks')
+@api_method
+def api_0_chart_radzinsky_risks(event_id):
+    from blueprints.risar.lib.radzinsky_risks.calc import get_event_radzinsky_risks_info
+    event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
+
+    return get_event_radzinsky_risks_info(card.radz_risk, card)
+
+
+@module.route('/api/0/rb_radzinsky_risks')
+@api_method
+def api_0_rb_radzinsky_riskfactors():
+    from blueprints.risar.lib.radzinsky_risks.calc import radzinsky_risk_factors
+    return radzinsky_risk_factors()

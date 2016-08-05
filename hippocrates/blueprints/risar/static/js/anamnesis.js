@@ -142,7 +142,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         if (!child) { return '' }
         var result = [];
         result.push((child.alive)?('живой'):('мёртвый'));
-        result.push('масса: ' + child.weight);
+        result.push('масса: {0}'.formatNonEmpty(child.weight));
         if(child.abnormal_development){
             result.push('аномалии развития');
         }

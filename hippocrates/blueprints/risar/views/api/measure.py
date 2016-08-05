@@ -186,6 +186,9 @@ def api_0_event_measure_result_save(event_measure_id, em_result_id=None):
         em_ctrl.store(em, em_result)
     else:
         raise ApiException(404, u'`appointment_id` required')
+    card = PregnancyCard.get_for_event(em.event)
+    card.reevaluate_card_attrs()
+    db.session.commit()
     return EmResultRepr().represent_em_result(em_result)
 
 

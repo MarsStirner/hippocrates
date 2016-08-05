@@ -373,3 +373,8 @@ def html_concilium_list():
 @module.route('/concilium.html')
 def html_concilium():
     return render_template('risar/concilium.html')
+
+
+@module.route('/radzinsky_risks.html')
+def html_radzinsky_risks():
+    return render_template('risar/radzinsky_risks.html')

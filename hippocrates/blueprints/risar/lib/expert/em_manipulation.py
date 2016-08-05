@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
 
 from hippocrates.blueprints.risar.lib.utils import format_action_data
@@ -123,7 +123,7 @@ class EventMeasureController(BaseModelController):
             'beg_date_to': end_date,
             'end_date_from': start_date
         }
-        return self.get_listed_data(args)
+        return self.get_selecter().get_measures_in_action(args)
 
     def calc_event_measure_stats(self, event):
         sel = self.get_selecter()
@@ -224,6 +224,25 @@ class EventMeasureSelecter(BaseSelecter):
                 EventMeasure.id.desc()
             )
         return self
+
+    def get_measures_in_action(self, args):
+        EventMeasure = self.model_provider.get('EventMeasure')
+
+        self.apply_filter(**args)
+        self.apply_sort_order(**args)
+        self.query = self.query.options(
+            (joinedload(EventMeasure._scheme_measure).
+             joinedload('schedule', innerjoin=True).
+             joinedload('additional_mkbs')
+             ),
+            joinedload(EventMeasure._scheme_measure).joinedload('scheme', innerjoin=True),
+            (joinedload(EventMeasure._scheme_measure).
+             joinedload('measure', innerjoin=True).
+             joinedload('measure_type', innerjoin=True)
+             ),
+            joinedload(EventMeasure._measure).joinedload('measure_type', innerjoin=True),
+        )
+        return self.get_all()
 
     def set_calc_event_stats(self, event_id):
         EventMeasure = self.model_provider.get('EventMeasure')
