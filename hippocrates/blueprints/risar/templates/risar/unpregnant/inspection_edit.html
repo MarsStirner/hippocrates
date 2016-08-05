@@ -76,9 +76,7 @@
                                         <span>Заключение</span>
                                     </a>
                                 </li>
-                                {#<li>
-                                    <pre>[[checkup|json]]</pre>
-                                </li>#}
+                               
                                 {#
                                     <li>
                                         <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
@@ -444,7 +442,7 @@
                                         <td class="text-right">ЧСС</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input valid-number min-val="0" id="heart_rate" name="heart_rate" ng-model="checkup.heart_rate"
+                                                <input id="heart_rate" type="number" name="heart_rate" ng-model="checkup.heart_rate"
                                                        class="form-control" autofocus>
                                             </div>
                                             </div>
