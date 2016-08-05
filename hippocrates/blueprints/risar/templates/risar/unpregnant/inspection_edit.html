@@ -1439,15 +1439,15 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right col-md-4">Обращение (законченный случай лечения)</th>
+                                            <th class="text-right col-md-4">Случай закончен</th>
                                             <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarFinishedTreatment" ng-model="checkup.ticket_25.finished_treatment"></rb-select>
+                                                <div refbook-radio ref-book="rbRisarFinishedTreatment" ng-model="checkup.ticket_25.finished_treatment">[[ item.name ]]</div>
                                             </td>
                                         </tr>
                                         <tr>
                                             <th class="text-right col-md-4">Обращение</th>
                                             <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarInitialTreatment" ng-model="checkup.ticket_25.initial_treatment"></rb-select>
+                                                <div refbook-radio ref-book="rbRisarInitialTreatment" ng-model="checkup.ticket_25.initial_treatment">[[ item.name ]]</div>
                                             </td>
                                         </tr>
                                         <tr>
