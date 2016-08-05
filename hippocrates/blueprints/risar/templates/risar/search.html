@@ -93,7 +93,8 @@
                 </div>
                 <div class="form-group">
                     <label>Степень риска</label>
-                    <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding">
+                    <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding"
+                         ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'">
                         [[ item.name ]]
                     </div>
                 </div>
@@ -101,10 +102,10 @@
                     <label>Дата родов</label>
                     <div class="row">
                         <div class="col-md-6">
-                            <wm-date ng-model="query.bdate_from"></wm-date>
+                            <wm-date ng-model="query.bdate_from" ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'"></wm-date>
                         </div>
                         <div class="col-md-6">
-                            <wm-date ng-model="query.bdate_to"></wm-date>
+                            <wm-date ng-model="query.bdate_to" ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'"></wm-date>
                         </div>
                     </div>
                 </div>
