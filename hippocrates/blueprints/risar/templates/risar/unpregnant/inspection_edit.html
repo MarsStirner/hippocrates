@@ -1639,7 +1639,7 @@
 
                                                         <td class="col-md-3">
                                                             <span ng-if="!$table.$edited($index)" ng-bind="$row.client"></span>
-                                                            <span ng-if="$table.$edited($index)"><input class="form-control" ng-model="$table.$tmp.client" /></span>
+                                                            <span ng-if="$table.$edited($index)"><input ng-disabled="$table.$tmp.reason.code == '2'" class="form-control" ng-model="$table.$tmp.client" /></span>
                                                         </td>
 
                                                         <td class="col-md-1">
