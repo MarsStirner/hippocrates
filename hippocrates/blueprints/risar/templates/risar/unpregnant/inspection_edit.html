@@ -1,6 +1,8 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/unpregnant/_macros.html' as rimacros %}
+{% import 'risar/_inspection_macros.html' as inspection_macros %}
 {%- block modules_css %}
+    {{ super() }}
     <style type="text/css">
         .fs-racheck{
             margin-top: -1%;
@@ -76,9 +78,6 @@
                                         <span>Заключение</span>
                                     </a>
                                 </li>
-                                {#<li>
-                                    <pre>[[checkup|json]]</pre>
-                                </li>#}
                                 <li>
                                     <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
                                         <span class="badge">9</span>
@@ -112,11 +111,11 @@
                                         <td class="text-right col-md-4">Дата</td>
                                         <td class="col-md-2">
                                             <wm-date  name="osmotr_date"
-                                                     ng-model="checkup.beg_date" style="width: 250px" ></wm-date>
+                                                     ng-model="checkup.beg_date" style="width: 250px" autofocus></wm-date>
                                         </td>
                                         <td class="text-right">Время осмотра</td>
                                         <td><wm-time  name="beg_time"
-                                                     ng-model="checkup.beg_time" style="width: 200px" ></wm-time>
+                                                     ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
                                         </td>
                                     </tr>
                                 <tbody>
@@ -236,7 +235,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="number" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -325,7 +324,7 @@
                                                        name="pregnancy_failure_period"
                                                        ng-model="checkup.pregnancy_failure_period"
                                                        class="form-control" ng-disabled="!checkup.pregnancy_failure"
-                                                       autofocus>
+                                                       >
                                             </div>
                                             </div>
                                         </td>
@@ -402,7 +401,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="number" id="height" name="height" ng-model="checkup.height"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -413,7 +412,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input valid-number valid-number-float id="mrk" name="mrk" ng-model="checkup.mrk"
-                                                       disabled class="form-control" autofocus>
+                                                       disabled class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -423,7 +422,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input valid-number valid-number-float id="imt" name="imt" ng-model="checkup.imt"
-                                                       disabled class="form-control" autofocus>
+                                                       disabled class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -433,7 +432,7 @@
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="number" id="temperature" name="temperature" ng-model="checkup.temperature"
-                                                       class="form-control" autofocus>
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -442,8 +441,8 @@
                                         <td class="text-right">ЧСС</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input valid-number min-val="0" id="heart_rate" name="heart_rate" ng-model="checkup.heart_rate"
-                                                       class="form-control" autofocus>
+                                                <input id="heart_rate" type="number" name="heart_rate" ng-model="checkup.heart_rate"
+                                                       class="form-control" >
                                             </div>
                                             </div>
                                         </td>
@@ -565,7 +564,7 @@
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis" 
-                                                      ref-book="rbRisarVulvaPilosis" ></rb-select>
+                                                      ref-book="rbRisarVulvaPilosis" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -715,7 +714,7 @@
                                                             <td class="col-md-8"><div class="row">
                                                                 <div class="col-md-6">
                                                                 <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors"
-                                                                          ref-book="rbRisarVaginaGenVisit" ></rb-select>
+                                                                          ref-book="rbRisarVaginaGenVisit" autofocus></rb-select>
                                                                 </div>
                                                             </div></td>
                                                         </tr>
@@ -884,7 +883,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
+                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1033,7 +1032,7 @@
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
+                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1045,7 +1044,7 @@
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
                                             <rb-select ng-disabled="checkup.rectovaginal_cervix_uteri.code == 'missing'"
-                                                    name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
+                                                    name="rectovaginal_cervix_consistency" ng-model="checkup.rectovaginal_cervix_consistency" ref-book="rbRisarCervix_Consistency" autofocus></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -1055,7 +1054,7 @@
                                     <tr>
                                         <!-- example multiple -->
                                         <td class="text-right">Тело матки</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body"></rb-select></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body" ></rb-select></td>
                                     </tr>
 
                                 
@@ -1199,7 +1198,7 @@
                                         <!-- example few_checkboxes -->
                                         <td class="text-right">Перианальная область</td>
                                         <td><div >
-                                            <div name="rectal_perianal_zona" refbook-checkbox ng-model="checkup.rectal_perianal_zona" ref-book="rbRisarPerianalZona">
+                                            <div name="rectal_perianal_zona" refbook-checkbox ng-model="checkup.rectal_perianal_zona" ref-book="rbRisarPerianalZona" autofocus>
                                                 [[ item.name ]]
                                             </div>
                                             </div>
@@ -1367,7 +1366,7 @@
                                     </tr>
                                     <tr>
                                         <td colspan="2">
-                                            <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
+                                            <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types" autofocus/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1401,287 +1400,7 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="ticket_25" name="ticket_25" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                                <div class="box-header">
-                                    <h3 class="box-title">Шаг 10. Талон посещения</h3>
-                                </div>
-                                <div class="box-body">
-                                    <table class="table table-condensed">
-                                        <tbody>
-                                        <tr>
-                                            <th class="text-right col-md-4">Даты открытия и закрытия талона</th>
-                                            <td class="col-md-8">
-                                                <div class="row">
-                                                    <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date"></wm-date></div>
-                                                    <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date"></wm-date></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Оказываемая медицинская помощь</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarMedicalCare" ng-model="checkup.ticket_25.medical_care"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Место обращения (посещения)</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarVisitPlace" ng-model="checkup.ticket_25.visit_place"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Посещение</th>
-                                            <td class="col-md-8">
-                                                <rb-select ng-disabled="true" ref-book="rbRisarMedicalCare" ng-model="checkup.ticket_25.visit_type"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Обращение (цель)</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarTreatmentReason" ng-model="checkup.ticket_25.visit_reason"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Обращение (законченный случай лечения)</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarFinishedTreatment" ng-model="checkup.ticket_25.finished_treatment"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Обращение</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbRisarInitialTreatment" ng-model="checkup.ticket_25.initial_treatment"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Результат обращения</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbResult" ng-model="checkup.ticket_25.treatment_result"></rb-select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right col-md-4">Оплата за счет</th>
-                                            <td class="col-md-8">
-                                                <rb-select ref-book="rbFinance" ng-model="checkup.ticket_25.payment"></rb-select>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th class="text-right col-md-4">Медицинские услуги</th>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.services">
-                                                    <thead>
-                                                    <tr>
-                                                        <th class="col-md-5">Название</th>
-                                                        <th class="col-md-5">Врач</th>
-                                                        <th class="col-md-2">&nbsp;</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr ng-repeat="$row in $table.$model">
-                                                        <td class="col-md-5">
-                                                            <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-5">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
-                                                            <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2"><inplace-table-buttons class="pull-right" /></td>
-                                                    </tr>
-                                                    </tbody>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td colspan="3" class="text-right">
-                                                            <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
-                                                                <i class="fa fa-plus"></i> Добавить
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th class="text-right col-md-4">Операции</th>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.operations">
-                                                    <thead>
-                                                    <tr>
-                                                        <th class="col-md-4">Название</th>
-                                                        <th class="col-md-2">Анестезия</th>
-                                                        <th class="col-md-2">Аппаратура</th>
-                                                        <th class="col-md-2">Врач</th>
-                                                        <th class="col-md-2">&nbsp;</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr ng-repeat="$row in $table.$model">
-                                                        <td class="col-md-4">
-                                                            <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.anesthetization.name"></span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.anesthetization" ref-book="rbRisarOperationAnesthetization" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.equipment.name"></span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.equipment" ref-book="rbRisarOperationEquipment" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
-                                                            <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2"><inplace-table-buttons class="pull-right"></inplace-table-buttons></td>
-                                                    </tr>
-                                                    </tbody>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td colspan="5" class="text-right">
-                                                            <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
-                                                                <i class="fa fa-plus"></i> Добавить
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th class="text-right col-md-4">Манипуляции и исследования</th>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.manipulations">
-                                                    <thead>
-                                                    <tr>
-                                                        <th class="col-md-4">Название</th>
-                                                        <th class="col-md-2">Количество</th>
-                                                        <th class="col-md-4">Врач</th>
-                                                        <th class="col-md-2">&nbsp;</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr ng-repeat="$row in $table.$model">
-                                                        <td class="col-md-4">
-                                                            <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.amount"></span>
-                                                            <span ng-if="$table.$edited($index)"><input valid-number class="form-control" ng-model="$table.$tmp.amount" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-4">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
-                                                            <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2"><inplace-table-buttons class="pull-right" /></td>
-                                                    </tr>
-                                                    </tbody>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td colspan="4" class="text-right">
-                                                            <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
-                                                                <i class="fa fa-plus"></i> Добавить
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <th class="text-right col-md-4">Документы временной нетрудоспособности</th>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2">
-                                                <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.temp_disability">
-                                                    <thead>
-                                                    <tr>
-                                                        <th class="col-md-2">Тип</th>
-                                                        <th class="col-md-2">Повод</th>
-                                                        <th class="col-md-3">Кому</th>
-                                                        <th class="col-md-1">Дата выдачи</th>
-                                                        <th class="col-md-1">Даты продления</th>
-                                                        <th class="col-md-1">Дата закрытия</th>
-                                                        <th class="col-md-2">&nbsp;</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr ng-repeat="$row in $table.$model">
-                                                        <td class="col-md-2">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.type.name"></span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.type" ref-book="rbRisarSickLeaveType" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.reason.name"></span>
-                                                            <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.reason" ref-book="rbRisarSickLeaveReason" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-3">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.client"></span>
-                                                            <span ng-if="$table.$edited($index)"><input class="form-control" ng-model="$table.$tmp.client" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-1">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.beg_date | asDate"></span>
-                                                            <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.beg_date" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-1">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.prolong_dates | applyFilter:'asDate' | join:', '"></span>
-                                                            <span ng-if="$table.$edited($index)"><wm-date ng-disabled="true" ng-model="$table.$tmp.prolong_dates" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-1">
-                                                            <span ng-if="!$table.$edited($index)" ng-bind="$row.end_date | asDate"></span>
-                                                            <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.end_date" /></span>
-                                                        </td>
-
-                                                        <td class="col-md-2"><inplace-table-buttons class="pull-right"></inplace-table-buttons></td>
-                                                    </tr>
-                                                    </tbody>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td colspan="7" class="text-right">
-                                                            <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
-                                                                <i class="fa fa-plus"></i> Добавить
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </ng-form>
+                        {{ inspection_macros.ticket_25(10) }}
                     </div>
                 </div>
             </div>

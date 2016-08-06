@@ -6,11 +6,10 @@ from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic
-from hippocrates.blueprints.risar.lib.utils import bail_out
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.data import create_action
-from nemesis.lib.utils import get_new_event_ext_id
+from nemesis.lib.utils import get_new_event_ext_id, bail_out
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import Event, EventType

@@ -59,6 +59,11 @@ class EventMeasureController(BaseModelController):
             em.status = MeasureStatus.assigned[0]
         return em
 
+    def make_performed(self, em):
+        if em.status != MeasureStatus.performed[0]:
+            em.status = MeasureStatus.performed[0]
+        return em
+
     def get_new_appointment(self, em, action_data=None, action_props=None):
         event_id = em.event_id
         action_type_id = em.measure.appointmentAt_id
@@ -96,13 +101,14 @@ class EventMeasureController(BaseModelController):
             props = []
         em_result = self.get_new_em_result(em, json_data, props)
         em.result_action = em_result
-        self.make_assigned(em)
+        self.make_performed(em)
         return em_result
 
     def update_em_result(self, em, em_result, json_data):
         json_data = format_action_data(json_data)
         em_result = update_action(em_result, **json_data)
         em.result_action = em_result
+        self.make_performed(em)
         return em_result
 
     def get_measures_in_event(self, event, args, paginate=False):

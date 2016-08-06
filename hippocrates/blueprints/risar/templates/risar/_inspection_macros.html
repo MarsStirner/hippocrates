@@ -1,0 +1,23 @@
+{% macro ticket_25(step) %}
+<ng-form class="tab-pane" id="ticket_25" name="ticket_25" novalidate rc-submit rc-step>
+    <div class="box box-primary box-wizard">
+        <div class="box-header">
+            <h3 class="box-title">Шаг {{ step }}. Талон посещения</h3>
+        </div>
+        <div class="box-body">{% include 'risar/_ticket_25_edit.html' %}</div>
+    </div>
+</ng-form>
+{% endmacro %}
+
+{% macro diagnostics(step) %}
+<ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
+    <div class="box box-primary box-wizard">
+        <div class="box-header">
+            <h3 class="box-title">Шаг {{ step }}. Диагностические мероприятия</h3>
+        </div>
+        <div class="box-body">
+            {% include 'risar/inspection_measure_list.html' %}
+        </div>
+    </div>
+</ng-form>
+{% endmacro %}

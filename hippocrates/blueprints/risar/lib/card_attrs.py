@@ -3,51 +3,29 @@ import datetime
 import logging
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, \
     hepatitis_diags, tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, \
-    belongs_to_mkbgroup, notify_risk_rate_changes, bail_out
+    belongs_to_mkbgroup, notify_risk_rate_changes
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
-from hippocrates.blueprints.risar.risar_config import risar_epicrisis, first_inspection_code,\
-    rtc_2_atc, pc_inspection_code
-from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from nemesis.lib.apiutils import ApiException
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
+    first_inspection_flat_code, rtc_2_atc, pc_inspection_flat_code
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
-from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
+from nemesis.models.actions import Action, ActionType
+from nemesis.models.enums import PregnancyPathology, PerinatalRiskRate, CardFillRate
 from nemesis.models.event import EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.refbooks import rbFinance
-from nemesis.models.enums import PregnancyPathology, PerinatalRiskRate, CardFillRate
 from nemesis.models.risar import rbPreEclampsiaRate
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
-
 
 logger = logging.getLogger('simple')
 
 
 __author__ = 'viruzzz-kun'
-
-
-def create_property(action, apt_code):
-    prop_type = action.actionType.property_types.filter(
-        ActionPropertyType.deleted == 0, ActionPropertyType.code == apt_code
-    ).first() or bail_out(
-        ApiException(
-            500,
-            u'Action.id = %s, ActionType.id = %s (%s), ActionPropertyType.code = %s. '
-            u'Свойство действия не обнаружено у этого типа действия' % (
-                action.id, action.actionType_id, action.actionType.name, apt_code)))
-    prop = ActionProperty()
-    prop.type = prop_type
-    prop.action = action
-    prop.isAssigned = False
-    if prop.type.defaultValue:
-        prop.set_value(prop.type.defaultValue, True)
-    else:
-        prop.value = None
-    action.properties.append(prop)
 
 
 def default_AT_Heuristic(event_type):
@@ -407,7 +385,7 @@ def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True
     first_inspection = None
     last_inspection = card.latest_inspection
     if last_inspection is not None and \
-            last_inspection.action.actionType.flatCode in (first_inspection_code, pc_inspection_code):
+            last_inspection.action.actionType.flatCode in (first_inspection_flat_code, pc_inspection_flat_code):
         first_inspection = last_inspection
 
     ri_fr = CardFillRate.not_required[0]

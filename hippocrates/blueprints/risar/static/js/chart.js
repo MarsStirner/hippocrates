@@ -99,7 +99,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
             var mother_anamnesis = $scope.chart.anamnesis.mother;
             $scope.chart.bad_habits_mother = [{value:mother_anamnesis ? mother_anamnesis.alcohol: false, text: 'алкоголь'},
                 {value:mother_anamnesis ? mother_anamnesis.smoking: false, text: 'курение'},
-                {value:mother_anamnesis ? mother_anamnesis.toxic: false, text: 'токсические вечества'},
+                {value:mother_anamnesis ? mother_anamnesis.toxic: false, text: 'токсичные вещества'},
                 {value:mother_anamnesis ? mother_anamnesis.drugs: false,text: 'наркотики'}];
             //$scope.chart.bad_habits_father = [{value:$scope.chart.anamnesis.father.alcohol, text: 'алкоголь'},
             //    {value:$scope.chart.anamnesis.father.smoking, text: 'курение'},
@@ -177,7 +177,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
             $scope.chart.bad_habits = [
                 {value:general_anamnesis ? general_anamnesis.alcohol: false, text: 'алкоголь'},
                 {value:general_anamnesis ? general_anamnesis.smoking: false, text: 'курение'},
-                {value:general_anamnesis ? general_anamnesis.toxic: false, text: 'токсические вечества'},
+                {value:general_anamnesis ? general_anamnesis.toxic: false, text: 'токсичные вещества'},
                 {value:general_anamnesis ? general_anamnesis.drugs: false,text: 'наркотики'}
             ];
             if (ticket_id || client_id) {

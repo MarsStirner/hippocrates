@@ -4,15 +4,13 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from hippocrates.blueprints.risar.lib.represent.common import represent_measures
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup, represent_gyn_checkup_wm
-from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, bail_out, \
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     set_action_apt_values
-from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_code
+from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime, safe_traverse, safe_traverse_attrs
+from nemesis.lib.utils import safe_datetime, bail_out
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 
@@ -34,7 +32,7 @@ def api_0_gyn_checkup(event_id):
 
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)
-    action = get_action_by_id(checkup_id, event, risar_gyn_checkup_code, True)
+    action = get_action_by_id(checkup_id, event, risar_gyn_checkup_flat_code, True)
 
     if not checkup_id:
         close_open_checkups(event_id)

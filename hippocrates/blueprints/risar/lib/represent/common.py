@@ -9,7 +9,7 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.utils import action_as_dict
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes, \
-    risar_gyn_checkup_codes
+    risar_gyn_checkup_flat_codes
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_int, safe_bool
@@ -199,7 +199,7 @@ def represent_gynecological_ticket(ticket, event):
         'beg_time': ticket.begDateTime,
         'event_id': event.id,
         'note': ticket.client_ticket.note if ticket.client else None,
-        'checkup_n': _get_ckeckup_count(event, risar_gyn_checkup_codes),
+        'checkup_n': _get_ckeckup_count(event, risar_gyn_checkup_flat_codes),
     }
 
 
@@ -386,4 +386,15 @@ def represent_checkup_shortly(action):
 def represent_measures(action):
     return EventMeasureRepr().represent_listed_event_measures_in_action(
         EventMeasureController().get_measures_in_action(action)
+    )
+
+
+def represent_ticket_25(action):
+    if not action:
+        print(u'no ticket25')
+        return {}
+    return dict(
+        action_as_dict(action),
+        beg_date=action.begDate,
+        end_date=action.endDate,
     )

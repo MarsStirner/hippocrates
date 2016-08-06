@@ -8,15 +8,15 @@ from sqlalchemy.orm import lazyload, joinedload
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
+from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import cache, db
-from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code,\
-    inspection_preg_week_code, puerpera_inspection_code, request_type_pregnancy, pc_inspection_code,\
-    risar_gyn_checkup_codes
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
+    inspection_preg_week_code, puerpera_inspection_flat_code, request_type_pregnancy, pc_inspection_flat_code,\
+    risar_gyn_checkup_flat_codes
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
@@ -257,7 +257,7 @@ def get_last_checkup_date(event_id):
     query = db.session.query(Action.begDate).join(ActionType).filter(
         Action.event_id == event_id,
         Action.deleted == 0,
-        ActionType.flatCode.in_(checkup_flat_codes + risar_gyn_checkup_codes)
+        ActionType.flatCode.in_(checkup_flat_codes + risar_gyn_checkup_flat_codes)
     ).order_by(Action.begDate.desc()).first()
     return query[0] if query else None
 
@@ -283,7 +283,7 @@ def close_open_checkups_puerpera(event_id):
         Action.endDate.is_(None),
         Action.deleted == 0,
         ActionType.id == Action.actionType_id,
-        ActionType.flatCode == puerpera_inspection_code,
+        ActionType.flatCode == puerpera_inspection_flat_code,
     ).update({
         Action.endDate: now,
         Action.status: ActionStatus.finished[0],
@@ -306,7 +306,7 @@ def risk_mkbs():
 
 def is_event_late_first_visit(event):
     result = False
-    fi = get_action(event, (first_inspection_code, pc_inspection_code))
+    fi = get_action(event, (first_inspection_flat_code, pc_inspection_flat_code))
     if fi:
         preg_week = fi[inspection_preg_week_code].value
         if preg_week is not None:
@@ -368,11 +368,6 @@ def notify_risk_rate_changes(card, new_prr):
             cur_prr is None or cur_prr.order < new_prr.order):
         event = RiskRateRiseEvent(card, new_prr)
         NotificationQueue.add_events(event)
-
-
-def bail_out(exc):
-    # TODO: DELETE ME, когда я буду в nemesis
-    raise exc
 
 
 def represent_prop_value(prop):

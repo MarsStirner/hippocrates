@@ -3,7 +3,8 @@ from hippocrates.blueprints.risar.lib.card import GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import check_disease
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.represent.common import represent_event, represent_checkup, \
-    represent_checkup_shortly, represent_measures, represent_pregnancy, represent_transfusion, represent_intolerance
+    represent_checkup_shortly, represent_measures, represent_pregnancy, represent_transfusion, represent_intolerance, \
+    represent_ticket_25
 from hippocrates.blueprints.risar.lib.utils import action_as_dict
 from hippocrates.blueprints.risar.risar_config import gyn_checkup_simple_codes
 from nemesis.lib.utils import safe_traverse_attrs
@@ -37,17 +38,6 @@ def represent_gyn_checkup_wm(action):
     result = represent_gyn_checkup(action)
     result['measures'] = represent_measures(action)
     return result
-
-
-def represent_ticket_25(action):
-    if not action:
-        print(u'no ticket25')
-        return {}
-    return dict(
-        action_as_dict(action),
-        beg_date=action.begDate,
-        end_date=action.endDate,
-    )
 
 
 def represent_gyn_checkup(action):
