@@ -59,11 +59,8 @@ def api_0_pregnancy_checkup(event_id):
 
     with db.session.no_autoflush:
         set_action_apt_values(action, data, {'ticket_25': set_ticket})
-
         create_or_update_diagnoses(action, diagnoses)
-
-    create_or_update_diagnoses(action, diagnoses)
-    create_or_update_fetuses(action, fetuses)
+        create_or_update_fetuses(action, fetuses)
 
     db.session.commit()
     card.reevaluate_card_attrs()
@@ -83,6 +80,7 @@ def api_0_pregnancy_checkup(event_id):
 @api_method
 def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
+    action.update_action_integrity()
     if not action:
         raise ApiException(404, 'Action with id {0} not found'.format(checkup_id))
     return represent_pregnancy_checkup_wm(action)
@@ -112,6 +110,8 @@ def api_0_pregnancy_checkup_new(event_id):
 def api_0_pregnancy_checkup_list(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
+    for action in card.checkups:
+        action.update_action_integrity()
     return {
         'checkups': map(represent_pregnancy_checkup_wm, card.checkups)
     }

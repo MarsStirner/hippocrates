@@ -51,10 +51,7 @@ def api_0_pregnancy_checkup_puerpera(event_id):
 
     with db.session.no_autoflush:
         set_action_apt_values(action, data, {'ticket_25': set_ticket})
-
         create_or_update_diagnoses(action, diagnoses)
-
-    create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
     from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
@@ -69,6 +66,7 @@ def api_0_pregnancy_checkup_puerpera(event_id):
 @api_method
 def api_0_pregnancy_checkup_puerpera_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
+    action.update_action_integrity()
     if not action:
         raise ApiException(404, 'Action with id {0} not found'.format(checkup_id))
     return represent_pregnancy_checkup_puerpera(action)
@@ -94,6 +92,8 @@ def api_0_pregnancy_checkup_puerpera_new(event_id):
 def api_0_pregnancy_checkup_puerpera_list(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
+    for action in card.checkups_puerpera:
+        action.update_action_integrity()
     return {
         'checkups': map(represent_pregnancy_checkup_puerpera, card.checkups_puerpera)
     }
