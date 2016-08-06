@@ -20,6 +20,7 @@
             {#  <a ng-href="{{ url_for('.html_concilium_list') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_concilium_list', '.html_concilium']) }}>Консилиумы</a> #}
             <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
             <a  ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
+            <a class="btn btn-default" ng-href="{{ url_for('.html_pregnancy_chart') }}?client_id=[[ chart.client.id ]]">Взять на диспансерный учёт</a>
             {# <div class="btn-group">
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Взять на диспансерный учёт <span class="fa fa-caret-down"></span></button>
                 <ul role="menu" class="dropdown-menu">
