@@ -279,6 +279,11 @@ WebMis20
     this.fetus = {
         get_fetus_list: function (event_id) {
             return wrapper('GET', Config.url.api_fetus_list + event_id);
+        },
+        calc_fisher_ktg: function (fetus_data) {
+            return wrapper('POST', Config.url.api_fetus_calc_fisher_ktg, {}, fetus_data, {
+                silent: true
+            });
         }
     };
     this.gravidograma = {
@@ -566,6 +571,11 @@ WebMis20
             return wrapper('GET', Config.url.api_concilium_get.format(event_id) + concilium_id);
         }
     };
+    this.radzinsky_risks = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_radzinsky_risks.format(event_id));
+        }
+    };
     this.utils = {
         get_person_contacts: function(person_id){
             return wrapper('GET', Config.url.api_person_contacts_get.format(person_id))
@@ -795,6 +805,32 @@ WebMis20
             };
             scope.open = function () {
                 $window.open('{0}?event_id={1}'.format(Config.url.card_fill_history, scope.eventId), '_self');
+            };
+        }
+    }
+}])
+.directive('radzRiskRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span style="font-size: 60%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    >Р</span>\
+',
+        scope: {
+            radzRiskRateIcon: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.radzRiskRateIcon) return;
+                var r = scope.radzRiskRateIcon;
+                if (r.code === 'low') return 'label-success';
+                else if (r.code === 'medium') return 'label-warning';
+                else if (r.code === 'high') return 'label-danger';
+                return 'label-default';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.radzRiskRateIcon) return;
+                return scope.radzRiskRateIcon.name;
             };
         }
     }

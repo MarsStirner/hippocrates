@@ -9,6 +9,7 @@ from hippocrates.blueprints.risar.lib.card_attrs import check_disease
 from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk_rate
 from hippocrates.blueprints.risar.lib.represent.common import represent_event, represent_action_diagnoses, represent_intolerance, represent_fetus, \
     represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures, \
     represent_ticket_25
@@ -54,6 +55,7 @@ def represent_pregnancy_event(event):
             for pathg in safe_action_property(card_attrs_action, 'pregnancy_pathology_list')
         ],
         'card_fill_rates': represent_event_cfrs(card_attrs_action),
+        'radz_risk_rate': get_radz_risk_rate(card.radz_risk),
         'pregnancy_week': get_pregnancy_week(event),
         'has_diseases': check_disease(all_diagnostics)
     })

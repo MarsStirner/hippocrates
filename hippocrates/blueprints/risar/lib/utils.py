@@ -5,16 +5,19 @@ import datetime
 import six
 from sqlalchemy.orm import lazyload, joinedload
 
-from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
-from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code, inspection_preg_week_code, \
-    puerpera_inspection_flat_code
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
+from nemesis.models.event import Event, EventType
+from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import cache, db
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
+    inspection_preg_week_code, puerpera_inspection_flat_code, request_type_pregnancy, pc_inspection_flat_code,\
+    risar_gyn_checkup_flat_codes
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
@@ -138,7 +141,7 @@ def get_action_list(event, flat_code, all=False):
     query = Action.query.join(ActionType).filter(
         Action.event == event, Action.deleted == 0
     ).options(
-        joinedload(Action.actionType)
+        joinedload(Action.actionType, innerjoin=True)
     )
     if isinstance(flat_code, (list, tuple)):
         query = query.filter(ActionType.flatCode.in_(flat_code))
@@ -169,7 +172,9 @@ def get_action_by_id(action_id, event=None, flat_code=None, create=False):
     """
     action = None
     if action_id:
-        query = Action.query.filter(Action.id == action_id, Action.deleted == 0)
+        query = Action.query.filter(Action.id == action_id, Action.deleted == 0).options(
+            joinedload(Action.actionType, innerjoin=True)
+        )
         action = query.first()
     elif create:
         action = create_action(get_action_type_id(flat_code), event)
@@ -252,7 +257,7 @@ def get_last_checkup_date(event_id):
     query = db.session.query(Action.begDate).join(ActionType).filter(
         Action.event_id == event_id,
         Action.deleted == 0,
-        ActionType.flatCode.in_(checkup_flat_codes)
+        ActionType.flatCode.in_(checkup_flat_codes + risar_gyn_checkup_flat_codes)
     ).order_by(Action.begDate.desc()).first()
     return query[0] if query else None
 
@@ -301,12 +306,21 @@ def risk_mkbs():
 
 def is_event_late_first_visit(event):
     result = False
-    fi = get_action(event, first_inspection_flat_code)
+    fi = get_action(event, (first_inspection_flat_code, pc_inspection_flat_code))
     if fi:
-        preg_week = fi[inspection_preg_week_code]
+        preg_week = fi[inspection_preg_week_code].value
         if preg_week is not None:
             result = preg_week >= 10
     return result
+
+
+def get_patient_risar_event(client_id):
+    return Event.query.join(EventType, rbRequestType).filter(
+        Event.client_id == client_id,
+        Event.deleted == 0,
+        rbRequestType.code == request_type_pregnancy,
+        Event.execDate.is_(None)
+    ).order_by(Event.setDate.desc()).first()
 
 
 def format_action_data(json_data):

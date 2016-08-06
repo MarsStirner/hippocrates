@@ -5,6 +5,8 @@ from flask import request
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup, represent_gyn_checkup_wm
+from hippocrates.blueprints.risar.lib.represent.common import represent_measures
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     set_action_apt_values
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_flat_code
@@ -60,13 +62,13 @@ def api_0_gyn_checkup(event_id):
     card.reevaluate_card_attrs()
     db.session.commit()
 
-    # em_ctrl = EventMeasureController()
-    # em_ctrl.regenerate(action)
+    em_ctrl = EventMeasureController()
+    em_ctrl.regenerate_gyn(action)
 
     result = represent_gyn_checkup(action)
-    # result['measures'] = represent_measures(action)
-    # if em_ctrl.exception:
-    #     result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
+    result['measures'] = represent_measures(action)
+    if em_ctrl.exception:
+        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
     return result
 
 

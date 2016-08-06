@@ -186,6 +186,9 @@ def api_0_event_measure_result_save(event_measure_id, em_result_id=None):
         em_ctrl.store(em, em_result)
     else:
         raise ApiException(404, u'`appointment_id` required')
+    card = PregnancyCard.get_for_event(em.event)
+    card.reevaluate_card_attrs()
+    db.session.commit()
     return EmResultRepr().represent_em_result(em_result)
 
 
@@ -200,8 +203,6 @@ def api_0_measure_list(event_id):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != request_type_pregnancy:
-        raise ApiException(400, u'Обращение не является случаем беременности')
 
     paginate = safe_bool(data.get('paginate', True))
     em_ctrl = EventMeasureController()

@@ -4,7 +4,7 @@ import datetime
 import logging
 import os
 
-from flask import abort, request
+from flask import abort, request, current_app
 
 from nemesis.app import app
 from nemesis.systemwide import db
@@ -16,6 +16,7 @@ from nemesis.lib.jsonify import ClientVisualizer
 from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy, ClientContact
 from nemesis.models.exists import FileMeta, FileGroupDocument, VMPCoupon, MKB, QuotaType
 from nemesis.lib.utils import safe_date
+from nemesis.signals import patient_saved
 from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
@@ -218,6 +219,7 @@ def api_patient_save():
             db.session.add(cont)
 
     db.session.commit()
+    patient_saved.send(current_app._get_current_object(), client_id=client.id)
 
     return int(client)
 

@@ -84,6 +84,7 @@ WebMis20
         api_checkup_new: '{{ url_for('.api_0_pregnancy_checkup_new') }}{0}',
         api_checkup_save: '{{ url_for('.api_0_pregnancy_checkup') }}{0}',
         api_fetus_list: '{{ url_for('.api_0_fetus_list') }}',
+        api_fetus_calc_fisher_ktg: '{{ url_for('.api_0_fetus_calc_fisher_ktg') }}',
         api_checkup_puerpera_list: '{{ url_for('.api_0_pregnancy_checkup_puerpera_list') }}',
         api_checkup_puerpera_get: '{{ url_for('.api_0_pregnancy_checkup_puerpera_get') }}{0}',
         api_checkup_puerpera_new: '{{ url_for('.api_0_pregnancy_checkup_puerpera_new') }}{0}',
@@ -110,8 +111,8 @@ WebMis20
         api_chart_risk_groups_list: '{{ url_for('.api_0_chart_risks', event_id=-90) | replace("-90", "{0}") }}',
         api_concilium_list_get: '{{ url_for('.api_0_concilium_list_get', event_id=-90) | replace("-90", "{0}") }}',
         api_concilium_get: '{{ url_for('.api_0_concilium_get', event_id=-90) | replace("-90", "{0}") }}',
+        api_chart_radzinsky_risks: '{{ url_for('.api_0_chart_radzinsky_risks', event_id=-90) | replace("-90", "{0}") }}',
         api_person_contacts_get: '{{ url_for('schedule.api_person_contacts_get') }}{0}',
-
     }
 })
 ;

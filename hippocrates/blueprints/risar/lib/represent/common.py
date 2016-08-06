@@ -276,6 +276,8 @@ def represent_fetus(fetus):
             'deceleration': fetus.deceleration,
             'heart_rate': fetus.heart_rate,
             'ktg_input': fetus.ktg_input,
+            'fisher_ktg_points': fetus.fisher_ktg_points,
+            'fisher_ktg_rate': fetus.fisher_ktg_rate
         },
     }
 
