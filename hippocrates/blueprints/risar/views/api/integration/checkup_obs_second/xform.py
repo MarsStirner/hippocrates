@@ -11,7 +11,7 @@ from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregn
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     notify_checkup_changes
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
-from hippocrates.blueprints.risar.risar_config import second_inspection_code
+from hippocrates.blueprints.risar.risar_config import second_inspection_flat_code
 from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.schemas import \
     CheckupObsSecondSchema
 from hippocrates.blueprints.risar.views.api.integration.xform import CheckupsXForm
@@ -106,7 +106,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
-            ActionType.flatCode == second_inspection_code,
+            ActionType.flatCode == second_inspection_flat_code,
         )
         if self.target_obj_id:
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
@@ -187,7 +187,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         event_id = self.parent_obj_id
         event = self.parent_obj
         checkup_id = self.target_obj_id
-        flat_code = second_inspection_code
+        flat_code = second_inspection_flat_code
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         get_diagnoses_func = data.pop('get_diagnoses_func')

@@ -5,7 +5,7 @@ from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.debug import get_debug_data
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
-    first_inspection_code, second_inspection_code, risar_gyn_checkup_code, pc_inspection_code, puerpera_inspection_code
+    first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, puerpera_inspection_flat_code
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
@@ -208,15 +208,15 @@ def html_inspection_read():
         abort(404)
     flat_code = checkup[0]
 
-    if flat_code == first_inspection_code:
+    if flat_code == first_inspection_flat_code:
         return render_template('risar/inspection_first_read.html')
-    elif flat_code == second_inspection_code:
+    elif flat_code == second_inspection_flat_code:
         return render_template('risar/inspection_second_read.html')
-    elif flat_code == risar_gyn_checkup_code:
+    elif flat_code == risar_gyn_checkup_flat_code:
         return render_template('risar/unpregnant/inspection_read.html')
-    elif flat_code == pc_inspection_code:
+    elif flat_code == pc_inspection_flat_code:
         return render_template('risar/inspection_pc_read.html')
-    elif flat_code == puerpera_inspection_code:
+    elif flat_code == puerpera_inspection_flat_code:
         return render_template('risar/inspection_puerpera_read.html')
 
 
@@ -243,16 +243,16 @@ def html_inspection_edit():
         flat_code = checkup[0]
     else:
         first_inspection_exists = Action.query.join(ActionType).filter(
-            Action.event_id == event_id, 
+            Action.event_id == event_id,
             Action.deleted == 0,
-            ActionType.flatCode == first_inspection_code,
+            ActionType.flatCode == first_inspection_flat_code,
         ).count() > 0
-        flat_code = second_inspection_code if first_inspection_exists else first_inspection_code
+        flat_code = second_inspection_flat_code if first_inspection_exists else first_inspection_flat_code
     
-    if flat_code == first_inspection_code:
+    if flat_code == first_inspection_flat_code:
         return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
     
-    elif flat_code == second_inspection_code:
+    elif flat_code == second_inspection_flat_code:
         return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
     
 

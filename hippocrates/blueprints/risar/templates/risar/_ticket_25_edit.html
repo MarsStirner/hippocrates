@@ -1,0 +1,278 @@
+            <table class="table table-condensed">
+                <tbody>
+                <tr>
+                    <th class="text-right col-md-4">Даты открытия и закрытия талона</th>
+                    <td class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date" autofocus></wm-date></div>
+                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date"></wm-date></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Оказываемая медицинская помощь</th>
+                    <td class="col-md-8">
+                        <rb-select ref-book="rbRisarMedicalCare" ng-model="checkup.ticket_25.medical_care"></rb-select>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Место обращения (посещения)</th>
+                    <td class="col-md-8">
+                        <rb-select ref-book="rbRisarVisitPlace" ng-model="checkup.ticket_25.visit_place"></rb-select>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Обращение (цель)</th>
+                    <td class="col-md-8">
+                        <div refbook-radio ref-book="rbRisarTreatmentReason" ng-model="checkup.ticket_25.visit_reason">[[ item.name ]]</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Посещение</th>
+                    <td class="col-md-8">
+                        <ui-select ng-model="checkup.ticket_25.visit_type">
+                            <ui-select-choices repeat="item in checkup.ticket_25.visit_reason.types | filter: $select.search track by item._id">
+                                <div style="text-align: justify" ng-bind-html="item.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                            <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                        </ui-select>
+                        {#                                                <pre>[[ checkup.ticket_25.visit_reason | json ]]</pre>#}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Случай закончен</th>
+                    <td class="col-md-8">
+                        <div refbook-radio ref-book="rbRisarFinishedTreatment" ng-model="checkup.ticket_25.finished_treatment">[[ item.name ]]</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Обращение</th>
+                    <td class="col-md-8">
+                        <div refbook-radio ref-book="rbRisarInitialTreatment" ng-model="checkup.ticket_25.initial_treatment">[[ item.name ]]</div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Результат обращения</th>
+                    <td class="col-md-8">
+                        <rb-select ref-book="rbResult" ng-model="checkup.ticket_25.treatment_result"></rb-select>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right col-md-4">Оплата за счет</th>
+                    <td class="col-md-8">
+                        <rb-select ref-book="rbFinance" ng-model="checkup.ticket_25.payment"></rb-select>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="text-right col-md-4">Медицинские услуги</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.services">
+                            <thead>
+                            <tr>
+                                <th class="col-md-5">Название</th>
+                                <th class="col-md-5">Врач</th>
+                                <th class="col-md-2">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="$row in $table.$model">
+                                <td class="col-md-5">
+                                    <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
+                                </td>
+
+                                <td class="col-md-5">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
+                                    <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
+                                </td>
+
+                                <td class="col-md-2"><inplace-table-buttons class="pull-right" /></td>
+                            </tr>
+                            </tbody>
+                            <tbody>
+                            <tr>
+                                <td colspan="3" class="text-right">
+                                    <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
+                                        <i class="fa fa-plus"></i> Добавить
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="text-right col-md-4">Операции</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.operations">
+                            <thead>
+                            <tr>
+                                <th class="col-md-4">Название</th>
+                                <th class="col-md-2">Анестезия</th>
+                                <th class="col-md-2">Аппаратура</th>
+                                <th class="col-md-2">Врач</th>
+                                <th class="col-md-2">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="$row in $table.$model">
+                                <td class="col-md-4">
+                                    <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
+                                </td>
+
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.anesthetization.name"></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.anesthetization" ref-book="rbRisarOperationAnesthetization" /></span>
+                                </td>
+
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.equipment.name"></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.equipment" ref-book="rbRisarOperationEquipment" /></span>
+                                </td>
+
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
+                                    <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
+                                </td>
+
+                                <td class="col-md-2"><inplace-table-buttons class="pull-right"></inplace-table-buttons></td>
+                            </tr>
+                            </tbody>
+                            <tbody>
+                            <tr>
+                                <td colspan="5" class="text-right">
+                                    <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
+                                        <i class="fa fa-plus"></i> Добавить
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="text-right col-md-4">Манипуляции и исследования</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.manipulations">
+                            <thead>
+                            <tr>
+                                <th class="col-md-4">Название</th>
+                                <th class="col-md-2">Количество</th>
+                                <th class="col-md-4">Врач</th>
+                                <th class="col-md-2">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="$row in $table.$model">
+                                <td class="col-md-4">
+                                    <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
+                                </td>
+
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.amount"></span>
+                                    <span ng-if="$table.$edited($index)"><input valid-number class="form-control" ng-model="$table.$tmp.amount" /></span>
+                                </td>
+
+                                <td class="col-md-4">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
+                                    <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
+                                </td>
+
+                                <td class="col-md-2"><inplace-table-buttons class="pull-right" /></td>
+                            </tr>
+                            </tbody>
+                            <tbody>
+                            <tr>
+                                <td colspan="4" class="text-right">
+                                    <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
+                                        <i class="fa fa-plus"></i> Добавить
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="text-right col-md-4">Документы временной нетрудоспособности</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.temp_disability">
+                            <thead>
+                            <tr>
+                                <th class="col-md-2">Тип</th>
+                                <th class="col-md-2">Повод</th>
+                                <th class="col-md-3">Кому</th>
+                                <th class="col-md-1">Дата выдачи</th>
+                                <th class="col-md-1">Даты продления</th>
+                                <th class="col-md-1">Дата закрытия</th>
+                                <th class="col-md-2">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="$row in $table.$model">
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.type.name"></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.type" ref-book="rbRisarSickLeaveType" /></span>
+                                </td>
+
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.reason.name"></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.reason" ref-book="rbRisarSickLeaveReason" /></span>
+                                </td>
+
+                                <td class="col-md-3">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.client"></span>
+                                    <span ng-if="$table.$edited($index)"><input ng-disabled="$table.$tmp.reason.code != '2'" class="form-control" ng-model="$table.$tmp.client" /></span>
+                                </td>
+
+                                <td class="col-md-1">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.beg_date | asDate"></span>
+                                    <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.beg_date" /></span>
+                                </td>
+
+                                <td class="col-md-1">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.prolong_dates | applyFilter:'asDate' | join:', '"></span>
+                                    <span ng-if="$table.$edited($index)"><wm-date ng-disabled="true" ng-model="$table.$tmp.prolong_dates" /></span>
+                                </td>
+
+                                <td class="col-md-1">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.end_date | asDate"></span>
+                                    <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.end_date" /></span>
+                                </td>
+
+                                <td class="col-md-2"><inplace-table-buttons class="pull-right"></inplace-table-buttons></td>
+                            </tr>
+                            </tbody>
+                            <tbody>
+                            <tr>
+                                <td colspan="7" class="text-right">
+                                    <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add()">
+                                        <i class="fa fa-plus"></i> Добавить
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>

@@ -11,10 +11,10 @@ from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
-    puerpera_inspection_code, risar_gyn_general_anamnesis_code, risar_gyn_checkup_codes, request_type_pregnancy, \
+    puerpera_inspection_flat_code, risar_gyn_general_anamnesis_flat_code, risar_gyn_checkup_flat_codes, request_type_pregnancy, \
     request_type_gynecological
 from nemesis.lib.data import create_action
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, create_property
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
 from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.event import Event
@@ -239,7 +239,7 @@ class PregnancyCard(AbstractCard):
         :type action: nemesis.models.actions.Action
         :return: None
         """
-        from hippocrates.blueprints.risar.lib.card_attrs import create_property
+        from nemesis.models.actions import create_property
 
         property_type_codes = [
             'pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed',
@@ -260,7 +260,7 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def checkups_puerpera(self):
-        return get_action_list(self.event, puerpera_inspection_code).all()
+        return get_action_list(self.event, puerpera_inspection_flat_code).all()
 
     def reevaluate_card_attrs(self):
         """
@@ -287,11 +287,11 @@ class GynecologicCard(AbstractCard):
 
     @lazy
     def anamnesis(self):
-        return get_action(self.event, risar_gyn_general_anamnesis_code, True)
+        return get_action(self.event, risar_gyn_general_anamnesis_flat_code, True)
 
     @lazy
     def checkups(self):
-        return get_action_list(self.event, risar_gyn_checkup_codes).all()
+        return get_action_list(self.event, risar_gyn_checkup_flat_codes).all()
 
 
 classes = {

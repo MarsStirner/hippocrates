@@ -9,7 +9,7 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
 from hippocrates.blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
-    first_inspection_code, second_inspection_code)
+                                                       first_inspection_flat_code, second_inspection_flat_code)
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.lib.utils import safe_date, initialize_name
@@ -41,7 +41,7 @@ def make_card_fill_timeline(card):
     inspections = get_action_list(event, checkup_flat_codes).order_by(Action.begDate).all()
     first_inspection = last_inspection = None
     if inspections:
-        if inspections[0].actionType.flatCode == first_inspection_code:
+        if inspections[0].actionType.flatCode == first_inspection_flat_code:
             first_inspection = inspections[0]
         last_inspection = inspections[-1]
     epicrisis = get_action(event, risar_epicrisis)
@@ -51,7 +51,7 @@ def make_card_fill_timeline(card):
 
     inspections_iter = iter(
         (inspection for inspection in inspections
-         if inspection.actionType.flatCode == second_inspection_code)
+         if inspection.actionType.flatCode == second_inspection_flat_code)
     )
 
     def get_next_repeated_inspection():
