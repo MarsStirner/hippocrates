@@ -20,8 +20,10 @@ def printing_checkup_ticket_25():
     file_format = data.get('extension', 'html')
     jasper_report = JasperReport(
         'form25_1u',
-        '/reports/Hippocrates/Risar/form25_1u',
-        params=data['action_id']
+        '/reports/Hippocrates/Analytics/form25_1u',
+        params={
+            'action_id': str(data['action_id'])
+        }
     )
     jasper_report.generate(file_format)
     return jasper_report.get_response_data()
