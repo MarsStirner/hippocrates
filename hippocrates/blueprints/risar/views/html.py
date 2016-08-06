@@ -157,7 +157,7 @@ def html_gynecological_anamnesis():
 
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
-    return render_template('risar/anamnesis_mother_edit.html')\
+    return render_template('risar/anamnesis_mother_edit.html')
 
 
 @module.route('/gynecological-anamnesis/edit.html')
@@ -333,7 +333,7 @@ def html_event_measure():
 
 @module.route('/gynecological-measure_list.html')
 def html_gynecological_event_measure():
-    return render_template('risar/event_measure_list.html', unpregnant=True)
+    return render_template('risar/unpregnant/event_measure_list.html')
 
 
 @module.route('/stats/org-birth-care/')

@@ -4,15 +4,17 @@ import datetime
 import logging
 
 from collections import defaultdict
+from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
 from nemesis.lib.data import get_client_diagnostics
 from nemesis.lib.utils import safe_date, safe_int, safe_datetime
 from nemesis.systemwide import db
 from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
-    ExpertSchemeMeasureAssoc)
+    ExpertSchemeMeasureAssoc, ExpertProtocol_ActionTypeAssoc)
 from nemesis.models.exists import MKB
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
+from nemesis.lib.agesex import recordAcceptableEx
 from hippocrates.blueprints.risar.lib.expert.utils import (em_final_status_list, em_garbage_status_list,
     is_em_cancellable, is_em_touched, is_em_in_final_status)
 from hippocrates.blueprints.risar.lib.utils import is_event_late_first_visit
@@ -29,11 +31,41 @@ class EventMeasureGenerator(object):
     указанных в осмотрах.
     """
 
-    def __init__(self, action):
+    @classmethod
+    def get_for_pregnancy(cls, action):
+        context = PregnancyGeneratorContext(action)
+        return cls(action, context)
+
+    @classmethod
+    def get_for_gynecol(cls, action):
+        context = GynecolGeneratorContext(action)
+        return cls(action, context)
+
+    @classmethod
+    def get(cls, action):
+        return cls(action, None)
+
+    def __init__(self, action, context):
         self.source_action = action
+        self.protocol_ids = None
         self.existing_em_list = None
-        self.context = None
+        self.context = context
         self.aux_changed_em_list = []
+
+    def get_available_protocols(self):
+        ep_list = db.session.query(ExpertProtocol).outerjoin(
+            ExpertProtocol_ActionTypeAssoc
+        ).filter(
+            ExpertProtocol.deleted == 0,
+            or_(ExpertProtocol_ActionTypeAssoc.actionType_id == self.source_action.actionType_id,
+                ExpertProtocol_ActionTypeAssoc.id.is_(None))
+        )
+        client = self.source_action.event.client
+        client_age = client.age_tuple(datetime.date.today())
+        self.protocol_ids = []
+        for ep in ep_list:
+            if recordAcceptableEx(client.sexCode, client_age, ep.sex, ep.age):
+                self.protocol_ids.append(ep.id)
 
     def clear_existing_measures(self):
         db.session.query(EventMeasure).filter(
@@ -124,7 +156,6 @@ class EventMeasureGenerator(object):
         # ---
 
         # prepare
-        self.context = MeasureGeneratorRisarContext(self.source_action)
         self._load_existing_measures()
 
         # go
@@ -133,6 +164,9 @@ class EventMeasureGenerator(object):
             self.source_action.id
         )
         logger.debug(msg)
+
+        self.get_available_protocols()
+        logger.debug(u'> EM generation: using protocols {0}'.format(self.protocol_ids))
 
         current_action_sm_list = self._select_scheme_measures_from_current_state()
         msg = u'> EM generation [Get new SMs]: got SM list from current action id = {0}. Count = {1}'.format(
@@ -270,7 +304,7 @@ class EventMeasureGenerator(object):
     def _select_scheme_measures_from_current_state(self):
         mkb_list = self.context.actual_existing_mkb.union(self.context.actual_action_mkb)
         return [
-            ActionMkbSpawner(self.source_action, mkb)
+            ActionMkbSpawner(self.source_action, mkb, self.protocol_ids)
             for mkb in mkb_list
         ]
 
@@ -525,61 +559,27 @@ class EventMeasureGenerator(object):
         db.session.commit()
 
 
-class MeasureGeneratorRisarContext(object):
+class BaseMeasureGeneratorRisarContext(object):
 
     def __init__(self, action):
         self.inspection_date = None
         self.inspection_datetime = None
         self.is_first_inspection = None
         self.is_late_first_visit = None
-        self.pregnancy_start_date = None
         self.source_action = action
         self.all_existing_mkb = set()
         self.actual_existing_mkb = set()
         self.actual_action_mkb = set()
 
-        self.next_inspection_date = None
-        self.next_inspection_datetime = None
         self.pregnancy_week = None
         self.load()
 
     def load(self):
         self.inspection_date = safe_date(self.source_action.begDate)
         self.inspection_datetime = safe_datetime(self.source_action.begDate)
-        self.is_first_inspection = self.source_action.actionType.flatCode in (first_inspection_code, pc_inspection_code)
-        self.is_late_first_visit = is_event_late_first_visit(self.source_action.event)
-        self.pregnancy_start_date = get_pregnancy_start_date(self.source_action.event)
-        assert isinstance(self.pregnancy_start_date, datetime.date), 'No pregnancy start date in event'
-        self._load_mkb_lists()
 
-        # unused
-        self.next_inspection_date = safe_date(self.source_action.propsByCode['next_date'].value)
-        self.next_inspection_datetime = safe_datetime(self.next_inspection_date)
-        self.pregnancy_week = safe_int(self.source_action.propsByCode['pregnancy_week'].value)
-
-    def _load_mkb_lists(self):
-        diagnostics = get_client_diagnostics(self.source_action.event.client, self.source_action.begDate, self.source_action.endDate, True)
-
-        # Все возможные диагнозы, действовашие на период действия, в том числе закрытые, но не созданные в нём
-        self.all_existing_mkb = set(
-            d.MKB
-            for d in diagnostics
-            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0])
-        )
-
-        # Все незакрытые диагнозы, действовавшие на период действия, кроме созданных в нём
-        self.actual_existing_mkb = set(
-            d.MKB
-            for d in diagnostics
-            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
-        )
-
-        # Все диагнозы, созданные в этом действии
-        self.actual_action_mkb = set(
-            d.MKB
-            for d in diagnostics
-            if (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
-        )
+    def get_reference_dt(self):
+        raise NotImplementedError
 
     def is_sm_apply_event_after_each_visit(self, sm):
         return any(sched_type.code == 'after_each_visit' for sched_type in sm.schedule.schedule_types)
@@ -679,27 +679,93 @@ class MeasureGeneratorRisarContext(object):
             status = MeasureStatus.created[0]
         return status
 
+
+class PregnancyGeneratorContext(BaseMeasureGeneratorRisarContext):
+
+    def __init__(self, action):
+        self.pregnancy_start_date = None
+        super(PregnancyGeneratorContext, self).__init__(action)
+
+    def load(self):
+        super(PregnancyGeneratorContext, self).load()
+        self.is_first_inspection = self.source_action.actionType.flatCode in (first_inspection_code, pc_inspection_code)
+        self.is_late_first_visit = is_event_late_first_visit(self.source_action.event)
+        self.pregnancy_start_date = get_pregnancy_start_date(self.source_action.event)
+        assert isinstance(self.pregnancy_start_date, datetime.date), 'No pregnancy start date in event'
+        self._load_mkb_lists()
+
+    def _load_mkb_lists(self):
+        diagnostics = get_client_diagnostics(self.source_action.event.client, self.source_action.begDate, self.source_action.endDate, True)
+
+        # Все возможные диагнозы, действовашие на период действия, в том числе закрытые, но не созданные в нём
+        self.all_existing_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0])
+        )
+
+        # Все незакрытые диагнозы, действовавшие на период действия, кроме созданных в нём
+        self.actual_existing_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+        )
+
+        # Все диагнозы, созданные в этом действии
+        self.actual_action_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+        )
+
     def get_reference_dt(self):
         return safe_datetime(self.pregnancy_start_date)
 
-    # unused
-    def get_current_preg_weeks_interval(self):
-        """Вернуть интервал в неделях беременности от текущего осмотра до следующего"""
-        cur_w = self.pregnancy_week
-        next_w = cur_w + (self.next_inspection_date - self.inspection_date).days / 7  # TODO: check this, +1?
-        return DateTimeInterval(cur_w, next_w)
 
-    # unused
-    def get_current_datetime_interval(self):
-        """Вернуть интервал дат-времени от текущего осмотра до следующего"""
-        return DateTimeInterval(self.inspection_datetime, self.next_inspection_datetime)
+class GynecolGeneratorContext(BaseMeasureGeneratorRisarContext):
+
+    def __init__(self, action):
+        super(GynecolGeneratorContext, self).__init__(action)
+
+    def load(self):
+        super(GynecolGeneratorContext, self).load()
+        self._load_mkb_lists()
+
+    def _load_mkb_lists(self):
+        # TODO: different queries?
+        diagnostics = get_client_diagnostics(self.source_action.event.client, self.source_action.begDate, self.source_action.endDate, True)
+
+        # Все возможные диагнозы, действовашие на период действия, в том числе закрытые, но не созданные в нём
+        self.all_existing_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0])
+        )
+
+        # Все незакрытые диагнозы, действовавшие на период действия, кроме созданных в нём
+        self.actual_existing_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if not (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+        )
+
+        # Все диагнозы, созданные в этом действии
+        self.actual_action_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if (d.action_id == self.source_action.id and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+        )
+
+    def get_reference_dt(self):
+        return self.inspection_datetime
 
 
 class ActionMkbSpawner(object):
 
-    def __init__(self, action, mkb):
+    def __init__(self, action, mkb, protocol_ids=None):
         self.action = action
         self.mkb_code = mkb
+        self.protocol_ids = protocol_ids
         self.scheme_measures = []
         self.load_schemes()
 
@@ -707,7 +773,6 @@ class ActionMkbSpawner(object):
         query = ExpertSchemeMeasureAssoc.query.join(
             ExpertScheme, ExpertSchemeMKBAssoc, ExpertProtocol, MKB
         ).filter(
-            ExpertProtocol.deleted == 0,
             ExpertScheme.deleted == 0,
             ExpertSchemeMeasureAssoc.deleted == 0,
             MKB.DiagID == self.mkb_code
@@ -716,4 +781,8 @@ class ActionMkbSpawner(object):
             joinedload('schedule', innerjoin=True).joinedload('schedule_types'),
             joinedload('schedule', innerjoin=True).joinedload('additional_mkbs')
         )
+        if self.protocol_ids is not None:
+            query = query.filter(ExpertProtocol.id.in_(self.protocol_ids))
+        else:
+            query = query.filter(ExpertProtocol.deleted == 0)
         self.scheme_measures = query.all()

@@ -14,8 +14,9 @@ from nemesis.models.person import Person
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import cache, db
-from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code, \
-    puerpera_inspection_code, request_type_pregnancy, pc_inspection_code
+from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code,\
+    inspection_preg_week_code, puerpera_inspection_code, request_type_pregnancy, pc_inspection_code,\
+    risar_gyn_checkup_codes
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
@@ -256,7 +257,7 @@ def get_last_checkup_date(event_id):
     query = db.session.query(Action.begDate).join(ActionType).filter(
         Action.event_id == event_id,
         Action.deleted == 0,
-        ActionType.flatCode.in_(checkup_flat_codes)
+        ActionType.flatCode.in_(checkup_flat_codes + risar_gyn_checkup_codes)
     ).order_by(Action.begDate.desc()).first()
     return query[0] if query else None
 

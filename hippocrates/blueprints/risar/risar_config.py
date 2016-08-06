@@ -45,7 +45,7 @@ second_inspection_code = 'risarSecondInspection'
 pc_inspection_code = 'risarPCCheckUp'
 puerpera_inspection_code = 'risarPuerperaCheckUp'
 
-checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspection_code]
+checkup_flat_codes = (first_inspection_code, second_inspection_code, pc_inspection_code)
 
 # inspection properties
 inspection_preg_week_code = 'pregnancy_week'

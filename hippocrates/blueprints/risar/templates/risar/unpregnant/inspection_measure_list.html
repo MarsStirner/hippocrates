@@ -1,0 +1,71 @@
+<div ng-controller="EventMeasureActionViewCtrl">
+<div ng-if="checkup.measures.length">
+<div class="text-right marginal">
+    <div class="btn-group">
+{#        <button type="button" class="btn btn-danger" ng-click="removeMeasures()">Удалить мероприятия</button>#}
+{#        <button type="button" class="btn btn-default" ng-click="generateMeasures()">Сформировать мероприятия</button>#}
+        <button type="button" class="btn btn-default"><span class="fa fa-print"></span>Печать всех</button>
+    </div>
+</div>
+<div ng-if="checkup.em_error" class="alert alert-danger">
+    [[ checkup.em_error ]]
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th width="30%">Название мероприятия</th>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+            <th>Статус</th>
+            <th width="1%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="em in checkup.measures track by em.data.id" ng-class="{ 'measure-manual': !em.data.scheme }">
+            <td>[[ $index + 1 ]]</td>
+            <td>
+                <span ng-bind="em.data.measure.name"></span>
+                <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
+                <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
+                <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
+            </td>
+            <td>[[ em.data.beg_datetime | asDateTime ]]</td>
+            <td>[[ em.data.end_datetime | asDateTime ]]</td>
+            <td>
+                <event-measure-status status="em.data.status"></event-measure-status>
+                <span ng-if="emIsNotActual(em)">(Неактуально)</span>
+            </td>
+            <td class="nowrap">
+                <div class="btn-group" style="min-width: 125px">
+                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                        Просмотр
+                    </button>
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li role="menuitem" ng-class="{'disabled': !canEditEmAppointment(em)}">
+                            <a href="javascript:void(0);" ng-click="openEmAppointment($index)">Редактировать направление</a>
+                        </li>
+                        <li role="menuitem" ng-class="{'disabled': !canEditEmResult(em)}">
+                            <a href="javascript:void(0);" ng-click="openEmResult($index)">Редактировать результат</a>
+                        </li>
+                        <li role="menuitem" ng-class="{'disabled': !canNewAppointment(em)}">
+                            <a href="javascript:void(0);" ng-click="newAppointment(em, checkup, header)">Записать в расписание</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a></li>
+                        <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
+<div ng-if="!checkup.measures.length && !checkup.em_error">
+    <h3 class="text-center">Не хватает данных для формирования мероприятий</h3>
+    <span class="text-muted">Требуется заполнить раздел «Заключение» и указать основной диагноз.</span>
+</div>
+</div>

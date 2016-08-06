@@ -203,8 +203,6 @@ def api_0_measure_list(event_id):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != request_type_pregnancy:
-        raise ApiException(400, u'Обращение не является случаем беременности')
 
     paginate = safe_bool(data.get('paginate', True))
     em_ctrl = EventMeasureController()

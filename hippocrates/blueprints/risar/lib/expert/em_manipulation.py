@@ -25,7 +25,16 @@ class EventMeasureController(BaseModelController):
         return EventMeasureSelecter()
 
     def regenerate(self, action):
-        gen = EventMeasureGenerator(action)
+        gen = EventMeasureGenerator.get_for_pregnancy(action)
+        try:
+            gen.generate_measures()
+        except Exception, e:
+            logger.error(u'Ошибка генерации мероприятий для action с id={0}'.format(action.id), exc_info=True)
+            self.error_message = u'Ошибка генерации мероприятий'
+            self.exception = e
+
+    def regenerate_gyn(self, action):
+        gen = EventMeasureGenerator.get_for_gynecol(action)
         try:
             gen.generate_measures()
         except Exception, e:
@@ -34,7 +43,7 @@ class EventMeasureController(BaseModelController):
             self.exception = e
 
     def delete_in_action(self, action):
-        gen = EventMeasureGenerator(action)
+        gen = EventMeasureGenerator.get(action)
         gen.clear_existing_measures()
 
     def execute(self, em):

@@ -62,13 +62,13 @@ def api_0_gyn_checkup(event_id):
     card.reevaluate_card_attrs()
     db.session.commit()
 
-    # em_ctrl = EventMeasureController()
-    # em_ctrl.regenerate(action)
+    em_ctrl = EventMeasureController()
+    em_ctrl.regenerate_gyn(action)
 
     result = represent_gyn_checkup(action)
-    # result['measures'] = represent_measures(action)
-    # if em_ctrl.exception:
-    #     result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
+    result['measures'] = represent_measures(action)
+    if em_ctrl.exception:
+        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
     return result
 
 

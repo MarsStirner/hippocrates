@@ -1,14 +1,14 @@
 {% extends 'risar/base/base.html' %}
-{% import 'risar/_macros.html' as rimacros %}
+{% import 'risar/unpregnant/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
 
-<div ng-controller="EventMeasureListCtrl" ng-cloak>
+<div ng-controller="GynecolEventMeasureListCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title_n('Мероприятия случая') }}
-        {{ rimacros.navigation('[[ event_id ]]') }}
+        {{ rimacros.unpregnant_page_title_ext_n('Мероприятия') }}
+        {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
     </section>
     <section class="content">
         <div class="row">

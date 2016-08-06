@@ -79,19 +79,17 @@
                                 {#<li>
                                     <pre>[[checkup|json]]</pre>
                                 </li>#}
-                                {#
-                                    <li>
-                                        <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
-                                            <span class="badge">9</span>
-                                            <span>Диагностические мероприятия</span>
-                                            <i class="fa fa-exclamation-circle text-red pull-right" style="font-size: larger"
-                                                title="[[checkup.em_error]]" ng-if="checkup.em_error"></i>
-                                        </a>
-                                    </li>
-                                #}
+                                <li>
+                                    <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
+                                        <span class="badge">9</span>
+                                        <span>Диагностические мероприятия</span>
+                                        <i class="fa fa-exclamation-circle text-red pull-right" style="font-size: larger"
+                                            title="[[checkup.em_error]]" ng-if="checkup.em_error"></i>
+                                    </a>
+                                </li>
                                 <li>
                                     <a aria-controls="ticket" href="#ticket_25" data-toggle="tab">
-                                        <span class="badge">9</span>
+                                        <span class="badge">10</span>
                                         <span>Талон посещения</span>
                                     </a>
                                 </li>
@@ -1393,10 +1391,20 @@
                             </div>
                             </div>
                         </ng-form>
+                        <ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 9. Диагностические мероприятия</h3>
+                            </div>
+                            <div class="box-body">
+                            {% include 'risar/unpregnant/inspection_measure_list.html' %}
+                            </div>
+                            </div>
+                        </ng-form>
                         <ng-form class="tab-pane" id="ticket_25" name="ticket_25" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                                 <div class="box-header">
-                                    <h3 class="box-title">Шаг 9. Талон посещения</h3>
+                                    <h3 class="box-title">Шаг 10. Талон посещения</h3>
                                 </div>
                                 <div class="box-body">
                                     <table class="table table-condensed">
@@ -1674,39 +1682,6 @@
                                 </div>
                             </div>
                         </ng-form>
-                      
-                        {#
-                        <ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 9. Диагностические мероприятия</h3>
-                            </div>
-                            <div class="box-body">
-                                <table class="table table-condensed">
-                                    <tbody>
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
-                            </div>
-                        </ng-form>
-                        #}
-                        {#
-                        <ng-form class="tab-pane" id="ticket" name="ticketForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 10. Талон посещения</h3>
-                            </div>
-                            <div class="box-body">
-                                <table class="table table-condensed">
-                                    <tbody>
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
-                            </div>
-                        </ng-form>
-                        #}
                     </div>
                 </div>
             </div>

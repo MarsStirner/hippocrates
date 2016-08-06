@@ -110,8 +110,8 @@ def api_0_chart_measure_list(event_id=None):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != request_type_pregnancy:
-        raise ApiException(400, u'Обращение не является случаем беременности')
+    # if event.eventType.requestType.code != request_type_pregnancy:
+    #     raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'last_inspection_date': get_last_checkup_date(event_id)
     }

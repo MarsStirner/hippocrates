@@ -53,6 +53,7 @@ def represent_ticket_25(action):
 def represent_gyn_checkup(action):
     result = represent_checkup(action, gyn_checkup_simple_codes)
     result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+    result['measures'] = represent_measures(action)
     return result
 
 

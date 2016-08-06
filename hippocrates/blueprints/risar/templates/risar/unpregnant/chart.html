@@ -200,15 +200,16 @@
                         </tbody>
                     </table>
                 </div>
-                {#
                 <div class="box box-primary">
                     <div class="box-header">
-                        <h3 class="box-title">Мероприятия(<a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
+                        <h3 class="box-title">Мероприятия(<a ng-href="{{ url_for('.html_gynecological_event_measure') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3>
+                        {#
                         <div class="box-tools">
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-primary" ng-click="close_event()"><i class="fa fa-plus"></i> Добавить</button>
                             </div>
                         </div>
+                        #}
                     </div>
                     <table class="table table-condensed">
                         <tbody>
@@ -251,7 +252,6 @@
                         </tbody>
                     </table>
                 </div>
-                #}
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">Закрытие случая

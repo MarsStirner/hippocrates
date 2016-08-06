@@ -134,7 +134,6 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
         $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
             then(function () {
                 $scope.setViewMode('table');
-                $scope.excl_rbMeasureStatus = _.reject($scope.rbMeasureStatus.objects, function(item){return _.include($scope.without_statuses, item.code)});
             });
         RisarApi.measure.get_checkups($scope.event_id).then(function (data) {
              $scope.model.checkups = data.checkups;
@@ -149,6 +148,154 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
 
     $scope.init();
 };
+
+
+var GynecolEventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService, PrintingDialog, EMModalService, EventMeasureService) {
+    var params = aux.getQueryParams(window.location.search);
+    var event_id = $scope.event_id = params.event_id;
+    var viewMode;
+    $scope.model = {
+        measure_list: [],
+        checkups: []
+    };
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.event_id
+        }
+    };
+    $scope.setViewMode = function (mode) {
+        viewMode = mode;
+        $scope.$broadcast('viewModeChanged', {
+            mode: mode
+        });
+    };
+    $scope.isTableMode = function () {
+        return viewMode === 'table';
+    };
+    $scope.isCalendarMode = function () {
+        return viewMode === 'calendar';
+    };
+
+    $scope.query = {};
+
+    var selectMeasureTypes = function (on) {
+        if (on) {
+            $scope.query.measure_type = $scope.rbMeasureType.objects.clone();
+        } else {
+            $scope.query.measure_type = [];
+        }
+    };
+    var selectMeasureStatuses = function (on) {
+        if (on) {
+            $scope.query.status = $scope.rbMeasureStatus.objects.clone();
+        } else {
+            $scope.query.status = [];
+        }
+    };
+    var reloadChart = function () {
+        var header = RisarApi.chart.get_header($scope.event_id).then(function (data) {
+            $scope.header = data.header;
+        });
+        var chart = RisarApi.measure.get_chart($scope.event_id).then(function (data) {
+             $scope.chart = data;
+        });
+        return $q.all(header, chart);
+    };
+
+    $scope.resetFilters = function () {
+        $scope.query = {
+            checkups: [],
+            measure_type: [],
+            beg_date_from: null,
+            beg_date_to: null,
+            end_date_from: null,
+            end_date_to: null,
+            status: []
+        };
+    };
+    $scope.viewEventMeasure = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EMModalService.openView(em.data);
+    };
+    $scope.executeEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EventMeasureService.execute(em.data)
+            .then(function (upd_em) {
+                $scope.model.measure_list.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.cancelEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EventMeasureService.cancel(em.data)
+            .then(function (upd_em) {
+                $scope.model.measure_list.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.openEmAppointment = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        if ($scope.canEditEmAppointment(em)) {
+            EventMeasureService.get_appointment(em)
+                .then(function (appointment) {
+                    return EMModalService.openAppointmentEdit(em, appointment);
+                })
+                .then(function (result) {
+                    return EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.model.measure_list.splice(idx, 1, upd_em);
+                        });
+                });
+        }
+    };
+    $scope.openEmResult = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        if ($scope.canEditEmResult(em)) {
+            EventMeasureService.get_em_result(em)
+                .then(function (em_result) {
+                    return EMModalService.openEmResultEdit(em, em_result);
+                })
+                .then(function (result) {
+                    return EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.model.measure_list.splice(idx, 1, upd_em);
+                        });
+                });
+        }
+    };
+    $scope.canEditEmAppointment = function (em) {
+        return em.access.can_edit_appointment;
+    };
+    $scope.canEditEmResult = function (em) {
+        return em.access.can_edit_result;
+    };
+    $scope.emHasAppointment = function (em) {
+        return Boolean(em.data.appointment_action_id);
+    };
+    $scope.emHasResult = function (em) {
+        return Boolean(em.data.result_action_id);
+    };
+
+    $scope.init = function () {
+        $scope.resetFilters();
+        $scope.rbMeasureType = RefBookService.get('rbMeasureType');
+        $scope.rbMeasureStatus = RefBookService.get('MeasureStatus');
+        var chart_loading = reloadChart($scope.event_id);
+        $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
+            then(function () {
+                $scope.setViewMode('table');
+            });
+    };
+
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()){
+            PrintingDialog.open($scope.ps, $scope.ps_resolve());
+        }
+    };
+
+    $scope.init();
+};
+
 
 var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
     $scope.pager = {
