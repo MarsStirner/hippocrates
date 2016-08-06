@@ -393,6 +393,7 @@ def represent_ticket_25(action):
         return {}
     return dict(
         action_as_dict(action),
+        id=action.id,
         beg_date=action.begDate,
         end_date=action.endDate,
     )

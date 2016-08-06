@@ -231,6 +231,11 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
             action_id: checkup_id
         }
     };
+    $scope.print_checkup_ticket = function (checkup, fmt) {
+        // Вы потом не разберётесь, откуда у этого говна ноги растут. Простите. Я не хотел
+        var ticket_id = checkup.ticket_25.id;
+        RisarApi.print_ticket_25(ticket_id, fmt);
+    };
 
     $scope.declOfNum = function (number, titles) {
         var cases = [2, 0, 1, 1, 1, 2];
@@ -295,6 +300,12 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
                 event_id: $scope.header.event.id,
                 action_id: checkup_id
             }
+        };
+
+        $scope.print_checkup_ticket = function (checkup, fmt) {
+            // Вы потом не разберётесь, откуда у этого говна ноги растут. Простите. Я не хотел
+            var ticket_id = checkup.ticket_25.id;
+            RisarApi.print_ticket_25(ticket_id, fmt);
         };
 
         $scope.declOfNum = function (number, titles) {

@@ -21,6 +21,7 @@ WebMis20
             inpection_read_html:'{{ url_for('.html_inspection_read') }}',
             inpection_edit_html:'{{ url_for('.html_gyn_inspection_edit') }}',
         },
+        print_checkup_ticket_25: '{{ url_for('.printing_checkup_ticket_25') }}', // МЕНЯ ЗАСТАВИЛИ!!!
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',
         api_stats_pregnancy_week_diagram: '{{ url_for('.api_1_stats_pregnancy_week_diagram') }}',

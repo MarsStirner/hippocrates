@@ -1,5 +1,6 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
+{% import 'risar/_inspection_macros.html' as imacros %}
 
 {% block title %}> Осмотры акушером-гинекологом беременной{% endblock %}
 
@@ -29,6 +30,7 @@
                                 <li ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
                                 <li><a href="#">Копировать</a></li>
                                 <li><a href="#">Удалить</a></li>
+                                <li>{{ imacros.checkup_ticket_25_print_link() }}</li>
                             </ul>
                         </div>
                     </th>

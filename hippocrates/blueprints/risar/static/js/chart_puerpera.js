@@ -18,6 +18,11 @@ var InspectionPuerperaViewCtrl = function ($scope, $modal, RisarApi, PrintingSer
             action_id: checkup_id
         }
     };
+    $scope.print_checkup_ticket = function (checkup, fmt) {
+        // Вы потом не разберётесь, откуда у этого говна ноги растут. Простите. Я не хотел
+        var ticket_id = checkup.ticket_25.id;
+        RisarApi.print_ticket_25(ticket_id, fmt);
+    };
 
     var reload = function () {
         RisarApi.chart.get_header(event_id).

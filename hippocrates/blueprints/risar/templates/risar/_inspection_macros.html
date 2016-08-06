@@ -21,3 +21,7 @@
     </div>
 </ng-form>
 {% endmacro %}
+
+{% macro checkup_ticket_25_print_link(checkup_name='checkup') %}
+    <a ng-href="#" ng-click="print_checkup_ticket({{ checkup_name }}, 'pdf')">Печать талона</a>
+{% endmacro %}
