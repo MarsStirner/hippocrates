@@ -4,7 +4,7 @@ from flask import request
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
+from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses, calc_fisher_ktg_info
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_wm, represent_fetuses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
@@ -124,3 +124,14 @@ def api_0_fetus_list(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     return represent_fetuses(card)
+
+
+@module.route('/api/0/fetus/calc_fisher_ktg/', methods=['POST'])
+@api_method
+def api_0_fetus_calc_fisher_ktg():
+    data = request.get_json()
+    points, rate = calc_fisher_ktg_info(data)
+    return {
+        'points': points,
+        'fisher_ktg_rate': rate
+    }

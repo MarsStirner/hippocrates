@@ -10,7 +10,7 @@ from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, 
     belongs_to_mkbgroup, notify_risk_rate_changes
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
-    first_inspection_flat_code, rtc_2_atc
+    first_inspection_flat_code, rtc_2_atc, pc_inspection_flat_code
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType
@@ -133,19 +133,19 @@ def reevaluate_dates(card):
     card.attrs['chart_modify_time'].value = now
     prev_start_date, prev_delivery_date = card.attrs['pregnancy_start_date'].value, card.attrs['predicted_delivery_date'].value
     start_date, delivery_date, p_week = None, None, None
-    epicrisis = get_action(card.event, risar_epicrisis)
+    epicrisis = card.epicrisis
 
-    if epicrisis and epicrisis['pregnancy_duration'].value:
+    if epicrisis.action.id and epicrisis.action['pregnancy_duration'].value:
         # Установленная неделя беременности. Может быть как меньше, так и больше 40
-        p_week = int(epicrisis['pregnancy_duration'].value)
+        p_week = int(epicrisis.action['pregnancy_duration'].value)
         # вычисленная дата начала беременности
-        start_date = (epicrisis['delivery_date'].value + datetime.timedelta(weeks=-p_week, days=1))
+        start_date = (epicrisis.action['delivery_date'].value + datetime.timedelta(weeks=-p_week, days=1))
         # Точная дата окончания беременности - дата родоразрешения
-        delivery_date = epicrisis['delivery_date'].value
+        delivery_date = epicrisis.action['delivery_date'].value
 
     if not start_date:
         # Сначала смотрим по осмотрам, если таковые есть
-        for inspection in get_action_list(card.event, checkup_flat_codes).order_by(Action.begDate.desc()):
+        for inspection in reversed(card.checkups):
             if inspection['pregnancy_week'].value:
                 # Установленная неделя беременности. Может быть как меньше, так и больше 40
                 p_week = int(inspection['pregnancy_week'].value)
@@ -178,7 +178,7 @@ def reevaluate_dates(card):
 
     if not prev_start_date or start_date != prev_start_date:
         card.attrs['pregnancy_start_date'].value = start_date
-    if not prev_delivery_date or epicrisis or abs((delivery_date - prev_delivery_date).days) > 3:
+    if not prev_delivery_date or epicrisis.action.id or abs((delivery_date - prev_delivery_date).days) > 3:
         # Не надо трогать дату родоразрешения, если она не слишком отличается от предыдущей вычисленной при отсутствии
         # эпикриза
         card.attrs['predicted_delivery_date'].value = delivery_date
@@ -236,7 +236,7 @@ def reevaluate_preeclampsia_rate(card):
 
     preg_week = get_pregnancy_week(event, action)
 
-    last_inspection = get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()).first()
+    last_inspection = card.latest_inspection
     if preg_week > 20:
         urinary_24 = get_action(event, '24urinary')
         urinary_protein_24 = urinary_24['24protein'].value if urinary_24 else None
@@ -259,12 +259,12 @@ def reevaluate_preeclampsia_rate(card):
             if urinary_protein_24 >= 0.3 or urinary_protein >= 0.3 or albumin_creatinine >= 0.15 or ALaT > 31 or ASaT > 31 or thrombocytes < 100:
                 res = 'ChAH'  # преэклампсия на фоне ХАГ
         elif last_inspection:
-            all_complaints = last_inspection['complaints'].value
+            all_complaints = last_inspection.action['complaints'].value
             complaints = filter(lambda x: x['code'] in ('epigastrii', 'zrenie', 'golovnaabol_'), all_complaints) if all_complaints else None
-            ad_left_high = last_inspection['ad_left_high'].value
-            ad_left_low = last_inspection['ad_left_low'].value
-            ad_right_high = last_inspection['ad_right_high'].value
-            ad_right_low = last_inspection['ad_right_low'].value
+            ad_left_high = last_inspection.action['ad_left_high'].value
+            ad_left_low = last_inspection.action['ad_left_low'].value
+            ad_right_high = last_inspection.action['ad_right_high'].value
+            ad_right_low = last_inspection.action['ad_right_low'].value
             hight_blood_pressure = (ad_left_high >= 140 or ad_left_low >= 90) or (ad_right_high >= 140 or ad_right_low >= 90)
             very_hight_blood_pressure = (ad_left_high >= 160 or ad_left_low >= 110) or (ad_right_high >= 160 or ad_right_low >= 110)
 
@@ -275,7 +275,11 @@ def reevaluate_preeclampsia_rate(card):
                    ASaT > 31 or (thrombocytes and thrombocytes < 100) or heavy_diags or complaints:
                     res = 'heavy'
 
-    last_inspection_diags = get_diagnoses_from_action(last_inspection, open=False)
+    # TODO: REDO !
+    if last_inspection:
+        last_inspection_diags = get_diagnoses_from_action(last_inspection.action, open=False)
+    else:
+        last_inspection_diags = []
 
     action['preeclampsia_susp'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == res).first().__json__()
     confirmed_rate = max(map(preec_diag, last_inspection_diags), key=lambda x: x[0]) if last_inspection_diags else (1, 'unknown')
@@ -329,7 +333,7 @@ def reevaluate_card_fill_rate_anamnesis(card, update_general_rate=True):
     без проверки на наличие данных в самом документе.
     """
     event_date = safe_date(card.event.setDate)
-    mother_anamnesis = get_action(card.event, risar_mother_anamnesis)
+    mother_anamnesis = card.anamnesis.mother
     anamnesis_fr = (
         CardFillRate.filled[0]
         if mother_anamnesis is not None
@@ -354,7 +358,7 @@ def reevaluate_card_fill_rate_first_inspection(card, update_general_rate=True):
     без проверки на наличие данных в самом документе.
     """
     event_date = safe_date(card.event.setDate)
-    first_inspection = get_action(card.event, first_inspection_flat_code)
+    first_inspection = card.primary_inspection
     fi_fr = (
         CardFillRate.filled[0]
         if first_inspection is not None
@@ -379,15 +383,16 @@ def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True
     без проверки на наличие данных в самом документе.
     """
     first_inspection = None
-    last_inspection = get_action_list(card.event, checkup_flat_codes).order_by(Action.begDate.desc()).first()
-    if last_inspection is not None and last_inspection.actionType.flatCode == first_inspection_flat_code:
+    last_inspection = card.latest_inspection
+    if last_inspection is not None and \
+            last_inspection.action.actionType.flatCode in (first_inspection_flat_code, pc_inspection_flat_code):
         first_inspection = last_inspection
 
     ri_fr = CardFillRate.not_required[0]
     # Заполненность повторного осмотра актуальна только при наличии первого осмотра,
     # плюс наличие эпикриза отменяет необходимость повторного осмотра
     if last_inspection is not None:
-        inspection_date = safe_date(last_inspection.begDate)
+        inspection_date = safe_date(last_inspection.action.begDate)
         valid_by_date = DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(inspection_date,
                                                                                     30,
                                                                                     DateTimeUtil.day)
@@ -399,7 +404,7 @@ def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True
                                                                      DateTimeUtil.day)
         ) if epicrisis is not None else False
 
-        if last_inspection == first_inspection:
+        if first_inspection is not None and last_inspection.action == first_inspection.action:
             ri_fr = (
                 CardFillRate.not_required[0]
                 if valid_epicrisis and valid_by_epicrisis_date else (
@@ -430,10 +435,10 @@ def reevaluate_card_fill_rate_epicrisis(card, update_general_rate=True):
     без проверки на наличие данных в самом документе.
     """
     preg_start_date = card.attrs['pregnancy_start_date'].value
-    epicrisis = get_action(card.event, risar_epicrisis)
+    epicrisis = card.epicrisis
     epicrisis_fr = (
         CardFillRate.filled[0]
-        if epicrisis is not None
+        if epicrisis.action.id
         else (
             CardFillRate.waiting[0]
             if (not preg_start_date or
@@ -448,9 +453,11 @@ def reevaluate_card_fill_rate_epicrisis(card, update_general_rate=True):
     card.attrs['card_fill_rate_epicrisis'].value = epicrisis_fr
 
     if update_general_rate:
+        gen_up_data = dict(epicrisis_fr=epicrisis_fr)
         if old_cfr_epicrisis != epicrisis_fr:
-            reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate)
-        reevaluate_card_fill_rate(card, epicrisis_fr=epicrisis_fr)
+            ri_fr = reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate)
+            gen_up_data['repeated_inspection_fr'] = ri_fr
+        reevaluate_card_fill_rate(card, **gen_up_data)
     return epicrisis_fr
 
 

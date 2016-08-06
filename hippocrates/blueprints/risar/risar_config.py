@@ -37,7 +37,7 @@ risar_anamnesis_apt_mother_codes = [
     'menstruation_last_date', 'marital_status',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
     'intrauterine', 'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income',
-    'preeclampsia', 'multifetation'] + risar_anamnesis_apt_common_codes
+    'preeclampsia', 'multifetation', 'heart_disease'] + risar_anamnesis_apt_common_codes
 risar_anamnesis_apt_father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + risar_anamnesis_apt_common_codes
 
 first_inspection_flat_code = 'risarFirstInspection'
@@ -45,7 +45,7 @@ second_inspection_flat_code = 'risarSecondInspection'
 pc_inspection_flat_code = 'risarPCCheckUp'
 puerpera_inspection_flat_code = 'risarPuerperaCheckUp'
 
-checkup_flat_codes = [first_inspection_flat_code, second_inspection_flat_code, pc_inspection_flat_code]
+checkup_flat_codes = (first_inspection_flat_code, second_inspection_flat_code, pc_inspection_flat_code)
 
 # inspection properties
 inspection_preg_week_code = 'pregnancy_week'
