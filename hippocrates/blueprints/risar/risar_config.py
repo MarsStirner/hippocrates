@@ -13,9 +13,9 @@ risar_newborn_inspection = 'risar_newborn_inspection'
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
 
-risar_gyn_general_anamnesis_code = 'gynecological_visit_general_anamnesis'
-risar_gyn_checkup_code = 'gynecological_visit_general_checkUp'
-risar_gyn_checkup_codes = (risar_gyn_checkup_code,)
+risar_gyn_general_anamnesis_flat_code = 'gynecological_visit_general_anamnesis'
+risar_gyn_checkup_flat_code = 'gynecological_visit_general_checkUp'
+risar_gyn_checkup_flat_codes = (risar_gyn_checkup_flat_code,)
 
 pregnancy_card_attrs = 'cardAttributes'
 gynecological_card_attrs = 'gynecologicalAttributes'
@@ -27,25 +27,25 @@ pregnancy_apt_codes = [
 ]
 transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
 
-common_codes = [
+risar_anamnesis_apt_common_codes = [
     'education', 'work_group', 'professional_properties',
     'infertility', 'infertility_period', 'infertility_cause', 'infertility_type', 'infertility_treatment',
     'blood_type', 'finished_diseases', 'current_diseases', 'finished_diseases_text', 'current_diseases_text',
     'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
 
-mother_codes = [
+risar_anamnesis_apt_mother_codes = [
     'menstruation_last_date', 'marital_status',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
     'intrauterine', 'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income',
-    'preeclampsia', 'multifetation'] + common_codes
-father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + common_codes
+    'preeclampsia', 'multifetation'] + risar_anamnesis_apt_common_codes
+risar_anamnesis_apt_father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + risar_anamnesis_apt_common_codes
 
-first_inspection_code = 'risarFirstInspection'
-second_inspection_code = 'risarSecondInspection'
-pc_inspection_code = 'risarPCCheckUp'
-puerpera_inspection_code = 'risarPuerperaCheckUp'
+first_inspection_flat_code = 'risarFirstInspection'
+second_inspection_flat_code = 'risarSecondInspection'
+pc_inspection_flat_code = 'risarPCCheckUp'
+puerpera_inspection_flat_code = 'risarPuerperaCheckUp'
 
-checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspection_code]
+checkup_flat_codes = [first_inspection_flat_code, second_inspection_flat_code, pc_inspection_flat_code]
 
 # inspection properties
 inspection_preg_week_code = 'pregnancy_week'

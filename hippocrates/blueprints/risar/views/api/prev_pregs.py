@@ -5,7 +5,8 @@ from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PreviousPregnancy
 from hippocrates.blueprints.risar.lib.prev_children import create_or_update_prev_children
 from hippocrates.blueprints.risar.lib.represent.common import represent_pregnancy
-from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_action_type_id, bail_out
+from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_action_type_id
+from nemesis.lib.utils import bail_out
 from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy
 from hippocrates.blueprints.risar.views.api.pregnancies.anamnesis import logger
 from nemesis.lib.apiutils import api_method, ApiException

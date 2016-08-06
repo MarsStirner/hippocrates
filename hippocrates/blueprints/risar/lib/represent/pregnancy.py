@@ -10,12 +10,14 @@ from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timel
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.common import represent_event, represent_action_diagnoses, represent_intolerance, represent_fetus, \
-    represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures
+    represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures, \
+    represent_ticket_25
+from hippocrates.blueprints.risar.lib.represent.gyn import represent_ticket_25
 from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
 from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix, \
     represent_prop_value, safe_action_property
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
-from hippocrates.blueprints.risar.risar_config import mother_codes, father_codes, risar_epicrisis, attach_codes
+from hippocrates.blueprints.risar.risar_config import risar_anamnesis_apt_mother_codes, risar_anamnesis_apt_father_codes, risar_epicrisis, attach_codes
 from nemesis.app import app
 from nemesis.lib.utils import safe_traverse_attrs, safe_date
 from nemesis.lib.vesta import Vesta
@@ -206,7 +208,7 @@ def represent_mother_action(action):
     represent_mother = dict((
         (prop.type.code, represent_prop_value(prop))
         for prop in action.properties
-        if prop.type.code in mother_codes),
+        if prop.type.code in risar_anamnesis_apt_mother_codes),
 
         blood_type=safe_traverse_attrs(
             BloodHistory.query
@@ -232,7 +234,7 @@ def represent_father_action(action):
     represent_father = dict(
         (prop.type.code, prop.value)
         for prop in action.properties
-        if prop.type.code in father_codes
+        if prop.type.code in risar_anamnesis_apt_father_codes
     )
     return represent_father
 
@@ -241,6 +243,8 @@ def represent_pregnancy_checkup(action):
     result = represent_checkup(action)
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
+    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+
     return result
 
 

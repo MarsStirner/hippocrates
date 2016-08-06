@@ -1,5 +1,6 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
+{% import 'risar/_inspection_macros.html' as inspection_macros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -57,7 +58,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="ticket" href="#ticket" data-toggle="tab">
+                                    <a aria-controls="ticket" href="#ticket_25" data-toggle="tab">
                                         <span class="badge">7</span>
                                         <span>Талон посещения</span>
                                     </a>
@@ -680,117 +681,8 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="ticket" name="ticketForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 7. Талон посещения</h3>
-                            </div>
-                            <div class="box-body">
-                            <table class="table table-condensed">
-                                <tbody>
-                                    <tr>
-                                        <th class="text-right col-md-4">Место обслуживания <span class="text-danger">*</span></th>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-4">
-                                                <input name="place" ng-required="true" class="form-control">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Цель посещения <span class="text-danger">*</span></th>
-                                        <td><div class="row">
-                                            <div class="col-md-4">
-                                                <input name="place" ng-required="true" class="form-control">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Результат обращения <span class="text-danger">*</span></th>
-                                        <td><div class="row">
-                                            <div class="col-md-4">
-                                                <input name="place" ng-required="true" class="form-control">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Рецептурный бланк <span>&nbsp;</span></th>
-                                        <td>&nbsp;</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Статус <span>&nbsp;</span></td>
-                                        <td><div class="row">
-                                            <div class="col-md-4">
-                                                <ui-select ng-model="status" theme="select2" class="form-control">
-                                                    <ui-select-match></ui-select-match>
-                                                    <ui-select-choices repeat="item in []">
-                                                        <div></div>
-                                                    </ui-select-choices>
-                                                </ui-select>
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Причина выдачи <span>&nbsp;</span></td>
-                                        <td><div class="row">
-                                            <div class="col-md-4">
-                                                <ui-select ng-model="reason" theme="select2" class="form-control">
-                                                    <ui-select-match></ui-select-match>
-                                                    <ui-select-choices repeat="item in []">
-                                                        <div></div>
-                                                    </ui-select-choices>
-                                                </ui-select>
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Документ временной нетрудоспособности <span>&nbsp;</span></th>
-                                        <td>&nbsp;</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Серия <span>&nbsp;</span></td>
-                                        <td><div class="row">
-                                            <div class="col-md-4">
-                                                <input name="serial"class="form-control">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Номер <span>&nbsp;</span></td>
-                                        <td><div class="row">
-                                            <div class="col-md-4">
-                                                <input name="number"class="form-control">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Дата выписки <span>&nbsp;</span></td>
-                                        <td>
-                                            <wm-date name="discharge_date"
-                                                     ng-model="discharge_date" style="width: 250px"></wm-date>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            </div>
-                            </div>
-                        </ng-form>
-                        <ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 8. Диагностические мероприятия</h3>
-                            </div>
-                            <div class="box-body">
-                            {% include 'risar/inspection_measure_list.html' %}
-                            </div>
-                            </div>
-                        </ng-form>
+                        {{ inspection_macros.ticket_25(7) }}
+                        {{ inspection_macros.diagnostics(8) }}
                     </div>
                 </div>
             </div>
