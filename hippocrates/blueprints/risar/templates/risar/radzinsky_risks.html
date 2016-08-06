@@ -2,7 +2,20 @@
 {% import 'risar/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
-
+{% macro print_button() %}
+    <div class="pull-right">
+        <a class="btn btn-lg dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-print"></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-right">
+            <li class="dropdown-header" style="background-color: #e3e3e3">Формат</li>
+            <li><a ng-href="#" ng-click="printRadz('pdf')">PDF</a></li>
+            {#<li><a ng-q="#" ng-click="printRadz('docx')">Word</a></li>#}
+            <li><a ng-href="#" ng-click="printRadz('xlsx')">Excel</a></li>
+            <li><a ng-href="#" ng-click="printRadz('odt')">Open Office</a></li>
+        </ul>
+    </div>
+{% endmacro %}
 {% block main %}
 <div ng-controller="RadzinskyRisksCtrl" ng-cloak>
     <section class="content-header">
@@ -36,6 +49,7 @@
                         <div class="col-sm-6 col-md-5 text-right">Сумма баллов анамнестических факторов:</div>
                         <div class="col-sm-6 col-md-7">
                             <span class="text-bold" ng-bind="risks.general_info.anamnestic_points"></span>
+                            {{print_button()}}
                         </div>
                     </div>
                     <div class="row">
@@ -86,6 +100,7 @@
             <div class="box box-solid" ng-repeat="stage in rbRadzStage.objects" ng-show="isStageSelected(stage)">
                 <div class="box-header with-border">
                     <h3 class="box-title">Сумма баллов [[ risks.stage_points[stage.code].sum ]]</h3>
+                    {{print_button()}}
                 </div>
                 <div class="box-body novpadding">
                     <table class="table table-hover">

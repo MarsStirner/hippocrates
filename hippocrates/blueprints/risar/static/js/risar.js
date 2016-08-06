@@ -574,6 +574,9 @@ WebMis20
     this.radzinsky_risks = {
         list: function (event_id) {
             return wrapper('GET', Config.url.api_chart_radzinsky_risks.format(event_id));
+        },
+        print: function (query) {
+            self.file_get('POST', Config.url.api_radz_print, query);
         }
     };
     this.utils = {
