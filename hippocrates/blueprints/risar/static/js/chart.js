@@ -334,7 +334,7 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
 .controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', function ($scope, $modal, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
-    $scope.fetuses = [];
+    $scope.checkup = {};
 
     var reload = function () {
         RisarApi.chart.get_header(event_id).
@@ -342,8 +342,8 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
                 $scope.header = data.header;
             });
         RisarApi.fetus.get_fetus_list(event_id)
-            .then(function (fetuses) {
-                $scope.fetuses = fetuses;
+            .then(function (checkup) {
+                $scope.checkup = checkup;
             });
     };
 
