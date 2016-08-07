@@ -14,11 +14,10 @@ from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, risar_
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.actions import Action, ActionType
-from nemesis.models.enums import PregnancyPathology, PerinatalRiskRate, CardFillRate
+from nemesis.models.enums import PregnancyPathology, PerinatalRiskRate, CardFillRate, PreeclampsiaRisk
 from nemesis.models.event import EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.refbooks import rbFinance
-from nemesis.models.risar import rbPreEclampsiaRate
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 
@@ -281,9 +280,11 @@ def reevaluate_preeclampsia_rate(card):
     else:
         last_inspection_diags = []
 
-    action['preeclampsia_susp'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == res).first().__json__()
+    # rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == res).first().__json__()
+    action['preeclampsia_susp'].value = safe_dict(PreeclampsiaRisk.getId(res))
     confirmed_rate = max(map(preec_diag, last_inspection_diags), key=lambda x: x[0]) if last_inspection_diags else (1, 'unknown')
-    action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == confirmed_rate[1]).first().__json__()
+    # rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == confirmed_rate[1]).first().__json__()
+    action['preeclampsia_comfirmed'].value = safe_dict(PreeclampsiaRisk.getId(confirmed_rate[1]))
 
 
 def reevaluate_card_fill_rate_all(card):
