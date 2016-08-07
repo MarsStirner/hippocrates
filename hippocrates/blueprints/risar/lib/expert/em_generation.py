@@ -692,7 +692,7 @@ class PregnancyGeneratorContext(BaseMeasureGeneratorRisarContext):
                                                                               pc_inspection_flat_code)
         self.is_late_first_visit = is_event_late_first_visit(self.source_action.event)
         self.pregnancy_start_date = get_pregnancy_start_date(self.source_action.event)
-        assert isinstance(self.pregnancy_start_date, datetime.date), 'No pregnancy start date in event'
+        # assert isinstance(self.pregnancy_start_date, datetime.date), 'No pregnancy start date in event'
         self._load_mkb_lists()
 
     def _load_mkb_lists(self):
