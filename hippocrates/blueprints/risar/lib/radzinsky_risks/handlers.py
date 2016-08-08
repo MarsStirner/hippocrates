@@ -3,12 +3,13 @@
 import itertools
 
 from .utils import (
-    _iter_preg_child, _mkb_match, _theone_measure,
+    _iter_preg_child, _theone_measure,
     _filter_child_abnormal_weight, _filter_child_cong_prev_preg, _filter_child_death,
     _filter_child_miscarriage, _filter_child_neuro_prev_preg, _filter_misbirth_prev_preg,
     _filter_parity_prev_preg, _filter_premature_prev_preg, _filter_prev_preg_compl,
     _filter_prev_preg_tubal
 )
+from hippocrates.blueprints.risar.lib.utils import mkb_match as _mkb_match
 from nemesis.lib.utils import safe_bool, safe_decimal
 
 
