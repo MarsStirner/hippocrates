@@ -392,7 +392,23 @@ def represent_measures(action):
 def represent_ticket_25(action):
     if not action:
         print(u'no ticket25')
-        return {}
+        return {
+            'id': None,
+            'beg_date': None,
+            'end_date': None,
+            'medical_care': {},
+            'visit_place': {},
+            'visit_reason': {},
+            'visit_type': {},
+            'finished_treatment': {},
+            'initial_treatment': {},
+            'treatment_result': {},
+            'payment': {},
+            'services': [],
+            'operations': [],
+            'manipulations': [],
+            'temp_disability': [],
+        }
     return dict(
         action_as_dict(action),
         id=action.id,
