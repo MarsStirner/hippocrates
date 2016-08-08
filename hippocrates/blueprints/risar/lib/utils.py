@@ -101,6 +101,29 @@ def belongs_to_mkbgroup(diag, grp, with_subnodes=True):
     return False
 
 
+def mkb_match(where, mkb_list=None, needles=None):
+    """Проверяет попадает ли хоть один диагноз из списка мкб where
+    в список мкб mkb_list или в список мкб needles, заданный в виде строки.
+
+    :param where: iterable of mkb strings
+    :param mkb_list: iterable of mkb strings
+    :param needles: string of mkbs (see lib/risk_groups/needles_haystacks.py)
+    :return boolean:
+    """
+    from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
+
+    if mkb_list is not None:
+        if not isinstance(mkb_list, (list, tuple)):
+            mkb_list = (mkb_list, )
+        return any(
+            mkb in where for mkb in mkb_list
+        )
+    elif needles is not None:
+        return any_thing(where, needles, lambda x: x)
+    else:
+        raise ValueError('need `mkb_list` or `needles` argument')
+
+
 def get_action(event, flat_code, create=False):
     """
     Поиск и создание действия внутри обращения
@@ -151,8 +174,8 @@ def get_action_list(event, flat_code, all=False):
         return
     else:
         raise TypeError('flat_code must be list|tuple|basestring|None')
-    query = query.order_by(Action.begDate.asc())
     if all:
+        query = query.order_by(Action.begDate.asc())
         return query.all()
     return query
 

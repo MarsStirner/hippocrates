@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
+from blueprints.risar.lib.utils import mkb_match as _mkb_match
 from nemesis.lib.utils import safe_bool_none
 
 
@@ -91,19 +91,6 @@ def _filter_child_abnormal_weight(child):
     if child.weight is not None:
         return child.weight < 2500 or child.weight > 4000
     return False
-
-
-def _mkb_match(where, mkb_list=None, needles=None):
-    if mkb_list is not None:
-        if not isinstance(mkb_list, (list, tuple)):
-            mkb_list = (mkb_list, )
-        return any(
-            mkb in where for mkb in mkb_list
-        )
-    elif needles is not None:
-        return any_thing(where, needles, lambda x: x)
-    else:
-        raise ValueError('need `mkb_list` or `needles` argument')
 
 
 def _filter_prev_preg_compl(prev_preg):
