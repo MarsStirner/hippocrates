@@ -363,7 +363,7 @@ class PregnancyCard(AbstractCard):
         return set(
             d.MKB
             for d in diagnostics
-            if d.endDate is None
+            if d.diagnosis.endDate is None
         )
 
     @cache.cached_call
