@@ -87,7 +87,7 @@ class RiskRateRiseEvent(NotificationEvent):
 
     def make_message(self):
         patient_name = self.card.event.client.nameText
-        link = url_for('.html_chart', event_id=self.card.event.id)
+        link = url_for('.html_pregnancy_chart', event_id=self.card.event.id)
         tag = u'<a href="{0}">{1}</a>'.format(link, patient_name)
         card_number = self.card.event.externalId
 
@@ -145,7 +145,7 @@ class PregContInabilityEvent(NotificationEvent):
 
     def make_message(self):
         patient_name = self.card.event.client.nameText
-        link = url_for('.html_chart', event_id=self.card.event.id)
+        link = url_for('.html_pregnancy_chart', event_id=self.card.event.id)
         tag = u'<a href="{0}">{1}</a>'.format(link, patient_name)
         card_number = self.card.event.externalId
 
