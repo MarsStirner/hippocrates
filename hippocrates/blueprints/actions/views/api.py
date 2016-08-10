@@ -399,6 +399,7 @@ def api_create_lab_direction():
                 service_data=service_data
             )
         except Exception, e:
+            logger.exception(e.message)
             raise ApiException(500, e.message)
         db.session.add(action)
 

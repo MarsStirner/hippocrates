@@ -129,7 +129,7 @@ def core_notify_takentissuejournal(sender, ids):
     try:
         sess.put(
             core_integration_address,
-            json={'ids': ids},
+            json={'ids': list(ids)},
             timeout=10,
         )
     except requests.ConnectionError:
