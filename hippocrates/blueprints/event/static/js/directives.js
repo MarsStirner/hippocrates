@@ -128,25 +128,18 @@ angular.module('WebMis20')
                     scope.event.services.splice(idx, 1);
                 }
             };
-            scope.inNewInvoice = false;
             scope.isInNewInvoice = function () {
-                return scope.inNewInvoice;
+                return scope.service.in_new_invoice;
             };
             scope.addServiceToInvoice = function () {
                 scope.newInvoice.push(scope.service);
-                scope.inNewInvoice = true;
+                scope.service.in_new_invoice = true;
             };
             scope.removeServiceFromInvoice = function () {
                 var idx = _.indexOf(scope.newInvoice, scope.service);
                 scope.newInvoice.splice(idx, 1);
-                scope.inNewInvoice = false;
+                scope.service.in_new_invoice = false;
             };
-            scope.$watch('editInvoiceMode', function (newVal, oldVal) {
-                if (!scope.service.in_invoice && scope.service.ui_attrs.level === 0) {
-                    if (newVal) scope.addServiceToInvoice();
-                    else scope.removeServiceFromInvoice();
-                }
-            });
             scope.invoiceControlsVisible = function () {
                 return scope.editInvoiceMode;
             };
@@ -257,7 +250,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.pager.pages = data.result.pages;
                 });
             };
-            scope.$on('serviceListChanged', function() {
+            scope.$on('servicesDataChanged', function() {
                 scope.reload();
             });
             scope.reset_sorting = function () {

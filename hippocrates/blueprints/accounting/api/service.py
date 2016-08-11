@@ -49,10 +49,21 @@ def api_0_service_get(service_id=None):
 def api_0_service_list(event_id=None):
     if not event_id:
         raise ApiException(404, u'`event_id` required')
+    args = request.args.to_dict()
+    if request.json:
+        args.update(request.json)
+
+    paginate = safe_bool(args.get('paginate', True))
     service_ctrl = ServiceController()
-    service_list = service_ctrl.get_services_by_event(event_id)
-    service_repr = ServiceRepr()
-    return service_repr.represent_listed_event_services(service_list)
+
+    if paginate:
+        page = safe_int(args.get('page')) or 1
+        per_page = safe_int(args.get('per_page')) or 10
+        data = service_ctrl.get_paginated_services_by_event(event_id, page, per_page)
+        return ServiceRepr().represent_paginated_event_services(data)
+    else:
+        service_list = service_ctrl.get_services_by_event(event_id)
+        return ServiceRepr().represent_listed_event_services(service_list)
 
 
 @module.route('/api/0/service/service_list/', methods=['POST'])
@@ -62,7 +73,9 @@ def api_0_service_list_save():
     event_id = safe_int(json_data.get('event_id'))
     if not event_id:
         raise ApiException(422, u'`event_id` required')
+    args = request.args.to_dict()
     service_list = json_data.get('service_list', [])
+    paginate = safe_bool(args.get('paginate', False))
 
     service_ctrl = ServiceController()
     service_list = service_ctrl.save_service_list(service_list)
@@ -70,9 +83,14 @@ def api_0_service_list_save():
     # to launch orm.reconstruct in Service
     service_ctrl.session.close()
 
-    service_list = service_ctrl.get_services_by_event(event_id)
-    service_repr = ServiceRepr()
-    return service_repr.represent_listed_event_services(service_list)
+    if paginate:
+        page = safe_int(args.get('page')) or 1
+        per_page = safe_int(args.get('per_page')) or 10
+        data = service_ctrl.get_paginated_services_by_event(event_id, page, per_page)
+        return ServiceRepr().represent_paginated_event_services(data)
+    else:
+        service_list = service_ctrl.get_services_by_event(event_id)
+        return ServiceRepr().represent_listed_event_services(service_list)
 
 
 @module.route('/api/0/service/calc_sum/', methods=['POST'])

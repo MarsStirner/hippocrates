@@ -230,10 +230,14 @@ WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisAp
         }
         return WebMisApi.service.get(service_id, args);
     };
-    this.save_service_list = function (event_id, service_list) {
+    this.save_service_list = function (event_id, service_list, page, per_page) {
         return WebMisApi.service.save_service_list({
             event_id: event_id,
             service_list: service_list
+        }, {
+            paginate: page !== undefined,
+            page: page,
+            per_page: per_page
         });
     };
     this.delete_service = function (service) {
@@ -241,6 +245,13 @@ WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisAp
     };
     this.get_listed_services = function (event_id) {
         return WebMisApi.service.get_list(event_id);
+    };
+    this.get_paginated_services = function (event_id, page, per_page) {
+        return WebMisApi.service.get_list(event_id, {
+            paginate: true,
+            page: page,
+            per_page: per_page
+        });
     };
     this.refreshServiceSubservices = function (service) {
         return WebMisApi.service.refreshServiceSubservices(service);
