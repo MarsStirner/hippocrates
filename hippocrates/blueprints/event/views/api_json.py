@@ -26,6 +26,7 @@ from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPro
 from nemesis.models.client import Client
 from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
+from nemesis.models.diagnosis import Event_Diagnosis
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB, rbTest
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
@@ -579,8 +580,29 @@ def api_get_events():
                             False)
                     )
         )
-    if 'diag_mkb' in flt:
-        base_query = base_query.join(Event.diagnostics, Diagnosis, Diagnosis.mkb).filter(MKB.DiagID == flt['diag_mkb']['code'])
+    if 'diag_mkb_list' in flt:
+        # latest diagnostics for *all* diagnoses
+        diag_sqq = db.session.query(Diagnostic).join(
+            Diagnosis
+        ).filter(
+            Diagnosis.deleted == 0,
+            Diagnostic.deleted == 0,
+        )
+        diag_sqq = diag_sqq.group_by(
+            Diagnostic.diagnosis_id
+        )
+        diag_sqq = diag_sqq.with_entities(func.max(Diagnostic.id).label('zid')).subquery()
+        diag_sq = db.session.query(Diagnostic.id, Diagnostic.diagnosis_id, Diagnostic.MKB.label('mkb')).join(
+            diag_sqq, diag_sqq.c.zid == Diagnostic.id
+        ).subquery('AllLatestDiagnostics')
+
+        base_query = base_query.join(
+            Event_Diagnosis
+        ).join(
+            diag_sq, Event_Diagnosis.diagnosis_id == diag_sq.c.diagnosis_id
+        ).filter(
+            diag_sq.c.mkb.in_(flt['diag_mkb_list'])
+        )
 
     if 'draft_contract' in flt:
         base_query = base_query.join(Contract).filter(Contract.draft == (flt['draft_contract'] and 1 or 0))

@@ -80,7 +80,9 @@
                         </wm-custom-dropdown>
 
                         <label for="filter-diag-mkb">МКБ диагноза</label>
-                        <ui-mkb id="filter-diag-mkb" ng-model="flt.diag_mkb"></ui-mkb>
+                        <wm-mkb-multiple id="filter-diag-mkb" placeholder="Выберите диагнозы"
+                            ng-model="flt.diag_mkb_list">
+                        </wm-mkb-multiple>
                     </div>
                     <div class="box-footer">
                         <div class="btn-group">
