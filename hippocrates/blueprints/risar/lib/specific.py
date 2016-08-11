@@ -30,6 +30,8 @@ class SpecificsManager(object):
 
     @classmethod
     def get_ext_card_url(cls, event):
+        if not event:
+            return '/'
         if cls._system_mode == SystemMode.sar_barsmis[0]:
             return get_sarbarsmis_card_url(event)
 
