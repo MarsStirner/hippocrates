@@ -44,6 +44,8 @@ def api_0_pregnancy_checkup_puerpera(event_id):
         db.session.commit()
 
     def set_ticket(prop, value):
+        if value is None:
+            value = {}
         set_action_apt_values(ticket, value)
         ticket.begDate = safe_datetime(value.get('beg_date'))
         ticket.endDate = safe_datetime(value.get('end_date'))

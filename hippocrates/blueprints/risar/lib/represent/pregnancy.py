@@ -259,7 +259,7 @@ def represent_pregnancy_checkup_wm(action):
 
 def represent_pregnancy_checkup_puerpera(action):
     result = represent_checkup(action)
-
+    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
     # if with_measures:
     #     em_ctrl = EventMeasureController()
     #     measures = em_ctrl.get_measures_in_action(action)
