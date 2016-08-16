@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 
 from blueprints.risar.lib.expert.em_diagnosis import update_patient_diagnoses, \
     get_event_measure_diag
-from blueprints.risar.lib.diagnosis import get_3_inspections_diagnoses, get_adjacent_inspections
+from blueprints.risar.lib.diagnosis import get_5_inspections_diagnoses, get_adjacent_inspections
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.data import create_action
@@ -746,7 +746,7 @@ class CheckupsXForm(ExternalXForm):
 
         return res, changed_entities
 
-    def get_diagnoses(self, mis_diags, diag_type, old_action_data):
+    def get_diagnoses1(self, mis_diags, diag_type, old_action_data):
         """Из расчета, что на (пере)сохранение могут прийти данные с любыми изменениями,
         ломающими систему диагнозов (серьезная смена даты осмотра, изменение набора диагнозов),
         попытаться изменить состояние диагнозов в текущем, прошлом и следующем осмотрах.
@@ -975,6 +975,37 @@ class CheckupsXForm(ExternalXForm):
 
         return res, changed_entities
 
+    def get_diagnoses(self, mis_diags, diag_type, old_action_data):
+        """Из расчета, что на (пере)сохранение могут прийти данные с любыми изменениями,
+        ломающими систему диагнозов (серьезная смена даты осмотра, изменение набора диагнозов),
+        попытаться изменить состояние диагнозов в текущем, прошлом и следующем осмотрах.
+
+        Редактирование осуществляется за 2 прохода: при первом проходе изменяется состояние
+        диагнозов по данным осмотра с еще неизмененной датой начала, при втором - с уже обновленной.
+        """
+        mis_diags = self._get_filtered_mis_diags(mis_diags)
+
+        if not self.new and self.target_obj.begDate != old_action_data['begDate']:
+            t_beg_date = self.target_obj.begDate
+            self.target_obj.begDate = old_action_data['begDate']
+            t_person = self.target_obj.person
+            self.target_obj.person = old_action_data['person']
+
+            with db.session.no_autoflush:
+                diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, diag_type)
+                diag_sys.refresh_with_old_data(mis_diags)
+                new_diagnoses, changed_diagnoses = diag_sys.get_result()
+
+            create_or_update_diagnoses(self.target_obj, new_diagnoses)
+            db.session.add_all(changed_diagnoses)
+            db.session.flush()
+            self.target_obj.begDate = t_beg_date
+            self.target_obj.person = t_person
+
+        diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, diag_type)
+        diag_sys.refresh_with(mis_diags)
+        return diag_sys.get_result()
+
 
 class DiagnosesSystemManager(object):
     """Класс, отвечающий за обновление диагнозов в существующей
@@ -1013,9 +1044,7 @@ class DiagnosesSystemManager(object):
         self.existing_diags = None
         self.to_create = []
         self.to_delete = []
-
-    def initialize(self):
-        self.existing_diags = get_3_inspections_diagnoses(self.source.action)
+        self.existing_diags_insp = get_5_inspections_diagnoses(self.source.action)
 
     def add_diag_data(self, ds_id, mkb_code, diag_kind, ds_beg_date, ds_end_date,
                       dgn_beg_date, dgn_create_date, person,
@@ -1029,6 +1058,7 @@ class DiagnosesSystemManager(object):
             'kind_changed': kind_changed,
             'diagnostic_changed': diagnostic_changed,
             'diagnostic': {
+                # TODO: update mkb from codes later
                 'mkb': {'code': mkb_code},
                 'set_date': dgn_beg_date,
                 'create_datetime': dgn_create_date
@@ -1041,15 +1071,19 @@ class DiagnosesSystemManager(object):
             'end_date': ds_end_date,
         })
 
+    def get_result(self):
+        return self.to_create, self.to_delete
+
     def refresh_with(self, mkb_data_list):
-        """Изменить систему диагнозов новыми данными
+        """Рассчитать изменения в системе диагнозов на основе данных сохранения
+        осмотра или результата мероприятия.
 
         :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
         """
 
-        by_mkb = self.existing_diags['by_mkb']
-        by_inspection = self.existing_diags['by_inspection']
-        adj_inspections = self.existing_diags['inspections']
+        by_mkb = self.existing_diags_insp['by_mkb']
+        by_inspection = self.existing_diags_insp['by_inspection']
+        adj_inspections = self.existing_diags_insp['inspections']
         source_id = self.source.action.id
         action_date = self.source.get_date()
         new_person = self.source.get_person()
@@ -1066,26 +1100,20 @@ class DiagnosesSystemManager(object):
                         diag = by_inspection['cur'][mkb]
 
                         cur_diagn = diag['diagn']
-                        first_diagn = diag['first_diagn']
                         diag_kind = diag['a_d'].diagnosisKind.code if diag['a_d'] else 'associated'
                         kind_changed = diag_kind != new_kind or not source_id
                         ds_beg_date = diag['ds'].setDate
                         ds_end_date = diag['ds'].endDate
+                        diagnosis_id = diag['ds'].id
                         dgn_bd = cur_diagn.setDate if cur_diagn else None
                         dgn_cd = cur_diagn.createDatetime if cur_diagn else None
                         diagnostic_changed = dgn_bd != action_date or dgn_cd != action_date or not source_id
                         if 'left' not in insp_w_mkb:
-                            if first_diagn.action_id == source_id:
-                                # diag was created exactly in current action
-                                ds_beg_date = action_date
+                            # diag was created exactly in current action
+                            ds_beg_date = action_date
                         if 'right' not in insp_w_mkb:
                             # close or open ds
-                            # todo: think about opening DS, that had explicitly assigned endDate
-                            ds_end_date = (
-                                adj_inspections['right'].begDate - timedelta(seconds=1)
-                                if adj_inspections['right']
-                                else None
-                            )
+                            ds_end_date = self.get_date_before(adj_inspections['right'])
 
                         if diagnostic_changed and source_id:
                             # need to delete dgn because it can have higher date than the date of 'cur' inspection
@@ -1096,57 +1124,45 @@ class DiagnosesSystemManager(object):
                     # not in current yet, but can be in one of adjacent:
                     elif 'left' in insp_w_mkb and 'right' in insp_w_mkb:
                         # todo: test
-                        # diag is in the left and in the right
-                        # if its is the same diagnosis, the new diagn will be added;
-                        # else there are 2 different diagnoses, and left ds will be extended
+                        # diag is in the left and in the right -
+                        # there are 2 different diagnoses, and left ds will be extended
                         # to include new diagn, right diagn will not be changed
                         diag_l = by_inspection['left'][mkb]
-                        diag_r = by_inspection['right'][mkb]
-                        if diag_l['ds'].id == diag_r['ds'].id:
-                            # this cant be
-                            diag = diag_l
-                            ds_beg_date = diag_l['ds'].setDate
-                            ds_end_date = diag_l['ds'].endDate
-                            diagnostic_changed = kind_changed = True
-                        else:
-                            diag = diag_l
-                            ds_beg_date = diag_l['ds'].setDate
-                            # if measure exists, ds can be duplicated
-                            ds_end_date = self.get_date_before(adj_inspections['right'])
-                            diagnostic_changed = kind_changed = True
+                        diagnosis_id = diag_l['ds'].id
+                        ds_beg_date = diag_l['ds'].setDate
+                        ds_end_date = self.get_date_before(adj_inspections['right'])
+                        diagnostic_changed = kind_changed = True
                     elif 'left' in insp_w_mkb:
                         # ds from previous inspection that ends by the time of right inspection or remains opened
-                        diag = by_inspection['left'][mkb]
-                        ds_beg_date = diag['ds'].setDate
-                        # if measure exists, ds can be duplicated
+                        diag_l = by_inspection['left'][mkb]
+                        diagnosis_id = diag_l['ds'].id
+                        ds_beg_date = diag_l['ds'].setDate
                         ds_end_date = self.get_date_before(adj_inspections['right'])
                         diagnostic_changed = kind_changed = True
                     else:  # 'right' in insp_w_mkb:
-                        # move ds.setDate from next inspection to current inspection
-                        diag = by_inspection['right'][mkb]
+                        # ds from next inspection now to start in current inspection
+                        diag_r = by_inspection['right'][mkb]
+                        diagnosis_id = diag_r['ds'].id
                         ds_beg_date = action_date
-                        ds_end_date = diag['ds'].endDate
+                        ds_end_date = diag_r['ds'].endDate
                         diagnostic_changed = kind_changed = True
 
                     dgn_beg_date = dgn_create_date = action_date
-                    self.add_diag_data(diag['ds'].id, mkb, new_kind, ds_beg_date, ds_end_date,
+                    self.add_diag_data(diagnosis_id, mkb, new_kind, ds_beg_date, ds_end_date,
                                        dgn_beg_date, dgn_create_date, new_person, diagnostic_changed, kind_changed)
                 else:
                     # is new mkb, not presented in any of 3 inspections
                     ds_beg_date = dgn_beg_date = dgn_create_date = action_date
-                    ds_end_date = (
-                        adj_inspections['right'].begDate - timedelta(seconds=1)
-                        if adj_inspections['right']
-                        else None
-                    )
+                    ds_end_date = self.get_date_before(adj_inspections['right'])
                     self.add_diag_data(None, mkb, new_kind, ds_beg_date, ds_end_date,
                                        dgn_beg_date, dgn_create_date, new_person, True, True)
 
-        # process existing diags, that were not sent from mis
-        mis_mkbs = {mkb for diag_data in mkb_data_list for mkb in diag_data['mkbs']}
+        # process existing diags, that were not sent from external source
+        ext_mkbs = {mkb for diag_data in mkb_data_list for mkb in diag_data['mkbs']}
         for mkb in by_mkb:
-            if mkb not in mis_mkbs:
+            if mkb not in ext_mkbs:
                 insp_w_mkb = by_mkb[mkb]
+                # diags in current inspection, that should not be here according to new external data
                 if 'cur' in insp_w_mkb:
                     if 'left' not in insp_w_mkb and 'right' not in insp_w_mkb:
                         # diag was created only in this inspection and can be deleted
@@ -1163,19 +1179,20 @@ class DiagnosesSystemManager(object):
                         if diag_l['ds'].id == diag_r['ds'].id:
                             # left
                             ds_beg_date = diag_l['ds'].setDate
-                            ds_end_date = action_date - timedelta(seconds=1)
+                            ds_end_date = self.get_date_before(adj_inspections['cur'])
                             self.add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                                None, None, None, False, False)
                             # right
                             ds_beg_date = dgn_beg_date = dgn_create_date = adj_inspections['right'].begDate
                             ds_end_date = diag_r['ds'].endDate
                             diag_kind = diag_r['a_d'].diagnosisKind.code if diag_r['a_d'] else 'associated'
+                            person = diag_r['diagn'].person
                             self.add_diag_data(None, mkb, diag_kind, ds_beg_date, ds_end_date,
-                                               dgn_beg_date, dgn_create_date, None, True, True)
+                                               dgn_beg_date, dgn_create_date, person, True, True)
                         else:
                             # left
                             ds_beg_date = diag_l['ds'].setDate
-                            ds_end_date = action_date - timedelta(seconds=1)
+                            ds_end_date = self.get_date_before(adj_inspections['cur'])
                             self.add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                                None, None, None, False, False)
                             # right
@@ -1184,11 +1201,10 @@ class DiagnosesSystemManager(object):
                             self.add_diag_data(diag_r['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                                None, None, None, False, False)
                     elif 'left' in insp_w_mkb:
-                        # close diag from previous inspection
-                        # its is closed as 1 second before current inspection date
+                        # in previous but now not in current
                         diag = by_inspection['left'][mkb]
                         ds_beg_date = diag['ds'].setDate
-                        ds_end_date = action_date - timedelta(seconds=1)
+                        ds_end_date = self.get_date_before(adj_inspections['cur'])
                         self.add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                            None, None, None, False, False)
                     elif 'right' in insp_w_mkb:
@@ -1208,8 +1224,129 @@ class DiagnosesSystemManager(object):
                             diagn.deleted = 1
                             self.to_delete.append(diagn)
                 # else:
-                    # diags in 'left' and 'right' should be ok
-                    # no edit needed
+                    # diags in 'left' and 'right' should be ok, no edit needed
+
+    def refresh_with_old_data(self, mkb_data_list, new_beg_date):
+        """Рассчитать изменения в системе диагнозов на основе данных action с еще
+        не измененным begDate.
+
+        Этот шаг требуется для обработки случаев, когда осмотр, который ранее являлся причиной
+        появляения диагноза, а теперь оказывается сменил дату с перескоком через другие осмотры,
+        мог либо унести свой диагноз с собой, либо оставить его в соседних осмотрах.
+        Этот шаг может быть пропущен, если дата осмотра не изменилась. На этом шаге не могут быть
+        созданы новые диагнозы и диагностики, а только изменены даты диагнозов или удалены
+        диагнозы и диагностики.
+
+        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
+        :param new_beg_date: datetime
+        """
+
+        by_mkb = self.existing_diags_insp['by_mkb']
+        by_inspection = self.existing_diags_insp['by_inspection']
+        adj_inspections = self.existing_diags_insp['inspections']
+
+        old_action_date = self.source.get_date()
+        if old_action_date == new_beg_date:
+            return
+
+        left_shift = old_action_date > new_beg_date and adj_inspections['left'] and \
+            adj_inspections['left'].begDate > new_beg_date
+        right_shift = old_action_date < new_beg_date and adj_inspections['right'] and \
+            adj_inspections['right'].begDate < new_beg_date
+
+        for diag_data in mkb_data_list:
+            new_kind = diag_data['kind']
+            for mkb in diag_data['mkbs']:
+                if mkb in by_mkb:
+                    # mkb is in at least one of the inspections (previous, current, next)
+                    insp_w_mkb = by_mkb[mkb]
+
+                    if 'cur' in insp_w_mkb and (left_shift or right_shift):
+                        # exists in old action
+                        diag = by_inspection['cur'][mkb]
+                        ds_beg_date = diag['ds'].setDate
+                        ds_end_date = diag['ds'].endDate
+
+                        if 'left' in insp_w_mkb and 'right' in insp_w_mkb:
+                            # nothing changes in ds, diagn will be updated in next step
+                            pass
+                        elif right_shift and 'right' in insp_w_mkb:
+                            # ds was in cur and in right - right is the new owner of ds
+                            ds_beg_date = adj_inspections['right'].begDate
+                        elif left_shift and 'left' in insp_w_mkb:
+                            # ds was in left and in cur - left is the end of ds
+                            ds_end_date = self.get_date_before(adj_inspections['cur'])
+                        else:  # right_shift or left_shift:
+                            # delete ds and it will be recreated in next step
+                            # todo: test this case!
+                            ds = diag['ds']
+                            ds.deleted = 1
+                            self.to_delete.append(ds)
+
+                        # delete dgn
+                        # todo: test
+                        diag['diagn'].deleted = 1
+                        self.to_delete.append(diag['diagn'])
+
+                        self.add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                           None, None, None, False, False)
+
+        # process existing diags, that were not sent from external source
+        ext_mkbs = {mkb for diag_data in mkb_data_list for mkb in diag_data['mkbs']}
+        for mkb in by_mkb:
+            if mkb not in ext_mkbs:
+                insp_w_mkb = by_mkb[mkb]
+
+                # if not shifted, then process in next step
+                if 'cur' in insp_w_mkb and (left_shift or right_shift):
+                    if 'left' not in insp_w_mkb and 'right' not in insp_w_mkb:
+                        # diag was created only in this inspection and can be deleted
+                        ds = by_inspection['cur'][mkb]['ds']
+                        ds.deleted = 1
+                        self.to_delete.append(ds)
+                    elif 'left' in insp_w_mkb and 'right' in insp_w_mkb:
+                        # diag is in the left and in the right
+                        # if its is the same diagnosis, it will be splitted in 2 - left will be shrinked,
+                        # right will be created new;
+                        # else there are 2 different diagnoses, that will have their dates changed
+                        diag_l = by_inspection['left'][mkb]
+                        diag_r = by_inspection['right'][mkb]
+                        if diag_l['ds'].id == diag_r['ds'].id:
+                            # # no changes because without cur inspection ds would be continuous span
+                            # from left to right inspection
+                            pass
+                        else:
+                            # todo: ignore this case?
+                            # left
+                            ds_beg_date = diag_l['ds'].setDate
+                            ds_end_date = self.get_date_before(adj_inspections['right'])
+                            self.add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                               None, None, None, False, False)
+                            # right
+                            ds_beg_date = adj_inspections['right'].begDate
+                            ds_end_date = diag_r['ds'].endDate
+                            self.add_diag_data(diag_r['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                               None, None, None, False, False)
+                    elif 'left' in insp_w_mkb:
+                        # close diag from previous inspection
+                        diag = by_inspection['left'][mkb]
+                        ds_beg_date = diag['ds'].setDate
+                        ds_end_date = self.get_date_before(adj_inspections['right'])
+                        self.add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                           None, None, None, False, False)
+                    elif 'right' in insp_w_mkb:
+                        # move in future setDate of next inspection's diag
+                        diag = by_inspection['right'][mkb]
+                        ds_beg_date = adj_inspections['right'].begDate
+                        ds_end_date = diag['ds'].endDate
+                        self.add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                           None, None, None, False, False)
+
+                    # delete unneeded dgn from cur
+                    # todo: test
+                    diagn = by_inspection['cur'][mkb]['diagn']
+                    diagn.deleted = 1
+                    self.to_delete.append(diagn)
 
     @staticmethod
     def get_date_before(action):

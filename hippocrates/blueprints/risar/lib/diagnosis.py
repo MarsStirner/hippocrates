@@ -6,11 +6,11 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy import or_, and_, func
 
 from blueprints.risar.risar_config import checkup_flat_codes
-from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.datetime_interval import DateTimeInterval, IntersectionType, get_intersection_type
 
 from nemesis.models.diagnosis import Diagnosis, Diagnostic, Action_Diagnosis
 from nemesis.models.actions import Action, ActionType
+from nemesis.models.expert_protocol import EventMeasure
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_datetime, safe_traverse
 
@@ -28,6 +28,8 @@ def get_diagnostics_history(event, beg_date, end_date=None, including_closed=Fal
     :param including_closed:
     :return:
     """
+    if not beg_date and not end_date:
+        return []
     client = event.client
     query = db.session.query(Diagnostic).join(
         Diagnosis
@@ -55,6 +57,8 @@ def get_diagnostics_history(event, beg_date, end_date=None, including_closed=Fal
 
 
 def get_first_diagnostics_of_diagnoses(ds_ids):
+    if not ds_ids:
+        return []
     ds_diagn_dates = db.session.query(func.min(Diagnostic.setDate).label('min_date')).filter(
         Diagnostic.deleted == 0,
         Diagnostic.diagnosis_id.in_(ds_ids)
@@ -68,6 +72,17 @@ def get_first_diagnostics_of_diagnoses(ds_ids):
     query = db.session.query(Diagnostic).join(
         ds_diagn_ids, Diagnostic.id == ds_diagn_ids.c.min_id
     )
+    return query.all()
+
+
+def get_action_ds_kinds(action_ids, ds_ids):
+    if not action_ids or not ds_ids:
+        return []
+    query = db.session.query(Action_Diagnosis).filter(
+        Action_Diagnosis.deleted == 0,
+        Action_Diagnosis.action_id.in_(action_ids),
+        Action_Diagnosis.diagnosis_id.in_(ds_ids)
+    ).order_by(Action_Diagnosis.id)
     return query.all()
 
 
@@ -95,12 +110,40 @@ def get_adjacent_inspections(action):
     return left, action, right
 
 
-def get_3_inspections_diagnoses(action):
-    left, cur, right = get_adjacent_inspections(action)
+def get_adjacent_measure_results(inspection_action):
+    left = db.session.query(Action).join(ActionType).join(
+        EventMeasure, EventMeasure.resultAction_id == Action.id
+    ).filter(
+        Action.deleted == 0,
+        EventMeasure.event_id == inspection_action.event.id,
+        Action.begDate < inspection_action.begDate,
+    ).order_by(Action.begDate.desc()).limit(1).first()
+    right = db.session.query(Action).join(ActionType).join(
+        EventMeasure, EventMeasure.resultAction_id == Action.id
+    ).filter(
+        Action.deleted == 0,
+        EventMeasure.event_id == inspection_action.event.id,
+        Action.begDate > inspection_action.begDate,
+    ).order_by(Action.begDate).limit(1).first()
+    return left, right
 
-    beg_date = left.begDate if left else cur.begDate
-    end_date = right.begDate if right else cur.begDate
-    diagns = get_diagnostics_history(action.event, beg_date, end_date)
+
+def get_5_inspections_diagnoses(action):
+    left, cur, right = get_adjacent_inspections(action)
+    inter_left, inter_right = get_adjacent_measure_results(action)
+    if left and inter_left and inter_left < left:
+        inter_left = None
+    if right and inter_right and right < inter_right:
+        inter_right = None
+
+    beg_date = left.begDate if left else inter_left.begDate if inter_left else cur.begDate
+    end_date = right.begDate if right else inter_right.begDate if inter_right else cur.begDate
+
+    return _get_3_diagnoses(action.event, beg_date, end_date, left, cur, right, inter_left, inter_right)
+
+
+def _get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, inter_right):
+    diagns = get_diagnostics_history(event, beg_date, end_date)
     _used_ds_ids = set()
     # make unique, save order
     ds_ids = [diagn.diagnosis_id for diagn in diagns
@@ -115,17 +158,30 @@ def get_3_inspections_diagnoses(action):
         })
 
     action_ids = [a.id for a in (left, cur, right) if a is not None and a.id]
-    act_ds_query = db.session.query(Action_Diagnosis).filter(
-        Action_Diagnosis.deleted == 0,
-        Action_Diagnosis.action_id.in_(action_ids),
-        Action_Diagnosis.diagnosis_id.in_(ds_ids)
-    ).order_by(Action_Diagnosis.id)
+    act_ds_kinds = get_action_ds_kinds(action_ids, ds_ids)
     ds_action_map = dict(
-        ((a_d.diagnosis_id, a_d.action_id), a_d) for a_d in act_ds_query
+        ((a_d.diagnosis_id, a_d.action_id), a_d) for a_d in act_ds_kinds
     )
 
+    # todo: to del first diag?
     first_ds_digns = get_first_diagnostics_of_diagnoses(ds_ids)
     ds_first_diagn_map = dict((diagn.diagnosis_id, diagn) for diagn in first_ds_digns)
+
+    inspections = {
+        'left_insp': left,
+        'right_insp': right,
+        'left_measure': inter_left,
+        'right_measure': inter_right,
+    }
+    if inter_left:
+        left = inter_left
+    if inter_right:
+        right = inter_right
+    inspections.update({
+        'cur': cur,
+        'left': left,
+        'right': right
+    })
 
     mkb_inspections = {}
     inspection_diags = {}
@@ -192,9 +248,5 @@ def get_3_inspections_diagnoses(action):
     return {
         'by_mkb': mkb_inspections,
         'by_inspection': inspection_diags,
-        'inspections': {
-            'left': left,
-            'cur': cur,
-            'right': right
-        }
+        'inspections': inspections
     }
