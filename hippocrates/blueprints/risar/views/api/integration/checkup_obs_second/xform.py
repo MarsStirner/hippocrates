@@ -17,7 +17,6 @@ from blueprints.risar.risar_config import second_inspection_code
 from blueprints.risar.views.api.integration.checkup_obs_second.schemas import \
     CheckupObsSecondSchema
 from blueprints.risar.views.api.integration.xform import CheckupsXForm
-from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
@@ -199,7 +198,11 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
             'person': self.target_obj.person
         }
         res.update({
-            'get_diagnoses_func': lambda: self.get_diagnoses(diag_data, 'final', old_action_data)
+            '_data_for_diags': {
+                'diag_data': diag_data,
+                'diag_type': 'final',
+                'old_action_data': old_action_data
+            }
         })
 
     def update_form(self, data):
@@ -208,7 +211,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         event_id = self.parent_obj_id
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
-        get_diagnoses_func = data.pop('get_diagnoses_func')
+        data_for_diags = data.pop('_data_for_diags')
         fetuses = data.pop('fetuses', [])
 
         if self.new:
@@ -229,18 +232,13 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
             if code in action.propsByCode:
                 action.propsByCode[code].value = value
 
-        diagnoses, changed_diags = get_diagnoses_func()
-        self._changed.extend(changed_diags)
-
-        create_or_update_diagnoses(action, diagnoses)
+        self.update_diagnoses_system(data_for_diags['diag_data'],
+            data_for_diags['diag_type'], data_for_diags['old_action_data'])
         create_or_update_fetuses(action, fetuses)
 
     def delete_target_obj(self):
-        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
-        # self.close_diags()
-        # В методе удаления осмотра с плодами ничего не делать, у action.deleted = 1
-        # self.delete_fetuses()
         # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        self.delete_diagnoses()
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,

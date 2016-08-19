@@ -5,8 +5,6 @@ import requests
 
 from contextlib import contextmanager
 
-from nemesis.app import app
-
 
 coldstar_url = os.getenv('TEST_COLDSTAR_URL', 'http://127.0.0.1:6098')
 mis_url = os.getenv('TEST_MIS_URL', 'http://127.0.0.1:6600')
@@ -104,6 +102,8 @@ def test_auth(login, password):
 
 
 if __name__ == '__main__':
+    from nemesis.app import app
+
     with app.app_context():
         from blueprints.risar.views.api.integration.client.test import test_register_edit_client
 

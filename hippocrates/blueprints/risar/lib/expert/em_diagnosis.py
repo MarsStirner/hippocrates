@@ -83,10 +83,12 @@ def get_event_measure_doctor(em_result):
 
 
 def diagnosis_using_by_next_checkups(action):
-    q = Action.query.join(ActionType).filter(
-        Action.begDate > action.begDate,
-        ActionType.flatCode.in_(checkup_flat_codes),
-        Action.event == action.event,
-        Action.deleted == 0,
-    )
-    return db.session.query(q.exists()).scalar()
+    return None
+
+
+def get_measure_result_mkbs(action, codes):
+    res = []
+    for code in codes:
+        if code in action.propsByCode and action.propsByCode[code].value:
+            res.append(action.propsByCode[code].value.DiagID)
+    return res

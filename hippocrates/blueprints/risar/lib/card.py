@@ -264,3 +264,12 @@ class PregnancyCard(object):
             result = g._pregnancy_card_cache[event.id]
         return result
 
+
+def _clear_caches():
+    from flask import g
+    if hasattr(g, '_pregnancy_card_cache'):
+        del g._pregnancy_card_cache
+
+    PregnancyCard.cache = LocalCache()
+
+    lazy.cache = WeakKeyDictionary()

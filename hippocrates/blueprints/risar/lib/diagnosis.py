@@ -62,13 +62,13 @@ def get_first_diagnostics_of_diagnoses(ds_ids):
     ds_diagn_dates = db.session.query(func.min(Diagnostic.setDate).label('min_date')).filter(
         Diagnostic.deleted == 0,
         Diagnostic.diagnosis_id.in_(ds_ids)
-    ).group_by(Diagnostic.client_id).subquery('DiagnosisLowestDiagnosticDates')
+    ).group_by(Diagnostic.diagnosis_id).subquery('DiagnosisLowestDiagnosticDates')
     ds_diagn_ids = db.session.query(func.min(Diagnostic.id).label('min_id')).join(
         ds_diagn_dates, Diagnostic.setDate == ds_diagn_dates.c.min_date
     ).filter(
         Diagnostic.deleted == 0,
         Diagnostic.diagnosis_id.in_(ds_ids)
-    ).group_by(Diagnostic.client_id).subquery('DiagnosisLowestDiagnosticIds')
+    ).group_by(Diagnostic.diagnosis_id).subquery('DiagnosisLowestDiagnosticIds')
     query = db.session.query(Diagnostic).join(
         ds_diagn_ids, Diagnostic.id == ds_diagn_ids.c.min_id
     )
@@ -137,7 +137,7 @@ def get_5_inspections_diagnoses(action):
         inter_right = None
 
     beg_date = left.begDate if left else inter_left.begDate if inter_left else cur.begDate
-    end_date = right.begDate if right else inter_right.begDate if inter_right else cur.begDate
+    end_date = right.begDate if right else inter_right.begDate if inter_right else action.event.execDate
 
     return _get_3_diagnoses(action.event, beg_date, end_date, left, cur, right, inter_left, inter_right)
 
