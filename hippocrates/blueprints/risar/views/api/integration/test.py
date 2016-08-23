@@ -122,7 +122,7 @@ if __name__ == '__main__':
         from blueprints.risar.views.api.integration.concilium.test import \
             test_register_edit_delete_concilium
 
-        # test_auth(login, password)
+        test_auth(login, password)
 
         # test_register_edit_client()
 
@@ -137,15 +137,15 @@ if __name__ == '__main__':
 
         # delete_test_card_id(test_card_id)
 
-        from blueprints.risar.views.api.integration.checkup_obs_first.test import \
-            test_register_edit_delete_first_checkup
-        card_id = '278'
-        test_register_edit_delete_first_checkup(card_id)
-
-        from blueprints.risar.views.api.integration.checkup_obs_second.test import \
-            test_register_edit_delete_second_checkup
-        card_id = '278'
-        test_register_edit_delete_second_checkup(card_id)
+        # from blueprints.risar.views.api.integration.checkup_obs_first.test import \
+        #     test_register_edit_delete_first_checkup
+        # card_id = '278'
+        # test_register_edit_delete_first_checkup(card_id)
+        #
+        # from blueprints.risar.views.api.integration.checkup_obs_second.test import \
+        #     test_register_edit_delete_second_checkup
+        # card_id = '278'
+        # test_register_edit_delete_second_checkup(card_id)
 
         # from blueprints.risar.views.api.integration.checkup_pc.test import \
         #     test_register_edit_delete_pc_checkup

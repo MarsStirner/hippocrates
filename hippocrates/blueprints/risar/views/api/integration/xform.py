@@ -6,16 +6,19 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from abc import ABCMeta, abstractmethod
 
-from blueprints.risar.lib.diagnosis import get_5_inspections_diagnoses, get_adjacent_inspections
+from blueprints.risar.lib.diagnosis import get_5_inspections_diagnoses, get_adjacent_inspections, \
+    get_prev_inspection_query
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.models.risar import ActionIdentification
+from blueprints.risar.risar_config import inspections_span_flatcodes
 
 from nemesis.lib.data import create_action
 from nemesis.views.rb import check_rb_value_exists
 from nemesis.lib.vesta import Vesta, VestaNotFoundException
 from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
 from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureStatus
-from nemesis.models.enums import MeasureStatus, MeasureType
+from nemesis.models.actions import Action
+from nemesis.models.enums import MeasureStatus, MeasureType, ActionStatus
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from nemesis.lib.apiutils import ApiException
@@ -560,14 +563,16 @@ class CheckupsXForm(ExternalXForm):
         em_ctrl = EventMeasureController()
         em_ctrl.regenerate(self.target_obj)
 
-    def _change_end_date(self, old_beg_date):
-        if not self.new:
-            if self.target_obj.endDate and self.target_obj.begDate != old_beg_date:
-                left, cur, right = get_adjacent_inspections(self.target_obj)
+    def _change_end_date(self):
+        with db.session.no_autoflush:
+            left, cur, right = get_adjacent_inspections(self.target_obj, inspections_span_flatcodes)
+            if right:
                 self.target_obj.endDate = max(
                     right.begDate - timedelta(seconds=1),
                     self.target_obj.begDate
-                ) if right else None
+                )
+            else:
+                self.target_obj.endDate = None
 
     def _get_filtered_mis_diags(self, mis_diags):
         # filter mis diags
@@ -605,10 +610,13 @@ class CheckupsXForm(ExternalXForm):
             if not self.new and self.target_obj.begDate != old_action_data['begDate']:
                 t_beg_date = self.target_obj.begDate
                 self.target_obj.begDate = old_action_data['begDate']
+                t_end_date = self.target_obj.endDate
+                self.target_obj.endDate = old_action_data['endDate']
                 t_person = self.target_obj.person
                 self.target_obj.person = old_action_data['person']
 
-                diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, diag_type)
+                diag_sys = DiagnosesSystemManager.get_for_inspection(
+                    self.target_obj, diag_type, inspections_span_flatcodes)
                 diag_sys.refresh_with_old_data(mis_diags, t_beg_date)
                 new_diagnoses, changed_diagnoses = diag_sys.get_result()
 
@@ -616,9 +624,11 @@ class CheckupsXForm(ExternalXForm):
                 db.session.add_all(changed_diagnoses)
                 db.session.flush()
                 self.target_obj.begDate = t_beg_date
+                self.target_obj.endDate = t_end_date
                 self.target_obj.person = t_person
 
-            diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, diag_type)
+            diag_sys = DiagnosesSystemManager.get_for_inspection(
+                self.target_obj, diag_type, inspections_span_flatcodes)
             diag_sys.refresh_with(mis_diags)
             new_diagnoses, changed_diagnoses = diag_sys.get_result()
             create_or_update_diagnoses(self.target_obj, new_diagnoses)
@@ -627,11 +637,27 @@ class CheckupsXForm(ExternalXForm):
     def delete_diagnoses(self):
         """Изменить систему диагнозов после удаления осмотра
         """
-        diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, None)
+        diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, None, inspections_span_flatcodes)
         diag_sys.refresh_with_deletion([])
         new_diagnoses, changed_diagnoses = diag_sys.get_result()
         create_or_update_diagnoses(self.target_obj, new_diagnoses)
         db.session.add_all(changed_diagnoses)
+
+    def close_prev_checkup(self):
+        if self.new:
+            with db.session.no_autoflush:
+                e_d = self.target_obj.begDate - timedelta(seconds=1)
+                sq = get_prev_inspection_query(
+                    self.target_obj,
+                    inspections_span_flatcodes
+                ).with_entities(Action.id.label('action_id')).subquery()
+
+                db.session.query(Action).filter(
+                    Action.id == sq.c.action_id
+                ).update({
+                    Action.endDate: e_d,
+                    Action.status: ActionStatus.finished[0],
+                }, synchronize_session=False)
 
 
 class DiagnosesSystemManager(object):
@@ -662,20 +688,21 @@ class DiagnosesSystemManager(object):
                 return self.action['Doctor'].value
 
     @classmethod
-    def get_for_inspection(cls, action, diag_type):
-        return cls(cls.InspectionSource(action), diag_type)
+    def get_for_inspection(cls, action, diag_type, insp_flatcodes):
+        return cls(cls.InspectionSource(action), diag_type, insp_flatcodes)
 
     @classmethod
-    def get_for_measure_result(cls, action, diag_type, measure_type):
-        return cls(cls.MeasureResultSource(action, measure_type), diag_type)
+    def get_for_measure_result(cls, action, diag_type, measure_type, insp_flatcodes):
+        return cls(cls.MeasureResultSource(action, measure_type), diag_type, insp_flatcodes)
 
-    def __init__(self, source, diag_type):
+    def __init__(self, source, diag_type, insp_flatcodes):
         self.source = source
         # todo: считать для разных типов диагноза отдельно или объединить в единое поле расчетов?
         # Могут ли существовать одинаковые мкб, относящиеся к разным типам диагноза?
         # (отдельно диагноз предварительный с мкб1 и отдельно диагноз заключительный с мкб1 в одно и то же время)
         self.diag_type = diag_type
-        self.existing_diags = get_5_inspections_diagnoses(self.source.action)
+        self.insp_flatcodes = insp_flatcodes
+        self.existing_diags = get_5_inspections_diagnoses(self.source.action, self.insp_flatcodes)
         self.to_create = []
         self.to_delete = []
 
@@ -693,7 +720,10 @@ class DiagnosesSystemManager(object):
             'diagnostic': {
                 'mkb': {'code': mkb_code},
                 'set_date': dgn_beg_date,
-                'create_datetime': dgn_create_date
+                'create_datetime': dgn_create_date,
+                'person': {
+                    'id': person.id
+                } if person else None,
             },
             'diagnosis_types': diagnosis_types,
             'person': {
@@ -744,7 +774,7 @@ class DiagnosesSystemManager(object):
                             ds_beg_date = action_date
                         if 'right' not in insp_w_mkb:
                             # close or open ds
-                            ds_end_date = self.get_date_before(adj_inspections['right'])
+                            ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
 
                         if diagnostic_changed and source_id:
                             # need to delete dgn because it can have higher date than the date of 'cur' inspection
@@ -761,14 +791,14 @@ class DiagnosesSystemManager(object):
                         diag_l = by_inspection['left'][mkb]
                         diagnosis_id = diag_l['ds'].id
                         ds_beg_date = diag_l['ds'].setDate
-                        ds_end_date = self.get_date_before(adj_inspections['right'])
+                        ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
                         diagnostic_changed = kind_changed = True
                     elif 'left' in insp_w_mkb:
                         # ds from previous inspection that ends by the time of right inspection or remains opened
                         diag_l = by_inspection['left'][mkb]
                         diagnosis_id = diag_l['ds'].id
                         ds_beg_date = diag_l['ds'].setDate
-                        ds_end_date = self.get_date_before(adj_inspections['right'])
+                        ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
                         diagnostic_changed = kind_changed = True
                     else:  # 'right' in insp_w_mkb:
                         # ds from next inspection now to start in current inspection
@@ -784,7 +814,7 @@ class DiagnosesSystemManager(object):
                 else:
                     # is new mkb, not presented in any of 3 inspections
                     ds_beg_date = dgn_beg_date = dgn_create_date = action_date
-                    ds_end_date = self.get_date_before(adj_inspections['right'])
+                    ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
                     self.add_diag_data(None, mkb, new_kind, ds_beg_date, ds_end_date,
                                        dgn_beg_date, dgn_create_date, new_person, True, True)
 
@@ -885,7 +915,7 @@ class DiagnosesSystemManager(object):
                             # todo: ignore this case?
                             # left
                             ds_beg_date = diag_l['ds'].setDate
-                            ds_end_date = self.get_date_before(adj_inspections['right'])
+                            ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
                             self.add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                                None, None, None, False, False)
                             # right
@@ -897,7 +927,7 @@ class DiagnosesSystemManager(object):
                         # close diag from previous inspection
                         diag = by_inspection['left'][mkb]
                         ds_beg_date = diag['ds'].setDate
-                        ds_end_date = self.get_date_before(adj_inspections['right'])
+                        ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
                         self.add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                            None, None, None, False, False)
                     elif 'right' in insp_w_mkb:
@@ -994,8 +1024,12 @@ class DiagnosesSystemManager(object):
                     # diags in 'left' and 'right' should be ok, no edit needed
 
     @staticmethod
-    def get_date_before(action):
-        return action.begDate - timedelta(seconds=1) if action else None
+    def get_date_before(action, max_date=None):
+        b_a = action.begDate - timedelta(seconds=1) if action else None
+        if max_date:
+            return max(b_a, max_date) if b_a else b_a
+        else:
+            return b_a
 
 
 class MeasuresResultsXForm(ExternalXForm):
@@ -1058,7 +1092,7 @@ class MeasuresResultsXForm(ExternalXForm):
                 target = self.modify_target(mr_data['old_beg_date'], mr_data['old_person'])
 
                 diag_sys = DiagnosesSystemManager.get_for_measure_result(
-                    target, 'final', self.get_measure_type().value
+                    target, 'final', self.get_measure_type().value, inspections_span_flatcodes
                 )
                 diag_sys.refresh_with_old_data(new_diags, mr_data['new_beg_date'])
                 new_diagnoses, changed_diagnoses = diag_sys.get_result()
@@ -1069,7 +1103,7 @@ class MeasuresResultsXForm(ExternalXForm):
                 self.modify_target(mr_data['new_beg_date'], mr_data['new_person'])
 
             diag_sys = DiagnosesSystemManager.get_for_measure_result(
-                self.target_obj, 'final', self.get_measure_type().value
+                self.target_obj, 'final', self.get_measure_type().value, inspections_span_flatcodes
             )
             diag_sys.refresh_with(new_diags)
             new_diagnoses, changed_diagnoses = diag_sys.get_result()

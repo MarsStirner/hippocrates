@@ -7,7 +7,7 @@
 
 """
 from blueprints.risar.lib.represent import represent_checkup_puerpera
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera
+from blueprints.risar.lib.utils import get_action_by_id
 from blueprints.risar.risar_config import puerpera_inspection_code
 from blueprints.risar.views.api.integration.checkup_puerpera.schemas import \
     CheckupPuerperaSchema
@@ -102,9 +102,6 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
         self.target_obj = action
         diagnoses = get_diagnoses_func()
 
-        if not checkup_id:
-            close_open_checkups_puerpera(event_id)
-
         action.begDate = beg_date
         action.setPerson = self.person
         action.person = self.person
@@ -114,6 +111,8 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
                 action.propsByCode[code].value = value
 
         create_or_update_diagnoses(action, diagnoses)
+
+        self.close_prev_checkup()
 
     def reevaluate_data(self):
         from blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all

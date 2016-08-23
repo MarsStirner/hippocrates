@@ -37,6 +37,11 @@ pc_inspection_code = 'risarPCCheckUp'
 puerpera_inspection_code = 'risarPuerperaCheckUp'
 checkup_flat_codes = [first_inspection_code, second_inspection_code, pc_inspection_code]
 
+# рассматривать все осмотры из следующих как непрерывную последовательность;
+# используется в определении порядка следования осмотров при расчете диагнозов,
+# закрытии предыдущих, а также в методах интеграции
+inspections_span_flatcodes = tuple(checkup_flat_codes + [puerpera_inspection_code])
+
 # inspection properties
 inspection_preg_week_code = 'pregnancy_week'
 

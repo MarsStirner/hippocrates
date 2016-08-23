@@ -215,6 +215,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
             })
         old_action_data = {
             'begDate': self.target_obj.begDate,
+            'endDate': self.target_obj.endDate,
             'person': self.target_obj.person
         }
         res.update({
@@ -233,17 +234,13 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         data_for_diags = data.pop('_data_for_diags')
         fetuses = data.pop('fetuses', [])
 
-        if self.new:
-            close_open_checkups(event_id, beg_date - datetime.timedelta(seconds=1))
-
         action = self.target_obj
 
         self.set_pcard()
         notify_checkup_changes(self.pcard, action, data.get('pregnancy_continuation'))
 
-        old_beg_date = action.begDate
         action.begDate = beg_date
-        self._change_end_date(old_beg_date)
+        self._change_end_date()
         action.setPerson = self.person
         action.person = self.person
 
@@ -254,6 +251,8 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, CheckupsXForm):
         self.update_diagnoses_system(data_for_diags['diag_data'],
             data_for_diags['diag_type'], data_for_diags['old_action_data'])
         create_or_update_fetuses(action, fetuses)
+
+        self.close_prev_checkup()
 
     def delete_target_obj(self):
         # todo: при удалении последнего осмотра наверно нужно открывать предпослений

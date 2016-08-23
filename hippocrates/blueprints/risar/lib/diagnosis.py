@@ -86,27 +86,35 @@ def get_action_ds_kinds(action_ids, ds_ids):
     return query.all()
 
 
-def get_adjacent_inspections(action):
-    left = db.session.query(Action).join(ActionType).filter(
+def get_prev_inspection_query(action, flatcodes):
+    return db.session.query(Action).join(ActionType).filter(
         Action.deleted == 0,
-        Action.event_id == action.event.id,
-        ActionType.flatCode.in_(checkup_flat_codes),
+        Action.event_id == action.event_id,
+        ActionType.flatCode.in_(flatcodes),
         or_(Action.begDate < action.begDate,
             and_(Action.begDate == action.begDate,
                  Action.id < action.id if action.id else True)
             ),
         Action.id != action.id
-    ).order_by(Action.begDate.desc()).limit(1).first()
-    right = db.session.query(Action).join(ActionType).filter(
+    ).order_by(Action.begDate.desc()).limit(1)
+
+
+def get_next_inspection_query(action, flatcodes):
+    return db.session.query(Action).join(ActionType).filter(
         Action.deleted == 0,
-        Action.event_id == action.event.id,
-        ActionType.flatCode.in_(checkup_flat_codes),
+        Action.event_id == action.event_id,
+        ActionType.flatCode.in_(flatcodes),
         or_(Action.begDate > action.begDate,
             and_(Action.begDate == action.begDate,
                  Action.id > action.id if action.id else False)
             ),
         Action.id != action.id
-    ).order_by(Action.begDate).limit(1).first()
+    ).order_by(Action.begDate).limit(1)
+
+
+def get_adjacent_inspections(action, flatcodes):
+    left = get_prev_inspection_query(action, flatcodes).first()
+    right = get_next_inspection_query(action, flatcodes).first()
     return left, action, right
 
 
@@ -128,8 +136,8 @@ def get_adjacent_measure_results(inspection_action):
     return left, right
 
 
-def get_5_inspections_diagnoses(action):
-    left, cur, right = get_adjacent_inspections(action)
+def get_5_inspections_diagnoses(action, insp_flatcodes):
+    left, cur, right = get_adjacent_inspections(action, insp_flatcodes)
     inter_left, inter_right = get_adjacent_measure_results(action)
     if left and inter_left and inter_left < left:
         inter_left = None
