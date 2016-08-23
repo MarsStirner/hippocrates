@@ -21,11 +21,31 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             $scope.checkup.imt = NaN;
         }
     };
+
     $scope.$watch('checkup.height', update_auto);
     $scope.$watch('checkup.weight', update_auto);
-    $scope.save = function (form_controller) {
+
+    $scope.switchToTab = function(tabHref){
+        $("li a[href='#"+tabHref+"']").click();
+    };
+    $scope.goToConclusion = function(){
+        $scope.switchToTab('conclusion');
+    };
+    $scope.hasAtleastOneMainDiagnosis = function () {
+        var diagnoses = $scope.checkup.diagnoses,
+            atleastOneMainDiagnosis = _.any(diagnoses, function(diag){
+                return safe_traverse(diag,['diagnosis_types', 'final', 'code']) === 'main'
+            });
+        return diagnoses.length > 0 && atleastOneMainDiagnosis
+
+    };
+    $scope.save = function (form_controller){
         form_controller.submit_attempt = true;
-        if (form_controller.$valid){
+        $scope.hasMainDiagnose = $scope.hasAtleastOneMainDiagnosis();
+
+        if ( !$scope.hasMainDiagnose ) { $scope.goToConclusion(); }
+
+        if (form_controller.$valid && $scope.hasMainDiagnose){
             return RisarApi.checkup_gyn.save($scope.event_id, $scope.checkup)
                 .then(function (data) {
                     if ($scope.checkup.id){
