@@ -118,20 +118,22 @@ def get_adjacent_inspections(action, flatcodes):
     return left, action, right
 
 
-def get_adjacent_measure_results(inspection_action):
+def get_adjacent_measure_results(action):
     left = db.session.query(Action).join(ActionType).join(
         EventMeasure, EventMeasure.resultAction_id == Action.id
     ).filter(
         Action.deleted == 0,
-        EventMeasure.event_id == inspection_action.event.id,
-        Action.begDate < inspection_action.begDate,
+        EventMeasure.event_id == action.event.id,
+        Action.begDate < action.begDate,
+        Action.id != action.id
     ).order_by(Action.begDate.desc()).limit(1).first()
     right = db.session.query(Action).join(ActionType).join(
         EventMeasure, EventMeasure.resultAction_id == Action.id
     ).filter(
         Action.deleted == 0,
-        EventMeasure.event_id == inspection_action.event.id,
-        Action.begDate > inspection_action.begDate,
+        EventMeasure.event_id == action.event.id,
+        Action.begDate > action.begDate,
+        Action.id != action.id
     ).order_by(Action.begDate).limit(1).first()
     return left, right
 
@@ -171,10 +173,6 @@ def _get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, in
         ((a_d.diagnosis_id, a_d.action_id), a_d) for a_d in act_ds_kinds
     )
 
-    # todo: to del first diag?
-    first_ds_digns = get_first_diagnostics_of_diagnoses(ds_ids)
-    ds_first_diagn_map = dict((diagn.diagnosis_id, diagn) for diagn in first_ds_digns)
-
     inspections = {
         'left_insp': left,
         'right_insp': right,
@@ -193,6 +191,7 @@ def _get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, in
 
     mkb_inspections = {}
     inspection_diags = {}
+    # todo: all diagn usage
     for ds_id in ds_ids:
         action_diagns = ds_action_diagn_map[ds_id]
         ds = action_diagns[action_diagns.keys()[0]].diagnosis
@@ -203,16 +202,15 @@ def _get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, in
                     ds_interval,
                     DateTimeInterval(left.begDate, left.endDate)
                 )):
-            diagn = action_diagns[left.id]
+            diagn = action_diagns.get(left.id)
             mkb_inspections.setdefault(mkb, set()).add('left')
-            if safe_traverse(inspection_diags, 'left', mkb):
+            if diagn and safe_traverse(inspection_diags, 'left', mkb):
                 logger.warning(u'Несколько диагнозов с одинаковым МКБ {0} '
                                u'(Diagnosis.id={1}, Diagnostic.id={2})'.format(mkb, ds.id, diagn.id))
             inspection_diags.setdefault('left', {}).setdefault(
                 mkb, {}
             ).update({
                 'diagn': diagn,
-                'first_diagn': ds_first_diagn_map[ds_id],
                 'ds': ds,
                 'a_d': ds_action_map.get((ds.id, left.id))
             })
@@ -230,7 +228,6 @@ def _get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, in
                 mkb, {}
             ).update({
                 'diagn': diagn,
-                'first_diagn': ds_first_diagn_map[ds_id],
                 'ds': ds,
                 'a_d': ds_action_map.get((ds.id, cur.id))
             })
@@ -248,7 +245,6 @@ def _get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, in
                 mkb, {}
             ).update({
                 'diagn': diagn,
-                'first_diagn': ds_first_diagn_map[ds_id],
                 'ds': ds,
                 'a_d': ds_action_map.get((ds.id, right.id))
             })

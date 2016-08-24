@@ -617,7 +617,7 @@ class CheckupsXForm(ExternalXForm):
 
                 diag_sys = DiagnosesSystemManager.get_for_inspection(
                     self.target_obj, diag_type, inspections_span_flatcodes)
-                diag_sys.refresh_with_old_data(mis_diags, t_beg_date)
+                diag_sys.refresh_with_old_state(mis_diags, t_beg_date)
                 new_diagnoses, changed_diagnoses = diag_sys.get_result()
 
                 create_or_update_diagnoses(self.target_obj, new_diagnoses)
@@ -677,15 +677,17 @@ class DiagnosesSystemManager(object):
             self.action = action
             self.measure_type = measure_type
         def get_date(self):
-            if self.measure_type == MeasureType.checkup[0]:
-                return self.action['CheckupDate'].value
-            elif self.measure_type == MeasureType.hospitalization[0]:
-                return self.action['IssueDate'].value
+            return self.action.begDate
+            # if self.measure_type == MeasureType.checkup[0]:
+            #     return self.action['CheckupDate'].value
+            # elif self.measure_type == MeasureType.hospitalization[0]:
+            #     return self.action['IssueDate'].value
         def get_person(self):
-            if self.measure_type == MeasureType.checkup[0]:
-                return self.action['Doctor'].value
-            elif self.measure_type == MeasureType.hospitalization[0]:
-                return self.action['Doctor'].value
+            return self.action.person
+            # if self.measure_type == MeasureType.checkup[0]:
+            #     return self.action['Doctor'].value
+            # elif self.measure_type == MeasureType.hospitalization[0]:
+            #     return self.action['Doctor'].value
 
     @classmethod
     def get_for_inspection(cls, action, diag_type, insp_flatcodes):
@@ -729,7 +731,7 @@ class DiagnosesSystemManager(object):
             'person': {
                 'id': person.id
             } if person else None,
-            'set_date': ds_beg_date,
+            'set_date': safe_date(ds_beg_date),
             'end_date': ds_end_date,
         })
 
@@ -738,7 +740,7 @@ class DiagnosesSystemManager(object):
 
     def refresh_with(self, mkb_data_list):
         """Рассчитать изменения в системе диагнозов на основе данных сохранения
-        осмотра или результата мероприятия.
+        осмотра.
 
         :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
         """
@@ -766,9 +768,11 @@ class DiagnosesSystemManager(object):
                         ds_beg_date = diag['ds'].setDate
                         ds_end_date = diag['ds'].endDate
                         diagnosis_id = diag['ds'].id
+                        dg_person_id = diag['diagn'].modifyPerson_id if cur_diagn else None
                         dgn_bd = cur_diagn.setDate if cur_diagn else None
                         dgn_cd = cur_diagn.createDatetime if cur_diagn else None
-                        diagnostic_changed = dgn_bd != action_date or dgn_cd != action_date or not source_id
+                        diagnostic_changed = not source_id or dgn_bd != action_date or dgn_cd != action_date or \
+                            dg_person_id != new_person.id
                         if 'left' not in insp_w_mkb:
                             # diag was created exactly in current action
                             ds_beg_date = action_date
@@ -776,7 +780,7 @@ class DiagnosesSystemManager(object):
                             # close or open ds
                             ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
 
-                        if diagnostic_changed and source_id:
+                        if cur_diagn and diagnostic_changed:
                             # need to delete dgn because it can have higher date than the date of 'cur' inspection
                             # TODO: test
                             cur_diagn.deleted = 1
@@ -822,9 +826,9 @@ class DiagnosesSystemManager(object):
         ext_mkbs = {mkb for diag_data in mkb_data_list for mkb in diag_data['mkbs']}
         self.refresh_with_deletion(ext_mkbs)
 
-    def refresh_with_old_data(self, mkb_data_list, new_beg_date):
-        """Рассчитать изменения в системе диагнозов на основе данных action с еще
-        не измененной датой.
+    def refresh_with_old_state(self, mkb_data_list, new_beg_date):
+        """Рассчитать изменения в системе диагнозов на основе старого состояния
+        action с еще не измененной датой.
 
         Этот шаг требуется для обработки случаев, когда осмотр, который ранее являлся причиной
         появляения диагноза, а теперь оказывается сменил дату с перескоком через другие осмотры,
@@ -881,8 +885,9 @@ class DiagnosesSystemManager(object):
 
                         # delete dgn
                         # todo: test
-                        diag['diagn'].deleted = 1
-                        self.to_delete.append(diag['diagn'])
+                        if diag['diagn']:
+                            diag['diagn'].deleted = 1
+                            self.to_delete.append(diag['diagn'])
 
                         self.add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                            None, None, None, False, False)
@@ -941,8 +946,9 @@ class DiagnosesSystemManager(object):
                     # delete unneeded dgn from cur
                     # todo: test
                     diagn = by_inspection['cur'][mkb]['diagn']
-                    diagn.deleted = 1
-                    self.to_delete.append(diagn)
+                    if diagn:
+                        diagn.deleted = 1
+                        self.to_delete.append(diagn)
 
     def refresh_with_deletion(self, mkb_to_stay_list):
         """Рассчитать изменения в системе диагнозов на основе данных удаления
@@ -983,7 +989,7 @@ class DiagnosesSystemManager(object):
                             ds_beg_date = dgn_beg_date = dgn_create_date = adj_inspections['right'].begDate
                             ds_end_date = diag_r['ds'].endDate
                             diag_kind = diag_r['a_d'].diagnosisKind.code if diag_r['a_d'] else 'associated'
-                            person = diag_r['diagn'].person
+                            person = diag_r['diagn'].person if diag_r['diagn'] else None
                             self.add_diag_data(None, mkb, diag_kind, ds_beg_date, ds_end_date,
                                                dgn_beg_date, dgn_create_date, person, True, True)
                         else:
@@ -1023,6 +1029,65 @@ class DiagnosesSystemManager(object):
                 # else:
                     # diags in 'left' and 'right' should be ok, no edit needed
 
+    def refresh_with_measure_result(self, mkb_data_list):
+        """Рассчитать изменения в системе диагнозов на основе данных сохранения
+        результата мероприятия
+
+        В список диагнозов для сохранения передаются диагнозы, поставленные
+        непосредственно в результате мероприятия, а также к ним добавляются все диагнозы,
+        существующие на дату результата мероприятия - т.е. те, которые относятся
+        к предыдущему осмотру.
+
+        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
+        """
+        mkb_data_list = mkb_data_list[:]
+        by_inspection = self.existing_diags['by_inspection']
+        if 'left' in by_inspection:
+            dk_mkb_map = {}
+            for mkb, diag in by_inspection['left'].items():
+                if diag['a_d']:
+                    if diag['a_d'].diagnosisType.code == self.diag_type:
+                        dk_mkb_map.setdefault(diag['a_d'].diagnosisKind.code, set()).add(mkb)
+                else:
+                    dk_mkb_map.setdefault('associated', set()).add(mkb)
+            for dk_code, mkb_list in dk_mkb_map.items():
+                mkb_data_list.append({
+                    'kind': dk_code,
+                    'mkbs': mkb_list
+                })
+
+        self.refresh_with(mkb_data_list)
+
+    def refresh_with_measure_result_old_state(self, mkb_data_list, new_beg_date):
+        """Рассчитать изменения в системе диагнозов на основе старого состояния
+        action мероприятия с еще не измененной датой.
+
+        В список диагнозов для сохранения передаются диагнозы, поставленные
+        непосредственно в результате мероприятия, а также к ним добавляются все диагнозы,
+        существующие на дату результата мероприятия - т.е. те, которые относятся
+        к предыдущему осмотру.
+
+        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
+        """
+        mkb_data_list = mkb_data_list[:]
+        by_inspection = self.existing_diags['by_inspection']
+        if 'left' in by_inspection:
+            dk_mkb_map = {}
+            for mkb, diag in by_inspection['left'].items():
+                if diag['a_d']:
+                    if diag['a_d'].diagnosisType.code == self.diag_type:
+                        dk_mkb_map.setdefault(diag['a_d'].diagnosisKind.code, set()).add(mkb)
+                else:
+                    dk_mkb_map.setdefault('associated', set()).add(mkb)
+            for dk_code, mkb_list in dk_mkb_map.items():
+                mkb_data_list.append({
+                    'kind': dk_code,
+                    'mkbs': mkb_list
+                })
+
+        self.refresh_with_old_state(mkb_data_list, new_beg_date)
+
+
     @staticmethod
     def get_date_before(action, max_date=None):
         b_a = action.begDate - timedelta(seconds=1) if action else None
@@ -1049,6 +1114,20 @@ class MeasuresResultsXForm(ExternalXForm):
     @abstractmethod
     def get_properties_data(self, data):
         return data
+
+    def get_em(self):
+        return self.em
+
+    def set_pcard(self):
+        if not self.pcard:
+            if not self.parent_obj:
+                self.find_parent_obj(self.parent_obj_id)
+            event = self.parent_obj
+            self.pcard = PregnancyCard.get_for_event(event)
+
+    def reevaluate_data(self):
+        self.set_pcard()
+        self.pcard.reevaluate_card_attrs()
 
     def update_measure_data(self, data):
         status = data.get('status')
@@ -1078,6 +1157,7 @@ class MeasuresResultsXForm(ExternalXForm):
         mr_data = self.get_data_for_diags(data)
 
         properties_data = self.get_properties_data(data)
+        self.set_result_action_data(properties_data)
         self.set_properties(properties_data)
         self.update_measure_data(data)
         self.save_external_data()
@@ -1086,15 +1166,15 @@ class MeasuresResultsXForm(ExternalXForm):
 
     def update_diagnoses_system(self, mr_data):
         with db.session.no_autoflush:
-            new_mkbs = mr_data['new_mkbs']
-            new_diags = [dict(diag_type='associated', mkb_list=new_mkbs)]
+            measure_mkbs = mr_data['new_mkbs']
+            new_diags = [dict(kind='associated', mkbs=measure_mkbs)]
             if not self.new and mr_data['changed']:
                 target = self.modify_target(mr_data['old_beg_date'], mr_data['old_person'])
 
                 diag_sys = DiagnosesSystemManager.get_for_measure_result(
                     target, 'final', self.get_measure_type().value, inspections_span_flatcodes
                 )
-                diag_sys.refresh_with_old_data(new_diags, mr_data['new_beg_date'])
+                diag_sys.refresh_with_measure_result_old_state(new_diags, mr_data['new_beg_date'])
                 new_diagnoses, changed_diagnoses = diag_sys.get_result()
 
                 create_or_update_diagnoses(self.target_obj, new_diagnoses)
@@ -1105,7 +1185,7 @@ class MeasuresResultsXForm(ExternalXForm):
             diag_sys = DiagnosesSystemManager.get_for_measure_result(
                 self.target_obj, 'final', self.get_measure_type().value, inspections_span_flatcodes
             )
-            diag_sys.refresh_with(new_diags)
+            diag_sys.refresh_with_measure_result(new_diags)
             new_diagnoses, changed_diagnoses = diag_sys.get_result()
             create_or_update_diagnoses(self.target_obj, new_diagnoses)
             db.session.add_all(changed_diagnoses)
@@ -1146,6 +1226,9 @@ class MeasuresResultsXForm(ExternalXForm):
         db.session.add_all((self.em, em_result))
 
         self.target_obj = em_result
+
+    def set_result_action_data(self, data):
+        pass
 
     def set_properties(self, data):
         for code, value in data.iteritems():

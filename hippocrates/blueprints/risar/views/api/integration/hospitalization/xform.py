@@ -51,6 +51,10 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
                 ('old_mkbs', 'new_mkbs'), ('old_beg_date', 'new_beg_date'), ('old_person', 'new_person')
             ))
             return res
+        else:
+            return {
+                'new_mkbs': [new_data.get('diagnosis_out'), ] if 'diagnosis_out' in new_data else [],
+            }
 
     def modify_target(self, new_date, new_person):
         self.target_obj['IssueDate'].value = new_date
