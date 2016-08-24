@@ -106,8 +106,10 @@ def represent_event_diagnoses(event):
     return result
 
 
-def represent_action_diagnoses(action):
+def represent_action_diagnoses(action, flat_codes):
     from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
+    from hippocrates.blueprints.risar.lib.diagnosis import get_prev_inspection_query
+    from sqlalchemy.orm.session import make_transient
 
     card = AbstractCard.get_for_event(action.event)
 
@@ -116,25 +118,44 @@ def represent_action_diagnoses(action):
     # Потом достём id всех действовавших на тот момент диагнозов
     diagnosis_ids = [diagnostic.diagnosis_id for diagnostic in diagnostics]
 
+    this_is_new_action = action.id is None
+    prev_action = get_prev_inspection_query(action, flat_codes).first()
+    if this_is_new_action:
+        query_action = prev_action
+    else:
+        query_action = action
+
+    query = Action_Diagnosis.query.filter(
+            Action_Diagnosis.deleted == 0,
+            Action_Diagnosis.action == query_action,
+            Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
+    )
+
+    # Расставляем ассоциации Diagnosis.id -> Action_Diagnosis
+    associations = collections.defaultdict(set)
+    for action_diagnosis in query:
+        if this_is_new_action:
+            blank_ad = Action_Diagnosis(diagnosis_id=action_diagnosis.diagnosis_id,
+                                      diagnosisType_id=action_diagnosis.diagnosisType_id,
+                                      diagnosisKind_id=action_diagnosis.diagnosisKind_id,
+                                      diagnosis=action_diagnosis.diagnosis,
+                                      diagnosisType=action_diagnosis.diagnosisType,
+                                      diagnosisKind=action_diagnosis.diagnosisKind)
+
+            associations[action_diagnosis.diagnosis_id].add(blank_ad)
+        else:
+            associations[action_diagnosis.diagnosis_id].add(action_diagnosis)
+
+    # Начинаем генерацию
+    dvis = DiagnosisVisualizer()
+    result = []
+
     # По умолчанию все диагнозы сопутствующие, если не указано иного
     associated_kind = rbDiagnosisKind.query.filter(rbDiagnosisKind.code == 'associated').first()
     types_info = {
         diag_type.code: associated_kind
         for diag_type in action.actionType.diagnosis_types
     }
-
-    # Расставляем ассоциации Diagnosis.id -> Action_Diagnosis
-    associations = collections.defaultdict(set)
-    for action_diagnosis in Action_Diagnosis.query.filter(
-        Action_Diagnosis.deleted == 0,
-        Action_Diagnosis.action == action,
-        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
-    ):
-        associations[action_diagnosis.diagnosis_id].add(action_diagnosis)
-
-    # Начинаем генерацию
-    dvis = DiagnosisVisualizer()
-    result = []
     for diagnostic in diagnostics:
         # Основа типов
         types = copy.copy(types_info)
@@ -147,6 +168,8 @@ def represent_action_diagnoses(action):
         result.append(dict(
             dvis.make_diagnosis_record(diagnostic.diagnosis, diagnostic),
             diagnosis_types=types,
+            kind_changed=this_is_new_action,
+            diagnostic_changed=this_is_new_action,
         ))
     return result
 
@@ -334,7 +357,7 @@ def represent_anamnesis_newborn_inspection(child):
     }
 
 
-def represent_checkup(action, codes=None):
+def represent_checkup(action, che_p_flat_codes=[], codes=None):
     result = action_as_dict(action, codes)
     result['beg_date'] = action.begDate
     result['end_date'] = action.endDate
@@ -342,7 +365,7 @@ def represent_checkup(action, codes=None):
     result['flat_code'] = action.actionType.flatCode
     result['id'] = action.id
 
-    result['diagnoses'] = represent_action_diagnoses(action)
+    result['diagnoses'] = represent_action_diagnoses(action, che_p_flat_codes)
     result['diagnosis_types'] = action.actionType.diagnosis_types
     return result
 
