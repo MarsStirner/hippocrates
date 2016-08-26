@@ -16,7 +16,7 @@ from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
 from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PerinatalRiskRate
-from nemesis.models.exists import Organisation, Person
+from nemesis.models.exists import Organisation, Person, rbRequestType
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 
@@ -143,6 +143,9 @@ def api_0_event_search():
     total = safe_int(result['result']['meta']['total_found'])
     pages = int(math.ceil(total / float(per_page)))
     today = datetime.date.today()
+
+    rbRT_cache = rbRequestType.cache().dict('id')
+
     return {
         'count': total,
         'total_pages': pages,
@@ -165,7 +168,8 @@ def api_0_event_search():
                 'week':((
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
                     datetime.date.fromtimestamp(row['psdate'])
-                ).days / 7 + 1) if row['psdate'] else None
+                ).days / 7 + 1) if row['psdate'] else None,
+                'request_type': rbRT_cache.get(row['request_type_id'])
             }
             for row in result['result']['items']
         ]
