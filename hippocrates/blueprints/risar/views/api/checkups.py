@@ -79,18 +79,19 @@ def api_0_checkup_get(checkup_id=None):
 @module.route('/api/0/checkup/new/<int:event_id>', methods=['POST'])
 @api_method
 def api_0_checkup_new(event_id):
-    data = request.get_json()
-    flat_code = data.get('flat_code')
-    if not flat_code:
-        raise ApiException(400, 'flat_code required')
-    event = Event.query.get(event_id)
-    action = get_action_by_id(None, event, flat_code, True)
-    copy_attrs_from_last_action(event, flat_code, action, (
-        'fetus_first_movement_date',
-    ))
-    result = represent_checkup(action)
-    result['pregnancy_week'] = get_pregnancy_week(event)
-    return result
+    with db.session.no_autoflush:
+        data = request.get_json()
+        flat_code = data.get('flat_code')
+        if not flat_code:
+            raise ApiException(400, 'flat_code required')
+        event = Event.query.get(event_id)
+        action = get_action_by_id(None, event, flat_code, True)
+        copy_attrs_from_last_action(event, flat_code, action, (
+            'fetus_first_movement_date',
+        ))
+        result = represent_checkup(action)
+        result['pregnancy_week'] = get_pregnancy_week(event)
+        return result
 
 
 @module.route('/api/0/checkup_list/')

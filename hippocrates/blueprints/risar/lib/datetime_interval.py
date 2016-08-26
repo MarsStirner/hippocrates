@@ -29,6 +29,16 @@ class DateTimeInterval(object):
         if self.beg == self.end:
             self.is_point = True
 
+    def __lt__(self, other):
+        if not isinstance(other, DateTimeInterval):
+            raise RuntimeError('Can compare only with DateTimeInterval')
+        return get_intersection_type(self, other) == IntersectionType.none_left
+
+    def __gt__(self, other):
+        if not isinstance(other, DateTimeInterval):
+            raise RuntimeError('Can compare only with DateTimeInterval')
+        return get_intersection_type(self, other) == IntersectionType.none_right
+
 
 def get_intersection_type(interval, other_interval):
     """Возвращает тип пересечения интервала с другим интервалом

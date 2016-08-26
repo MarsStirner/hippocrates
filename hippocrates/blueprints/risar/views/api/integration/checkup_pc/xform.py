@@ -235,7 +235,7 @@ class CheckupPCXForm(CheckupPCSchema, CheckupsXForm):
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_fetuses(action, fetuses)
 
-        self.close_prev_checkup()
+        # self.close_prev_checkup()
 
 
     def close_diags(self):

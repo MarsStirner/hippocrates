@@ -6,7 +6,6 @@
 @date: 22.03.2016
 
 """
-import datetime
 
 from blueprints.risar.lib.fetus import create_or_update_fetuses
 from blueprints.risar.lib.represent import represent_checkup
@@ -199,16 +198,18 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         }
         res.update({
             '_data_for_diags': {
-                'diag_data': diag_data,
-                'diag_type': 'final',
+                'diags_list': [
+                    {
+                        'diag_data': diag_data,
+                        'diag_type': 'final'
+                    }
+                ],
                 'old_action_data': old_action_data
             }
         })
 
     def update_form(self, data):
         # like blueprints.risar.views.api.checkups.api_0_checkup
-
-        event_id = self.parent_obj_id
 
         beg_date = safe_datetime(safe_date(data.get('beg_date', None)))
         data_for_diags = data.pop('_data_for_diags')
@@ -220,19 +221,19 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         notify_checkup_changes(self.pcard, action, data.get('pregnancy_continuation'))
 
         action.begDate = beg_date
-        self._change_end_date()
         action.setPerson = self.person
         action.person = self.person
+        self.ais.refresh(self.target_obj)
+        self.ais.set_cur_enddate()
 
         for code, value in data.iteritems():
             if code in action.propsByCode:
                 action.propsByCode[code].value = value
 
-        self.update_diagnoses_system(data_for_diags['diag_data'],
-            data_for_diags['diag_type'], data_for_diags['old_action_data'])
+        self.update_diagnoses_system(data_for_diags['diags_list'], data_for_diags['old_action_data'])
         create_or_update_fetuses(action, fetuses)
 
-        self.close_prev_checkup()
+        self.ais.close_previous()
 
     def delete_target_obj(self):
         # todo: при удалении последнего осмотра наверно нужно открывать предпослений

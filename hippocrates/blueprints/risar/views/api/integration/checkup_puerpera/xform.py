@@ -112,7 +112,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, CheckupsXForm):
 
         create_or_update_diagnoses(action, diagnoses)
 
-        self.close_prev_checkup()
+        # self.close_prev_checkup()
 
     def reevaluate_data(self):
         from blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
