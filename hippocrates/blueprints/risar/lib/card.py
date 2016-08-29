@@ -336,7 +336,7 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def radz_risk(self):
-        from blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
+        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
         return get_radz_risk(self.event, True)
 
     def reevaluate_card_attrs(self):

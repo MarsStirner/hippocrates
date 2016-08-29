@@ -34,6 +34,22 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         max_pages: 10,
         pages: 1
     };
+    $scope.query = {
+        areas: [],
+        curators: [],
+        orgs: [],
+        person: default_docs[0],
+        checkup_date_from: null,
+        checkup_date_to: null,
+        bdate_from: null,
+        bdate_to: null,
+        risk: [],
+        closed: $scope.closed_items[0],
+        client_work_group: {},
+        age_min: null,
+        age_max: null
+    };
+
     $scope.get_search_data = function () {
         var orgs = [];
         var from_orgs = $scope.query.orgs.length ? $scope.query.orgs: $scope.organisations;
@@ -92,7 +108,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         return RisarApi.search_event.area_curator_list(areas)
         .then(function (result) {
             $scope.curators = result;
-            $scope.query.curators = [];
+            setFltCurators();
             return $scope.refresh_organisations();
         });
     };
@@ -111,7 +127,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         return RisarApi.search_event.lpu_doctors_list(orgs)
         .then(function (result) {
             $scope.doctors = default_docs.concat(result);
-            $scope.query.person = $scope.doctors[0];
+            setFltDoctor();
         });
     }; 
 
@@ -120,9 +136,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     $scope.reset_filters = function () {
         $scope.query = {
             areas: [],
-            curators: [],
             orgs: [],
-            person: default_docs[0],
             checkup_date_from: null,
             checkup_date_to: null,
             bdate_from: null,
@@ -132,7 +146,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             client_work_group: {},
             age_min: null,
             age_max: null,
-            request_types: []
+            request_types: [],
+            person: $scope.query.person,
+            curators: $scope.query.curators
         };
         return $scope.refresh_areas();
     };
@@ -145,14 +161,47 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     $scope.onPageChanged = function () {
         perform(true);
     };
+    $scope.canChangeDoctor = function () {
+        return CurrentUser.current_role_in('admin');
+    };
+    $scope.canChangeCurator = function () {
+        return CurrentUser.current_role_in('admin');
+    };
+
+    var setFltDoctor = function () {
+        if (CurrentUser.current_role_in('admin', 'obstetrician')) {
+           var doc_id = CurrentUser.get_main_user().id,
+                person_idx = _.findIndex($scope.doctors, function (doctor) {
+                    return doctor.id === doc_id;
+                });
+            if (person_idx !== -1) {
+                $scope.query.person = $scope.doctors[person_idx];
+            }
+        } else {
+            $scope.query.person = default_docs[0];
+        }
+    };
+    var setFltCurators = function () {
+        if (CurrentUser.current_role_in('overseer1', 'overseer2', 'overseer3')) {
+            var cur_id = CurrentUser.get_main_user().id,
+                curators_list = [];
+            for (var i = 0; i < $scope.curators.length; i++) {
+                if ($scope.curators[i].person_id === cur_id) {
+                    curators_list.push($scope.curators[i]);
+                }
+            }
+            if (curators_list.length) {
+                $scope.query.curators = curators_list;
+            }
+        } else {
+            $scope.query.curators = [];
+        }
+    };
 
     // start
     $q.all([areas_promise]).then(function () {
-        var doc_id = CurrentUser.get_main_user().id,
-            person_idx = _.findIndex($scope.doctors, function (doctor) {
-                return doctor.id === doc_id;
-            });
-        $scope.query.person = $scope.doctors[person_idx !== -1 ? person_idx : 0];
+        setFltDoctor();
+        setFltCurators();
 
         $scope.$watchCollection('query', function () {
             tc.start()

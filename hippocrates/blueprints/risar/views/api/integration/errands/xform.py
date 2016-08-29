@@ -9,6 +9,7 @@
 from hippocrates.blueprints.risar.views.api.integration.errands.schemas import \
     ErrandSchema, ErrandListSchema
 from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
+from hippocrates.blueprints.risar.lib.represent import make_file_url
 from nemesis.lib.utils import safe_date
 from nemesis.models.event import Event
 from nemesis.models.risar import Errand, rbErrandStatus
@@ -99,5 +100,22 @@ class ErrandListXForm(ErrandListSchema, XForm):
                 'execution_doctor': self.from_person_rb(errand.execPerson),
                 'status': self.from_rb(errand.status),
                 'communication': "\\n".join(errand.communications.split('\n')),
+                'attached_files': [
+                    self._represent_attached_file(attach)
+                    for attach in errand.attach_files
+                ]
             })
         return res
+
+    def _represent_attached_file(self, efa):
+        filemeta = efa.file_meta
+        return {
+            'id': str(efa.id),
+            "name": filemeta.name,
+            "url": make_file_url(filemeta),
+            "comment": filemeta.note,
+            "doctor_code": self.from_person_rb(efa.set_person),
+            "hospital_code": self.from_org_rb(efa.set_person and efa.set_person.organisation),
+            "attach_date": safe_date(efa.attachDate),
+            "mimetype": filemeta.mimetype
+        }

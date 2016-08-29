@@ -1,5 +1,5 @@
 {% extends 'risar/base/base.html' %}
-{% import 'risar/_macros.html' as rimacros %}
+{% import 'risar/_macros.html' as rimacros with context %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -96,7 +96,7 @@
                                         <th>Статус</th>
                                         <th>Номер карты</th>
                                         <th>Исполнитель</th>
-                                        <th>Прогресс</th>
+{#                                        <th>Прогресс</th>#}
                                         <th>Дата выполнения</th>
                                         <th></th>
                                     </tr>
@@ -115,9 +115,9 @@
                                     </td>
                                     <td ng-class="{'bold':!errand.reading_date}"><a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ errand.event.id ]]">[[errand.event.external_id]]</a></td>
                                     <td ng-class="{'bold':!errand.reading_date}">[[errand.exec_person.name]]</td>
-                                    <td style="text-align: center;">
-                                        <span class="progress" id="[[errand.id]]">Загрузка..</span>
-                                    </td>
+{#                                    <td style="text-align: center;">#}
+{#                                        <span class="progress" id="[[errand.id]]">Загрузка..</span>#}
+{#                                    </td>#}
                                     <td ng-class="{'bold':!errand.reading_date}">[[errand.planned_exec_date | asDate]]</td>
                                     <td>
                                         <div class="btn-group">
