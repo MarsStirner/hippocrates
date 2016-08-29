@@ -333,7 +333,10 @@ class DiagnosesSystemManager(object):
         self.source = source
         self.diag_type = diag_type
         self.ais = adj_insp_state
+        # source action is being created
         self.create_mode = adj_insp_state.create_mode
+        # source action is being deleted
+        self.delete_mode = False
         # расчет диагнозов будет осуществляться по нескольким сериям данных с разными diag_type
         self.refresh_in_series = refresh_in_series
         self.existing_diags = None
@@ -442,7 +445,7 @@ class DiagnosesSystemManager(object):
 
         # process existing diags, that were not sent from external source
         ext_mkbs = {mkb for diag_data in mkb_data_list for mkb in diag_data['mkbs']}
-        self.refresh_with_deletion(ext_mkbs)
+        self._delete_remaining(ext_mkbs)
 
     def refresh_with_old_state(self, mkb_data_list, future_interval):
         """Рассчитать изменения в системе диагнозов на основе старого состояния
@@ -596,7 +599,76 @@ class DiagnosesSystemManager(object):
                         diagn.deleted = 1
                         self.to_delete.append(diagn)
 
-    def refresh_with_deletion(self, mkb_to_stay_list):
+    def refresh_with_deletion(self):
+        """Рассчитать изменения в системе диагнозов после удаления осмотра."""
+        self.delete_mode = True
+        self._delete_remaining([])
+
+    def refresh_with_measure_result(self, mkb_data_list):
+        """Рассчитать изменения в системе диагнозов на основе данных сохранения
+        результата мероприятия
+
+        В список диагнозов для сохранения передаются диагнозы, поставленные
+        непосредственно в результате мероприятия, а также к ним добавляются все диагнозы,
+        существующие на дату результата мероприятия - т.е. те, которые относятся
+        к предыдущему осмотру.
+
+        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
+        """
+        mkb_data_list = mkb_data_list[:]
+        by_inspection = self.existing_diags['by_inspection']
+        if 'left' in by_inspection:
+            dk_mkb_map = {}
+            for mkb, diag in by_inspection['left'].items():
+                if self.diag_type in diag['diag_types']:
+                    dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
+                else:
+                    dk_mkb_map.setdefault('associated', set()).add(mkb)
+            for dk_code, mkb_list in dk_mkb_map.items():
+                mkb_data_list.append({
+                    'kind': dk_code,
+                    'mkbs': mkb_list
+                })
+
+        self.refresh_with(mkb_data_list)
+
+    def refresh_with_measure_result_old_state(self, mkb_data_list, future_interval):
+        """Рассчитать изменения в системе диагнозов на основе старого состояния
+        action мероприятия с еще не измененной датой.
+
+        В список диагнозов для сохранения передаются диагнозы, поставленные
+        непосредственно в результате мероприятия, а также к ним добавляются все диагнозы,
+        существующие на дату результата мероприятия - т.е. те, которые относятся
+        к предыдущему осмотру.
+
+        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
+        """
+        mkb_data_list = mkb_data_list[:]
+        by_inspection = self.existing_diags['by_inspection']
+        if 'left' in by_inspection:
+            dk_mkb_map = {}
+            for mkb, diag in by_inspection['left'].items():
+                if self.diag_type in diag['diag_types']:
+                    dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
+                else:
+                    dk_mkb_map.setdefault('associated', set()).add(mkb)
+            for dk_code, mkb_list in dk_mkb_map.items():
+                mkb_data_list.append({
+                    'kind': dk_code,
+                    'mkbs': mkb_list
+                })
+
+        self.refresh_with_old_state(mkb_data_list, future_interval)
+
+    @staticmethod
+    def get_date_before(action, max_date=None):
+        b_a = action.begDate - datetime.timedelta(seconds=1) if action else None
+        if max_date:
+            return max(b_a, max_date) if b_a else b_a
+        else:
+            return b_a
+
+    def _delete_remaining(self, mkb_to_stay_list):
         """Рассчитать изменения в системе диагнозов на основе данных удаления
         всех МКБ, относящихся к текущему осмотру, кроме тех, что должны
         остаться - mkb_to_stay_list.
@@ -614,17 +686,21 @@ class DiagnosesSystemManager(object):
                 if 'cur' in insp_w_mkb:
                     diag = by_inspection['cur'][mkb]
                     diag_types = diag['diag_types']
-                    if self.diag_type in diag_types:
-                        # diag_type_exists
-                        diag_kind = diag_types[self.diag_type]
-                    elif len(diag_types):
-                        # diag_type_not_exists
-                        diag_kind = None
+                    if self.diag_type:
+                        if self.diag_type in diag_types:
+                            # diag_type_exists
+                            diag_kind = diag_types[self.diag_type]
+                        elif len(diag_types):
+                            # diag_type_not_exists
+                            diag_kind = None
+                        else:
+                            # diag_type_exists
+                            diag_kind = 'associated'
                     else:
-                        # diag_type_exists
                         diag_kind = 'associated'
 
-                    if diag_kind is None or (diag_kind == 'associated' and self.refresh_in_series):
+                    if self.diag_type is not None and (diag_kind is None or
+                            (diag_kind == 'associated' and self.refresh_in_series)):
                         # diag exists in current, but has different from current run diagnosis_type;
                         # don't perform anything in this case
                         continue
@@ -641,18 +717,19 @@ class DiagnosesSystemManager(object):
                         diag_l = by_inspection['left'][mkb]
                         diag_r = by_inspection['right'][mkb]
                         if diag_l['ds'].id == diag_r['ds'].id:
-                            # left
-                            ds_beg_date = diag_l['ds'].setDate
-                            ds_end_date = self.get_date_before(adj_inspections['cur'])
-                            self._add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
-                                               None, None, None, False, False)
-                            # right
-                            ds_beg_date = dgn_beg_date = dgn_create_date = adj_inspections['right'].begDate
-                            ds_end_date = diag_r['ds'].endDate
-                            diag_kind = diag_kind
-                            person = diag_r['diagn'].person if diag_r['diagn'] else None
-                            self._add_diag_data(None, mkb, diag_kind, ds_beg_date, ds_end_date,
-                                               dgn_beg_date, dgn_create_date, person, True, True)
+                            if not self.delete_mode:
+                                # left
+                                ds_beg_date = diag_l['ds'].setDate
+                                ds_end_date = self.get_date_before(adj_inspections['cur'])
+                                self._add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                                   None, None, None, False, False)
+                                # right
+                                ds_beg_date = dgn_beg_date = dgn_create_date = adj_inspections['right'].begDate
+                                ds_end_date = diag_r['ds'].endDate
+                                diag_kind = diag_kind
+                                person = diag_r['diagn'].person if diag_r['diagn'] else None
+                                self._add_diag_data(None, mkb, diag_kind, ds_beg_date, ds_end_date,
+                                                   dgn_beg_date, dgn_create_date, person, True, True)
                         else:
                             # left
                             ds_beg_date = diag_l['ds'].setDate
@@ -689,76 +766,6 @@ class DiagnosesSystemManager(object):
                             self.to_delete.append(diagn)
                 # else:
                     # diags in 'left' and 'right' should be ok, no edit needed
-
-    def refresh_with_measure_result(self, mkb_data_list):
-        """Рассчитать изменения в системе диагнозов на основе данных сохранения
-        результата мероприятия
-
-        В список диагнозов для сохранения передаются диагнозы, поставленные
-        непосредственно в результате мероприятия, а также к ним добавляются все диагнозы,
-        существующие на дату результата мероприятия - т.е. те, которые относятся
-        к предыдущему осмотру.
-
-        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
-        """
-        mkb_data_list = mkb_data_list[:]
-        by_inspection = self.existing_diags['by_inspection']
-        if 'left' in by_inspection:
-            dk_mkb_map = {}
-            for mkb, diag in by_inspection['left'].items():
-                if self.diag_type in diag['diag_types']:
-                    dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
-                # if diag['a_d']:
-                #     if diag['a_d'].diagnosisType.code == self.diag_type:
-                #         dk_mkb_map.setdefault(diag['a_d'].diagnosisKind.code, set()).add(mkb)
-                else:
-                    dk_mkb_map.setdefault('associated', set()).add(mkb)
-            for dk_code, mkb_list in dk_mkb_map.items():
-                mkb_data_list.append({
-                    'kind': dk_code,
-                    'mkbs': mkb_list
-                })
-
-        self.refresh_with(mkb_data_list)
-
-    def refresh_with_measure_result_old_state(self, mkb_data_list, future_interval):
-        """Рассчитать изменения в системе диагнозов на основе старого состояния
-        action мероприятия с еще не измененной датой.
-
-        В список диагнозов для сохранения передаются диагнозы, поставленные
-        непосредственно в результате мероприятия, а также к ним добавляются все диагнозы,
-        существующие на дату результата мероприятия - т.е. те, которые относятся
-        к предыдущему осмотру.
-
-        :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
-        """
-        mkb_data_list = mkb_data_list[:]
-        by_inspection = self.existing_diags['by_inspection']
-        if 'left' in by_inspection:
-            dk_mkb_map = {}
-            for mkb, diag in by_inspection['left'].items():
-                if self.diag_type in diag['diag_types']:
-                    dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
-                # if diag['a_d']:
-                #     if diag['a_d'].diagnosisType.code == self.diag_type:
-                #         dk_mkb_map.setdefault(diag['a_d'].diagnosisKind.code, set()).add(mkb)
-                else:
-                    dk_mkb_map.setdefault('associated', set()).add(mkb)
-            for dk_code, mkb_list in dk_mkb_map.items():
-                mkb_data_list.append({
-                    'kind': dk_code,
-                    'mkbs': mkb_list
-                })
-
-        self.refresh_with_old_state(mkb_data_list, future_interval)
-
-    @staticmethod
-    def get_date_before(action, max_date=None):
-        b_a = action.begDate - datetime.timedelta(seconds=1) if action else None
-        if max_date:
-            return max(b_a, max_date) if b_a else b_a
-        else:
-            return b_a
 
     def _add_diag_data(self, ds_id, mkb_code, diag_kind, ds_beg_date, ds_end_date,
                       dgn_beg_date, dgn_create_date, person,

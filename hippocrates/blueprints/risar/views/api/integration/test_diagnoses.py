@@ -97,6 +97,39 @@ where a.event_id = {0}'''.format(self.card_id)))
             for action_id, action in self.insp_map.items()
         )
 
+    def get_diagnoses_in_event(self):
+        clear_preg_card_cache()
+
+        diagns = self.card.get_client_diagnostics(self.card.event.setDate, self.card.event.execDate, True)
+        def make_diag_data(ds, dg):
+            return {
+                'id': ds.id,
+                'set_date': ds.setDate,
+                'end_date': ds.endDate,
+                'client_id': ds.client_id,
+                'deleted': ds.deleted,
+                'person': {
+                    'id': ds.person_id
+                } if ds.person_id else None,
+                'diagnostic': {
+                    'id': dg.id,
+                    'set_date': dg.setDate,
+                    'end_date': dg.endDate,
+                    'createDatetime': dg.createDatetime,
+                    'mkb': dg.mkb,
+                    'mkbex': dg.mkb_ex,
+                    'deleted': dg.deleted,
+                    'action_id': dg.action_id,
+                    'modify_person': {
+                        'id': dg.modifyPerson_id
+                    } if dg.modifyPerson_id else None
+
+                } if dg else None
+            }
+        diag_data_list = [make_diag_data(diagn.diagnosis, diagn) for diagn in diagns]
+
+        return [self._make_diagnosis_info(diag_data) for diag_data in diag_data_list]
+
     def _make_diagnosis_info(self, data):
         return {
             'ds_id': data['id'],
@@ -130,6 +163,18 @@ where a.event_id = {0}'''.format(self.card_id)))
             self.insp_map[xform.target_obj.id] = xform.target_obj
         return xform.target_obj.id
 
+    def delete_first_inspection(self, id_, api_version=0):
+        xform = CheckupObsFirstXForm(api_version)
+        xform.check_params(id_, card_id)
+        xform.delete_target_obj()
+        xform.store()
+        xform.reevaluate_data()
+        db.session.commit()
+        try:
+            xform.generate_measures()
+        except:
+            print 'delete_first_inspection -> xform.generate_measures() error'
+
     def update_second_inspection(self, data, id_=None, api_version=0):
         create = id_ is None
 
@@ -144,6 +189,15 @@ where a.event_id = {0}'''.format(self.card_id)))
         if create:
             self.insp_map[xform.target_obj.id] = xform.target_obj
         return xform.target_obj.id
+
+    def delete_second_inspection(self, id_, api_version=0):
+        xform = CheckupObsSecondXForm(api_version)
+        xform.check_params(id_, card_id)
+        xform.delete_target_obj()
+        xform.store()
+        xform.reevaluate_data()
+        db.session.commit()
+        xform.generate_measures()
 
     def update_childbirth(self, data, id_=None, api_version=0):
         create = id_ is None
@@ -615,8 +669,8 @@ class SimpleTestCases(BaseDiagTest):
         insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
             hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main, mkb_compl=mkb_compl, mkb_assoc=mkb_assoc)
         insp1_id = self.env.update_first_inspection(insp1, None)
-        insp2_diags = self.env.get_diagnoses_by_action()[insp1_id]
-        main_mkb_ds_id = self._get_ds_id_from_diags(insp2_diags, mkb_main)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        main_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_main)
 
         # 2 insp to right
         a2_date = '2016-06-09'
@@ -896,6 +950,95 @@ class SimpleTestCases(BaseDiagTest):
                                                   diagnosis_types=self._final_assoc(), dg_set_date=a2_date),
                           self.make_expected_diag(ds_set_date=emr1_date, mkb=mkb_assoc2[1],
                                                   diagnosis_types=self._final_assoc(), dg_set_date=a2_date)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+    # @unittest.skip('debug')
+    def test_inspections_delete(self):
+        a1_date = '2016-04-30'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main = 'D01'
+        mkb_compl = ['N01']
+        mkb_assoc = ['G01']
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main, mkb_compl=mkb_compl, mkb_assoc=mkb_assoc)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+
+        # test base deletion
+        self.env.delete_first_inspection(insp1_id)
+        card_diags = self.env.get_diagnoses_in_event()
+        self.assertEqual(card_diags, [])
+
+        # test delete 2nd inspection
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main, mkb_compl=mkb_compl, mkb_assoc=mkb_assoc)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        main_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_main)
+        # 2 insp to right
+        a2_date = '2016-06-09'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main2 = 'D01'
+        mkb_compl2 = ['H01', 'H02']
+        mkb_assoc2 = ['G01']
+        insp2 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a2_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main2, mkb_compl=mkb_compl2, mkb_assoc=mkb_assoc2)
+        insp2_id = self.env.update_second_inspection(insp2, None)
+
+        self.env.delete_second_inspection(insp2_id)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_compl[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        # test 3 inspections, delete middle
+        insp2 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a2_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main2, mkb_compl=mkb_compl2, mkb_assoc=mkb_assoc2)
+        insp2_id = self.env.update_second_inspection(insp2, None)
+
+        # 3 insp between 1 and 2
+        a3_date = "2016-05-15"
+        external_id3 = "a3"
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main3 = 'D01'
+        mkb_compl3 = ['H01']
+        mkb_assoc3 = ['G01']
+        insp3 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a3_date, external_id=external_id3,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main3, mkb_compl=mkb_compl3, mkb_assoc=mkb_assoc3)
+        insp3_id = self.env.update_second_inspection(insp3, None)
+
+        self.env.delete_second_inspection(insp3_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_compl[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+        insp2_diags = act_diags_map[insp2_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_compl2[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date)]
         self.assertDiagsLikeExpected(insp2_diags, expected_diags)
 
 

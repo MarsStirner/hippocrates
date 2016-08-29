@@ -537,7 +537,6 @@ class ExternalXForm(XForm):
     def delete_external_data(self):
         ActionIdentification.query.filter(
             ActionIdentification.action_id == self.target_obj_id,
-            ActionIdentification.external_id == self.external_id,
             ActionIdentification.external_system_id == self.external_system.id,
         ).delete()
 
@@ -643,8 +642,9 @@ class CheckupsXForm(ExternalXForm):
     def delete_diagnoses(self):
         """Изменить систему диагнозов после удаления осмотра
         """
-        diag_sys = DiagnosesSystemManager.get_for_inspection(self.target_obj, None, inspections_span_flatcodes)
-        diag_sys.refresh_with_deletion([])
+        diag_sys = DiagnosesSystemManager.get_for_inspection(
+            self.target_obj, None, self.ais)
+        diag_sys.refresh_with_deletion()
         new_diagnoses, changed_diagnoses = diag_sys.get_result()
         create_or_update_diagnoses(self.target_obj, new_diagnoses)
         db.session.add_all(changed_diagnoses)

@@ -75,7 +75,6 @@ def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
     xform = CheckupObsFirstXForm(api_version)
     xform.check_params(exam_obs_id, card_id)
     xform.delete_target_obj()
-    xform.reevaluate_data()
     xform.store()
 
     try:

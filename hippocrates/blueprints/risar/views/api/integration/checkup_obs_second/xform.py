@@ -236,7 +236,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         self.ais.close_previous()
 
     def delete_target_obj(self):
-        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        self.find_parent_obj(self.parent_obj_id)
+        self.target_obj = get_action_by_id(self.target_obj_id, self.parent_obj, second_inspection_code, True)
+        self.ais.refresh(self.target_obj)
         self.delete_diagnoses()
 
         self.target_obj_class.query.filter(
@@ -246,6 +248,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         ).update({'deleted': 1})
 
         self.delete_external_data()
+
+        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        # if self.ais.left: ...
 
     def delete_fetuses(self):
         RisarFetusState.query.filter(
