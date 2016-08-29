@@ -46,3 +46,5 @@ def api_specialists_checkup_delete(api_version, card_id, result_action_id):
     xform.check_params(result_action_id, card_id)
     xform.delete_target_obj()
     db.session.commit()
+    xform.reevaluate_data()
+    db.session.commit()

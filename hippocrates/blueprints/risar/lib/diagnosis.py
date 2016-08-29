@@ -730,6 +730,12 @@ class DiagnosesSystemManager(object):
                                 person = diag_r['diagn'].person if diag_r['diagn'] else None
                                 self._add_diag_data(None, mkb, diag_kind, ds_beg_date, ds_end_date,
                                                    dgn_beg_date, dgn_create_date, person, True, True)
+                            else:
+                                ds_beg_date = adj_inspections['left'].begDate if diag_l['diagn'] else \
+                                    adj_inspections['right'].begDate
+                                ds_end_date = diag_l['ds'].endDate
+                                self._add_diag_data(diag_l['ds'].id, mkb, None, ds_beg_date, ds_end_date,
+                                                    None, None, None, False, False)
                         else:
                             # left
                             ds_beg_date = diag_l['ds'].setDate
@@ -745,7 +751,10 @@ class DiagnosesSystemManager(object):
                         # in previous but now not in current
                         diag = by_inspection['left'][mkb]
                         ds_beg_date = diag['ds'].setDate
-                        ds_end_date = self.get_date_before(adj_inspections['cur'])
+                        if not self.delete_mode:
+                            ds_end_date = self.get_date_before(adj_inspections['cur'])
+                        else:
+                            ds_end_date = self.get_date_before(adj_inspections['right'])
                         self._add_diag_data(diag['ds'].id, mkb, None, ds_beg_date, ds_end_date,
                                            None, None, None, False, False)
                     elif 'right' in insp_w_mkb:

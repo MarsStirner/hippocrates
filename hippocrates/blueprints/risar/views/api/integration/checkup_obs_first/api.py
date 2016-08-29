@@ -88,13 +88,13 @@ def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
             u'Осмотр удалён, но произошла ошибка при пересчёте атрибутов карты'
         )
 
-    try:
-        xform.generate_measures()
-    except Exception, e:
-        action_id = exam_obs_id
-        logger.error(err_measures_save_msg.format(action_id), exc_info=True)
-        return RawApiResult(
-            None,
-            measures_save_error_code,
-            u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
-        )
+    # try:
+    #     xform.generate_measures()
+    # except Exception, e:
+    #     action_id = exam_obs_id
+    #     logger.error(err_measures_save_msg.format(action_id), exc_info=True)
+    #     return RawApiResult(
+    #         None,
+    #         measures_save_error_code,
+    #         u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
+    #     )

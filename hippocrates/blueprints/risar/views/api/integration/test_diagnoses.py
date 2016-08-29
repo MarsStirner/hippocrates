@@ -85,6 +85,8 @@ delete a.* \
 from Action a \
 where a.event_id = {0}'''.format(self.card_id)))
 
+        db.session.close()
+
     def create_new_card(self):
         raise NotImplementedError
 
@@ -170,10 +172,6 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform.store()
         xform.reevaluate_data()
         db.session.commit()
-        try:
-            xform.generate_measures()
-        except:
-            print 'delete_first_inspection -> xform.generate_measures() error'
 
     def update_second_inspection(self, data, id_=None, api_version=0):
         create = id_ is None
@@ -229,6 +227,14 @@ where a.event_id = {0}'''.format(self.card_id)))
         if create:
             self.emr_map[em.id] = em
         return em
+
+    def delete_specialist_checkup_emr(self, id_=None, api_version=0):
+        xform = SpecialistsCheckupXForm(api_version)
+        xform.check_params(id_, card_id)
+        xform.delete_target_obj()
+        db.session.commit()
+        xform.reevaluate_data()
+        db.session.commit()
 
 
 class BaseDiagTest(unittest.TestCase):
@@ -1039,6 +1045,72 @@ class SimpleTestCases(BaseDiagTest):
                                                   diagnosis_types=self._final_compl(), dg_set_date=a2_date),
                           self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_compl2[1],
                                                   diagnosis_types=self._final_compl(), dg_set_date=a2_date)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+    # @unittest.skip('debug')
+    def test_measure_results_delete(self):
+        a1_date = '2016-04-30'
+        hosp1_code = TEST_DATA['person1']['hosp']
+        doctor1_code = TEST_DATA['person1']['doctor']
+        mkb_main1 = 'D01'
+        mkb_compl1 = None
+        mkb_assoc1 = None
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp1_code, doctor=doctor1_code, mkb_main=mkb_main1, mkb_compl=mkb_compl1,
+            mkb_assoc=mkb_assoc1)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+
+        emr1_external_id = '12346'
+        emr1_measure_code = TEST_DATA['measure_spec_checkup1']['measure_code']
+        emr1_measure_id = None
+        emr1_date = '2016-05-24'
+        emr1_hosp_code = TEST_DATA['person1']['hosp']
+        emr1_doctor_code = TEST_DATA['person1']['doctor']
+        emr1_mkb = 'A00'
+        emr1 = self._change_test_specialist_checkup_emr_data(deepcopy(self.emr_spec_ch1),
+             measure_code=emr1_measure_code, checkup_date=emr1_date, hospital=emr1_hosp_code,
+             doctor=emr1_doctor_code, mkb=emr1_mkb)
+        em1 = self.env.update_specialist_checkup_emr(emr1, None)
+
+        # test base deletion
+        self.env.delete_specialist_checkup_emr(em1.resultAction_id)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main1, ds_end_date=None,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        # test insp1, emr, insp2, delete emr
+        em1 = self.env.update_specialist_checkup_emr(emr1, None)
+
+        a2_date = '2016-06-10'
+        hosp2_code = TEST_DATA['person1']['hosp']
+        doctor2_code = TEST_DATA['person1']['doctor']
+        mkb_main2 = 'D01'
+        mkb_compl2 = ['H01']
+        mkb_assoc2 = ['N01', 'A00']
+        insp2 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a2_date,
+            hospital=hosp2_code, doctor=doctor2_code, mkb_main=mkb_main2, mkb_compl=mkb_compl2,
+            mkb_assoc=mkb_assoc2)
+        insp2_id = self.env.update_second_inspection(insp2, None)
+
+        self.env.delete_specialist_checkup_emr(em1.resultAction_id)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main1, ds_end_date=None,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+        insp2_diags = act_diags_map[insp2_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main1, ds_end_date=None,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_assoc2[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date)]
         self.assertDiagsLikeExpected(insp2_diags, expected_diags)
 
 

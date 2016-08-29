@@ -751,6 +751,16 @@ class MeasuresResultsXForm(ExternalXForm):
         db.session.add_all(changed_diagnoses)
         db.session.flush()
 
+    def delete_diagnoses(self):
+        """Изменить систему диагнозов после удаления результата мероприятия
+        """
+        diag_sys = DiagnosesSystemManager.get_for_measure_result(
+            self.target_obj, None, self.get_measure_type().value, self.ais)
+        diag_sys.refresh_with_deletion()
+        new_diagnoses, changed_diagnoses = diag_sys.get_result()
+        create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        db.session.add_all(changed_diagnoses)
+
     def get_event_measure(self, event_measure_id, measure_code, beg_date, end_date):
         if event_measure_id:
             em = EventMeasure.query.get(event_measure_id)
@@ -804,8 +814,9 @@ class MeasuresResultsXForm(ExternalXForm):
                     raise
 
     def delete_target_obj(self):
-        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
-        # self.close_diags()
+        self.find_target_obj(self.target_obj_id)
+        self.ais.refresh(self.target_obj)
+        self.delete_diagnoses()
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,
