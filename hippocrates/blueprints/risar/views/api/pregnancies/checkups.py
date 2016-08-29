@@ -95,12 +95,14 @@ def api_0_pregnancy_checkup_new(event_id):
     if not flat_code:
         raise ApiException(400, 'flat_code required')
     event = Event.query.get(event_id)
-    action = get_action_by_id(None, event, flat_code, True)
-    copy_attrs_from_last_action(event, flat_code, action, (
-        'fetus_first_movement_date',
-    ))
-    result = represent_pregnancy_checkup_wm(action)
-    result['pregnancy_week'] = get_pregnancy_week(event)
+
+    with db.session.no_autoflush:
+        action = get_action_by_id(None, event, flat_code, True)
+        copy_attrs_from_last_action(event, flat_code, action, (
+            'fetus_first_movement_date',
+        ))
+        result = represent_pregnancy_checkup_wm(action)
+        result['pregnancy_week'] = get_pregnancy_week(event)
     return result
 
 

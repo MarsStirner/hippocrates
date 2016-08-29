@@ -3,6 +3,7 @@
  */
 "use strict";
 WebMis20
+
 .controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
@@ -21,10 +22,20 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             $scope.checkup.imt = NaN;
         }
     };
+
     $scope.$watch('checkup.height', update_auto);
     $scope.$watch('checkup.weight', update_auto);
-    $scope.save = function (form_controller) {
+
+    // $scope.switchToTab = function(tabHref){
+    //     $("li a[href='#"+tabHref+"']").click();
+    // };
+    // $scope.goToConclusion = function(){
+    //     $scope.switchToTab('conclusion');
+    // };
+
+    $scope.save = function (form_controller){
         form_controller.submit_attempt = true;
+        // todo: как то надо переделать if ( !$scope.hasMainDiagnose ) { $scope.goToConclusion(); }
         if (form_controller.$valid){
             return RisarApi.checkup_gyn.save($scope.event_id, $scope.checkup)
                 .then(function (data) {

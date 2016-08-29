@@ -6,7 +6,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_event, r
     represent_checkup_shortly, represent_measures, represent_pregnancy, represent_transfusion, represent_intolerance, \
     represent_ticket_25
 from hippocrates.blueprints.risar.lib.utils import action_as_dict
-from hippocrates.blueprints.risar.risar_config import gyn_checkup_simple_codes
+from hippocrates.blueprints.risar.risar_config import gyn_checkup_simple_codes, risar_gyn_checkup_flat_codes
 from nemesis.lib.utils import safe_traverse_attrs
 from nemesis.models.client import BloodHistory
 
@@ -41,8 +41,8 @@ def represent_gyn_checkup_wm(action):
 
 
 def represent_gyn_checkup(action):
-    result = represent_checkup(action, gyn_checkup_simple_codes)
-    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+    result = represent_checkup(action, risar_gyn_checkup_flat_codes, gyn_checkup_simple_codes)
+    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value if action.id else None)
     result['measures'] = represent_measures(action)
     return result
 

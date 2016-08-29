@@ -18,7 +18,8 @@ from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
 from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix, \
     represent_prop_value, safe_action_property
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
-from hippocrates.blueprints.risar.risar_config import risar_anamnesis_apt_mother_codes, risar_anamnesis_apt_father_codes, risar_epicrisis, attach_codes
+from hippocrates.blueprints.risar.risar_config import risar_anamnesis_apt_mother_codes, risar_anamnesis_apt_father_codes, \
+    risar_epicrisis, attach_codes, checkup_flat_codes
 from nemesis.app import app
 from nemesis.lib.utils import safe_traverse_attrs, safe_date
 from nemesis.lib.vesta import Vesta
@@ -242,7 +243,7 @@ def represent_father_action(action):
 
 
 def represent_pregnancy_checkup(action):
-    result = represent_checkup(action)
+    result = represent_checkup(action, checkup_flat_codes)
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
     result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
@@ -258,7 +259,7 @@ def represent_pregnancy_checkup_wm(action):
 
 
 def represent_pregnancy_checkup_puerpera(action):
-    result = represent_checkup(action)
+    result = represent_checkup(action, checkup_flat_codes)
     result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
     # if with_measures:
     #     em_ctrl = EventMeasureController()
@@ -302,7 +303,7 @@ def represent_pregnancy_epicrisis(event, action=None):
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, date=event.setDate.date()) if finish_date else None
     epicrisis['newborn_inspections'] = represent_newborn_inspections(action)
     epicrisis['info'] = make_epicrisis_info(epicrisis)
-    epicrisis['diagnoses'] = represent_action_diagnoses(action)
+    epicrisis['diagnoses'] = represent_action_diagnoses(action, checkup_flat_codes)
     epicrisis['diagnosis_types'] = action.actionType.diagnosis_types
     return epicrisis
 
