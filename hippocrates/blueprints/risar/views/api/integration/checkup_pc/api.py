@@ -11,7 +11,7 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.views.api.integration.checkup_pc.xform import \
-    CheckupPCXForm
+    CheckupPCXForm, CheckupPCTicket25XForm
 from hippocrates.blueprints.risar.views.api.integration.logformat import hook
 from hippocrates.blueprints.risar.views.api.integration.const import (
     card_attrs_save_error_code, measures_save_error_code,
@@ -98,3 +98,11 @@ def api_checkup_pc_delete(api_version, card_id, exam_pc_id):
             measures_save_error_code,
             u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
         )
+
+
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/pc/<int:exam_pc_id>/ticket25')
+@api_method(hook=hook)
+def api_checkup_pc_ticket25_get(api_version, card_id, exam_pc_id):
+    xform = CheckupPCTicket25XForm(api_version)
+    xform.check_params(exam_pc_id, card_id)
+    return xform.as_json()

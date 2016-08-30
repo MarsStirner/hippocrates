@@ -9,7 +9,7 @@
 from hippocrates.blueprints.risar.views.api.integration.errands.schemas import \
     ErrandSchema, ErrandListSchema
 from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
-from hippocrates.blueprints.risar.lib.represent import make_file_url
+from hippocrates.blueprints.risar.lib.represent.common import make_file_url
 from nemesis.lib.utils import safe_date
 from nemesis.models.event import Event
 from nemesis.models.risar import Errand, rbErrandStatus

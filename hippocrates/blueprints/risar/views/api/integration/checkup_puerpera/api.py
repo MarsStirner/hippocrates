@@ -11,7 +11,7 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.views.api.integration.checkup_puerpera.xform import \
-    CheckupPuerperaXForm
+    CheckupPuerperaXForm, CheckupPuerperaTicket25XForm
 from hippocrates.blueprints.risar.views.api.integration.logformat import hook
 from hippocrates.blueprints.risar.views.api.integration.const import (
     card_attrs_save_error_code, measures_save_error_code,
@@ -75,3 +75,11 @@ def api_checkup_puerpera_delete(api_version, card_id, exam_puerpera_id):
             card_attrs_save_error_code,
             u'Осмотр удалён, но произошла ошибка при пересчёте атрибутов карты'
         )
+
+
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/puerpera/<int:exam_puerpera_id>/ticket25')
+@api_method(hook=hook)
+def api_checkup_puerpera_ticket25_get(api_version, card_id, exam_puerpera_id):
+    xform = CheckupPuerperaTicket25XForm(api_version)
+    xform.check_params(exam_puerpera_id, card_id)
+    return xform.as_json()
