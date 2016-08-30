@@ -14,7 +14,8 @@ from . import (
     concilium,
     specialists_checkup,
     research,
-    schedule_tickets
+    schedule_tickets,
+    appointments
 )
 from . import xform
 
