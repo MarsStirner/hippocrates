@@ -82,4 +82,5 @@ def api_checkup_puerpera_delete(api_version, card_id, exam_puerpera_id):
 def api_checkup_puerpera_ticket25_get(api_version, card_id, exam_puerpera_id):
     xform = CheckupPuerperaTicket25XForm(api_version)
     xform.check_params(exam_puerpera_id, card_id)
+    xform.find_ticket25()
     return xform.as_json()

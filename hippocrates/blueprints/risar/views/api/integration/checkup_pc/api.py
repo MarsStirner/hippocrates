@@ -105,4 +105,5 @@ def api_checkup_pc_delete(api_version, card_id, exam_pc_id):
 def api_checkup_pc_ticket25_get(api_version, card_id, exam_pc_id):
     xform = CheckupPCTicket25XForm(api_version)
     xform.check_params(exam_pc_id, card_id)
+    xform.find_ticket25()
     return xform.as_json()

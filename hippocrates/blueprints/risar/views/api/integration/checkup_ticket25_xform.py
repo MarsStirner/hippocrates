@@ -208,7 +208,6 @@ class CheckupsTicket25XForm(CheckupsXForm):
 
     @wrap_simplify
     def as_json(self):
-        self.find_ticket25()
         if not self.ticket25:
             return
 

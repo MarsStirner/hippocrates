@@ -40,7 +40,6 @@ class AppointmentListXForm(AppointmentListSchema, XForm):
 
     @wrap_simplify
     def as_json(self):
-        self.find_appointments()
         return [str(appointment.id) for appointment in self.appointment_list]
 
 

@@ -15,7 +15,8 @@ from . import (
     specialists_checkup,
     research,
     schedule_tickets,
-    appointments
+    appointments,
+    schedule
 )
 from . import xform
 

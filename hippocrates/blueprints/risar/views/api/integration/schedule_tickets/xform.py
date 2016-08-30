@@ -8,7 +8,6 @@ from sqlalchemy.orm import joinedload
 from ..xform import XForm
 from .schemas import ScheduleTicketsSchema
 
-
 from nemesis.models.event import Event
 from nemesis.models.schedule import ScheduleClientTicket, ScheduleTicket, Schedule
 from nemesis.models.person import Person
@@ -68,8 +67,6 @@ class ScheduleTicketsXForm(ScheduleTicketsSchema, XForm):
         self.tickets = query.all()
 
     def as_json(self):
-        self.find_tickets()
-
         res = [
             {
                 'schedule_ticket_id': ticket[0],

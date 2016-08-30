@@ -20,6 +20,7 @@ def api_appointment_list_schema(api_version):
 def api_appointment_list_get(api_version, card_id):
     xform = AppointmentListXForm(api_version)
     xform.check_params(None, card_id)
+    xform.find_appointments()
     return xform.as_json()
 
 

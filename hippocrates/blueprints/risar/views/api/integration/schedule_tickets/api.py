@@ -25,4 +25,5 @@ def api_schedule_tickets_schema(api_version):
 def api_schedule_tickets_get(api_version, card_id):
     xform = ScheduleTicketsXForm(api_version)
     xform.check_params(None, card_id)
+    xform.find_tickets()
     return xform.as_json()

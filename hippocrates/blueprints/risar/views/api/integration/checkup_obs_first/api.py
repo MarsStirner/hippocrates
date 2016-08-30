@@ -106,4 +106,5 @@ def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
 def api_checkup_obs_first_ticket25_get(api_version, card_id, exam_obs_id):
     xform = CheckupObsFirstTicket25XForm(api_version)
     xform.check_params(exam_obs_id, card_id)
+    xform.find_ticket25()
     return xform.as_json()
