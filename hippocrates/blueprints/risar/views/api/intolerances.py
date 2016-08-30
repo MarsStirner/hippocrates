@@ -27,10 +27,10 @@ def intolerance_class_from_type(i_type):
 def api_0_intolerances_get(i_type, object_id):
     c = intolerance_class_from_type(i_type)
     if c is None:
-        raise ApiException(404, 'Intolerance type not found')
+        raise ApiException(404, u'Тип непереносимости не найден')
     obj = c.query.get(object_id)
     if obj is None:
-        raise ApiException(404, 'Object not found')
+        raise ApiException(404, u'Объект непереносимости не найден')
     return dict(
         represent_intolerance(obj),
         id=object_id
@@ -42,12 +42,12 @@ def api_0_intolerances_get(i_type, object_id):
 def api_0_intolerances_delete(i_type, object_id):
     c = intolerance_class_from_type(i_type)
     if c is None:
-        raise ApiException(404, 'Intolerance type not found')
+        raise ApiException(404, u'Неперносимость не найдена')
     obj = c.query.get(object_id)
     if obj is None:
-        raise ApiException(404, 'Allergy not found')
+        raise ApiException(404, u'Аллергия не найдена')
     if obj.deleted:
-        raise ApiException(400, 'Allergy already deleted')
+        raise ApiException(400, u'Аллергия уже была удалена')
     obj.deleted = 1
     db.session.commit()
     return True
@@ -58,12 +58,12 @@ def api_0_intolerances_delete(i_type, object_id):
 def api_0_intolerances_undelete(i_type, object_id):
     c = intolerance_class_from_type(i_type)
     if c is None:
-        raise ApiException(404, 'Intolerance type not found')
+        raise ApiException(404, u'Тип непереносимости не найден')
     obj = c.query.get(object_id)
     if obj is None:
-        raise ApiException(404, 'Allergy not found')
+        raise ApiException(404, u'Аллергия не найдена')
     if not obj.deleted:
-        raise ApiException(400, 'Allergy not deleted')
+        raise ApiException(400, u'Аллергия уже была удалена')
     obj.deleted = 0
     db.session.commit()
     return True
@@ -75,16 +75,16 @@ def api_0_intolerances_undelete(i_type, object_id):
 def api_0_intolerances_post(i_type, object_id=None):
     c = intolerance_class_from_type(i_type)
     if c is None:
-        raise ApiException(404, 'Intolerance type not found')
+        raise ApiException(404, u'Тип непереносимости не найден')
     client_id = request.args.get('client_id', None)
     if object_id is None:
         if client_id is None:
-            raise ApiException(400, 'Client is not set')
+            raise ApiException(400, u'Client не определен')
         obj = c()
     else:
         obj = c.query.get(object_id)
         if obj is None:
-            raise ApiException(404, 'Action not found')
+            raise ApiException(404, u'Action не найден')
     json = request.get_json()
     obj.name = json.get('name')
     obj.client_id = client_id

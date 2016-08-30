@@ -34,11 +34,11 @@ def api_0_chart_delete(ticket_id):
     # TODO: Security
     ticket = ScheduleClientTicket.query.get(ticket_id)
     if not ticket:
-        raise ApiException(404, 'Ticket not found')
+        raise ApiException(404, u'Ticket не найден')
     if not ticket.event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     if ticket.event.deleted:
-        raise ApiException(400, 'Event already deleted')
+        raise ApiException(400, u'Event уже был удален')
     ticket.event.deleted = 1
     ticket.event = None
     db.session.commit()
@@ -71,7 +71,7 @@ def api_1_pregnancy_chart(event_id=None):
         chart_creator()
         return represent_pregnancy_event(chart_creator.event)
     except PregnancyChartCreator.DoNotCreate:
-        raise ApiException(201, 'Must explicitly create event first')
+        raise ApiException(201, u'Сначала создайте Event')
 
 
 @module.route('/api/1/pregnancy/chart/', methods=['POST'])
@@ -164,7 +164,7 @@ def api_0_event_routing():
 @api_method
 def api_0_chart_close(event_id=None):
     if not event_id:
-        raise ApiException(400, u'Either event_id must be provided')
+        raise ApiException(400, u'event_id не найден')
     else:
         event = Event.query.get(event_id)
         data = request.get_json()
@@ -183,7 +183,7 @@ def api_0_chart_close(event_id=None):
 def api_0_attach_lpu():
     client_id = request.args.get('client_id', None)
     if client_id is None:
-        raise ApiException(400, 'Client is not set')
+        raise ApiException(400, u'Client не определен')
     data = request.get_json()
 
     result = {}
@@ -195,7 +195,7 @@ def api_0_attach_lpu():
             else:
                 obj = ClientAttach.query.get(attach_lpu['id'])
                 if obj is None:
-                    raise ApiException(404, 'Attach not found')
+                    raise ApiException(404, u'Attach не найден')
 
             obj.client_id = client_id
             obj.attachType = rbAttachType.query.filter(rbAttachType.code == attach_codes[attach_type]).first()
@@ -214,7 +214,7 @@ def api_1_attach_lpu():
     # TODO: проверить работоспособность
     client_id = request.args.get('client_id', None)
     if client_id is None:
-        raise ApiException(400, 'Client is not set')
+        raise ApiException(400, u'Клиент не определен')
     data = request.get_json()
     now = datetime.now()
 
@@ -239,7 +239,7 @@ def api_1_attach_lpu():
             else:
                 obj = ClientAttach.query.get(attach_lpu['id'])
                 if obj is None:
-                    raise ApiException(404, 'Attach not found')
+                    raise ApiException(404, u'Приложение не найдено')
 
             obj.client_id = client_id
             # rbAttachType.query.filter(rbAttachType.code == attach_codes[attach_type]).first()

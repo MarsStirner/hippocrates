@@ -37,7 +37,7 @@ def api_0_contragent_search_payer():
 @api_method
 def api_0_contragent_payer_get(payer_id=None):
     if not payer_id:
-        raise ApiException(404, u'`payer_id` required')
+        raise ApiException(404, u'необходим `payer_id`')
 
     ca_ctrl = ContragentController()
     payer = ca_ctrl.get_payer(payer_id)

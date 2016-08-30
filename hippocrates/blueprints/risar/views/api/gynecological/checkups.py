@@ -82,9 +82,9 @@ def api_0_gyn_checkup(event_id):
 @module.route(_base + '<int:checkup_id>', methods=['GET'])
 @api_method
 def api_0_gyn_checkup_get(event_id, checkup_id):
-    action = get_action_by_id(checkup_id) or bail_out(ApiException(404, 'Action with id {0} not found'.format(checkup_id)))
+    action = get_action_by_id(checkup_id) or bail_out(ApiException(404, u'Action с id {0} не найден'.format(checkup_id)))
     if action.event_id != event_id:
-        raise ApiException(404, 'Action with id {0} does not belong to Event with id {1}'.format(checkup_id, event_id))
+        raise ApiException(404, u'Action c id {0} не принадлежит Event с id {1}'.format(checkup_id, event_id))
     return represent_gyn_checkup(action)
 
 
@@ -92,7 +92,7 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
 @api_method
 def api_0_gyn_checkup_get_new(event_id, flat_code):
     with db.session.no_autoflush:
-        event = Event.query.get(event_id) or bail_out(ApiException(404, 'Event with id {0} not found'.format(event_id)))
+        event = Event.query.get(event_id) or bail_out(ApiException(404, u'Event c id {0} не найден'.format(event_id)))
         action = get_action_by_id(None, event, flat_code, True)
         result = represent_gyn_checkup(action)
         return result

@@ -158,7 +158,7 @@ def api_0_event_measure_result_get(event_measure_id, em_result_id=None):
         if not em_result:
             raise ApiException(404, u'Не найден Action с id = '.format(em_result_id))
     else:
-        raise ApiException(404, u'`appointment_id` required')
+        raise ApiException(404, u'необходим `appointment_id`')
     return EmResultRepr().represent_em_result(em_result)
 
 
@@ -185,7 +185,7 @@ def api_0_event_measure_result_save(event_measure_id, em_result_id=None):
         update_patient_diagnoses(old_event_measure_diag, em_result)
         em_ctrl.store(em, em_result)
     else:
-        raise ApiException(404, u'`appointment_id` required')
+        raise ApiException(404, u'необходим `appointment_id`')
     card = PregnancyCard.get_for_event(em.event)
     card.reevaluate_card_attrs()
     db.session.commit()

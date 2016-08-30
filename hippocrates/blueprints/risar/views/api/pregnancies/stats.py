@@ -532,7 +532,7 @@ def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
         curator_id = safe_current_user_id()
     args = request.args.to_dict()
     if 'curation_level_code' not in args:
-        raise ApiException(404, u'`curation_level_code` required')
+        raise ApiException(404, u'необходим `curation_level_code`')
     curation_level = safe_unicode(args.get('curation_level_code'))
 
     cfr_ctrl = CFRController()

@@ -22,5 +22,5 @@ def api_0_contingent_get(contingent_id=None):
     elif contingent_id:
         raise NotImplementedError()
     else:
-        raise ApiException(404, u'`contingent_id` required')
+        raise ApiException(404, u'необходим `contingent_id`')
     return ContingentRepr().represent_contingent(contingent)

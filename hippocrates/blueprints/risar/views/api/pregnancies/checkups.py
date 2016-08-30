@@ -36,7 +36,7 @@ def api_0_pregnancy_checkup(event_id):
     fetuses = data.pop('fetuses', [])
 
     if not flat_code:
-        raise ApiException(400, 'flat_code required')
+        raise ApiException(400, u'необходим flat_code')
 
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
@@ -89,7 +89,7 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     action.update_action_integrity()
     if not action:
-        raise ApiException(404, 'Action with id {0} not found'.format(checkup_id))
+        raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
     return represent_pregnancy_checkup_wm(action)
 
 
@@ -100,7 +100,7 @@ def api_0_pregnancy_checkup_new(event_id):
     data = request.get_json()
     flat_code = data.get('flat_code')
     if not flat_code:
-        raise ApiException(400, 'flat_code required')
+        raise ApiException(400, u'необходим flat_code')
     event = Event.query.get(event_id)
 
     with db.session.no_autoflush:

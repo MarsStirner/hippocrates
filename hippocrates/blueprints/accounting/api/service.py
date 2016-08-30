@@ -39,7 +39,7 @@ def api_0_service_get(service_id=None):
         elif service_id:
             service = service_ctrl.get_service(service_id)
         else:
-            raise ApiException(404, u'`service_id` required')
+            raise ApiException(404, u'необходим `service_id`')
         return ServiceRepr().represent_service_full(service)
 
 
@@ -48,7 +48,7 @@ def api_0_service_get(service_id=None):
 @api_method
 def api_0_service_list(event_id=None):
     if not event_id:
-        raise ApiException(404, u'`event_id` required')
+        raise ApiException(404, u'необходим `event_id`')
     service_ctrl = ServiceController()
     service_list = service_ctrl.get_services_by_event(event_id)
     service_repr = ServiceRepr()
@@ -61,7 +61,7 @@ def api_0_service_list_save():
     json_data = request.get_json()
     event_id = safe_int(json_data.get('event_id'))
     if not event_id:
-        raise ApiException(422, u'`event_id` required')
+        raise ApiException(422, u'необходим `event_id`')
     service_list = json_data.get('service_list', [])
 
     service_ctrl = ServiceController()
@@ -107,7 +107,7 @@ def api_0_service_refresh_subservices():
 @api_method
 def api_0_service_delete(service_id=None):
     if not service_id:
-        raise ApiException(404, u'`contract_id` required')
+        raise ApiException(404, u'необходим `contract_id`')
     service_ctrl = ServiceController()
     service = service_ctrl.get_service(service_id)
     service_ctrl.delete_service(service)
@@ -120,7 +120,7 @@ def api_0_service_delete(service_id=None):
 @api_method
 def api_0_service_at_price_get(contract_id=None):
     if not contract_id:
-        raise ApiException(404, '`contract_id` required')
+        raise ApiException(404, u'необходим `contract_id`')
     args = request.args.to_dict()
 
     service_ctrl = ServiceController()

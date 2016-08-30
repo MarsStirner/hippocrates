@@ -110,7 +110,7 @@ def api_find_previous():
 @api_method
 def api_delete_action(action_id=None):
     if not action_id:
-        raise ApiException(404, u"Argument 'action_id' cannot be found.")
+        raise ApiException(404, u"Не передан 'action_id'.")
     action = Action.query.get(action_id)
     if not action:
         raise ApiException(404, u"Действие с id=%s не найдено" % action_id)
@@ -187,9 +187,9 @@ def api_action_post(action_id=None):
     if action_id:
         action = Action.query.get(action_id)
         if not action:
-            raise ApiException(404, 'Action %s not found' % action_id)
+            raise ApiException(404, u'Не найден Action с id %s' % action_id)
         if not UserUtils.can_edit_action(action):
-            raise ApiException(403, 'User cannot edit action %s' % action_id)
+            raise ApiException(403, u'Пользователь не может редактировать Action с id %s' % action_id)
         if person_id != action.person_id:
             if person_id:
                 notifications.append({
@@ -428,7 +428,7 @@ def api_action_template_save(type_id, id_=None):
                 Action.actionType_id == type_id,
             ).first()
         if not template:
-            raise ApiException(404, 'Template not found')
+            raise ApiException(404, u'Шаблон не найден')
 
         if not template.action and src_action:
             action = Action()
@@ -495,7 +495,7 @@ def api_search_rls():
 @api_method
 def api_check_action_service_requirement(action_type_id=None):
     if not action_type_id:
-        raise ApiException(404, '`action_type_id` reuqired')
+        raise ApiException(404, u'необходим `action_type_id`')
 
     try:
         res = check_at_service_requirement(action_type_id)

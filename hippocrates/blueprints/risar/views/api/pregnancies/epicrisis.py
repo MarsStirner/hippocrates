@@ -22,7 +22,7 @@ def api_0_chart_epicrisis(event_id):
     card = PregnancyCard.get_for_event(event)
 
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     if request.method == 'GET':
         action = get_action(event, risar_epicrisis, True)
     else:
@@ -55,9 +55,9 @@ def api_0_chart_epicrisis(event_id):
 def api_0_newborn_inspection_delete(inspection_id):
     inspection = Action.query.get(inspection_id)
     if inspection is None:
-        raise ApiException(404, 'inspection not found')
+        raise ApiException(404, u'Осмотр не найден')
     if inspection.deleted:
-        raise ApiException(400, 'inspection already deleted')
+        raise ApiException(400, u'Осмотр уже был удален')
     inspection.deleted = 1
     db.session.commit()
     return True
@@ -68,9 +68,9 @@ def api_0_newborn_inspection_delete(inspection_id):
 def api_0_newborn_inspection_undelete(inspection_id):
     inspection = Action.query.get(inspection_id)
     if inspection is None:
-        raise ApiException(404, 'Transfusion not found')
+        raise ApiException(404, u'Переливание не найдено')
     if not inspection.deleted:
-        raise ApiException(400, 'Transfusion not deleted')
+        raise ApiException(400, u'Переливание не является удалённым')
     inspection.deleted = 0
     db.session.commit()
     return True

@@ -25,7 +25,7 @@ def api_0_invoice_get(invoice_id=None):
         elif invoice_id:
             invoice = invoice_ctrl.get_invoice(invoice_id)
         else:
-            raise ApiException(404, u'`invoice_id` required')
+            raise ApiException(404, u'необходим `invoice_id`')
         return InvoiceRepr().represent_invoice_full(invoice)
 
 
@@ -48,7 +48,7 @@ def api_0_invoice_save(invoice_id=None):
             invoice = invoice_ctrl.update_invoice(invoice, json_data)
             invoice_ctrl.store(invoice)
         else:
-            raise ApiException(404, u'`invoice_id` required')
+            raise ApiException(404, u'необходим `invoice_id`')
         return InvoiceRepr().represent_invoice_full(invoice)
 
 
@@ -57,7 +57,7 @@ def api_0_invoice_save(invoice_id=None):
 @api_method
 def api_0_invoice_delete(invoice_id=None):
     if not invoice_id:
-        raise ApiException(404, u'`invoice_id` required')
+        raise ApiException(404, u'необходим `invoice_id`')
     invoice_ctrl = InvoiceController()
     invoice = invoice_ctrl.get_invoice(invoice_id)
     invoice_ctrl.delete_invoice(invoice)
@@ -94,5 +94,5 @@ def api_0_invoice_calc_sum(invoice_id=None):
                 raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
             invoice = invoice_ctrl.update_invoice(invoice, json_data)
         else:
-            raise ApiException(404, u'`invoice_id` required')
+            raise ApiException(404, u'необходим `invoice_id`')
         return InvoiceRepr().represent_invoice_full(invoice)

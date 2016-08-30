@@ -129,7 +129,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         q = self._find_target_obj_query()
         target_obj_exist = db.session.query(q.exists()).scalar()
         if target_obj_exist:
-            raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
+            raise ApiException(ALREADY_PRESENT_ERROR, u'%s уже существует' %
                                self.target_obj_class.__name__)
 
     def update_target_obj(self, data):

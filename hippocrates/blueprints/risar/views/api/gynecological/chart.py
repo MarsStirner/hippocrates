@@ -32,7 +32,7 @@ def api_0_gyn_chart(event_id=None):
         chart_creator()
         return represent_gyn_event(chart_creator.event)
     except GynecologicCardCreator.DoNotCreate:
-        raise ApiException(200, 'Must explicitly create event first')
+        raise ApiException(200, u'Для начала нужно создать Event')
 
 
 @module.route(_base, methods=['POST'])
@@ -75,11 +75,11 @@ def api_0_gyn_chart_mini(event_id=None):
 def api_0_gyn_chart_delete(ticket_id):
     ticket = ScheduleClientTicket.query.get(ticket_id)
     if not ticket:
-        raise ApiException(404, 'Ticket not found')
+        raise ApiException(404, u'Тикет не найден')
     if not ticket.event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     if ticket.event.deleted:
-        raise ApiException(400, 'Event already deleted')
+        raise ApiException(400, u'Event уже был удален')
     ticket.event.deleted = 1
     ticket.event = None
     db.session.commit()
@@ -90,7 +90,7 @@ def api_0_gyn_chart_delete(ticket_id):
 @api_method
 def api_0_gyn_chart_close(event_id=None):
     if not event_id:
-        raise ApiException(400, u'Either event_id must be provided')
+        raise ApiException(400, u'необходим event_id')
     else:
         event = Event.query.get(event_id)
         data = request.get_json()
