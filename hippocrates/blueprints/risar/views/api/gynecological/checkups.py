@@ -14,6 +14,7 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, bail_out
 from nemesis.models.event import Event
+from nemesis.models.person import Person
 from nemesis.systemwide import db
 
 
@@ -29,7 +30,11 @@ def api_0_gyn_checkup(event_id):
     data = request.get_json()
     checkup_id = data.pop('id', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
-    person = data.pop('person', None)
+    person_data = data.pop('person', None)
+    if person_data:
+        person = Person.query.get(person_data['id'])
+    else:
+        person = None
     diagnoses = data.pop('diagnoses', [])
 
     event = Event.query.get(event_id)
@@ -40,6 +45,7 @@ def api_0_gyn_checkup(event_id):
         close_open_checkups(event_id)
 
     action.begDate = beg_date
+    action.person = person
 
     ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
@@ -51,6 +57,7 @@ def api_0_gyn_checkup(event_id):
         set_action_apt_values(ticket, value)
         ticket.begDate = safe_datetime(value.get('beg_date'))
         ticket.endDate = safe_datetime(value.get('end_date'))
+        ticket.person = person
         prop.set_value(ticket.id, True)
 
     with db.session.no_autoflush:
