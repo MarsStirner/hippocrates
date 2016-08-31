@@ -68,8 +68,8 @@ class AppointmentXForm(AppointmentSchema, CheckupsXForm):
             # 'time': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'Time'))),
             # 'date': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'Date'))),
             # 'parameters': an_props['ReceiptDate'].value,
-            # 'referral_lpu': an_props['IssueDate'].value,
-            # 'referral_date': self.person.organisation and self.person.organisation.TFOMSCode or '',
+            'referral_lpu': self.or_undefined(self.from_org_rb(self._get_prop_val(action, 'LPUDirection'))),
+            'referral_date': self.or_undefined(self._get_prop_val(action, 'DateDirection')),
             'comment': self.or_undefined(self._get_prop_val(action, 'Comment')),
         }
         return res
