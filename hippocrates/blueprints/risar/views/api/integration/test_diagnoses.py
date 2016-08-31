@@ -14,6 +14,7 @@ from blueprints.risar.views.api.integration.checkup_obs_first.xform import Check
 from blueprints.risar.views.api.integration.checkup_obs_second.xform import CheckupObsSecondXForm
 from blueprints.risar.views.api.integration.childbirth.xform import ChildbirthXForm
 from blueprints.risar.views.api.integration.specialists_checkup.xform import SpecialistsCheckupXForm
+from blueprints.risar.views.api.integration.hospitalization.xform import HospitalizationXForm
 from blueprints.risar.views.api.integration.utils import get_person_by_codes
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_dict, safe_date, safe_datetime
@@ -236,6 +237,29 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform.reevaluate_data()
         db.session.commit()
 
+    def update_hospitalization_emr(self, data, id_=None, api_version=0):
+        create = id_ is None
+
+        xform = HospitalizationXForm(api_version, create)
+        # xform.validate(data)
+        xform.check_params(id_, card_id, data)
+        xform.update_target_obj(data)
+        xform.store()
+        xform.reevaluate_data()
+        db.session.commit()
+        em = xform.get_em()
+        if create:
+            self.emr_map[em.id] = em
+        return em
+
+    def delete_hospitalization_emr(self, id_=None, api_version=0):
+        xform = HospitalizationXForm(api_version)
+        xform.check_params(id_, card_id)
+        xform.delete_target_obj()
+        db.session.commit()
+        xform.reevaluate_data()
+        db.session.commit()
+
 
 class BaseDiagTest(unittest.TestCase):
     client_id = None
@@ -337,6 +361,17 @@ class BaseDiagTest(unittest.TestCase):
         'lpu_code': '-1',
         'doctor_code': '22',
         'diagnosis': 'A00',
+    }
+    emr_hospitalization1 = {
+        'external_id': '12345',
+        'measure_id': None,
+        'date_in': '2016-03-28',
+        'date_out': '2016-04-04',
+        'hospital': '6202',
+        'doctor': '33',
+        'pregnancy_week': 14,
+        'diagnosis_in': 'A01.1',
+        'diagnosis_out': 'A03.3',
     }
 
     @classmethod
@@ -552,6 +587,25 @@ class BaseDiagTest(unittest.TestCase):
                 del emr['diagnosis']
             else:
                 emr['diagnosis'] = mkb
+        return emr
+
+    def _change_test_hospitalization_emr_data(self, emr, **kwargs):
+        if 'date' in kwargs:
+            emr['date_out'] = kwargs['date']
+        if 'external_id' in kwargs:
+            emr['external_id'] = emr['external_id']
+        if 'measure_id' in kwargs:
+            emr['measure_id'] = kwargs['measure_id']
+        if 'hospital' in kwargs:
+            emr['hospital'] = kwargs['hospital']
+        if 'doctor' in kwargs:
+            emr['doctor'] = kwargs['doctor']
+        if 'mkb' in kwargs:
+            mkb = kwargs['mkb']
+            if mkb is None:
+                del emr['diagnosis_out']
+            else:
+                emr['diagnosis_out'] = mkb
         return emr
 
     def _get_ds_id_from_diags(self, diags, mkb):
@@ -1114,13 +1168,61 @@ class SimpleTestCases(BaseDiagTest):
         self.assertDiagsLikeExpected(insp2_diags, expected_diags)
 
 
-class MoarTestCases(BaseDiagTest):
+class MeasureResultsCases(BaseDiagTest):
 
-    def test_3(self):
-        self.assertEqual(1, 2, 'uf')
+    # @unittest.skip('debug')
+    def test_emr_hospitalization(self):
+        a1_date = '2016-04-30'
+        hosp1_code = TEST_DATA['person1']['hosp']
+        doctor1_code = TEST_DATA['person1']['doctor']
+        mkb_main1 = 'D01'
+        mkb_compl1 = None
+        mkb_assoc1 = None
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp1_code, doctor=doctor1_code, mkb_main=mkb_main1, mkb_compl=mkb_compl1,
+            mkb_assoc=mkb_assoc1)
+        insp1_id = self.env.update_first_inspection(insp1, None)
 
-    def test_4(self):
-        self.assertEqual(2, 2)
+        # test add emr after
+        emr1_external_id = '12346'
+        emr1_measure_id = None
+        emr1_date = '2016-05-24'
+        emr1_hosp_code = TEST_DATA['person1']['hosp']
+        emr1_doctor_code = TEST_DATA['person1']['doctor']
+        emr1_mkb = 'A00'
+        emr1 = self._change_test_hospitalization_emr_data(deepcopy(self.emr_hospitalization1),
+             date=emr1_date, hospital=emr1_hosp_code, doctor=emr1_doctor_code, mkb=emr1_mkb)
+        em1 = self.env.update_hospitalization_emr(emr1, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+        # на данный момент ситуация, что в 1ом осмотре (без даты окончания)
+        # появился диагноз из результата мероприятия (более позднего), корректна.
+        # Впоследствии при изменении такого поведения нужно будет исправить проверки в тестах.
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main1, ds_end_date=None,
+                                                  diagnosis_types=self._final_main(), dg_set_date=emr1_date),
+                          self.make_expected_diag(ds_set_date=emr1_date, mkb=emr1_mkb,
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=emr1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        # test nothing changed
+        emr1 = self._change_test_hospitalization_emr_data(emr1, measure_id=em1.id)
+        em1 = self.env.update_hospitalization_emr(emr1, em1.resultAction_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main1, ds_end_date=None,
+                                                  diagnosis_types=self._final_main(), dg_set_date=emr1_date),
+                          self.make_expected_diag(ds_set_date=emr1_date, mkb=emr1_mkb,
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=emr1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        # delete emr
+        self.env.delete_hospitalization_emr(em1.resultAction_id)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main1, ds_end_date=None,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
 
 
 def get_application():
@@ -1225,14 +1327,13 @@ if __name__ == '__main__':
 
     with app.app_context():
         suite1 = unittest.TestLoader().loadTestsFromTestCase(SimpleTestCases)
-        suite2 = unittest.TestLoader().loadTestsFromTestCase(MoarTestCases)
+        suite2 = unittest.TestLoader().loadTestsFromTestCase(MeasureResultsCases)
 
         unittest.TextTestRunner(verbosity=2).run(
-            unittest.TestSuite(
-                [suite1,
-                 #suite2
-                 ]
-            )
+            unittest.TestSuite([
+                    suite1,
+                    suite2
+            ])
         )
 
         # TestEnvironment(client_id, card_id)._delete_everything()
