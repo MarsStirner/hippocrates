@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -10,6 +11,7 @@ from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregn
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action, set_action_apt_values
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
+from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -33,6 +35,7 @@ def api_0_pregnancy_checkup(event_id):
     else:
         person = None
     diagnoses = data.pop('diagnoses', [])
+    validate_diagnoses(diagnoses)
     fetuses = data.pop('fetuses', [])
 
     if not flat_code:

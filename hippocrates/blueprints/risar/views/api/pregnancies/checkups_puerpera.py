@@ -1,10 +1,12 @@
 # -*- encoding: utf-8 -*-
+
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_puerpera
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera, set_action_apt_values
+from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -23,6 +25,8 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     flat_code = data.pop('flat_code', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
     diagnoses = data.pop('diagnoses', None)
+    validate_diagnoses(diagnoses)
+
     person_data = data.pop('person', None)
     if person_data:
         person = Person.query.get(person_data['id'])

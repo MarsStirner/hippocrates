@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -7,6 +8,7 @@ from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis, \
     represent_chart_for_epicrisis
 from hippocrates.blueprints.risar.lib.utils import get_action, close_open_checkups
+from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -30,6 +32,7 @@ def api_0_chart_epicrisis(event_id):
         action_id = data.pop('id', None)
         newborn_inspections = filter(None, data.pop('newborn_inspections', []))
         diagnoses = data.pop('diagnoses', [])
+        validate_diagnoses(diagnoses)
         action = get_action(event, risar_epicrisis, True)
 
         if not action.id:
