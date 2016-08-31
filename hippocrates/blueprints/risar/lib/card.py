@@ -57,7 +57,8 @@ class AbstractCard(object):
     @property
     def attrs(self):
         result = self.get_card_attrs_action()
-        self.check_card_attrs_action_integrity(result)
+        if result:
+            self.check_card_attrs_action_integrity(result)
         return result
 
     def get_card_attrs_action(self, auto=False):
@@ -336,7 +337,7 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def radz_risk(self):
-        from blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
+        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
         return get_radz_risk(self.event, True)
 
     def reevaluate_card_attrs(self):

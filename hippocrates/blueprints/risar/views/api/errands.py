@@ -11,6 +11,7 @@ from hippocrates.blueprints.risar.lib.represent.errand import represent_errand, 
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
 from nemesis.models.risar import Errand
+from nemesis.models.event import Event
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 from ...app import module
@@ -61,7 +62,7 @@ def api_0_errands_get():
 
     result = {}
 
-    query = Errand.query
+    query = Errand.query.join(Event).filter(Event.deleted == 0)
     if unread:
         query = query.filter(Errand.readingDate.is_(None))
     if exec_person:

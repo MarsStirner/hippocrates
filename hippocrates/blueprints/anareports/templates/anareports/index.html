@@ -25,7 +25,8 @@
         <tr ng-repeat="template in ps.templates | filter:query">
             <td>[[ $index + 1 ]]</td>
             <td>
-                <a href="#" ng-click="print_template(template)">[[ template.name ]]</a>
+                <a href="#" ng-click="print_template(template)" ng-if="!isRedirected(template)">[[ template.name ]]</a>
+                <a ng-href="[[template.redirect_to]]" ng-if="isRedirected(template)">[[ template.name ]]</a>
             </td>
         </tr>
         </tbody>

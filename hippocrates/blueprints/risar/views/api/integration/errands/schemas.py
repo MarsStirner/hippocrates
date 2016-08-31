@@ -32,9 +32,56 @@ class ErrandSchema(Schema):
                 "execution_comment": {
                     "description": "Текст ответа на поручение",
                     "type": "string"
+                },
+                "communication": {
+                    "description": "Контактные данные автора поручения",
+                    "type": "string"
+                },
+                "attached_files": {
+                    "description": "Файлы, относящиеся к поручению",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "id прикрепления файла",
+                                "type": "string"
+                            },
+                            "name": {
+                                "description": "Название файла",
+                                "type": "string"
+                            },
+                            "url": {
+                                "description": "Ссылка на скачивание",
+                                "type": "string"
+                            },
+                            "comment": {
+                                "description": "Комментарий",
+                                "type": "string"
+                            },
+                            "doctor_code": {
+                                "description": "Код пользователя хозяина файла",
+                                "type": "string"
+                            },
+                            "hospital_code": {
+                                "description": "Код ЛПУ пользователя хозяина файла",
+                                "type": "string"
+                            },
+                            "attach_date": {
+                                "description": "Дата прикрепления",
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "mimetype": {
+                                "description": "MIME type файла",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "minItems": 0
                 }
             }
-        },
+        }
     ]
 
 
@@ -97,6 +144,49 @@ class ErrandListSchema(Schema):
                     "execution_comment": {
                         "description": "Текст ответа на поручения",
                         "type": "string"
+                    },
+                    "attached_files": {
+                        "description": "Файлы, относящиеся к поручению",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "description": "id прикрепления файла",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "description": "Название файла",
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "description": "Ссылка на скачивание",
+                                    "type": "string"
+                                },
+                                "comment": {
+                                    "description": "Комментарий",
+                                    "type": "string"
+                                },
+                                "doctor_code": {
+                                    "description": "Код пользователя хозяина файла",
+                                    "type": "string"
+                                },
+                                "hospital_code": {
+                                    "description": "Код ЛПУ пользователя хозяина файла",
+                                    "type": "string"
+                                },
+                                "attach_date": {
+                                    "description": "Дата прикрепления",
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "mimetype": {
+                                    "description": "MIME type файла",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "minItems": 0
                     }
                 }
             },

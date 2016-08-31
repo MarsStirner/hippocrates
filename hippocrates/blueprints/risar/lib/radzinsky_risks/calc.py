@@ -5,10 +5,10 @@ import logging
 from collections import defaultdict
 from sqlalchemy.orm import joinedload
 
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.models.radzinsky_risks import (RisarRadzinskyRisks, RisarRadzinskyRisks_FactorsAssoc)
-from blueprints.risar.lib.utils import get_patient_risar_event
-from blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from hippocrates.blueprints.risar.models.radzinsky_risks import (RisarRadzinskyRisks, RisarRadzinskyRisks_FactorsAssoc)
+from hippocrates.blueprints.risar.lib.utils import get_patient_risar_event
+from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.enums import RadzinskyStage, RadzinskyRiskRate
 from nemesis.models.risar import (rbRadzRiskFactor, rbRadzStage, rbRadzRiskFactor_StageAssoc,

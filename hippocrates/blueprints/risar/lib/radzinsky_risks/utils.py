@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from blueprints.risar.lib.utils import mkb_match as _mkb_match
+from hippocrates.blueprints.risar.lib.utils import mkb_match as _mkb_match
 from nemesis.lib.utils import safe_bool_none
 
 

@@ -35,3 +35,6 @@ class HippoUsagiClient(TsukinoUsagiClient):
         app.register_blueprint(actions_module, url_prefix='/actions')
         app.register_blueprint(useraccount_module, url_prefix='/user')
         app.register_blueprint(risar_module, url_prefix='/risar')
+
+        from hippocrates.blueprints.risar.lib.specific import SpecificsManager
+        SpecificsManager.init_from_app(app)
