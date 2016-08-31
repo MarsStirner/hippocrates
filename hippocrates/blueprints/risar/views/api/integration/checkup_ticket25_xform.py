@@ -195,10 +195,10 @@ class CheckupsTicket25XFormSchema(Schema):
     ]
 
 
-class CheckupsTicket25XForm(CheckupsXForm):
+class CheckupsTicket25XForm(CheckupsTicket25XFormSchema, CheckupsXForm):
 
     def __init__(self, *args, **kwargs):
-        super(CheckupsTicket25XForm, self).__init__(*args, **kwargs)
+        CheckupsXForm.__init__(self, *args, **kwargs)
         self.ticket25 = None
 
     def find_ticket25(self):
