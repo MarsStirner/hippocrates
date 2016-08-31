@@ -57,9 +57,8 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             }
 
     def modify_target(self, new_date, new_person):
-        self.target_obj['CheckupDate'].value = new_date
         self.target_obj.begDate = self.target_obj.endDate = safe_datetime(new_date)
-        self.target_obj['Doctor'].value = self.target_obj.person = new_person
+        self.target_obj.person = new_person
         return self.target_obj
 
     def get_measure_type(self):

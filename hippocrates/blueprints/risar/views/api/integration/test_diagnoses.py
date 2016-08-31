@@ -669,7 +669,7 @@ class SimpleTestCases(BaseDiagTest):
         a1_date = '2016-04-30'
         hosp_code = TEST_DATA['person1']['hosp']
         doctor_code = TEST_DATA['person1']['doctor']
-        mkb_main = 'D01'
+        mkb_main = 'Z34.0'
         mkb_compl = ['N01']
         mkb_assoc = ['G01']
         insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
@@ -682,7 +682,7 @@ class SimpleTestCases(BaseDiagTest):
         a2_date = '2016-06-09'
         hosp_code = TEST_DATA['person1']['hosp']
         doctor_code = TEST_DATA['person1']['doctor']
-        mkb_main2 = 'D01'
+        mkb_main2 = 'Z34.0'
         mkb_compl2 = ['H01', 'H02']
         mkb_assoc2 = ['G01']
         insp2 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a2_date,
@@ -717,7 +717,7 @@ class SimpleTestCases(BaseDiagTest):
         external_id3 = "a3"
         hosp_code = TEST_DATA['person1']['hosp']
         doctor_code = TEST_DATA['person1']['doctor']
-        mkb_main3 = 'D01'
+        mkb_main3 = 'Z34.0'
         mkb_compl3 = ['H01']
         mkb_assoc3 = ['G01']
         insp3 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a3_date, external_id=external_id3,
@@ -761,7 +761,7 @@ class SimpleTestCases(BaseDiagTest):
         external_id4 = "a4"
         hosp_code = TEST_DATA['person1']['hosp']
         doctor_code = TEST_DATA['person1']['doctor']
-        mkb_main4 = 'D01'
+        mkb_main4 = 'Z34.0'
         mkb_compl4 = ['H01']
         mkb_assoc4 = None
         insp4 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a4_date, external_id=external_id4,
