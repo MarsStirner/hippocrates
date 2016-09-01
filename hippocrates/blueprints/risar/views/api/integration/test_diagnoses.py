@@ -216,6 +216,14 @@ where a.event_id = {0}'''.format(self.card_id)))
             self.insp_map[xform.target_obj.id] = xform.target_obj
         return xform.target_obj.id
 
+    def delete_childbirth(self, api_version=0):
+        xform = ChildbirthXForm(api_version)
+        xform.check_params(None, self.card_id)
+        xform.delete_target_obj()
+        xform.store()
+        xform.reevaluate_data()
+        xform.store()
+
     def update_specialist_checkup_emr(self, data, id_=None, api_version=0):
         create = id_ is None
 
@@ -1496,6 +1504,216 @@ class InspectionPuerperaCases(BaseDiagTest):
         self.assertDiagsLikeExpected(insp2_diags, expected_diags)
 
 
+class ChildbirthCases(BaseDiagTest):
+
+    # @unittest.skip('debug')
+    def test_childbirth_final_diags(self):
+        card_id = self.env.card_id
+        a1_date = '2016-04-30'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main = 'Z35.2'
+        mkb_compl = ['N01']
+        mkb_assoc = ['G01']
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main, mkb_compl=mkb_compl, mkb_assoc=mkb_assoc)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        main_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_main)
+        compl_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_compl[0])
+        assoc_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_assoc[0])
+
+        # test add epicrisis
+        ep1_date = '2016-08-01'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main_cb1 = 'Z35.2'
+        mkb_compl_cb1 = ['O20']
+        mkb_assoc_cb1 = ['J01']
+        chb = self._change_test_childbirth_data(deepcopy(self.chbirth1), date=ep1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main_cb1, mkb_compl=mkb_compl_cb1,
+            mkb_assoc=mkb_assoc_cb1, mkb_main_pat=None, mkb_compl_pat=None,
+            mkb_assoc_pat=None)
+        chb1_id = self.env.update_childbirth(chb, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        chb_diags = act_diags_map[chb1_id]
+        # O95_compl_ds_id = self._get_ds_id_from_diags(chb_diags, mkb_main_pat1)
+        # O96_1_assoc_ds_id = self._get_ds_id_from_diags(chb_diags, mkb_compl_pat1[0])
+        # J01_1_assoc_ds_id = self._get_ds_id_from_diags(chb_diags, mkb_assoc_pat1[0])
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main_cb1,
+                                                  diagnosis_types=dict(self._final_main(), **self._pat_assoc()),
+                                                  dg_set_date=ep1_date),
+                          self.make_expected_diag(ds_set_date=ep1_date, mkb=mkb_assoc_cb1[0],
+                                                  diagnosis_types=dict(self._final_assoc(), **self._pat_assoc()),
+                                                  dg_set_date=ep1_date),
+                          self.make_expected_diag(ds_set_date=ep1_date, mkb=mkb_compl_cb1[0],
+                                                  diagnosis_types=dict(self._final_compl(), **self._pat_assoc()),
+                                                  dg_set_date=ep1_date)]
+        self.assertDiagsLikeExpected(chb_diags, expected_diags)
+
+        # test nothing changed
+        chb1_id = self.env.update_childbirth(chb, chb1_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        chb_diags = act_diags_map[chb1_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main_cb1,
+                                                  diagnosis_types=dict(self._final_main(), **self._pat_assoc()),
+                                                  dg_set_date=ep1_date),
+                          self.make_expected_diag(ds_set_date=ep1_date, mkb=mkb_assoc_cb1[0],
+                                                  diagnosis_types=dict(self._final_assoc(), **self._pat_assoc()),
+                                                  dg_set_date=ep1_date),
+                          self.make_expected_diag(ds_set_date=ep1_date, mkb=mkb_compl_cb1[0],
+                                                  diagnosis_types=dict(self._final_compl(), **self._pat_assoc()),
+                                                  dg_set_date=ep1_date)]
+        self.assertDiagsLikeExpected(chb_diags, expected_diags)
+
+        # test change date and diags
+        ep2_date = '2016-08-21'
+        mkb_main_cb2 = 'Z35.3'
+        mkb_compl_cb2 = ['O20', 'O21']
+        mkb_assoc_cb2 = ['G01']
+        chb = self._change_test_childbirth_data(chb, date=ep2_date,
+            mkb_main=mkb_main_cb2, mkb_compl=mkb_compl_cb2, mkb_assoc=mkb_assoc_cb2)
+        chb1_id = self.env.update_childbirth(chb, chb1_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        chb_diags = act_diags_map[chb1_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_main_cb2,
+                                                  diagnosis_types=dict(self._final_main(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc_cb2[0],
+                                                  diagnosis_types=dict(self._final_assoc(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_compl_cb2[0],
+                                                  diagnosis_types=dict(self._final_compl(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_compl_cb2[1],
+                                                  diagnosis_types=dict(self._final_compl(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date)]
+        self.assertDiagsLikeExpected(chb_diags, expected_diags)
+
+        # delete ep
+        self.env.delete_childbirth()
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_compl[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date,
+                                                  ds_id=compl_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date,
+                                                  ds_id=assoc_mkb_ds_id)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+    # @unittest.skip('debug')
+    def test_childbirth_final_and_path_diags(self):
+        card_id = self.env.card_id
+        a1_date = '2016-04-30'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main = 'Z35.2'
+        mkb_compl = ['N01']
+        mkb_assoc = ['G01']
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main, mkb_compl=mkb_compl, mkb_assoc=mkb_assoc)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        main_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_main)
+        compl_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_compl[0])
+        assoc_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_assoc[0])
+
+        # test add epicrisis
+        ep1_date = '2016-08-01'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main_cb1 = 'Z35.2'
+        mkb_compl_cb1 = ['O20']
+        mkb_assoc_cb1 = ['J01']
+        chb = self._change_test_childbirth_data(deepcopy(self.chbirth1), date=ep1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main_cb1, mkb_compl=mkb_compl_cb1,
+            mkb_assoc=mkb_assoc_cb1, mkb_main_pat=None, mkb_compl_pat=None,
+            mkb_assoc_pat=None)
+        chb1_id = self.env.update_childbirth(chb, None)
+
+        # edit and add path diagnoses
+        ep2_date = '2016-07-29'
+        mkb_main_cb2 = 'Z35.2'
+        mkb_compl_cb2 = ['O20']
+        mkb_assoc_cb2 = ['J01', 'J02']
+        mkb_main_pat1 = 'O95'
+        mkb_compl_pat1 = ['O96.1']
+        mkb_assoc_pat1 = ['J02', 'J01']
+        chb = self._change_test_childbirth_data(chb, date=ep2_date, mkb_assoc=mkb_assoc_cb2,
+            mkb_main_pat=mkb_main_pat1, mkb_compl_pat=mkb_compl_pat1, mkb_assoc_pat=mkb_assoc_pat1)
+        chb1_id = self.env.update_childbirth(chb, chb1_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        chb_diags = act_diags_map[chb1_id]
+        # O95_compl_ds_id = self._get_ds_id_from_diags(chb_diags, mkb_main_pat1)
+        # O96_1_assoc_ds_id = self._get_ds_id_from_diags(chb_diags, mkb_compl_pat1[0])
+        # J01_1_assoc_ds_id = self._get_ds_id_from_diags(chb_diags, mkb_assoc_pat1[0])
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main_cb2,
+                                                  diagnosis_types=dict(self._final_main(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date, ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_compl_cb2[0],
+                                                  diagnosis_types=dict(self._final_compl(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_assoc_cb2[0],
+                                                  diagnosis_types=dict(self._final_assoc(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_main_pat1,
+                                                  diagnosis_types=dict(self._pat_main(), **self._final_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_compl_pat1[0],
+                                                  diagnosis_types=dict(self._pat_compl(), **self._final_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_assoc_pat1[0],
+                                                  diagnosis_types=dict(self._pat_assoc(), **self._final_assoc()),
+                                                  dg_set_date=ep2_date)]
+        self.assertDiagsLikeExpected(chb_diags, expected_diags)
+
+        # remove pat diags
+        mkb_main_cb3 = 'Z35.2'
+        mkb_compl_cb3 = ['O20']
+        mkb_assoc_cb3 = ['J01']
+        mkb_main_pat2 = None
+        mkb_compl_pat2 = None
+        mkb_assoc_pat2 = None
+        chb = self._change_test_childbirth_data(chb, mkb_main=mkb_main_cb3, mkb_compl=mkb_compl_cb3,
+            mkb_assoc=mkb_assoc_cb3, mkb_main_pat=mkb_main_pat2, mkb_compl_pat=mkb_compl_pat2,
+            mkb_assoc_pat=mkb_assoc_pat2)
+        chb1_id = self.env.update_childbirth(chb, chb1_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        chb_diags = act_diags_map[chb1_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main_cb3,
+                                                  diagnosis_types=dict(self._final_main(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date, ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_compl_cb3[0],
+                                                  diagnosis_types=dict(self._final_compl(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date),
+                          self.make_expected_diag(ds_set_date=ep2_date, mkb=mkb_assoc_cb3[0],
+                                                  diagnosis_types=dict(self._final_assoc(), **self._pat_assoc()),
+                                                  dg_set_date=ep2_date)]
+        self.assertDiagsLikeExpected(chb_diags, expected_diags)
+
+        # delete ep
+        self.env.delete_childbirth()
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_compl[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date,
+                                                  ds_id=compl_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date,
+                                                  ds_id=assoc_mkb_ds_id)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+
 def get_application():
     from nemesis.app import app
     from tsukino_usagi.client import TsukinoUsagiClient
@@ -1601,13 +1819,15 @@ if __name__ == '__main__':
         suite2 = unittest.TestLoader().loadTestsFromTestCase(MeasureResultsCases)
         suite3 = unittest.TestLoader().loadTestsFromTestCase(InspectionPCCases)
         suite4 = unittest.TestLoader().loadTestsFromTestCase(InspectionPuerperaCases)
+        suite5 = unittest.TestLoader().loadTestsFromTestCase(ChildbirthCases)
 
         unittest.TextTestRunner(verbosity=2).run(
             unittest.TestSuite([
                 suite1,
                 suite2,
                 suite3,
-                suite4
+                suite4,
+                suite5
             ])
         )
 

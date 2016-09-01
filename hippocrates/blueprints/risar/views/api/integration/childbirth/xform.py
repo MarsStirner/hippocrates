@@ -216,19 +216,19 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             res.setdefault('newborn_inspections', []).append(nb_state)
 
     def mapping_diag_data(self, data, res):
-        diag_data = []
+        final_diag_data = []
         if 'diagnosis_osn' in data['general_info']:
-            diag_data.append({
+            final_diag_data.append({
                 'kind': 'main',
                 'mkbs': [data['general_info']['diagnosis_osn']]
             })
         if 'diagnosis_osl' in data['general_info']:
-            diag_data.append({
+            final_diag_data.append({
                 'kind': 'complication',
                 'mkbs': data['general_info']['diagnosis_osl']
             })
         if 'diagnosis_sop' in data['general_info']:
-            diag_data.append({
+            final_diag_data.append({
                 'kind': 'associated',
                 'mkbs': data['general_info']['diagnosis_sop']
             })
@@ -249,25 +249,33 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
                     'kind': 'associated',
                     'mkbs': data['mother_death']['pat_diagnosis_sop']
                 })
+        if not pat_diag_data:
+            for fd in final_diag_data:
+                pat_diag_data.append({
+                    'kind': 'associated',
+                    'mkbs': fd['mkbs'][:]
+                })
+
         old_action_data = {
             'begDate': self.target_obj.begDate,
             'endDate': self.target_obj.endDate,
             'person': self.target_obj.person
         }
+        data_for_diags = {
+            'diags_list': [
+                {
+                    'diag_data': final_diag_data,
+                    'diag_type': 'final'
+                },
+                {
+                    'diag_data': pat_diag_data,
+                    'diag_type': 'pathanatomical'
+                }
+            ],
+            'old_action_data': old_action_data
+        }
         res.update({
-            '_data_for_diags': {
-                'diags_list': [
-                    {
-                        'diag_data': diag_data,
-                        'diag_type': 'final'
-                    },
-                    {
-                        'diag_data': pat_diag_data,
-                        'diag_type': 'pathanatomical'
-                    }
-                ],
-                'old_action_data': old_action_data
-            }
+            '_data_for_diags': data_for_diags
         })
         return res
 
@@ -291,30 +299,11 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
 
         self.ais.close_previous()
 
-    def close_diags(self):
-        # Роман:
-        # сначала найти открытые диагнозы пациента (это будут просто диагнозы без типа), затем среди них определить какие являются основными,
-        # осложнениями и пр. - это значит, что Diagnosis связывается с осмотром через Action_Diagnosis, где указывается его тип, т.е. диагноз
-        # пациента в рамках какого-то осмотра будет иметь определенный тип. *Все открытые диагнозы пациента, для которых не указан тип в связке
-        # с экшеном являются сопотствующими неявно*.
-        # тут надо понять логику работы с диагнозами (четкого описания нет), после этого нужно доработать механизм диагнозов - из того, что я знаю,
-        # сейчас проблема как раз с определением тех диагнозов пациента, которые относятся к текущему случаю. Для этого нужно исправлять запрос,
-        # выбирающий диагнозы по датам с учетом дат Event'а. После этого уже интегрировать.
-
-        # Action_Diagnosis
-        # Diagnostic.query.filter(Diagnosis.id == diagnosis)
-        # q = Diagnosis.query.filter(Diagnosis.client == self.parent_obj.client)
-        # q.update({'deleted': 1})
-        raise
-
     def delete_target_obj(self):
+        self.find_parent_obj(self.parent_obj_id)
         self.find_target_obj(self.target_obj_id)
-
-        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
-        # self.close_diags()
-        # В методе удаления осмотра с плодами ничего не делать, у action.deleted = 1
-        # self.delete_newborns()
-        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        self.ais.refresh(self.target_obj)
+        self.delete_diagnoses()
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,
@@ -322,11 +311,10 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             Action.deleted == 0
         ).update({'deleted': 1})
 
-    def delete_newborns(self):
-        RisarEpicrisis_Children.query.filter(
-            RisarEpicrisis_Children.delete == 0,
-            RisarEpicrisis_Children.action_id == self.target_obj_id
-        ).delete()
+        self.delete_external_data()
+
+        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        # if self.ais.left: ...
 
     def as_json(self):
         data = represent_epicrisis(self.parent_obj, self.target_obj)
