@@ -248,13 +248,14 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         ).update({'deleted': 1})
 
         self.delete_external_data()
+        self.delete_fetuses()
 
         # todo: при удалении последнего осмотра наверно нужно открывать предпослений
         # if self.ais.left: ...
 
     def delete_fetuses(self):
         RisarFetusState.query.filter(
-            RisarFetusState.delete == 0,
+            RisarFetusState.deleted == 0,
             RisarFetusState.action_id == self.target_obj_id
         ).delete()
 

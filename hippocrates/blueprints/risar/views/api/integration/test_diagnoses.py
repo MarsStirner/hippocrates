@@ -15,6 +15,8 @@ from blueprints.risar.views.api.integration.checkup_obs_second.xform import Chec
 from blueprints.risar.views.api.integration.childbirth.xform import ChildbirthXForm
 from blueprints.risar.views.api.integration.specialists_checkup.xform import SpecialistsCheckupXForm
 from blueprints.risar.views.api.integration.hospitalization.xform import HospitalizationXForm
+from blueprints.risar.views.api.integration.checkup_pc.xform import CheckupPCXForm
+from blueprints.risar.views.api.integration.checkup_puerpera.xform import CheckupPuerperaXForm
 from blueprints.risar.views.api.integration.utils import get_person_by_codes
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_dict, safe_date, safe_datetime
@@ -172,7 +174,7 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform.delete_target_obj()
         xform.store()
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
 
     def update_second_inspection(self, data, id_=None, api_version=0):
         create = id_ is None
@@ -195,7 +197,7 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform.delete_target_obj()
         xform.store()
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
         xform.generate_measures()
 
     def update_childbirth(self, data, id_=None, api_version=0):
@@ -223,7 +225,7 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform.update_target_obj(data)
         xform.store()
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
         em = xform.get_em()
         if create:
             self.emr_map[em.id] = em
@@ -233,9 +235,9 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform = SpecialistsCheckupXForm(api_version)
         xform.check_params(id_, card_id)
         xform.delete_target_obj()
-        db.session.commit()
+        xform.store()
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
 
     def update_hospitalization_emr(self, data, id_=None, api_version=0):
         create = id_ is None
@@ -246,7 +248,7 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform.update_target_obj(data)
         xform.store()
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
         em = xform.get_em()
         if create:
             self.emr_map[em.id] = em
@@ -256,9 +258,51 @@ where a.event_id = {0}'''.format(self.card_id)))
         xform = HospitalizationXForm(api_version)
         xform.check_params(id_, card_id)
         xform.delete_target_obj()
-        db.session.commit()
+        xform.store()
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
+
+    def update_inspection_pc(self, data, id_=None, api_version=0):
+        create = id_ is None
+
+        xform = CheckupPCXForm(api_version, create)
+        # xform.validate(data)
+        xform.check_params(id_, self.card_id, data)
+        xform.update_target_obj(data)
+        xform.store()
+        xform.reevaluate_data()
+        xform.store()
+        xform.generate_measures()
+        if create:
+            self.insp_map[xform.target_obj.id] = xform.target_obj
+        return xform.target_obj.id
+
+    def delete_inspection_pc(self, id_, api_version=0):
+        xform = CheckupPCXForm(api_version)
+        xform.check_params(id_, card_id)
+        xform.delete_target_obj()
+        xform.store()
+        xform.reevaluate_data()
+        xform.store()
+        xform.generate_measures()
+
+    def update_inspection_puerpera(self, data, id_=None, api_version=0):
+        create = id_ is None
+
+        xform = CheckupPuerperaXForm(api_version, create)
+        # xform.validate(data)
+        xform.check_params(id_, self.card_id, data)
+        xform.update_target_obj(data)
+        xform.store()
+        if create:
+            self.insp_map[xform.target_obj.id] = xform.target_obj
+        return xform.target_obj.id
+
+    def delete_inspection_puerpera(self, id_, api_version=0):
+        xform = CheckupPuerperaXForm(api_version)
+        xform.check_params(id_, card_id)
+        xform.delete_target_obj()
+        xform.store()
 
 
 class BaseDiagTest(unittest.TestCase):
@@ -372,6 +416,48 @@ class BaseDiagTest(unittest.TestCase):
         'pregnancy_week': 14,
         'diagnosis_in': 'A01.1',
         'diagnosis_out': 'A03.3',
+    }
+    insp_pc1 = {
+        "external_id": "12345",
+        "general_info": {
+            "date": "2016-04-30",  # *
+            "hospital": "-1",  # *
+            "doctor": "22",  # *
+            "height": 180,  # *
+            "weight": 80  # *
+        },
+        "medical_report": {  # Заключение
+            "pregnancy_week": 12,  # * Беременность (недель)
+            "next_visit_date": "2016-04-15",  # * Плановая дата следующей явки
+            "pregnancy_continuation": True,  # * Возможность сохранения беременности
+            "abortion_refusal": True,  # * Отказ от прерывания
+            "diagnosis_osn": "D01",  # Основной диагноз
+            "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
+            "diagnosis_osl": ["N01"],  # Диагноз осложнения
+        }
+    }
+    insp_pp1 = {
+        "external_id": "12345",
+        "date": "2016-04-01",  # *
+        "date_of_childbirth": "2016-11-01",  # *
+        "hospital": "-1",  # *
+        "doctor": "22",  # *
+        "time_since_childbirth": 1,
+        "complaints": ["02", "04"],  # * Жалобы ["01", "02", "03", "04", "05"]
+        "nipples": ["01"],  # Состояние сосков ["01", "02"]
+        "secretion": ["01"],  # Выделения ["01", "02", "03"]
+        "breast": ["02", "04"],  # * Молочные железы ["01", "02", "03", "04", "05"]
+        "lactation": "01",  # Лактация ["01", "02"]
+        "uterus": "02",  # Состояние матки ["01", ..., "05"]
+        "scar": "01",  # Состояние послеоперационного рубца ["01", "02"]
+        "state": "tajeloe",  # * Общ. состояние ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
+        "ad_right_high": 120,  # *
+        "ad_left_high": 120,  # *
+        "ad_right_low": 80,  # *
+        "ad_left_low": 80,  # *
+        "veins": "noma",  # Общ. состояние ["poverhnostnyjvarikoz", "varikoznoerassirenieven", "noma"]
+        "diagnosis": "A01",  # * Основной диагноз
+        "contraception_recommendations": "01",  # Рекомендации по контрацепции ["01", ..., "04"]
     }
 
     @classmethod
@@ -607,6 +693,52 @@ class BaseDiagTest(unittest.TestCase):
             else:
                 emr['diagnosis_out'] = mkb
         return emr
+
+    def _change_test_insp_pc_data(self, insp, **kwargs):
+        if 'date' in kwargs:
+            insp['general_info']['date'] = kwargs['date']
+        if 'hospital' in kwargs:
+            insp['general_info']['hospital'] = kwargs['hospital']
+        if 'doctor' in kwargs:
+            insp['general_info']['doctor'] = kwargs['doctor']
+        if 'external_id' in kwargs:
+            insp['general_info']['external_id'] = kwargs['external_id']
+        if 'mkb_main' in kwargs:
+            mkb_main = kwargs['mkb_main']
+            if mkb_main is None:
+                del insp['medical_report']['diagnosis_osn']
+            else:
+                insp['medical_report']['diagnosis_osn'] = mkb_main
+        if 'mkb_compl' in kwargs:
+            mkb_compl = kwargs['mkb_compl']
+            if mkb_compl is None:
+                del insp['medical_report']['diagnosis_osl']
+            else:
+                insp['medical_report']['diagnosis_osl'] = mkb_compl
+        if 'mkb_assoc' in kwargs:
+            mkb_assoc = kwargs['mkb_assoc']
+            if mkb_assoc is None:
+                del insp['medical_report']['diagnosis_sop']
+            else:
+                insp['medical_report']['diagnosis_sop'] = mkb_assoc
+        return insp
+
+    def _change_test_insp_puerpera_data(self, insp, **kwargs):
+        if 'date' in kwargs:
+            insp['date'] = kwargs['date']
+        if 'hospital' in kwargs:
+            insp['hospital'] = kwargs['hospital']
+        if 'doctor' in kwargs:
+            insp['doctor'] = kwargs['doctor']
+        if 'external_id' in kwargs:
+            insp['external_id'] = kwargs['external_id']
+        if 'mkb_main' in kwargs:
+            mkb_main = kwargs['mkb_main']
+            if mkb_main is None:
+                del insp['diagnosis']
+            else:
+                insp['diagnosis'] = mkb_main
+        return insp
 
     def _get_ds_id_from_diags(self, diags, mkb):
         for d in diags:
@@ -1225,6 +1357,145 @@ class MeasureResultsCases(BaseDiagTest):
         self.assertDiagsLikeExpected(insp1_diags, expected_diags)
 
 
+class InspectionPCCases(BaseDiagTest):
+
+    # @unittest.skip('debug')
+    def test_inspections_pc_base(self):
+        a1_date = '2016-04-30'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main = 'Z34.0'
+        mkb_compl = ['N01']
+        mkb_assoc = ['G01']
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main, mkb_compl=mkb_compl, mkb_assoc=mkb_assoc)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        main_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_main)
+
+        # 2 insp to right
+        a2_date = '2016-06-09'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main2 = 'Z34.0'
+        mkb_compl2 = ['H01', 'H02']
+        mkb_assoc2 = ['G01']
+        insp2 = self._change_test_insp_pc_data(deepcopy(self.insp_pc1), date=a2_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main2, mkb_compl=mkb_compl2, mkb_assoc=mkb_assoc2)
+        insp2_id = self.env.update_inspection_pc(insp2, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date),
+                          self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_compl2[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        # delete 2nd
+        self.env.delete_inspection_pc(insp2_id)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_id=main_mkb_ds_id),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_assoc[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date),
+                          self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_compl[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+
+class InspectionPuerperaCases(BaseDiagTest):
+
+    # @unittest.skip('debug')
+    def test_inspections_pp_base(self):
+        a1_date = '2016-04-30'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        mkb_main = 'Z38.0'
+        insp1 = self._change_test_insp_puerpera_data(deepcopy(self.insp_pp1), date=a1_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main)
+        insp1_id = self.env.update_inspection_puerpera(insp1, None)
+        insp1_diags = self.env.get_diagnoses_by_action()[insp1_id]
+        main_mkb_ds_id = self._get_ds_id_from_diags(insp1_diags, mkb_main)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_id=main_mkb_ds_id)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        # 2 insp to right
+        a2_date = '2016-06-09'
+        hosp_code = TEST_DATA['person1']['hosp']
+        doctor_code = TEST_DATA['person1']['doctor']
+        external_id = 'insp_pp2'
+        mkb_main2 = 'Z38.0'
+        insp2 = self._change_test_insp_puerpera_data(deepcopy(self.insp_pp1), date=a2_date,
+            hospital=hosp_code, doctor=doctor_code, mkb_main=mkb_main2, external_id=external_id)
+        insp2_id = self.env.update_inspection_puerpera(insp2, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date,
+                                                  ds_id=main_mkb_ds_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        # change 2 insp
+        a2_date = '2016-07-11'
+        mkb_main2 = 'Z39.0'
+        insp2 = self._change_test_insp_puerpera_data(insp2, date=a2_date, mkb_main=mkb_main2)
+        insp2_id = self.env.update_inspection_puerpera(insp2, insp2_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        # prev
+        a1_enddatetime = (datetime.datetime.strptime(a2_date, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_end_date=a1_enddatetime)]
+        self.assertDiagsLikeExpected(act_diags_map[insp1_id], expected_diags)
+
+        # change 2 insp back
+        a2_date = '2016-06-09'
+        mkb_main2 = 'Z38.0'
+        insp2 = self._change_test_insp_puerpera_data(insp2, date=a2_date, mkb_main=mkb_main2)
+        insp2_id = self.env.update_inspection_puerpera(insp2, insp2_id)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date,
+                                                  ds_id=main_mkb_ds_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        # prev
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date, mkb=mkb_main,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date,
+                                                  ds_end_date=None)]
+        self.assertDiagsLikeExpected(act_diags_map[insp1_id], expected_diags)
+
+        # delete 1st
+        self.env.delete_inspection_puerpera(insp1_id)
+        insp2_diags = self.env.get_diagnoses_by_action()[insp2_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date, mkb=mkb_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date,
+                                                  ds_id=main_mkb_ds_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+
 def get_application():
     from nemesis.app import app
     from tsukino_usagi.client import TsukinoUsagiClient
@@ -1328,11 +1599,15 @@ if __name__ == '__main__':
     with app.app_context():
         suite1 = unittest.TestLoader().loadTestsFromTestCase(SimpleTestCases)
         suite2 = unittest.TestLoader().loadTestsFromTestCase(MeasureResultsCases)
+        suite3 = unittest.TestLoader().loadTestsFromTestCase(InspectionPCCases)
+        suite4 = unittest.TestLoader().loadTestsFromTestCase(InspectionPuerperaCases)
 
         unittest.TextTestRunner(verbosity=2).run(
             unittest.TestSuite([
-                    suite1,
-                    suite2
+                suite1,
+                suite2,
+                suite3,
+                suite4
             ])
         )
 
