@@ -7,6 +7,7 @@ from hippocrates.blueprints.risar.lib.card import GynecologicCard
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup, represent_gyn_checkup_wm
 from hippocrates.blueprints.risar.lib.represent.common import represent_measures
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     set_action_apt_values
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_flat_code
@@ -36,6 +37,7 @@ def api_0_gyn_checkup(event_id):
     else:
         person = None
     diagnoses = data.pop('diagnoses', [])
+    validate_diagnoses(diagnoses)
 
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)
@@ -62,7 +64,6 @@ def api_0_gyn_checkup(event_id):
 
     with db.session.no_autoflush:
         set_action_apt_values(action, data, {'ticket_25': set_ticket})
-
         create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
@@ -82,9 +83,9 @@ def api_0_gyn_checkup(event_id):
 @module.route(_base + '<int:checkup_id>', methods=['GET'])
 @api_method
 def api_0_gyn_checkup_get(event_id, checkup_id):
-    action = get_action_by_id(checkup_id) or bail_out(ApiException(404, 'Action with id {0} not found'.format(checkup_id)))
+    action = get_action_by_id(checkup_id) or bail_out(ApiException(404, u'Action с id {0} не найден'.format(checkup_id)))
     if action.event_id != event_id:
-        raise ApiException(404, 'Action with id {0} does not belong to Event with id {1}'.format(checkup_id, event_id))
+        raise ApiException(404, u'Action c id {0} не принадлежит Event с id {1}'.format(checkup_id, event_id))
     return represent_gyn_checkup(action)
 
 
@@ -92,7 +93,7 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
 @api_method
 def api_0_gyn_checkup_get_new(event_id, flat_code):
     with db.session.no_autoflush:
-        event = Event.query.get(event_id) or bail_out(ApiException(404, 'Event with id {0} not found'.format(event_id)))
+        event = Event.query.get(event_id) or bail_out(ApiException(404, u'Event c id {0} не найден'.format(event_id)))
         action = get_action_by_id(None, event, flat_code, True)
         result = represent_gyn_checkup(action)
         return result

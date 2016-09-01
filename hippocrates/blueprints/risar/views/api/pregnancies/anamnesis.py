@@ -39,7 +39,7 @@ def api_0_chart_mother(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     if request.method == 'GET':
         action = get_action(event, risar_mother_anamnesis)
     else:
@@ -68,7 +68,7 @@ def api_0_chart_father(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     if request.method == 'GET':
         action = get_action(event, risar_father_anamnesis)
     else:

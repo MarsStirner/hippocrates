@@ -108,14 +108,14 @@ class XForm(object):
         for v in xrange(self.version + 1, version + 1):
             method = getattr(self, 'set_version_%i' % v, None)
             if method is None:
-                raise ApiException(VALIDATION_ERROR, 'Version %i of API is unsupported' % (version, ))
+                raise ApiException(VALIDATION_ERROR, u'Версия %i API не поддерживается' % (version, ))
             else:
                 method()
         self.version = version
 
     def validate(self, data):
         if data is None:
-            raise ApiException(VALIDATION_ERROR, 'No JSON body')
+            raise ApiException(VALIDATION_ERROR, u'Нет данных')
         schema = self.schema[self.version]
         cls = jsonschema.validators.validator_for(schema)
         val = cls(schema)
@@ -128,7 +128,7 @@ class XForm(object):
             logger.error(u'Ошибка валидации данных', extra={'errors': errors})
             raise ApiException(
                 VALIDATION_ERROR,
-                'Validation error',
+                u'Ошибка валидации',
                 errors=errors,
             )
 
@@ -137,7 +137,7 @@ class XForm(object):
         if parent_obj_id is None:
             # Ручная валидация
             raise Exception(
-                u'%s.find_parent_obj called without "parent_obj_id"' %
+                u'%s.find_parent_obj вызван без "parent_obj_id"' %
                 self.__class__.__name__
             )
         else:
@@ -150,7 +150,7 @@ class XForm(object):
         if self.target_id_required and target_obj_id is None:
             # Ручная валидация
             raise Exception(
-                u'%s.find_target_obj called without "target_obj_id"' %
+                u'%s.find_target_obj вызван без "target_obj_id"' %
                 self.__class__.__name__
             )
         else:
@@ -167,7 +167,7 @@ class XForm(object):
                 # Ручная валидация
                 raise ApiException(
                     VALIDATION_ERROR,
-                    u'%s.check_parent_obj called without "parent_obj_id"' %
+                    u'%s.check_parent_obj вызван без "parent_obj_id"' %
                     self.__class__.__name__
                 )
             else:
@@ -188,7 +188,7 @@ class XForm(object):
             if not data:
                 raise ApiException(
                     INTERNAL_ERROR,
-                    u'%s.check_target_obj called without "data"' %
+                    u'%s.check_target_obj вызван с пустой "data"' %
                     self.__class__.__name__
                 )
 
@@ -199,7 +199,7 @@ class XForm(object):
                 # Ручная валидация
                 raise ApiException(
                     VALIDATION_ERROR,
-                    u'%s.check_target_obj called without "parent_obj_id"' %
+                    u'%s.check_target_obj вызван без "parent_obj_id"' %
                     self.__class__.__name__
                 )
 
@@ -207,7 +207,7 @@ class XForm(object):
                 q = self._find_target_obj_query()
                 target_obj_exist = db.session.query(q.exists()).scalar()
                 if not target_obj_exist:
-                    raise ApiException(NOT_FOUND_ERROR, u'%s not found' %
+                    raise ApiException(NOT_FOUND_ERROR, u'%s не найден' %
                                        self.target_obj_class.__name__)
             else:
                 self.check_parent_obj(parent_obj_id)
@@ -489,7 +489,7 @@ class ExternalXForm(XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'check_duplicate used without "external_id"'
+                u'check_duplicate нужно использовать вместе с  "external_id"'
             )
         q = self._find_target_obj_query().join(
             ActionIdentification
@@ -499,7 +499,7 @@ class ExternalXForm(XForm):
         )
         target_obj_exist = db.session.query(q.exists()).scalar()
         if target_obj_exist:
-            raise ApiException(ALREADY_PRESENT_ERROR, u'%s already exist' %
+            raise ApiException(ALREADY_PRESENT_ERROR, u'%s уже существует' %
                                self.target_obj_class.__name__)
 
     def check_external_id(self, data):

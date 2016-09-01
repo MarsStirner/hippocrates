@@ -46,7 +46,7 @@ class ConciliumXForm(ConciliumSchema, XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'check_duplicate used without "external_id"'
+                u'для check_duplicate необходим "external_id"'
             )
         q = self._find_target_obj_query().join(
             RisarConcilium_Identification
@@ -66,7 +66,7 @@ class ConciliumXForm(ConciliumSchema, XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'check_external_id used without "external_id"'
+                u'для check_external_id необходим "external_id"'
             )
         q = RisarConcilium_Identification.query.join(rbAccountingSystem).filter(
             RisarConcilium_Identification.external_id == self.external_id,

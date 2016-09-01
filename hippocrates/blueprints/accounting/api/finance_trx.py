@@ -42,7 +42,7 @@ def api_0_finance_transaction_invoice_get():
 def api_0_finance_transaction_make(trx_type_code=None):
     trx_type = get_finance_trx_type(trx_type_code)
     if trx_type is None:
-        raise ApiException(404, u'Unknown `trx_type_code`')
+        raise ApiException(404, u'Неизвестный `trx_type_code`')
     args = request.args.to_dict()
     if request.json:
         args.update(request.json)
@@ -60,7 +60,7 @@ def api_0_finance_transaction_make(trx_type_code=None):
 def api_0_finance_transaction_invoice_make(trx_type_code=None):
     trx_type = get_finance_trx_type(trx_type_code)
     if trx_type is None:
-        raise ApiException(404, u'Unknown `trx_type_code`')
+        raise ApiException(404, u'Неизвестный `trx_type_code`')
     args = request.args.to_dict()
     if request.json:
         args.update(request.json)

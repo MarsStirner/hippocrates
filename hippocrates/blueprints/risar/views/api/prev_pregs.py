@@ -26,7 +26,7 @@ _base = '/api/0/any/<int:event_id>/anamnesis/pregnancies/'
 @module.route(_base + '<int:action_id>', methods=['GET'])
 @api_method
 def api_0_pregnancies_get(event_id, action_id):
-    action = Action.query.get(action_id) or bail_out(ApiException(404, 'Pregnancy not found'))
+    action = Action.query.get(action_id) or bail_out(ApiException(404, u'Беременность не найдена'))
     return dict(
         action_as_dict(action, pregnancy_apt_codes),
         id=action_id
@@ -36,9 +36,9 @@ def api_0_pregnancies_get(event_id, action_id):
 @module.route(_base + '<int:action_id>', methods=['DELETE'])
 @api_method
 def api_0_pregnancies_delete(event_id, action_id):
-    action = Action.query.get(action_id) or bail_out(ApiException(404, 'Pregnancy not found'))
+    action = Action.query.get(action_id) or bail_out(ApiException(404, u'Беременность не найдена'))
     if action.deleted:
-        raise ApiException(400, 'Pregnancy already deleted')
+        raise ApiException(400, u'Беременность уже была удалена')
     action.deleted = 1
     db.session.commit()
     card = AbstractCard.get_for_event(action.event)
@@ -50,9 +50,9 @@ def api_0_pregnancies_delete(event_id, action_id):
 @module.route(_base + '<int:action_id>/undelete', methods=['POST'])
 @api_method
 def api_0_pregnancies_undelete(event_id, action_id):
-    action = Action.query.get(action_id) or bail_out(ApiException(404, 'Pregnancy not found'))
+    action = Action.query.get(action_id) or bail_out(ApiException(404, u'Беременность не найдена'))
     if not action.deleted:
-        raise ApiException(400, 'Pregnancy not deleted')
+        raise ApiException(400, u'Беременность не является удалённой')
     action.deleted = 0
     db.session.commit()
     card = AbstractCard.get_for_event(action.event)
@@ -69,9 +69,9 @@ def api_0_pregnancies_post(event_id, action_id=None):
     if action_id is None:
         action = create_action(actionType_id, event_id)
     else:
-        action = Action.query.get(action_id) or bail_out(ApiException(404, 'Action not found'))
+        action = Action.query.get(action_id) or bail_out(ApiException(404, u'Action не найден'))
         if action.event_id != event_id:
-            raise ApiException(404, 'Action not found')
+            raise ApiException(404, u'Action не найден')
     card = AbstractCard.get_for_event(action.event)
     json = request.get_json()
 

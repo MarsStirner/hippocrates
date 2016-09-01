@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -7,6 +8,7 @@ from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis, \
     represent_chart_for_epicrisis
 from hippocrates.blueprints.risar.lib.utils import get_action, close_open_checkups
+from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -22,7 +24,7 @@ def api_0_chart_epicrisis(event_id):
     card = PregnancyCard.get_for_event(event)
 
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     if request.method == 'GET':
         action = get_action(event, risar_epicrisis, True)
     else:
@@ -30,6 +32,7 @@ def api_0_chart_epicrisis(event_id):
         action_id = data.pop('id', None)
         newborn_inspections = filter(None, data.pop('newborn_inspections', []))
         diagnoses = data.pop('diagnoses', [])
+        validate_diagnoses(diagnoses)
         action = get_action(event, risar_epicrisis, True)
 
         if not action.id:
@@ -55,9 +58,9 @@ def api_0_chart_epicrisis(event_id):
 def api_0_newborn_inspection_delete(inspection_id):
     inspection = Action.query.get(inspection_id)
     if inspection is None:
-        raise ApiException(404, 'inspection not found')
+        raise ApiException(404, u'Осмотр не найден')
     if inspection.deleted:
-        raise ApiException(400, 'inspection already deleted')
+        raise ApiException(400, u'Осмотр уже был удален')
     inspection.deleted = 1
     db.session.commit()
     return True
@@ -68,9 +71,9 @@ def api_0_newborn_inspection_delete(inspection_id):
 def api_0_newborn_inspection_undelete(inspection_id):
     inspection = Action.query.get(inspection_id)
     if inspection is None:
-        raise ApiException(404, 'Transfusion not found')
+        raise ApiException(404, u'Переливание не найдено')
     if not inspection.deleted:
-        raise ApiException(400, 'Transfusion not deleted')
+        raise ApiException(400, u'Переливание не является удалённым')
     inspection.deleted = 0
     db.session.commit()
     return True

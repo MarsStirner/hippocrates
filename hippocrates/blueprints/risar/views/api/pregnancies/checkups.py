@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -10,6 +11,7 @@ from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregn
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action, set_action_apt_values
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
+from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -33,10 +35,11 @@ def api_0_pregnancy_checkup(event_id):
     else:
         person = None
     diagnoses = data.pop('diagnoses', [])
+    validate_diagnoses(diagnoses)
     fetuses = data.pop('fetuses', [])
 
     if not flat_code:
-        raise ApiException(400, 'flat_code required')
+        raise ApiException(400, u'необходим flat_code')
 
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
@@ -89,7 +92,7 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     action.update_action_integrity()
     if not action:
-        raise ApiException(404, 'Action with id {0} not found'.format(checkup_id))
+        raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
     return represent_pregnancy_checkup_wm(action)
 
 
@@ -100,7 +103,7 @@ def api_0_pregnancy_checkup_new(event_id):
     data = request.get_json()
     flat_code = data.get('flat_code')
     if not flat_code:
-        raise ApiException(400, 'flat_code required')
+        raise ApiException(400, u'необходим flat_code')
     event = Event.query.get(event_id)
 
     with db.session.no_autoflush:

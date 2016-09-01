@@ -24,7 +24,7 @@ def api_0_contract_get(contract_id=None):
     elif contract_id:
         contract = con_ctrl.get_contract(contract_id)
     else:
-        raise ApiException(404, u'`contract_id` required')
+        raise ApiException(404, u'необходим `contract_id`')
     return ContractRepr().represent_contract_full(contract)
 
 
@@ -46,7 +46,7 @@ def api_0_contract_save(contract_id=None):
         contract = con_ctrl.update_contract(contract, json_data)
         con_ctrl.store(contract)
     else:
-        raise ApiException(404, u'`contract_id` required')
+        raise ApiException(404, u'необходим `contract_id`')
     return ContractRepr().represent_contract_full(contract)
 
 
@@ -72,7 +72,7 @@ def api_0_contract_list():
 @api_method
 def api_0_contract_delete(contract_id=None):
     if not contract_id:
-        raise ApiException(404, u'`contract_id` required')
+        raise ApiException(404, u'необходим `item_id`')
     con_ctrl = ContractController()
     contract = con_ctrl.get_contract(contract_id)
     con_ctrl.delete_contract(contract)
@@ -85,10 +85,10 @@ def api_0_contract_delete(contract_id=None):
 def api_0_contract_get_available():
     client_id = safe_int(request.args.get('client_id'))
     if not client_id:
-        raise ApiException(400, '`client_id` argument required')
+        raise ApiException(400, u'необходим `client_id`')
     finance_id = safe_int(request.args.get('finance_id'))
     if not finance_id:
-        raise ApiException(400, '`finance_id` argument required')
+        raise ApiException(400, u'необходим `finance_id`')
     set_date = safe_date(request.args.get('event_set_date')) or datetime.date.today()
     con_ctrl = ContractController()
     data = con_ctrl.get_avalable_contracts(client_id, finance_id, set_date)

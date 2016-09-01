@@ -19,4 +19,4 @@ class Schema(object):
         try:
             return cls.schema[api_version]
         except IndexError:
-            raise ApiException(NOT_FOUND_ERROR, u'Api version %i is not supported. Maximum is %i' % (api_version, len(cls.schema) - 1))
+            raise ApiException(NOT_FOUND_ERROR, u'Версия API %i не поддерживается. Максимум %i' % (api_version, len(cls.schema) - 1))

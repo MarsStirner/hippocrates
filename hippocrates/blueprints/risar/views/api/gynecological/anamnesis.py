@@ -21,7 +21,7 @@ _base = '/api/0/gyn/<int:event_id>/anamnesis'
 def api_0_gyn_anamnesis(event_id):
     event = Event.query.get(event_id)
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     return represent_gyn_anamnesis(card)
 
@@ -31,7 +31,7 @@ def api_0_gyn_anamnesis(event_id):
 def api_0_gyn_anamnesis_general(event_id):
     event = Event.query.get(event_id)
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     return represent_general_anamnesis_action(card.anamnesis)
 
@@ -41,7 +41,7 @@ def api_0_gyn_anamnesis_general(event_id):
 def api_0_gyn_anamnesis_general_post(event_id):
     event = Event.query.get(event_id)
     if not event:
-        raise ApiException(404, 'Event not found')
+        raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     action = card.anamnesis
     pbc = action.propsByCode

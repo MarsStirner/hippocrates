@@ -42,12 +42,13 @@ class InputPrepare(object):
                 context[name] = ','.join((str(x['code']) for x in value)) if value else None
 
             elif typeName.startswith('RefBook'):
-                extended_typename = typeName.split('.')
-                if len(extended_typename) == 2:
-                    refbook_attr = extended_typename[1]
-                    context[name] = value.get(refbook_attr, '') if value else ''
-                else:
-                    context[name] = value.get('code', '') if value else ''
+                if isinstance(value, dict):
+                    extended_typename = typeName.split('.')
+                    if len(extended_typename) == 2:
+                        refbook_attr = extended_typename[1]
+                        context[name] = value.get(refbook_attr, '') if value else ''
+                    else:
+                        context[name] = value.get('code', '') if value else ''
             if not context[name]:
                 context[name] = ''
 
