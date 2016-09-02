@@ -60,7 +60,8 @@ class ScheduleXForm(ScheduleSchema, XForm):
         ).filter(
             ScheduleTicket.deleted == 0,
             Schedule.deleted == 0,
-            Schedule.person_id == self.parent_obj_id
+            Schedule.person_id == self.parent_obj_id,
+            Schedule.reasonOfAbsence_id.is_(None)
         )
         if 'date_begin' in args:
             query = query.filter(Schedule.date >= args['date_begin'])

@@ -9,6 +9,7 @@ from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
 from nemesis.models.actions import Action
 from nemesis.systemwide import db
+from nemesis.lib.utils import format_time
 
 
 logger = logging.getLogger('simple')
@@ -65,9 +66,9 @@ class AppointmentXForm(AppointmentSchema, CheckupsXForm):
         res = {
             'measure_code': action.em_appointment.measure.code,
             'diagnosis': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'DiagnosisDirection'))),
-            # 'time': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'Time'))),
-            # 'date': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'Date'))),
-            # 'parameters': an_props['ReceiptDate'].value,
+            'time': self.or_undefined(format_time(self._get_prop_val(action, 'time'))),
+            'date': self.or_undefined(self._get_prop_val(action, 'date')),
+            'parameters': self.or_undefined(self._get_prop_val(action, 'additional')),
             'referral_lpu': self.or_undefined(self.from_org_rb(self._get_prop_val(action, 'LPUDirection'))),
             'referral_date': self.or_undefined(self._get_prop_val(action, 'DateDirection')),
             'comment': self.or_undefined(self._get_prop_val(action, 'Comment')),
