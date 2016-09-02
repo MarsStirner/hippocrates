@@ -287,9 +287,7 @@ class EventMeasureGenerator(object):
     def _process_existing_em_list(self, sm_to_exist_list):
         """Отменить созданные ранее EM, которые еще не наступили, вследствие того,
         что МКБ таких схем перестал быть актуальным.
-        # TODO: доработать описание
         """
-        # TODO: check and think
         current_dt_point = DateTimeInterval(self.context.inspection_datetime, is_point=True)
         renew_sm_id_list = set([sm.id for sm in sm_to_exist_list])
         result = []
@@ -355,7 +353,7 @@ class EventMeasureGenerator(object):
                 time_intervals = self.context.make_infinite_time_interval(start_dt, sm)
 
             for beg, end in time_intervals:
-                status = self.context.get_new_status(sm)  # TODO:
+                status = self.context.get_new_status(sm)
                 em = self.create_measure(sm, beg, end, status)
                 new_em_list.append(em)
 
@@ -680,7 +678,7 @@ class MeasureGeneratorRisarContext(object):
     def get_current_preg_weeks_interval(self):
         """Вернуть интервал в неделях беременности от текущего осмотра до следующего"""
         cur_w = self.pregnancy_week
-        next_w = cur_w + (self.next_inspection_date - self.inspection_date).days / 7  # TODO: check this, +1?
+        next_w = cur_w + (self.next_inspection_date - self.inspection_date).days / 7
         return DateTimeInterval(cur_w, next_w)
 
     # unused

@@ -403,7 +403,6 @@ class DiagnosesSystemManager(object):
 
                         if cur_diagn and diagnostic_changed:
                             # need to delete dgn because it can have higher date than the date of 'cur' inspection
-                            # TODO: test
                             cur_diagn.deleted = 1
                             self.to_delete.append(cur_diagn)
 
@@ -517,7 +516,6 @@ class DiagnosesSystemManager(object):
                         #     self.to_delete.append(ds)
 
                         # delete dgn
-                        # todo: test
                         if diag['diagn']:
                             diag['diagn'].deleted = 1
                             self.to_delete.append(diag['diagn'])
@@ -593,7 +591,6 @@ class DiagnosesSystemManager(object):
                                            None, None, None, False, False)
 
                     # delete unneeded dgn from cur
-                    # todo: test
                     diagn = by_inspection['cur'][mkb]['diagn']
                     if diagn:
                         diagn.deleted = 1
@@ -768,7 +765,6 @@ class DiagnosesSystemManager(object):
                     if not self.create_mode:
                         # delete unneeded dgn from cur
                         # dgn can be with higher date, delete just in case
-                        # todo: test
                         diagn = by_inspection['cur'][mkb]['diagn']
                         if diagn:
                             diagn.deleted = 1
