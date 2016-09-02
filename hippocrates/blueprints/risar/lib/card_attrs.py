@@ -337,7 +337,7 @@ def reevaluate_card_fill_rate_anamnesis(card, update_general_rate=True):
     mother_anamnesis = card.anamnesis.mother
     anamnesis_fr = (
         CardFillRate.filled[0]
-        if mother_anamnesis is not None
+        if mother_anamnesis is not None and mother_anamnesis.id is not None
         else (
             CardFillRate.waiting[0]
             if DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(event_date, 7, DateTimeUtil.day)
