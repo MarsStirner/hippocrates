@@ -82,6 +82,11 @@ angular.module('WebMis20')
                                             '<span ng-bind="layout_tools.format_Diagnosis({0}.value)"></span>';
                                     }
                                     break;
+                                case 'URL':
+                                    inner_template =
+                                            '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
+                                            'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
+                                    break;
 
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>'; break;
@@ -200,6 +205,11 @@ angular.module('WebMis20')
                                     inner_template = ('<wm-diagnosis model="{0}.value" action="action" params="{1}" ' +
                                         'can-add-new="true" can-delete="true" can-edit="true" list-mode="{2}">' +
                                         '</wm-diagnosis>').format('{0}', property_value_domain_obj, property.type.vector);
+                                    break;
+                                case 'URL':
+                                    inner_template =
+                                            '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
+                                            'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
                                     break;
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>';
