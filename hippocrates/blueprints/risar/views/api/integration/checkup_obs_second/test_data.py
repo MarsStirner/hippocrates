@@ -8,10 +8,10 @@
 """
 
 obs_second_data = {
-    "external_id": "123456",
+    "external_id": "1234567",
     # "exam_obs_id": "",
     "dynamic_monitoring": {
-        "date": "2016-07-09",  # *
+        "date": "2016-10-09",  # *
         "hospital": "-1",  # *
         "doctor": "22",  # *
         "ad_right_high": 120,  # *
@@ -81,7 +81,7 @@ obs_second_data = {
         "pregnancy_continuation": False,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "D01",  # Основной диагноз
+        "diagnosis_osn": "Z34.0",  # Основной диагноз
         "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
         "diagnosis_osl": ["H01", "H02"],  # Диагноз осложнения
         # "recommendations": "",  # Рекомендации

@@ -44,12 +44,12 @@ def test_register_edit_delete_second_checkup(card_id):
         #     else:
         #         raise e
         #
-        checkup_id = 1303
+        checkup_id = 4563
         result = edit_checkup(session, card_id, checkup_id, obs_second_data)
-        # checkup = result['result']
-        # meta = result['meta']
-        # print u'edited checkup meta: {0}'.format(repr(meta).decode("unicode-escape"))
-        # print u'edited checkup data: {0}'.format(repr(checkup).decode("unicode-escape"))
+        checkup = result['result']
+        meta = result['meta']
+        print u'edited checkup meta: {0}'.format(repr(meta).decode("unicode-escape"))
+        print u'edited checkup data: {0}'.format(repr(checkup).decode("unicode-escape"))
         #
         # obs_second_data['external_id'] = 'x'
         # try:

@@ -617,9 +617,11 @@ class CheckupsXForm(ExternalXForm):
                     self.target_obj, diag_type, self.ais, refresh_in_series)
                 fut_interval = DateTimeInterval(t_beg_date, t_end_date)
                 diag_sys.refresh_with_old_state(mis_diags, fut_interval)
-                new_diagnoses, changed_diagnoses = diag_sys.get_result()
+                new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
 
                 create_or_update_diagnoses(self.target_obj, new_diagnoses)
+                for d in new_oa_diagnoses:
+                    create_or_update_diagnoses(d['action'], [d['data']])
                 db.session.add_all(changed_diagnoses)
                 db.session.flush()
                 self.target_obj.begDate = t_beg_date
@@ -633,8 +635,10 @@ class CheckupsXForm(ExternalXForm):
             diag_sys = DiagnosesSystemManager.get_for_inspection(
                 self.target_obj, diag_type, self.ais, refresh_in_series)
             diag_sys.refresh_with(mis_diags)
-            new_diagnoses, changed_diagnoses = diag_sys.get_result()
+            new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
             create_or_update_diagnoses(self.target_obj, new_diagnoses)
+            for d in new_oa_diagnoses:
+                create_or_update_diagnoses(d['action'], [d['data']])
             db.session.add_all(changed_diagnoses)
 
             db.session.flush()
@@ -645,8 +649,10 @@ class CheckupsXForm(ExternalXForm):
         diag_sys = DiagnosesSystemManager.get_for_inspection(
             self.target_obj, None, self.ais)
         diag_sys.refresh_with_deletion()
-        new_diagnoses, changed_diagnoses = diag_sys.get_result()
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
         create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
         db.session.add_all(changed_diagnoses)
 
 
@@ -734,9 +740,11 @@ class MeasuresResultsXForm(ExternalXForm):
                 target, 'final', self.get_measure_type().value, self.ais)
             fut_interval = DateTimeInterval(mr_data['new_beg_date'], mr_data['new_beg_date'])
             diag_sys.refresh_with_measure_result_old_state(new_diags, fut_interval)
-            new_diagnoses, changed_diagnoses = diag_sys.get_result()
+            new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
 
             create_or_update_diagnoses(self.target_obj, new_diagnoses)
+            for d in new_oa_diagnoses:
+                create_or_update_diagnoses(d['action'], [d['data']])
             db.session.add_all(changed_diagnoses)
             db.session.flush()
             self.modify_target(mr_data['new_beg_date'], mr_data['new_person'])
@@ -746,8 +754,10 @@ class MeasuresResultsXForm(ExternalXForm):
         diag_sys = DiagnosesSystemManager.get_for_measure_result(
             self.target_obj, 'final', self.get_measure_type().value, self.ais)
         diag_sys.refresh_with_measure_result(new_diags)
-        new_diagnoses, changed_diagnoses = diag_sys.get_result()
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
         create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
         db.session.add_all(changed_diagnoses)
         db.session.flush()
 
@@ -757,8 +767,11 @@ class MeasuresResultsXForm(ExternalXForm):
         diag_sys = DiagnosesSystemManager.get_for_measure_result(
             self.target_obj, None, self.get_measure_type().value, self.ais)
         diag_sys.refresh_with_deletion()
-        new_diagnoses, changed_diagnoses = diag_sys.get_result()
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
         create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
+
         db.session.add_all(changed_diagnoses)
 
     def get_event_measure(self, event_measure_id, measure_code, beg_date, end_date):

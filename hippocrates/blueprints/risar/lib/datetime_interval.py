@@ -32,12 +32,17 @@ class DateTimeInterval(object):
     def __lt__(self, other):
         if not isinstance(other, DateTimeInterval):
             raise RuntimeError('Can compare only with DateTimeInterval')
-        return get_intersection_type(self, other) == IntersectionType.none_left
+        return get_intersection_type(self, other) in (
+            IntersectionType.none_left, IntersectionType.left,
+            IntersectionType.over, IntersectionType
+        )
 
     def __gt__(self, other):
         if not isinstance(other, DateTimeInterval):
             raise RuntimeError('Can compare only with DateTimeInterval')
-        return get_intersection_type(self, other) == IntersectionType.none_right
+        return get_intersection_type(self, other) in (
+            IntersectionType.none_right, IntersectionType.inner, IntersectionType.right
+        )
 
 
 def get_intersection_type(interval, other_interval):

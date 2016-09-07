@@ -387,7 +387,6 @@ class EventMeasureGenerator(object):
         existing_em_list = self._filter_actual_existing_ems(self.existing_em_list.get(sm.id, []))
         grouped_em = self._group_by_sm_action(existing_em_list)
         key = (sm.id, self.source_action.id)
-        # TODO: think
         if key in grouped_em:
             return self._compare_em_lists(em_list, grouped_em[key])
         else:

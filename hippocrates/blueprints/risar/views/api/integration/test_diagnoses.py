@@ -65,6 +65,12 @@ from Diagnostic d join Diagnosis ds on d.diagnosis_id = ds.id \
 left join Action_Diagnosis ad on ad.diagnosis_id = ds.id \
 where ds.client_id = {0}'''.format(self.client_id)))
         db.engine.execute(text(u'''\
+delete ed.* \
+from Diagnostic d join Diagnosis ds on d.diagnosis_id = ds.id \
+left join Event_Diagnosis ed on ed.diagnosis_id = ds.id \
+where ds.client_id = {0}'''.format(self.client_id)))
+
+        db.engine.execute(text(u'''\
 delete d.*, ds.*
 from Diagnostic d join Diagnosis ds on d.diagnosis_id = ds.id
 left join Action_Diagnosis ad on ad.diagnosis_id = ds.id
@@ -146,7 +152,6 @@ where a.event_id = {0}'''.format(self.card_id)))
             'dg_id': data['diagnostic']['id'],
             'dg_deleted': data['diagnostic']['deleted'],
             'dg_set_date': data['diagnostic']['set_date'],
-            'dg_end_date': data['diagnostic']['end_date'],
             'dg_create_date': data['diagnostic']['createDatetime'],
             'dg_person_id': data['diagnostic']['modify_person']['id'],
             'dg_action_id': data['diagnostic']['action_id'],
@@ -1001,6 +1006,121 @@ class SimpleTestCases(BaseDiagTest):
         self.assertDiagsLikeExpected(act_diags_map[insp1_id], expected_diags)
 
     # @unittest.skip('debug')
+    def test_multiple_sequential_inspections(self):
+        """Последовательное добавление осмотров"""
+        a1_date1 = '2016-04-30'
+        hosp1_code = TEST_DATA['person1']['hosp']
+        doctor1_code = TEST_DATA['person1']['doctor']
+        mkb1_main1 = 'D01'
+        mkb1_compl1 = ['N01']
+        mkb1_assoc1 = ['G01']
+        insp1 = self._change_test_prinsp_data(deepcopy(self.prim_insp1), date=a1_date1,
+            hospital=hosp1_code, doctor=doctor1_code, mkb_main=mkb1_main1, mkb_compl=mkb1_compl1,
+            mkb_assoc=mkb1_assoc1)
+        insp1_id = self.env.update_first_inspection(insp1, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+
+        D01_ds_main_id = self._get_ds_id_from_diags(insp1_diags, mkb1_main1)
+        N01_ds_compl_id = self._get_ds_id_from_diags(insp1_diags, mkb1_compl1[0])
+        G01_ds_assoc_id = self._get_ds_id_from_diags(insp1_diags, mkb1_assoc1[0])
+
+        # 2nd
+        a2_date1 = '2016-06-29'
+        hosp2_code = TEST_DATA['person1']['hosp']
+        doctor2_code = TEST_DATA['person1']['doctor']
+        mkb2_main1 = 'Z34.0'
+        mkb2_compl1 = ['N01']
+        mkb2_assoc1 = ['G01', 'G02']
+        insp2 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a2_date1,
+            hospital=hosp2_code, doctor=doctor2_code, mkb_main=mkb2_main1, mkb_compl=mkb2_compl1,
+            mkb_assoc=mkb2_assoc1)
+        insp2_id = self.env.update_second_inspection(insp2, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+
+        Z34_0_ds_main_id = self._get_ds_id_from_diags(insp2_diags, mkb2_main1)
+        G02_ds_assoc_id = self._get_ds_id_from_diags(insp2_diags, mkb2_assoc1[1])
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date1,
+                                                  ds_id=N01_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
+                                                  ds_id=G01_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
+                                                  ds_id=G02_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        insp1_diags = act_diags_map[insp1_id]
+        a2_beforedate = (datetime.datetime.strptime(a2_date1, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb1_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date1,
+                                                  ds_id=D01_ds_main_id, ds_end_date=a2_beforedate),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb1_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date1,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb1_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date1,
+                                                  ds_id=G01_ds_assoc_id, ds_end_date=None)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        # 3rd
+        a3_date1 = '2016-07-20'
+        a3_external_id = 'a3'
+        hosp3_code = TEST_DATA['person1']['hosp']
+        doctor3_code = TEST_DATA['person1']['doctor']
+        mkb3_main1 = 'Z34.0'
+        mkb3_compl1 = ['N01', 'N02']
+        mkb3_assoc1 = ['G02', 'G03']
+        insp3 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a3_date1, external_id=a3_external_id,
+            hospital=hosp3_code, doctor=doctor3_code, mkb_main=mkb3_main1, mkb_compl=mkb3_compl1,
+            mkb_assoc=mkb3_assoc1)
+        insp3_id = self.env.update_second_inspection(insp3, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp3_diags = act_diags_map[insp3_id]
+
+        N02_ds_compl_id = self._get_ds_id_from_diags(insp3_diags, mkb3_compl1[1])
+        G03_ds_assoc_id = self._get_ds_id_from_diags(insp3_diags, mkb3_assoc1[1])
+
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb3_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a3_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb3_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
+                                                  ds_id=N01_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
+                                                  ds_id=N02_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb3_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G02_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G03_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp3_diags, expected_diags)
+
+        insp2_diags = act_diags_map[insp2_id]
+        a3_beforedate = (datetime.datetime.strptime(a3_date1, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date1,
+                                                  ds_id=Z34_0_ds_main_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date1,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
+                                                  ds_id=G01_ds_assoc_id, ds_end_date=a3_beforedate),
+                          self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
+                                                  ds_id=G02_ds_assoc_id, ds_end_date=None)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+    # @unittest.skip('debug')
     def test_different_diag_types(self):
         a1_date = '2016-04-30'
         hosp_code = TEST_DATA['person1']['hosp']
@@ -1721,9 +1841,9 @@ class ChildbirthCases(BaseDiagTest):
         self.assertDiagsLikeExpected(insp1_diags, expected_diags)
 
 
-class ChangeInspectionDatesCases(BaseDiagTest):
+class SingleInspectionCases(BaseDiagTest):
 
-    @unittest.skip('debug')
+    # @unittest.skip('debug')
     def test_single_inspection_dates(self):
         a1_date = '2016-04-30'
         hosp_code = TEST_DATA['person1']['hosp']
@@ -1809,10 +1929,18 @@ class ChangeInspectionDatesCases(BaseDiagTest):
                                                   diagnosis_types=self._final_main(), dg_set_date=a5_date)]
         self.assertDiagsLikeExpected(insp1_diags, expected_diags)
 
-    # @unittest.skip('debug')
-    def test_multiple_sequential_inspections_dates(self):
-        """Последовательное добавление осмотров / изменение дат уже существующих
-        без перескоков друг относительно друга / удаление осмотров"""
+
+class InspectionSeqTest(BaseDiagTest):
+
+    def setUp(self):
+        super(InspectionSeqTest, self).setUp()
+        self._state = None
+        self._create_initial_inspections()
+
+    def tearDown(self):
+        super(InspectionSeqTest, self).tearDown()
+
+    def _create_initial_inspections(self):
         a1_date1 = '2016-04-30'
         hosp1_code = TEST_DATA['person1']['hosp']
         doctor1_code = TEST_DATA['person1']['doctor']
@@ -1847,20 +1975,6 @@ class ChangeInspectionDatesCases(BaseDiagTest):
         Z34_0_ds_main_id = self._get_ds_id_from_diags(insp2_diags, mkb2_main1)
         G02_ds_assoc_id = self._get_ds_id_from_diags(insp2_diags, mkb2_assoc1[1])
 
-        expected_diags = [self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_main1,
-                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date1,
-                                                  ds_id=Z34_0_ds_main_id),
-                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_compl1[0],
-                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date1,
-                                                  ds_id=N01_ds_compl_id),
-                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_assoc1[0],
-                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
-                                                  ds_id=G01_ds_assoc_id),
-                          self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_assoc1[1],
-                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
-                                                  ds_id=G02_ds_assoc_id)]
-        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
-
         # 3rd
         a3_date1 = '2016-07-20'
         a3_external_id = 'a3'
@@ -1879,16 +1993,234 @@ class ChangeInspectionDatesCases(BaseDiagTest):
         N02_ds_compl_id = self._get_ds_id_from_diags(insp3_diags, mkb3_compl1[1])
         G03_ds_assoc_id = self._get_ds_id_from_diags(insp3_diags, mkb3_assoc1[1])
 
-        expected_diags = [self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb3_main1,
+        self._state = locals()
+
+
+class ChangeInspectionsDatesCases(InspectionSeqTest):
+
+    # @unittest.skip('debug')
+    def test_multiple_sequential_inspections_dates(self):
+        """Последовательное добавление осмотров / изменение дат уже существующих
+        без перескоков друг относительно друга / удаление"""
+        # current state variables
+        a1_date1 = self._state['a1_date1']
+        a2_date1 = self._state['a2_date1']
+        a3_date1 = self._state['a3_date1']
+        mkb2_main1 = self._state['mkb2_main1']  # 'Z34.0'
+        mkb2_compl1 = self._state['mkb2_compl1']  # ['N01']
+        mkb2_assoc1 = self._state['mkb2_assoc1']  # ['G01', 'G02']
+        mkb3_main1 = self._state['mkb3_main1']  # 'Z34.0'
+        mkb3_compl1 = self._state['mkb3_compl1']  # ['N01', 'N02']
+        mkb3_assoc1 = self._state['mkb3_assoc1']  # ['G02', 'G03']
+        Z34_0_ds_main_id = self._state['Z34_0_ds_main_id']
+        N01_ds_compl_id = self._state['N01_ds_compl_id']
+        N02_ds_compl_id = self._state['N02_ds_compl_id']
+        D01_ds_main_id = self._state['D01_ds_main_id']
+        G01_ds_assoc_id = self._state['G01_ds_assoc_id']
+        G02_ds_assoc_id = self._state['G02_ds_assoc_id']
+        G03_ds_assoc_id = self._state['G03_ds_assoc_id']
+
+        # move 1st left, change diags
+        a1_date2 = '2016-04-25'
+        mkb1_main2 = 'D01'
+        mkb1_compl2 = ['N01']
+        mkb1_assoc2 = ['G02']
+        insp1 = self._change_test_prinsp_data(self._state['insp1'], date=a1_date2,
+            mkb_main=mkb1_main2, mkb_compl=mkb1_compl2, mkb_assoc=mkb1_assoc2)
+        insp1_id = self.env.update_first_inspection(insp1, self._state['insp1_id'])
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date2,
+                                                  ds_id=D01_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date2,
+                                                  ds_id=N01_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date2,
+                                                  ds_id=G02_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        insp2_diags = act_diags_map[self._state['insp2_id']]
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb2_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date1,
+                                                  ds_id=N01_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb2_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
+                                                  ds_id=G01_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb2_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date1,
+                                                  ds_id=G02_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        # move 2nd right, change diags
+        a2_date2 = '2016-07-05'
+        mkb2_main2 = 'Z34.0'
+        mkb2_compl2 = None
+        mkb2_assoc2 = ['G01', 'G02']
+        insp2 = self._change_test_repinsp_data(self._state['insp2'], date=a2_date2,
+            mkb_main=mkb2_main2, mkb_compl=mkb2_compl2, mkb_assoc=mkb2_assoc2)
+        insp2_id = self.env.update_second_inspection(insp2, self._state['insp2_id'])
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date2, mkb=mkb2_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date2,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a2_date2, mkb=mkb2_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date2,
+                                                  ds_id=G01_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb2_assoc2[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date2,
+                                                  ds_id=G02_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        a2_beforedate = (datetime.datetime.strptime(a2_date2, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date2,
+                                                  ds_id=D01_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date2,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=a2_beforedate),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date2,
+                                                  ds_id=G02_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        insp3_diags = act_diags_map[self._state['insp3_id']]
+        expected_diags = [self.make_expected_diag(ds_set_date=a2_date2, mkb=mkb3_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a3_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
+                                                  ds_id=N02_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb3_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G02_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G03_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp3_diags, expected_diags)
+        new_N01_ds_compl_id = self._get_ds_id_from_diags(insp3_diags, mkb3_compl1[0])
+        self.assertNotEqual(new_N01_ds_compl_id, N01_ds_compl_id)
+
+        # del 2nd
+        self.env.delete_second_inspection(insp2_id)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+
+        a3_beforedate = (datetime.datetime.strptime(a3_date1, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        insp1_diags = act_diags_map[insp1_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date2,
+                                                  ds_id=D01_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date2,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=a2_beforedate),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb1_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date2,
+                                                  ds_id=G02_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        insp3_diags = act_diags_map[self._state['insp3_id']]
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a3_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
+                                                  ds_id=N02_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a1_date2, mkb=mkb3_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G02_ds_assoc_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G03_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp3_diags, expected_diags)
+
+    # @unittest.skip('debug')
+    def test_inspections_shifting(self):
+        """Изменение дат уже существующих осмотров с перескоком через
+        другие осмотры / удаление"""
+        # current state variables
+        a1_date1 = self._state['a1_date1']
+        a2_date1 = self._state['a2_date1']
+        a3_date1 = self._state['a3_date1']
+        mkb1_main1 = self._state['mkb1_main1']  # 'D01'
+        mkb1_compl1 = self._state['mkb1_compl1']  # ['N01']
+        mkb1_assoc1 = self._state['mkb1_assoc1']  # ['G01']
+        mkb2_main1 = self._state['mkb2_main1']  # 'Z34.0'
+        mkb2_compl1 = self._state['mkb2_compl1']  # ['N01']
+        mkb2_assoc1 = self._state['mkb2_assoc1']  # ['G01', 'G02']
+        mkb3_main1 = self._state['mkb3_main1']  # 'Z34.0'
+        mkb3_compl1 = self._state['mkb3_compl1']  # ['N01', 'N02']
+        mkb3_assoc1 = self._state['mkb3_assoc1']  # ['G02', 'G03']
+        Z34_0_ds_main_id = self._state['Z34_0_ds_main_id']
+        N01_ds_compl_id = self._state['N01_ds_compl_id']
+        N02_ds_compl_id = self._state['N02_ds_compl_id']
+        D01_ds_main_id = self._state['D01_ds_main_id']
+        G01_ds_assoc_id = self._state['G01_ds_assoc_id']
+        G02_ds_assoc_id = self._state['G02_ds_assoc_id']
+        G03_ds_assoc_id = self._state['G03_ds_assoc_id']
+
+        # move 2nd inspection after 3rd
+        a2_date2 = '2016-08-15'
+        mkb2_main2 = 'Z34.0'
+        mkb2_compl2 = ['N01']
+        mkb2_assoc2 = ['G02', 'G03']
+        insp2 = self._change_test_repinsp_data(self._state['insp2'], date=a2_date2,
+            mkb_main=mkb2_main2, mkb_compl=mkb2_compl2, mkb_assoc=mkb2_assoc2)
+        insp2_id = self.env.update_second_inspection(insp2, self._state['insp2_id'])
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb2_main2,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date2,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb2_assoc2[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date2,
+                                                  ds_id=G02_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb2_assoc2[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date2,
+                                                  ds_id=G03_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_compl2[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date2,
+                                                  ds_id=N01_ds_compl_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        a2_beforedate = (datetime.datetime.strptime(a2_date2, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        a3_beforedate = (datetime.datetime.strptime(a3_date1, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        insp1_diags = act_diags_map[self._state['insp1_id']]
+        expected_diags = [self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb1_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a1_date1,
+                                                  ds_id=D01_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb1_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a1_date1,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb1_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a1_date1,
+                                                  ds_id=G01_ds_assoc_id, ds_end_date=a3_beforedate)]
+        self.assertDiagsLikeExpected(insp1_diags, expected_diags)
+
+        insp3_diags = act_diags_map[self._state['insp3_id']]
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_main1,
                                                   diagnosis_types=self._final_main(), dg_set_date=a3_date1,
                                                   ds_id=Z34_0_ds_main_id),
                           self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb3_compl1[0],
                                                   diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
-                                                  ds_id=N01_ds_compl_id),
+                                                  ds_id=N01_ds_compl_id, ds_end_date=None),
                           self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[1],
                                                   diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
-                                                  ds_id=N02_ds_compl_id),
-                          self.make_expected_diag(ds_set_date=a2_date1, mkb=mkb3_assoc1[0],
+                                                  ds_id=N02_ds_compl_id, ds_end_date=a2_beforedate),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[0],
                                                   diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
                                                   ds_id=G02_ds_assoc_id),
                           self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[1],
@@ -1896,7 +2228,107 @@ class ChangeInspectionDatesCases(BaseDiagTest):
                                                   ds_id=G03_ds_assoc_id)]
         self.assertDiagsLikeExpected(insp3_diags, expected_diags)
 
-        print locals()
+        # insert insp between 3 and 2
+        a4_date1 = '2016-07-29'
+        a4_external_id = 'a4'
+        hosp4_code = TEST_DATA['person1']['hosp']
+        doctor4_code = TEST_DATA['person1']['doctor']
+        mkb4_main1 = 'Z34.0'
+        mkb4_compl1 = ['N01', 'N02']
+        mkb4_assoc1 = ['G01']
+        insp4 = self._change_test_repinsp_data(deepcopy(self.rep_insp1), date=a4_date1, external_id=a4_external_id,
+            hospital=hosp4_code, doctor=doctor4_code, mkb_main=mkb4_main1, mkb_compl=mkb4_compl1,
+            mkb_assoc=mkb4_assoc1)
+        insp4_id = self.env.update_second_inspection(insp4, None)
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp4_diags = act_diags_map[insp4_id]
+
+        new_G01_ds_assoc_id = self._get_ds_id_from_diags(insp4_diags, mkb4_assoc1[0])
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb4_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a4_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb4_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a4_date1,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb4_compl1[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a4_date1,
+                                                  ds_id=N02_ds_compl_id, ds_end_date=a2_beforedate),
+                          self.make_expected_diag(ds_set_date=a4_date1, mkb=mkb4_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a4_date1,
+                                                  ds_id=new_G01_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp4_diags, expected_diags)
+        # insp3 and insp2 diags should be ok...
+        insp2_diags = act_diags_map[insp2_id]
+        new_G02_ds_assoc_id = self._get_ds_id_from_diags(insp2_diags, mkb3_assoc1[0])
+        new_G03_ds_assoc_id = self._get_ds_id_from_diags(insp2_diags, mkb3_assoc1[1])
+
+        # move 2 to left between 3 and 4
+        a2_date3 = '2016-07-25'
+        mkb2_main3 = 'Z34.0'
+        mkb2_compl3 = ['N01']
+        mkb2_assoc3 = ['G01', 'G02', 'G03']
+        insp2 = self._change_test_repinsp_data(insp2, date=a2_date3,
+            mkb_main=mkb2_main3, mkb_compl=mkb2_compl3, mkb_assoc=mkb2_assoc3)
+        insp2_id = self.env.update_second_inspection(insp2, insp2_id)
+
+        act_diags_map = self.env.get_diagnoses_by_action()
+        insp2_diags = act_diags_map[insp2_id]
+        a4_beforedate = (datetime.datetime.strptime(a4_date1, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb2_main3,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a2_date3,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a2_date3, mkb=mkb2_assoc3[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date3,
+                                                  ds_id=new_G01_ds_assoc_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb2_assoc3[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date3,
+                                                  ds_id=G02_ds_assoc_id, ds_end_date=a4_beforedate),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb2_assoc3[2],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a2_date3,
+                                                  ds_id=G03_ds_assoc_id, ds_end_date=a4_beforedate),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb2_compl3[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a2_date3,
+                                                  ds_id=N01_ds_compl_id)]
+        self.assertDiagsLikeExpected(insp2_diags, expected_diags)
+
+        a2_beforedate = (datetime.datetime.strptime(a2_date3, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        insp3_diags = act_diags_map[self._state['insp3_id']]
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a3_date1,
+                                                  ds_id=Z34_0_ds_main_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G02_ds_assoc_id, ds_end_date=a4_beforedate),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_assoc1[1],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a3_date1,
+                                                  ds_id=G03_ds_assoc_id, ds_end_date=a4_beforedate),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb3_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
+                                                  ds_id=N01_ds_compl_id),
+                          self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb3_compl1[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a3_date1,
+                                                  ds_id=N02_ds_compl_id, ds_end_date=a2_beforedate)]
+        self.assertDiagsLikeExpected(insp3_diags, expected_diags)
+
+        insp4_diags = act_diags_map[insp4_id]
+        new_N02_ds_compl_id = self._get_ds_id_from_diags(insp4_diags, mkb4_compl1[1])
+        a2_beforedate = (datetime.datetime.strptime(a2_date2, "%Y-%m-%d") - datetime.timedelta(seconds=1))
+        expected_diags = [self.make_expected_diag(ds_set_date=a3_date1, mkb=mkb4_main1,
+                                                  diagnosis_types=self._final_main(), dg_set_date=a4_date1,
+                                                  ds_id=Z34_0_ds_main_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a1_date1, mkb=mkb4_compl1[0],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a4_date1,
+                                                  ds_id=N01_ds_compl_id, ds_end_date=None),
+                          self.make_expected_diag(ds_set_date=a4_date1, mkb=mkb4_compl1[1],
+                                                  diagnosis_types=self._final_compl(), dg_set_date=a4_date1,
+                                                  ds_id=new_N02_ds_compl_id, ds_end_date=a2_beforedate),
+                          self.make_expected_diag(ds_set_date=a2_date3, mkb=mkb4_assoc1[0],
+                                                  diagnosis_types=self._final_assoc(), dg_set_date=a4_date1,
+                                                  ds_id=new_G01_ds_assoc_id)]
+        self.assertDiagsLikeExpected(insp4_diags, expected_diags)
+        new_G02_ds_assoc_id_deleted = db.engine.execute('select deleted from Diagnosis where id = {0}'.format(
+            new_G02_ds_assoc_id)).first()[0]
+        self.assertEqual(new_G02_ds_assoc_id_deleted, 1)
 
 
 def get_application():
@@ -2005,16 +2437,18 @@ if __name__ == '__main__':
         suite3 = unittest.TestLoader().loadTestsFromTestCase(InspectionPCCases)
         suite4 = unittest.TestLoader().loadTestsFromTestCase(InspectionPuerperaCases)
         suite5 = unittest.TestLoader().loadTestsFromTestCase(ChildbirthCases)
-        suite6 = unittest.TestLoader().loadTestsFromTestCase(ChangeInspectionDatesCases)
+        suite6 = unittest.TestLoader().loadTestsFromTestCase(SingleInspectionCases)
+        suite7 = unittest.TestLoader().loadTestsFromTestCase(ChangeInspectionsDatesCases)
 
         unittest.TextTestRunner(verbosity=2).run(
             unittest.TestSuite([
-                # suite1,
-                # suite2,
-                # suite3,
-                # suite4,
-                # suite5,
-                suite6
+                suite1,
+                suite2,
+                suite3,
+                suite4,
+                suite5,
+                suite6,
+                suite7
             ])
         )
 
