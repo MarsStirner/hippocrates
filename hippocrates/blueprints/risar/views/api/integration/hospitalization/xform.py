@@ -42,8 +42,8 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             res = {
                 'old_mkbs': old_mr_mkbs,
                 'new_mkbs': [new_data.get('diagnosis_out'), ] if 'diagnosis_out' in new_data else [],
-                'old_beg_date': self.target_obj['IssueDate'].value,
-                'new_beg_date': safe_date(new_data['date_out']),
+                'old_beg_date': safe_datetime(self.target_obj['IssueDate'].value),
+                'new_beg_date': safe_datetime(new_data['date_out']),
                 'old_person': self.target_obj['Doctor'].value,
                 'new_person': self.find_doctor(new_data.get('doctor'), new_data.get('hospital'))
             }

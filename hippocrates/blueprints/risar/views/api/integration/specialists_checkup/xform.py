@@ -42,8 +42,8 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             res = {
                 'old_mkbs': old_mr_mkbs,
                 'new_mkbs': [new_data.get('diagnosis'), ] if 'diagnosis' in new_data else [],
-                'old_beg_date': self.target_obj['CheckupDate'].value,
-                'new_beg_date': safe_date(new_data['checkup_date']),
+                'old_beg_date': safe_datetime(self.target_obj['CheckupDate'].value),
+                'new_beg_date': safe_datetime(new_data['checkup_date']),
                 'old_person': self.target_obj['Doctor'].value,
                 'new_person': self.find_doctor(new_data.get('doctor_code'), new_data.get('lpu_code'))
             }

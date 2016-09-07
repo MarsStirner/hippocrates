@@ -234,9 +234,9 @@ def get_3_diagnoses(event, beg_date, end_date, left, cur, right, inter_left, int
                     ds_interval,
                     DateTimeInterval(right.begDate, right.endDate)
                 )):
-            diagn = action_diagns[right.id]
+            diagn = action_diagns.get(right.id)
             mkb_inspections.setdefault(mkb, set()).add('right')
-            if safe_traverse(inspection_diags, 'right', mkb):
+            if diagn and safe_traverse(inspection_diags, 'right', mkb):
                 logger.warning(u'Несколько диагнозов с одинаковым МКБ {0} '
                                u'(Diagnosis.id={1}, Diagnostic.id={2})'.format(mkb, ds.id, diagn.id))
             diag_types = {}
@@ -271,7 +271,10 @@ class AdjasentInspectionsState(object):
 
     def close_previous(self):
         if self.left:
-            self.left.endDate = self.cur.begDate - datetime.timedelta(seconds=1)
+            self.left.endDate = max(
+                self.cur.begDate - datetime.timedelta(seconds=1),
+                self.left.begDate
+            )
             self.left.status = ActionStatus.finished[0]
 
     def set_cur_enddate(self):
@@ -409,7 +412,6 @@ class DiagnosesSystemManager(object):
 
                     # not in current yet, but can be in one of adjacent:
                     elif 'left' in insp_w_mkb and 'right' in insp_w_mkb:
-                        # todo: test
                         # diag is in the left and in the right -
                         # there are 2 different diagnoses, and left ds will be extended
                         # to include new diagn, right diagn will not be changed
@@ -633,14 +635,20 @@ class DiagnosesSystemManager(object):
         :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
         """
         mkb_data_list = mkb_data_list[:]
+        mr_mkbs = set()
+        for d in mkb_data_list:
+            for mkb in d['mkbs']:
+                mr_mkbs.add(mkb)
+
         by_inspection = self.existing_diags['by_inspection']
         if 'left' in by_inspection:
             dk_mkb_map = {}
             for mkb, diag in by_inspection['left'].items():
-                if self.diag_type in diag['diag_types']:
-                    dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
-                else:
-                    dk_mkb_map.setdefault('associated', set()).add(mkb)
+                if mkb not in mr_mkbs:
+                    if self.diag_type in diag['diag_types']:
+                        dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
+                    else:
+                        dk_mkb_map.setdefault('associated', set()).add(mkb)
             for dk_code, mkb_list in dk_mkb_map.items():
                 mkb_data_list.append({
                     'kind': dk_code,
@@ -661,14 +669,20 @@ class DiagnosesSystemManager(object):
         :param mkb_data_list: list of dicts with (diag_type, mkb_list) keys
         """
         mkb_data_list = mkb_data_list[:]
+        mr_mkbs = set()
+        for d in mkb_data_list:
+            for mkb in d['mkbs']:
+                mr_mkbs.add(mkb)
+
         by_inspection = self.existing_diags['by_inspection']
         if 'left' in by_inspection:
             dk_mkb_map = {}
             for mkb, diag in by_inspection['left'].items():
-                if self.diag_type in diag['diag_types']:
-                    dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
-                else:
-                    dk_mkb_map.setdefault('associated', set()).add(mkb)
+                if mkb not in mr_mkbs:
+                    if self.diag_type in diag['diag_types']:
+                        dk_mkb_map.setdefault(diag['diag_types'][self.diag_type], set()).add(mkb)
+                    else:
+                        dk_mkb_map.setdefault('associated', set()).add(mkb)
             for dk_code, mkb_list in dk_mkb_map.items():
                 mkb_data_list.append({
                     'kind': dk_code,
@@ -835,9 +849,9 @@ class DiagnosesSystemManager(object):
     def _get_5_inspections_diagnoses(self):
         left, cur, right = self.ais.left, self.ais.cur, self.ais.right
         inter_left, inter_right = get_adjacent_measure_results(cur)
-        if left and inter_left and inter_left < left:
+        if left and inter_left and inter_left.begDate < left.begDate:
             inter_left = None
-        if right and inter_right and right < inter_right:
+        if right and inter_right and right.begDate < inter_right.begDate:
             inter_right = None
 
         beg_date = left.begDate if left else inter_left.begDate if inter_left else cur.begDate
