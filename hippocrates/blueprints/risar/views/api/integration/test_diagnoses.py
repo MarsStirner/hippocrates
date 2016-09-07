@@ -628,7 +628,7 @@ class BaseDiagTest(unittest.TestCase):
         if 'hospital' in kwargs:
             chb['general_info']['maternity_hospital'] = kwargs['hospital']
         if 'doctor' in kwargs:
-            chb['general_info']['maternity_hospital_doctor'] = kwargs['hospital']
+            chb['general_info']['maternity_hospital_doctor'] = kwargs['doctor']
         if 'mkb_main' in kwargs:
             mkb_main = kwargs['mkb_main']
             if mkb_main is None:
