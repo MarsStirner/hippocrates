@@ -226,9 +226,11 @@ class EventMeasureController(BaseModelController):
                 target, 'final', None, ais)
             fut_interval = DateTimeInterval(emr_data['new_beg_date'], emr_data['new_beg_date'])
             diag_sys.refresh_with_measure_result_old_state(new_diags, fut_interval)
-            new_diagnoses, changed_diagnoses = diag_sys.get_result()
+            new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
 
             create_or_update_diagnoses(em_result, new_diagnoses)
+            for d in new_oa_diagnoses:
+                create_or_update_diagnoses(d['action'], [d['data']])
             db.session.add_all(changed_diagnoses)
             db.session.flush()
             self.modify_emr(em_result, emr_data['new_beg_date'], emr_data['new_person'])
@@ -238,8 +240,10 @@ class EventMeasureController(BaseModelController):
         diag_sys = DiagnosesSystemManager.get_for_measure_result(
             em_result, 'final', None, ais)
         diag_sys.refresh_with_measure_result(new_diags)
-        new_diagnoses, changed_diagnoses = diag_sys.get_result()
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
         create_or_update_diagnoses(em_result, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
         db.session.add_all(changed_diagnoses)
         db.session.flush()
 
