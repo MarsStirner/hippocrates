@@ -9,7 +9,7 @@ from collections import defaultdict
 from flask import abort, request
 from flask_login import current_user
 
-from nemesis.lib.apiutils import api_method
+from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.jsonify import ScheduleVisualizer, PersonTreeVisualizer
 from nemesis.lib.sphinx_search import SearchPerson
 from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt,
@@ -21,7 +21,7 @@ from nemesis.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTic
     rbAttendanceType, QuotingByTime)
 from nemesis.systemwide import db, cache
 from ..app import module
-from ..lib.data import delete_schedules
+from ..lib.data import delete_schedules, create_schedules, create_time_quotas
 from ..lib.utils import person_contacts_for_errand
 
 __author__ = 'mmalkov'
@@ -144,107 +144,25 @@ def api_day_schedule():
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
+@api_method
 def api_schedule_description_post():
-    # TODO: validations
-
-    def make_default_ticket(schedule):
-        ticket = ScheduleTicket()
-        ticket.schedule = schedule
-        return ticket
-
-    def make_tickets(schedule, planned, extra, cito):
-        # here cometh another math
-        dt = (datetime.datetime.combine(schedule.date, schedule.endTime) -
-              datetime.datetime.combine(schedule.date, schedule.begTime)) / planned
-        it = schedule.begTimeAsDt
-        attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == u'planned').first()
-        for i in xrange(planned):
-            ticket = make_default_ticket(schedule)
-            begDateTime = datetime.datetime.combine(schedule.date, it.time())
-            ticket.begTime = begDateTime.time()
-            ticket.endTime = (begDateTime + dt).time()
-            ticket.attendanceType = attendanceType
-            it += dt
-            db.session.add(ticket)
-
-        if extra:
-            attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == u'extra').first()
-            for i in xrange(extra):
-                ticket = make_default_ticket(schedule)
-                ticket.attendanceType = attendanceType
-                db.session.add(ticket)
-
-        if cito:
-            attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == u'CITO').first()
-            for i in xrange(cito):
-                ticket = make_default_ticket(schedule)
-                ticket.attendanceType = attendanceType
-                db.session.add(ticket)
-
-    schedule_data = request.json
+    schedule_data = request.get_json()
     schedule = schedule_data['schedule']
     quotas = schedule_data['quotas']
     person_id = schedule_data['person_id']
     dates = [day['date'] for day in schedule]
+    person = Person.query.get(person_id)
 
     if schedule:
         ok, msg = delete_schedules(dates, person_id)
         if not ok:
-            return jsonify({}, 422, msg)
+            raise ApiException(422, msg)
 
-    for day_desc in schedule:
-        date = safe_date(day_desc['date'])
-        roa = day_desc['roa']
+    scheds = create_schedules(person, schedule)
+    db.session.add_all(scheds)
 
-        if roa:
-            new_sched = Schedule()
-            new_sched.person_id = person_id
-            new_sched.date = date
-            new_sched.reasonOfAbsence = rbReasonOfAbsence.query.\
-                filter(rbReasonOfAbsence.code == roa['code']).first()
-            new_sched.begTime = '00:00'
-            new_sched.endTime = '00:00'
-            new_sched.numTickets = 0
-            db.session.add(new_sched)
-        else:
-            new_scheds_by_rt = defaultdict(list)
-            for sub_sched in day_desc['scheds']:
-                new_sched = Schedule()
-                new_sched.person_id = person_id
-                new_sched.date = date
-                new_sched.begTimeAsDt = safe_time_as_dt(sub_sched['begTime'])
-                new_sched.begTime = new_sched.begTimeAsDt.time()
-                new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
-                new_sched.endTime = new_sched.endTimeAsDt.time()
-                new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
-                new_sched.finance_id = safe_traverse(sub_sched, 'finance', 'id')
-                office_id = safe_traverse(sub_sched, 'office', 'id')
-                if not office_id and safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':
-                    return jsonify({}, 422, u'На %s не указан кабинет' % format_date(date))
-                new_sched.office_id = office_id
-                new_sched.numTickets = sub_sched.get('planned', 0)
-
-                planned_count = sub_sched.get('planned')
-                if not planned_count:
-                    return jsonify({}, 422, u'На %s указаны интервалы с нулевым планом' % format_date(date))
-                make_tickets(new_sched,
-                             planned_count,
-                             sub_sched.get('extra', 0),
-                             sub_sched.get('CITO', 0))
-
-    for quota_desc in quotas:
-        date = safe_date(quota_desc['date'])
-        QuotingByTime.query.filter(QuotingByTime.doctor_id == person_id,
-                                   QuotingByTime.quoting_date == date).delete()
-        new_quotas = quota_desc['day_quotas']
-        for quota in new_quotas:
-            quota_record = QuotingByTime()
-            quota_record.quoting_date = date
-            quota_record.doctor_id = person_id
-            quota_record.QuotingTimeStart = safe_time_as_dt(quota['time_start'])
-            quota_record.QuotingTimeEnd = safe_time_as_dt(quota['time_end'])
-            quota_record.quotingType_id = quota['quoting_type']['id']
-            db.session.add(quota_record)
+    quotas = create_time_quotas(person, quotas)
+    db.session.add_all(quotas)
 
     db.session.commit()
 
@@ -253,7 +171,7 @@ def api_schedule_description_post():
     end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
     context = ScheduleVisualizer()
     person = Person.query.get(person_id)
-    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+    return context.make_person_schedule_description(person, start_date, end_date)
 
 
 @module.route('/api/all_persons_tree.json')
