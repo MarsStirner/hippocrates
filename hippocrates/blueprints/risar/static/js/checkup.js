@@ -73,3 +73,23 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
     };
 }])
 ;
+
+
+WebMis20.controller('CheckupTicket25Ctrl', ['$scope', function ($scope) {
+    var setTicket25Data = function () {
+        if ($scope.checkup && $scope.checkup.ticket_25 && !$scope.checkup.ticket_25.beg_date) {
+            $scope.checkup.ticket_25.beg_date = new Date($scope.checkup.beg_date);
+        }
+    };
+
+    $scope.$watch(function () {
+        return $scope.rc.sampleWizard.currentIndex;
+    }, function (newIndex) {
+        if (newIndex === $scope.thisRcStep - 1) setTicket25Data();
+    });
+
+    $scope.init = function (rc_step) {
+        $scope.thisRcStep = rc_step;
+    };
+}])
+;
