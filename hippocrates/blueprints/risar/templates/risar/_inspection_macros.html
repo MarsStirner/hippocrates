@@ -4,7 +4,8 @@
         <div class="box-header">
             <h3 class="box-title">Шаг {{ step }}. Талон посещения</h3>
         </div>
-        <div class="box-body">{% include 'risar/_ticket_25_edit.html' %}</div>
+        <div class="box-body" ng-controller="CheckupTicket25Ctrl"
+            ng-init="init({{ step }})">{% include 'risar/_ticket_25_edit.html' %}</div>
     </div>
 </ng-form>
 {% endmacro %}

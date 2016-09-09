@@ -236,3 +236,7 @@ if __name__ == '__main__':
         # test_post_research(card_id)
         # test_research_data['measure_id'] = event_measure_id
         # test_put_research(card_id, result_action_id)
+
+        # from hippocrates.blueprints.risar.views.api.integration.schedule.test import \
+        #     test_create_schedules
+        # test_create_schedules()
