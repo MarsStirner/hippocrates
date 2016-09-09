@@ -3,6 +3,7 @@ from flask import Blueprint, render_template
 from flask_login import current_user
 from .config import MODULE_NAME, RUS_NAME
 from nemesis.app import app as nemesis_app
+from nemesis.lib.frontend import frontend_config
 from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 
 module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_folder='static')
@@ -29,6 +30,20 @@ def current_user_js():
 def risar_context_processors():
     return {
         'specifics_mng': SpecificsManager
+    }
+
+
+@frontend_config
+def fc_risar_settings():
+    """
+    Настройки из конфигов, специфичные для РИСАР
+    """
+    return {
+        'local_config': {
+            'risar': {
+                'risar_regions': nemesis_app.config['RISAR_REGIONS']
+            }
+        }
     }
 
 
