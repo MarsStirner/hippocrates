@@ -459,7 +459,7 @@ WebMis20
                         'Ошибка сохранения, свяжитесь с администратором',
                         'danger'
                     );
-                    return result;
+                    return $q.reject(result);
                 });
         },
         get_em_result: function (event_measure_id, em_result_id) {
@@ -495,7 +495,7 @@ WebMis20
                         'Ошибка сохранения, свяжитесь с администратором',
                         'danger'
                     );
-                    return result;
+                    return $q.reject(result);
                 });
         }
     };
