@@ -83,9 +83,10 @@ angular.module('WebMis20')
                                     }
                                     break;
                                 case 'URL':
-                                    inner_template =
-                                            '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
-                                            'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
+                                    inner_template = scope.action.is_new() || !property.value ?
+                                        '<span></span>' :
+                                        '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
+                                        'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
                                     break;
 
                                 default:
@@ -207,9 +208,10 @@ angular.module('WebMis20')
                                         '</wm-diagnosis>').format('{0}', property_value_domain_obj, property.type.vector);
                                     break;
                                 case 'URL':
-                                    inner_template =
-                                            '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
-                                            'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
+                                    inner_template = scope.action.is_new() || !property.value ?
+                                        '<span></span>' :
+                                        '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
+                                        'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
                                     break;
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>';
