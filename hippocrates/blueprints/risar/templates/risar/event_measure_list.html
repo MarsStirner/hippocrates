@@ -80,8 +80,11 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Мероприятия: <b>[[pager.record_count]]</b></h3>
                         <div class="box-tools">
-                        <a href="javascript:void(0);" class="fa fa-calendar-o btn-box-tool" style="font-size: x-large"
-                            title="Переключить отображение в виде календаря" ng-click="setViewMode('calendar')"></a>
+                            <button type="button" class="btn btn-success" ng-click="addNewEventMeasure()"
+                                    style="vertical-align: bottom; margin-right: 20px;"><i class="fa fa-plus"> Добавить</i>
+                            </button>
+                            <a href="javascript:void(0);" class="fa fa-calendar-o btn-box-tool" style="font-size: x-large"
+                                title="Переключить отображение в виде календаря" ng-click="setViewMode('calendar')"></a>
                         </div>
                     </div>
                     <div class="box-body">
@@ -146,6 +149,9 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Календарь мероприятий</h3>
                         <div class="box-tools">
+                            <button type="button" class="btn btn-success" ng-click="addNewEventMeasure()"
+                                    style="vertical-align: bottom; margin-right: 20px;"><i class="fa fa-plus"> Добавить</i>
+                            </button>
                             <a href="javascript:void(0);" class="fa fa-table btn-box-tool" style="font-size: x-large"
                                 title="Переключить отображение в виде таблицы" ng-click="setViewMode('table')"></a>
                         </div>
@@ -167,6 +173,7 @@
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_info.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_appointment.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_result.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/modal_em_create_list.js', v=app_version) }}"></script>
     <script src="{{ url_for('actions.static', filename='js/action-layout.js', v=app_version) }}"></script>
     <script src="{{ url_for('actions.static', filename='js/action_editor.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/ezekiel.js', v=nemesis_version) }}"></script>

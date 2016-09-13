@@ -14,6 +14,21 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
             });
             return instance.result;
         },
+        openCreate: function (event_id) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/RISAR/modal/em_create_list.html',
+                controller: EMCreateListModalCtrl,
+                backdrop: 'static',
+                size: 'lg',
+                windowClass: 'modal-scrollable',
+                resolve: {
+                    event_id: function () {
+                        return event_id
+                    }
+                }
+            });
+            return instance.result;
+        },
         openAppointmentEdit: function (em, appointment) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/RISAR/modal/em_appointment_edit.html',
@@ -54,8 +69,11 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
 }]);
 
 WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
-    this.get = function (em_id) {
-        return RisarApi.measure.get(em_id);
+    this.get = function (em_id, args) {
+        return RisarApi.measure.get(em_id, args);
+    };
+    this.save_em_list = function (event_id, data) {
+        return RisarApi.measure.save_list(event_id, data);
     };
     this.execute = function (em) {
         return RisarApi.measure.execute(em.id);

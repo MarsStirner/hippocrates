@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import datetime
 
 from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
@@ -9,9 +10,11 @@ from hippocrates.blueprints.risar.lib.utils import format_action_data
 from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list
 from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
+from nemesis.models.expert_protocol import EventMeasure, Measure
 from nemesis.models.enums import MeasureStatus
-from nemesis.lib.data import create_action, update_action, safe_datetime
+from nemesis.lib.data import create_action, update_action
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
+from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int
 
 
 logger = logging.getLogger('simple')
@@ -110,6 +113,32 @@ class EventMeasureController(BaseModelController):
         em.result_action = em_result
         self.make_performed(em)
         return em_result
+
+    def get_new_event_measure(self, data):
+        em = EventMeasure()
+        em.begDateTime = safe_datetime(data.get('beg_date')) or datetime.datetime.now()
+        em.endDateTime = safe_datetime(data.get('end_date'))
+        default_status_id = MeasureStatus.created[0]
+        em.status = safe_traverse(data, 'status', 'id', default=default_status_id)
+        em.event_id = safe_int(data['event_id'])
+        measure_id = safe_traverse(data, 'measure', 'id')
+        if not measure_id:
+            measure_id = data['measure_id']
+        measure = Measure.query.get(measure_id)
+        em.measure_id = measure.id
+        em.manual_measure = measure
+        return em
+
+    def save_list(self, event, data):
+        res = []
+        for em_data in data:
+            em_id = em_data.get('id')
+            if em_id:
+                raise NotImplementedError('cannot save event_measure list')
+            else:
+                new_em = self.get_new_event_measure(em_data['data'])
+            res.append(new_em)
+        return res
 
     def get_measures_in_event(self, event, args, paginate=False):
         event_id = event.id if event is not None else args.get('event_id')

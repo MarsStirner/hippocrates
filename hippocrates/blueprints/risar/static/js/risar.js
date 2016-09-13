@@ -402,11 +402,17 @@ WebMis20
         regenerate: function (action_id) {
             return wrapper('GET', Config.url.api_event_measure_generate + action_id)
         },
-        get: function (event_measure_id) {
-            return wrapper('GET', Config.url.api_event_measure_get + event_measure_id);
+        get: function (event_measure_id, args) {
+            var url = Config.url.api_event_measure_get;
+            if (event_measure_id) {
+                url += event_measure_id;
+            } else {
+                url += '?new=true';
+            }
+            return wrapper('GET', url, args);
         },
-        remove: function (action_id) {
-            return wrapper('POST', Config.url.api_event_measure_remove + action_id)
+        save_list: function (event_id, data) {
+            return wrapper('POST', Config.url.api_event_measure_save_list.format(event_id), {}, data);
         },
         execute: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_execute + event_measure_id);

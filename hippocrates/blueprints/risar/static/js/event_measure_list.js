@@ -113,6 +113,12 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
                 });
         }
     };
+    $scope.addNewEventMeasure = function () {
+        return EMModalService.openCreate($scope.event_id)
+            .then(function () {
+                $scope.$broadcast('emDataUpdated');
+            });
+    };
     $scope.canEditEmAppointment = function (em) {
         return em.access.can_edit_appointment;
     };
@@ -348,6 +354,9 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
             registered_watchers = [];
         }
     });
+    $scope.$on('emDataUpdated', function () {
+        refreshMeasureList(true);
+    });
 };
 
 var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, TimeoutCallback, uiCalendarConfig) {
@@ -439,6 +448,9 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.forEach(function (unwatch) { unwatch(); });
             registered_watchers = [];
         }
+    });
+    $scope.$on('emDataUpdated', function () {
+        reloadCalendar();
     });
 };
 

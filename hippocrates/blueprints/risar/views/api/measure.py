@@ -37,20 +37,30 @@ def api_0_event_measure_generate(action_id):
 @module.route('/api/0/event_measure/<int:event_measure_id>')
 @api_method
 def api_0_event_measure_get(event_measure_id=None):
-    em = EventMeasure.query.get(event_measure_id)
-    if not em:
-        raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+    get_new = safe_bool(request.args.get('new', False))
+    if get_new:
+        data = request.args.to_dict()
+        em_ctrl = EventMeasureController()
+        em = em_ctrl.get_new_event_measure(data)
+    elif event_measure_id:
+        em = EventMeasure.query.get(event_measure_id)
+        if not em:
+            raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+    else:
+        raise ApiException(404, u'`event_measure_id` required')
     return EventMeasureRepr().represent_em_full(em)
 
 
-@module.route('/api/0/event_measure/remove/', methods=['POST'])
-@module.route('/api/0/event_measure/remove/<int:action_id>', methods=['POST'])
+@module.route('/api/0/event_measure/<int:event_id>/save-list/', methods=['POST'])
 @api_method
-def api_0_event_measure_remove(action_id):
-    action = Action.query.get_or_404(action_id)
+def api_0_event_measure_save_list(event_id):
+    data = request.get_json()
+    event = Event.query.get(event_id)
+
     em_ctrl = EventMeasureController()
-    em_ctrl.delete_in_action(action)
-    return []
+    em_list = em_ctrl.save_list(event, data)
+    em_ctrl.store(*em_list)
+    return EventMeasureRepr().represent_listed_event_measures(em_list)
 
 
 @module.route('/api/0/event_measure/execute/', methods=['POST'])
