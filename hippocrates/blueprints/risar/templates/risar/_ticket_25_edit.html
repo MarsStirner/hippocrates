@@ -82,7 +82,10 @@
                             <tr ng-repeat="$row in $table.$model">
                                 <td class="col-md-5">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
+                                    <span ng-if="$table.$edited($index)">
+                                        <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
+                                            theme="select2"></ui-select>
+                                    </span>
                                 </td>
 
                                 <td class="col-md-5">
@@ -126,7 +129,10 @@
                             <tr ng-repeat="$row in $table.$model">
                                 <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
+                                    <span ng-if="$table.$edited($index)">
+                                        <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
+                                            theme="select2"></ui-select>
+                                    </span>
                                 </td>
 
                                 <td class="col-md-2">
@@ -179,7 +185,10 @@
                             <tr ng-repeat="$row in $table.$model">
                                 <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.service" ref-book="SST365" /></span>
+                                    <span ng-if="$table.$edited($index)">
+                                        <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
+                                            theme="select2"></ui-select>
+                                    </span>
                                 </td>
 
                                 <td class="col-md-2">
