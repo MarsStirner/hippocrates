@@ -70,12 +70,13 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.services">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.services"
+                               style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th class="col-md-5">Название</th>
-                                <th class="col-md-5">Врач</th>
-                                <th class="col-md-2">&nbsp;</th>
+                                <th width="50%">Название</th>
+                                <th width="40%">Врач</th>
+                                <th width="10%">&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -115,14 +116,15 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.operations">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.operations"
+                               style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th class="col-md-4">Название</th>
-                                <th class="col-md-2">Анестезия</th>
-                                <th class="col-md-2">Аппаратура</th>
-                                <th class="col-md-2">Врач</th>
-                                <th class="col-md-2">&nbsp;</th>
+                                <th width="35%">Название</th>
+                                <th width="15%">Анестезия</th>
+                                <th width="15%">Аппаратура</th>
+                                <th width="25%">Врач</th>
+                                <th width="10%">&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -137,12 +139,12 @@
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.anesthetization.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.anesthetization" ref-book="rbRisarOperationAnesthetization" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.anesthetization" ref-book="rbRisarOperationAnesthetization" with-title="true" /></span>
                                 </td>
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.equipment.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.equipment" ref-book="rbRisarOperationEquipment" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.equipment" ref-book="rbRisarOperationEquipment" with-title="true" /></span>
                                 </td>
 
                                 <td class="col-md-2">
@@ -172,13 +174,14 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.manipulations">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.manipulations"
+                               style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th class="col-md-4">Название</th>
-                                <th class="col-md-2">Количество</th>
-                                <th class="col-md-4">Врач</th>
-                                <th class="col-md-2">&nbsp;</th>
+                                <th width="45%">Название</th>
+                                <th width="10%">Количество</th>
+                                <th width="35%">Врач</th>
+                                <th width="10%">&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -223,28 +226,29 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.temp_disability">
+                        <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.temp_disability"
+                               style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th class="col-md-2">Тип</th>
-                                <th class="col-md-2">Повод</th>
-                                <th class="col-md-3">Кому</th>
-                                <th class="col-md-1">Дата выдачи</th>
-                                <th class="col-md-1">Даты продления</th>
-                                <th class="col-md-1">Дата закрытия</th>
-                                <th class="col-md-2">&nbsp;</th>
+                                <th width="10%">Тип</th>
+                                <th width="10%">Повод</th>
+                                <th width="25%">Кому</th>
+                                <th width="15%">Дата выдачи</th>
+                                <th width="15%">Даты продления</th>
+                                <th width="15%">Дата закрытия</th>
+                                <th width="10%">&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr ng-repeat="$row in $table.$model">
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.type.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.type" ref-book="rbRisarSickLeaveType" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.type" ref-book="rbRisarSickLeaveType" with-title="true" /></span>
                                 </td>
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.reason.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.reason" ref-book="rbRisarSickLeaveReason" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.reason" ref-book="rbRisarSickLeaveReason" with-title="true" /></span>
                                 </td>
 
                                 <td class="col-md-3">
