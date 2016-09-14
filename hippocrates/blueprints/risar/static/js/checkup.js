@@ -69,9 +69,9 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
         if (!$scope.checkup) return false;
         return !Boolean($scope.checkup.pregnancy_continuation);  // требуется при "Нет"
     };
-    $scope.print_checkup_ticket = function (checkup, fmt) {
+    $scope.print_checkup_ticket = function () {
         var ticket_id = $scope.checkup.ticket_25.id;
-        RisarApi.print_ticket_25(ticket_id, fmt);
+        RisarApi.print_ticket_25(ticket_id, 'pdf');
     };
 }])
 ;
