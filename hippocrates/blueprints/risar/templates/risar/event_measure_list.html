@@ -80,7 +80,7 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Мероприятия: <b>[[pager.record_count]]</b></h3>
                         <div class="box-tools">
-                            <button type="button" class="btn btn-success" ng-click="addNewEventMeasure()"
+                            <button type="button" class="btn btn-success" ng-click="addNewEventMeasures()"
                                     style="vertical-align: bottom; margin-right: 20px;"><i class="fa fa-plus"> Добавить</i>
                             </button>
                             <a href="javascript:void(0);" class="fa fa-calendar-o btn-box-tool" style="font-size: x-large"
@@ -100,7 +100,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat="em in model.measure_list" ng-class="{ 'measure-manual': !em.data.scheme }">
+                            <tr ng-repeat="em in model.measure_list"
+                                    ng-class="{ 'measure-manual': isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }">
                                 <td><span measure-type-icon="em.data.measure.measure_type" style="font-size: x-large"></span></td>
                                 <td>
                                     <span ng-bind="em.data.measure.name"></span>
@@ -114,7 +115,7 @@
                                 <td>[[ em.data.beg_datetime | asDate ]]</td>
                                 <td>[[ em.data.end_datetime | asDate ]]</td>
                                 <td class="nowrap">
-                                    <div class="btn-group" style="min-width: 125px">
+                                    <div class="btn-group" style="min-width: 125px" ng-class="{'dropup': $index >= model.measure_list.length / 1.25}">
                                         <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
                                             Просмотр
                                         </button>
@@ -131,6 +132,8 @@
                                             <li role="separator" class="divider"></li>
                                             <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a></li>
                                             <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
+                                            <li role="menuitem" ng-show="canDeleteEm(em)"><a href="javascript:void(0);" ng-click="deleteEm($index)">Удалить</a></li>
+                                            <li role="menuitem" ng-show="canRestoreEm(em)"><a href="javascript:void(0);" ng-click="restoreEm($index)">Восстановить</a></li>
                                         </ul>
                                     </div>
                                 </td>
@@ -149,7 +152,7 @@
                     <div class="box-header with-border">
                         <h3 class="box-title">Календарь мероприятий</h3>
                         <div class="box-tools">
-                            <button type="button" class="btn btn-success" ng-click="addNewEventMeasure()"
+                            <button type="button" class="btn btn-success" ng-click="addNewEventMeasures()"
                                     style="vertical-align: bottom; margin-right: 20px;"><i class="fa fa-plus"> Добавить</i>
                             </button>
                             <a href="javascript:void(0);" class="fa fa-table btn-box-tool" style="font-size: x-large"

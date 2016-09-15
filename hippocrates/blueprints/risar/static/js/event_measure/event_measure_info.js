@@ -81,6 +81,12 @@ WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
     this.cancel = function (em) {
         return RisarApi.measure.cancel(em.id);
     };
+    this.del = function (em) {
+        return RisarApi.measure.del(em.id);
+    };
+    this.restore = function (em) {
+        return RisarApi.measure.restore(em.id);
+    };
     this.new_appointment = function (em, checkup, header) {
         var start_date = moment(em.data.beg_datetime).format('YYYY-MM-DD');
         return RisarApi.measure.new_appointment(header.client.id, checkup.person.id, start_date);

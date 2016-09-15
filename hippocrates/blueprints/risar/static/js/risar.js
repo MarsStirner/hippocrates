@@ -399,6 +399,9 @@ WebMis20
         get_by_event: function (event_id, query) {
             return wrapper('POST', Config.url.api_measure_list + event_id, undefined, query)
         },
+        get_by_action: function (action_id, args) {
+            return wrapper('GET', Config.url.api_measure_list_by_action + action_id, args)
+        },
         regenerate: function (action_id) {
             return wrapper('GET', Config.url.api_event_measure_generate + action_id)
         },
@@ -419,6 +422,12 @@ WebMis20
         },
         cancel: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
+        },
+        del: function (event_measure_id) {
+            return wrapper('DELETE', Config.url.api_event_measure_delete.format(event_measure_id));
+        },
+        restore: function (event_measure_id) {
+            return wrapper('POST', Config.url.api_event_measure_undelete.format(event_measure_id));
         },
         get_checkups: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);

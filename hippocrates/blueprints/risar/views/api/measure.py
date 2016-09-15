@@ -85,6 +85,26 @@ def api_0_event_measure_cancel(event_measure_id):
     return EventMeasureRepr().represent_em_full(em)
 
 
+@module.route('/api/0/event_measure/<int:event_measure_id>', methods=['DELETE'])
+@api_method
+def api_0_event_measure_delete(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.delete(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_em_full(em)
+
+
+@module.route('/api/0/event_measure/<int:event_measure_id>/undelete', methods=['POST'])
+@api_method
+def api_0_event_measure_undelete(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.restore(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_em_full(em)
+
+
 @module.route('/api/0/event_measure/<int:event_measure_id>/appointment/')
 @module.route('/api/0/event_measure/<int:event_measure_id>/appointment/<int:appointment_id>')
 @api_method
@@ -221,6 +241,18 @@ def api_0_measure_list(event_id):
         return EventMeasureRepr().represent_paginated_event_measures(data)
     else:
         return EventMeasureRepr().represent_listed_event_measures(data)
+
+
+@module.route('/api/0/measure/list/by_action/<int:action_id>')
+@module.route('/api/0/measure/list/by_action/')
+@api_method
+def api_0_measure_list_by_action(action_id):
+    args = dict(request.args)
+    action = Action.query.get_or_404(action_id)
+
+    em_ctrl = EventMeasureController()
+    data = em_ctrl.get_measures_in_action(action, args)
+    return EventMeasureRepr().represent_listed_event_measures(data)
 
 
 @module.route('/api/0/measure_checkups/')

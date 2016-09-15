@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
-from hippocrates.blueprints.risar.lib.expert.utils import can_edit_em_appointment, can_edit_em_result
+from hippocrates.blueprints.risar.lib.expert.utils import (can_edit_em_appointment,
+    can_edit_em_result, can_delete_em, can_restore_em)
 
 
 class EventMeasureRepr(object):
@@ -13,7 +14,9 @@ class EventMeasureRepr(object):
             'access': {
                 'can_edit_appointment': can_edit_em_appointment(em),
                 'can_edit_result': can_edit_em_result(em),
-                'can_cancel': False
+                'can_cancel': False,
+                'can_delete': can_delete_em(em),
+                'can_restore': can_restore_em(em),
             },
             'additional_info': self._make_em_addtional_info(em)
         }
@@ -32,6 +35,7 @@ class EventMeasureRepr(object):
             'measure': self.represent_measure_rb(measure.measure),
             'create_datetime': measure.createDatetime,
             'modify_datetime': measure.modifyDatetime,
+            'deleted': measure.deleted
         }
 
     def _make_em_addtional_info(self, em):

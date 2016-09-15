@@ -40,7 +40,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <td><wm-date ng-model="em.data.beg_datetime"></wm-date></td>\
                     <td><wm-date ng-model="em.data.end_datetime"></wm-date></td>\
                     <td>\
-                        <button type="button" class="btn btn-sm dnt-danger" title="Удалить" ng-click="removeNewEm($index)">\
+                        <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-click="removeNewEm($index)">\
                             <i class="fa fa-trash"></i></button>\
                     </td>\
                 <tr>\
@@ -52,7 +52,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
-    <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
+    <button type="button" class="btn btn-primary" ng-click="saveAndClose()" ng-disabled="!canSave()">Сохранить</button>\
 </div>');
 }]);
 
@@ -82,6 +82,10 @@ var EMCreateListModalCtrl = function ($scope, EventMeasureService, event_id) {
     };
     $scope.save_em_list = function () {
         return EventMeasureService.save_em_list(event_id, $scope.new_em.list);
+    };
+
+    $scope.canSave = function () {
+        return $scope.new_em.list.length;
     };
 
     //$scope.init = function () {};
