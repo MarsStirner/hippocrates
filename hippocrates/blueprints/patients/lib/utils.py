@@ -5,11 +5,12 @@ import datetime
 import logging
 import os
 import mimetypes
+import uuid
 
 from nemesis.app import app
 from nemesis.lib.apiutils import ApiException
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid, encode_file_name
+from nemesis.lib.utils import safe_date, safe_traverse, encode_file_name
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
 from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument, ClientWork,
    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
@@ -109,7 +110,7 @@ def set_client_main_info(client, data):
 
     client.notes = data.get('notes', '')
     if not client.uuid:
-        client.uuid = get_new_uuid()
+        client.uuid = uuid.uuid4()
     return client
 
 

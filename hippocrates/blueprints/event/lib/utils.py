@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import uuid
 
 from flask_login import current_user
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
@@ -15,7 +16,7 @@ from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
 from nemesis.models.client import Client
 from nemesis.lib.apiutils import ApiException
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
-from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
+from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id
 from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
@@ -50,7 +51,7 @@ class EventSaveController():
         event.payStatus = 0
         event = self.update_base_info(event, event_data)
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-        event.uuid = get_new_uuid()
+        event.uuid = uuid.uuid4()
         return event
 
     def update_base_info(self, event, event_data):
@@ -198,7 +199,7 @@ def create_new_event(event_data):
     event.orgStructure_id = event_data['org_structure']['id']
     event.payStatus = 0
     event.note = event_data['note']
-    event.uuid = get_new_uuid()
+    event.uuid = uuid.uuid4()
 
     error_msg = {}
     if not UserUtils.can_create_event(event, error_msg):
