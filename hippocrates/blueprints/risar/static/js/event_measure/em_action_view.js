@@ -1,6 +1,19 @@
 'use strict';
 
 var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, EventMeasureService) {
+    $scope.selectAll = false;
+    $scope.checkboxes = {};
+    $scope.toggleSelection = function () {
+        $scope.selectAll = !$scope.selectAll;
+        _.map($scope.checkup.measures, function (em) {
+            if ( $scope.canEditEmAppointment(em) ) {
+                $scope.checkboxes[em.data.id] =  $scope.selectAll;
+            }
+        });
+    };
+    $scope.printButtonActive = function () {
+        return _.any(_.values($scope.checkboxes));
+    };
     $scope.generateMeasures = function () {
         RisarApi.measure.regenerate($scope.checkup.id).
             then(function (measures) {
@@ -109,6 +122,32 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.newAppointment = function(em, checkup, header) {
         if($scope.canNewAppointment(em)) {
             EventMeasureService.new_appointment(em, checkup, header);
+        }
+    };
+    $scope.get_ps_appointments_data = function () {
+        return {
+            action_id: $scope.checkup.id,
+            em_id_list: $scope.getSelectedMeasuresIds()
+        }
+    };
+    $scope.getSelectedMeasuresIds = function () {
+        return _.keys(_.object(_.filter(_.pairs($scope.checkboxes),
+                                                    function(item){return item[1]===true})));
+    };
+    $scope.createAppointments = function() {
+       var em_id_list = $scope.getSelectedMeasuresIds();
+        if (!_.isEmpty(em_id_list)) {
+            return EventMeasureService.save_appointment_list($scope.checkup.id, em_id_list).
+                then(function (em_list) {
+                   _.each(em_list, function(nuevo) {
+                       _.each($scope.checkup.measures, function (old, ind) {
+                           if ( safe_traverse(nuevo, ['data', 'id']) === safe_traverse(old, ['data', 'id']) ) {
+                               $scope.checkup.measures[ind] = nuevo;
+                           };
+                           });
+                       });
+                    return em_list;
+                });
         }
     };
     $scope.canDeleteEm = function (em) {

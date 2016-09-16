@@ -7,7 +7,8 @@
         <button type="button" class="btn btn-success" ng-click="addNewEventMeasures()" ng-if="checkup.id">
             <i class="fa fa-plus"> Добавить</i>
         </button>
-        <button type="button" class="btn btn-default"><span class="fa fa-print"></span>Печать всех</button>
+        <ui-print-button ext-disabled="!printButtonActive()" ps="ps_inspections" resolve="get_ps_appointments_data()" lazy-load-context="inspections"
+            template-code="appointment_list" fast-print="true" before-print="createAppointments()">Печать направлений</ui-print-button>
     </div>
 </div>
 <div ng-if="checkup.em_error" class="alert alert-danger">
@@ -16,7 +17,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>#</th>
+            <th><label for="allChecks">#&nbsp;</label><input class="measure-checkbox-main" id="allChecks" type="checkbox"  ng-click="toggleSelection()"></th>
             <th width="30%">Название мероприятия</th>
             <th>Дата начала</th>
             <th>Дата окончания</th>
@@ -25,9 +26,12 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="em in checkup.measures track by em.data.id"
-                ng-class="{ 'measure-manual': isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }">
-            <td>[[ $index + 1 ]]</td>
+        <tr ng-repeat="em in checkup.measures track by em.data.id" ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }">
+            <td><label for="inp_[[ $index + 1 ]]" ng-bind="[[ $index + 1 ]]"> </label>
+                <input id="inp_[[ $index + 1 ]]" class="measure-checkbox" type="checkbox"
+                       ng-disabled = "!canEditEmAppointment(em)"
+                       ng-model="checkboxes[em.data.id]">
+            </td>
             <td>
                 <span ng-bind="em.data.measure.name"></span>
                 <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>

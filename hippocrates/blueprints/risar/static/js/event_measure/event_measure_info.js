@@ -97,6 +97,9 @@ WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
     this.get_em_result = function (em) {
         return RisarApi.measure.get_em_result(em.data.id, em.data.result_action_id);
     };
+    this.save_appointment_list = function (action_id, em_id_list) {
+        return RisarApi.measure.save_appointment_list(action_id, em_id_list);
+    };
 }]);
 
 WebMis20.directive('eventMeasureStatus', [function () {

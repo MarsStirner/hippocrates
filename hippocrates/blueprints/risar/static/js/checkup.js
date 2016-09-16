@@ -6,6 +6,9 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
+    $scope.ps_talon = new PrintingService("risar");
+    $scope.ps_talon.set_context("risar_talon");
+    $scope.ps_inspections = new PrintingService("risar_inspections");
     $scope.ps_resolve = function () {
         return {
             event_id: $scope.header.event.id

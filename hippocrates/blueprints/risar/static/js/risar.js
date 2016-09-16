@@ -512,6 +512,27 @@ WebMis20
                     );
                     return $q.reject(result);
                 });
+        },
+        save_appointment_list: function (action_id, em_id_list) {
+            var url = Config.url.api_event_measure_appointment_list_save.format(action_id),
+                data = {em_id_list: em_id_list};
+            return wrapper('POST', url, {}, data)
+                .then(function (result) {
+                    NotificationService.notify(
+                        200,
+                        'Успешно сохранено',
+                        'success',
+                        5000
+                    );
+                    return result;
+                }, function (result) {
+                    NotificationService.notify(
+                        500,
+                        'Ошибка сохранения, свяжитесь с администратором',
+                        'danger'
+                    );
+                    return $q.reject(result);
+                });
         }
     };
     this.stats = {

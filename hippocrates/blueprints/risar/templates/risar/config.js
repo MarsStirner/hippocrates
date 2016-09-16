@@ -61,6 +61,7 @@ WebMis20
         api_event_measure_undelete: '{{ url_for('.api_0_event_measure_undelete', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_appointment_get: '{{ url_for('.api_0_event_measure_appointment_get', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_appointment_save: '{{ url_for('.api_0_event_measure_appointment_save', event_measure_id=-90) | replace("-90", "{0}") }}',
+        api_event_measure_appointment_list_save:  '{{ url_for('.api_0_event_measure_appointment_list_save', action_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_result_get: '{{ url_for('.api_0_event_measure_result_get', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_result_save: '{{ url_for('.api_0_event_measure_result_save', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_save_list: '{{ url_for('.api_0_event_measure_save_list', event_id=-90) | replace("-90", "{0}") }}',

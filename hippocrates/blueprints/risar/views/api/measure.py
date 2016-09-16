@@ -264,3 +264,15 @@ def api_0_event_measure_checkups(event_id):
     return {
         'checkups': map(represent_pregnancy_checkup_shortly, card.checkups)
     }
+
+
+@module.route('/api/0/event_measure/<int:action_id>/appointment-list/', methods=['POST'])
+@api_method
+def api_0_event_measure_appointment_list_save(action_id):
+    json_data = request.get_json()
+    data_list = json_data.get('em_id_list')
+    action = get_action_by_id(action_id)
+    em_ctrl = EventMeasureController()
+    ev_measures = em_ctrl.save_appointment_list(data_list, action)
+    em_ctrl.store(*ev_measures)
+    return EventMeasureRepr().represent_listed_event_measures_in_action(ev_measures)

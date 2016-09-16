@@ -12,8 +12,9 @@ from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGe
 
 from nemesis.models.expert_protocol import EventMeasure, Measure
 from nemesis.models.enums import MeasureStatus
-from nemesis.lib.data import create_action, update_action
+from nemesis.lib.data import create_action, update_action, safe_datetime
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
+from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int
 
 
@@ -78,8 +79,9 @@ class EventMeasureController(BaseModelController):
     def get_new_appointment(self, em, action_data=None, action_props=None):
         event_id = em.event_id
         action_type_id = em.measure.appointmentAt_id
-        appointment = create_action(action_type_id, event_id, properties=action_props, data=action_data)
-        return appointment
+        if action_type_id is not None:
+            appointment = create_action(action_type_id, event_id, properties=action_props, data=action_data)
+            return appointment
 
     def create_appointment(self, em, json_data):
         json_data = format_action_data(json_data)
@@ -216,6 +218,32 @@ class EventMeasureController(BaseModelController):
                 'percent': hosp_pct,
             }
         }
+
+    def save_appointment_list(self, item_list, action):
+        """Сохраняет списоок мероприятий, создаёт направляения, проставляет им LPUDirection"""
+        result = []
+        organistaion = action.event.execPerson.organisation
+        for em_id in item_list:
+            em = EventMeasure.query.get(em_id)
+            if not em:
+                raise ApiException(404, u'Не найдено EM с id = '.format(em_id))
+
+            if not em.appointmentAction_id:
+                appointment = self.get_new_appointment(em)
+                if "LPUDirection" in action.propsByCode:
+                    action['LPUDirection'].value = organistaion
+                if appointment:
+                    em.appointment_action = appointment
+                    self.make_assigned(em)
+            else:
+                appointment = em.appointment_action
+
+            if appointment:
+                result.append(em)
+        return result
+
+
+
 
 
 class EventMeasureSelecter(BaseSelecter):
