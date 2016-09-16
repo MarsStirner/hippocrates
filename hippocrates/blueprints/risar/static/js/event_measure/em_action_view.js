@@ -31,6 +31,20 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
                 $scope.checkup.measures.splice(idx, 1, upd_em);
             });
     };
+    $scope.deleteEm = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.del(em.data)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.restoreEm = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.restore(em.data)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
+            });
+    };
     $scope.openEmAppointment = function (idx) {
         var em = $scope.checkup.measures[idx];
         if ($scope.canEditEmAppointment(em)) {
@@ -61,6 +75,19 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
                 });
         }
     };
+    $scope.addNewEventMeasures = function () {
+        return EMModalService.openCreate($scope.event_id)
+            .then(function () {
+                RisarApi.measure.get_by_action($scope.checkup.id, {
+                    with_deleted_hand_measures: true
+                }).then(function (em_list) {
+                    Array.prototype.splice.apply(
+                        $scope.checkup.measures,
+                        [0, em_list.length].concat(em_list)
+                    );
+                })
+            });
+    };
     $scope.emIsNotActual = function (em) {
         return em.data.is_actual.id === 0;
     };
@@ -83,6 +110,18 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
         if($scope.canNewAppointment(em)) {
             EventMeasureService.new_appointment(em, checkup, header);
         }
+    };
+    $scope.canDeleteEm = function (em) {
+        return em.access.can_delete;
+    };
+    $scope.canRestoreEm = function (em) {
+        return em.access.can_restore;
+    };
+    $scope.isManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 0;
+    };
+    $scope.isDeletedManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 1;
     };
 };
 

@@ -1,6 +1,7 @@
 'use strict';
 
-var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService, PrintingDialog, EMModalService, EventMeasureService) {
+var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService,
+                                     PrintingDialog, EMModalService, EventMeasureService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     var viewMode;
@@ -83,6 +84,20 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
                 $scope.model.measure_list.splice(idx, 1, upd_em);
             });
     };
+    $scope.deleteEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EventMeasureService.del(em.data)
+            .then(function (upd_em) {
+                $scope.model.measure_list.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.restoreEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EventMeasureService.restore(em.data)
+            .then(function (upd_em) {
+                $scope.model.measure_list.splice(idx, 1, upd_em);
+            });
+    };
     $scope.openEmAppointment = function (idx) {
         var em = $scope.model.measure_list[idx];
         if ($scope.canEditEmAppointment(em)) {
@@ -113,6 +128,12 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
                 });
         }
     };
+    $scope.addNewEventMeasures = function () {
+        return EMModalService.openCreate($scope.event_id)
+            .then(function () {
+                $scope.$broadcast('emDataUpdated');
+            });
+    };
     $scope.canEditEmAppointment = function (em) {
         return em.access.can_edit_appointment;
     };
@@ -124,6 +145,18 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
     };
     $scope.emHasResult = function (em) {
         return Boolean(em.data.result_action_id);
+    };
+    $scope.canDeleteEm = function (em) {
+        return em.access.can_delete;
+    };
+    $scope.canRestoreEm = function (em) {
+        return em.access.can_restore;
+    };
+    $scope.isManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 0;
+    };
+    $scope.isDeletedManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 1;
     };
 
     $scope.init = function () {
@@ -150,7 +183,8 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
 };
 
 
-var GynecolEventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService, PrintingDialog, EMModalService, EventMeasureService) {
+var GynecolEventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService,
+                                            PrintingDialog, EMModalService, EventMeasureService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     var viewMode;
@@ -233,6 +267,20 @@ var GynecolEventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService
                 $scope.model.measure_list.splice(idx, 1, upd_em);
             });
     };
+    $scope.deleteEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EventMeasureService.del(em.data)
+            .then(function (upd_em) {
+                $scope.model.measure_list.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.restoreEm = function (idx) {
+        var em = $scope.model.measure_list[idx];
+        EventMeasureService.restore(em.data)
+            .then(function (upd_em) {
+                $scope.model.measure_list.splice(idx, 1, upd_em);
+            });
+    };
     $scope.openEmAppointment = function (idx) {
         var em = $scope.model.measure_list[idx];
         if ($scope.canEditEmAppointment(em)) {
@@ -263,6 +311,12 @@ var GynecolEventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService
                 });
         }
     };
+    $scope.addNewEventMeasures = function () {
+        return EMModalService.openCreate($scope.event_id)
+            .then(function () {
+                $scope.$broadcast('emDataUpdated');
+            });
+    };
     $scope.canEditEmAppointment = function (em) {
         return em.access.can_edit_appointment;
     };
@@ -274,6 +328,18 @@ var GynecolEventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService
     };
     $scope.emHasResult = function (em) {
         return Boolean(em.data.result_action_id);
+    };
+    $scope.canDeleteEm = function (em) {
+        return em.access.can_delete;
+    };
+    $scope.canRestoreEm = function (em) {
+        return em.access.can_restore;
+    };
+    $scope.isManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 0;
+    };
+    $scope.isDeletedManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 1;
     };
 
     $scope.init = function () {
@@ -321,7 +387,8 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
             beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
             end_date_from: $scope.query.end_date_from ? moment($scope.query.end_date_from).startOf('day').toDate() : undefined,
             end_date_to: $scope.query.end_date_to ? moment($scope.query.end_date_to).endOf('day').toDate() : undefined,
-            measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
+            measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined,
+            with_deleted_hand_measures: true
         };
         RisarApi.measure.get_by_event($scope.event_id, query).then(setMeasureData);
     };
@@ -348,6 +415,9 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
             registered_watchers = [];
         }
     });
+    $scope.$on('emDataUpdated', function () {
+        refreshMeasureList(true);
+    });
 };
 
 var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, TimeoutCallback, uiCalendarConfig) {
@@ -366,7 +436,8 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             end_date_from: start.local().startOf('day').toDate(),
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
-            measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
+            measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined,
+            with_deleted_hand_measures: true
         };
         return RisarApi.measure.get_by_event($scope.event_id, query).
             then(function (measures) {
@@ -439,6 +510,9 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.forEach(function (unwatch) { unwatch(); });
             registered_watchers = [];
         }
+    });
+    $scope.$on('emDataUpdated', function () {
+        reloadCalendar();
     });
 };
 

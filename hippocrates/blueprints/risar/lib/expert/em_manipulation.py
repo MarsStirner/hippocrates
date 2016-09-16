@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import datetime
 
 from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
@@ -9,9 +10,11 @@ from hippocrates.blueprints.risar.lib.utils import format_action_data
 from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list
 from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
+from nemesis.models.expert_protocol import EventMeasure, Measure
 from nemesis.models.enums import MeasureStatus
-from nemesis.lib.data import create_action, update_action, safe_datetime
+from nemesis.lib.data import create_action, update_action
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
+from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int
 
 
 logger = logging.getLogger('simple')
@@ -52,6 +55,14 @@ class EventMeasureController(BaseModelController):
 
     def cancel(self, em):
         em.status = MeasureStatus.cancelled[0]
+        return em
+
+    def delete(self, em):
+        em.deleted = 1
+        return em
+
+    def restore(self, em):
+        em.deleted = 0
         return em
 
     def make_assigned(self, em):
@@ -111,6 +122,32 @@ class EventMeasureController(BaseModelController):
         self.make_performed(em)
         return em_result
 
+    def get_new_event_measure(self, data):
+        em = EventMeasure()
+        em.begDateTime = safe_datetime(data.get('beg_datetime')) or datetime.datetime.now()
+        em.endDateTime = safe_datetime(data.get('end_datetime'))
+        default_status_id = MeasureStatus.created[0]
+        em.status = safe_traverse(data, 'status', 'id', default=default_status_id)
+        em.event_id = safe_int(data['event_id'])
+        measure_id = safe_traverse(data, 'measure', 'id')
+        if not measure_id:
+            measure_id = data['measure_id']
+        measure = Measure.query.get(measure_id)
+        em.measure_id = measure.id
+        em.manual_measure = measure
+        return em
+
+    def save_list(self, event, data):
+        res = []
+        for em_data in data:
+            em_id = em_data.get('id')
+            if em_id:
+                raise NotImplementedError('cannot save event_measure list')
+            else:
+                new_em = self.get_new_event_measure(em_data['data'])
+            res.append(new_em)
+        return res
+
     def get_measures_in_event(self, event, args, paginate=False):
         event_id = event.id if event is not None else args.get('event_id')
         if not event_id:
@@ -123,21 +160,22 @@ class EventMeasureController(BaseModelController):
         else:
             return self.get_listed_data(args)
 
-    def get_measures_in_action(self, action):
+    def get_measures_in_action(self, action, args=None):
         if not action.id:
             return []
+        if args is None:
+            args = {}
         start_date = safe_datetime(action.begDate)
         next_date_property = action.propsByCode.get('next_date')
         end_date = safe_datetime(next_date_property.value) if next_date_property else None
         if not end_date:
             end_date = action.endDate
-        if not end_date:
-            end_date = start_date
-        args = {
+        args.update({
             'event_id': action.event_id,
-            'beg_date_to': end_date,
             'end_date_from': start_date
-        }
+        })
+        if end_date:
+            args['beg_date_to'] = end_date
         return self.get_selecter().get_measures_in_action(args)
 
     def calc_event_measure_stats(self, event):
@@ -214,29 +252,44 @@ class EventMeasureSelecter(BaseSelecter):
 
         if 'end_date_from' in flt:
             self.query = self.query.filter(or_(EventMeasure.endDateTime >= safe_datetime(flt['end_date_from']),
-                                           EventMeasure.endDateTime == None))
+                                               EventMeasure.endDateTime == None))
         if 'end_date_to' in flt:
             self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
         if 'measure_status_id_list' in flt:
             self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
-        self.query = self.query.filter(EventMeasure.deleted == 0)
+        if 'with_deleted_hand_measures' in flt:
+            self.query = self.query.filter(
+                func.IF(EventMeasure.measure_id.isnot(None), 1, EventMeasure.deleted == 0)
+            )
+        else:
+            self.query = self.query.filter(EventMeasure.deleted == 0)
         return self
 
     def apply_sort_order(self, **order_options):
         EventMeasure = self.model_provider.get('EventMeasure')
-        Action = self.model_provider.get('Action')
+        ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
+        Measure = self.model_provider.get('Measure')
+        rbMeasureType = self.model_provider.get('rbMeasureType')
 
+        order_options = order_options.get('order', {})
         desc_order = order_options.get('order', 'ASC') == 'DESC'
+
         if order_options:
+            # not implemented
             pass
         else:
-            source_action = aliased(Action, name='SourceAction')
-            self.query = self.query.join(
-                source_action, EventMeasure.sourceAction_id == source_action.id
-            ).order_by(
-                source_action.begDate.desc(),
-                EventMeasure.begDateTime.desc(),
-                EventMeasure.id.desc()
+            joined_tables = {mapper.class_ for mapper in self.query._join_entities}
+            if rbMeasureType not in joined_tables:
+                if Measure not in joined_tables:
+                    self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+                        Measure, or_(Measure.id == ExpertSchemeMeasureAssoc.measure_id,
+                                     Measure.id == EventMeasure.measure_id)
+                    )
+                self.query = self.query.join(rbMeasureType)
+            self.query = self.query.order_by(
+                EventMeasure.begDateTime,
+                rbMeasureType.id,
+                EventMeasure.id
             )
         return self
 

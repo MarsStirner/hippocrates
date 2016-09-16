@@ -56,3 +56,11 @@ def can_edit_em_result(em):
         em.resultAction_id is not None or
         em.measure.resultAt_id is not None
     )
+
+
+def can_delete_em(em):
+    return em.measure_id is not None and em.deleted == 0
+
+
+def can_restore_em(em):
+    return em.measure_id is not None and em.deleted == 1

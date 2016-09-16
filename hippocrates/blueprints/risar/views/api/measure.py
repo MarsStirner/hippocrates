@@ -37,20 +37,30 @@ def api_0_event_measure_generate(action_id):
 @module.route('/api/0/event_measure/<int:event_measure_id>')
 @api_method
 def api_0_event_measure_get(event_measure_id=None):
-    em = EventMeasure.query.get(event_measure_id)
-    if not em:
-        raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+    get_new = safe_bool(request.args.get('new', False))
+    if get_new:
+        data = request.args.to_dict()
+        em_ctrl = EventMeasureController()
+        em = em_ctrl.get_new_event_measure(data)
+    elif event_measure_id:
+        em = EventMeasure.query.get(event_measure_id)
+        if not em:
+            raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+    else:
+        raise ApiException(404, u'`event_measure_id` required')
     return EventMeasureRepr().represent_em_full(em)
 
 
-@module.route('/api/0/event_measure/remove/', methods=['POST'])
-@module.route('/api/0/event_measure/remove/<int:action_id>', methods=['POST'])
+@module.route('/api/0/event_measure/<int:event_id>/save-list/', methods=['POST'])
 @api_method
-def api_0_event_measure_remove(action_id):
-    action = Action.query.get_or_404(action_id)
+def api_0_event_measure_save_list(event_id):
+    data = request.get_json()
+    event = Event.query.get(event_id)
+
     em_ctrl = EventMeasureController()
-    em_ctrl.delete_in_action(action)
-    return []
+    em_list = em_ctrl.save_list(event, data)
+    em_ctrl.store(*em_list)
+    return EventMeasureRepr().represent_listed_event_measures(em_list)
 
 
 @module.route('/api/0/event_measure/execute/', methods=['POST'])
@@ -71,6 +81,26 @@ def api_0_event_measure_cancel(event_measure_id):
     em = EventMeasure.query.get_or_404(event_measure_id)
     em_ctrl = EventMeasureController()
     em_ctrl.cancel(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_em_full(em)
+
+
+@module.route('/api/0/event_measure/<int:event_measure_id>', methods=['DELETE'])
+@api_method
+def api_0_event_measure_delete(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.delete(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_em_full(em)
+
+
+@module.route('/api/0/event_measure/<int:event_measure_id>/undelete', methods=['POST'])
+@api_method
+def api_0_event_measure_undelete(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.restore(em)
     em_ctrl.store(em)
     return EventMeasureRepr().represent_em_full(em)
 
@@ -211,6 +241,18 @@ def api_0_measure_list(event_id):
         return EventMeasureRepr().represent_paginated_event_measures(data)
     else:
         return EventMeasureRepr().represent_listed_event_measures(data)
+
+
+@module.route('/api/0/measure/list/by_action/<int:action_id>')
+@module.route('/api/0/measure/list/by_action/')
+@api_method
+def api_0_measure_list_by_action(action_id):
+    args = dict(request.args)
+    action = Action.query.get_or_404(action_id)
+
+    em_ctrl = EventMeasureController()
+    data = em_ctrl.get_measures_in_action(action, args)
+    return EventMeasureRepr().represent_listed_event_measures(data)
 
 
 @module.route('/api/0/measure_checkups/')
