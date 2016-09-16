@@ -2,6 +2,7 @@
     <h3 class="modal-title">Сведения об аллергиях и непереносимостях</h3>
 </div>
 <div class="modal-body">
+    <ng-form name="modalForm">
     <table class="table table-condensed">
         <thead>
         <tr>
@@ -13,11 +14,22 @@
         </thead>
         <tbody>
         <tr ng-repeat="model in models">
-            <td ng-if="!model.deleted"><input class="form-control" type="text" ng-model="model.name" /></td>
-            <td ng-if="!model.deleted"><rb-select ref-book="AllergyPower" ng-model="model.power" /></td>
-            <td ng-if="!model.deleted"><div fs-date ng-model="model.date"></div></td>
-            <td ng-if="!model.deleted"><input class="form-control" type="text" ng-model="model.note" /></td>
-            <td ng-if="!model.deleted"><button class="btn btn-danger" ng-click="remove(model)"><i class="glyphicon glyphicon-trash"></i></button></td>
+            <td ng-if="!model.deleted">
+                <input class="form-control" type="text" ng-model="model.name" ng-required="true"/>
+            </td>
+            <td ng-if="!model.deleted" ng-class="{'has-error': modalForm['power' + $index].$invalid}">
+                <rb-select id="power[[$index]]" name="power[[$index]]" ref-book="AllergyPower"
+                    ng-model="model.power" ng-required="true"></rb-select>
+            </td>
+            <td ng-if="!model.deleted">
+                <wm-date id="date[[$index]]" name="date[[$index]]" ng-model="model.date" ></wm-date>
+            </td>
+            <td ng-if="!model.deleted">
+                <input class="form-control" type="text" ng-model="model.note" />
+            </td>
+            <td ng-if="!model.deleted">
+                <button class="btn btn-danger" ng-click="remove(model)"><i class="glyphicon glyphicon-trash"></i></button>
+            </td>
             <td ng-if="model.deleted" colspan="5" class="text-center"><a ng-click="restore(model)">Восстановить</a></td>
         </tr>
         <tr>
@@ -25,8 +37,9 @@
         </tr>
         </tbody>
     </table>
+    </ng-form>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-success" ng-click="$close(models)">Сохранить</button>
+    <button class="btn btn-success" ng-disabled="modalForm.$invalid" ng-click="$close(models)">Сохранить</button>
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
 </div>

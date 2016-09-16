@@ -817,7 +817,7 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
                                 RisarApi.anamnesis.intolerances.delete(model.id, field)
                             }
                         } else {
-                            return RisarApi.anamnesis.intolerances.save($scope.$parent.event.info.client_id, model)
+                            return RisarApi.anamnesis.intolerances.save($scope.event.info.client_id, model)
                         }
                     }),
                     function (deferred) {
@@ -854,7 +854,7 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
                 _.filter(
                     _.map(models, function (model) {
                         var data = {
-                            client_id: $scope.$parent.event.info.client_id,
+                            client_id: $scope.event.info.client_id,
                             blood_type_info: model
                         };
                         return ApiCalls.wrapper('POST', WMConfig.url.event.blood_history, {}, data)

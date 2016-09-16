@@ -2,6 +2,7 @@
     <h3 class="modal-title">Сведения о переливаниях крови</h3>
 </div>
 <div class="modal-body">
+    <ng-form name="modalForm">
     <table class="table table-condensed">
         <thead>
         <tr>
@@ -14,24 +15,23 @@
         </thead>
         <tbody>
         <tr ng-repeat="model in models">
-            <td class="col-md-2" ng-if="!model.deleted"><div fs-date ng-model="model.date"></div></td>
-            <td class="col-md-2" ng-if="!model.deleted">
-                <rb-select id="type" name="type" ng-model="model.blood_type"
-                           ref-book="rbBloodType"></rb-select>
+            <td class="col-md-2" ng-if="!model.deleted"><wm-date ng-model="model.date" ng-required="true"></wm-date></td>
+            <td class="col-md-2" ng-if="!model.deleted" ng-class="{'has-error': modalForm['blood_type' + $index].$invalid}">
+                <rb-select id="blood_type[[$index]]" name="blood_type[[$index]]" ng-model="model.blood_type"
+                           ref-book="rbBloodType" ng-required="true"></rb-select>
             </td>
-            <td class="col-md-3" ng-if="!model.deleted">
-                <wm-person-select id="person" name="person"
-                                  ng-model="model.person"
-                                  placeholder="Врач">
+            <td class="col-md-3" ng-if="!model.deleted" ng-class="{'has-error': modalForm['person' + $index].$invalid}">
+                <wm-person-select id="person[[$index]]" name="person[[$index]]"
+                                  ng-model="model.person" ng-required="true" placeholder="Врач">
                 </wm-person-select>
             </td>
-            <td class="col-md-2" ng-if="!model.deleted">
-                <rb-select id="type" name="type" ng-model="model.blood_phenotype"
-                           ref-book="rbBloodPhenotype"></rb-select>
+            <td class="col-md-2" ng-if="!model.deleted" ng-class="{'has-error': modalForm['blood_phenotype' + $index].$invalid}">
+                <rb-select id="blood_phenotype[[$index]]" name="blood_phenotype[[$index]]" ng-model="model.blood_phenotype"
+                           ref-book="rbBloodPhenotype" ng-required="true"></rb-select>
             </td>
-            <td class="col-md-2" ng-if="!model.deleted">
-                <rb-select id="type" name="type" ng-model="model.blood_kell"
-                           ref-book="rbBloodKell"></rb-select>
+            <td class="col-md-2" ng-if="!model.deleted" ng-class="{'has-error': modalForm['blood_kell' + $index].$invalid}">
+                <rb-select id="blood_kell[[$index]]" name="blood_kell[[$index]]" ng-model="model.blood_kell"
+                           ref-book="rbBloodKell" ng-required="true"></rb-select>
             </td>
         </tr>
         <tr>
@@ -39,8 +39,9 @@
         </tr>
         </tbody>
     </table>
+    </ng-form>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-success" ng-click="$close(models)">Сохранить</button>
+    <button class="btn btn-success" ng-disabled="modalForm.$invalid" ng-click="$close(models)">Сохранить</button>
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
 </div>
