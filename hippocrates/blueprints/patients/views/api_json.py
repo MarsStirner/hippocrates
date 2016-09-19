@@ -15,7 +15,7 @@ from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
 from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy, ClientContact
 from nemesis.models.exists import FileMeta, FileGroupDocument, VMPCoupon, MKB, QuotaType
-from nemesis.lib.utils import safe_date
+from nemesis.lib.utils import safe_date, format_date
 from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
@@ -424,6 +424,10 @@ def api_patient_coupon_parse():
     file_content = coupon_file.get('binary_b64')
     head, content = file_content.split(',')
     coupon = VMPCoupon.from_xlsx(content)
+    if not coupon.quotaType:
+        raise ApiException(422, u'Не найдено подходящей квоты по коду "{0}" и дате {1}'.format(
+            coupon.parsed.get('quota_type_code'), format_date(coupon.parsed.get('quota_date'))
+        ))
     coupon.file = file_content
     return coupon
 
