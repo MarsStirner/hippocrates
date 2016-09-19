@@ -729,14 +729,15 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
-    $scope.initialize();
-    $scope.$watchCollection(function() {
-        return [safe_traverse($scope.event, ['received', 'weight', 'value']),
-                safe_traverse($scope.event, ['received', 'height', 'value'])];
-    }, function(n, o) {
-        if (n !== o && n[0] && n[1]) {
-            $scope.event.info.body_area = Math.sqrt(n[0]*n[1]/3600).toFixed(2);
+    var recalcBodyArea = function() {
+        var w = safe_traverse($scope.event, ['received', 'weight', 'value']),
+            h = safe_traverse($scope.event, ['received', 'height', 'value']);
+        if (w && h) {
+            $scope.event.info.body_area = Math.sqrt(w * h / 3600).toFixed(2);
         }
+    };
+    $scope.$on('event_loaded', function () {
+        recalcBodyArea();
     });
     $scope.format_admission_date = function (date) {
         return date ? $filter('asDateTime')(date) : '&nbsp;';
@@ -867,7 +868,7 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
                 $scope.event.blood_history = results;
             });
         })
-    }
+    };
     var open_edit_blood = function (list) {
         var scope = $scope.$new();
         scope.models = list;
@@ -882,6 +883,8 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
             size: 'lg'
         })
     };
+
+    $scope.initialize();
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
