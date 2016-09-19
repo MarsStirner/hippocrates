@@ -4,7 +4,8 @@
 'use strict';
 
 angular.module('WebMis20')
-.directive('wmActionLayout', ['$compile', 'SelectAll', '$filter', '$log', function ($compile, SelectAll, $filter, $log) {
+.directive('wmActionLayout', ['$compile', 'SelectAll', '$filter', '$log',
+        function ($compile, SelectAll, $filter, $log) {
     return {
         restrict: 'E',
         scope: {
@@ -23,6 +24,11 @@ angular.module('WebMis20')
                         $filter('asDate')(diag.set_date),
                         $filter('asDate')(diag.end_date)
                     );
+                },
+                onCheckboxSelected: function (args) {
+                    scope.$broadcast('actionLayoutItemFocused', {
+                        apt_id: args
+                    });
                 }
             };
             scope.unity_function = function (arg) { return arg };
@@ -47,32 +53,32 @@ angular.module('WebMis20')
                                 case 'Text':
                                 case 'Html':
                                 case 'Жалобы':
-                                    inner_template = '<span ng-bind-html="{0}.value | trustHtml"></span>'; break;
+                                    inner_template = '<span ng-bind-html="{0}.value | trustHtml" id="[[{0}.type.id]]"></span>'; break;
                                 case 'String':
                                 case 'String/Select':
                                 case 'String/Free':
                                 case 'Integer':
                                 case 'Double':
-                                    inner_template = '<span>[[ {0}.value ]] {1}</span>'.format('{0}', property_unit_code); break;
+                                    inner_template = '<span id="[[{0}.type.id]]">[[ {0}.value ]] {1}</span>'.format('{0}', property_unit_code); break;
                                 case 'Date':
-                                    inner_template = '<span ng-bind="{0}.value | asDate"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value | asDate" id="[[{0}.type.id]]"></span>'; break;
                                 case 'Time':
-                                    inner_template = '<span ng-bind="{0}.value | asTime"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value | asTime" id="[[{0}.type.id]]"></span>'; break;
                                 case 'JobTicket':
-                                    inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value.datetime | asDateTime" id="[[{0}.type.id]]"></span>'; break;
                                 case 'AnalysisStatus':
                                 case 'OperationType':
                                 case 'HospitalBedProfile':
                                 case 'ReferenceRb':
-                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value.name" id="[[{0}.type.id]]"></span>'; break;
                                 case 'Person':
-                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value.name" id="[[{0}.type.id]]"></span>'; break;
                                 case 'Organisation':
-                                    inner_template = '<span ng-bind="{0}.value.full_name"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value.full_name" id="[[{0}.type.id]]"></span>'; break;
                                 case 'MKB':
-                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value.name" id="[[{0}.type.id]]"></span>'; break;
                                 case 'OrgStructure':
-                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value.name" id="[[{0}.type.id]]"></span>'; break;
                                 case 'Diagnosis':
                                     if (property.type.vector) {
                                         inner_template =
@@ -84,98 +90,99 @@ angular.module('WebMis20')
                                     break;
                                 case 'URL':
                                     inner_template = scope.action.is_new() || !property.value ?
-                                        '<span></span>' :
-                                        '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
-                                        'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
+                                        '<span id="[[{0}.type.id]]"></span>' :
+                                        '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"\
+                                            style="font-size:larger; margin-left: 10px; margin-top: 5px;"\
+                                            id="[[{0}.type.id]]">[[ {0}.type.description || {0}.value ]]</a>';
                                     break;
 
                                 default:
-                                    inner_template = '<span ng-bind="{0}.value"></span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value" id="[[{0}.type.id]]"></span>'; break;
                             }
                         } else {
                             switch (property.type.type_name) {
                                 case 'Constructor':
-                                    inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}" />'.format('{0}', property.type.domain);
+                                    inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}"\
+                                        id="[[{0}.type.id]]" al-item-focused />'.format('{0}', property.type.domain);
                                     break;
                                 case 'Text':
                                 case 'Html':
                                 case 'Жалобы':
-                                    inner_template = '<wysiwyg ng-model="{0}.value" />';
+                                    inner_template = '<wysiwyg ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused/>';
                                     break;
                                 case 'Date':
-                                    inner_template = '<wm-date ng-model="{0}.value"></wm-date>';
+                                    inner_template = '<wm-date ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></wm-date>';
                                     break;
                                 case 'Integer':
-                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value" valid-number valid-number-negative>';
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused valid-number valid-number-negative>';
                                     if (property.type.unit) {
-                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
+                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'
+                                            .format(inner_template, property_unit_code);
                                     }
                                     break;
                                 case 'Double':
-                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value" valid-number valid-number-negative valid-number-float>';
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused valid-number valid-number-negative valid-number-float>';
                                     if (property.type.unit) {
-                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
+                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'
+                                            .format(inner_template, property_unit_code);
                                     }
                                     break;
                                 case 'Time':
-                                    inner_template = '<div fs-time ng-model="{0}.value"></div>';
+                                    inner_template = '<div fs-time ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></div>';
                                     break;
                                 case 'String':
-                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused>';
                                     if (property.type.unit) {
-                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'.format(inner_template, property_unit_code);
+                                        inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'
+                                            .format(inner_template, property_unit_code);
                                     }
                                     break;
                                 case 'String/Select':
                                     inner_template =
-                                        '<div class="row">\
-                                            <div class="col-md-10">\
-                                                <ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off">\
-                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
-                                                    <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
-                                                        <span ng-bind-html="item | highlight: $select.search"></span>\
-                                                    </ui-select-choices>\
-                                                </ui-select>\
-                                            </div>\
-                                            <div class="col-md-2">\
-                                                <button class="btn btn-default" ng-click="{0}.value = \'\'"><i class="fa fa-remove"></i></button>\
-                                            </div>\
-                                        </div>';
+                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off"\
+                                                id="[[{0}.type.id]]" al-item-focused>\
+                                            <ui-select-match placeholder="не выбрано" allow-clear="true">[[ $select.selected ]]</ui-select-match>\
+                                            <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
+                                                <span ng-bind-html="item | highlight: $select.search"></span>\
+                                            </ui-select-choices>\
+                                        </ui-select>';
                                     break;
                                 case 'String/Free':
                                     inner_template =
-                                        '<div class="btn-group">\
-                                            <div class="col-md-10">\
-                                                <ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function" autocomplete="off">\
-                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected ]]</ui-select-match>\
-                                                    <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
-                                                        <span ng-bind-html="item | highlight: $select.search"></span>\
-                                                    </ui-select-choices>\
-                                                </ui-select>\
-                                            </div>\
-                                            <div class="col-md-2">\
-                                                <button class="btn btn-default" ng-click="{0}.value = \'\'"><i class="fa fa-remove"></i></button>\
-                                            </div>\
-                                        </div>';
+                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function"\
+                                                autocomplete="off" id="[[{0}.type.id]]" al-item-focused>\
+                                            <ui-select-match placeholder="не выбрано" allow-clear="true">[[ $select.selected ]]</ui-select-match>\
+                                            <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
+                                                <span ng-bind-html="item | highlight: $select.search"></span>\
+                                            </ui-select-choices>\
+                                        </ui-select>';
                                     break;
                                 case 'JobTicket':
                                     inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
                                     break;
                                 case 'AnalysisStatus':
-                                    inner_template = '<rb-select ref-book="rbAnalysisStatus" ng-model="{0}.value"></rb-select>';
+                                    inner_template = '<rb-select ref-book="rbAnalysisStatus" ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused></rb-select>';
                                     break;
                                 case 'OperationType':
-                                    inner_template = '<rb-select ref-book="rbOperationType" ng-model="{0}.value"></rb-select>';
+                                    inner_template = '<rb-select ref-book="rbOperationType" ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused></rb-select>';
                                     break;
                                 case 'HospitalBedProfile':
-                                    inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
+                                    inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused></rb-select>';
                                     break;
                                 case 'Person':
-                                    inner_template = '<wm-person-select ng-model="{0}.value"></wm-person-select>';
+                                    inner_template = '<wm-person-select ng-model="{0}.value"\
+                                        id="[[{0}.type.id]]" al-item-focused></wm-person-select>';
                                     break;
                                 case 'Organisation':
                                     inner_template =
-                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">\
+                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control"\
+                                                autocomplete="off" ref-book="Organisation" id="[[{0}.type.id]]" al-item-focused>\
                                             <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>\
                                             <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
                                                 <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
@@ -183,12 +190,12 @@ angular.module('WebMis20')
                                         </ui-select>';
                                     break;
                                 case 'MKB':
-                                    inner_template = '<ui-mkb ng-model="{0}.value"></ui-mkb>';
+                                    inner_template = '<ui-mkb ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></ui-mkb>';
                                     break;
                                 case 'OrgStructure': // Без фильтров
                                     inner_template =
                                         '<wm-custom-dropdown>\
-                                            <wm-org-structure-tree ng-model="{0}.value"></wm-org-structure-tree>\
+                                            <wm-org-structure-tree ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></wm-org-structure-tree>\
                                         </wm-custom-dropdown>';
                                     break;
                                 case 'ReferenceRb':
@@ -200,7 +207,8 @@ angular.module('WebMis20')
                                             return code !== "''";
                                         })) : [],
                                         extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
-                                    inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
+                                    inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"\
+                                        allow-clear="true" id="[[{0}.type.id]]" al-item-focused></rb-select>'.format('{0}', rbTable, extra_filter);
                                     break;
                                 case 'Diagnosis':
                                     inner_template = ('<wm-diagnosis model="{0}.value" action="action" params="{1}" ' +
@@ -210,11 +218,12 @@ angular.module('WebMis20')
                                 case 'URL':
                                     inner_template = scope.action.is_new() || !property.value ?
                                         '<span></span>' :
-                                        '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"' +
-                                        'style="font-size:larger; margin-left: 10px; margin-top: 5px;">[[ {0}.type.description || {0}.value ]]</a>';
+                                        '<a ng-href="[[{0}.value]]" target="_blank" title="Открыть ссылку в новой вкладке"\
+                                            style="font-size:larger; margin-left: 10px; margin-top: 5px;"\
+                                            id="[[{0}.type.id]]">[[ {0}.type.description || {0}.value ]]</a>';
                                     break;
                                 default:
-                                    inner_template = '<span ng-bind="{0}.value"></span>';
+                                    inner_template = '<span ng-bind="{0}.value" id="[[{0}.type.id]]"></span>';
                             }
                         }
                         var property_name = tag.title || property.type.name;
@@ -224,7 +233,7 @@ angular.module('WebMis20')
                                 template = '<div><label>{0}:</label> {1}</div>'.format(property_name, inner_template.format(property_code))
                             } else {
                                 template =
-                                    '<div class="form-group"><wm-checkbox select-all="sas" key="{2}">{0}</wm-checkbox><div ng-show="sas.selected({2})">{1}</div></div>'.format(
+                                    '<div class="form-group"><wm-checkbox select-all="sas" on-checked="layout_tools.onCheckboxSelected({2})" key="{2}">{0}</wm-checkbox><div ng-show="sas.selected({2})">{1}</div></div>'.format(
                                         property_name,
                                         inner_template.format(property_code),
                                         property.type.id);
@@ -368,6 +377,26 @@ angular.module('WebMis20')
             scope.$watch('action.readonly', function (n, o) {
                 if (!angular.equals(n, o)) {
                     rebuild_layout(scope.action.layout)
+                }
+            });
+        }
+    }
+}])
+.directive('alItemFocused', [function () {
+    return {
+        restrict: 'A',
+        link: function (scope, elem, attrs) {
+            var focusActionLayoutItem = function (id) {
+                document.getElementById(id).focus();
+            };
+            scope.$on('actionLayoutItemFocused', function (event, args) {
+                if (String(args.apt_id) === elem.attr('id')) {
+                    var phase = scope.$root.$$phase;
+                    if (phase == '$apply' || phase == '$digest') {
+                        focusActionLayoutItem(elem.attr('id'));
+                    } else {
+                        scope.$apply(focusActionLayoutItem(elem.attr('id')));
+                    }
                 }
             });
         }
