@@ -1,6 +1,19 @@
 'use strict';
 
 var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, EventMeasureService) {
+    $scope.selectAll = false;
+    $scope.checkboxes = {};
+    $scope.toggleSelection = function () {
+        $scope.selectAll = !$scope.selectAll;
+        _.map($scope.checkup.measures, function (em) {
+            if ( $scope.canEditEmAppointment(em) ) {
+                $scope.checkboxes[em.data.id] =  $scope.selectAll;
+            }
+        });
+    };
+    $scope.printButtonActive = function () {
+        return _.any(_.values($scope.checkboxes));
+    };
     $scope.generateMeasures = function () {
         RisarApi.measure.regenerate($scope.checkup.id).
             then(function (measures) {
@@ -27,6 +40,20 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.cancelEm = function (idx) {
         var em = $scope.checkup.measures[idx];
         EventMeasureService.cancel(em.data)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.deleteEm = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.del(em.data)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
+            });
+    };
+    $scope.restoreEm = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.restore(em.data)
             .then(function (upd_em) {
                 $scope.checkup.measures.splice(idx, 1, upd_em);
             });
@@ -61,6 +88,19 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
                 });
         }
     };
+    $scope.addNewEventMeasures = function () {
+        return EMModalService.openCreate($scope.event_id)
+            .then(function () {
+                RisarApi.measure.get_by_action($scope.checkup.id, {
+                    with_deleted_hand_measures: true
+                }).then(function (em_list) {
+                    Array.prototype.splice.apply(
+                        $scope.checkup.measures,
+                        [0, em_list.length].concat(em_list)
+                    );
+                })
+            });
+    };
     $scope.emIsNotActual = function (em) {
         return em.data.is_actual.id === 0;
     };
@@ -83,6 +123,44 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
         if($scope.canNewAppointment(em)) {
             EventMeasureService.new_appointment(em, checkup, header);
         }
+    };
+    $scope.get_ps_appointments_data = function () {
+        return {
+            action_id: $scope.checkup.id,
+            em_id_list: $scope.getSelectedMeasuresIds()
+        }
+    };
+    $scope.getSelectedMeasuresIds = function () {
+        return _.keys(_.object(_.filter(_.pairs($scope.checkboxes),
+                                                    function(item){return item[1]===true})));
+    };
+    $scope.createAppointments = function() {
+       var em_id_list = $scope.getSelectedMeasuresIds();
+        if (!_.isEmpty(em_id_list)) {
+            return EventMeasureService.save_appointment_list($scope.checkup.id, em_id_list).
+                then(function (em_list) {
+                   _.each(em_list, function(nuevo) {
+                       _.each($scope.checkup.measures, function (old, ind) {
+                           if ( safe_traverse(nuevo, ['data', 'id']) === safe_traverse(old, ['data', 'id']) ) {
+                               $scope.checkup.measures[ind] = nuevo;
+                           };
+                           });
+                       });
+                    return em_list;
+                });
+        }
+    };
+    $scope.canDeleteEm = function (em) {
+        return em.access.can_delete;
+    };
+    $scope.canRestoreEm = function (em) {
+        return em.access.can_restore;
+    };
+    $scope.isManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 0;
+    };
+    $scope.isDeletedManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 1;
     };
 };
 

@@ -14,6 +14,21 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
             });
             return instance.result;
         },
+        openCreate: function (event_id) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/RISAR/modal/em_create_list.html',
+                controller: EMCreateListModalCtrl,
+                backdrop: 'static',
+                size: 'lg',
+                windowClass: 'modal-scrollable',
+                resolve: {
+                    event_id: function () {
+                        return event_id
+                    }
+                }
+            });
+            return instance.result;
+        },
         openAppointmentEdit: function (em, appointment) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/RISAR/modal/em_appointment_edit.html',
@@ -54,14 +69,23 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
 }]);
 
 WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
-    this.get = function (em_id) {
-        return RisarApi.measure.get(em_id);
+    this.get = function (em_id, args) {
+        return RisarApi.measure.get(em_id, args);
+    };
+    this.save_em_list = function (event_id, data) {
+        return RisarApi.measure.save_list(event_id, data);
     };
     this.execute = function (em) {
         return RisarApi.measure.execute(em.id);
     };
     this.cancel = function (em) {
         return RisarApi.measure.cancel(em.id);
+    };
+    this.del = function (em) {
+        return RisarApi.measure.del(em.id);
+    };
+    this.restore = function (em) {
+        return RisarApi.measure.restore(em.id);
     };
     this.new_appointment = function (em, checkup, header) {
         var start_date = moment(em.data.beg_datetime).format('YYYY-MM-DD');
@@ -72,6 +96,9 @@ WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
     };
     this.get_em_result = function (em) {
         return RisarApi.measure.get_em_result(em.data.id, em.data.result_action_id);
+    };
+    this.save_appointment_list = function (action_id, em_id_list) {
+        return RisarApi.measure.save_appointment_list(action_id, em_id_list);
     };
 }]);
 

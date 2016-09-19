@@ -63,7 +63,7 @@ def api_0_schedule(person_id=None):
         Schedule.person_id == person_id,
         ScheduleTicket.deleted == 0,
         ScheduleClientTicket.deleted == 0,
-    )
+    ).order_by(Schedule.date, ScheduleTicket.begTime)
     if not all_tickets:
         query = query.filter(ScheduleClientTicket.id.isnot(None))
     ticket_event_list = query.with_entities(ScheduleTicket, Event)

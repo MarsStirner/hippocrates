@@ -399,20 +399,35 @@ WebMis20
         get_by_event: function (event_id, query) {
             return wrapper('POST', Config.url.api_measure_list + event_id, undefined, query)
         },
+        get_by_action: function (action_id, args) {
+            return wrapper('GET', Config.url.api_measure_list_by_action + action_id, args)
+        },
         regenerate: function (action_id) {
             return wrapper('GET', Config.url.api_event_measure_generate + action_id)
         },
-        get: function (event_measure_id) {
-            return wrapper('GET', Config.url.api_event_measure_get + event_measure_id);
+        get: function (event_measure_id, args) {
+            var url = Config.url.api_event_measure_get;
+            if (event_measure_id) {
+                url += event_measure_id;
+            } else {
+                url += '?new=true';
+            }
+            return wrapper('GET', url, args);
         },
-        remove: function (action_id) {
-            return wrapper('POST', Config.url.api_event_measure_remove + action_id)
+        save_list: function (event_id, data) {
+            return wrapper('POST', Config.url.api_event_measure_save_list.format(event_id), {}, data);
         },
         execute: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_execute + event_measure_id);
         },
         cancel: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
+        },
+        del: function (event_measure_id) {
+            return wrapper('DELETE', Config.url.api_event_measure_delete.format(event_measure_id));
+        },
+        restore: function (event_measure_id) {
+            return wrapper('POST', Config.url.api_event_measure_undelete.format(event_measure_id));
         },
         get_checkups: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
@@ -489,6 +504,27 @@ WebMis20
                         5000
                     );
                     return action;
+                }, function (result) {
+                    NotificationService.notify(
+                        500,
+                        'Ошибка сохранения, свяжитесь с администратором',
+                        'danger'
+                    );
+                    return $q.reject(result);
+                });
+        },
+        save_appointment_list: function (action_id, em_id_list) {
+            var url = Config.url.api_event_measure_appointment_list_save.format(action_id),
+                data = {em_id_list: em_id_list};
+            return wrapper('POST', url, {}, data)
+                .then(function (result) {
+                    NotificationService.notify(
+                        200,
+                        'Успешно сохранено',
+                        'success',
+                        5000
+                    );
+                    return result;
                 }, function (result) {
                     NotificationService.notify(
                         500,

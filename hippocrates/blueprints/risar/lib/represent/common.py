@@ -410,7 +410,9 @@ def represent_checkup_shortly(action):
 
 def represent_measures(action):
     return EventMeasureRepr().represent_listed_event_measures_in_action(
-        EventMeasureController().get_measures_in_action(action)
+        EventMeasureController().get_measures_in_action(action, {
+            'with_deleted_hand_measures': True
+        })
     )
 
 
