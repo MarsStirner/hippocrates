@@ -48,6 +48,12 @@
                            ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
                            popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
                 </div>
+                <div class="form-group col-md-3" >
+                    <label for="nationality" class="control-label">Национальность</label>
+                    <ui-select ext-select-ref-book-search="rbOKIN_Nationality" class="form-control" id="nationality" name="nationality" theme="select2"
+                               ng-model="client.info.nationality">
+                    </ui-select>
+                </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-12">
