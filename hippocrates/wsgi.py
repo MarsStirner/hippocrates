@@ -21,10 +21,11 @@ def general_menu():
         visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator()),
         icon='glyphicon glyphicon-home'
     ), dict(
-        link='patients.index',
-        title=u'Обслуживание пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut()),
-        icon='fa fa-users'
+        link='patients.search',
+        title=u'Поиск пациентов',
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut() or
+                 UserProfileManager.has_ui_doctor()),
+        icon='fa fa-search'
     ), dict(
         link='schedule.person_schedule_monthview',
         title=u'Формирование графика',
@@ -40,11 +41,6 @@ def general_menu():
         title=u'Приём пациентов',
         visible=(UserProfileManager.has_ui_doctor()),
         icon='fa fa-stethoscope'
-    ), dict(
-        link='patients.search',
-        title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_doctor()),
-        icon='fa fa-search'
     ), dict(
         link='event.get_events',
         title=u'Обращения',
