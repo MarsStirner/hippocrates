@@ -123,10 +123,10 @@
                                             <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                            <li role="menuitem" ng-class="{'disabled': !canEditEmAppointment(em)}">
+                                            <li role="menuitem" ng-class="{'disabled': !canReadEmAppointment(em)}">
                                                 <a href="javascript:void(0);" ng-click="openEmAppointment($index)">Редактировать направление</a>
                                             </li>
-                                            <li role="menuitem" ng-class="{'disabled': !canEditEmResult(em)}">
+                                            <li role="menuitem" ng-class="{'disabled': !canReadEmResult(em)}">
                                                 <a href="javascript:void(0);" ng-click="openEmResult($index)">Редактировать результат</a>
                                             </li>
                                             <li role="separator" class="divider"></li>

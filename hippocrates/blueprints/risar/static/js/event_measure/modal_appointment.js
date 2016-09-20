@@ -24,7 +24,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 <div class="modal-footer">\
     <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_appointment(true)" fast-print="true"\
         class="pull-left"></ui-print-button>\
-    <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
+    <button type="button" class="btn btn-default" ng-click="close()">Закрыть</button>\
     <button type="button" class="btn btn-primary" ng-click="save_appointment()">Сохранить</button>\
 </div>');
 }]);
@@ -32,6 +32,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 
 var EMAppointmentModalCtrl = function ($scope, $q, RisarApi, RefBookService, WMAction,
                                        PrintingService, PrintingDialog, MessageBox, event_measure, appointment) {
+    $scope.ro = false;
+    var _saved = false;
     $scope.ps = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
         return {
@@ -43,6 +45,13 @@ var EMAppointmentModalCtrl = function ($scope, $q, RisarApi, RefBookService, WMA
         $scope.ps.set_context(context_name);
     }
 
+    $scope.close = function () {
+        if (_saved) {
+            $scope.$close();
+        } else {
+            $scope.$dismiss('cancel');
+        }
+    };
     $scope.saveAndClose = function () {
         $scope.save_appointment().then(function () {
             $scope.$close();
@@ -60,6 +69,7 @@ var EMAppointmentModalCtrl = function ($scope, $q, RisarApi, RefBookService, WMA
                     data
                 ).
                     then(function (action) {
+                        _saved = true;
                         $scope.action.merge(action);
                     });
             }, function (result) {
@@ -97,7 +107,7 @@ var EMAppointmentModalCtrl = function ($scope, $q, RisarApi, RefBookService, WMA
         $scope.ActionStatus = RefBookService.get('ActionStatus');
         $scope.ActionStatus.loading.then(function () {
             $scope.action = $scope.action.merge(appointment);
-            $scope.action.readonly = false;
+            $scope.ro = $scope.action.readonly = $scope.action.ro = appointment.ro;
             update_print_templates(appointment.action_type.context_name);
         });
     };

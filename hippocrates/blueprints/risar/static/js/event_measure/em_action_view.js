@@ -6,7 +6,7 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.toggleSelection = function () {
         $scope.selectAll = !$scope.selectAll;
         _.map($scope.checkup.measures, function (em) {
-            if ( $scope.canEditEmAppointment(em) ) {
+            if ( $scope.canReadEmAppointment(em) ) {
                 $scope.checkboxes[em.data.id] =  $scope.selectAll;
             }
         });
@@ -60,7 +60,7 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.openEmAppointment = function (idx) {
         var em = $scope.checkup.measures[idx];
-        if ($scope.canEditEmAppointment(em)) {
+        if ($scope.canReadEmAppointment(em)) {
             EventMeasureService.get_appointment(em)
                 .then(function (appointment) {
                     return EMModalService.openAppointmentEdit(em, appointment);
@@ -75,7 +75,7 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.openEmResult = function (idx) {
         var em = $scope.checkup.measures[idx];
-        if ($scope.canEditEmResult(em)) {
+        if ($scope.canReadEmResult(em)) {
             EventMeasureService.get_em_result(em)
                 .then(function (em_result) {
                     return EMModalService.openEmResultEdit(em, em_result);
@@ -104,11 +104,11 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.emIsNotActual = function (em) {
         return em.data.is_actual.id === 0;
     };
-    $scope.canEditEmAppointment = function (em) {
-        return em.access.can_edit_appointment;
+    $scope.canReadEmAppointment = function (em) {
+        return em.access.can_read_appointment;
     };
-    $scope.canEditEmResult = function (em) {
-        return em.access.can_edit_result;
+    $scope.canReadEmResult = function (em) {
+        return em.access.can_read_result;
     };
     $scope.emHasAppointment = function (em) {
         return Boolean(em.data.appointment_action_id);
