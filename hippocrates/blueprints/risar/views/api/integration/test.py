@@ -240,3 +240,7 @@ if __name__ == '__main__':
         # from hippocrates.blueprints.risar.views.api.integration.schedule.test import \
         #     test_create_schedules
         # test_create_schedules()
+
+        # from hippocrates.blueprints.risar.views.api.integration.doctors.test import \
+        #     test_create_update_doctor
+        # test_create_update_doctor()
