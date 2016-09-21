@@ -1,0 +1,120 @@
+{% extends "actions/base.html" %}
+{% block main %}
+<section class="content">
+    <div ng-controller="ActionListCtrl" class="ng-cloak">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Filter -->
+            <div>
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Фильтр</h3>
+                    </div>
+                    <div class="box-body">
+                        <label for="filter-id">№ направления</label>
+                        <input type="text" valid-number id="filter-id" class="form-control" ng-model="flt.id">
+
+                        <label for="filter-status">Статус</label>
+                        <rb-select id="filter-status" ng-model="flt.status" ref-book="ActionStatus" allow-clear="true"></rb-select>
+
+                        <label for="filter-beg-date-from">Назначено</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <wm-date id="filter-beg-date-from" ng-model="flt.beg_date_from"></wm-date>
+                            </div>
+                            <div class="col-md-6">
+                                <wm-date id="filter-beg-date-to" ng-model="flt.beg_date_to"></wm-date>
+                            </div>
+                        </div>
+
+                        <label for="filter-end-date">План</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <wm-date id="filter-end-date-from" ng-model="flt.end_date_from"></wm-date>
+                            </div>
+                            <div class="col-md-6">
+                                <wm-date id="filter-end-date-to" ng-model="flt.end_date_to"></wm-date>
+                            </div>
+                        </div>
+
+                        <label for="filter-set-person">Назначил</label>
+                        <wm-person-select id="filter-set-person" ng-model="flt.set_person"></wm-person-select>
+
+                        <label for="filter-person">Исполнитель</label>
+                        <wm-person-select id="filter-person" ng-model="flt.person"></wm-person-select>
+
+                        <label for="filter-person-org-struct" title="Отделение исполнителя">Отделение</label>
+                        <wm-custom-dropdown id="filter-person-org-struct">
+                            <wm-org-structure-tree ng-model="flt.person_org_struct" nodes-selectable="true"></wm-org-structure-tree>
+                        </wm-custom-dropdown>
+
+                    </div>
+                    <div class="box-footer">
+                        <div class="btn-group">
+                            <button class="btn btn-default" ng-click="get_data(1, true)">Получить данные</button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-default" ng-click="clear()">Сбросить</button>
+                            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a ng-click="clear_all()">Сбросить и очистить результаты</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="box box-primary">
+            <!-- Main -->
+            <table class="table table-condensed table-hover table-clickable">
+                <thead wm-sortable-header>
+                <tr>
+                    <th wm-sortable-column="at_name" on-change-order="sort_by_column(params)">Тип</th>
+                    <th wm-sortable-column="beg_date" on-change-order="sort_by_column(params)">Начато</th>
+                    <th wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Завершено</th>
+                    <th wm-sortable-column="ped" on-change-order="sort_by_column(params)">План</th>
+                    <th wm-sortable-column="set_person_short_name" on-change-order="sort_by_column(params)">Назначивший</th>
+                    <th wm-sortable-column="person_short_name" on-change-order="sort_by_column(params)">Исполнитель</th>
+                    <th>Статус</th>
+                    <th>№ обращения</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="action in results">
+                    <td ng-click="openAction(action.id)">[[ action.action_type.name ]]</td>
+                    <td>[[ action.beg_date | asDate ]]</td>
+                    <td>[[ action.end_date | asDate ]]</td>
+                    <td>[[ action.planned_end_date | asDateTime ]]</td>
+                    <td>[[ action.set_person_short_name ]]</td>
+                    <td>[[ action.person_short_name ]]</td>
+                    <td>[[ action.status.name ]]</td>
+                    <td>
+                        <a ng-href="{{ url_for('event.html_event_info') }}?event_id=[[action.event_id]]"
+                            target="_blank">[[ action.event_external_id ]]</a>
+                    </td>
+                </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <td colspan="8" class="text-right">Всего записей: [[total]]</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="box-footer center-block">
+                <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size"
+                    ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
+            </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/actions.js', v=app_version) }}"></script>
+{% endblock %}

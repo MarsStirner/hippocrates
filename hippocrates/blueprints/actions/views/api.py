@@ -4,11 +4,10 @@ import datetime
 import logging
 
 from flask import request, url_for
-
 from flask_login import current_user
+from sqlalchemy.orm import joinedload, aliased
 
 from hippocrates.blueprints.actions.lib.models import ActionAutoSave, ActionAutoSaveUnsaved
-from sqlalchemy.orm import joinedload
 from ..app import module
 from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
@@ -19,7 +18,7 @@ from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out, safe_int
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
@@ -525,3 +524,89 @@ def api_search_rls():
             .filter(rlsTradeName.localName.like(query_string))
 
     return base_query.limit(limit).all()
+
+
+@module.route('/api/search_actions.json', methods=["POST"])
+@api_method
+def api_search_actions():
+    flt = request.get_json()
+    context = ActionVisualizer()
+
+    base_query = Action.query.join(Event).filter(
+        Action.deleted == 0,
+        Event.deleted == 0,
+    )
+    PersonExec = aliased(Person, name='PersonExec')
+    PersonSet = aliased(Person, name='PersonSet')
+
+    if 'id' in flt:
+        action = base_query.filter(Action.id == flt['id']).first()
+        return {
+            'pages': 1,
+            'items': [context.make_searched_action(action)] if action else []
+        }
+    if not any(param in flt for param in ('beg_date_from', 'beg_date_to', 'ped_from', 'ped_to')):
+        raise ApiException(422, u'Для проведения поиска необходимо указать интересующий диапазон дат')
+    if 'status_id' in flt:
+        base_query = base_query.filter(Action.status == flt['status_id'])
+    if 'beg_date_from' in flt:
+        base_query = base_query.filter(Action.begDate >= safe_datetime(flt['beg_date_from']))
+    if 'beg_date_to' in flt:
+        base_query = base_query.filter(Action.setDate <= safe_datetime(flt['beg_date_to']))
+    if 'ped_from' in flt:
+        base_query = base_query.filter(Action.plannedEndDate >= safe_datetime(flt['ped_from']))
+    if 'ped_to' in flt:
+        base_query = base_query.filter(Action.plannedEndDate <= safe_datetime(flt['ped_to']))
+    if 'set_person_id' in flt:
+        base_query = base_query.filter(Action.setPerson_id == flt['set_person_id'])
+    if 'person_id' in flt:
+        base_query = base_query.filter(Action.person_id == flt['person_id'])
+    if 'person_org_structure_id' in flt:
+        base_query = base_query.join(
+            PersonExec, Action.person_id == PersonExec.id
+        ).filter(
+            PersonExec.orgStructure_id == flt['person_org_structure_id']
+        )
+
+    order_options = flt.get('sorting_params')
+    if order_options:
+        def is_joined(q, model_class):
+            for mapper in q._join_entities:
+                if mapper.class_ == model_class or mapper.entity == model_class:
+                    return True
+            return False
+
+        desc_order = order_options['order'] == 'DESC'
+        col_name = order_options['column_name']
+        if col_name == 'at_name':
+            if not is_joined(base_query, ActionType):
+                base_query = base_query.join(ActionType)
+            base_query = base_query.order_by(ActionType.name.desc() if desc_order else ActionType.name)
+        elif col_name == 'beg_date':
+            base_query = base_query.order_by(Action.begDate.desc() if desc_order else Action.begDate)
+        elif col_name == 'end_date':
+            base_query = base_query.order_by(Action.endDate.desc() if desc_order else Action.endDate)
+        elif col_name == 'ped':
+            base_query = base_query.order_by(Action.plannedEndDate.desc() if desc_order else Action.plannedEndDate)
+        elif col_name == 'set_person_short_name':
+            if not is_joined(base_query, PersonSet):
+                base_query = base_query.outerjoin(PersonSet, Action.setPerson_id == PersonSet.id)
+            base_query = base_query.order_by(PersonSet.lastName.desc() if desc_order else PersonSet.lastName)
+        elif col_name == 'person_short_name':
+            if not is_joined(base_query, PersonExec):
+                base_query = base_query.outerjoin(PersonExec, Action.person_id == PersonExec.id)
+            base_query = base_query.order_by(PersonExec.lastName.desc() if desc_order else PersonExec.lastName)
+    else:
+        base_query = base_query.order_by(Action.begDate.desc())
+
+    per_page = int(flt.get('per_page', 20))
+    page = int(flt.get('page', 1))
+    paginate = base_query.paginate(page, per_page, False)
+    return {
+        'pages': paginate.pages,
+        'total': paginate.total,
+        'items': [
+            context.make_searched_action(action)
+            for action in paginate.items
+        ]
+    }

@@ -27,3 +27,8 @@ def html_action():
             )
 
     return render_template('actions/action.html')
+
+
+@module.route('/actions.html')
+def html_search_actions():
+    return render_template('actions/actions.html')

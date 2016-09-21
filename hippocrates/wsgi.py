@@ -47,6 +47,11 @@ def general_menu():
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
         icon='fa fa-medkit'
     ), dict(
+        link='actions.html_search_actions',
+        title=u'Поиск документов',
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
+        icon='fa fa-file-text-o'
+    ), dict(
         link='accounting.cashbook_html',
         title=u'Приём платежей',
         visible=UserProfileManager.has_ui_cashier(),

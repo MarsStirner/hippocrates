@@ -21,6 +21,9 @@ def fc_urls():
     return {
         'url': {
             'actions': {
+                'html': {
+                    'action': url_for('actions.html_action'),
+                },
                 'action_get': uf_placeholders('actions.api_action_get', ['action_id']),
                 'action_new': uf_placeholders('actions.api_action_new_get', ['action_type_id', 'event_id']),
                 'action_save': uf_placeholders('actions.api_action_post', ['action_id']),
@@ -33,6 +36,7 @@ def fc_urls():
                 'action_html': url_for('actions.html_action'),
                 'create_lab_direction': url_for('actions.api_create_lab_direction'),
                 'get_action_ped': url_for('actions.api_get_action_ped'),
+                'search_actions': url_for('actions.api_search_actions')
             }
         }
     }
