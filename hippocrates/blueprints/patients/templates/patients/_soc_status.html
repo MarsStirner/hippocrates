@@ -64,7 +64,7 @@
                             edit-mode="socstat.id ? edit.activated : true" edit-type="!socstat.id">
                         </wm-soc-status>
                         <div class="row" ng-if="socstat.ss_type.code == '004' || socstat.ss_type.code == '003' || socstat.ss_type.code == '001'">
-                            <div class=" col-md-4">
+                            <div class=" col-md-6">
                                 <label for="company" class="control-label">
                                     <div ng-switch on="socstat.ss_type.code">
                                         <div ng-switch-when="004">
@@ -85,7 +85,7 @@
                                        ng-disabled="socstat.id ? !edit.activated : false"
                                        id="company" name="company" ng-model="socstat.work.organisation"/>
                             </div>
-                            <div class=" col-md-3">
+                            <div class=" col-md-6">
                                 <label for="post" class="control-label">
                                     <div ng-switch on="socstat.ss_type.code">
                                         <div ng-switch-when="004">
@@ -105,12 +105,6 @@
                                 <input type="text" class="form-control" autocomplete="off" placeholder="Должность"
                                        ng-disabled="socstat.id ? !edit.activated : false"
                                        id="post" name="post" ng-model="socstat.work.post"/>
-                            </div>
-                            <div class=" col-md-4">
-                                <label for="note" class="control-label">Примечание</label>
-                                <input type="text" class="form-control" autocomplete="off" placeholder="Примечание"
-                                       ng-disabled="socstat.id ? !edit.activated : false"
-                                       id="note" name="note" ng-model="socstat.note"/>
                             </div>
                         </div>
                         <h4>Документ
