@@ -2,6 +2,7 @@
 import collections
 import datetime
 import logging
+import uuid
 
 from flask import request, url_for
 from flask_login import current_user
@@ -466,6 +467,7 @@ def api_action_template_save(type_id, id_=None):
 
         if not template.action and src_action:
             action = Action()
+            action.uuid = uuid.uuid4()
             template.action = action
             update_template_action(action, src_action)
             db.session.add(action)
