@@ -545,10 +545,15 @@ def api_search_actions():
             'pages': 1,
             'items': [context.make_searched_action(action)] if action else []
         }
-    if not any(param in flt for param in ('beg_date_from', 'beg_date_to', 'ped_from', 'ped_to')):
-        raise ApiException(422, u'Для проведения поиска необходимо указать интересующий диапазон дат')
+    if not any(param in flt for param in ('beg_date_from', 'beg_date_to', 'ped_from', 'ped_to', 'client_id')):
+        raise ApiException(422, u'Для проведения поиска необходимо указать интересующий диапазон '
+                                u'дат или выбрать пациента')
     if 'status_id' in flt:
         base_query = base_query.filter(Action.status == flt['status_id'])
+    if 'client_id' in flt:
+        base_query = base_query.filter(Event.client_id == flt['client_id'])
+    if 'action_type_id' in flt:
+        base_query = base_query.filter(Action.actionType_id == flt['action_type_id'])
     if 'beg_date_from' in flt:
         base_query = base_query.filter(Action.begDate >= safe_datetime(flt['beg_date_from']))
     if 'beg_date_to' in flt:

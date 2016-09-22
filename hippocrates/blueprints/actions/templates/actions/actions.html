@@ -12,10 +12,20 @@
                     </div>
                     <div class="box-body">
                         <label for="filter-id">№ направления</label>
-                        <input type="text" valid-number id="filter-id" class="form-control" ng-model="flt.id">
+                        <input type="text" valid-number id="filter-id" class="form-control" ng-model="flt.id"
+                            wm-slow-change="get_data(1, true)">
 
                         <label for="filter-status">Статус</label>
                         <rb-select id="filter-status" ng-model="flt.status" ref-book="ActionStatus" allow-clear="true"></rb-select>
+
+                        <label for="filter-client">Пациент</label>
+                        <ui-select id="filter-client" ng-model="flt.client" ext-select-client-search theme="select2"
+                            placeholder="Поиск пациента">
+                        </ui-select>
+
+                        <label for="filter-action-type">Документ</label>
+                        <ui-select ext-select-ref-book-search="ActionType" ng-model="flt.action_type"
+                            theme="select2" id="filter-action-type" placeholder="Поиск типа документа"></ui-select>
 
                         <label for="filter-beg-date-from">Назначено</label>
                         <div class="row">

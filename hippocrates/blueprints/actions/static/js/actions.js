@@ -11,6 +11,8 @@ var ActionListCtrl = function ($scope, $q, $window, WebMisApi, MessageBox, WMCon
         };
         if ($scope.flt.id) model.id = $scope.flt.id;
         if ($scope.flt.status) model.status_id = $scope.flt.status.id;
+        if ($scope.flt.client) model.client_id = $scope.flt.client.id;
+        if ($scope.flt.action_type) model.action_type_id = $scope.flt.action_type.id;
         if ($scope.flt.beg_date_from) model.beg_date_from = moment($scope.flt.beg_date_from).startOf('day').toDate();
         if ($scope.flt.beg_date_to) model.beg_date_to = moment($scope.flt.beg_date_to).endOf('day').toDate();
         if ($scope.flt.ped_from) model.end_date_from = moment($scope.flt.ped_from).startOf('day').toDate();
@@ -25,12 +27,12 @@ var ActionListCtrl = function ($scope, $q, $window, WebMisApi, MessageBox, WMCon
 
     var checkSearchParams = function (flt) {
         var deferred = $q.defer();
-        if (!['beg_date_from', 'beg_date_to', 'ped_from', 'ped_to'].some(function (param) {
+        if (!['beg_date_from', 'beg_date_to', 'ped_from', 'ped_to', 'client'].some(function (param) {
             return Boolean($scope.flt[param]);
         })) {
             return MessageBox.error(
-                'Укажите диапазон дат для поиска',
-                'Для проведения поиска необходимо указать интересующий диапазон дат'
+                'Укажите обязательные параметры фильтрации',
+                'Для проведения поиска необходимо указать интересующий диапазон дат или выбрать пациента'
             );
         }
         deferred.resolve();
@@ -68,6 +70,8 @@ var ActionListCtrl = function ($scope, $q, $window, WebMisApi, MessageBox, WMCon
         $scope.flt = {
             id: null,
             status: null,
+            client: null,
+            action_type: null,
             beg_date_from: current_monday,
             beg_date_to: null,
             ped_from: null,
