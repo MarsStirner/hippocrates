@@ -244,8 +244,8 @@ class EventMeasureController(BaseModelController):
 
             if not em.appointmentAction_id:
                 appointment = self.get_new_appointment(em)
-                if "LPUDirection" in action.propsByCode:
-                    action['LPUDirection'].value = organistaion
+                if "LPUDirection" in appointment.propsByCode:
+                    appointment['LPUDirection'].value = organistaion
                 if appointment:
                     em.appointment_action = appointment
                     self.make_assigned(em)
