@@ -47,8 +47,8 @@ def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
-    if 'fio' in kwargs and kwargs['fio']:
-        query = query.match(u'@name {0}'.format(kwargs['fio']), raw=True)
+    if 'client_id' in kwargs:
+        query = query.filter(client_id__eq=kwargs['client_id'])
     if 'areas' in kwargs:
         areas = [area['code'][:5] for area in kwargs['areas']]
         query = query.filter(area__in=areas)
