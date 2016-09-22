@@ -3,7 +3,7 @@ import datetime
 
 from sqlalchemy.dialects.mysql import LONGTEXT
 
-from hippocrates.blueprints.risar.models.vesta_props import VestaProperty
+from nemesis.lib.vesta_props import VestaProperty
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 
