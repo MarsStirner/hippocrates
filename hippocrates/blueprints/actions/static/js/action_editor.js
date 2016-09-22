@@ -390,7 +390,8 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service',
+        'attached_files'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};

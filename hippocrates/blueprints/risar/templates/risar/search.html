@@ -67,7 +67,9 @@
                 </div>
                 <div class="form-group">
                     <label>ФИО пациентки</label>
-                    <input class="form-control" ng-model="query.fio">
+                    <ui-select id="filter-client" ng-model="query.client" ext-select-client-search theme="select2"
+                        class="form-control" placeholder="Поиск пациентки">
+                    </ui-select>
                 </div>
                 <div class="form-group">
                     <label></label>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from nemesis.lib.utils import safe_unicode
+from hippocrates.blueprints.risar.lib.expert.utils import can_edit_em_appointment
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.models.enums import ActionStatus
 
@@ -9,6 +9,7 @@ class EmAppointmentRepr(object):
 
     def represent_appointment(self, action):
         aviz = ActionVisualizer()
+        event_measure = action.em_appointment
         return {
             'id': action.id,
             'action_type': self.represent_action_type(action.actionType),
@@ -33,7 +34,7 @@ class EmAppointmentRepr(object):
                 aviz.make_property(prop)
                 for prop in action.properties
             ],
-            'ro': False,
+            'ro': not can_edit_em_appointment(event_measure) if event_measure is not None else False,
             'layout': aviz.make_action_layout(action),
         }
 

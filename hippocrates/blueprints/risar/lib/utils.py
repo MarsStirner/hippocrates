@@ -367,8 +367,10 @@ def format_action_data(json_data):
         'payStatus': json_data['pay_status'] or 0,
         'coordDate': safe_datetime(json_data['coord_date']),
         'office': json_data['office'],
-        'properties': json_data['properties']
+        'properties': json_data['properties'],
     }
+    if 'attached_files' in json_data:
+        data['attached_files'] = json_data['attached_files']
     return data
 
 

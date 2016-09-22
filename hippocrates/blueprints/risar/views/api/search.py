@@ -47,8 +47,8 @@ def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
-    if 'fio' in kwargs and kwargs['fio']:
-        query = query.match(u'@name {0}'.format(kwargs['fio']), raw=True)
+    if 'client_id' in kwargs:
+        query = query.filter(client_id__eq=kwargs['client_id'])
     if 'areas' in kwargs:
         areas = [area['code'][:5] for area in kwargs['areas']]
         query = query.filter(area__in=areas)
@@ -67,15 +67,15 @@ def search_events(paginated=True, **kwargs):
     if 'request_types' in kwargs and kwargs['request_types']:
         query = query.filter(request_type_id__in=kwargs['request_types'])
     if 'bdate_from' in kwargs:
-        query = query.filter(bdate__gte=sphinx_local_days(kwargs['bdate_from']))
+        query = query.filter(bdate__gte=sphinx_days(kwargs['bdate_from']))
     if 'bdate_to' in kwargs:
-        query = query.filter(bdate__lte=sphinx_local_days(kwargs['bdate_to']))
+        query = query.filter(bdate__lte=sphinx_days(kwargs['bdate_to']))
     if 'psdate' in kwargs:
-        query = query.filter(psdate__eq=sphinx_local_days(kwargs['psdate']))
+        query = query.filter(psdate__eq=sphinx_days(kwargs['psdate']))
     if 'checkup_date_from' in kwargs:
-        query = query.filter(checkups__gte=sphinx_local_days(kwargs['checkup_date_from']))
+        query = query.filter(checkups__gte=sphinx_days(kwargs['checkup_date_from']))
     if 'checkup_date_to' in kwargs:
-        query = query.filter(checkups__lte=sphinx_local_days(kwargs['checkup_date_to']))
+        query = query.filter(checkups__lte=sphinx_days(kwargs['checkup_date_to']))
     client_workgroup = kwargs.get('client_workgroup')
     if client_workgroup:
         work_code = client_workgroup.get('code')
@@ -162,8 +162,9 @@ def api_0_event_search():
                 'client_workgroup': get_workgroupname_by_code(row.get('client_work_code', '')),
                 'literal_age': represent_age(row.get('client_age', 0)),
                 'risk': PerinatalRiskRate(row['risk']),
-                'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if 'card_modify_date' in row else None,
-                'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
+                'mdate': datetime.date.fromtimestamp(row['card_modify_date'] * 86400)
+                    if 'card_modify_date' in row and row['card_modify_date'] else None,
+                'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
                 'curators': get_org_curators(safe_int(row['org_id']), '2'),
                 'week':((
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -

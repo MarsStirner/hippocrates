@@ -132,7 +132,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                         <button type="button" class="btn btn-link" ngf-select ngf-multiple="true"\
                             ngf-change="addNewFiles($files)"\
                             ng-disabled="!isAuthor() && !isExecutor()">Добавить</button><br>\
-                        <table class=table table-compact>\
+                        <table class="table table-condensed">\
                         <tr>\
                             <th>Наименование</th>\
                             <th>Комментарий</th>\
@@ -156,7 +156,6 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             </td>\
                             <td></td>\
                         </tr>\
-                        <tr><tr>\
                         <tr ng-repeat="file in new_files">\
                             <td><input type="text" class="form-control" ng-model="file.name" ng-required="true"\
                                 ng-disabled="!canEditFileInfo(file)"></td>\

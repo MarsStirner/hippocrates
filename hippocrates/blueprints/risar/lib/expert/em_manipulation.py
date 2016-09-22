@@ -122,7 +122,21 @@ class EventMeasureController(BaseModelController):
         em_result = update_action(em_result, **json_data)
         em.result_action = em_result
         self.make_performed(em)
+        if 'attached_files' in json_data:
+            em_result = self.edit_errand_attach_files(em_result, json_data['attached_files'])
         return em_result
+
+    def edit_errand_attach_files(self, action, attach_data):
+        cur_attaches = dict((attach.id, attach) for attach in action.attach_files)
+        for at_data in attach_data:
+            attach = cur_attaches.pop(at_data['id'], None)
+            if attach is not None:
+                fm = attach.file_meta
+                fm.name = at_data['file_meta']['name']
+        for attach in cur_attaches.values():
+            attach.deleted = 1
+            attach.file_meta.deleted = 1
+        return action
 
     def get_new_event_measure(self, data):
         em = EventMeasure()

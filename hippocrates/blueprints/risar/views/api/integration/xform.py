@@ -209,7 +209,7 @@ class XForm(object):
                 if not target_obj_exist:
                     raise ApiException(NOT_FOUND_ERROR, u'%s не найден' %
                                        self.target_obj_class.__name__)
-            else:
+            elif self.parent_id_required:
                 self.check_parent_obj(parent_obj_id)
 
             if data:
@@ -383,6 +383,12 @@ class XForm(object):
         if value is None:
             return None
         enum = enum_model(value)
+        if not enum.is_valid():
+            raise ApiException(
+                NOT_FOUND_ERROR,
+                u'В справочнике "%s" запись с кодом "%s" не найдена' % (
+                    enum_model.__name__, value)
+            )
         return enum if enum.is_valid() else None
 
     def rb(self, code, rb_model, rb_code_field='code'):

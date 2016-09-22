@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
+from flask_login import current_user
 
 
 em_status_all = {id_val for id_val in MeasureStatus.get_values()}
@@ -44,17 +45,37 @@ def is_em_in_final_status(em):
     return em.status in em_final_status_list
 
 
-def can_edit_em_appointment(em):
+def _can_access_em_appointment(em):
     return (
         em.appointmentAction_id is not None or
         em.measure.appointmentAt_id is not None
     )
 
 
-def can_edit_em_result(em):
+def can_read_em_appointment(em):
+    return _can_access_em_appointment(em)
+
+
+def can_edit_em_appointment(em):
+    return _can_access_em_appointment(em) and (
+        not is_em_in_final_status(em) or current_user.has_right('adm')
+    )
+
+
+def _can_access_em_result(em):
     return (
         em.resultAction_id is not None or
         em.measure.resultAt_id is not None
+    )
+
+
+def can_read_em_result(em):
+    return _can_access_em_result(em)
+
+
+def can_edit_em_result(em):
+    return _can_access_em_result(em) and (
+        not is_em_in_final_status(em) or current_user.has_right('adm')
     )
 
 
