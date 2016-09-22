@@ -6,6 +6,8 @@
 @date: 22.03.2016
 
 """
+import logging
+
 from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis
 from hippocrates.blueprints.risar.lib.utils import close_open_checkups, get_action
@@ -23,6 +25,9 @@ from nemesis.models.enums import Gender
 from nemesis.models.event import Event
 from nemesis.models.exists import MKB
 from nemesis.systemwide import db
+
+
+logger = logging.getLogger('simple')
 
 
 class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
@@ -237,7 +242,13 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             close_open_checkups(event_id)  # закрыть все незакрытые осмотры
         for code, value in data.iteritems():
             if code in action.propsByCode:
-                action.propsByCode[code].value = value
+                prop = action[code]
+                try:
+                    prop.value = value
+                except Exception, e:
+                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
+                        prop.type.name, prop.type.id))
+                    raise e
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_newborns(action, newborn_inspections)
 
