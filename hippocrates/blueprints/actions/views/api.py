@@ -557,7 +557,7 @@ def api_search_actions():
     if 'beg_date_from' in flt:
         base_query = base_query.filter(Action.begDate >= safe_datetime(flt['beg_date_from']))
     if 'beg_date_to' in flt:
-        base_query = base_query.filter(Action.setDate <= safe_datetime(flt['beg_date_to']))
+        base_query = base_query.filter(Action.begDate <= safe_datetime(flt['beg_date_to']))
     if 'ped_from' in flt:
         base_query = base_query.filter(Action.plannedEndDate >= safe_datetime(flt['ped_from']))
     if 'ped_to' in flt:
