@@ -100,6 +100,10 @@ def set_client_main_info(client, data):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Пол')
     client.sexCode = sex
 
+    nationality_code = safe_traverse(data, 'nationality', 'code')
+    if nationality_code:
+        client.nationality_code = nationality_code
+
     snils = unformat_snils(data.get('snils', '') or '')
     if snils:
         ok, msg = check_snils(snils)

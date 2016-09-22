@@ -110,6 +110,12 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.canReadEmResult = function (em) {
         return em.access.can_read_result;
     };
+    $scope.canEditEmAppointment = function (em) {
+        return em.access.can_edit_appointment;
+    };
+    $scope.canEditEmResult = function (em) {
+        return em.access.can_edit_result;
+    };
     $scope.emHasAppointment = function (em) {
         return Boolean(em.data.appointment_action_id);
     };
