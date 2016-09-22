@@ -64,10 +64,16 @@ class DoctorXForm(DoctorSchema, XForm):
         self.target_obj.INN = data.get('INN') or ''
         org = self.find_org(data.get('organization'))
         self.target_obj.organisation = org
-        speciality = rbSpeciality.query.get(data['speciality']) if 'speciality' in data else None
-        self.target_obj.speciality = speciality
-        post = rbPost.query.get(data['post']) if 'post' in data else None
-        self.target_obj.post = post
+        if 'speciality' in data:
+            self._check_rb_value('rbSpeciality', data['speciality'])
+            self.target_obj.speciality = rbSpeciality.query.filter(rbSpeciality.code == data['speciality']).first()
+        else:
+            self.target_obj.speciality = None
+        if 'post' in data:
+            self._check_rb_value('rbPost', data['post'])
+            self.target_obj.post = rbPost.query.filter(rbPost.code == data['post']).first()
+        else:
+            self.target_obj.post = None
         self.target_obj.login = data.get('login')
         self.target_obj.regionalCode = data.get('regional_code')
         self._fill_required_fields()
