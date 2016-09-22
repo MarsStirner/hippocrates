@@ -84,7 +84,7 @@ def reevaluate_radzinsky_risks(card):
     if intranatal_sum is not None and (after33week_sum is not None or before32week_sum is not None):
         stage_sum = after33week_totalsum if after33week_sum is not None else before32week_totalsum
         intranatal_totalsum = intranatal_sum + stage_sum
-        intranatal_growth = round(float(intranatal_sum) / stage_sum * 100, 2)
+        intranatal_growth = round(float(intranatal_sum) / stage_sum * 100, 2) if stage_sum else 0
 
     radz_risk = card.radz_risk
     # анамнестические пересчитываются всегда
