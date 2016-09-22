@@ -45,6 +45,12 @@ class SpecificsManager(object):
         if cls._system_mode == SystemMode.sar_barsmis[0]:
             return get_sarbarsmis_url()
 
+    @classmethod
+    def uses_regional_services(cls):
+        return safe_traverse(
+            app.config, 'system_prefs', 'regional', 'uses_regional_services', default=False
+        )
+
 
 def get_sarbarsmis_url():
     return safe_traverse(

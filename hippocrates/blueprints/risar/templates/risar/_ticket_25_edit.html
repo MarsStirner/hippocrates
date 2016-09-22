@@ -36,7 +36,6 @@
                             </ui-select-choices>
                             <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
                         </ui-select>
-                        {#                                                <pre>[[ checkup.ticket_25.visit_reason | json ]]</pre>#}
                     </td>
                 </tr>
                 <tr>
@@ -84,8 +83,13 @@
                                 <td class="col-md-5">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
                                     <span ng-if="$table.$edited($index)">
+                                        {% if specifics_mng.uses_regional_services() %}
+                                        <ui-select ext-select-ref-book-search="rbService_regional" ng-model="$table.$tmp.service"
+                                            theme="select2"></ui-select>
+                                        {% else %}
                                         <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
                                             theme="select2"></ui-select>
+                                        {% endif %}
                                     </span>
                                 </td>
 
@@ -132,8 +136,13 @@
                                 <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
                                     <span ng-if="$table.$edited($index)">
+                                        {% if specifics_mng.uses_regional_services() %}
+                                        <ui-select ext-select-ref-book-search="rbService_regional" ng-model="$table.$tmp.service"
+                                            theme="select2"></ui-select>
+                                        {% else %}
                                         <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
                                             theme="select2"></ui-select>
+                                        {% endif %}
                                     </span>
                                 </td>
 
@@ -189,8 +198,13 @@
                                 <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
                                     <span ng-if="$table.$edited($index)">
+                                        {% if specifics_mng.uses_regional_services() %}
+                                        <ui-select ext-select-ref-book-search="rbService_regional" ng-model="$table.$tmp.service"
+                                            theme="select2"></ui-select>
+                                        {% else %}
                                         <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
                                             theme="select2"></ui-select>
+                                        {% endif %}
                                     </span>
                                 </td>
 
