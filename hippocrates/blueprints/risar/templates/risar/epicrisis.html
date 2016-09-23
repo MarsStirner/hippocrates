@@ -29,26 +29,26 @@
                             <div class="box-body">
                                 <!-- TODO: Отображение диагнозов -->
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'main':'final'" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                            [[diag.diagnostic.mkb.code]]
+                                    <div class="col-sm-5 col-md-5  text-right">Основной диагноз:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'main':'final'">
+                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Диагнозы осложнения:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'final'" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                            [[diag.diagnostic.mkb.code]]
+                                    <div class="col-sm-5 col-md-5  text-right">Диагнозы осложнения:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'final'">
+                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated':'final'" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                            [[diag.diagnostic.mkb.code]]
+                                    <div class="col-sm-5 col-md-5  text-right">Сопутствующие диагнозы:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated':'final'">
+                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
                                 </div>
@@ -108,12 +108,28 @@
                                     <div class="col-sm-7 col-md-7  long-words">[[epicrisis.reason_of_death]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Патологоанатомический диагноз:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">Основной патологоанатомический диагноз:</div>
                                     <div class="col-sm-7 col-md-7">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses: 'main':'pathanatomical'" tooltip="[[ diag.diagnostic.mkb.name ]]">
-                                            [[diag.diagnostic.mkb.code]]
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses: 'main':'pathanatomical'">
+                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                    <div class="col-sm-5 col-md-5  text-right">Диагнозы осложнения:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'pathanatomical'">
+                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5  text-right">Сопутствующие диагнозы:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated':'pathanatomical'">
+                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
+                                        </div>
+                                    </div>
+                                </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Заключение ЛКК:</div>
