@@ -40,16 +40,19 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                 });
                 return action;
             }).then(function (action) {
-                console.log(action.lock);
-                $scope.$watch('action.lock.locker', function (newVal, oldVal) {
-                    if (!$scope.action.lock.success && newVal) {
-                        var locker_id = $scope.action.lock.locker;
-                        $http.get(WMConfig.url.schedule.person + locker_id)
-                            .success(function (data) {
-                                $scope.locker_person = data.result;
-                            })
-                    }
-                });
+                if (!$scope.action.ro) {
+                    $scope.$watch('action.lock.success', function (newVal, oldVal) {
+                        if (!newVal && $scope.action.lock.locker) {
+                            var locker_id = $scope.action.lock.locker;
+                            $http.get(WMConfig.url.schedule.person + locker_id)
+                                .success(function (data) {
+                                    $scope.locker_person = data.result;
+                                })
+                        } else if (newVal) {
+                            $scope.locker_person = null;
+                        }
+                    });
+                }
             });
         } else if (params.event_id && params.action_type_id) {
             WMAction.get_new(
@@ -388,8 +391,8 @@ WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
-    var template_fields = ['status', 'set_person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
-    var excluded_template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'person', 'coord_date'];
+    var template_fields = ['set_person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
+    var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'person', 'coord_date'];
     var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
@@ -461,7 +464,6 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
                     });
                     lock.subscribe('rejected', function () {
                         action.readonly = true;
-                        lock.close();
                     });
                 } else {
                     action.lock = null;
