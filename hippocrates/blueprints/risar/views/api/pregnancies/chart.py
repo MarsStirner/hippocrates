@@ -75,13 +75,20 @@ def api_1_pregnancy_chart(event_id=None):
 
 
 @module.route('/api/1/pregnancy/chart/', methods=['POST'])
+@module.route('/api/1/pregnancy/chart/<int:event_id>', methods=['PATCH'])
 @api_method
-def api_1_pregnancy_chart_create():
+def api_1_pregnancy_chart_create(event_id=None):
     ticket_id = request.args.get('ticket_id')
     client_id = request.args.get('client_id')
 
-    chart_creator = PregnancyChartCreator(client_id, ticket_id)
+    chart_creator = PregnancyChartCreator(client_id, ticket_id, event_id)
     chart_creator(create=True)
+
+    if request.method == 'PATCH' and request.json:
+        chart_creator.event.setDate = safe_datetime(request.json['beg_date'])
+        chart_creator.event.execPerson_id = request.json['person']['id']
+        db.session.commit()
+
     return dict(
         represent_pregnancy_event(chart_creator.event),
         automagic=chart_creator.automagic,
