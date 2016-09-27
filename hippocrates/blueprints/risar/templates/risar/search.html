@@ -153,6 +153,9 @@
                                 <th>№ карты</th>
                                 <th>ФИО</th>
                                 <th>Врач</th>
+                                {% if user_profiles_mng.has_ui_overseers23()  %}
+                                <th>ЛПУ</th>
+                                {% endif %}
                                 <th>Срок</th>
                                 <th>Соц. статус</th>
                                 <th>Последнее<br>изменение</th>
@@ -165,6 +168,7 @@
                                 <td>[[ row.external_id ]]</td>
                                 <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a> [[row.literal_age]]</td>
                                 <td>[[ row.exec_person_name ]]</td>
+                                {%- if user_profiles_mng.has_ui_overseers23()  -%} <td >[[ row.org_name ]]</td>{%- endif -%}
                                 <td>[[ row.week ]]</td>
                                 <td>[[ row.client_workgroup ]]</td>
                                 <td>[[ row.mdate | asDate ]]</td>

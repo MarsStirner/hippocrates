@@ -150,6 +150,7 @@ def api_0_event_search():
                 'event_id': row['id'],
                 'client_id': row['client_id'],
                 'name': row['name'],
+                'org_name': row["org_name"],
                 'set_date': datetime.date.fromtimestamp(row['set_date']) if row['set_date'] else None,
                 'exec_date': datetime.date.fromtimestamp(row['exec_date']) if row['exec_date'] else None,
                 'external_id': row['external_id'],
