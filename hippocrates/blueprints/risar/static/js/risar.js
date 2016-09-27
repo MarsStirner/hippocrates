@@ -97,7 +97,12 @@ WebMis20
                     {bold: true, text: event.person.name},
                     '. ',
                     {
-                        click: function () {RisarEventControlService.open_edit_modal(event)},
+                        click: function () {
+                            RisarEventControlService.open_edit_modal(event, urls)
+                                .then(function () {
+                                    $window.location.replace(urls.html + '?event_id=' + event.id);
+                                })
+                        },
                         text: 'Изменить'
                     },
                     ' ',
@@ -931,27 +936,27 @@ WebMis20
         }
     }
 }])
-.service('RisarEventControlService', ['$modal', function ($modal) {
+.service('RisarEventControlService', ['$modal', 'ApiCalls', function ($modal, ApiCalls) {
     return {
-        open_edit_modal: function (event) {
+        open_edit_modal: function (event, urls) {
             var model = {
                 beg_date: event.set_date,
                 person: event.person
             };
-            $modal.open({
+            return $modal.open({
                 template: '\
 <div class="modal-header">\
-    <h3 class="modal-title">Поручение [[model.number]] по карте [[model.event.external_id]]</h3>\
+    <h3 class="modal-title">Изменение данных карты</h3>\
 </div>\
 <div class="modal-body">\
     <h1>Изменение данных карты</h1>\
     <div class="row">\
         <div class="col-md-4">Дата создания карты</div>\
-        <div class="col-md-8"><wm-date ng-model="model.beg_date" /></div>\
+        <div class="col-md-8"><wm-date ng-model="$model.beg_date" /></div>\
     </div>\
     <div class="row">\
         <div class="col-md-4">Лечащий врач</div>\
-        <div class="col-md-8"><wm-person-select ng-model="model.person" /></div>\
+        <div class="col-md-8"><wm-person-select ng-model="$model.person" /></div>\
     </div>\
 </div>\
 <div class="modal-footer">\
@@ -963,7 +968,7 @@ WebMis20
                 },
                 size: 'lg'
             }).result.then(function () {
-                wrapper(
+                ApiCalls.wrapper(
                     'PATCH',
                     urls.get.format(event.id),
                     undefined,

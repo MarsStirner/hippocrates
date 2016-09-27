@@ -118,7 +118,7 @@ var EMResultModalCtrl = function ($scope, $q, RisarApi, RefBookService, Upload, 
                         return $scope.processNewFiles(action)
                             .then(function () {
                                 // затем получить новые данных по экшену
-                                EventMeasureService.get_em_result(event_measure)
+                                return EventMeasureService.get_em_result(event_measure)
                                     .then(function (action) {
                                         $scope.action.merge(action);
                                     })
@@ -161,9 +161,16 @@ var EMResultModalCtrl = function ($scope, $q, RisarApi, RefBookService, Upload, 
                 },
                 arrayKey: '',
                 withCredentials: true
+            }).then(angular.noop, function (result) {
+                return MessageBox.error(
+                    'Ошибка сохранения файла',
+                    'Не удалось сохранить прикреплённый файл. Свяжитесь с администратором.'
+                );
             });
         }
-        return $q.reject('no files to upload');
+        var defer = $q.defer();
+        defer.resolve('no files to upload');
+        return defer.promise;
     };
     $scope.check_can_save_action = function () {
         var deferred = $q.defer();
