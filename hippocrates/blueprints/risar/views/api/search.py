@@ -319,7 +319,7 @@ def api_0_curator_lpu_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^$|^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
+        regex = '^$|^' + '|^'.join([area['code'][:8] for area in areas if area['code']])
         query = query.filter(Organisation.area.op('regexp')(regex))
     return query.all()
 
