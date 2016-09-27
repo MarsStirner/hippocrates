@@ -70,7 +70,7 @@ test_childbirth_data = {
         "obstetrical_forceps": "vyhodnye",  # Акушерские щипцы, справочник rbRisarObstetrical_Forceps ["vyhodnye",]
         "vacuum_extraction": True,  # Вакуум-экстракция
         "indication": "sostoronyploda",  # Показания к операции, справочник rbRisarIndication ["sostoronyploda",]
-        "specialities": "особ",  # Особенности операции, справочник rbRisarSpecialities ["planovoe",]
+        "specialities": "planovoe",  # Особенности операции, справочник rbRisarSpecialities ["planovoe",]
         "anesthetization": "02",  # Обезболивание, справочник rbRisarAnesthetization ("01")
         "hysterectomy": "vpredelahdvuhsutokposlerodov",  # Гистерэктомия, справочник rbRisarHysterectomy ["vpredelahdvuhsutokposlerodov", "boleedvuhsutokposlerodov"]
         "complications": ["A00.1"],  # Осложнения при родах (массив, код диагноза по МКБ-10)
