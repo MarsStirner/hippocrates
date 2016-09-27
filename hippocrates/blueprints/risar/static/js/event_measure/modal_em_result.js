@@ -114,10 +114,11 @@ var EMResultModalCtrl = function ($scope, $q, RisarApi, RefBookService, Upload, 
                         _saved = true;
                         $scope.action.merge(action);
                         event_measure.data.result_action_id = action.id;
+                        em_result.id = action.id;
                         // затем сохранить его файлы
                         return $scope.processNewFiles(action)
                             .then(function () {
-                                // затем получить новые данных по экшену
+                                // затем получить новые данные по экшену
                                 return EventMeasureService.get_em_result(event_measure)
                                     .then(function (action) {
                                         $scope.action.merge(action);

@@ -123,10 +123,10 @@ class EventMeasureController(BaseModelController):
         em.result_action = em_result
         self.make_performed(em)
         if 'attached_files' in json_data:
-            em_result = self.edit_errand_attach_files(em_result, json_data['attached_files'])
+            em_result = self.edit_emr_attach_files(em_result, json_data['attached_files'])
         return em_result
 
-    def edit_errand_attach_files(self, action, attach_data):
+    def edit_emr_attach_files(self, action, attach_data):
         cur_attaches = dict((attach.id, attach) for attach in action.attach_files)
         for at_data in attach_data:
             attach = cur_attaches.pop(at_data['id'], None)

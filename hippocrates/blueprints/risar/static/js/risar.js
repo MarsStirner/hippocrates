@@ -205,7 +205,7 @@ WebMis20
         header: Config.url.gyn.header,
         delete: Config.url.gyn.delete,
         close: Config.url.gyn.close,
-        html: Config.url.chart_pregnancy_html,
+        html: Config.url.chart_gynecological_html,
         back: Config.url.index_html
     });
     this.event_routing = {

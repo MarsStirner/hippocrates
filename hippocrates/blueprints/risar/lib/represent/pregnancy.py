@@ -155,7 +155,7 @@ def group_orgs_for_routing(orgs, client):
             c_kladr_code = None
     else:
         c_kladr_code = None
-    c_district_codes = {c_kladr_code[:5]} if c_kladr_code else set()
+    c_district_codes = {c_kladr_code[:8]} if c_kladr_code else set()
     c_region_codes = {code[:2] for code in risar_regions}
     # special cases
     # 1) Ленинградская Область 47 000 000 000 (00) и Санкт-Петербург Город 78 000 000 000 (00)

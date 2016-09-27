@@ -165,7 +165,7 @@ angular.module('WebMis20')
                                     inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
                                     break;
                                 case 'Person':
-                                    inner_template = '<wm-person-select ng-model="{0}.value"></wm-person-select>';
+                                    inner_template = '<wm-person-select ng-model="{0}.value" person-kind="onlyOrgPersons"></wm-person-select>';
                                     break;
                                 case 'Organisation':
                                     inner_template =
