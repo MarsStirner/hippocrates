@@ -12,8 +12,9 @@ from nemesis.lib.utils import jsonify, public_endpoint
 from nemesis.app import app
 
 from blueprints.reports.jasper_client import JasperReport
-from blueprints.reports.models import rbRisarPrintTemplateMeta
+from blueprints.reports.models import rbRisarPrintTemplateMeta, RisarReports
 from blueprints.reports.prepare import InputPrepare
+from blueprints.risar.lib.specific import SpecificsManager
 from .app import module
 
 
@@ -23,11 +24,25 @@ def api_jr_templates():
     data = request.args
     locate_reports = data.get('folder')
     templates = JasperReport.get_reports(locate_reports)
-    return jsonify([{
-        'id': t['uri'],
-        'code': t['label'],
-        'name': t['description'],
-    } for t in templates])
+
+    ext_url = SpecificsManager.get_reports_redirect_url()
+    # these will be redirected to external system
+    redirect_map = dict(RisarReports.query.values(
+        RisarReports.template_uri, RisarReports.redirect_url)
+    ) if ext_url is not None else {}
+
+    res = []
+    for t in templates:
+        t_data = {
+            'id': t['uri'],
+            'code': t['label'],
+            'name': t['description'],
+        }
+        if ext_url:
+            t_data['redirect_to'] = ext_url + redirect_map[t['uri']]\
+                if t['uri'] in redirect_map else None
+        res.append(t_data)
+    return jsonify(res)
 
 
 @module.route('/templates-meta')

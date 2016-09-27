@@ -42,7 +42,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         'help': {'attr': 'help', 'default': None, 'rb': None, 'is_vector': False},
         'pregnancy_final': {'attr': 'pregnancy_final', 'default': None, 'rb': 'rbRisarPregnancy_Final', 'is_vector': False},
         'abort': {'attr': 'abortion', 'default': None, 'rb': 'rbRisarAbort', 'is_vector': False},
-        'maternity_hosp_doctor': {'attr': 'maternity_hospital_doctor', 'default': None, 'rb': None, 'is_vector': False},
+        'maternity_hosp_medico': {'attr': 'maternity_hospital_doctor', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     MOTHER_DEATH_MAP = {
@@ -168,6 +168,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             'LPU': maternity_hospital,
             'newborn_LPU': curation_hospital,
             'delivery_time': res.get('delivery_time') and safe_time(res.get('delivery_time')).isoformat(),
+            'maternity_hosp_medico': self.person
         })
 
     def mapping_mother_death(self, data, res):

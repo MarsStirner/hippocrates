@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 
 from ...app import module
 from nemesis.models.risar import Errand
+from nemesis.models.event import Event
 from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
@@ -61,7 +62,7 @@ def api_0_errands_get():
 
     result = {}
 
-    query = Errand.query
+    query = Errand.query.join(Event).filter(Event.deleted == 0)
     if unread:
         query = query.filter(Errand.readingDate.is_(None))
     if exec_person:

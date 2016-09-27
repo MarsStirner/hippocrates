@@ -39,7 +39,8 @@
                 </div>
                 <div class="form-group">
                     <label>Куратор</label>
-                    <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control">
+                    <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control"
+                            ng-disabled="!canChangeCurator()">
                         <ui-select-match placeholder="Выберите кураторов">[[ $item.lastName + ' ' + $item.firstName + ', ' + $item.name ]]</ui-select-match>
                         <ui-select-choices repeat="curator in curators | filter: {name: $select.search} | limitTo:50">
                             <div ng-bind-html="curator.lastName + ' ' + curator.firstName + ', ' + curator.name | highlight: $select.search"></div>
@@ -57,7 +58,7 @@
                 </div>
                 <div class="form-group">
                     <label>Врач</label>
-                    <ui-select ng-model="query.person" theme="select2" class="form-control">
+                    <ui-select ng-model="query.person" theme="select2" class="form-control" ng-disabled="!canChangeDoctor()">
                         <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
                         <ui-select-choices repeat="doc in doctors | filter: {full_name: $select.search} | limitTo:50">
                             <div ng-bind-html="doc.full_name | highlight: $select.search"></div>
@@ -152,6 +153,9 @@
                                 <th>№ карты</th>
                                 <th>ФИО</th>
                                 <th>Врач</th>
+                                {% if user_profiles_mng.has_ui_overseers23()  %}
+                                <th>ЛПУ</th>
+                                {% endif %}
                                 <th>Срок</th>
                                 <th>Соц. статус</th>
                                 <th>Последнее<br>изменение</th>
@@ -164,6 +168,7 @@
                                 <td>[[ row.external_id ]]</td>
                                 <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a> [[row.literal_age]]</td>
                                 <td>[[ row.exec_person_name ]]</td>
+                                {%- if user_profiles_mng.has_ui_overseers23()  -%} <td >[[ row.org_name ]]</td>{%- endif -%}
                                 <td>[[ row.week ]]</td>
                                 <td>[[ row.client_workgroup ]]</td>
                                 <td>[[ row.mdate | asDate ]]</td>

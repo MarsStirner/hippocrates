@@ -150,6 +150,7 @@ def api_0_event_search():
                 'event_id': row['id'],
                 'client_id': row['client_id'],
                 'name': row['name'],
+                'org_name': row["org_name"],
                 'set_date': datetime.date.fromtimestamp(row['set_date']) if row['set_date'] else None,
                 'exec_date': datetime.date.fromtimestamp(row['exec_date']) if row['exec_date'] else None,
                 'external_id': row['external_id'],
@@ -294,7 +295,8 @@ def api_0_area_curator_list():
     ).order_by(
         Person.lastName, Person.firstName, Person.patrName, rbOrgCurationLevel.name
     )
-    return list(query.values(PersonCurationAssoc.id, Person.lastName, Person.firstName, Person.patrName, rbOrgCurationLevel.name))
+    return list(query.values(PersonCurationAssoc.id, Person.lastName, Person.firstName, Person.patrName,
+                             Person.id.label('person_id'), rbOrgCurationLevel.name))
 
 
 @module.route('/api/0/curator_lpu_list.json', methods=['POST', 'GET'])

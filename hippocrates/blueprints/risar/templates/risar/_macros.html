@@ -171,6 +171,9 @@
                 <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">Диагнозы случая</a></li>
                 <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id={{ event_id_repl }}">Мероприятия случая</a></li>
                 <li><a ng-href="{{ url_for('.html_card_fill_history') }}?event_id={{ event_id_repl }}">Качество ведения карты</a></li>
+                {% if specifics_mng.ext_card_url_menu_enabled() %}
+                {% if event %}<li><a href="{{ specifics_mng.get_ext_card_url(event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
+                {% endif %}
             </ul>
         </div>
     </div>
