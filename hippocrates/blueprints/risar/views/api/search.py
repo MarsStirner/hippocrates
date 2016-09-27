@@ -50,7 +50,7 @@ def search_events(paginated=True, **kwargs):
     if 'client_id' in kwargs:
         query = query.filter(client_id__eq=kwargs['client_id'])
     if 'areas' in kwargs:
-        areas = [area['code'][:5] for area in kwargs['areas']]
+        areas = [area['code'][:8] for area in kwargs['areas']]
         query = query.filter(area__in=areas)
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
@@ -293,7 +293,7 @@ def api_0_area_curator_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^$|^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
+        regex = '^$|^' + '|^'.join([area['code'][:8] for area in areas if area['code']])
         query = query.filter(Organisation.area.op('regexp')(regex))
     query = query.group_by(
         PersonCurationAssoc.id
