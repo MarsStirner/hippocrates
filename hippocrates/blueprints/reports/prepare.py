@@ -40,18 +40,6 @@ class InputPrepare(object):
                 context[name] = ','.join((str(x['id']) for x in value)) if value else None
             elif typeName in ('MultiArea',):
                 context[name] = ','.join((str(x['code']) for x in value)) if value else None
-
-            elif typeName.startswith('RefBook'):
-                extended_typename = typeName.split('.')
-                if len(extended_typename) == 2:
-                    refbook_attr = extended_typename[1]
-                    context[name] = value.get(refbook_attr, '') if value else ''
-                else:
-                    context[name] = value.get('code', '') if value else ''
-            if not context[name]:
-                context[name] = ''
-
-
             # elif typeName == 'Organisation':
             #     context[name] = Organisation.query.get(int(value)) if value else None
             # elif typeName == 'Person':
@@ -62,7 +50,8 @@ class InputPrepare(object):
             #     context[name] = rbService.query.get(int(value)) if value else None
             # elif typeName == 'MKB':
             #     context[name] = MKB.query.get(int(value)) if value else None
-
+            if not context[name]:
+                context[name] = ''
 
     def report_data(self, doc):
         context_type = doc['context_type']
