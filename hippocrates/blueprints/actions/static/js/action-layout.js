@@ -143,7 +143,7 @@ angular.module('WebMis20')
                                 case 'String/Select':
                                     inner_template =
                                         '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off"\
-                                                id="[[{0}.type.id]]" al-item-focused>\
+                                                id="[[{0}.type.id]]" al-item-focused no-undefined-value>\
                                             <ui-select-match placeholder="не выбрано" allow-clear="true">[[ $select.selected ]]</ui-select-match>\
                                             <ui-select-choices repeat="item in {0}.type.domain_obj.values | filter: $select.search">\
                                                 <span ng-bind-html="item | highlight: $select.search"></span>\
@@ -153,7 +153,7 @@ angular.module('WebMis20')
                                 case 'String/Free':
                                     inner_template =
                                         '<ui-select ng-model="{0}.value" theme="select2" class="form-control" tagging="unity_function"\
-                                                autocomplete="off" id="[[{0}.type.id]]" al-item-focused>\
+                                                autocomplete="off" id="[[{0}.type.id]]" al-item-focused no-undefined-value>\
                                             <ui-select-match placeholder="не выбрано" allow-clear="true">[[ $select.selected ]]</ui-select-match>\
                                             <ui-select-choices repeat="item in [].concat({0}.type.domain_obj.values, \'\') | filter: $select.search">\
                                                 <span ng-bind-html="item | highlight: $select.search"></span>\
@@ -208,7 +208,8 @@ angular.module('WebMis20')
                                         })) : [],
                                         extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
                                     inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"\
-                                        allow-clear="true" id="[[{0}.type.id]]" al-item-focused></rb-select>'.format('{0}', rbTable, extra_filter);
+                                        allow-clear="true" id="[[{0}.type.id]]" al-item-focused no-undefined-value></rb-select>'
+                                            .format('{0}', rbTable, extra_filter);
                                     break;
                                 case 'Diagnosis':
                                     inner_template = ('<wm-diagnosis model="{0}.value" action="action" params="{1}" ' +
@@ -397,6 +398,21 @@ angular.module('WebMis20')
                     } else {
                         scope.$apply(focusActionLayoutItem(elem.attr('id')));
                     }
+                }
+            });
+        }
+    }
+}])
+.directive('noUndefinedValue', [function () {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, element, attrs, ngModelCtrl) {
+            scope.$watch(function () {
+                return ngModelCtrl.$modelValue;
+            }, function (newVal, oldVal) {
+                if (newVal !== oldVal && newVal === undefined) {
+                    ngModelCtrl.$setViewValue(null);
                 }
             });
         }
