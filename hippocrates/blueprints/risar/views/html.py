@@ -5,7 +5,9 @@ from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.debug import get_debug_data
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
-    first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, puerpera_inspection_flat_code
+    first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, \
+    puerpera_inspection_flat_code
+from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
@@ -13,9 +15,8 @@ from nemesis.models.exists import rbRequestType
 from nemesis.models.event import EventType, Event
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
-
 from ..app import module
-from hippocrates.blueprints.risar.lib.chart import get_event
+
 
 __author__ = 'mmalkov'
 
@@ -86,7 +87,9 @@ def html_gynecological_chart():
     event_id = safe_int(request.args.get('event_id'))
     event = get_event(event_id)
     debug_data = get_debug_data(request.args)
-    return render_template('risar/unpregnant/chart.html', event=event, debug_data=debug_data)
+    pregnancy_event = get_latest_pregnancy_event(event.client_id) if event else None
+    return render_template('risar/unpregnant/chart.html', event=event, debug_data=debug_data,
+                           pregnancy_event=pregnancy_event)
 
 
 chart_mapping = {
