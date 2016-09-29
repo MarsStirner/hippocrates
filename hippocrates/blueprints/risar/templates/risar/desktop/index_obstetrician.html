@@ -8,7 +8,7 @@
 </section>
 <section class="content">
     <div ng-controller="IndexObstetricianCtrl" class="ng-cloak">
-        {% include "risar/quick_search.html" %}
+        {{ quick_search.one_long_row() }}
         <div class="row">
             <div class="col-md-12 text-right">
                 <a href="{{ url_for('.html_search') }}">Расширенный поиск</a>

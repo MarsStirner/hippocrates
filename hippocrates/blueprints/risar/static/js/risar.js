@@ -1012,7 +1012,7 @@ WebMis20
                     };
                     scope.get_clients = function (query) {
                         if (!query) return;
-                        return $http.get(url_client_cards_search, {
+                        return $http.get(Config.url.api_event_search_short, {
                             params: {
                                 q: query,
                                 limit: 20
