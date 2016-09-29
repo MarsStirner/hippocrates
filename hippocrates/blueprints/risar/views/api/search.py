@@ -43,6 +43,18 @@ def sphinx_local_days(date_string):
     return int(time.mktime(date.timetuple()))
 
 
+def quick_search_events(query_string, limit=20, **kwargs):
+    from nemesis.lib.sphinx_search import Search, SearchConfig
+    if query_string:
+        search = Search(indexes=['quick_risar_events'], config=SearchConfig)
+        search = search.match(query_string)
+        search = search.limit(0, limit).order_by(
+            '@weight desc, client_lastName asc, client_firstName asc, client_patrName', 'asc'
+        )
+        result = search.ask()
+        return result
+
+
 def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
