@@ -42,6 +42,7 @@ WebMis20
         api_epicrisis:'{{ url_for('.api_0_chart_epicrisis', event_id=-99).replace('-99', '{0}') }}',
         api_newborn_inspection: '{{ url_for('.api_0_newborn_inspection_delete') }}{0}',
         api_event_search: '{{ url_for('.api_0_event_search') }}',
+        api_event_search_short: '{{ url_for('.api_0_event_search_short') }}',
         api_event_print: '{{ url_for('.api_0_event_print') }}',
         api_event_search_ambulance: '{{ url_for('.api_0_event_search_ambulance') }}',
         api_event_search_area_list: '{{ url_for('.api_0_area_list') }}',

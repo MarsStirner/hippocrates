@@ -9,6 +9,7 @@
 </head>
 <body ng-class="{loading: pendingRequests}" class="skin-green-light sidebar-mini sidebar-collapse">
 <div class="wrapper">
+    {% import "risar/_quick_search.html" as quick_search %}
     {%- include 'risar/base/_top.html' -%}
     {%- include 'risar/base/_sidebar.html' -%}
     <div class="content-wrapper" style="min-height: 855px">{# FIXME: убрать явное указание min-height #}
