@@ -3,11 +3,10 @@ import functools
 from flask import render_template, request, redirect, url_for, abort
 from flask_login import current_user
 
-from hippocrates.blueprints.risar.lib.debug import get_debug_data
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
     first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, \
     puerpera_inspection_flat_code
-from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event
+from hippocrates.blueprints.risar.lib.card import AbstractCard
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import Action, ActionType
@@ -51,8 +50,8 @@ def html_search():
 @module.route('/routing.html')
 def html_routing():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/event_routing.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/event_routing.html', card=card)
 
 
 def redirect_chart_if_possible(func):
@@ -76,20 +75,16 @@ def redirect_chart_if_possible(func):
 @redirect_chart_if_possible
 def html_pregnancy_chart():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    debug_data = get_debug_data(request.args)
-    return render_template('risar/chart.html', event=event, debug_data=debug_data)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/chart.html', card=card)
 
 
 @module.route('/gynecological-chart.html')
 @redirect_chart_if_possible
 def html_gynecological_chart():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    debug_data = get_debug_data(request.args)
-    pregnancy_event = get_latest_pregnancy_event(event.client_id) if event else None
-    return render_template('risar/unpregnant/chart.html', event=event, debug_data=debug_data,
-                           pregnancy_event=pregnancy_event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/unpregnant/chart.html', card=card)
 
 
 chart_mapping = {
@@ -135,7 +130,7 @@ def html_auto_chart():
                 Event.deleted == 0,
             ).first() or (None, None)
     else:
-        raise abort(400, 'We are totally fucked up')
+        raise abort(400, u'Невозможно определить тип карты по передаваемым параметрам')
 
     if event_id:
         if not request_type_code:
@@ -151,63 +146,71 @@ def html_auto_chart():
         request_type_code = request_type_gynecological
 
     if request_type_code not in chart_mapping:
-        raise abort(500, 'We are totally fucked up')
+        raise abort(500, u'Невозможно определить тип карты по передаваемым параметрам')
     return redirect(url_for(chart_mapping[request_type_code], **kwargs))
 
 
 @module.route('/anamnesis.html')
 def html_anamnesis():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/anamnesis_view.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/anamnesis_view.html', card=card)
 
 
 @module.route('/gynecological-anamnesis.html')
 def html_gynecological_anamnesis():
-    return render_template('risar/unpregnant/anamnesis_view.html')
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/unpregnant/anamnesis_view.html', card=card)
 
 
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/anamnesis_mother_edit.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/anamnesis_mother_edit.html', card=card)
 
 
 @module.route('/gynecological-anamnesis/edit.html')
 def html_gynecological_anamnesis_edit():
-    return render_template('risar/unpregnant/anamnesis_edit.html')
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/unpregnant/anamnesis_edit.html', card=card)
 
 
 @module.route('/anamnesis/father_edit.html')
 def html_anamnesis_father_edit():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/anamnesis_father_edit.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/anamnesis_father_edit.html', card=card)
 
 
 @module.route('/gyn/inspection.html')
 def html_gyn_inspection():
-    return render_template('risar/unpregnant/inspection_view.html')
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/unpregnant/inspection_view.html', card=card)
 
 
 @module.route('/gyn/inspection_edit.html')
 def html_gyn_inspection_edit():
-    return render_template('risar/unpregnant/inspection_edit.html')
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/unpregnant/inspection_edit.html', card=card)
 
 
 @module.route('/inspection.html')
 def html_inspection():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/inspection_view.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/inspection_view.html', card=card)
 
 
 @module.route('/inspection/gravidograma.html')
 def html_gravidograma():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/gravidograma.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/gravidograma.html', card=card)
 
 
 @module.route('/inspection_read.html')
@@ -217,7 +220,7 @@ def html_inspection_read():
         raise abort(404)
 
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
+    card = AbstractCard.get_by_id(event_id)
 
     checkup = Action.query.join(
         ActionType
@@ -232,22 +235,21 @@ def html_inspection_read():
     flat_code = checkup[0]
 
     if flat_code == first_inspection_flat_code:
-        return render_template('risar/inspection_first_read.html', event=event)
+        return render_template('risar/inspection_first_read.html', card=card)
     elif flat_code == second_inspection_flat_code:
-        return render_template('risar/inspection_second_read.html', event=event)
+        return render_template('risar/inspection_second_read.html', card=card)
     elif flat_code == risar_gyn_checkup_flat_code:
-        return render_template('risar/unpregnant/inspection_read.html', event=event)
+        return render_template('risar/unpregnant/inspection_read.html', card=card)
     elif flat_code == pc_inspection_flat_code:
-        return render_template('risar/inspection_pc_read.html', event=event)
+        return render_template('risar/inspection_pc_read.html', card=card)
     elif flat_code == puerpera_inspection_flat_code:
-        return render_template('risar/inspection_puerpera_read.html', event=event)
+        return render_template('risar/inspection_puerpera_read.html', card=card)
 
 
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    debug_data = get_debug_data(request.args)
+    card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.join(
@@ -262,7 +264,7 @@ def html_inspection_edit():
             abort(404)
 
         if checkup[1]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=event))
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, card=card))
 
         flat_code = checkup[0]
     else:
@@ -274,17 +276,16 @@ def html_inspection_edit():
         flat_code = second_inspection_flat_code if first_inspection_exists else first_inspection_flat_code
     
     if flat_code == first_inspection_flat_code:
-        return render_template('risar/inspection_first_edit.html', event=event, debug_data=debug_data)
+        return render_template('risar/inspection_first_edit.html', card=card)
     
     elif flat_code == second_inspection_flat_code:
-        return render_template('risar/inspection_second_edit.html', event=event, debug_data=debug_data)
+        return render_template('risar/inspection_second_edit.html', card=card)
     
 
 @module.route('/inspection_pc_edit.html')
 def html_inspection_pc_edit():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    debug_data = get_debug_data(request.args)
+    card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.filter(
@@ -297,22 +298,21 @@ def html_inspection_pc_edit():
             abort(404)
 
         if checkup[0]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=event))
-    return render_template('risar/inspection_pc_edit.html', event=event, debug_data=debug_data)
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=card))
+    return render_template('risar/inspection_pc_edit.html', card=card)
 
 
 @module.route('/inspection_puerpera.html')
 def html_inspection_puerpera():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/inspection_puerpera_view.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/inspection_puerpera_view.html', event=card)
 
 
 @module.route('/inspection_puerpera_edit.html')
 def html_inspection_puerpera_edit():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    debug_data = get_debug_data(request.args)
+    card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
         checkup = Action.query.filter(
@@ -325,55 +325,57 @@ def html_inspection_puerpera_edit():
             abort(404)
 
         if checkup[0]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=event))
-    return render_template('risar/inspection_puerpera_edit.html', event=event, debug_data=debug_data)
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=card))
+    return render_template('risar/inspection_puerpera_edit.html', event=card)
 
 
 @module.route('/inspection_fetus.html')
 def html_inspection_fetus():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/inspection_fetus_view.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/inspection_fetus_view.html', card=card)
 
 
 @module.route('/epicrisis.html')
 def html_epicrisis():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/epicrisis.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/epicrisis.html', card=card)
 
 
 @module.route('/epicrisis_edit.html')
 def html_epicrisis_edit():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/epicrisis_edit.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/epicrisis_edit.html', card=card)
 
 
 @module.route('/event_diagnoses.html')
 def html_event_diagnoses():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/event_diagnoses.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/event_diagnoses.html', card=card)
 
 
 @module.route('/ambulance_patient_info.html')
 def html_ambulance_patient_info():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/ambulance_patient_info.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/ambulance_patient_info.html', card=card)
 
 
 @module.route('/measure_list.html')
 def html_event_measure():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/event_measure_list.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/event_measure_list.html', card=card)
 
 
 @module.route('/gynecological-measure_list.html')
 def html_gynecological_event_measure():
-    return render_template('risar/unpregnant/event_measure_list.html')
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/unpregnant/event_measure_list.html', card=card)
 
 
 @module.route('/stats/org-birth-care/')
@@ -397,33 +399,33 @@ def html_card_fill_history():
     event_id = safe_int(args.get('event_id'))
     if not event_id:
         raise abort(404)
-    event = get_event(event_id)
-    return render_template('risar/card_fill_history.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/card_fill_history.html', card=card)
 
 
 @module.route('/risk_groups_list.html')
 def html_risk_groups_list():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/risk_groups_list.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/risk_groups_list.html', card=card)
 
 
 @module.route('/concilium_list.html')
 def html_concilium_list():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/concilium_list.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/concilium_list.html', card=card)
 
 
 @module.route('/concilium.html')
 def html_concilium():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/concilium.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/concilium.html', card=card)
 
 
 @module.route('/radzinsky_risks.html')
 def html_radzinsky_risks():
     event_id = safe_int(request.args.get('event_id'))
-    event = get_event(event_id)
-    return render_template('risar/radzinsky_risks.html', event=event)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/radzinsky_risks.html', card=card)

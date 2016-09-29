@@ -9,6 +9,7 @@ from sqlalchemy import and_, func
 
 from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
+from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.fetus import get_fetuses
 from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
@@ -45,6 +46,28 @@ class PreviousPregnancy(object):
 class AbstractCard(object):
     cache = LocalCache()
     action_type_attrs = None
+
+    @classmethod
+    def get_for_event(cls, event):
+        """
+        :rtype: AbstractCard
+        :param event:
+        :return:
+        """
+        klass = classes.get(event.eventType.requestType.code, cls)
+        from flask import g
+        if not hasattr(g, '_card_cache'):
+            g._card_cache = WeakValueDictionary()
+        if event.id not in g._card_cache:
+            result = g._card_cache[event.id] = klass(event)
+        else:
+            result = g._card_cache[event.id]
+        return result
+
+    @classmethod
+    def get_by_id(cls, event_id):
+        event = get_event(event_id)
+        return cls.get_for_event(event) if event else None
 
     def __init__(self, event):
         self._cached = {}
@@ -93,23 +116,6 @@ class AbstractCard(object):
 
     def reevaluate_card_attrs(self):
         pass
-
-    @classmethod
-    def get_for_event(cls, event):
-        """
-        :rtype: AbstractCard
-        :param event:
-        :return:
-        """
-        klass = classes.get(event.eventType.requestType.code, cls)
-        from flask import g
-        if not hasattr(g, '_card_cache'):
-            g._card_cache = WeakValueDictionary()
-        if event.id not in g._card_cache:
-            result = g._card_cache[event.id] = klass(event)
-        else:
-            result = g._card_cache[event.id]
-        return result
 
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):
@@ -426,6 +432,10 @@ class GynecologicCard(AbstractCard):
     @lazy
     def checkups(self):
         return get_action_list(self.event, risar_gyn_checkup_flat_codes).all()
+
+    @lazy
+    def latest_pregnancy_event(self):
+        return get_latest_pregnancy_event(self.event.client_id) if self.event else None
 
 
 classes = {
