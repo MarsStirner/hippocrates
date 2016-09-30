@@ -81,7 +81,7 @@
                                         </div>
                                     </div>
                                 </label>
-                                <input type="text" class="form-control" autocomplete="off" placeholder="Место работы"
+                                <input ng-required="true" type="text" class="form-control" autocomplete="off" placeholder="Место работы"
                                        ng-disabled="socstat.id ? !edit.activated : false"
                                        id="company" name="company" ng-model="socstat.work.organisation"/>
                             </div>
