@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.models.radzinsky_risks import (RisarRadzinskyRisks, RisarRadzinskyRisks_FactorsAssoc)
-from hippocrates.blueprints.risar.lib.utils import get_patient_risar_event
+from hippocrates.blueprints.risar.lib.chart import get_latest_pregnancy_event
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from nemesis.lib.utils import safe_dict, safe_date
 from nemesis.models.enums import RadzinskyStage, RadzinskyRiskRate
@@ -249,7 +249,7 @@ def radzinsky_risk_factors():
 
 
 def on_patient_info_saved(sender, client_id, **extra):
-    event = get_patient_risar_event(client_id)
+    event = get_latest_pregnancy_event(client_id)
     if event:
         card = PregnancyCard.get_for_event(event)
         reevaluate_radzinsky_risks(card)

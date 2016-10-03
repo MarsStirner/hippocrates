@@ -980,4 +980,51 @@ WebMis20
         }
     }
 }])
+.directive('extSelectQuickEventSearch', ['$http', '$window', 'Config', function ($http, $window, Config) {
+    return {
+        restrict: 'A',
+        require: ['uiSelect', 'ngModel'],
+        compile: function compile (tElement, tAttrs, transclude) {
+            // Add the inner content to the element
+            tElement.append(
+'<ui-select-match  placeholder="[[placeholder]]">[[ $select.selected.client_name ]]</ui-select-match>\
+<ui-select-choices repeat="client in clients" refresh="get_clients($select.search)">\
+    <div  ng-switch="client.event_type_code">\
+        <span  ng-bind-html="client.client_name | highlight: $select.search"></span>\
+        <strong>[[ client.external_id ]] </strong>                                                                                                                                  \
+        <span ng-switch-when="98">Карта беременной</span>\
+        <span ng-switch-when="97">Гинекологический приём</span>\
+    </div>\
+</ui-select-choices> ');
+            return {
+                pre: function preLink(scope, iElement, iAttrs, controller) {},
+                post: function postLink(scope, iElement, iAttrs, controller) {
+                    scope.placeholder = iAttrs.placeholder || 'ФИО пациента';
+                    scope.autoChartUrl = Config.url.chart_auto_html + '?event_id=';
+                    scope.goToCard = function (event_id) {
+                        $window.location.href = scope.autoChartUrl+event_id;
+                    };
+                    scope.onSelect = function(){
+                        var event_id = safe_traverse(arguments, ['0', 'id']);
+                        if (event_id !== undefined) {
+                            scope.goToCard(event_id);
+                        }
+                    };
+                    scope.get_clients = function (query) {
+                        if (!query) return;
+                        return $http.get(Config.url.api_event_search_short, {
+                            params: {
+                                q: query,
+                                limit: 20
+                            }
+                        })
+                        .then(function (res) {
+                            return scope.clients = res.data.result;
+                        });
+                    };
+                }
+            }
+        }
+    }
+}])
 ;

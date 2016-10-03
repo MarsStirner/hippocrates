@@ -4,7 +4,7 @@ import json
 import math
 import time
 
-from flask import request, make_response
+from flask import request, make_response, abort
 from flask_login import current_user
 
 from hippocrates.blueprints.reports.jasper_client import JasperReport
@@ -41,6 +41,18 @@ def sphinx_local_days(date_string):
     date_string = date_string[:10]
     date = datetime.datetime.strptime(date_string, '%Y-%m-%d')
     return int(time.mktime(date.timetuple()))
+
+
+def quick_search_events(query_string, limit=20, **kwargs):
+    from nemesis.lib.sphinx_search import Search, SearchConfig
+    if query_string:
+        search = Search(indexes=['risar_events_short'], config=SearchConfig)
+        search = search.match(query_string)
+        search = search.limit(0, limit).order_by(
+            '@weight desc, client_lastName asc, client_firstName asc, client_patrName', 'asc'
+        )
+        result = search.ask()
+        return result
 
 
 def search_events(paginated=True, **kwargs):
@@ -175,6 +187,19 @@ def api_0_event_search():
             for row in result['result']['items']
         ]
     }
+
+
+@module.route('/api/0/search_event_short/', methods=['GET'])
+@api_method
+def api_0_event_search_short():
+    try:
+        query_string = request.args['q']
+        limit = int(request.args.get('limit', 100))
+    except (KeyError, ValueError):
+        return abort(404)
+
+    result = quick_search_events(query_string=query_string, limit=limit)
+    return result['result']['items']
 
 
 @module.route('/api/0/search-print/', methods=['POST'])

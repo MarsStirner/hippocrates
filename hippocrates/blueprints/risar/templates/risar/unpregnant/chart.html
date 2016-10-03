@@ -7,7 +7,6 @@
 <div ng-controller="GynecologicalChartCtrl" ng-cloak>
     <section class="content-header">
         <div alert-notify></div>
-        {% if debug_data %}<pre>{{ debug_data.ca }}</pre>{% endif %}
         {{ rimacros.unpregnant_page_title_ext_n('Медицинская карта амбулаторного пациента' + "<br>"|safe, 'chart') }}
         {{ rimacros.navigation_unpreg('[[ chart.id ]]', undefined, 'chart') }}
     </section>

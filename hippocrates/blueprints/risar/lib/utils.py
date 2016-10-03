@@ -11,11 +11,9 @@ from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPro
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
-from nemesis.models.event import Event, EventType
-from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
-    inspection_preg_week_code, puerpera_inspection_flat_code, request_type_pregnancy, pc_inspection_flat_code,\
+    inspection_preg_week_code, puerpera_inspection_flat_code, pc_inspection_flat_code,\
     risar_gyn_checkup_flat_codes
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
@@ -335,15 +333,6 @@ def is_event_late_first_visit(event):
         if preg_week is not None:
             result = preg_week >= 10
     return result
-
-
-def get_patient_risar_event(client_id):
-    return Event.query.join(EventType, rbRequestType).filter(
-        Event.client_id == client_id,
-        Event.deleted == 0,
-        rbRequestType.code == request_type_pregnancy,
-        Event.execDate.is_(None)
-    ).order_by(Event.setDate.desc()).first()
 
 
 def format_action_data(json_data):

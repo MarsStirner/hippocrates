@@ -56,6 +56,19 @@ def api_search_clients():
         return jsonify(map(context.make_search_client_info, clients))
 
 
+@module.route('/api/search_clients_cards.json')
+def api_search_clients_cards():
+    from hippocrates.blueprints.risar.views.api.search import quick_search_events
+    try:
+        query_string = request.args['q']
+        limit = int(request.args.get('limit', 100))
+    except (KeyError, ValueError):
+        return abort(404)
+
+    result = quick_search_events(query_string=query_string, limit=limit)
+    return jsonify(result['result']['items'])
+
+
 @module.route('/api/patient.json')
 def api_patient_get():
     client_id = parse_id(request.args, 'client_id')
@@ -348,11 +361,13 @@ def api_patient_file_attach_save():
         else:
             f_file = file_page.get('file')
             if not f_file:
-                raise ApiException(404, u'Не передано поле file в file_attach.file_document.files[{0}]'.format(page_idx))
+                raise ApiException(404,
+                                   u'Не передано поле file в file_attach.file_document.files[{0}]'.format(page_idx))
             f_mime = f_file.get('mime')
             attach_date = cfa.attachDate
             filename = generate_filename(f_name, f_mime, date=attach_date) if f_name else (
-                generate_filename(None, f_mime, descname=f_descname, idx=f_idx, date=attach_date, relation_type=f_relation_type)
+                generate_filename(None, f_mime, descname=f_descname, idx=f_idx, date=attach_date,
+                                  relation_type=f_relation_type)
             )
             ok, msg = save_new_file(file_page, filename, fgd, client_id)
             if not ok:
@@ -390,7 +405,8 @@ def api_patient_file_attach_delete():
 @api_method
 def api_patient_get_vmpcoupons():
     client_id = request.args['client_id']
-    coupon_list = VMPCoupon.query.filter(VMPCoupon.client_id == client_id, VMPCoupon.deleted == 0, VMPCoupon.clientQuoting == None).all()
+    coupon_list = VMPCoupon.query.filter(VMPCoupon.client_id == client_id, VMPCoupon.deleted == 0,
+                                         VMPCoupon.clientQuoting == None).all()
     return coupon_list
 
 
@@ -425,7 +441,8 @@ def api_patient_coupon_save():
     coupon.client_id = client_id
     coupon.date = safe_date(coupon_data.get('date'))
     coupon.MKB_object = MKB.query.get(safe_traverse(coupon_data, 'mkb', 'id'))
-    coupon.quotaType = QuotaType.query.filter(QuotaType.code == safe_traverse(coupon_data, 'quota_type', 'code')).first()
+    coupon.quotaType = QuotaType.query.filter(
+        QuotaType.code == safe_traverse(coupon_data, 'quota_type', 'code')).first()
     coupon.fileLink = fullpath
     db.session.add(coupon)
     db.session.commit()
