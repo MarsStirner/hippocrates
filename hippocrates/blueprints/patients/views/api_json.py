@@ -21,7 +21,7 @@ from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, Cli
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
     add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
-    add_or_update_work_soc_status, store_file_locally
+    add_or_update_work_soc_status, store_file_locally, check_for_duplicates
 )
 
 
@@ -132,21 +132,23 @@ def api_patient_save():
         raise ApiException(404, u'Пациент %s не найден' % client_id)
 
     err_msg = u'Ошибка сохранения данных пациента'
-    if client_id:
-        client = Client.query.get(client_id)
-        client_info = client_data.get('info')
-        if client_info:
-            client = set_client_main_info(client, client_info)
-            db.session.add(client)
-    else:
-        client = Client()
-        client_info = client_data.get('info')
-        if not client_info:
-            raise ClientSaveException(err_msg, u'Отсутствует основная информация о пациенте.')
+
+
+    client_info = client_data.get('info')
+
+    client = Client.query.get(client_id) if client_id else Client()
+
+    if client_info:
         client = set_client_main_info(client, client_info)
-        db.session.add(client)
+    else:
+        if not client_id:
+            raise ClientSaveException(err_msg, u'Отсутствует основная информация о пациенте.')
 
     id_doc_info = client_data.get('id_docs')
+    doc_info = id_doc_info or client.documents
+    check_for_duplicates(client, doc_info)
+    db.session.add(client)
+
     if id_doc_info:
         for id_doc in id_doc_info:
             doc = add_or_update_doc(client, id_doc)
