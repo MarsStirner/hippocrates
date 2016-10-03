@@ -31,7 +31,7 @@ def api_integr_errands_list_schema(api_version):
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/errands/', methods=['GET'])
-# @api_method(hook=hook)
+@api_method()
 def api_integr_errands_get(api_version, card_id):
     xform = ErrandListXForm(api_version)
     xform.check_params(None, card_id)
