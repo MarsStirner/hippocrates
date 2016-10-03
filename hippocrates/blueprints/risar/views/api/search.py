@@ -100,6 +100,7 @@ def search_events(paginated=True, **kwargs):
         query = query.limit(from_, per_page)
     else:
         query = query.limit(0, 99999)
+    query = query.options(max_matches=10000)
     result = query.ask()
     return result
 
