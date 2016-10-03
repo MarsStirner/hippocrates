@@ -8,10 +8,16 @@ from sqlalchemy.sql.expression import func, and_, or_
 from blueprints.risar.lib.utils import format_action_data
 from blueprints.risar.lib.expert.utils import em_stats_status_list
 from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from blueprints.risar.lib.expert.em_diagnosis import get_measure_result_mkbs
+from blueprints.risar.lib.datetime_interval import DateTimeInterval
+from blueprints.risar.lib.diagnosis import DiagnosesSystemManager, AdjasentInspectionsState
+from blueprints.risar.risar_config import inspections_span_flatcodes
 
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
+from nemesis.lib.diagnosis import create_or_update_diagnoses
+from nemesis.systemwide import db
 
 
 logger = logging.getLogger('simple')
@@ -22,6 +28,8 @@ class EMGenerateException(Exception):
 
 
 class EventMeasureController(BaseModelController):
+
+    ds_emr_apt_codes = ('MainDiagnosis', 'FinalDiagnosis')
 
     def get_selecter(self):
         return EventMeasureSelecter()
@@ -87,6 +95,7 @@ class EventMeasureController(BaseModelController):
         else:
             props = []
         em_result = self.get_new_em_result(em, json_data, props)
+        self._set_emr_data(em_result)
         em.result_action = em_result
         self.make_assigned(em)
         return em_result
@@ -94,8 +103,22 @@ class EventMeasureController(BaseModelController):
     def update_em_result(self, em, em_result, json_data):
         json_data = format_action_data(json_data)
         em_result = update_action(em_result, **json_data)
+        self._set_emr_data(em_result)
         em.result_action = em_result
         return em_result
+
+    def _set_emr_data(self, em_result):
+        if 'CheckupDate' in em_result.propsByCode:
+            new_date = safe_datetime(em_result.propsByCode['CheckupDate'].value)
+        elif 'IssueDate' in em_result.propsByCode:
+            new_date = safe_datetime(em_result.propsByCode['IssueDate'].value)
+        else:
+            new_date = None
+        if 'Doctor' in em_result.propsByCode:
+            new_doctor = em_result.propsByCode['Doctor'].value
+        else:
+            new_doctor = None
+        self.modify_emr(em_result, new_date, new_doctor)
 
     def get_measures_in_event(self, event, args, paginate=False):
         event_id = event.id if event is not None else args.get('event_id')
@@ -163,6 +186,84 @@ class EventMeasureController(BaseModelController):
                 'percent': hosp_pct,
             }
         }
+
+    def update_patient_diagnoses(self, em_result, create_mode=False, old_mr_data=None):
+        """
+        См. CheckupsXForm.update_diagnoses_system
+        """
+        if not create_mode and not old_mr_data:
+            raise ValueError('`old_mr_data` required')
+        new_mr_data = self.get_emr_data_for_diags(em_result)
+        # prepare data
+        if not create_mode:
+            emr_data = {
+                'old_mkbs': old_mr_data['mkbs'],
+                'new_mkbs': new_mr_data['mkbs'],
+                'old_beg_date': old_mr_data['beg_date'],
+                'new_beg_date': new_mr_data['beg_date'],
+                'old_person': old_mr_data['person'],
+                'new_person': new_mr_data['person']
+            }
+            emr_data['changed'] = any(emr_data[o] != emr_data[n] for o, n in (
+                ('old_mkbs', 'new_mkbs'), ('old_beg_date', 'new_beg_date'), ('old_person', 'new_person')
+            ))
+        else:
+            emr_data = {
+                'new_mkbs': new_mr_data['mkbs']
+            }
+
+        ais = AdjasentInspectionsState(inspections_span_flatcodes, create_mode)
+
+        measure_mkbs = emr_data['new_mkbs']
+        new_diags = [dict(kind='associated', mkbs=measure_mkbs)]
+
+        # recalc for previous state
+        if not create_mode and emr_data['changed']:
+            target = self.modify_emr(em_result, emr_data['old_beg_date'], emr_data['old_person'])
+            ais.refresh(em_result)
+
+            diag_sys = DiagnosesSystemManager.get_for_measure_result(
+                target, 'final', None, ais)
+            fut_interval = DateTimeInterval(emr_data['new_beg_date'], emr_data['new_beg_date'])
+            diag_sys.refresh_with_measure_result_old_state(new_diags, fut_interval)
+            new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+
+            create_or_update_diagnoses(em_result, new_diagnoses)
+            for d in new_oa_diagnoses:
+                create_or_update_diagnoses(d['action'], [d['data']])
+            db.session.add_all(changed_diagnoses)
+            db.session.flush()
+            self.modify_emr(em_result, emr_data['new_beg_date'], emr_data['new_person'])
+
+        ais.refresh(em_result)
+
+        diag_sys = DiagnosesSystemManager.get_for_measure_result(
+            em_result, 'final', None, ais)
+        diag_sys.refresh_with_measure_result(new_diags)
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+        create_or_update_diagnoses(em_result, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
+        db.session.add_all(changed_diagnoses)
+        db.session.flush()
+
+    def emr_changes_diagnoses_system(self, emr):
+        return any(prop_code in self.ds_emr_apt_codes for prop_code in emr.propsByCode)
+
+    def get_emr_data_for_diags(self, em_result):
+        mkbs = get_measure_result_mkbs(em_result, self.ds_emr_apt_codes)
+        return {
+            'mkbs': mkbs,
+            'beg_date': em_result.begDate,
+            'person': em_result.person
+        }
+
+    def modify_emr(self, em_result, new_date, new_person):
+        if new_date:
+            em_result.begDate = em_result.endDate = new_date
+        if new_person:
+            em_result.person = new_person
+        return em_result
 
 
 class EventMeasureSelecter(BaseSelecter):

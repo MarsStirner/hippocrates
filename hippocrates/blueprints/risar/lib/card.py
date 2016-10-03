@@ -195,9 +195,19 @@ class PregnancyCard(object):
         query = query.group_by(
             Diagnostic.diagnosis_id
         )
-        query = query.with_entities(sqlalchemy.func.max(Diagnostic.id).label('zid')).subquery()
-        query = db.session.query(Diagnostic).join(query, query.c.zid == Diagnostic.id)
-        return query.all()
+        max_dates_sq = query.with_entities(
+            sqlalchemy.func.max(Diagnostic.setDate).label('set_date'),
+            Diagnostic.diagnosis_id.label('diagnosis_id')
+        ).subquery()
+        ids_sq = query.join(
+            max_dates_sq, sqlalchemy.and_(Diagnostic.setDate == max_dates_sq.c.set_date,
+                                          Diagnostic.diagnosis_id == max_dates_sq.c.diagnosis_id)
+        ).with_entities(
+            sqlalchemy.func.max(Diagnostic.id).label('diagnostic_id'),
+        ).subquery()
+
+        final_q = db.session.query(Diagnostic).join(ids_sq, ids_sq.c.diagnostic_id == Diagnostic.id)
+        return final_q.all()
 
     @cache.cached_call
     def get_event_diagnostics(self, beg_date, end_date=None, kind_ids=None, including_closed=False):
@@ -264,3 +274,12 @@ class PregnancyCard(object):
             result = g._pregnancy_card_cache[event.id]
         return result
 
+
+def _clear_caches():
+    from flask import g
+    if hasattr(g, '_pregnancy_card_cache'):
+        del g._pregnancy_card_cache
+
+    PregnancyCard.cache = LocalCache()
+
+    lazy.cache = WeakKeyDictionary()

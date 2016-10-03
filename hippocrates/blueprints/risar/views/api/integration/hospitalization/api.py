@@ -33,7 +33,9 @@ def api_hospitalization_save(api_version, card_id, hospitalization_id=None):
     xform.validate(data)
     xform.check_params(hospitalization_id, card_id, data)
     xform.update_target_obj(data)
-    db.session.commit()
+    xform.store()
+    xform.reevaluate_data()
+    xform.store()
     return xform.as_json()
 
 
@@ -43,4 +45,6 @@ def api_hospitalization_delete(api_version, card_id, hospitalization_id):
     xform = HospitalizationXForm(api_version)
     xform.check_params(hospitalization_id, card_id)
     xform.delete_target_obj()
-    db.session.commit()
+    xform.store()
+    xform.reevaluate_data()
+    xform.store()

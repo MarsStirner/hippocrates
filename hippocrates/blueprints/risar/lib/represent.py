@@ -508,6 +508,7 @@ def represent_action_diagnoses(action):
         result.append(dict(
             dvis.make_diagnosis_record(diagnostic.diagnosis, diagnostic),
             diagnosis_types=types,
+            diagnostic_changed=bool(action.id)
         ))
     return result
 

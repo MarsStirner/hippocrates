@@ -8,10 +8,10 @@
 """
 
 obs_second_data = {
-    "external_id": "12345",
+    "external_id": "1234567",
     # "exam_obs_id": "",
     "dynamic_monitoring": {
-        "date": "2016-04-01",  # *
+        "date": "2016-10-09",  # *
         "hospital": "-1",  # *
         "doctor": "22",  # *
         "ad_right_high": 120,  # *
@@ -49,7 +49,7 @@ obs_second_data = {
             "fetus_presentation": "zatylocnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
             "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 121,  # ЧСС плода
-            "intrauterine_growth_retardation": "otsutstvuet",  # Задержка в развитии плода ["1-2nedeli", "4_and_more", ">3nedel_", "otsutstvuet"]
+            # "intrauterine_growth_retardation": "otsutstvuet",  # Задержка в развитии плода ["1-2nedeli", "4_and_more", ">3nedel_", "otsutstvuet"]
             # "ctg_data": {
             #     "fhr": "",  # Базальный ритм
             #     "fhr_variability_amp": "",  # Вариабельность (амплитуда) []
@@ -65,7 +65,7 @@ obs_second_data = {
             "fetus_presentation": "cistoagodicnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
             "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 120,  # ЧСС плода
-            "intrauterine_growth_retardation": "otsutstvuet",  # Задержка в развитии плода ["1-2nedeli", "4_and_more", ">3nedel_", "otsutstvuet"]
+            # "intrauterine_growth_retardation": "otsutstvuet",  # Задержка в развитии плода ["1-2nedeli", "4_and_more", ">3nedel_", "otsutstvuet"]
             "ctg_data": {
                 "fhr": "04",  # * Базальный ритм ["04", "03", "02", "01"]
                 "fhr_variability_amp": "03",  # * Вариабельность (амплитуда) ["03", "02", "01"]
@@ -81,9 +81,9 @@ obs_second_data = {
         "pregnancy_continuation": False,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "A01",  # Основной диагноз
-        "diagnosis_sop": ["Z34.0"],  # Диагноз сопутствующий
-        # "diagnosis_osl": [],  # Диагноз осложнения
+        "diagnosis_osn": "Z34.0",  # Основной диагноз
+        "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
+        "diagnosis_osl": ["H01", "H02"],  # Диагноз осложнения
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания
         # "vitaminization": "",  # Витаминизация

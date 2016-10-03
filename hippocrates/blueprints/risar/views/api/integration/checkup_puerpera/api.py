@@ -13,13 +13,8 @@ from blueprints.risar.app import module
 from blueprints.risar.views.api.integration.checkup_puerpera.xform import \
     CheckupPuerperaXForm
 from blueprints.risar.views.api.integration.logformat import hook
-from blueprints.risar.views.api.integration.const import (
-    card_attrs_save_error_code, measures_save_error_code,
-    err_card_attrs_save_msg, err_measures_save_msg
-)
-from nemesis.lib.apiutils import api_method, RawApiResult
+from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import public_endpoint
-from nemesis.systemwide import db
 
 
 logger = logging.getLogger('simple')
@@ -44,16 +39,6 @@ def api_checkup_puerpera_save(api_version, card_id, exam_puerpera_id=None):
     xform.update_target_obj(data)
     xform.store()
 
-    try:
-        xform.reevaluate_data()
-        db.session.commit()
-    except Exception, e:
-        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
-        return RawApiResult(
-            xform.as_json(),
-            card_attrs_save_error_code,
-            u'Осмотр сохранён, но произошла ошибка при пересчёте атрибутов карты'
-        )
     return xform.as_json()
 
 
@@ -64,14 +49,3 @@ def api_checkup_puerpera_delete(api_version, card_id, exam_puerpera_id):
     xform.check_params(exam_puerpera_id, card_id)
     xform.delete_target_obj()
     xform.store()
-
-    try:
-        xform.reevaluate_data()
-        db.session.commit()
-    except Exception, e:
-        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
-        return RawApiResult(
-            None,
-            card_attrs_save_error_code,
-            u'Осмотр удалён, но произошла ошибка при пересчёте атрибутов карты'
-        )

@@ -19,7 +19,6 @@ from blueprints.risar.views.api.integration.const import (
 )
 from nemesis.lib.apiutils import api_method, RawApiResult
 from nemesis.lib.utils import public_endpoint
-from nemesis.systemwide import db
 
 
 logger = logging.getLogger('simple')
@@ -46,7 +45,7 @@ def api_checkup_obs_first_save(api_version, card_id, exam_obs_id=None):
 
     try:
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
     except Exception, e:
         logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
         return RawApiResult(
@@ -75,12 +74,11 @@ def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
     xform = CheckupObsFirstXForm(api_version)
     xform.check_params(exam_obs_id, card_id)
     xform.delete_target_obj()
-    xform.reevaluate_data()
     xform.store()
 
     try:
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
     except Exception, e:
         logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
         return RawApiResult(
@@ -89,13 +87,13 @@ def api_checkup_obs_first_delete(api_version, card_id, exam_obs_id):
             u'Осмотр удалён, но произошла ошибка при пересчёте атрибутов карты'
         )
 
-    try:
-        xform.generate_measures()
-    except Exception, e:
-        action_id = exam_obs_id
-        logger.error(err_measures_save_msg.format(action_id), exc_info=True)
-        return RawApiResult(
-            None,
-            measures_save_error_code,
-            u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
-        )
+    # try:
+    #     xform.generate_measures()
+    # except Exception, e:
+    #     action_id = exam_obs_id
+    #     logger.error(err_measures_save_msg.format(action_id), exc_info=True)
+    #     return RawApiResult(
+    #         None,
+    #         measures_save_error_code,
+    #         u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
+    #     )

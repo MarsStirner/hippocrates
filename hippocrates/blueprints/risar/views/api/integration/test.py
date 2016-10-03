@@ -5,8 +5,6 @@ import requests
 
 from contextlib import contextmanager
 
-from nemesis.app import app
-
 
 coldstar_url = os.getenv('TEST_COLDSTAR_URL', 'http://127.0.0.1:6098')
 mis_url = os.getenv('TEST_MIS_URL', 'http://127.0.0.1:6600')
@@ -104,6 +102,8 @@ def test_auth(login, password):
 
 
 if __name__ == '__main__':
+    from nemesis.app import app
+
     with app.app_context():
         from blueprints.risar.views.api.integration.client.test import test_register_edit_client
 
@@ -139,12 +139,12 @@ if __name__ == '__main__':
 
         # from blueprints.risar.views.api.integration.checkup_obs_first.test import \
         #     test_register_edit_delete_first_checkup
-        # card_id = '214'
+        # card_id = '278'
         # test_register_edit_delete_first_checkup(card_id)
-
+        #
         # from blueprints.risar.views.api.integration.checkup_obs_second.test import \
         #     test_register_edit_delete_second_checkup
-        # card_id = '214'
+        # card_id = '278'
         # test_register_edit_delete_second_checkup(card_id)
 
         # from blueprints.risar.views.api.integration.checkup_pc.test import \
@@ -222,13 +222,13 @@ if __name__ == '__main__':
         # test_specialists_checkup_data['measure_id'] = event_measure_id
         # test_put_specialists_checkup(card_id, result_action_id)
 
-        from blueprints.risar.views.api.integration.research.test import \
-            test_put_research, test_delete_research, test_post_research
+        # from blueprints.risar.views.api.integration.research.test import \
+        #     test_put_research, test_delete_research, test_post_research
         # from blueprints.risar.views.api.integration.research.test_data import \
         #     test_research_data
-        # card_id = '230'
+        # card_id = '278'
         # event_measure_id = '3234'
-
+        #
         # result_action_id = '895'
         # measure_type_code = '0022'
         # test_research_data['measure_type_code'] = measure_type_code
