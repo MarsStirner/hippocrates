@@ -993,7 +993,7 @@ WebMis20
         <span  ng-bind-html="client.client_name | highlight: $select.search"></span>\
         <strong>[[ client.external_id ]] </strong>                                                                                                                                  \
         <span ng-switch-when="98">Карта беременной</span>\
-        <span ng-switch-when="97">Гинекологический приём</span>\
+        <span ng-switch-when="97">Карта амбулаторного пациента</span>\
     </div>\
 </ui-select-choices> ');
             return {
