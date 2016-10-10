@@ -17,7 +17,7 @@ var AnamnesisBaseCtrl = function ($scope, RisarApi, RefBookService, PrintingServ
     var params = aux.getQueryParams(window.location.search);
     $scope.event_id = params.event_id;
     $scope.reload_header = function () {
-        RisarApi.chart.get_header($scope.event_id).
+        return RisarApi.chart.get_header($scope.event_id).
             then(function (data) {
                 $scope.header = data.header;
             });
@@ -84,7 +84,7 @@ var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $time
         }
         reload_anamnesis();
 
-    }
+    };
     $scope.init();
 };
 
@@ -236,6 +236,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
                 pregnancy.newborn_inspections = [];
             }
         };
+        scope.minYear = moment($scope.header.client.birth_date).year();
+        scope.maxYear = new Date().getFullYear();
+
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/pregnancies.html',
             scope: scope,
@@ -289,9 +292,12 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
             p.deleted = 0;
         }
     };
+
     var open_edit = function (p) {
         var scope = $scope.$new();
         scope.model = p;
+        scope.minDate = $scope.header.client.birth_date;
+        scope.maxDate = new Date();
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/transfusions.html',
             scope: scope,
@@ -359,6 +365,8 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     var open_edit = function (p) {
         var scope = $scope.$new();
         scope.model = p;
+        scope.minDate = $scope.header.client.birth_date;
+        scope.maxDate = new Date();
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/intolerances.html',
             scope: scope,
@@ -372,11 +380,14 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
 var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
-    $scope.menstruation_max_date= new Date();
-    $scope.menstruation_max_date.setDate($scope.menstruation_max_date.getDate() - 1);
+    $scope.menstruation_min_date = new Date();
+    $scope.menstruation_max_date = new Date();
 
     var reload_anamnesis = function () {
-        $scope.reload_header();
+        $scope.reload_header()
+            .then(function () {
+                $scope.menstruation_min_date = $scope.header.client.birth_date;
+            });
         RisarApi.anamnesis.mother.get($scope.event_id)
         .then(function (anamnesis_mother) {
             $scope.anamnesis_mother = anamnesis_mother ? anamnesis_mother : {finished_diseases: [],
@@ -402,11 +413,14 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
 var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
+    $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date= new Date();
-    $scope.menstruation_max_date.setDate($scope.menstruation_max_date.getDate() - 1);
 
     var reload_anamnesis = function () {
-        $scope.reload_header();
+        $scope.reload_header()
+            .then(function () {
+                $scope.menstruation_min_date = $scope.header.client.birth_date;
+            });
         RisarApi.gynecological_anamnesis.general.get($scope.event_id)
         .then(function (data) {
             $scope.anamnesis_unpregnant = data ? data : {

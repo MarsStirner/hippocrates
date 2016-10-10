@@ -952,7 +952,7 @@ WebMis20
     <h1>Изменение данных карты</h1>\
     <div class="row">\
         <div class="col-md-4">Дата создания карты</div>\
-        <div class="col-md-8"><wm-date ng-model="$model.beg_date" /></div>\
+        <div class="col-md-8"><wm-date ng-model="$model.beg_date" min-date="minDate" max-date="currentDate" /></div>\
     </div>\
     <div class="row">\
         <div class="col-md-4">Лечащий врач</div>\
@@ -964,7 +964,9 @@ WebMis20
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
 </div>',
                 controller: function ($scope, $modalInstance) {
-                    $scope.$model = model
+                    $scope.$model = model;
+                    $scope.currentDate = new Date();
+                    $scope.minDate = event.client.birth_date;
                 },
                 size: 'lg'
             }).result.then(function () {
@@ -993,7 +995,7 @@ WebMis20
         <span  ng-bind-html="client.client_name | highlight: $select.search"></span>\
         <strong>[[ client.external_id ]] </strong>                                                                                                                                  \
         <span ng-switch-when="98">Карта беременной</span>\
-        <span ng-switch-when="97">Гинекологический приём</span>\
+        <span ng-switch-when="97">Карта амбулаторного пациента</span>\
     </div>\
 </ui-select-choices> ');
             return {

@@ -82,7 +82,7 @@
                                         <th class="text-right col-md-4">Дата осмотра <span class="text-danger">*</span></th>
                                         <td class="col-md-8">
                                             <wm-date ng-class="{'has-error': commonForm.beg_date.$invalid && commonForm.submit_attempt}" name="beg_date"
-                                                     ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-date>
+                                                     ng-model="checkup.beg_date" style="width: 250px" min-date="minDate" ng-required="true"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
@@ -96,8 +96,8 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input name="weight" ng-model="checkup.weight" class="form-control"
-                                                       ng-required="true" autofocus>
+                                                <input name="weight" ng-model="checkup.weight" class="form-control" valid-number
+                                                       maxlength="3" ng-required="true" autofocus>
                                             </div>
                                             </div>
                                         </td>
@@ -107,10 +107,10 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (commonForm.ad_right_high.$invalid || commonForm.ad_right_low.$invalid)  && commonForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input name="ad_right_high" ng-model="checkup.ad_right_high"
+                                                <input name="ad_right_high" ng-model="checkup.ad_right_high" valid-number
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                                 <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.ad_right_low"
+                                                <input name="ad_right_low" ng-model="checkup.ad_right_low" valid-number
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                             </div>
                                             </div>
@@ -121,11 +121,11 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (commonForm.ad_left_high.$invalid || commonForm.ad_left_low.$invalid) && commonForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
-                                                       class="form-control blood_presure" ng-required="true">
+                                                <input name="ad_left_high" ng-model="checkup.ad_left_high" valid-number
+                                                       maxlength="3" class="form-control blood_presure" ng-required="true">
                                                 <span>/</span>
-                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
-                                                       class="form-control blood_presure" ng-required="true">
+                                                <input name="ad_left_low" ng-model="checkup.ad_left_low" valid-number
+                                                       maxlength="3" class="form-control blood_presure" ng-required="true">
                                             </div>
                                         </div></td>
                                     </tr>
@@ -280,11 +280,15 @@
                                 <tbody>
                                     <tr>
                                         <th class="text-right col-md-4">Окружность живота</th>
-                                        <td class="col-md-8"><div class="row"><div class="col-md-2"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
+                                        <td class="col-md-8"><div class="row"><div class="col-md-2">
+                                            <input ng-model="checkup.abdominal" class="form-control" valid-number maxlength="3">
+                                           </div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Высота стояния дна матки</th>
-                                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
+                                        <td><div class="row"><div class="col-md-2">
+                                            <input ng-model="checkup.fundal_height" class="form-control" valid-number maxlength="3">
+                                           </div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Состояние матки</th>
@@ -309,7 +313,8 @@
                                         <tr>
                                             <th class="text-right">Дата первого шевеления <span>&nbsp;</span></th>
                                             <td><div class="row"><div class="col-md-4">
-                                                <wm-date ng-model="checkup.fetus_first_movement_date" style="width: 250px"></wm-date></div></div></td>
+                                                <wm-date ng-model="checkup.fetus_first_movement_date" style="width: 250px"
+                                                    min-date="minDate" max-date="currentDate"></wm-date></div></div></td>
                                         </tr>
                                         <tr>
                                             <th class="text-right">Шевеление <span>&nbsp;</span></th>
@@ -382,7 +387,8 @@
                                                             <tr>
                                                                 <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>
                                                                 <td><div class="row"><div class="col-md-3">
-                                                                    <input ng-model="child.state.heart_rate" class="form-control"></div></div></td>
+                                                                    <input ng-model="child.state.heart_rate" class="form-control" valid-number
+                                                                        maxlength="3"></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Данные КТГ <span>&nbsp;</span></th>
@@ -507,7 +513,8 @@
                                     <tr>
                                         <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
                                         <td><div ng-class="{'has-error': ticketForm.next_date.$invalid}">
-                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date>
+                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
+                                                min-date="currentDate" max-date="inFiveDate"></wm-date>
                                         </div></td>
                                     </tr>
                                     <tr>

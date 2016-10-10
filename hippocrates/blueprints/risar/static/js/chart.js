@@ -70,6 +70,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
     $scope.open_edit_epicrisis = function(e){
         var scope = $scope.$new();
         scope.model = e;
+        $scope.minDate = $scope.header.event.set_date;
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/edit_epicrisis.html',
             scope: scope,
@@ -146,6 +147,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
     $scope.open_edit_epicrisis = function(e){
         var scope = $scope.$new();
         scope.model = e;
+        $scope.minDate = $scope.header.event.set_date;
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/edit_epicrisis.html',
             scope: scope,

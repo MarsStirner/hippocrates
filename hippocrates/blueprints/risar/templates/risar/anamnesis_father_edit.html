@@ -21,7 +21,7 @@
                 <tbody>
                 <tr>
                     <th class="text-right">ФИО</th>
-                    <td><input ng-model="anamnesis_father.name" class="form-control" autofocus></td>
+                    <td><input ng-model="anamnesis_father.name" class="form-control" valid-regexp name-regexp autofocus></td>
                 </tr>
 
                 <tr>
@@ -29,7 +29,7 @@
                     <td>
                         <div class="row">
                             <div class="col-md-4">
-                                <input ng-model="anamnesis_father.age" class="form-control" type="number" valid-number>
+                                <input ng-model="anamnesis_father.age" class="form-control" max="999" type="number" valid-number>
                             </div>
                         </div>
                     </td>
@@ -83,7 +83,7 @@
 
                 <tr>
                     <td class="text-right">Длительность, лет</td>
-                    <td><input ng-model="anamnesis_father.infertility_period" class="form-control" type="number" valid-number ng-disabled="!anamnesis_father.infertility"></td>
+                    <td><input ng-model="anamnesis_father.infertility_period" class="form-control" max="999" type="number" valid-number ng-disabled="!anamnesis_father.infertility"></td>
                 </tr>
 
                 <tr>

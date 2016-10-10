@@ -13,7 +13,7 @@ from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid, encode_fil
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
 from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument, ClientWork,
    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
-   ClientRelation, Address, ClientFileAttach
+   ClientRelation, Address, ClientFileAttach, Client
 )
 from nemesis.models.enums import AddressType
 from nemesis.models.exists import rbSocStatusClass, FileMeta, FileGroupDocument
@@ -455,7 +455,7 @@ def add_or_update_work_soc_status(client, data):
     work_info = data.get('work')
     soc_status = add_or_update_soc_status(client, data)
     if deleted and soc_status.work:
-        soc_status.work = deleted
+        soc_status.work.deleted = deleted
         return soc_status
     work = add_or_update_work(client, work_info) if (work_info and work_info.keys()) else None
     soc_status.work = work
@@ -661,3 +661,43 @@ def delete_client_file_attach_and_relations(cfa_id):
         ClientPolicy.cfa_id: None
     })
     db.session.commit()
+
+
+def get_duplicates(suspect, id_doc_info):
+    """
+        Возвращет дубликаты Клиента по (ФИО, дате и документу)
+        @suspect Client instance:
+        @id_doc_info:
+        @return list of Clients
+    """
+
+    twins = Client.query.filter(
+            Client.firstName == suspect.firstName,
+            Client.lastName == suspect.lastName,
+            Client.patrName == suspect.patrName,
+            Client.birthDate == suspect.birthDate,
+            Client.deleted == 0,
+            Client.id != suspect.id
+    ).all()
+
+    duplicates = []
+    for client in twins:
+        if client.id_document:
+            for doc in id_doc_info:
+                if hasattr(doc, 'number'):
+                    doc_number = doc.number
+                else:
+                    doc_number = doc['number']
+                if client.id_document.number == doc_number:
+                    duplicates.append(client)
+    return duplicates
+
+
+def check_for_duplicates(client, id_doc_info, msg=''):
+    if get_duplicates(client, id_doc_info):
+        if not msg:
+            if not client.id:
+                msg = u'\nРегистрация не возможна: данная пациентка уже зарегистрирована в системе.'
+            else:
+                msg = u'\nРедактирование не возможно, пациентка с такими данными уже зарегистрирована в системе'
+        raise ClientSaveException(msg)

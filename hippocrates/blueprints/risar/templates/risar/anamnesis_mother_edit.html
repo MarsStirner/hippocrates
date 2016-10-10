@@ -47,7 +47,8 @@
                 </tr>
                 <tr>
                     <th class="text-right">Дата последней менструации <span>&nbsp;</span></th>
-                    <td><wm-date ng-model="anamnesis_mother.menstruation_last_date" max-date="menstruation_max_date" style="width: 250px"></wm-date></td>
+                    <td><wm-date ng-model="anamnesis_mother.menstruation_last_date"
+                            max-date="menstruation_max_date" min-date="menstruation_min_date" style="width: 250px"></wm-date></td>
                 </tr>
                 <tr>
                     <th class="text-right">Менструации <span>&nbsp;</span></th>
@@ -71,7 +72,7 @@
                 </tr>
                 <tr>
                     <th class="text-right">Половая жизнь с <span>&nbsp;</span></th>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.sex_life_start_age" class="form-control" type="number" valid-number></div></div></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.sex_life_start_age" class="form-control" valid-number maxlength="3" type="text" valid-number></div></div></td>
                 </tr>
                 <tr>
                     <th class="text-right">Сведения по контрацепции <span>&nbsp;</span></th>
@@ -100,7 +101,7 @@
                 </tr>
                 <tr>
                     <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.infertility_period" class="form-control" type="number" valid-number ng-disabled="!anamnesis_mother.infertility"></td>
+                    <td><input ng-model="anamnesis_mother.infertility_period" class="form-control" valid-number maxlength="3" type="text" valid-number ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Лечение <span>&nbsp;</span></td>

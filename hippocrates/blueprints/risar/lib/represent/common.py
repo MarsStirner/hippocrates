@@ -26,6 +26,7 @@ def represent_header(event):
         'client': {
             'id': client.id,
             'full_name': client.nameText,
+            'birth_date': client.birthDate
         },
         'event': {
             'id': event.id,

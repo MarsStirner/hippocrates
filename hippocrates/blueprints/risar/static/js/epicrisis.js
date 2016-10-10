@@ -17,6 +17,8 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
     $scope.is_empty = function (obj) {
         return angular.equals({}, obj);
     };
+    $scope.currentDate = new Date();
+    $scope.minDate = new Date();
 
     var open_tab = function (tab_name) {
         var prefix = "tab_";
@@ -32,6 +34,7 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
     var reload_epicrisis = function () {
         RisarApi.chart.get_header(event_id).then(function (data) {
             $scope.header = data.header;
+            $scope.minDate = $scope.header.event.set_date;
         });
         RisarApi.epicrisis.get(event_id)
             .then(function (result) {

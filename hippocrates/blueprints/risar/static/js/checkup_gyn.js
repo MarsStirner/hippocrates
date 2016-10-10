@@ -32,12 +32,15 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     // $scope.goToConclusion = function(){
     //     $scope.switchToTab('conclusion');
     // };
-
+    $scope.prepareCheckup = function () {
+            $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
+            return scope.checkup
+    };
     $scope.save = function (form_controller){
         form_controller.submit_attempt = true;
         // todo: как то надо переделать if ( !$scope.hasMainDiagnose ) { $scope.goToConclusion(); }
         if (form_controller.$valid){
-            return RisarApi.checkup_gyn.save($scope.event_id, $scope.checkup)
+            return RisarApi.checkup_gyn.save($scope.event_id,  $scope.prepareCheckup())
                 .then(function (data) {
                     if ($scope.checkup.id){
                         $scope.checkup = data;
@@ -50,7 +53,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     $scope.save_forward = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            RisarApi.checkup_gyn.save($scope.event_id, $scope.checkup)
+            RisarApi.checkup_gyn.save($scope.event_id,  $scope.prepareCheckup())
                 .then(function (data) {
                     if($scope.checkup.id){
                         $scope.checkup = data;
@@ -70,9 +73,11 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
 
     var reload_checkup = function () {
         RisarApi.chart.get_header(event_id).
-        then(function (data) {
-            $scope.header = data.header;
-        });
+            then(function (data) {
+                $scope.header = data.header;
+                $scope.minDate = $scope.header.event.set_date;
+                $scope.clientBd = $scope.header.client.birth_date;
+            });
         if (!checkup_id) {
             RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp').then(function (checkup) {$scope.checkup = checkup});
         } else {

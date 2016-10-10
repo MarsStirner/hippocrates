@@ -14,7 +14,7 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
             });
             return instance.result;
         },
-        openCreate: function (event_id) {
+        openCreate: function (event_id, checkup, event) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/RISAR/modal/em_create_list.html',
                 controller: EMCreateListModalCtrl,
@@ -24,6 +24,12 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
                 resolve: {
                     event_id: function () {
                         return event_id
+                    },
+                    checkup: function () {
+                        return checkup
+                    },
+                    event: function () {
+                        return event
                     }
                 }
             });
