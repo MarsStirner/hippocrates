@@ -26,12 +26,12 @@ def general_menu():
     ), dict(
         link='risar.html_search',
         title=u'Расширенный поиск',
-        visible=True,
+        visible=UserProfileManager.has_ui_risar(),
         icon='fa fa-search'
     ), dict(
         link='risar.html_errands_list',
         title=u'Поручения',
-        visible=True,
+        visible=UserProfileManager.has_ui_risar(),
         icon='fa fa-flag-o'
     ), dict(
         external_link=app.config['CAESAR_URL'],
@@ -41,12 +41,12 @@ def general_menu():
     ), dict(
         link='risar.html_mis',
         title=u'МИС',
-        visible=True,
+        visible=UserProfileManager.has_ui_risar(),
         icon='fa fa-medkit'
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
-        visible=True,
+        visible=UserProfileManager.has_ui_risar_reports(),
         icon='fa fa-bar-chart'
     )]
     return dict(main_menu=menu_items)

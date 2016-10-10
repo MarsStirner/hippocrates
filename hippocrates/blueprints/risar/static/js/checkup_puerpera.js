@@ -6,7 +6,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     $controller('CheckupCtrl', {$scope: $scope});
     $scope.prepareCheckup = function () {
             $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
-            return scope.checkup
+            return $scope.checkup
     };
     $scope.save = function (form_controller) {
         if (form_controller.$invalid) {
