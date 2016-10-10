@@ -106,15 +106,13 @@
                             <table class="table table-condensed">
                                 <tbody>
                                      <tr>
-                                    <!-- example date -->
                                         <td class="text-right col-md-4">Дата</td>
                                         <td class="col-md-2">
-                                            <wm-date  name="osmotr_date"
-                                                     ng-model="checkup.beg_date" style="width: 250px" autofocus></wm-date>
+                                            <wm-date name="osmotr_date" ng-model="checkup.beg_date" style="width: 250px" autofocus
+                                                min-date="minDate"></wm-date>
                                         </td>
                                         <td class="text-right">Время осмотра</td>
-                                        <td><wm-time  name="beg_time"
-                                                     ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
+                                        <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
                                         </td>
                                     </tr>
                                 <tbody>
@@ -128,15 +126,14 @@
                                     
                                     
                                     <tr>
-                                    <!-- example date -->
                                         <td class="text-right col-md-4">Дата</td>
                                         <td class="col-md-8">
                                             <wm-date ng-class="{'has-error': commonForm.last_menstruation_date.$invalid && commonForm.submit_attempt}" name="last_menstruation_date"
-                                                     ng-model="checkup.last_menstruation_date" style="width: 250px" ></wm-date>
+                                                     ng-model="checkup.last_menstruation_date" style="width: 250px"
+                                                     min-date="clientBd" max-date="currentDate"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
-                                    <!-- example select -->
                                         <td class="text-right col-md-4">Особенности</td>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': commonForm.last_menstruation_features.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-6">
@@ -145,7 +142,6 @@
                                         </div></td>
                                     </tr>
                                     <tr>
-                                    <!-- example multiple -->
                                         <td class="text-right">Характер </td>
                                         <td><rb-select multiple="true" ref-book="rbRisarMenstruationCharacter" ng-model="checkup.last_menstruation_character"></rb-select></td>
                                     </tr>
@@ -233,8 +229,8 @@
                                         <td class="text-right">Повышение температуры до </td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
-                                                       class="form-control" >
+                                                <input type="text" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
+                                                       class="form-control" valid-number maxlength="2">
                                             </div>
                                             </div>
                                         </td>
@@ -388,8 +384,8 @@
                                         <td class="text-right">Масса</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" id="weight" name="weight" ng-model="checkup.weight"
-                                                       class="form-control" autofocus>
+                                                <input type="text" id="weight" name="weight" ng-model="checkup.weight"
+                                                       class="form-control" autofocus valid-number maxlength="3">
                                             </div>
                                             </div>
                                         </td>
@@ -399,8 +395,8 @@
                                         <td class="text-right">Рост</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" id="height" name="height" ng-model="checkup.height"
-                                                       class="form-control" >
+                                                <input type="text" id="height" name="height" ng-model="checkup.height"
+                                                       class="form-control" valid-number maxlength="3">
                                             </div>
                                             </div>
                                         </td>
@@ -430,8 +426,8 @@
                                         <td class="text-right">Температура тела</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="number" id="temperature" name="temperature" ng-model="checkup.temperature"
-                                                       class="form-control" >
+                                                <input type="text" id="temperature" name="temperature" ng-model="checkup.temperature"
+                                                       class="form-control" ui-mask="99.9">
                                             </div>
                                             </div>
                                         </td>
@@ -440,8 +436,8 @@
                                         <td class="text-right">ЧСС</td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input id="heart_rate" type="number" name="heart_rate" ng-model="checkup.heart_rate"
-                                                       class="form-control" >
+                                                <input id="heart_rate" type="text" name="heart_rate" ng-model="checkup.heart_rate"
+                                                       class="form-control" valid-number maxlength="3">
                                             </div>
                                             </div>
                                         </td>
@@ -452,8 +448,8 @@
                                                  ng-class="{'has-error': (objectiveForm.ad_right_high.$invalid || objectiveForm.ad_right_low.$invalid)  && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input name="ad_right_high" ng-model="checkup.AD_right_high"
-                                                       maxlength="3"  class="form-control blood_presure"> <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.AD_right_low" maxlength="3" class="form-control blood_presure">
+                                                       valid-number maxlength="3"  class="form-control blood_presure"> <span>/</span>
+                                                <input name="ad_right_low" ng-model="checkup.AD_right_low" valid-number maxlength="3" class="form-control blood_presure">
                                             </div>
                                             </div>
                                         </td>
@@ -463,10 +459,10 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (objectiveForm.ad_left_high.$invalid || objectiveForm.ad_left_low.$invalid) && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.AD_left_high"
+                                                <input valid-number maxlength="3" name="ad_left_high" ng-model="checkup.AD_left_high"
                                                        class="form-control blood_presure" >
                                                 <span>/</span>
-                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.AD_left_low"
+                                                <input valid-number maxlength="3" name="ad_left_low" ng-model="checkup.AD_left_low"
                                                        class="form-control blood_presure" >
                                             </div>
                                         </div></td>

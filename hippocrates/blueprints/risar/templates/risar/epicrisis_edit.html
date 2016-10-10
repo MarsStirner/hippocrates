@@ -81,7 +81,7 @@
                                             <td class="col-md-8">
                                                 <div class="row">
                                                 <div class="col-md-2">
-                                                    <wm-date ng-model="epicrisis.arrival_date"
+                                                    <wm-date ng-model="epicrisis.arrival_date" min-date="minDate"
                                                              style="width: 250px" name="arrival_date"></wm-date>
                                                 </div>
                                                 </div>
@@ -92,9 +92,8 @@
                                             <td class="col-md-8">
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2">
-                                                <wm-date ng-model="epicrisis.delivery_date"
-                                                         style="width: 250px" ng-required="true"
-                                                         name="delivery_date"></wm-date>
+                                                <wm-date ng-model="epicrisis.delivery_date" min-date="minDate"
+                                                         style="width: 250px" ng-required="true" name="delivery_date"></wm-date>
                                                 </div>
                                                 </div>
                                             </td>
@@ -116,7 +115,7 @@
                                                 <div class="row" ng-class="{'has-error': firstForm.pregnancy_duration.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2  col-lg-2">
                                                     <input ng-model="epicrisis.pregnancy_duration" class="form-control" name="pregnancy_duration"
-                                                           ng-required="true">
+                                                           ng-required="true" valid-number maxlength="2">
                                                 </div>
                                                 </div>
                                             </td>
@@ -242,7 +241,7 @@
                                     <tr>
                                         <td class="text-right">Дата смерти матери <span class="text-danger">*</span></td>
                                         <td>
-                                            <wm-date name="death_date" ng-disabled="!mother_death"
+                                            <wm-date name="death_date" ng-disabled="!mother_death" min-date="epicrisis.delivery_date"
                                                      ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
                                                      ng-required="mother_death" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
                                         </td>
@@ -684,7 +683,8 @@
                                                             <td>
                                                                 <div class="row" ng-class="{'has-error': sixthForm.weight_[[$index]].$invalid && sixthForm.submit_attempt}">
                                                                 <div class="col-md-3 col-lg-2">
-                                                                    <input ng-model="child.weight" ng-required="true" class="form-control" name="weight_[[$index]]">
+                                                                    <input ng-model="child.weight" ng-required="true" class="form-control"
+                                                                        name="weight_[[$index]]" valid-number maxlength="3">
                                                                 </div>
                                                                 </div>
                                                             </td>
@@ -694,7 +694,7 @@
                                                             <td>
                                                                 <div class="row" ng-class="{'has-error': sixthForm.length_[[$index]].$invalid && sixthForm.submit_attempt}">
                                                                 <div class="col-md-3 col-lg-2">
-                                                                    <input ng-model="child.length" ng-required="true"
+                                                                    <input ng-model="child.length" ng-required="true" valid-number maxlength="3"
                                                                            class="form-control" name="length_[[$index]]">
                                                                 </div>
                                                                 </div>
@@ -705,7 +705,7 @@
                                                             <td>
                                                                 <wm-date ng-model="child.date" ng-required="true"
                                                                          ng-class="{'has-error': sixthForm.date_[[$index]].$invalid && sixthForm.submit_attempt}"
-                                                                         style="width: 250px" name="date_[[$index]]"></wm-date>
+                                                                         style="width: 250px" name="date_[[$index]]" min-date="epicrisis.delivery_date"></wm-date>
                                                             </td>
                                                         </tr>
                                                         <tr>

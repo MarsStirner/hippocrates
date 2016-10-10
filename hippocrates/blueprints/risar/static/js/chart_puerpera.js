@@ -28,6 +28,7 @@ var InspectionPuerperaViewCtrl = function ($scope, $modal, RisarApi, PrintingSer
         RisarApi.chart.get_header(event_id).
             then(function (data) {
                 $scope.header = data.header;
+                $scope.minDate = $scope.header.event.set_date;
             });
         RisarApi.checkup_puerpera.get_list(event_id)
             .then(function (data) {

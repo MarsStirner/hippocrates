@@ -88,7 +88,7 @@
                                         <th class="text-right col-md-4">Дата осмотра <span class="text-danger">*</span></th>
                                         <td class="col-md-8">
                                             <wm-date ng-class="{'has-error': commonForm.beg_date.$invalid && commonForm.submit_attempt}" name="beg_date"
-                                                     ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-date>
+                                                     ng-model="checkup.beg_date" style="width: 250px" min-date="minDate" ng-required="true"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
@@ -102,8 +102,8 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.height.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input id="height" name="height" ng-model="checkup.height"
-                                                       class="form-control" ng-required="true" autofocus>
+                                                <input id="height" name="height" ng-model="checkup.height" valid-number
+                                                       maxlength="3" class="form-control" ng-required="true" autofocus>
                                             </div>
                                             </div>
                                         </td>
@@ -113,7 +113,8 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
+                                                <input name="weight" ng-model="checkup.weight" valid-number
+                                                       maxlength="3" class="form-control" ng-required="true">
                                             </div>
                                             </div>
                                         </td>
@@ -203,10 +204,10 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (somaticForm.ad_right_high.$invalid || somaticForm.ad_right_low.$invalid)  && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input name="ad_right_high" ng-model="checkup.ad_right_high"
+                                                <input name="ad_right_high" ng-model="checkup.ad_right_high" valid-number
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                                 <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.ad_right_low"
+                                                <input name="ad_right_low" ng-model="checkup.ad_right_low" valid-number
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                             </div>
                                             </div>
@@ -217,10 +218,10 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (somaticForm.ad_left_high.$invalid || somaticForm.ad_left_low.$invalid) && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
+                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high" valid-number
                                                        class="form-control blood_presure" ng-required="true">
                                                 <span>/</span>
-                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
+                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low" valid-number
                                                        class="form-control blood_presure" ng-required="true">
                                             </div>
                                         </div></td>
@@ -230,7 +231,8 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': somaticForm.heart_rate.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control" type="number" valid-number ng-required="true" />
+                                                <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control" valid-number
+                                                       maxlength="3" ng-required="true" />
                                             </div></div>
                                         </td>
                                     </tr>
@@ -426,11 +428,15 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Окружность живота <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
+                                        <td><div class="row"><div class="col-md-2">
+                                            <input ng-model="checkup.abdominal" class="form-control" valid-number maxlength="3">
+                                        </div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Высота стояния дна матки <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
+                                        <td><div class="row"><div class="col-md-2">
+                                            <input ng-model="checkup.fundal_height" class="form-control" valid-number maxlength="3">
+                                        </div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Состояние матки <span class="text-danger">*</span></th>
@@ -510,7 +516,8 @@
                                                             <tr>
                                                                 <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>
                                                                 <td><div class="row"><div class="col-md-3">
-                                                                    <input ng-model="child.state.heart_rate" class="form-control"></div></div></td>
+                                                                    <input ng-model="child.state.heart_rate" class="form-control" valid-number
+                                                                        maxlength="3"></div></div></td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
@@ -673,7 +680,8 @@
                                     <tr>
                                         <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
                                         <td><div ng-class="{'has-error': conclusionForm.next_date.$invalid && conclusionForm.submit_attempt}">
-                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date>
+                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
+                                                min-date="currentDate" max-date="inFiveDate"></wm-date>
                                         </div></td>
                                     </tr>
                                     <tr>

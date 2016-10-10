@@ -23,9 +23,10 @@
                     <th class="text-right">Дата установления</th>
                     <td>
                         <div class="col-md-4">
-                            <wm-date ng-if="!model.id" name="date" ng-model="model.date" style="width: 250px"></wm-date>
-                            <wm-date ng-if="model.id" name="date" ng-model="model.date" style="width: 250px"
-                                     autofocus="autofocus"></wm-date>
+                            <wm-date ng-if="!model.id" name="date" ng-model="model.date" min-date="minDate"
+                                max-date="maxDate" style="width: 250px"></wm-date>
+                            <wm-date ng-if="model.id" name="date" ng-model="model.date" min-date="minDate"
+                                max-date="maxDate" style="width: 250px" autofocus="autofocus"></wm-date>
                         </div>
                     </td>
                 </tr>

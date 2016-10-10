@@ -80,7 +80,7 @@ var BaseMeasureListCtrl = function ($scope, EventMeasureService, EMModalService)
         }
     };
     $scope.addNewEventMeasures = function () {
-        return EMModalService.openCreate($scope.event_id)
+        return EMModalService.openCreate($scope.event_id, undefined, $scope.header.event)
             .then(function () {
                 $scope.$broadcast('emDataUpdated');
             });

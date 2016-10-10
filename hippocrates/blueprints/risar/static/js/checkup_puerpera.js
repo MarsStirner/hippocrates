@@ -45,9 +45,10 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
 
     var reload_checkup = function () {
         RisarApi.chart.get_header(event_id).
-        then(function (data) {
-            $scope.header = data.header;
-        });
+            then(function (data) {
+                $scope.header = data.header;
+                $scope.minDate = $scope.header.event.set_date;
+            });
         if (!checkup_id) {
             RisarApi.checkup_puerpera.create(event_id, 'risarPuerperaCheckUp').
             then(function (checkup) {

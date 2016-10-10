@@ -16,6 +16,8 @@
             <div class="box-body">
                 <wm-policy p-type="0" id-postfix="c[[$index]]"
                     model-policy="cpol"
+                    min-date="client.info.birth_date"
+                    max-date="currentDate"
                     edit-mode="cpol.id ? edit.activated : true">
                 </wm-policy>
                 <div ng-if="cpol.file_attach">
@@ -55,6 +57,8 @@
             <div class="box-body">
                 <wm-policy p-type="1" id-postfix="v[[$index]]"
                     model-policy="vpol"
+                    min-date="client.info.birth_date"
+                    max-date="currentDate"
                     edit-mode="vpol.id ? edit.activated : true">
                 </wm-policy>
                 <div ng-if="vpol.file_attach">

@@ -14,6 +14,10 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
             event_id: $scope.header.event.id
         }
     };
+    $scope.currentDate = new Date();
+    $scope.minDate = new Date();
+    $scope.inFiveDate = moment().add(5, 'y').toDate();
+    $scope.clientBd = new Date();
 
     $scope.ps_fi = new PrintingService("risar_inspection");
     $scope.ps_fi.set_context("risar_first_inspection");

@@ -89,7 +89,7 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
         }
     };
     $scope.addNewEventMeasures = function () {
-        return EMModalService.openCreate($scope.event_id)
+        return EMModalService.openCreate($scope.event_id, $scope.checkup)
             .then(function () {
                 RisarApi.measure.get_by_action($scope.checkup.id, {
                     with_deleted_hand_measures: true

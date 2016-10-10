@@ -18,6 +18,8 @@
                             <ng-form name="cbtForm">
                                 <wm-client-blood-type id-postfix="$index"
                                     model-blood-type="bt"
+                                    min-date="client.info.birth_date"
+                                    max-date="currentDate"
                                     edit-mode="bt.id ? false : true">
                                 </wm-client-blood-type>
                             </ng-form>
@@ -72,6 +74,8 @@
                                 <wm-client-allergy id-postfix="[[$index]]"
                                     type="allergy"
                                     model-allergy="alg"
+                                    min-date="client.info.birth_date"
+                                    max-date="currentDate"
                                     edit-mode="alg.id ? edit.activated : true">
                                 </wm-client-allergy>
                             </ng-form>
@@ -103,6 +107,8 @@
                                 <wm-client-allergy id-postfix="[[$index]]"
                                     type="intolerance"
                                     model-allergy="intlr"
+                                    min-date="client.info.birth_date"
+                                    max-date="currentDate"
                                     edit-mode="intlr.id ? edit.activated : true">
                                 </wm-client-allergy>
                             </ng-form>

@@ -17,7 +17,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <rb-select ref-book="Measure" ng-model="new_em.measure" id="measure_type"></rb-select>\
             </div>\
             <div class="cold-md-3">\
-                <button type="button" class="btn btn-primary" ng-click="addNewEm()">Добавить</button>\
+                <button type="button" class="btn btn-primary" ng-disabled="!new_em.measure"\
+                    ng-click="addNewEm()">Добавить</button>\
             </div>\
         </div>\
     </ng-form>\
@@ -37,8 +38,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <tbody>\
                 <tr ng-repeat="em in new_em.list">\
                     <td ng-bind="em.data.measure.name"></td>\
-                    <td><wm-date ng-model="em.data.beg_datetime"></wm-date></td>\
-                    <td><wm-date ng-model="em.data.end_datetime"></wm-date></td>\
+                    <td><wm-date ng-model="em.data.beg_datetime" min-date="minDate"></wm-date></td>\
+                    <td><wm-date ng-model="em.data.end_datetime" min-date="em.data.beg_datetime"></wm-date></td>\
                     <td>\
                         <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-click="removeNewEm($index)">\
                             <i class="fa fa-trash"></i></button>\
@@ -57,11 +58,12 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var EMCreateListModalCtrl = function ($scope, EventMeasureService, event_id) {
+var EMCreateListModalCtrl = function ($scope, EventMeasureService, event_id, checkup, event) {
     $scope.new_em = {
         measure: undefined,
         list: []
     };
+    $scope.minDate = checkup ? checkup.beg_date : event.set_date;
 
     $scope.addNewEm = function () {
         EventMeasureService.get(undefined, {

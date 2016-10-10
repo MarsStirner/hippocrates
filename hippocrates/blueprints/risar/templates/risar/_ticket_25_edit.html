@@ -4,8 +4,10 @@
                     <th class="text-right col-md-4">Даты открытия и закрытия талона</th>
                     <td class="col-md-8">
                         <div class="row">
-                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date" autofocus></wm-date></div>
-                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date"></wm-date></div>
+                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date" autofocus
+                                min-date="checkup.beg_date"></wm-date></div>
+                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date"
+                                min-date="checkup.beg_date"></wm-date></div>
                         </div>
                     </td>
                 </tr>
@@ -210,7 +212,8 @@
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.amount"></span>
-                                    <span ng-if="$table.$edited($index)"><input valid-number class="form-control" ng-model="$table.$tmp.amount" /></span>
+                                    <span ng-if="$table.$edited($index)">
+                                        <input valid-number maxlength="3" class="form-control" ng-model="$table.$tmp.amount" /></span>
                                 </td>
 
                                 <td class="col-md-4">
@@ -272,7 +275,7 @@
 
                                 <td class="col-md-1">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.beg_date | asDate"></span>
-                                    <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.beg_date" /></span>
+                                    <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.beg_date" min-date="checkup.beg_date"/></span>
                                 </td>
 
                                 <td class="col-md-1">
@@ -282,7 +285,7 @@
 
                                 <td class="col-md-1">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.end_date | asDate"></span>
-                                    <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.end_date" /></span>
+                                    <span ng-if="$table.$edited($index)"><wm-date ng-model="$table.$tmp.end_date" min-date="checkup.beg_date"/></span>
                                 </td>
 
                                 <td class="col-md-2"><inplace-table-buttons class="pull-right"></inplace-table-buttons></td>
