@@ -32,12 +32,14 @@ def api_0_gyn_checkup(event_id):
     checkup_id = data.pop('id', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
     person_data = data.pop('person', None)
+    wizard_step = data.pop('wizard_step', None)
     if person_data:
         person = Person.query.get(person_data['id'])
     else:
         person = None
     diagnoses = data.pop('diagnoses', [])
-    validate_diagnoses(diagnoses)
+    if wizard_step == 'conclusion':
+        validate_diagnoses(diagnoses, wizard_step)
 
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)

@@ -23,13 +23,17 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             updateBMI();
         }
     });
+    $scope.prepareCheckup = function () {
+            $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
+            return scope.checkup
+    };
     $scope.save = function (form_controller) {
         if (form_controller.$invalid) {
             //var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');
             //$document.scrollToElement(formelm, 100, 1500);
             return false;
         }
-        return RisarApi.checkup.save($scope.event_id, $scope.checkup)
+        return RisarApi.checkup.save($scope.event_id, $scope.prepareCheckup())
             .then(function (data) {
                 if($scope.checkup.id){
                     $scope.checkup = data;
@@ -41,7 +45,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     $scope.save_forward = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            RisarApi.checkup.save($scope.event_id, $scope.checkup)
+            RisarApi.checkup.save($scope.event_id, $scope.prepareCheckup())
                 .then(function (data) {
                     if($scope.checkup.id){
                         $scope.checkup = data;
