@@ -327,7 +327,7 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
         };
 
         $scope.open_print_window = function (ps, checkup_id) {
-            if (ps.is_available()){
+            if ($scope.ps.is_available()){
                 PrintingDialog.open(ps, $scope.ps_resolve(checkup_id));
             }
         };
