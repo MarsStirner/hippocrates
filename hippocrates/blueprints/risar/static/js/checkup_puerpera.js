@@ -4,12 +4,15 @@
 WebMis20.controller('CheckupPuerperaEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config', 
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
-
+    $scope.prepareCheckup = function () {
+            $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
+            return scope.checkup
+    };
     $scope.save = function (form_controller) {
         if (form_controller.$invalid) {
             return false;
         }
-        return RisarApi.checkup_puerpera.save($scope.event_id, $scope.checkup)
+        return RisarApi.checkup_puerpera.save($scope.event_id, $scope.prepareCheckup())
             .then(function (data) {
                 if($scope.checkup.id){
                     $scope.checkup = data;
@@ -21,7 +24,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     $scope.save_forward = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            RisarApi.checkup_puerpera.save($scope.event_id, $scope.checkup)
+            RisarApi.checkup_puerpera.save($scope.event_id, $scope.prepareCheckup())
                 .then(function (data) {
                     if($scope.checkup.id){
                         $scope.checkup = data;

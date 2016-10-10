@@ -30,12 +30,14 @@ def api_0_pregnancy_checkup(event_id):
     flat_code = data.pop('flat_code', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
     person_data = data.pop('person', None)
+    wizard_step = data.pop('wizard_step', None)
     if person_data:
         person = Person.query.get(person_data['id'])
     else:
         person = None
     diagnoses = data.pop('diagnoses', [])
-    validate_diagnoses(diagnoses)
+    if wizard_step == 'conclusion':
+        validate_diagnoses(diagnoses)
     fetuses = data.pop('fetuses', [])
 
     if not flat_code:
