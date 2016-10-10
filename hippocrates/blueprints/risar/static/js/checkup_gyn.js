@@ -34,7 +34,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     // };
     $scope.prepareCheckup = function () {
             $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
-            return scope.checkup
+            return $scope.checkup
     };
     $scope.save = function (form_controller){
         form_controller.submit_attempt = true;
