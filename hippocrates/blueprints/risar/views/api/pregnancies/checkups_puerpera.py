@@ -25,8 +25,8 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     flat_code = data.pop('flat_code', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
     diagnoses = data.pop('diagnoses', None)
-    wizard_step = data.pop('wizard_step', None)
-    if wizard_step == 'conclusion':
+    diagnoses_changed = data.pop('diagnoses_changed', None)
+    if diagnoses_changed:
         validate_diagnoses(diagnoses)
 
     person_data = data.pop('person', None)
