@@ -39,7 +39,7 @@ def api_0_gyn_checkup(event_id):
         person = None
     diagnoses = data.pop('diagnoses', [])
     if wizard_step == 'conclusion':
-        validate_diagnoses(diagnoses, wizard_step)
+        validate_diagnoses(diagnoses)
 
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)

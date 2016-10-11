@@ -179,8 +179,8 @@ def api_0_event_search():
                 'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
                 'curators': get_org_curators(safe_int(row['org_id']), '2'),
                 'week':((
-                    (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
-                    datetime.date.fromtimestamp(row['psdate'])
+                    (min(today, datetime.date.fromtimestamp(row['bdate'] * 86400)) if row['bdate'] else today) -
+                    datetime.date.fromtimestamp(row['psdate'] * 86400)
                 ).days / 7 + 1) if row['psdate'] else None,
                 'request_type': rbRT_cache.get(row['request_type_id'])
             }
