@@ -24,22 +24,22 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     checkup_id = data.pop('id', None)
     flat_code = data.pop('flat_code', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
+    event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     diagnoses = data.pop('diagnoses', None)
-    wizard_step = data.pop('wizard_step', None)
-    if wizard_step == 'conclusion':
+    diagnoses_changed = data.pop('diagnoses_changed', None)
+    if diagnoses_changed:
         validate_diagnoses(diagnoses)
 
     person_data = data.pop('person', None)
     if person_data:
         person = Person.query.get(person_data['id'])
     else:
-        person = None
+        person = event.execPerson
 
     if not flat_code:
         raise ApiException(400, u'необходим flat_code')
 
-    event = Event.query.get(event_id)
-    card = PregnancyCard.get_for_event(event)
     action = get_action_by_id(checkup_id, event, flat_code, True)
     action.update_action_integrity()
 

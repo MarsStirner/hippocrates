@@ -14,6 +14,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_event, r
     represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures, \
     represent_ticket_25
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_ticket_25
+from hippocrates.blueprints.risar.lib.represent.mat_cert import represent_mat_cert
 from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
 from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix, \
     represent_prop_value, safe_action_property
@@ -58,7 +59,8 @@ def represent_pregnancy_event(event):
         'card_fill_rates': represent_event_cfrs(card_attrs_action),
         'radz_risk_rate': get_radz_risk_rate(card.radz_risk),
         'pregnancy_week': get_pregnancy_week(event),
-        'has_diseases': check_disease(all_diagnostics)
+        'has_diseases': check_disease(all_diagnostics),
+        'maternal_cert': represent_mat_cert(event.maternal_cert)
     })
     return represent
 

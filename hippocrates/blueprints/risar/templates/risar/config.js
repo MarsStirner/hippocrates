@@ -69,6 +69,8 @@ WebMis20
         api_event_measure_checkups: '{{ url_for('.api_0_event_measure_checkups') }}',
         api_measure_list: '{{ url_for('.api_0_measure_list') }}',
         api_measure_list_by_action: '{{ url_for('.api_0_measure_list_by_action') }}',
+        api_maternal_cert_for_event: '{{ url_for('.api_0_maternal_cert_for_event', event_id=-90) | replace("-90", "{0}") }}',
+        api_maternal_cert_save: '{{ url_for('.api_0_maternal_cert_save') }}',
         url_schedule_appointment_html: '{{ url_for('schedule.appointment') }}',
         chart_auto_html: '{{ url_for('.html_auto_chart') }}',
         chart_pregnancy_html: '{{ url_for('.html_pregnancy_chart') }}',

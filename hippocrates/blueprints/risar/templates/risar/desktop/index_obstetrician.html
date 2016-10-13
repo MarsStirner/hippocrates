@@ -69,6 +69,13 @@
                 {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
         </div>
+        {% if user_profiles_mng.has_ui_admin() %}
+        <div class="row">
+            <div class="col-md-offset-9 col-md-3">
+                {% include "risar/stats/active_users.html" %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
@@ -82,6 +89,7 @@
     <script src="{{ url_for('.static', filename='js/stats/cards_overview.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/preg_week_distribution.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/active_users.js', v=app_version) }}"></script>
 {% endblock %}
 
 

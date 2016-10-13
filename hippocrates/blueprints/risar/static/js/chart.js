@@ -59,8 +59,9 @@ function ($scope, RisarApi, PrintingService, PrintingDialog, NotificationService
     };
 }
 ])
-.controller('PregnancyChartCtrl', ['$scope', '$controller', '$window', 'RisarApi', 'Config', '$modal', 'NotificationService',
-function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationService) {
+.controller('PregnancyChartCtrl', ['$scope', '$controller', '$window', 'RisarApi', 'Config', '$modal',
+    'NotificationService', 'MaternalCertModalService',
+function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationService, MaternalCertModalService) {
     $controller('BaseChartCtrl', {$scope: $scope});
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
@@ -134,6 +135,11 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
             });
         })
     };
+    $scope.openMaternalCert = function () {
+        MaternalCertModalService.openMaternal(event_id).then(function(rslt){
+            $scope.chart.maternal_cert = rslt;
+        });
+    };
     reload_chart();
 }])
 .controller('GynecologicalChartCtrl', ['$scope', '$controller', '$window', 'RisarApi', 'Config', '$modal',
@@ -196,7 +202,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
                     $scope.close_event();
                 },
                 cancel_callback = function (data) {
-                RisarApi.gynecologic_chart.cl1ose_event(
+                RisarApi.gynecologic_chart.close_event(
                     $scope.chart.id, {cancel: true}
                 ).then(function(data) {
                     _.extend($scope.header.event, data);
@@ -350,5 +356,4 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
     };
 
     reload();
-}])
-;
+}]);

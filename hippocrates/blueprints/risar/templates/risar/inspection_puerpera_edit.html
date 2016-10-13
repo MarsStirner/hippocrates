@@ -236,7 +236,9 @@
                                     <tr>
                                         <td colspan="2">
                                             <div ng-class="{'has-error': conclusionForm.next_date.$invalid && conclusionForm.submit_attempt}">
-                                                <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
+                                                <ng-form name="DiagForm">
+                                                    <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
+                                                </ng-form>
                                             </div>
                                         </td>
                                     </tr>

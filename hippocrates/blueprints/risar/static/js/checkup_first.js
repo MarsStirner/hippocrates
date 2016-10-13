@@ -24,10 +24,10 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         }
     });
     $scope.prepareCheckup = function() {
-        $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
+        $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
         return $scope.checkup
     };
-    
+
     $scope.save = function (form_controller) {
         if (form_controller.$invalid) {
             //var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');

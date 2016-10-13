@@ -32,9 +32,9 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     // $scope.goToConclusion = function(){
     //     $scope.switchToTab('conclusion');
     // };
-    $scope.prepareCheckup = function () {
-            $scope.checkup.wizard_step = $scope.rc.sampleWizard.currentStep.attributes.id;
-            return $scope.checkup
+    $scope.prepareCheckup = function() {
+        $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
+        return $scope.checkup
     };
     $scope.save = function (form_controller){
         form_controller.submit_attempt = true;

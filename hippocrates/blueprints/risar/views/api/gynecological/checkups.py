@@ -31,18 +31,18 @@ def api_0_gyn_checkup(event_id):
     data = request.get_json()
     checkup_id = data.pop('id', None)
     beg_date = safe_datetime(data.pop('beg_date', None))
+    event = Event.query.get(event_id)
+    card = GynecologicCard.get_for_event(event)
     person_data = data.pop('person', None)
-    wizard_step = data.pop('wizard_step', None)
     if person_data:
         person = Person.query.get(person_data['id'])
     else:
-        person = None
+        person = event.execPerson
     diagnoses = data.pop('diagnoses', [])
-    if wizard_step == 'conclusion':
+    diagnoses_changed = data.pop('diagnoses_changed', None)
+    if diagnoses_changed:
         validate_diagnoses(diagnoses)
 
-    event = Event.query.get(event_id)
-    card = GynecologicCard.get_for_event(event)
     action = get_action_by_id(checkup_id, event, risar_gyn_checkup_flat_code, True)
 
     if not checkup_id:
