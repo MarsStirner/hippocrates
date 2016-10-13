@@ -5,7 +5,7 @@ __author__ = 'viruzzz-kun'
 
 def represent_mat_cert(mat_cert):
     if not mat_cert:
-        return None,
+        return None
     return {
         'id': mat_cert.id,
         'date': mat_cert.date,
