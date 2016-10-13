@@ -86,7 +86,7 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
 
 WebMis20.controller('CheckupTicket25Ctrl', ['$scope', function ($scope) {
     var setTicket25Data = function () {
-        if ($scope.checkup && $scope.checkup.ticket_25 && !$scope.checkup.ticket_25.beg_date) {
+        if ($scope.checkup && $scope.checkup.ticket_25) {
             $scope.checkup.ticket_25.beg_date = new Date($scope.checkup.beg_date);
         }
     };
