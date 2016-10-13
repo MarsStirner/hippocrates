@@ -208,6 +208,15 @@ WebMis20
         html: Config.url.chart_gynecological_html,
         back: Config.url.index_html
     });
+    this.maternal_cert = {
+        get_by_event: function (event_id) {
+            return wrapper('GET', Config.url.api_maternal_cert_for_event.format(event_id))
+        },
+        save: function (cert) {
+            var target_url = cert.id === undefined ? Config.url.api_maternal_cert_save : Config.url.api_maternal_cert_save + cert.id;
+            return wrapper('POST', target_url, {}, cert)
+        }
+    };
     this.event_routing = {
         get_destinations: function (diagnoses, client_id) {
             return wrapper('POST', Config.url.api_event_routing, {}, {

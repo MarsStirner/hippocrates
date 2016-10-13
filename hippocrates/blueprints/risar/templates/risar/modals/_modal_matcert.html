@@ -1,0 +1,56 @@
+    <div class="modal-header" xmlns="http://www.w3.org/1999/html">
+        <button type="button" class="close" ng-click="$dismiss()">&times;</button>
+        <h4 class="modal-title">Родовый сертификат</h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="das-form">
+        <ng-form name="MCForm">
+              <table class="table table-condensed">
+                   <thead>
+                       <tr>
+                           <th class="col-md-3"></th>
+                           <th class="col-md-9"></th>
+                       </tr>
+                   </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-right"><strong>Серия</strong><span class="text-danger">*</span></td>
+                            <td>
+                                <div class="col-lg-8 col-md-8 col-xs-6"><input ng-required="true" class="form-control" type="text" ng-model="maternal_cert.series"/></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><strong>Номер</strong><span class="text-danger">*</span></td>
+                            <td>
+                                <div class="col-lg-8 col-md-8 col-xs-6"><input ng-required="true" class="form-control" type="text" ng-model="maternal_cert.number"/></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><strong>Дата выдачи</strong></td>
+                            <td>
+                                <div class="col-lg-8 col-md-8 col-xs-6"><wm-date ng-model="maternal_cert.date" autofocus></wm-date></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><strong>ЛПУ выдачи</strong></td>
+                            <td>
+                                <div class="form-group col-lg-8 col-md-8 col-xs-6">
+                                    <ui-select ext-select-hospital-org
+                                        tagging="orgBuilder" tagging-tokens="ENTER"
+                                        ng-model="maternal_cert.lpu" allow-clear="true"
+                                        theme="select2" id="lpu" name="lpu"
+                                        ng-required="false">
+                                    </ui-select>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+        </ng-form>
+        </div>
+    </div>
+   <div class="modal-footer">
+       <button type="button" class="btn btn-primary" ng-disabled="MCForm.$invalid" ng-click="saveAndClose()">Сохранить</button>
+       <button type="button" class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+    </div>

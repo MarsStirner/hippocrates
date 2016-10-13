@@ -1,6 +1,7 @@
 # coding: utf-8
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.models.event import Event, EventType
+
 from nemesis.models.exists import rbRequestType
 
 

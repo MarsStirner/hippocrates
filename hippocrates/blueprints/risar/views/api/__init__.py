@@ -6,5 +6,6 @@ from . import schedule, search, measure, errands, integration, tasks, concilium
 from . import chart
 from . import jasper_printing_tails
 from . import radz_risks
+from . import maternal_cert
 
 __author__ = 'mmalkov'
