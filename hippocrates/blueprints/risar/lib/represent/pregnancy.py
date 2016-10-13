@@ -58,7 +58,8 @@ def represent_pregnancy_event(event):
         'card_fill_rates': represent_event_cfrs(card_attrs_action),
         'radz_risk_rate': get_radz_risk_rate(card.radz_risk),
         'pregnancy_week': get_pregnancy_week(event),
-        'has_diseases': check_disease(all_diagnostics)
+        'has_diseases': check_disease(all_diagnostics),
+        'maternal_cert': event.maternal_cert
     })
     return represent
 

@@ -248,6 +248,42 @@
                     </table>
                 </div>
                 <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Родовый сертификат</h3>
+                        <span class="pull-right">
+                            <a class="btn-link" href="#"  ng-click="openMaternalCert()" >[[ chart.maternal_cert.id ? 'Изменить': 'Заполнить' ]]</a>
+                        </span>
+                    </div>
+                    <table class="table table-condensed">
+                        <tbody>
+                            <tr>
+                                <td class="col-md-3 text-left">Серия:</td>
+                                <td class="col-md-9">
+                                    <span>[[chart.maternal_cert.series]]</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-3 text-left">Номер:</td>
+                                <td class="col-md-9">
+                                    <span>[[chart.maternal_cert.number]]</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-3 text-left">Дата выдачи:</td>
+                                <td class="col-md-9">
+                                    <span>[[chart.maternal_cert.date|asDate]]</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-3 text-left">ЛПУ выдачи:</td>
+                                <td class="col-md-9">
+                                    <span>[[chart.maternal_cert.lpu.short_name]]</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="box box-primary">
                     <div class="box-header"><h3 class="box-title">ЛПУ родоразрешения</h3></div>
                     <table class="table table-condensed">
                         <tbody>
@@ -344,6 +380,7 @@
                     </table>
                 </div>
             </div>
+
         </div>
     </section>
 </div>
@@ -353,5 +390,7 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/maternal_cert.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/edit_epicrisis.html">{% include 'risar/modals/_modal_epicrisis.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/maternal_cert.html">{% include 'risar/modals/_modal_matcert.html' %}</script>
 {% endblock %}
