@@ -35,14 +35,12 @@
                         <tr>
                             <td class="text-right"><strong>ЛПУ выдачи</strong></td>
                             <td>
-                                <div class="form-group col-lg-8 col-md-8 col-xs-6" ng-class="{'has-error': false}">
+                                <div class="form-group col-lg-8 col-md-8 col-xs-6">
                                     <ui-select ext-select-hospital-org
                                         tagging="orgBuilder" tagging-tokens="ENTER"
                                         ng-model="maternal_cert.lpu" allow-clear="true"
                                         theme="select2" id="lpu" name="lpu"
-                                        add-rb-data="lpu"
-                                        freeinput="maternal_cert.issuing_LPU_free_input"
-                                        ng-disabled="" ng-required="false">
+                                        ng-required="false">
                                     </ui-select>
                                 </div>
                             </td>
@@ -53,6 +51,6 @@
         </div>
     </div>
    <div class="modal-footer">
-       <button type="button" class="btn btn-primary" ng-disabled="MCForm.$invalid" ng-click="$close(maternal_cert)">Сохранить</button>
+       <button type="button" class="btn btn-primary" ng-disabled="MCForm.$invalid" ng-click="saveAndClose()">Сохранить</button>
        <button type="button" class="btn btn-default" ng-click="$dismiss()">Отменить</button>
     </div>

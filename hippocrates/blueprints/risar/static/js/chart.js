@@ -134,11 +134,9 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
             });
         })
     };
-    $scope.openMaternalCert = function (event_id) {
+    $scope.openMaternalCert = function () {
         MaternalCertModalService.openMaternal(event_id).then(function(rslt){
-            MaternalCertModalService.saveOnClose(rslt).then(function(cert){
-                $scope.chart.maternal_cert = cert;
-            });
+            $scope.chart.maternal_cert = rslt;
         });
     };
     reload_chart();

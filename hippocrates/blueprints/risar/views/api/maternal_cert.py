@@ -2,7 +2,7 @@
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.chart import save_maternal_cert
+from hippocrates.blueprints.risar.lib.mat_cert import save_maternal_cert
 from nemesis.lib.apiutils import api_method
 from nemesis.systemwide import db
 from nemesis.models.risar import MaternalCertificate

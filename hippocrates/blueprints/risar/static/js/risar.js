@@ -213,7 +213,7 @@ WebMis20
             return wrapper('GET', Config.url.api_maternal_cert_for_event.format(event_id))
         },
         save: function (cert) {
-            var target_url = cert.id === undefined ? Config.url.api_maternal_cert_new : Config.url.api_maternal_cert_save.format(cert.id);
+            var target_url = cert.id === undefined ? Config.url.api_maternal_cert_save : Config.url.api_maternal_cert_save + cert.id;
             return wrapper('POST', target_url, {}, cert)
         }
     };
