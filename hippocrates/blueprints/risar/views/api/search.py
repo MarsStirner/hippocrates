@@ -2,7 +2,9 @@
 import datetime
 import json
 import math
+import re
 
+from collections import namedtuple
 from flask import request, make_response, abort
 from flask_login import current_user
 
@@ -22,6 +24,29 @@ from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 __author__ = 'mmalkov'
 
 
+ESCAPED_CHARS = namedtuple('EscapedChars', ['single_escape', 'double_escape'])(
+    single_escape=("'", '+', '[', ']', '=', '*'),
+    double_escape=('@', '!', '^', '(', ')', '~', '-', '|', '/', '<<', '$', '"')
+)
+
+
+def escape_sphinx_query(query):
+    # from sphintit/core/convertors.py MatchQueryCtx
+    single_escape_chars_re = '|\\'.join(ESCAPED_CHARS.single_escape)
+    query = re.sub(
+        single_escape_chars_re,
+        lambda m: r'\%s' % m.group(),
+        query
+    )
+    double_escape_chars_re = '|\\'.join(ESCAPED_CHARS.double_escape)
+    query = re.sub(
+        double_escape_chars_re,
+        lambda m: r'\\%s' % m.group(),
+        query
+    )
+    return query
+
+
 def quick_search_events(query_string, limit=20, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
     if query_string:
@@ -39,7 +64,7 @@ def search_events(paginated=True, **kwargs):
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
-        query = query.match(u'@name {0}'.format(kwargs['fio']), raw=True)
+        query = query.match(u'@name={0}'.format(escape_sphinx_query(kwargs['fio'])), raw=True)
     if 'areas' in kwargs:
         areas = [area['code'][:8] for area in kwargs['areas']]
         query = query.filter(area__in=areas)
@@ -82,7 +107,7 @@ def search_events(paginated=True, **kwargs):
     if client_workgroup:
         work_code = client_workgroup.get('code')
         if work_code:
-            query = query.match('@client_work_code %s' % work_code, raw=True)
+            query = query.match('@client_work_code %s' % escape_sphinx_query(work_code), raw=True)
     age_min = safe_int(kwargs.get('age_min'))
     if age_min:
         query = query.filter(client_age__gte=age_min)
@@ -112,7 +137,7 @@ def search_events_ambulance(**kwargs):
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'query' in kwargs and kwargs['query']:
-        query = query.match(u'@(name,document,policy) {0}'.format(kwargs['query']), raw=True)
+        query = query.match(u'@(name,document,policy) {0}'.format(escape_sphinx_query(kwargs['query'])), raw=True)
         query = query.options(field_weights={'lastName': 100,
                                              'firstName': 80,
                                              'patrName': 70,
