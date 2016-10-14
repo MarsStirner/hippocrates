@@ -60,7 +60,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             curators: $scope.query.curators,
             org_ids: orgs,
             doc_id: $scope.query.person.id,
-            client_id: safe_traverse($scope.query, ['client', 'id']),
+            fio: $scope.query.fio || undefined,
             checkup_date_from: $scope.query.checkup_date_from || undefined,
             checkup_date_to: $scope.query.checkup_date_to || undefined,
             bdate_from: $scope.query.bdate_from || undefined,
