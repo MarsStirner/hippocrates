@@ -156,6 +156,26 @@ def search_events_ambulance(**kwargs):
     return result
 
 
+def get_regexp_for_areas(areas):
+    """
+    если с 3 по 5 не будет 000 - проверить первые 5 цифр
+    иначе, с 5 по 8 не будет 000 - проверить первые 8 цифр
+    иначе, проверить первые 2 цифры
+    """
+    regx = '^$|^'
+    lst = []
+    for area in areas:
+        area_code = area['code']
+        if area_code:
+            if area_code[2:5] != u'000':
+                prefix = area_code[:5]
+            elif area_code[4:7] != u'000':
+                prefix = area_code[:8]
+            else:
+                prefix = area_code[:2]
+            lst.append(prefix)
+    return regx + '|^'.join(lst)
+
 
 @module.route('/api/0/search/', methods=['POST', 'GET'])
 @api_method
@@ -333,7 +353,7 @@ def api_0_area_curator_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^$|^' + '|^'.join([area['code'][:8] for area in areas if area['code']])
+        regex = get_regexp_for_areas(areas)
         query = query.filter(Organisation.area.op('regexp')(regex))
     query = query.group_by(
         PersonCurationAssoc.id
@@ -359,7 +379,7 @@ def api_0_curator_lpu_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^$|^' + '|^'.join([area['code'][:8] for area in areas if area['code']])
+        regex = get_regexp_for_areas(areas)
         query = query.filter(Organisation.area.op('regexp')(regex))
     return query.all()
 
