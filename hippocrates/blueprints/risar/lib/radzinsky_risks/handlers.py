@@ -387,7 +387,7 @@ def coagulopathy(card):
 
 def myopia(card):
     return _mkb_match(card.unclosed_mkbs,
-                      needles=u'H44.2, H52.1, H40.0-H40.9, H43.1, H44.5, H46-H47.7, H33.0-H35.9, O99.8')
+                      needles=u'H44.2, H52.1, H40.0-H40.9, H43.1, H44.5, H46-H47.7, H33.0-H35.9')
 
 
 def persistent_infection(card):
