@@ -27,7 +27,7 @@
                 <th>Срок беременности</th>
                 <th>Примечание</th>
             </tr>
-            <tr ng-repeat="row in tickets | filter:query">
+            <tr ng-repeat="row in tickets | filter:query.search_str">
                 <td ng-bind="row.beg_time | asTime"></td>
                 <td><span class="label"
                           ng-class="{'label-default': row.risk_rate.code == 'undefined',

@@ -999,7 +999,7 @@ WebMis20
             // Add the inner content to the element
             tElement.append(
 '<ui-select-match  placeholder="[[placeholder]]">[[ $select.selected.client_name ]]</ui-select-match>\
-<ui-select-choices repeat="client in clients" refresh="get_clients($select.search)">\
+<ui-select-choices repeat="client in clients" refresh="refresh_list($select.search)">\
     <div  ng-switch="client.event_type_code">\
         <span  ng-bind-html="client.client_name | highlight: $select.search"></span>\
         <strong>[[ client.external_id ]] </strong>                                                                                                                                  \
@@ -1012,6 +1012,8 @@ WebMis20
                 post: function postLink(scope, iElement, iAttrs, controller) {
                     scope.placeholder = iAttrs.placeholder || 'ФИО пациента';
                     scope.autoChartUrl = Config.url.chart_auto_html + '?event_id=';
+                    scope.onRefresh = scope.$eval(iAttrs.onRefresh) || angular.noop;
+
                     scope.goToCard = function (event_id) {
                         $window.location.href = scope.autoChartUrl+event_id;
                     };
@@ -1020,6 +1022,10 @@ WebMis20
                         if (event_id !== undefined) {
                             scope.goToCard(event_id);
                         }
+                    };
+                    scope.refresh_list = function (query) {
+                        scope.onRefresh(query);
+                        scope.get_clients(query);
                     };
                     scope.get_clients = function (query) {
                         if (!query) return;

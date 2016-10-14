@@ -2,7 +2,10 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.curation_level = {
         code: '1'
     };
-    $scope.query = "";
+    $scope.query = {
+        client: undefined,
+        search_str: undefined
+    };
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
     $scope.curYear = new Date().getFullYear();
@@ -20,6 +23,12 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         record_count: 0
     };
 
+    $scope.onQuickSearchChanged = function () {
+        // used in ui-select with ext-select-quick-event-search
+        return function (query_str) {
+            $scope.query.search_str = query_str;
+        }
+    };
     $scope.xAxisTickFormat = function(d){
         var m = moment();
         return m.months(d-1).format('MMM');
