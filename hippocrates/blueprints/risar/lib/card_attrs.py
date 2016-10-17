@@ -398,11 +398,11 @@ def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True
                                                                                     30,
                                                                                     DateTimeUtil.day)
         epicrisis = card.epicrisis
-        valid_epicrisis = epicrisis.action is not None
+        valid_epicrisis = epicrisis.action.id is not None
         valid_by_epicrisis_date = (
             safe_date(epicrisis.action.begDate) <= DateTimeUtil.add_to_date(inspection_date,
-                                                                     30,
-                                                                     DateTimeUtil.day)
+                                                                            30,
+                                                                            DateTimeUtil.day)
         ) if epicrisis.action is not None else False
 
         if first_inspection is not None and last_inspection.action == first_inspection.action:
