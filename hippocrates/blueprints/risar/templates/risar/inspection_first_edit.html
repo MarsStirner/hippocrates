@@ -683,7 +683,7 @@
                                         <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
                                         <td><div ng-class="{'has-error': conclusionForm.next_date.$invalid && conclusionForm.submit_attempt}">
                                             <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
-                                                min-date="currentDate" max-date="inFiveDate"></wm-date>
+                                                min-date="checkup.beg_date || currentDate" max-date="inFiveDate"></wm-date>
                                         </div></td>
                                     </tr>
                                     <tr>
