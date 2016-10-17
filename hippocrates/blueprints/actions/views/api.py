@@ -554,8 +554,8 @@ def api_search_actions():
         base_query = base_query.filter(Action.status == flt['status_id'])
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
-    if 'action_type_id' in flt:
-        base_query = base_query.filter(Action.actionType_id == flt['action_type_id'])
+    if 'action_type_id_list' in flt:
+        base_query = base_query.filter(Action.actionType_id.in_(flt['action_type_id_list']))
     if 'beg_date_from' in flt:
         base_query = base_query.filter(Action.begDate >= safe_datetime(flt['beg_date_from']))
     if 'beg_date_to' in flt:

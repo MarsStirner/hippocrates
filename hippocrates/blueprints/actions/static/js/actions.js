@@ -12,7 +12,7 @@ var ActionListCtrl = function ($scope, $q, $window, WebMisApi, MessageBox, WMCon
         if ($scope.flt.id) model.id = $scope.flt.id;
         if ($scope.flt.status) model.status_id = $scope.flt.status.id;
         if ($scope.flt.client) model.client_id = $scope.flt.client.id;
-        if ($scope.flt.action_type) model.action_type_id = $scope.flt.action_type.id;
+        if ($scope.flt.action_type.length) model.action_type_id_list = _.pluck($scope.flt.action_type, 'id');
         if ($scope.flt.beg_date_from) model.beg_date_from = moment($scope.flt.beg_date_from).startOf('day').toDate();
         if ($scope.flt.beg_date_to) model.beg_date_to = moment($scope.flt.beg_date_to).endOf('day').toDate();
         if ($scope.flt.ped_from) model.ped_from = moment($scope.flt.ped_from).startOf('day').toDate();
@@ -71,7 +71,7 @@ var ActionListCtrl = function ($scope, $q, $window, WebMisApi, MessageBox, WMCon
             id: null,
             status: null,
             client: null,
-            action_type: null,
+            action_type: [],
             beg_date_from: current_monday,
             beg_date_to: null,
             ped_from: null,
@@ -102,6 +102,9 @@ var ActionListCtrl = function ($scope, $q, $window, WebMisApi, MessageBox, WMCon
     };
     $scope.openAction = function (action_id) {
         $window.open(WMConfig.url.actions.html.action + '?action_id=' + action_id);
+    };
+    $scope.atFilter = function (item) {
+        return item.hidden === 0;
     };
 
     $scope.clear_all();

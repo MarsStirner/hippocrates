@@ -24,8 +24,9 @@
                         </ui-select>
 
                         <label for="filter-action-type">Документ</label>
-                        <ui-select ext-select-ref-book-search="ActionType" ng-model="flt.action_type"
-                            theme="select2" id="filter-action-type" placeholder="Поиск типа документа"></ui-select>
+                        <ui-select ext-select-ref-book-search="ActionType" multiple="true" close-on-select="false"
+                            custom-filter="atFilter" ng-model="flt.action_type" theme="select2" id="filter-action-type"
+                            placeholder="Поиск типа документа"></ui-select>
 
                         <label for="filter-beg-date">Назначено</label>
                         <div class="row">
@@ -79,7 +80,7 @@
         </div>
         <div class="col-md-9">
             <div class="box box-primary">
-            <!-- Main -->
+            <div style="overflow-x: auto">
             <table class="table table-condensed table-hover table-clickable">
                 <thead wm-sortable-header>
                 <tr>
@@ -90,6 +91,8 @@
                     <th wm-sortable-column="set_person_short_name" on-change-order="sort_by_column(params)">Назначивший</th>
                     <th wm-sortable-column="person_short_name" on-change-order="sort_by_column(params)">Исполнитель</th>
                     <th>Статус</th>
+                    <th>ФИО пациента</th>
+                    <th>Финансирование</th>
                     <th>№ обращения</th>
                 </tr>
                 </thead>
@@ -102,6 +105,8 @@
                     <td>[[ action.set_person_short_name ]]</td>
                     <td>[[ action.person_short_name ]]</td>
                     <td>[[ action.status.name ]]</td>
+                    <td>[[ action.client_short_name ]]</td>
+                    <td>[[ action.finance_name ]]</td>
                     <td>
                         <a ng-href="{{ url_for('event.html_event_info') }}?event_id=[[action.event_id]]"
                             target="_blank">[[ action.event_external_id ]]</a>
@@ -110,10 +115,11 @@
                 </tbody>
                 <tbody>
                     <tr>
-                        <td colspan="8" class="text-right">Всего записей: [[total]]</td>
+                        <td colspan="10" class="text-right">Всего записей: [[total]]</td>
                     </tr>
                 </tbody>
             </table>
+            </div>
             <div class="box-footer center-block">
                 <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size"
                     ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
