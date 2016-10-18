@@ -8,9 +8,13 @@
             <div class="row">
                 <div class="form-group col-md-3">
                     <label for="appointed_by">Кем направлен</label>
-                    <select id="appointed_by" name="appointed_by" class="form-control"
-                            ng-model="model.appointed_by.value"
-                            ng-options="val for val in model.appointed_by.type.domain_obj.values"></select>
+                    <ui-select ng-model="model.appointed_by.value" theme="select2" class="form-control"
+                            autocomplete="off" id="appointed_by" name="appointed_by" no-undefined-value>
+                        <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                        <ui-select-choices repeat="item in model.appointed_by.type.domain_obj.values | filter: $select.search">
+                            <span ng-bind-html="item | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="appointment_doctor">Направивший врач</label>
@@ -32,8 +36,8 @@
                 <div class="col-md-5">
                     <label for="orgStructDirectedFrom" class="control-label">Направлен из</label>
                     <ui-select id="orgStructDirectedFrom" name="orgStructDirectedFrom" theme="select2"
-                               ng-model="model.orgStructDirectedFrom.value">
-                        <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                               ng-model="model.orgStructDirectedFrom.value" no-undefined-value>
+                        <ui-select-match placeholder="Подразделение" allow-clear="true">[[$select.selected.name]]</ui-select-match>
                         <ui-select-choices repeat="os in OrgStructure.objects | filter: {show: 1} | filter: $select.search">
                             <div ng-bind-html="os.name | highlight: $select.search"></div>
                         </ui-select-choices>
@@ -42,11 +46,12 @@
                 <div class="col-md-3" ng-class="{'has-error': event_maininfo_form.hosp_order.$invalid && editing.submit_attempt}">
                     <label for="hosp_order" class="control-label">Порядок госпитализации</label>
                     <rb-select ng-model="model.hosp_order.value" ref-book="rbHospitalisationOrder" ng-required="true"
-                               id="hosp_order" name="hosp_order"></rb-select>
+                               id="hosp_order" name="hosp_order" no-undefined-value></rb-select>
                 </div>
                 <div class="col-md-4">
                     <label for="hosp_goal" class="control-label">Цель госпитализации</label>
-                    <rb-select ng-model="model.hosp_goal.value" ref-book="rbHospitalisationGoal"></rb-select>
+                    <rb-select ng-model="model.hosp_goal.value" ref-book="rbHospitalisationGoal"
+                        no-undefined-value allow-clear="true"></rb-select>
                 </div>
             </div>
             <div class="row">
@@ -54,7 +59,7 @@
                      ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
                     <label for="delivered_by">Отделение поступления</label>
                     <ui-select id="org_structure" name="org_structure" theme="select2"
-                               ng-model="model.orgStructStay.value" ng-required="true">
+                               ng-model="model.orgStructStay.value" ng-required="true" no-undefined-value>
                         <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
                         <ui-select-choices repeat="os in OrgStructure.objects | filter: {show: 1} | filter: $select.search">
                             <div ng-bind-html="os.name | highlight: $select.search"></div>
@@ -63,9 +68,13 @@
                 </div>
                 <div class="form-group col-md-3">
                     <label for="delivered_by">Кем доставлен</label>
-                    <select id="delivered_by" name="delivered_by" class="form-control"
-                            ng-model="model.delivered_by.value"
-                            ng-options="val for val in model.delivered_by.type.domain_obj.values"></select>
+                    <ui-select ng-model="model.delivered_by.value" theme="select2" class="form-control"
+                            autocomplete="off" id="delivered_by" name="delivered_by" no-undefined-value>
+                        <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                        <ui-select-choices repeat="item in model.delivered_by.type.domain_obj.values | filter: $select.search">
+                            <span ng-bind-html="item | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="ambulance_number">№ наряда СП</label>
@@ -80,14 +89,18 @@
             <div class="row">
                 <div class="form-group col-md-5">
                     <label for="delivered_after">Доставлен от начала заболевания\травмы через</label>
-                    <select id="delivered_after" name="delivered_by" class="form-control"
-                            ng-model="model.delivered_after.value"
-                            ng-options="val for val in model.delivered_after.type.domain_obj.values"></select>
+                    <ui-select ng-model="model.delivered_after.value" theme="select2" class="form-control"
+                            autocomplete="off" id="delivered_after" name="delivered_after" no-undefined-value>
+                        <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                        <ui-select-choices repeat="item in model.delivered_after.type.domain_obj.values | filter: $select.search">
+                            <span ng-bind-html="item | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="transp_type">Вид транспортировки</label>
                     <ui-select id="transp_type" name="transp_type" theme="select2"
-                               ng-model="model.transp_type.value">
+                               ng-model="model.transp_type.value" no-undefined-value>
                         <ui-select-match placeholder="Вид транспортировки">[[$select.selected]]</ui-select-match>
                         <ui-select-choices repeat="val in model.transp_type.type.domain_obj.values">
                             <div ng-bind-html="val | highlight: $select.search"></div>
@@ -96,9 +109,13 @@
                 </div>
                 <div class="form-group col-md-4">
                     <label for="intoxication">Доставлен в состоянии опьянения</label>
-                    <select id="intoxication" name="delivered_by" class="form-control"
-                            ng-model="model.intoxication.value"
-                            ng-options="val for val in model.intoxication.type.domain_obj.values"></select>
+                    <ui-select ng-model="model.intoxication.value" theme="select2" class="form-control"
+                            autocomplete="off" id="intoxication" name="intoxication" no-undefined-value>
+                        <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                        <ui-select-choices repeat="item in model.intoxication.type.domain_obj.values | filter: $select.search">
+                            <span ng-bind-html="item | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
             </div>
         </div>
@@ -115,7 +132,8 @@
             <div class="row">
                 <div class="col-md-4">
                     <label for="hosp_order" class="control-label">Травма</label>
-                    <rb-select ng-model="model.trauma.value" ref-book="rbTraumaType"></rb-select>
+                    <rb-select ng-model="model.trauma.value" ref-book="rbTraumaType"
+                        allow-clear="true" no-undefined-value></rb-select>
                 </div>
             </div>
         </div>

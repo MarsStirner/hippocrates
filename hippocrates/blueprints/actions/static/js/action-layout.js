@@ -403,19 +403,4 @@ angular.module('WebMis20')
         }
     }
 }])
-.directive('noUndefinedValue', [function () {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function (scope, element, attrs, ngModelCtrl) {
-            scope.$watch(function () {
-                return ngModelCtrl.$modelValue;
-            }, function (newVal, oldVal) {
-                if (newVal !== oldVal && newVal === undefined) {
-                    ngModelCtrl.$setViewValue(null);
-                }
-            });
-        }
-    }
-}])
 ;
