@@ -6,7 +6,8 @@ from flask import request
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.chart_creator import PregnancyChartCreator
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
-from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_dates, copy_anamnesis_from_gyn_card
+from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_dates
+from hippocrates.blueprints.risar.lib.anamnesis import copy_anamnesis_from_gyn_card
 from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_event, group_orgs_for_routing, \
     represent_pregnancy_card_attributes, represent_pregnancy_checkup_wm, represent_chart_for_routing, \
