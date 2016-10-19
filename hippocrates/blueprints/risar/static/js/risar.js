@@ -118,11 +118,11 @@ WebMis20
                 'success'
             );
         }
-        function create (ticket_id, client_id) {
+        function create (ticket_id, client_id, gyn_event_id) {
             return wrapper(
                 'POST',
                 urls.get.format(''),
-                {ticket_id: ticket_id, client_id: client_id}
+                {ticket_id: ticket_id, client_id: client_id, gyn_event_id: gyn_event_id}
             ).then(function (event) {
                 if (event.automagic) {
                     on_event_created(ticket_id, event);
@@ -169,7 +169,7 @@ WebMis20
                 };
             })
         };
-        this.get = function (event_id, ticket_id, client_id) {
+        this.get = function (event_id, ticket_id, client_id, gyn_event_id) {
             if (event_id) {
                 return wrapper('GET', urls.get.format(event_id))
             } else {
@@ -177,7 +177,7 @@ WebMis20
                 wrapper('GET', urls.get.format(''), {ticket_id: ticket_id, client_id: client_id}).then(
                     function (data) {
                         if (!data) {
-                            create(ticket_id, client_id).then(
+                            create(ticket_id, client_id, gyn_event_id).then(
                                 deferred.resolve,
                                 deferred.reject
                             )

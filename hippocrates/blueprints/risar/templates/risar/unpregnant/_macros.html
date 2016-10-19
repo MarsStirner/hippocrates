@@ -24,7 +24,7 @@
             <a class="btn btn-default" href="{{ url_for('.html_pregnancy_chart', event_id=card.latest_pregnancy_event.id) }}">
                 Открыть текущую карту беременной</a>
             {% else %}
-            <a class="btn btn-default" ng-href="{{ url_for('.html_pregnancy_chart') }}?client_id=[[ header.client.id ]]">Взять на учет по беременности</a>
+            <a class="btn btn-default" ng-href="{{ url_for('.html_pregnancy_chart') }}?client_id=[[ header.client.id ]]&gyn_event_id={{ event_id_repl }}">Взять на учет по беременности</a>
             {% endif %}
             {# <div class="btn-group">
                 <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Взять на диспансерный учёт <span class="fa fa-caret-down"></span></button>

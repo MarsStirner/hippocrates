@@ -67,6 +67,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
     var ticket_id = params.ticket_id;
     var client_id = params.client_id;
     var event_id = params.event_id;
+    var gyn_event_id = params.gyn_event_id;
 
     $scope.open_edit_epicrisis = function(e){
         var scope = $scope.$new();
@@ -95,7 +96,7 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
             load_header(event_id)
         }
         RisarApi.chart.get(
-            event_id, ticket_id, client_id
+            event_id, ticket_id, client_id, gyn_event_id
         ).then(function (event) {
             $scope.chart = event;
             var mother_anamnesis = $scope.chart.anamnesis.mother;
