@@ -42,7 +42,7 @@
                                         <th>ФИО</th>
                                         <th>Срок</th>
                                     </tr>
-                                    <tr ng-repeat="row in need_hospitalization | filter:query">
+                                    <tr ng-repeat="row in need_hospitalization | filter:query.search_str">
                                         <td><span class="label"
                                                   ng-class="{'label-default': row.risk_rate.code == 'undefined',
                                                              'label-success': row.risk_rate.code == 'low',

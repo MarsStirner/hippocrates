@@ -2,7 +2,9 @@
 import datetime
 import json
 import math
+import re
 
+from collections import namedtuple
 from flask import request, make_response, abort
 from flask_login import current_user
 
@@ -22,6 +24,29 @@ from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 __author__ = 'mmalkov'
 
 
+ESCAPED_CHARS = namedtuple('EscapedChars', ['single_escape', 'double_escape'])(
+    single_escape=("'", '+', '[', ']', '=', '*'),
+    double_escape=('@', '!', '^', '(', ')', '~', '-', '|', '/', '<<', '$', '"')
+)
+
+
+def escape_sphinx_query(query):
+    # from sphintit/core/convertors.py MatchQueryCtx
+    single_escape_chars_re = '|\\'.join(ESCAPED_CHARS.single_escape)
+    query = re.sub(
+        single_escape_chars_re,
+        lambda m: r'\%s' % m.group(),
+        query
+    )
+    double_escape_chars_re = '|\\'.join(ESCAPED_CHARS.double_escape)
+    query = re.sub(
+        double_escape_chars_re,
+        lambda m: r'\\%s' % m.group(),
+        query
+    )
+    return query
+
+
 def quick_search_events(query_string, limit=20, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
     if query_string:
@@ -38,8 +63,8 @@ def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
-    if 'client_id' in kwargs:
-        query = query.filter(client_id__eq=kwargs['client_id'])
+    if 'fio' in kwargs and kwargs['fio']:
+        query = query.match(u'@name={0}'.format(escape_sphinx_query(kwargs['fio'])), raw=True)
     if 'areas' in kwargs:
         areas = [area['code'][:8] for area in kwargs['areas']]
         query = query.filter(area__in=areas)
@@ -82,7 +107,7 @@ def search_events(paginated=True, **kwargs):
     if client_workgroup:
         work_code = client_workgroup.get('code')
         if work_code:
-            query = query.match('@client_work_code %s' % work_code, raw=True)
+            query = query.match('@client_work_code %s' % escape_sphinx_query(work_code), raw=True)
     age_min = safe_int(kwargs.get('age_min'))
     if age_min:
         query = query.filter(client_age__gte=age_min)
@@ -112,7 +137,7 @@ def search_events_ambulance(**kwargs):
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'query' in kwargs and kwargs['query']:
-        query = query.match(u'@(name,document,policy) {0}'.format(kwargs['query']), raw=True)
+        query = query.match(u'@(name,document,policy) {0}'.format(escape_sphinx_query(kwargs['query'])), raw=True)
         query = query.options(field_weights={'lastName': 100,
                                              'firstName': 80,
                                              'patrName': 70,
@@ -130,6 +155,26 @@ def search_events_ambulance(**kwargs):
     result = query.limit(from_, to_).ask()
     return result
 
+
+def get_regexp_for_areas(areas):
+    """
+    если с 3 по 5 не будет 000 - проверить первые 5 цифр
+    иначе, с 5 по 8 не будет 000 - проверить первые 8 цифр
+    иначе, проверить первые 2 цифры
+    """
+    regx = '^$|^'
+    lst = []
+    for area in areas:
+        area_code = area['code']
+        if area_code:
+            if area_code[2:5] != u'000':
+                prefix = area_code[:5]
+            elif area_code[4:7] != u'000':
+                prefix = area_code[:8]
+            else:
+                prefix = area_code[:2]
+            lst.append(prefix)
+    return regx + '|^'.join(lst)
 
 
 @module.route('/api/0/search/', methods=['POST', 'GET'])
@@ -308,7 +353,7 @@ def api_0_area_curator_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^$|^' + '|^'.join([area['code'][:8] for area in areas if area['code']])
+        regex = get_regexp_for_areas(areas)
         query = query.filter(Organisation.area.op('regexp')(regex))
     query = query.group_by(
         PersonCurationAssoc.id
@@ -334,7 +379,7 @@ def api_0_curator_lpu_list():
         Organisation.isLPU == 1,
     )
     if areas:
-        regex = '^$|^' + '|^'.join([area['code'][:8] for area in areas if area['code']])
+        regex = get_regexp_for_areas(areas)
         query = query.filter(Organisation.area.op('regexp')(regex))
     return query.all()
 

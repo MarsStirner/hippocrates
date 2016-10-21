@@ -111,7 +111,7 @@ def _filter_prev_preg_tubal(prev_preg):
     """
     mkbs = [mkb.DiagID for mkb in prev_preg.action['pregnancy_pathology'].value]
     if mkbs:
-        return _mkb_match(mkbs, needles=u'O00-O99.99')
+        return _mkb_match(mkbs, needles=u'O00-O00.99')
     return False
 
 

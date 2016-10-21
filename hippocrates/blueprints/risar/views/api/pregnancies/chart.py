@@ -5,8 +5,9 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.chart_creator import PregnancyChartCreator
-from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_dates
+from hippocrates.blueprints.risar.lib.anamnesis import copy_anamnesis_from_gyn_card
 from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_event, group_orgs_for_routing, \
     represent_pregnancy_card_attributes, represent_pregnancy_checkup_wm, represent_chart_for_routing, \
@@ -80,6 +81,7 @@ def api_1_pregnancy_chart(event_id=None):
 def api_1_pregnancy_chart_create(event_id=None):
     ticket_id = request.args.get('ticket_id')
     client_id = request.args.get('client_id')
+    gyn_event_id = request.args.get('gyn_event_id')
 
     chart_creator = PregnancyChartCreator(client_id, ticket_id, event_id)
     chart_creator(create=True)
@@ -88,6 +90,13 @@ def api_1_pregnancy_chart_create(event_id=None):
         chart_creator.event.setDate = safe_datetime(request.json['beg_date'])
         chart_creator.event.execPerson_id = request.json['person']['id']
         db.session.commit()
+
+    if gyn_event_id:
+        pc = PregnancyCard.get_for_event(chart_creator.event)
+        gc = GynecologicCard.get_by_id(gyn_event_id)
+        if pc and gc:
+            copy_anamnesis_from_gyn_card(gc, pc)
+            db.session.commit()
 
     return dict(
         represent_pregnancy_event(chart_creator.event),

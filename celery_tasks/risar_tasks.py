@@ -7,10 +7,12 @@ from celery.utils.log import get_task_logger
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_event_cfrs
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.lib.apiutils import json_dumps
 from nemesis.lib.utils import safe_dict
 from nemesis.models.celery_tasks import TaskInfo
-from nemesis.models.event import Event
+from nemesis.models.event import Event, EventType
+from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import celery, db
 
 logger = get_task_logger(__name__)
@@ -26,13 +28,19 @@ def update_card_attrs_cfrs(self):
     task_data = {}
 
     # before
-    event_list = db.session.query(Event).filter(
+    event_list = db.session.query(Event).join(
+        EventType, rbRequestType
+    ).filter(
         Event.deleted == 0,
-        Event.execDate.is_(None)
+        Event.execDate.is_(None),
+        rbRequestType.code == request_type_pregnancy
     ).order_by(Event.setDate).all()
     cfrs_before = []
     for event in event_list:
         card = PregnancyCard.get_for_event(event)
+        if not card or not card.attrs:
+            logger.critical('event {0} is not valid'.format(event.id))
+            continue
         cfrs_before.append({
             'event_id': event.id,
             'card_fill_rates': represent_event_cfrs(card.attrs)
@@ -47,7 +55,6 @@ def update_card_attrs_cfrs(self):
     for event in event_list:
         card = PregnancyCard.get_for_event(event)
         if not card or not card.attrs:
-            logger.critical('event {0} is not valid'.format(event.id))
             continue
         reevaluate_card_fill_rate_all(card)
     db.session.commit()
@@ -57,6 +64,8 @@ def update_card_attrs_cfrs(self):
     cfrs_after = []
     for event in event_list:
         card = PregnancyCard.get_for_event(event)
+        if not card or not card.attrs:
+            continue
         cfrs_after.append({
             'event_id': event.id,
             'card_fill_rates': represent_event_cfrs(card.attrs)

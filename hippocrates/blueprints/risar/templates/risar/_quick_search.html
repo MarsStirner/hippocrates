@@ -5,7 +5,8 @@
             <ui-select  id="filter-client" ng-model="query.client"
                         ext-select-quick-event-search theme="select2"
                         on-select="onSelect($select.selected)"
-                        class="form-control" placeholder="Поиск пациентки">
+                        class="form-control" placeholder="Поиск пациентки"
+                        on-refresh="onQuickSearchChanged($select.selected)">
             </ui-select>
         </div>
     </div>
