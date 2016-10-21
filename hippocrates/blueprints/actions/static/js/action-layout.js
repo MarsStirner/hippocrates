@@ -190,7 +190,7 @@ angular.module('WebMis20')
                                         </ui-select>';
                                     break;
                                 case 'MKB':
-                                    inner_template = '<ui-mkb ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></ui-mkb>';
+                                    inner_template = '<ui-select ext-select-mkb ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></ui-select>';
                                     break;
                                 case 'OrgStructure': // Без фильтров
                                     inner_template =
