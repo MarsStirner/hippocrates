@@ -2,7 +2,7 @@
  * Created by mmalkov on 14.07.14.
  */
 var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
-        RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig, AccountingService) {
+        RefBookService, MessageBox, NotificationService, WMConfig, AccountingService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -35,9 +35,6 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                 $scope.action = action;
                 update_print_templates(action.action_type.context_name);
                 process_printing();
-                WMEventCache.get($scope.action.event_id).then(function (event) {
-                    $scope.event = event;
-                });
                 return action;
             }).then(function (action) {
                 if (!$scope.action.ro) {
@@ -74,9 +71,6 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                         $scope.action.service = new_service;
                     });
                 }
-            });
-            WMEventCache.get(parseInt(params.event_id)).then(function (event) {
-                $scope.event = event;
             });
         }
     };
@@ -158,45 +152,6 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
         $scope.action.discard().then($window.close, $window.close);
     };
     $scope.check_can_save_action = function () {
-        function check_diagnoses_conflicts(event, action) {
-            var deferred = $q.defer();
-            var self_diagnoses = action.properties.map(function (prop) {
-                    return prop.type.type_name === 'Diagnosis' ? prop.value : undefined;
-                }).reduce(function (diag_list, cur_elem) {
-                    if (cur_elem !== undefined && cur_elem !== null) {
-                        if (cur_elem instanceof Array) {
-                            diag_list = diag_list.concat(cur_elem);
-                        } else {
-                            diag_list.push(cur_elem);
-                        }
-                    }
-                    return diag_list;
-                }, []).filter(function (diag) {
-                    return diag.deleted === 0;
-                }),
-                fin_diagnoses = self_diagnoses.filter(function (diag) {
-                    return diag.diagnosis_type.code === '1';
-                }),
-                event_has_closed_fin_diagnoses = event.diagnoses.some(function (diag) {
-                    var diag_action_id = safe_traverse(diag, ['action', 'id']);
-                    return (
-                        // рассматриваем только другие действия в обращении,
-                        // считаем, что без id может быть только текущее действие
-                        diag_action_id && diag_action_id !== action.id &&
-                        diag.diagnosis_type.code === '1' &&
-                        safe_traverse(diag, ['action', 'status', 'code']) === 'finished');
-                });
-            if (action.status && action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
-                deferred.reject({
-                    silent: false,
-                    message: 'В обращении уже есть закрытые осмотры с заключительным дагнозом. ' +
-                        'Нельзя указывать больше одного заключительного диагноза в обращении.'
-                });
-            }
-            deferred.resolve();
-            return deferred.promise;
-        }
-
         function check_diagnosis (action){
             var deferred = $q.defer();
             var diags_without_result = action.diagnoses.filter(function(diag){
@@ -386,7 +341,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 };
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
-    'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
+    'PrintingDialog', 'RefBookService', 'MessageBox', 'NotificationService',
     'WMConfig', 'AccountingService', ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
@@ -421,6 +376,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
         // в дальнейшем атрибут readonly определяет разрешения на редактирование с учётом блокировки.
         self.ro = source.ro;
         self.bak_lab_info = source.bak_lab_info;
+        self.event_info = source.event_info;
     }
     function merge_properties (self, source) {
         /* Перетягивает свойства действия */

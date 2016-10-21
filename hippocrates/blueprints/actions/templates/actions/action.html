@@ -16,7 +16,7 @@
     </div>
     <h1>[[ action.action_type.name ]] -
         <a href="{{ url_for('patients.patient') }}?client_id=[[action.client.id]]">[[ action.client.full_name ]] [[ action.client.birth_date |asDate ]] ([[ action.client.age]])</a>
-        <a class="lmargin20" href="{{ url_for('event.html_event_info') }}?event_id=[[action.event_id]]">[[event.info.external_id]]</a>
+        <a class="lmargin20" href="{{ url_for('event.html_event_info') }}?event_id=[[action.event_id]]">[[action.event_info.external_id]]</a>
     </h1>
 </section>
 <section class="content">
