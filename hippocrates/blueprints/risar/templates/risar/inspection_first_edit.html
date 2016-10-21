@@ -638,7 +638,11 @@
                                     <tr>
                                         <td colspan="2">
                                             <ng-form name="DiagForm">
-                                                <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
+                                                <wm-diagnosis-new ng-model="checkup.diagnoses"
+                                                                  can-add-new="true"
+                                                                  can-edit="true"
+                                                                  diag-types="checkup.diagnosis_types"
+                                                                  checkup-beg-date="checkup.beg_date"/>
                                             </ng-form>
                                         </td>
                                     </tr>
