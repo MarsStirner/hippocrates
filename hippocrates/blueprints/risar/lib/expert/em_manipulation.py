@@ -6,9 +6,10 @@ import datetime
 from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
 
-from hippocrates.blueprints.risar.lib.utils import format_action_data
+from hippocrates.blueprints.risar.lib.utils import format_action_data, get_action_by_id
 from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list
 from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from hippocrates.blueprints.risar.lib.diagnosis import get_inspection_primary_diag_mkb
 
 from nemesis.models.expert_protocol import EventMeasure, Measure
 from nemesis.models.enums import MeasureStatus
@@ -19,6 +20,9 @@ from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int
 
 
 logger = logging.getLogger('simple')
+
+
+class EventMeasureException(Exception): pass
 
 
 class EventMeasureController(BaseModelController):
@@ -79,9 +83,27 @@ class EventMeasureController(BaseModelController):
     def get_new_appointment(self, em, action_data=None, action_props=None):
         event_id = em.event_id
         action_type_id = em.measure.appointmentAt_id
-        if action_type_id is not None:
-            appointment = create_action(action_type_id, event_id, properties=action_props, data=action_data)
-            return appointment
+        if not action_type_id:
+            raise EventMeasureException(u'Невозможно создать направление, не указан `appointmentAt_id`')
+        appointment = create_action(action_type_id, event_id, properties=action_props, data=action_data)
+        return appointment
+
+    def fill_new_appointment(self, appointment, data):
+        """Заполнить новое направление данными по умолчанию"""
+        event = org = cur_inspection = None
+        if 'em' in data:
+            event = data['em'].event
+            org = event.execPerson.organisation
+        if 'checkup_id' in data:
+            cur_inspection = get_action_by_id(data['checkup_id'])
+
+        if org and 'LPUDirection' in appointment.propsByCode:
+            appointment['LPUDirection'].value = org
+        if cur_inspection and 'DateDirection' in appointment.propsByCode:
+            appointment['DateDirection'].value = cur_inspection.begDate
+        if cur_inspection and 'DiagnosisDirection' in appointment.propsByCode:
+            appointment['DiagnosisDirection'].value = get_inspection_primary_diag_mkb(cur_inspection)
+        return appointment
 
     def create_appointment(self, em, json_data):
         json_data = format_action_data(json_data)
@@ -243,21 +265,20 @@ class EventMeasureController(BaseModelController):
                 raise ApiException(404, u'Не найдено EM с id = '.format(em_id))
 
             if not em.appointmentAction_id:
-                appointment = self.get_new_appointment(em)
+                try:
+                    appointment = self.get_new_appointment(em)
+                except EventMeasureException:
+                    continue
                 if "LPUDirection" in appointment.propsByCode:
                     appointment['LPUDirection'].value = organistaion
-                if appointment:
-                    em.appointment_action = appointment
-                    self.make_assigned(em)
+                em.appointment_action = appointment
+                self.make_assigned(em)
             else:
                 appointment = em.appointment_action
 
             if appointment:
                 result.append(em)
         return result
-
-
-
 
 
 class EventMeasureSelecter(BaseSelecter):
