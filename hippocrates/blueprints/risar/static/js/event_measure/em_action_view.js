@@ -61,7 +61,7 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.openEmAppointment = function (idx) {
         var em = $scope.checkup.measures[idx];
         if ($scope.canReadEmAppointment(em)) {
-            EventMeasureService.get_appointment(em)
+            EventMeasureService.get_appointment(em, $scope.checkup.id)
                 .then(function (appointment) {
                     return EMModalService.openAppointmentEdit(em, appointment);
                 })

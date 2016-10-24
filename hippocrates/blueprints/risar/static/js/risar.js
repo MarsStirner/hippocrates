@@ -455,14 +455,14 @@ WebMis20
                 '_blank'
             );
         },
-        get_appointment: function (event_measure_id, appointment_id) {
+        get_appointment: function (event_measure_id, appointment_id, args) {
             var url = Config.url.api_event_measure_appointment_get.format(event_measure_id);
             if (appointment_id) {
                 url += appointment_id;
             } else {
                 url += '?new=true';
             }
-            return wrapper('GET', url);
+            return wrapper('GET', url, args);
         },
         save_appointment: function (event_measure_id, appointment_id, data) {
             var url = Config.url.api_event_measure_appointment_save.format(event_measure_id),
