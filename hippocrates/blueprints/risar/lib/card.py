@@ -456,9 +456,11 @@ classes = {
 
 def _clear_caches():
     from flask import g
-    if hasattr(g, '_pregnancy_card_cache'):
-        del g._pregnancy_card_cache
+    if hasattr(g, '_card_cache'):
+        del g._card_cache
 
+    AbstractCard.cache = LocalCache()
     PregnancyCard.cache = LocalCache()
+    GynecologicCard.cache = LocalCache()
 
     lazy.cache = WeakKeyDictionary()

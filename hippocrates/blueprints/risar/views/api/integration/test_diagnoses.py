@@ -8,16 +8,16 @@ import datetime
 from copy import deepcopy
 from sqlalchemy import text
 
-from blueprints.risar.lib.card import PregnancyCard, _clear_caches as clear_preg_card_cache
-from blueprints.risar.lib.represent import represent_action_diagnoses
-from blueprints.risar.views.api.integration.checkup_obs_first.xform import CheckupObsFirstXForm
-from blueprints.risar.views.api.integration.checkup_obs_second.xform import CheckupObsSecondXForm
-from blueprints.risar.views.api.integration.childbirth.xform import ChildbirthXForm
-from blueprints.risar.views.api.integration.specialists_checkup.xform import SpecialistsCheckupXForm
-from blueprints.risar.views.api.integration.hospitalization.xform import HospitalizationXForm
-from blueprints.risar.views.api.integration.checkup_pc.xform import CheckupPCXForm
-from blueprints.risar.views.api.integration.checkup_puerpera.xform import CheckupPuerperaXForm
-from blueprints.risar.views.api.integration.utils import get_person_by_codes
+from hippocrates.blueprints.risar.lib.card import PregnancyCard, _clear_caches as clear_preg_card_cache
+from hippocrates.blueprints.risar.lib.represent.common import represent_action_diagnoses
+from hippocrates.blueprints.risar.views.api.integration.checkup_obs_first.xform import CheckupObsFirstXForm
+from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.xform import CheckupObsSecondXForm
+from hippocrates.blueprints.risar.views.api.integration.childbirth.xform import ChildbirthXForm
+from hippocrates.blueprints.risar.views.api.integration.specialists_checkup.xform import SpecialistsCheckupXForm
+from hippocrates.blueprints.risar.views.api.integration.hospitalization.xform import HospitalizationXForm
+from hippocrates.blueprints.risar.views.api.integration.checkup_pc.xform import CheckupPCXForm
+from hippocrates.blueprints.risar.views.api.integration.checkup_puerpera.xform import CheckupPuerperaXForm
+from hippocrates.blueprints.risar.views.api.integration.utils import get_person_by_codes
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_dict, safe_date, safe_datetime
 from nemesis.models.event import Event
