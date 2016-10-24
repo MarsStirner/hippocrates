@@ -4,14 +4,11 @@ from flask import request
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
-from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_event_measure_diag, \
-    update_patient_diagnoses
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_shortly
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int
 from nemesis.models.actions import Action
@@ -153,7 +150,8 @@ def api_0_event_measure_appointment_save(event_measure_id, appointment_id=None):
     if not em:
         raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
     em_ctrl = EventMeasureController()
-    if not appointment_id:
+    create_mode = not appointment_id and request.method == 'PUT'
+    if create_mode:
         appointment = em_ctrl.create_appointment(em, json_data)
         em_ctrl.store(em, appointment)
     elif appointment_id:
@@ -196,7 +194,7 @@ def api_0_event_measure_result_get(event_measure_id, em_result_id=None):
             if not em_result:
                 raise ApiException(404, u'Не найден Action с id = '.format(em_result_id))
         else:
-            raise ApiException(404, u'необходим `appointment_id`')
+            raise ApiException(404, u'необходим `em_result_id`')
         return EmResultRepr().represent_em_result(em_result)
 
 
@@ -209,21 +207,26 @@ def api_0_event_measure_result_save(event_measure_id, em_result_id=None):
     if not em:
         raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
     em_ctrl = EventMeasureController()
-    if not em_result_id:
-        old_event_measure_diag = None
+    create_mode = not em_result_id and request.method == 'PUT'
+    if create_mode:
         em_result = em_ctrl.create_em_result(em, json_data)
-        update_patient_diagnoses(old_event_measure_diag, em_result)
+        if em_ctrl.emr_changes_diagnoses_system(em_result):
+            em_ctrl.update_patient_diagnoses(em_result, create_mode)
         em_ctrl.store(em, em_result)
     elif em_result_id:
         em_result = get_action_by_id(em_result_id)
         if not em_result:
             raise ApiException(404, u'Не найден Action с id = '.format(em_result_id))
-        old_event_measure_diag = get_event_measure_diag(em_result, raw=True)
+        if em_ctrl.emr_changes_diagnoses_system(em_result):
+            old_em_diag_data = em_ctrl.get_emr_data_for_diags(em_result)
+        else:
+            old_em_diag_data = None
         em_result = em_ctrl.update_em_result(em, em_result, json_data)
-        update_patient_diagnoses(old_event_measure_diag, em_result)
+        if em_ctrl.emr_changes_diagnoses_system(em_result):
+            em_ctrl.update_patient_diagnoses(em_result, False, old_em_diag_data)
         em_ctrl.store(em, em_result)
     else:
-        raise ApiException(404, u'необходим `appointment_id`')
+        raise ApiException(404, u'необходим `em_result_id`')
     card = PregnancyCard.get_for_event(em.event)
     card.reevaluate_card_attrs()
     db.session.commit()

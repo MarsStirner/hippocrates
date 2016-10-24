@@ -10,7 +10,7 @@ import logging
 
 from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis
-from hippocrates.blueprints.risar.lib.utils import close_open_checkups, get_action
+from hippocrates.blueprints.risar.lib.utils import get_action
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from hippocrates.blueprints.risar.views.api.integration.childbirth.schemas import \
@@ -18,8 +18,7 @@ from hippocrates.blueprints.risar.views.api.integration.childbirth.schemas impor
 from hippocrates.blueprints.risar.views.api.integration.xform import CheckupsXForm, \
     ALREADY_PRESENT_ERROR
 from nemesis.lib.apiutils import ApiException
-from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_time
+from nemesis.lib.utils import safe_time, safe_date, safe_datetime
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.enums import Gender
 from nemesis.models.event import Event
@@ -88,7 +87,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         'obstetrical_forceps': {'attr': 'obstetrical_forceps', 'default': None, 'rb': 'rbRisarObstetrical_Forceps', 'is_vector': False},
         'vacuum_extraction': {'attr': 'vacuum_extraction', 'default': None, 'rb': None, 'is_vector': False},
         'indication': {'attr': 'indication', 'default': None, 'rb': 'rbRisarIndication', 'is_vector': False},
-        'specialities': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
+        'specialities': {'attr': 'specialities', 'default': None, 'rb': 'rbRisarSpecialities', 'is_vector': False},
         'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
         'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
         'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
@@ -142,6 +141,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             self.find_target_obj(self.target_obj_id)
         self.find_parent_obj(self.parent_obj_id)
         self.set_pcard()
+        self.target_obj = get_action(self.parent_obj, risar_epicrisis, True)
         form_data = self.mapping_as_form(data)
         self.update_form(form_data)
 
@@ -153,10 +153,7 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
         self.mapping_manipulations(data, res)
         self.mapping_operations(data, res)
         self.mapping_kids(data, res)
-        res['get_diagnoses_func'] = lambda: self.get_diagnoses((
-            (data.get('general_info', {}), self.DIAG_KINDS_MAP, 'final'),
-            (data.get('mother_death', {}), self.PAT_DIAG_KINDS_MAP, 'pathanatomical')
-        ), res.get('person'), res.get('delivery_date'))
+        self.mapping_diag_data(data, res)
         return res
 
     def mapping_general_info(self, data, res):
@@ -224,58 +221,101 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
                 nb_state['time'] = safe_time(mis_child['time'] if mis_child['alive'] else mis_child['death_time'])
             res.setdefault('newborn_inspections', []).append(nb_state)
 
+    def mapping_diag_data(self, data, res):
+        final_diag_data = []
+        if 'diagnosis_osn' in data['general_info']:
+            final_diag_data.append({
+                'kind': 'main',
+                'mkbs': [data['general_info']['diagnosis_osn']]
+            })
+        if 'diagnosis_osl' in data['general_info']:
+            final_diag_data.append({
+                'kind': 'complication',
+                'mkbs': data['general_info']['diagnosis_osl']
+            })
+        if 'diagnosis_sop' in data['general_info']:
+            final_diag_data.append({
+                'kind': 'associated',
+                'mkbs': data['general_info']['diagnosis_sop']
+            })
+        pat_diag_data = []
+        if 'mother_death' in data:
+            if 'pat_diagnosis_osn' in data['mother_death']:
+                pat_diag_data.append({
+                    'kind': 'main',
+                    'mkbs': [data['mother_death']['pat_diagnosis_osn']]
+                })
+            if 'pat_diagnosis_osl' in data['mother_death']:
+                pat_diag_data.append({
+                    'kind': 'complication',
+                    'mkbs': data['mother_death']['pat_diagnosis_osl']
+                })
+            if 'pat_diagnosis_sop' in data['mother_death']:
+                pat_diag_data.append({
+                    'kind': 'associated',
+                    'mkbs': data['mother_death']['pat_diagnosis_sop']
+                })
+        if not pat_diag_data:
+            for fd in final_diag_data:
+                pat_diag_data.append({
+                    'kind': 'associated',
+                    'mkbs': fd['mkbs'][:]
+                })
+
+        old_action_data = {
+            'begDate': self.target_obj.begDate,
+            'endDate': self.target_obj.endDate,
+            'person': self.target_obj.person
+        }
+        data_for_diags = {
+            'diags_list': [
+                {
+                    'diag_data': final_diag_data,
+                    'diag_type': 'final'
+                },
+                {
+                    'diag_data': pat_diag_data,
+                    'diag_type': 'pathanatomical'
+                }
+            ],
+            'old_action_data': old_action_data
+        }
+        res.update({
+            '_data_for_diags': data_for_diags
+        })
+        return res
+
     def update_form(self, data):
         # like blueprints.risar.views.api.epicrisis.api_0_chart_epicrisis
 
-        event_id = self.parent_obj_id
-        event = self.parent_obj
-        get_diagnoses_func = data.pop('get_diagnoses_func')
+        action = self.target_obj
 
         newborn_inspections = filter(None, data.pop('newborn_inspections', []))
-        action = get_action(event, risar_epicrisis, True)
-        self.target_obj = action
-        diagnoses = get_diagnoses_func()
+        data_for_diags = data.pop('_data_for_diags')
+
+        self.target_obj.begDate = self.target_obj.endDate = safe_datetime(safe_date(data['delivery_date']))
         action.setPerson = self.person
         action.person = self.person
 
-        if not action.id:
-            close_open_checkups(event_id)  # закрыть все незакрытые осмотры
         for code, value in data.iteritems():
             if code in action.propsByCode:
                 prop = action[code]
                 try:
-                    prop.value = value
+                    action.propsByCode[code].value = value
                 except Exception, e:
                     logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
                         prop.type.name, prop.type.id))
                     raise e
-        create_or_update_diagnoses(action, diagnoses)
+        self.update_diagnoses_system(data_for_diags['diags_list'], data_for_diags['old_action_data'])
         create_or_update_newborns(action, newborn_inspections)
 
-    def close_diags(self):
-        # Роман:
-        # сначала найти открытые диагнозы пациента (это будут просто диагнозы без типа), затем среди них определить какие являются основными,
-        # осложнениями и пр. - это значит, что Diagnosis связывается с осмотром через Action_Diagnosis, где указывается его тип, т.е. диагноз
-        # пациента в рамках какого-то осмотра будет иметь определенный тип. *Все открытые диагнозы пациента, для которых не указан тип в связке
-        # с экшеном являются сопотствующими неявно*.
-        # тут надо понять логику работы с диагнозами (четкого описания нет), после этого нужно доработать механизм диагнозов - из того, что я знаю,
-        # сейчас проблема как раз с определением тех диагнозов пациента, которые относятся к текущему случаю. Для этого нужно исправлять запрос,
-        # выбирающий диагнозы по датам с учетом дат Event'а. После этого уже интегрировать.
-
-        # Action_Diagnosis
-        # Diagnostic.query.filter(Diagnosis.id == diagnosis)
-        # q = Diagnosis.query.filter(Diagnosis.client == self.parent_obj.client)
-        # q.update({'deleted': 1})
-        raise
+        self.ais.close_previous()
 
     def delete_target_obj(self):
+        self.find_parent_obj(self.parent_obj_id)
         self.find_target_obj(self.target_obj_id)
-
-        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
-        # self.close_diags()
-        # В методе удаления осмотра с плодами ничего не делать, у action.deleted = 1
-        # self.delete_newborns()
-        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        self.ais.refresh(self.target_obj)
+        self.delete_diagnoses()
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,
@@ -283,11 +323,10 @@ class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
             Action.deleted == 0
         ).update({'deleted': 1})
 
-    def delete_newborns(self):
-        RisarEpicrisis_Children.query.filter(
-            RisarEpicrisis_Children.delete == 0,
-            RisarEpicrisis_Children.action_id == self.target_obj_id
-        ).delete()
+        self.delete_external_data()
+
+        # todo: при удалении последнего осмотра наверно нужно открывать предпослений
+        # if self.ais.left: ...
 
     def as_json(self):
         data = represent_pregnancy_epicrisis(self.parent_obj, self.target_obj)

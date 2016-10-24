@@ -4,6 +4,7 @@ import datetime
 
 import six
 from sqlalchemy.orm import lazyload, joinedload
+from sqlalchemy import func
 
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
@@ -283,8 +284,9 @@ def get_last_checkup_date(event_id):
     return query[0] if query else None
 
 
-def close_open_checkups(event_id):
-    now = datetime.datetime.now()
+def close_open_checkups(event_id, set_date=None):
+    if not set_date:
+        set_date = datetime.datetime.now()
     db.session.query(Action).filter(
         Action.event_id == event_id,
         Action.endDate.is_(None),
@@ -292,7 +294,7 @@ def close_open_checkups(event_id):
         ActionType.id == Action.actionType_id,
         ActionType.flatCode.in_(checkup_flat_codes)
     ).update({
-        Action.endDate: now,
+        Action.endDate: set_date,
         Action.status: ActionStatus.finished[0],
     }, synchronize_session=False)
 
@@ -333,6 +335,16 @@ def is_event_late_first_visit(event):
         if preg_week is not None:
             result = preg_week >= 10
     return result
+
+
+def check_is_latest_inspection(action):
+    """Является ли осмотр последним по дате (даже если он еще не сохранен)."""
+    latest = get_action_list(action.event, checkup_flat_codes).order_by(
+        Action.begDate.desc(), Action.id.desc()).first()
+    if action.id:
+        return latest is not None and latest.id == action.id
+    else:
+        return latest is None or latest.begDate <= action.begDate
 
 
 def format_action_data(json_data):
