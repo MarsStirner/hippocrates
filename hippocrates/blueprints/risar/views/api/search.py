@@ -12,7 +12,7 @@ from flask.ext.login import current_user
 
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
-from nemesis.lib.utils import safe_int
+from nemesis.lib.utils import safe_int, safe_timestamp
 from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
@@ -66,15 +66,25 @@ def search_events(paginated=True, **kwargs):
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
     if 'bdate_from' in kwargs:
-        query = query.filter(bdate__gte=sphinx_days(kwargs['bdate_from']))
+        query = query.filter(bdate__gte=safe_timestamp(kwargs['bdate_from'],
+                                                       for_date=True, to_int=True))
     if 'bdate_to' in kwargs:
-        query = query.filter(bdate__lte=sphinx_days(kwargs['bdate_to']))
+        query = query.filter(bdate__lte=safe_timestamp(kwargs['bdate_to'],
+                                                       for_date=True, to_int=True))
     if 'psdate' in kwargs:
-        query = query.filter(psdate__eq=sphinx_days(kwargs['psdate']))
+        query = query.filter(psdate__eq=safe_timestamp(kwargs['psdate'],
+                                                       for_date=True, to_int=True))
+    ch_date_from = ch_date_to = None
     if 'checkup_date_from' in kwargs:
-        query = query.filter(checkups__gte=sphinx_days(kwargs['checkup_date_from']))
+        ch_date_from = safe_timestamp(kwargs['checkup_date_from'], for_date=True, to_int=True, wo_time=True)
     if 'checkup_date_to' in kwargs:
-        query = query.filter(checkups__lte=sphinx_days(kwargs['checkup_date_to']))
+        ch_date_to = safe_timestamp(kwargs['checkup_date_to'], for_date=True, to_int=True, wo_time=True)
+    if ch_date_from and ch_date_to:
+        query = query.filter(checkups__between=[ch_date_from, ch_date_to])
+    elif ch_date_from:
+        query = query.filter(checkups__gte=ch_date_from)
+    elif ch_date_to:
+        query = query.filter(checkups__lte=ch_date_to)
     client_workgroup = kwargs.get('client_workgroup')
     if client_workgroup:
         work_code = client_workgroup.get('code')
@@ -160,9 +170,9 @@ def api_0_event_search():
                 'client_workgroup': get_workgroupname_by_code(row.get('client_work_code', '')),
                 'literal_age': represent_age(row.get('client_age', 0)),
                 'risk': PerinatalRiskRate(row['risk']),
-                'mdate': datetime.date.fromtimestamp(row['card_modify_date'] * 86400)
+                'mdate': datetime.date.fromtimestamp(row['card_modify_date'])
                     if 'card_modify_date' in row and row['card_modify_date'] else None,
-                'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
+                'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
                 'curators': get_org_curators(safe_int(row['org_id']), '2'),
                 'week':((
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
@@ -190,7 +200,7 @@ def api_0_event_print():
             'exec_person_name': row['person_name'],
             'risk': PerinatalRiskRate(row['risk']).name,
             'curators': get_org_curators(safe_int(row['org_id']), '2'),
-            'week':((
+            'week': ((
                 (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
                 datetime.date.fromtimestamp(row['psdate'])
             ).days / 7 + 1) if row['psdate'] else None
