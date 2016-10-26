@@ -5,6 +5,7 @@ from . import (
     checkup_obs_first, checkup_obs_second, checkup_pc, checkup_puerpera,
     checkup_gyn,
     anamnesis,
+    anamnesis_gyn,
     expert_data,
     measure,
     childbirth,

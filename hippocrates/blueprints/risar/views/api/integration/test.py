@@ -249,3 +249,8 @@ if __name__ == '__main__':
         #     test_register_edit_delete_gyn_checkup
         # card_id = '354'
         # test_register_edit_delete_gyn_checkup(card_id)
+
+        # from hippocrates.blueprints.risar.views.api.integration.anamnesis_gyn.test import \
+        #     test_register_edit_delete_gyn_anamnesis
+        # card_id = '354'
+        # test_register_edit_delete_gyn_anamnesis(card_id)
