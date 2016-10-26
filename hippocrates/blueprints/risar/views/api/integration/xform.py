@@ -10,8 +10,8 @@ from hippocrates.blueprints.risar.lib.diagnosis import DiagnosesSystemManager, A
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
 from hippocrates.blueprints.risar.models.risar import ActionIdentification
-from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes
-from hippocrates.blueprints.risar.lib.card import PregnancyCard
+from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes, risar_gyn_checkup_flat_code
+from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 
 from nemesis.lib.data import create_action
 from nemesis.views.rb import check_rb_value_exists
@@ -499,7 +499,7 @@ class ExternalXForm(XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'check_duplicate нужно использовать вместе с  "external_id"'
+                u'check_duplicate нужно использовать вместе с "external_id"'
             )
         q = self._find_target_obj_query().join(
             ActionIdentification
@@ -548,26 +548,17 @@ class ExternalXForm(XForm):
 
 
 class CheckupsXForm(ExternalXForm):
-    __metaclass__ = ABCMeta
 
-    def __init__(self, *args, **kwargs):
-        super(CheckupsXForm, self).__init__(*args, **kwargs)
-        self.ais = AdjasentInspectionsState(inspections_span_flatcodes, self.new)
-
+    @abstractmethod
     def set_pcard(self):
-        if not self.pcard:
-            if not self.parent_obj:
-                self.find_parent_obj(self.parent_obj_id)
-            event = self.parent_obj
-            self.pcard = PregnancyCard.get_for_event(event)
+        pass
 
     def reevaluate_data(self):
-        self.set_pcard()
-        self.pcard.reevaluate_card_attrs()
+        pass
 
+    @abstractmethod
     def generate_measures(self):
-        em_ctrl = EventMeasureController()
-        em_ctrl.regenerate(self.target_obj)
+        pass
 
     def _get_filtered_mis_diags(self, mis_diags):
         # filter mis diags
@@ -660,6 +651,46 @@ class CheckupsXForm(ExternalXForm):
         for d in new_oa_diagnoses:
             create_or_update_diagnoses(d['action'], [d['data']])
         db.session.add_all(changed_diagnoses)
+
+
+class PregnancyCheckupsXForm(CheckupsXForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PregnancyCheckupsXForm, self).__init__(*args, **kwargs)
+        self.ais = AdjasentInspectionsState(inspections_span_flatcodes, self.new)
+
+    def set_pcard(self):
+        if not self.pcard:
+            if not self.parent_obj:
+                self.find_parent_obj(self.parent_obj_id)
+            event = self.parent_obj
+            self.pcard = PregnancyCard.get_for_event(event)
+
+    def reevaluate_data(self):
+        self.set_pcard()
+        self.pcard.reevaluate_card_attrs()
+
+    def generate_measures(self):
+        em_ctrl = EventMeasureController()
+        em_ctrl.regenerate(self.target_obj)
+
+
+class GynecologyCheckupsXForm(CheckupsXForm):
+
+    def __init__(self, *args, **kwargs):
+        super(GynecologyCheckupsXForm, self).__init__(*args, **kwargs)
+        self.ais = AdjasentInspectionsState((risar_gyn_checkup_flat_code,), self.new)
+
+    def set_pcard(self):
+        if not self.pcard:
+            if not self.parent_obj:
+                self.find_parent_obj(self.parent_obj_id)
+            event = self.parent_obj
+            self.pcard = GynecologicCard.get_for_event(event)
+
+    def generate_measures(self):
+        em_ctrl = EventMeasureController()
+        em_ctrl.regenerate_gyn(self.target_obj)
 
 
 class MeasuresResultsXForm(ExternalXForm):

@@ -15,7 +15,7 @@ from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from hippocrates.blueprints.risar.views.api.integration.childbirth.schemas import \
     ChildbirthSchema
-from hippocrates.blueprints.risar.views.api.integration.xform import CheckupsXForm, \
+from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCheckupsXForm, \
     ALREADY_PRESENT_ERROR
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_time, safe_date, safe_datetime
@@ -29,7 +29,7 @@ from nemesis.systemwide import db
 logger = logging.getLogger('simple')
 
 
-class ChildbirthXForm(ChildbirthSchema, CheckupsXForm):
+class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
     """
     Класс-преобразователь
     """

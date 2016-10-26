@@ -13,14 +13,15 @@ from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import second_inspection_flat_code
 from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.schemas import \
     CheckupObsSecondSchema
-from hippocrates.blueprints.risar.views.api.integration.checkup_ticket25_xform import CheckupsTicket25XForm
-from hippocrates.blueprints.risar.views.api.integration.xform import CheckupsXForm
+from hippocrates.blueprints.risar.views.api.integration.checkup_ticket25_xform import CheckupsTicket25XForm, \
+    CheckupsTicket25XFormSchema
+from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCheckupsXForm
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
 
 
-class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
+class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
     """
     Класс-преобразователь
     """
@@ -315,17 +316,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, CheckupsXForm):
         return res
 
 
-class CheckupObsSecondTicket25XForm(CheckupsTicket25XForm):
+class CheckupObsSecondTicket25XForm(CheckupsTicket25XFormSchema, CheckupsTicket25XForm):
 
-    parent_obj_class = Event
-    target_obj_class = Action
-
-    def _find_target_obj_query(self):
-        res = self.target_obj_class.query.join(ActionType).filter(
-            self.target_obj_class.event_id == self.parent_obj_id,
-            self.target_obj_class.deleted == 0,
-            ActionType.flatCode == second_inspection_flat_code,
-        )
-        if self.target_obj_id:
-            res = res.filter(self.target_obj_class.id == self.target_obj_id,)
-        return res
+    def set_checkup_xform(self):
+        self.checkup_xform = CheckupObsSecondXForm(self.version, self.new)

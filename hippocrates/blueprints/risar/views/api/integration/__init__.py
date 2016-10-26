@@ -3,6 +3,7 @@ from . import (
     client,
     card,
     checkup_obs_first, checkup_obs_second, checkup_pc, checkup_puerpera,
+    checkup_gyn,
     anamnesis,
     expert_data,
     measure,

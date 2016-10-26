@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from hippocrates.blueprints.risar.views.api.integration.xform import CheckupsXForm, wrap_simplify
+from abc import ABCMeta, abstractmethod
+
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
 from hippocrates.blueprints.risar.views.api.integration.schemas import Schema
 from hippocrates.blueprints.risar.lib.represent.common import represent_action_diagnoses
 
@@ -195,23 +197,43 @@ class CheckupsTicket25XFormSchema(Schema):
     ]
 
 
-class CheckupsTicket25XForm(CheckupsTicket25XFormSchema, CheckupsXForm):
+class CheckupsTicket25XForm(XForm):
 
     def __init__(self, *args, **kwargs):
-        CheckupsXForm.__init__(self, *args, **kwargs)
+        super(CheckupsTicket25XForm, self).__init__(*args, **kwargs)
+        self.checkup_xform = None
         self.ticket25 = None
 
+    @abstractmethod
+    def set_checkup_xform(self):
+        pass
+
+    def check_params(self, target_obj_id, parent_obj_id=None, data=None):
+        if not self.checkup_xform:
+            self.set_checkup_xform()
+
+        self.checkup_xform.check_params(target_obj_id, parent_obj_id, data)
+
+    def _find_target_obj_query(self):
+        pass
+
+    def check_duplicate(self, data):
+        pass
+
     def find_ticket25(self):
-        if not self.target_obj:  # == Action inspection
-            self.find_target_obj(self.target_obj_id)
-        self.ticket25 = self.target_obj.propsByCode['ticket_25'].value
+        if not self.checkup_xform:
+            self.set_checkup_xform()
+
+        if not self.checkup_xform.target_obj:
+            self.checkup_xform.find_target_obj(self.checkup_xform.target_obj_id)
+        self.ticket25 = self.checkup_xform.target_obj.propsByCode['ticket_25'].value
 
     @wrap_simplify
     def as_json(self):
         if not self.ticket25:
             return
 
-        inspection = self.target_obj
+        inspection = self.checkup_xform.target_obj
         action = self.ticket25
         person = action.person
         res = {

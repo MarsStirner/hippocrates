@@ -244,3 +244,8 @@ if __name__ == '__main__':
         # from hippocrates.blueprints.risar.views.api.integration.doctors.test import \
         #     test_create_update_doctor
         # test_create_update_doctor()
+
+        # from hippocrates.blueprints.risar.views.api.integration.checkup_gyn.test import \
+        #     test_register_edit_delete_gyn_checkup
+        # card_id = '354'
+        # test_register_edit_delete_gyn_checkup(card_id)
