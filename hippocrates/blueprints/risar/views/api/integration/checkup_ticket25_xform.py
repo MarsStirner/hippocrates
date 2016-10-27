@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 
 from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
 from hippocrates.blueprints.risar.views.api.integration.schemas import Schema
@@ -82,8 +82,17 @@ class CheckupsTicket25XFormSchema(Schema):
                     "description": "Медицинские услуги",
                     "type": "array",
                     "items": {
-                        "description": "Медицинская услуга (код)",
-                        "type": "string"
+                        "type": "object",
+                        "properties": {
+                            "medical_service": {
+                                "description": "Медицинская услуга (код)",
+                                "type": "string"
+                            },
+                            "medical_service_doctor": {
+                                "description": "Врач, оказавший услугу (код врача)",
+                                "type": "string"
+                            }
+                        }
                     }
                 },
                 "diagnosis": {
@@ -152,6 +161,10 @@ class CheckupsTicket25XFormSchema(Schema):
                             "manipulation": {
                                 "description": "Манипуляция, исследование (код)",
                                 "type": "string"
+                            },
+                            "manipulation_quantity": {
+                                "description": "Манипуляция, количество",
+                                "type": "integer"
                             },
                             "manipulation_doctor": {
                                 "description": "Врач манипуляции (код врача)",
@@ -256,9 +269,17 @@ class CheckupsTicket25XForm(XForm):
         return res
 
     def _repr_med_services(self, action):
+        def make_med_service_data(ms):
+            doctor_id = safe_traverse(ms, 'person', 'id')
+            doctor = Person.query.get(doctor_id) if doctor_id else None
+            return {
+                'medical_service': safe_traverse(ms, 'service', 'code'),
+                'medical_service_doctor': self.from_person_rb(doctor)
+            }
+
         return [
-            safe_traverse(service, 'service', 'code')
-            for service in action['services'].value
+            make_med_service_data(ms)
+            for ms in action['services'].value
         ]
 
     def _repr_operations(self, action):
@@ -282,7 +303,8 @@ class CheckupsTicket25XForm(XForm):
             doctor = Person.query.get(doctor_id) if doctor_id else None
             return {
                 'manipulation': safe_traverse(manip, 'service', 'code'),
-                'manipulation_doctor': self.from_person_rb(doctor)
+                'manipulation_doctor': self.from_person_rb(doctor),
+                'manipulation_quantity': manip.get('amount')
             }
         return [
             make_manipulation_data(manip)
