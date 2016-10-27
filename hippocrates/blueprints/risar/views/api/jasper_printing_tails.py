@@ -29,3 +29,20 @@ def printing_checkup_ticket_25():
     return jasper_report.get_response_data()
 
 
+@module.route('/printing/epicrisis', methods=['POST'])
+def printing_jsp_epicrisis():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'epicrisis',
+        '/reports/Hippocrates/Analytics/epicrisis',
+        params={
+            'action_id': str(data['action_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()
+
+
