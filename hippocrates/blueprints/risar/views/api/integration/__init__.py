@@ -19,7 +19,8 @@ from . import (
     schedule_tickets,
     appointments,
     schedule,
-    doctors
+    doctors,
+    orgs
 )
 from . import xform
 
