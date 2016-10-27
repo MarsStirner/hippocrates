@@ -19,7 +19,6 @@ from hippocrates.blueprints.risar.views.api.integration.const import (
 )
 from nemesis.lib.apiutils import api_method, RawApiResult
 from nemesis.lib.utils import public_endpoint
-from nemesis.systemwide import db
 
 
 logger = logging.getLogger('simple')
@@ -46,7 +45,7 @@ def api_checkup_pc_save(api_version, card_id, exam_pc_id=None):
 
     try:
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
     except Exception, e:
         logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
         return RawApiResult(
@@ -79,7 +78,7 @@ def api_checkup_pc_delete(api_version, card_id, exam_pc_id):
 
     try:
         xform.reevaluate_data()
-        db.session.commit()
+        xform.store()
     except Exception, e:
         logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
         return RawApiResult(

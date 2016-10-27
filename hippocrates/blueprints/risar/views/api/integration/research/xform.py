@@ -10,7 +10,7 @@ from hippocrates.blueprints.risar.risar_config import general_results
 from hippocrates.blueprints.risar.views.api.integration.research.schemas import \
     ResearchSchema
 from hippocrates.blueprints.risar.views.api.integration.xform import MeasuresResultsXForm
-from nemesis.lib.utils import safe_int, safe_date
+from nemesis.lib.utils import safe_date, safe_datetime
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.event import Event
 
@@ -51,6 +51,10 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'Doctor': self.person,
             'Comment': data.get('comment'),
         }
+
+    def set_result_action_data(self, data):
+        self.target_obj.begDate = self.target_obj.endDate = safe_datetime(data['RealizationDate'])
+        self.target_obj.person = data['Doctor']
 
     def as_json(self):
         an_props = self.target_obj.propsByCode

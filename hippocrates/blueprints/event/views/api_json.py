@@ -520,12 +520,18 @@ def api_delete_event():
         ).update({
             ScheduleClientTicket.event_id: None,
         }, synchronize_session=False)
-        db.session.query(Service).join(Action).filter(
+        service_ids = [r[0] for r in db.session.query(Service.id).join(
+            Action
+        ).filter(
             Action.event_id == event.id,
             Service.action_id == Action.id
-        ).update({
-            Service.deleted: 1,
-        }, synchronize_session=False)
+        )]
+        if service_ids:
+            db.session.query(Service).filter(
+                Service.id.in_(service_ids)
+            ).update({
+                Service.deleted: 1,
+            }, synchronize_session=False)
         db.session.commit()
         return jsonify(None)
 

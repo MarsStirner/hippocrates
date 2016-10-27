@@ -33,7 +33,9 @@ def api_specialists_checkup_save(api_version, card_id, result_action_id=None):
     xform.validate(data)
     xform.check_params(result_action_id, card_id, data)
     xform.update_target_obj(data)
-    db.session.commit()
+    xform.store()
+    xform.reevaluate_data()
+    xform.store()
     return xform.as_json()
 
 
@@ -43,4 +45,6 @@ def api_specialists_checkup_delete(api_version, card_id, result_action_id):
     xform = SpecialistsCheckupXForm(api_version)
     xform.check_params(result_action_id, card_id)
     xform.delete_target_obj()
-    db.session.commit()
+    xform.store()
+    xform.reevaluate_data()
+    xform.store()

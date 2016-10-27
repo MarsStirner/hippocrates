@@ -400,7 +400,6 @@ class ChildbirthSchema(Schema):
                             "death_reason": {
                                 "description": "Причина смерти",
                                 "type": "string",
-                                "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                             },
                             "diseases": {
                                 "description": "Заболевания новорождённого (массив, код диагноза по МКБ-10)",
