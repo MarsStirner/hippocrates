@@ -195,6 +195,9 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
             PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
         }
     };
+    $scope.print_self = function () {
+        RisarApi.print_jsp_epicrisis({action_id: $scope.epicrisis.printing_action_id, extension: 'html'});
+    };
     init();
 
 };

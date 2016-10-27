@@ -713,8 +713,8 @@
                     <div class="box-footer">
                         <div class="pull-right">
                             <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]">Перейти на форму осмотров пациентки</a>
-                            <button ng-show="checkup.id && rc.sampleWizard.currentIndex == 6" ng-click="print_checkup_ticket()"
-                                type="button" class="btn btn-default"><i class="glyphicon glyphicon-print"></i> Печать талона</button>
+{#                            <button ng-show="checkup.id && rc.sampleWizard.currentIndex == 6" ng-click="print_checkup_ticket()"#}
+{#                                type="button" class="btn btn-default"><i class="glyphicon glyphicon-print"></i> Печать талона</button>#}
                             <ui-print-button ng-show="rc.sampleWizard.currentIndex == 5" ps="ps_fi"
                                              resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>
                             <a class="btn btn-success"

@@ -304,6 +304,7 @@ def represent_pregnancy_epicrisis(event, action=None):
     epicrisis['info'] = make_epicrisis_info(epicrisis)
     epicrisis['diagnoses'] = represent_action_diagnoses(action, checkup_flat_codes)
     epicrisis['diagnosis_types'] = action.actionType.diagnosis_types
+    epicrisis['printing_action_id'] = action.id
     return epicrisis
 
 

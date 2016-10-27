@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
+import logging
+from collections import defaultdict
+from sqlalchemy import or_, and_
+
+from hippocrates.blueprints.risar.lib.card import AbstractCard
 from nemesis.lib.utils import safe_traverse
 from nemesis.models.actions import Action, ActionType
+from nemesis.models.diagnosis import rbDiagnosisKind
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import ApiException
-from sqlalchemy import or_, and_
-from collections import defaultdict
+
+
+logger = logging.getLogger('simple')
+
 
 def get_prev_inspection_query(action, flatcodes):
     return db.session.query(Action).join(ActionType).filter(
@@ -39,3 +47,12 @@ def validate_diagnoses(diagnoses):
     # rimis1310
     if 'main' not in kinds:
         raise ApiException(409, u'Не выбран основной диагноз!')
+
+
+def get_inspection_primary_diag_mkb(inspection):
+    main_kind = rbDiagnosisKind.query.filter(rbDiagnosisKind.code == 'main').first()
+    card = AbstractCard.get_for_event(inspection.event)
+    diags = card.get_event_diagnostics(inspection.begDate, inspection.endDate, (main_kind.id,))
+    if len(diags) > 1:
+        logger.warning(u'К осмотру с id={0} относится более одного основного диагноза')
+    return diags[0].mkb if diags else None

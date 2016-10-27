@@ -191,7 +191,18 @@ class JasperReport(object):
             self.dsource = JasperDBMemoryDataSource(table_name, fields)
             params = params or {}
             params.update(self.dsource.get_request_params())
+        params.update(self.mongo_params)
         self.jclient = JasperRestV2Client(path, session, params)
+
+    @property
+    def mongo_params(self):
+        return {
+            'mongo_host': app.config.get('MONGO_HOST', '10.1.2.11'),
+            'mongo_port': app.config.get('MONGO_PORT', '27017'),
+            'mongo_dbname': app.config.get('MONGO_DBNAME', 'nvesta'),
+            'mongo_user': app.config.get('MONGO_USERNAME', ''),
+            'mongo_pw': app.config.get('MONGO_PASSWORD', ''),
+        }
 
     def generate(self, file_format, data=None):
         """

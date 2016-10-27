@@ -19,9 +19,10 @@ class rbRisarPrintTemplateMeta(db.Model):
     id = Column(Integer, primary_key=True)
     template_uri = Column(String, nullable=False)
     type = Column(Enum(
-        u'Integer', u'Float', u'String', u'Boolean', u'Date', u'Time',
-        u'List', u'Multilist',
-        u'RefBook', u'Organisation', u'OrgStructure', u'Person', u'Service', u'SpecialVariable'
+        u'Integer', u'Float', u'String', u'Boolean', u'Date', u'Time', u'List', u'Multilist',
+        u'RefBook', u'Organisation', u'OrgStructure', u'Person', u'Service', u'SpecialVariable',
+        u'MKB', u'Area', u'MultiRefBook', u'MultiOrganisation', u'MultiOrgStructure', u'MultiPerson',
+        u'MultiService', u'MultiMKB', u'MultiArea'
     ), nullable=False)
     name = Column(String(128), nullable=False)
     title = Column(String, nullable=False)

@@ -311,7 +311,7 @@ def api_0_event_search_ambulance():
                 'document_type': row['document_type'],
                 'policy': row['policy'],
             }
-            for row in result['result']['items']
+            for row in result['result']['items'] if row['card_req_type'] == 'pregnancy'
         ]
     }
 

@@ -97,8 +97,10 @@ WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
         var start_date = moment(em.data.beg_datetime).format('YYYY-MM-DD');
         return RisarApi.measure.new_appointment(header.client.id, checkup.person.id, start_date);
     };
-    this.get_appointment = function (em) {
-        return RisarApi.measure.get_appointment(em.data.id, em.data.appointment_action_id);
+    this.get_appointment = function (em, checkup_id) {
+        return RisarApi.measure.get_appointment(em.data.id, em.data.appointment_action_id, {
+            checkup_id: checkup_id
+        });
     };
     this.get_em_result = function (em) {
         return RisarApi.measure.get_em_result(em.data.id, em.data.result_action_id);
