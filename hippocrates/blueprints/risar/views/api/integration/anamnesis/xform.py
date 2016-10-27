@@ -64,12 +64,14 @@ class AnamnesisXForm(XForm):
 
     def delete_target_obj(self):
         self.parent_obj = self.find_event(self.parent_obj_id)
-        self.target_obj_class.query.join(ActionType, Event).filter(
-            self.parent_obj_class.id == self.parent_obj_id,
+        action_ids = [r[0] for r in db.session.query(Action.id).join(ActionType, Event).filter(
+            Event.id == self.parent_obj_id,
             ActionType.flatCode == self.flat_code,
-            Action.event_id == Event.id,
-            Action.actionType_id == ActionType.id
-        ).update({self.target_obj_class.deleted: 1})
+        ).all()]
+        if action_ids:
+            self.target_obj_class.query.filter(
+                self.target_obj_class.id.in_(action_ids)
+            ).update({self.target_obj_class.deleted: 1}, synchronize_session=False)
 
 
 class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
@@ -347,11 +349,8 @@ class AnamnesisPrevPregXForm(AnamnesisPrevPregSchema, AnamnesisXForm):
 
     def delete_target_obj(self):
         self.parent_obj = self.find_event(self.parent_obj_id)
-        self.target_obj_class.query.join(ActionType, Event).filter(
-            self.parent_obj_class.id == self.parent_obj_id,
-            ActionType.flatCode == self.flat_code,
+        self.target_obj_class.query.filter(
             self.target_obj_class.id == self.target_obj_id,
-            Action.event_id == Event.id
         ).update({self.target_obj_class.deleted: 1})
 
     @wrap_simplify
