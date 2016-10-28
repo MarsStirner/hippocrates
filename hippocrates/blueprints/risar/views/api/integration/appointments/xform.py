@@ -2,7 +2,7 @@
 
 import logging
 
-from ..xform import XForm, CheckupsXForm, wrap_simplify
+from ..xform import XForm, wrap_simplify
 from .schemas import AppointmentListSchema, AppointmentSchema
 
 from nemesis.models.event import Event
@@ -44,7 +44,7 @@ class AppointmentListXForm(AppointmentListSchema, XForm):
         return [str(appointment.id) for appointment in self.appointment_list]
 
 
-class AppointmentXForm(AppointmentSchema, CheckupsXForm):
+class AppointmentXForm(AppointmentSchema, XForm):
     """
     Класс-преобразователь
     """

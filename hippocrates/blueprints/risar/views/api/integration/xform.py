@@ -5,19 +5,24 @@ import jsonschema
 from datetime import datetime
 from decimal import Decimal
 from abc import ABCMeta, abstractmethod
-from hippocrates.blueprints.risar.lib.expert.em_diagnosis import update_patient_diagnoses, \
-    get_event_measure_diag
 
-from nemesis.lib.apiutils import ApiException
-from nemesis.lib.data import create_action
-from nemesis.lib.diagnosis import diagnosis_using_by_next_checkups
-from nemesis.views.rb import check_rb_value_exists
-from nemesis.lib.vesta import Vesta
-from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
+from hippocrates.blueprints.risar.lib.diagnosis import DiagnosesSystemManager, AdjasentInspectionsState
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
 from hippocrates.blueprints.risar.models.risar import ActionIdentification
+from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes, risar_gyn_checkup_flat_code
+from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
+
+from nemesis.lib.data import create_action
+from nemesis.views.rb import check_rb_value_exists
+from nemesis.lib.vesta import Vesta, VestaNotFoundException
+from nemesis.models.exists import rbAccountingSystem, MKB, rbBloodType
+from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureStatus
+from nemesis.models.enums import MeasureStatus
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
-from nemesis.lib.vesta import VestaNotFoundException
+from nemesis.lib.apiutils import ApiException
+from nemesis.lib.diagnosis import create_or_update_diagnoses
 from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
@@ -414,10 +419,9 @@ class XForm(object):
                         row_id = None
             else:
                 field = getattr(rb_model, rb_code_field)
-                res_list = list(rb_model.query.filter(
+                row_id = rb_model.query.filter(
                     field == code
-                ).values(rb_model.id))[0]
-                row_id = res_list and res_list[0] or None
+                ).value(rb_model.id)
             if not row_id:
                 raise ApiException(
                     NOT_FOUND_ERROR,
@@ -495,7 +499,7 @@ class ExternalXForm(XForm):
         if not self.external_id:
             raise ApiException(
                 VALIDATION_ERROR,
-                u'check_duplicate нужно использовать вместе с  "external_id"'
+                u'check_duplicate нужно использовать вместе с "external_id"'
             )
         q = self._find_target_obj_query().join(
             ActionIdentification
@@ -539,17 +543,121 @@ class ExternalXForm(XForm):
     def delete_external_data(self):
         ActionIdentification.query.filter(
             ActionIdentification.action_id == self.target_obj_id,
-            ActionIdentification.external_id == self.external_id,
             ActionIdentification.external_system_id == self.external_system.id,
         ).delete()
 
 
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
-    rbDiagnosisTypeN
-from hippocrates.blueprints.risar.lib.card import PregnancyCard
-
 class CheckupsXForm(ExternalXForm):
-    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def set_pcard(self):
+        pass
+
+    def reevaluate_data(self):
+        pass
+
+    @abstractmethod
+    def generate_measures(self):
+        pass
+
+    def _get_filtered_mis_diags(self, mis_diags):
+        # filter mis diags
+        # если в списке диагнозов из МИС придут дубли кодов МКБ - отсекать лишние
+        # если код МКБ в основном заболевании - игнорировать (отсекать) его в осложнениях и сопутствующих
+        # если код МКБ в осложнении - отсекать его в сопутствующих
+        # если два раза в одной группе (в осложнениях, например) - оставлять один
+        uniq_mis_diags = set()
+        flt_mis_diags = []
+        for diag_data in mis_diags:
+            flt_mkbs = []
+            for mkb in diag_data['mkbs']:
+                if mkb not in uniq_mis_diags:
+                    self.rb_validate(MKB, mkb, 'DiagID')
+                    flt_mkbs.append(mkb)
+                    uniq_mis_diags.add(mkb)
+            if flt_mkbs:
+                flt_mis_diags.append({
+                    'kind': diag_data['kind'],
+                    'mkbs': flt_mkbs
+                })
+        return flt_mis_diags
+
+    def update_diagnoses_system(self, diags_list, old_action_data):
+        """Из расчета, что на (пере)сохранение могут прийти данные с любыми изменениями,
+        ломающими систему диагнозов (серьезная смена даты осмотра, изменение набора диагнозов),
+        попытаться изменить состояние диагнозов в текущем, прошлом и следующем осмотрах.
+
+        Редактирование осуществляется за 2 прохода: при первом проходе изменяется состояние
+        диагнозов по данным осмотра с еще неизмененной датой начала, при втором - с уже обновленной.
+        """
+        series_len = len(diags_list)
+        for series_number, diag_group in enumerate(diags_list):
+            refresh_in_series = series_number != series_len - 1
+
+            diag_type = diag_group['diag_type']
+            diag_data = diag_group['diag_data']
+            mis_diags = self._get_filtered_mis_diags(diag_data)
+
+            # recalc for previous state
+            if not self.new and self.target_obj.begDate != old_action_data['begDate']:
+                t_beg_date = self.target_obj.begDate
+                self.target_obj.begDate = old_action_data['begDate']
+                t_end_date = self.target_obj.endDate
+                self.target_obj.endDate = old_action_data['endDate']
+                t_person = self.target_obj.person
+                self.target_obj.person = old_action_data['person']
+                self.ais.refresh(self.target_obj)
+                self.ais.close_previous()
+                self.ais.flush()
+
+                diag_sys = DiagnosesSystemManager.get_for_inspection(
+                    self.target_obj, diag_type, self.ais, refresh_in_series)
+                fut_interval = DateTimeInterval(t_beg_date, t_end_date)
+                diag_sys.refresh_with_old_state(mis_diags, fut_interval)
+                new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+
+                create_or_update_diagnoses(self.target_obj, new_diagnoses)
+                for d in new_oa_diagnoses:
+                    create_or_update_diagnoses(d['action'], [d['data']])
+                db.session.add_all(changed_diagnoses)
+                db.session.flush()
+                self.target_obj.begDate = t_beg_date
+                self.target_obj.endDate = t_end_date
+                self.target_obj.person = t_person
+
+            self.ais.refresh(self.target_obj)
+            self.ais.close_previous()
+            self.ais.flush()
+
+            diag_sys = DiagnosesSystemManager.get_for_inspection(
+                self.target_obj, diag_type, self.ais, refresh_in_series)
+            diag_sys.refresh_with(mis_diags)
+            new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+            create_or_update_diagnoses(self.target_obj, new_diagnoses)
+            for d in new_oa_diagnoses:
+                create_or_update_diagnoses(d['action'], [d['data']])
+            db.session.add_all(changed_diagnoses)
+
+            db.session.flush()
+
+    def delete_diagnoses(self):
+        """Изменить систему диагнозов после удаления осмотра
+        """
+        diag_sys = DiagnosesSystemManager.get_for_inspection(
+            self.target_obj, None, self.ais)
+        diag_sys.refresh_with_deletion()
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+        create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
+        db.session.add_all(changed_diagnoses)
+
+
+class PregnancyCheckupsXForm(CheckupsXForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PregnancyCheckupsXForm, self).__init__(*args, **kwargs)
+        self.ais = AdjasentInspectionsState(inspections_span_flatcodes, self.new)
 
     def set_pcard(self):
         if not self.pcard:
@@ -566,151 +674,142 @@ class CheckupsXForm(ExternalXForm):
         em_ctrl = EventMeasureController()
         em_ctrl.regenerate(self.target_obj)
 
-    def get_diagnoses(self, diags_data_list, person, set_date):
-        # Прислали новый код МКБ, и не прислали старый - старый диагноз закрыли, новый открыли.
-        # если тот же МКБ пришел не как осложнение, а как сопутствующий, это смена вида
-        # если в списке диагнозов из МИС придут дубли кодов МКБ - отсекать лишние
-        # Если код МКБ в основном заболевании - игнорировать (отсекать) его в осложнениях и сопутствующих.
-        # Если код МКБ в осложнении - отсекать его в сопутствующих
-        # если два раза в одной группе (в осложнениях, например) - оставлять один
 
-        action = self.target_obj
-        diagnostics = self.pcard.get_client_diagnostics(action.begDate,
-                                                        action.endDate)
-        db_diags = {}
-        default_kind_codes = dict((x[2], 'associated') for x in diags_data_list)
-        for diagnostic in diagnostics:
-            diagnosis = diagnostic.diagnosis
-            if diagnosis.endDate:
-                continue
-            q_dict = dict(Action_Diagnosis.query.join(
-                rbDiagnosisKind, rbDiagnosisTypeN,
-            ).filter(
-                Action_Diagnosis.action == action,
-                Action_Diagnosis.diagnosis == diagnosis,
-                Action_Diagnosis.deleted == 0,
-            ).values(rbDiagnosisTypeN.code, rbDiagnosisKind.code))
-            diag_kind_codes = default_kind_codes.copy()
-            diag_kind_codes.update(q_dict)
-            db_diags[diagnostic.MKB] = {
-                'diagnosis_id': diagnosis.id,
-                'diagKind_codes': diag_kind_codes,
-            }
+class GynecologyCheckupsXForm(CheckupsXForm):
 
-        mis_diags = {}
-        for diags_data, diag_kinds_map, diag_type in diags_data_list:
-            mis_diags_uniq = set()
-            for mis_diag_kind, v in sorted(diag_kinds_map.items(),
-                                           key=lambda x: x[1]['level']):
-                mis_key, is_vector, default = v['attr'], v['is_vector'], v['default']
-                mkb_list = diags_data.get(mis_key, default)
-                if not is_vector:
-                    mkb_list = mkb_list and [mkb_list] or []
-                for mkb in mkb_list:
-                    if mkb not in mis_diags_uniq:
-                        mis_diags_uniq.add(mkb)
-                        mis_diags.setdefault(
-                            mkb, {}
-                        ).setdefault(
-                            'diagKind_codes', {}
-                        ).update(
-                            {diag_type: mis_diag_kind}
-                        )
+    def __init__(self, *args, **kwargs):
+        super(GynecologyCheckupsXForm, self).__init__(*args, **kwargs)
+        self.ais = AdjasentInspectionsState((risar_gyn_checkup_flat_code,), self.new)
 
-        def add_diag_data():
-            res.append({
-                'id': db_diag.get('diagnosis_id'),
-                'deleted': 0,
-                'kind_changed': kind_changed,
-                'diagnostic_changed': diagnostic_changed,
-                'diagnostic': {
-                    'mkb': self.rb(mkb, MKB, 'DiagID'),
-                },
-                'diagnosis_types': diagnosis_types,
-                'person': person,
-                'set_date': set_date,
-                'end_date': end_date,
-            })
+    def set_pcard(self):
+        if not self.pcard:
+            if not self.parent_obj:
+                self.find_parent_obj(self.parent_obj_id)
+            event = self.parent_obj
+            self.pcard = GynecologicCard.get_for_event(event)
 
-        res = []
-        for mkb in set(db_diags.keys() + mis_diags.keys()):
-            db_diag = db_diags.get(mkb, {})
-            mis_diag = mis_diags.get(mkb, {})
-            db_diagnosis_types = dict(
-                (k, self.rb(v, rbDiagnosisKind)) for k, v in db_diag.get('diagKind_codes', {}).items()
-            )
-            mis_diagnosis_types = dict(
-                (k, self.rb(v, rbDiagnosisKind)) for k, v in mis_diag.get('diagKind_codes', {}).items()
-            )
-            if db_diag and mis_diag:
-                # сменить тип
-                diagnostic_changed = False
-                kind_changed = mis_diag.get('diagKind_codes') != db_diag.get('diagKind_codes')
-                diagnosis_types = mis_diagnosis_types
-                end_date = None
-                add_diag_data()
-            elif not db_diag and mis_diag:
-                # открыть
-                diagnostic_changed = False
-                kind_changed = True
-                diagnosis_types = mis_diagnosis_types
-                end_date = None
-                add_diag_data()
-            elif db_diag and not mis_diag:
-                # закрыть
-                # нельзя закрывать, если используется в документах своего типа с бОльшей датой
-                if diagnosis_using_by_next_checkups(action):
-                    continue
-                diagnostic_changed = True
-                kind_changed = False
-                diagnosis_types = db_diagnosis_types
-                end_date = set_date
-                add_diag_data()
-        return res
+    def generate_measures(self):
+        em_ctrl = EventMeasureController()
+        em_ctrl.regenerate_gyn(self.target_obj)
 
-
-from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureStatus
-from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from nemesis.models.enums import MeasureStatus
 
 class MeasuresResultsXForm(ExternalXForm):
     __metaclass__ = ABCMeta
+
+    diagnosis_codes = None
 
     def __init__(self, *args, **kwargs):
         super(MeasuresResultsXForm, self).__init__(*args, **kwargs)
         self.em = None
         self.person = None
+        self.ais = AdjasentInspectionsState(inspections_span_flatcodes, self.new)
 
     @abstractmethod
     def prepare_params(self, data):
         pass
 
-
     @abstractmethod
     def get_properties_data(self, data):
         return data
+
+    def get_em(self):
+        return self.em
+
+    def set_pcard(self):
+        if not self.pcard:
+            if not self.parent_obj:
+                self.find_parent_obj(self.parent_obj_id)
+            event = self.parent_obj
+            self.pcard = PregnancyCard.get_for_event(event)
+
+    def reevaluate_data(self):
+        self.set_pcard()
+        self.pcard.reevaluate_card_attrs()
 
     def update_measure_data(self, data):
         status = data.get('status')
         if status:
             self.em.status = self.rb_validate(rbMeasureStatus, status, 'code')
 
+    def changes_diagnoses_system(self):
+        return bool(self.diagnosis_codes)
+
+    def get_data_for_diags(self, data):
+        pass
+
+    def modify_target(self, new_date, new_person):
+        return self.target_obj
+
+    def get_measure_type(self):
+        pass
 
     def update_target_obj(self, data):
         self.prepare_params(data)
 
         if self.new:
             self.create_action()
-            old_event_measure_diag = None
         else:
             self.find_target_obj(self.target_obj_id)
-            old_event_measure_diag = get_event_measure_diag(self.target_obj, raw=True)
+
+        mr_data = self.get_data_for_diags(data)
 
         properties_data = self.get_properties_data(data)
+        self.set_result_action_data(properties_data)
         self.set_properties(properties_data)
-        update_patient_diagnoses(old_event_measure_diag, self.target_obj)
         self.update_measure_data(data)
         self.save_external_data()
+        if self.changes_diagnoses_system():
+            self.update_diagnoses_system(mr_data)
+
+    def update_diagnoses_system(self, mr_data):
+        """
+        См. CheckupsXForm.update_diagnoses_system
+        """
+        measure_mkbs = mr_data['new_mkbs']
+        new_diags = [dict(kind='associated', mkbs=measure_mkbs)]
+
+        # recalc for previous state
+        if not self.new and mr_data['changed']:
+            target = self.modify_target(mr_data['old_beg_date'], mr_data['old_person'])
+            self.ais.refresh(self.target_obj)
+
+            diag_sys = DiagnosesSystemManager.get_for_measure_result(
+                target, 'final', self.get_measure_type().value, self.ais)
+            fut_interval = DateTimeInterval(mr_data['new_beg_date'], mr_data['new_beg_date'])
+            diag_sys.refresh_with_measure_result_old_state(new_diags, fut_interval)
+            new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+
+            create_or_update_diagnoses(self.target_obj, new_diagnoses)
+            for d in new_oa_diagnoses:
+                create_or_update_diagnoses(d['action'], [d['data']])
+            db.session.add_all(changed_diagnoses)
+            db.session.flush()
+            self.modify_target(mr_data['new_beg_date'], mr_data['new_person'])
+
+        self.ais.refresh(self.target_obj)
+
+        diag_sys = DiagnosesSystemManager.get_for_measure_result(
+            self.target_obj, 'final', self.get_measure_type().value, self.ais)
+        diag_sys.refresh_with_measure_result(new_diags)
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+        create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
+        db.session.add_all(changed_diagnoses)
+        db.session.flush()
+
+    def delete_diagnoses(self):
+        """Изменить систему диагнозов после удаления результата мероприятия
+        """
+        diag_sys = DiagnosesSystemManager.get_for_measure_result(
+            self.target_obj, None, self.get_measure_type().value, self.ais)
+        diag_sys.refresh_with_deletion()
+        new_diagnoses, changed_diagnoses, new_oa_diagnoses = diag_sys.get_result()
+        create_or_update_diagnoses(self.target_obj, new_diagnoses)
+        for d in new_oa_diagnoses:
+            create_or_update_diagnoses(d['action'], [d['data']])
+
+        db.session.add_all(changed_diagnoses)
 
     def get_event_measure(self, event_measure_id, measure_code, beg_date, end_date):
         if event_measure_id:
@@ -749,6 +848,9 @@ class MeasuresResultsXForm(ExternalXForm):
 
         self.target_obj = em_result
 
+    def set_result_action_data(self, data):
+        pass
+
     def set_properties(self, data):
         for code, value in data.iteritems():
             if code in self.target_obj.propsByCode:
@@ -762,8 +864,9 @@ class MeasuresResultsXForm(ExternalXForm):
                     raise
 
     def delete_target_obj(self):
-        #  Евгений: Пока диагнозы можешь не закрывать и не удалять.
-        # self.close_diags()
+        self.find_target_obj(self.target_obj_id)
+        self.ais.refresh(self.target_obj)
+        self.delete_diagnoses()
 
         self.target_obj_class.query.filter(
             self.target_obj_class.event_id == self.parent_obj_id,

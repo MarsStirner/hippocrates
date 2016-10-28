@@ -11,7 +11,7 @@ obs_first_data = {
     "external_id": "12345",
     # "exam_obs_id": "",
     "general_info": {
-        "date": "2016-03-31",  # *
+        "date": "2016-04-30",  # *
         "hospital": "-1",  # *
         "doctor": "22",  # *
         "height": 120,  # *
@@ -101,9 +101,9 @@ obs_first_data = {
         "pregnancy_continuation": True,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "A03",  # Основной диагноз
-        # "diagnosis_sop": [],  # Диагноз сопутствующий
-        # "diagnosis_osl": [],  # Диагноз осложнения
+        "diagnosis_osn": "D01",  # Основной диагноз
+        "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
+        # "diagnosis_osl": ["D01"],  # Диагноз осложнения
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания
     }

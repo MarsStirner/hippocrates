@@ -3,7 +3,9 @@ from . import (
     client,
     card,
     checkup_obs_first, checkup_obs_second, checkup_pc, checkup_puerpera,
+    checkup_gyn,
     anamnesis,
+    anamnesis_gyn,
     expert_data,
     measure,
     childbirth,
@@ -17,7 +19,8 @@ from . import (
     schedule_tickets,
     appointments,
     schedule,
-    doctors
+    doctors,
+    orgs
 )
 from . import xform
 
