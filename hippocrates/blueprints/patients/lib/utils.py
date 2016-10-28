@@ -639,13 +639,17 @@ def delete_client_file_attach(cfa_id):
     cfa = ClientFileAttach.query.get(cfa_id)
     cfa.deleted = 1
     db.session.add(cfa)
-    FileMeta.query.join(FileGroupDocument, ClientFileAttach).filter(
+    ids = [r[0] for r in db.session.query(FileMeta.id).join(
+        FileGroupDocument, ClientFileAttach
+    ).filter(
         FileMeta.filegroup_id == FileGroupDocument.id,
         FileGroupDocument.id == ClientFileAttach.filegroup_id,
         ClientFileAttach.id == cfa_id
-    ).update({
-        FileMeta.deleted: 1
-    }, synchronize_session=False)
+    ).all()]
+    if ids:
+        FileMeta.query.filter(
+            FileMeta.id.in_(ids)
+        ).update({FileMeta.deleted: 1}, synchronize_session=False)
     return cfa
 
 

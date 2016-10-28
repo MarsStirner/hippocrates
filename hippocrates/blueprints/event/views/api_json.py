@@ -20,7 +20,7 @@ from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
                                parse_id, bail_out)
-from nemesis.models.accounting import Service, Contract
+from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed, \
     Action_TakenTissueJournalAssoc, TakenTissueJournal
 from nemesis.models.client import Client
@@ -29,7 +29,7 @@ from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB, rbTest
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
-from sqlalchemy import desc, func, and_
+from sqlalchemy import desc, func, and_, or_
 from sqlalchemy.orm import joinedload
 
 logger = logging.getLogger('simple')
@@ -501,12 +501,31 @@ def api_delete_event():
         ).update({
             ScheduleClientTicket.event_id: None,
         }, synchronize_session=False)
-        db.session.query(Service).join(Action).filter(
-            Action.event_id == event.id,
-            Service.action_id == Action.id
+        db.session.query(Service).filter(
+            Service.event_id == event.id
         ).update({
             Service.deleted: 1,
         }, synchronize_session=False)
+        invoice_ids = [r[0] for r in db.session.query(Invoice.id.distinct()).join(
+            InvoiceItem, or_(InvoiceItem.invoice_id == Invoice.id,
+                             InvoiceItem.refund_id == Invoice.id)
+        ).join(
+            Service
+        ).filter(
+            Service.event_id == event.id
+        )]
+        if invoice_ids:
+            db.session.query(Invoice).filter(
+                Invoice.id.in_(invoice_ids)
+            ).update({
+                Invoice.deleted: 1,
+            }, synchronize_session=False)
+            db.session.query(InvoiceItem).filter(
+                or_(InvoiceItem.invoice_id.in_(invoice_ids),
+                    InvoiceItem.refund_id.in_(invoice_ids))
+            ).update({
+                InvoiceItem.deleted: 1,
+            }, synchronize_session=False)
         db.session.commit()
         return
 

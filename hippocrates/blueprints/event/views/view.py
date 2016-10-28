@@ -8,7 +8,7 @@ from nemesis.lib.html_utils import UIException
 from ..app import module
 from nemesis.lib.utils import breadcrumb, bail_out, parse_id
 from nemesis.models.event import Event
-from nemesis.lib.user import UserProfileManager
+from nemesis.lib.user import UserProfileManager, UserUtils
 
 # noinspection PyUnresolvedReferences
 from . import api_json
@@ -20,6 +20,8 @@ def html_event_info():
         event_id = int(request.args['event_id'])
         event = Event.query.get(event_id)
         if not event:
+            raise UIException(404, u'Обращение не найдено')
+        if not UserUtils.can_read_event(event):
             raise UIException(404, u'Обращение не найдено')
         requestType_kind = 'stationary' if event.is_stationary else 'policlinic'
     except (KeyError, ValueError):
