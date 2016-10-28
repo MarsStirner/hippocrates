@@ -1,12 +1,11 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices, tq_types, finance) {
+var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices, tq_types) {
     $scope.rec_types = rec_types;
     $scope.roas = roas;
     $scope.offices = offices;
     $scope.tq_types = tq_types;
-    $scope.finance = finance;
 
     $scope.selected_days = selected_days;
     $scope.model = model;
@@ -356,7 +355,8 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                                 reception_type: interval.reception_type,
                                 CITO: interval.CITO,
                                 planned: interval.planned,
-                                extra: interval.extra
+                                extra: interval.extra,
+                                finance: interval.finance
                             }
                         }),
                         quotas: first_day_quotas.day_quotas.map(function(quota) {
@@ -380,9 +380,6 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                 },
                 tq_types: function () {
                     return $scope.rbTimeQuotingType.objects;
-                },
-                finance: function () {
-                    return $scope.rbFinance.objects;
                 }
             }
         });
