@@ -66,8 +66,19 @@ def search_events(paginated=True, **kwargs):
     if 'fio' in kwargs and kwargs['fio']:
         query = query.match(u'@name={0}'.format(escape_sphinx_query(kwargs['fio'])), raw=True)
     if 'areas' in kwargs:
-        areas = [area['code'][:8] for area in kwargs['areas']]
-        query = query.filter(area__in=areas)
+        areas = kwargs['areas']
+        ors = []
+        for area in areas:
+            area_code = area['code']
+            if area_code[2:5] != u'000':
+                ors.append(area_code[:5])
+            elif area_code[5:8] != u'000':
+                ors.append(area_code[:8])
+            else:
+                ors.append(area_code[:2])
+
+        query = query.filter(areas__in=ors)
+
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
     if 'doc_id' in kwargs:
@@ -160,7 +171,7 @@ def search_events_ambulance(**kwargs):
 def get_regexp_for_areas(areas):
     """
     если с 3 по 5 не будет 000 - проверить первые 5 цифр
-    иначе, с 5 по 8 не будет 000 - проверить первые 8 цифр
+    иначе, с 6 по 8 не будет 000 - проверить первые 8 цифр
     иначе, проверить первые 2 цифры
     """
     regx = '^$|^'
@@ -170,7 +181,7 @@ def get_regexp_for_areas(areas):
         if area_code:
             if area_code[2:5] != u'000':
                 prefix = area_code[:5]
-            elif area_code[4:7] != u'000':
+            elif area_code[5:8] != u'000':
                 prefix = area_code[:8]
             else:
                 prefix = area_code[:2]
