@@ -18,7 +18,7 @@ from nemesis.lib.apiutils import ApiException
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id
 from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
-from nemesis.lib.settings import Settings
+from nemesis.models.enums import ActionStatus
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 
@@ -175,6 +175,7 @@ class MovingController():
 
     def close_moving(self, moving):
         moving.endDate = datetime.datetime.now()
+        moving.status = ActionStatus.finished[0]
         db.session.add(moving)
         db.session.commit()
         return moving
