@@ -70,9 +70,6 @@ def api_0_pregnancy_checkup_puerpera(event_id):
         create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
-    from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
-    reevaluate_card_fill_rate_all(card)
-    db.session.commit()
 
     return represent_pregnancy_checkup_puerpera(action)
 

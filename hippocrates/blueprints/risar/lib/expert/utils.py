@@ -27,7 +27,6 @@ em_stats_status_list = {MeasureStatus.created[0], MeasureStatus.assigned[0], Mea
 def is_em_touched(em):
     """Проверить, что с мероприятием случая провзаимодействовал кто-то или что-то."""
     return em.status in em_touched_status_list and (
-        # TODO: добавить проверку на созданное направление
         em.appointmentAction_id is not None or em.resultAction_id is not None
     )
 
