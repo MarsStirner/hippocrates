@@ -29,7 +29,7 @@
         <tr ng-repeat="em in checkup.measures track by em.data.id" ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }">
             <td><label for="inp_[[ $index + 1 ]]" ng-bind="[[ $index + 1 ]]"> </label>
                 <input id="inp_[[ $index + 1 ]]" class="measure-checkbox" type="checkbox"
-                       ng-disabled = "!canEditEmAppointment(em)"
+                       ng-disabled = "!canSelectEMAppointment(em)"
                        ng-model="checkboxes[em.data.id]">
             </td>
             <td>
