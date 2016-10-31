@@ -3,10 +3,13 @@
 var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, EventMeasureService) {
     $scope.selectAll = false;
     $scope.checkboxes = {};
+    var cancelled_statuses = ['cancelled', 'cancelled_invalid', 'cancelled_dupl',
+        'cancelled_changed_data', 'overdue'];
+
     $scope.toggleSelection = function () {
         $scope.selectAll = !$scope.selectAll;
         _.map($scope.checkup.measures, function (em) {
-            if ( $scope.canReadEmAppointment(em) ) {
+            if ( $scope.canSelectEMAppointment(em) ) {
                 $scope.checkboxes[em.data.id] =  $scope.selectAll;
             }
         });
@@ -112,6 +115,11 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.canEditEmAppointment = function (em) {
         return em.access.can_edit_appointment;
+    };
+    $scope.canSelectEMAppointment = function (em) {
+        return em.access.can_edit_appointment && (
+            em.data.id || !cancelled_statuses.has(em.data.status.code)
+        );
     };
     $scope.canEditEmResult = function (em) {
         return em.access.can_edit_result;

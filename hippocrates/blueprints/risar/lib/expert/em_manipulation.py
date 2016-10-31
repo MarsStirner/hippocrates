@@ -109,6 +109,8 @@ class EventMeasureController(BaseModelController):
             appointment['LPUDirection'].value = org
         if cur_inspection and 'DateDirection' in appointment.propsByCode:
             appointment['DateDirection'].value = cur_inspection.begDate
+        if cur_inspection and 'DirectionDate' in appointment.propsByCode:
+            appointment['DirectionDate'].value = cur_inspection.begDate
         if cur_inspection and 'DiagnosisDirection' in appointment.propsByCode:
             appointment['DiagnosisDirection'].value = get_inspection_primary_diag_mkb(cur_inspection)
         return appointment
@@ -359,7 +361,9 @@ class EventMeasureController(BaseModelController):
     def save_appointment_list(self, item_list, action):
         """Сохраняет списоок мероприятий, создаёт направляения, проставляет им LPUDirection"""
         result = []
-        organistaion = action.event.execPerson.organisation
+        org = action.event.execPerson.organisation
+        cur_beg_date = action.begDate
+        cur_main_diag = get_inspection_primary_diag_mkb(action)
         for em_id in item_list:
             em = EventMeasure.query.get(em_id)
             if not em:
@@ -370,8 +374,15 @@ class EventMeasureController(BaseModelController):
                     appointment = self.get_new_appointment(em)
                 except EventMeasureException:
                     continue
-                if "LPUDirection" in appointment.propsByCode:
-                    appointment['LPUDirection'].value = organistaion
+                if 'LPUDirection' in appointment.propsByCode:
+                    appointment['LPUDirection'].value = org
+                if 'DateDirection' in appointment.propsByCode:
+                    appointment['DateDirection'].value = cur_beg_date
+                if 'DirectionDate' in appointment.propsByCode:
+                    appointment['DirectionDate'].value = cur_beg_date
+                if 'DiagnosisDirection' in appointment.propsByCode:
+                    appointment['DiagnosisDirection'].value = cur_main_diag
+
                 em.appointment_action = appointment
                 self.make_assigned(em)
             else:
