@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
+
 __author__ = 'mmalkov'
 
 request_type_pregnancy = 'pregnancy'
@@ -201,3 +203,13 @@ gyn_checkup_simple_codes = [
 ]
 
 gyn_checkup_codes = gyn_checkup_simple_codes + ['ticket_25']
+
+
+soc_prof_codes = OrderedDict(
+    (('mother_employment', ['date', 'explanation', 'gestation_age', 'failure_reason']),
+     ('sanatorium_therapy', ['failure_reason', 'results', 'doctor', 'gestation_age', 'name']),
+     ('gymnastics', ['gestation_age', 'lessons_number', 'doctor', 'failure_reason']),
+     ('maternity_lessons', ['failure_reason', 'doctor', 'lessons_number', 'gestation_age']),
+     ('psychological_preparation', ['failure_reason', 'doctor', 'lessons_number', 'gestation_age']),
+     ('legal_support', ['gestation_age', 'explanation', 'doctor', 'failure_reason'])))
+

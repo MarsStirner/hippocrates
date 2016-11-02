@@ -429,3 +429,9 @@ def html_radzinsky_risks():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/radzinsky_risks.html', card=card)
+
+@module.route('/soc_prof_help.html')
+def html_soc_prof_help():
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/soc_prof_help.html', card=card)

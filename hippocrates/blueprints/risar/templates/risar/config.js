@@ -121,7 +121,11 @@ WebMis20
         api_concilium_get: '{{ url_for('.api_0_concilium_get', event_id=-90) | replace("-90", "{0}") }}',
         api_chart_radzinsky_risks: '{{ url_for('.api_0_chart_radzinsky_risks', event_id=-90) | replace("-90", "{0}") }}',
         api_person_contacts_get: '{{ url_for('schedule.api_person_contacts_get') }}{0}',
-        api_radz_print: '{{ url_for('.api_0_radz_print') }}'
+        api_radz_print: '{{ url_for('.api_0_radz_print') }}',
+        api_soc_prof_help: '{{ url_for('.api_0_soc_prof_post', action_id=-99, flat_code=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
+        api_soc_prof_help_list: '{{ url_for('.api_0_soc_prof_help_list', event_id=-99).replace('-99', '{0}') }}',
+        api_soc_prof_help_delete: '{{ url_for('.api_0_soc_prof_help_delete', action_id=-99).replace('-99', '{0}') }}',
+        api_soc_prof_help_undelete: '{{ url_for('.api_0_soc_prof_help_undelete', action_id=-99).replace('-99', '{0}') }}'
     }
 })
 ;

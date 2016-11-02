@@ -7,5 +7,6 @@ from . import chart
 from . import jasper_printing_tails
 from . import radz_risks
 from . import maternal_cert
+from . import soc_prof_help
 
 __author__ = 'mmalkov'

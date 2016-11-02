@@ -249,7 +249,6 @@ def represent_pregnancy_checkup(action):
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
     result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
-
     return result
 
 

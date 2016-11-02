@@ -437,6 +437,10 @@ def action_as_dict(action, prop_filter=None):
         return result
 
 
+def action_as_dict_with_id(action, prop_filter=None):
+    return dict(action_as_dict(action, prop_filter), id=action.id)
+
+
 def safe_action_property(action, prop_name, default=None):
     prop = action.propsByCode.get(prop_name)
     return prop.value if prop else default

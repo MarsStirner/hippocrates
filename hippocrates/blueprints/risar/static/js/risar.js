@@ -632,6 +632,21 @@ WebMis20
             self.file_get('POST', Config.url.api_radz_print, query);
         }
     };
+    this.soc_prof_help = {
+        save: function(event_id, flat_code, data) {
+            return wrapper('POST', Config.url.api_soc_prof_help.format(data.id||'', flat_code), {event_id: event_id}, data);
+        },
+        get_list: function(event_id) {
+            return wrapper('GET', Config.url.api_soc_prof_help_list.format(event_id));
+        },
+        delete: function (id) {
+            return wrapper('DELETE', Config.url.api_soc_prof_help_delete.format(id));
+        },
+        undelete: function (id) {
+            return wrapper('POST', Config.url.api_soc_prof_help_undelete.format(id));
+        }
+    };
+
     this.utils = {
         get_person_contacts: function(person_id){
             return wrapper('GET', Config.url.api_person_contacts_get.format(person_id))

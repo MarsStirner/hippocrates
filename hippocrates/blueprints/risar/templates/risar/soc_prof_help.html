@@ -1,0 +1,282 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+{% block main %}
+<div ng-controller="SocProfCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Социально-профилактическая помощь беременной ') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected('mother_employment')}" ng-click="selectStage('mother_employment')">Трудоустройство</a>
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected('sanatorium_therapy')}" ng-click="selectStage('sanatorium_therapy')">Санаторное лечение</a>
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected('gymnastics')}" ng-click="selectStage('gymnastics')">Физкультура</a>
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected('maternity_lessons')}" ng-click="selectStage('maternity_lessons')">Школа материнства</a>
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected('psychological_preparation')}" ng-click="selectStage('psychological_preparation')">Психопрофилактическая<br>подготовка к родам</a>
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected('legal_support')}" ng-click="selectStage('legal_support')">Социально-правовая помощь</a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="box box-solid" ng-show="isStageSelected('mother_employment')">
+                <div class="box-header with-border" style="margin-left:20px!important;">
+                    <h3 class="box-title">Трудоустройство</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row" style="margin-left:20px!important;">
+                        <table class="table" >
+                        <thead >
+                            <tr>
+                                <th>Дата</th>
+                                <th>Расшифровка</th>
+                                <th>Срок беременности</th>
+                                <th>Причина невыполнения</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="t in soc_prof_help.mother_employment_list | orderBy:'date' ">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.explanation | pluck:'name' | join:', ' "></td>
+                                <td ng-if="!t.deleted" ng-bind="t.gestation_age"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.failure_reason.name"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t, 'mother_employment')">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add('mother_employment')">Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-solid" ng-show="isStageSelected('sanatorium_therapy')">
+                <div class="box-header with-border" style="margin-left:20px!important;">
+                    <h3 class="box-title" >Санаторное лечение</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row" style="margin-left:20px!important;">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Срок беременности</th>
+                                <th>Направивший врач</th>
+                                <th>Результаты лечения</th>
+                                <th>Причина невыполнения</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="t in soc_prof_help.sanatorium_therapy_list">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.gestation_age"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.doctor.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.results"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.failure_reason.name"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t, 'sanatorium_therapy')">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add('sanatorium_therapy')">Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-solid" ng-show="isStageSelected('gymnastics')">
+                <div class="box-header with-border" style="margin-left:20px!important;">
+                    <h3 class="box-title">Физкультура</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row" style="margin-left:20px!important;">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Срок беременности</th>
+                                <th>Количество занятий</th>
+                                <th>Направивший врач</th>
+                                <th>Причина невыполнения</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="t in soc_prof_help.gymnastics_list">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.gestation_age"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.lessons_number"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.doctor.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.failure_reason.name"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t, 'gymnastics')">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add('gymnastics')">Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-solid" ng-show="isStageSelected('maternity_lessons')">
+                <div class="box-header with-border" style="margin-left:20px!important;">
+                    <h3 class="box-title">Школа материнства</h3>
+                </div>
+                <div class="box-body" >
+                    <div class="row" style="margin-left:20px!important;">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Срок беременности</th>
+                                <th>Количество занятий</th>
+                                <th>Направивший врач</th>
+                                <th>Причина невыполнения</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="t in soc_prof_help.maternity_lessons_list">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.gestation_age"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.lessons_number"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.doctor.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.failure_reason.name"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t, 'maternity_lessons')">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add('maternity_lessons')">Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-solid" ng-show="isStageSelected('psychological_preparation')">
+                <div class="box-header with-border" style="margin-left:20px!important;">
+                    <h3 class="box-title">Психопрофилактическая подготовка к родам</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row" style="margin-left:20px!important;">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Срок беременности</th>
+                                <th>Количество занятий</th>
+                                <th>Направивший врач</th>
+                                <th>Причина невыполнения</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="t in soc_prof_help.psychological_preparation_list">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.gestation_age"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.lessons_number"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.doctor.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.failure_reason.name"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t, 'psychological_preparation')">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add('psychological_preparation')">Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="box box-solid" ng-show="isStageSelected('legal_support')">
+                <div class="box-header with-border" style="margin-left:20px!important;">
+                    <h3 class="box-title">Социально-правовая помощь</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row" style="margin-left:20px!important;">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Срок беременности</th>
+                                <th>Расшифровка</th>
+                                <th>Направивший врач</th>
+                                <th>Причина невыполнения</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="t in soc_prof_help.legal_support_list">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.gestation_age"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.explanation"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.doctor.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.failure_reason.name"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t, 'legal_support')">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add('legal_support')">Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/soc_prof_help.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/mother_employment.html">{% include 'risar/modals/soc_prof_help/_mother_employment.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/sanatorium_therapy.html">{% include 'risar/modals/soc_prof_help/_sanatorium_therapy.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/gymnastics.html">{% include 'risar/modals/soc_prof_help/_gymnastics.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/maternity_lessons.html">{% include 'risar/modals/soc_prof_help/_maternity_lessons.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/psychological_preparation.html">{% include 'risar/modals/soc_prof_help/_psychological_preparation.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/legal_support.html">{% include 'risar/modals/soc_prof_help/_legal_support.html' %}</script>
+{% endblock %}
