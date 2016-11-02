@@ -128,7 +128,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         
     };
     $scope.openContractListUi = function () {
-        WMWindowSync.openTab(WMConfig.url.html_contract_list, refreshAvailableContracts);
+        WMWindowSync.openTab(WMConfig.url.accounting.html_contract_list, refreshAvailableContracts);
     };
 
     $scope.filter_rb_request_type = function(request_type_kind) {

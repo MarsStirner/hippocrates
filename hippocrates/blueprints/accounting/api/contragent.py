@@ -53,3 +53,15 @@ def api_0_contragent_client_get(client_id=None):
     if not client:
         raise ApiException(404, u'Client not found')
     return ContragentRepr().represent_ca_client(client)
+
+
+@module.route('/api/0/contragent/check_duplicate', methods=['POST'])
+@api_method
+def api_0_contragent_check_duplicate():
+    data = request.get_json()
+    if not data:
+        raise ApiException(400, 'no request data')
+    ca_ctrl = ContragentController()
+    res = ca_ctrl.check_duplicate(data)
+    res['existing'] = ContragentRepr().represent_contragent(res['existing'])
+    return res

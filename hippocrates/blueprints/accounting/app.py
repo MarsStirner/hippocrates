@@ -36,6 +36,7 @@ def fc_urls():
                 'api_contragent_payer_get': url_for('accounting.api_0_contragent_payer_get'),
                 'api_contingent_get': url_for('accounting.api_0_contingent_get'),
                 'api_contragent_search_payer': url_for('accounting.api_0_contragent_search_payer'),
+                'api_contragent_check_duplicate': url_for('accounting.api_0_contragent_check_duplicate'),
                 'api_pricelist_list': url_for('accounting.api_0_pricelist_list'),
                 'api_service_search': url_for('accounting.api_0_service_search'),
                 'api_service_get': url_for('accounting.api_0_service_get'),

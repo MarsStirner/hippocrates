@@ -204,6 +204,9 @@ WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisAp
         }
         return WebMisApi.contragent.get_payer(payer_id);
     };
+    this.check_ca_duplicate = function (c_agent) {
+        return WebMisApi.contragent.check_duplicate(c_agent);
+    };
     this.get_new_contingent = function (args) {
         return WebMisApi.contingent.get(undefined, args);
     };

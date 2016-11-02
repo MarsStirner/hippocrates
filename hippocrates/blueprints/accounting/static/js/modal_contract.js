@@ -97,12 +97,14 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             append-to-body="true" theme="select2" ng-if="!isPayerCreateMode()">\
                         </ui-select>\
                         <ui-select ng-model="contract.payer.org" ext-select-org theme="select2"\
-                            append-to-body="true" placeholder="Выберите организацию" ng-if="isPayerCreateMode() && isPayerLegal()">\
+                            append-to-body="true" placeholder="Выберите организацию" ng-if="isPayerCreateMode() && isPayerLegal()"\
+                            ng-change="checkNewCADuplicate(contract.payer, \'payer\')">\
                         </ui-select>\
                         <div class="row" ng-if="isPayerCreateMode() && isPayerIndividual()">\
                             <div class="col-md-8">\
                                 <ui-select ng-model="contract.payer.client" ext-select-client-search theme="select2"\
-                                    append-to-body="true" placeholder="Выберите клиента">\
+                                    append-to-body="true" placeholder="Выберите клиента"\
+                                    ng-change="checkNewCADuplicate(contract.payer, \'payer\')">\
                                 </ui-select>\
                             </div>\
                             <div class="col-md-4">\
@@ -110,6 +112,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             </div>\
                         </div>\
                     </div>\
+                    <div class="alert alert-danger" role="alert" ng-if="isCAPayerDuplicate()">\
+                        Указанный контрагент уже существует. <a href="javascript:void(0);" class="text-bold"\
+                        ng-click="selectExistingCA(\'payer\')">Выберите имеющуюся запись.</a></div>\
                 </div>\
                 <div class=col-md-6 col-sm-12>\
                     <div class="text-center vbmargin10">\
@@ -130,12 +135,17 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             append-to-body="true" theme="select2" ng-if="!isRecipientCreateMode()">\
                         </ui-select>\
                         <ui-select ng-model="contract.recipient.org" ext-select-org theme="select2"\
-                            append-to-body="true" placeholder="Выберите организацию" ng-if="isRecipientCreateMode() && isRecipientLegal()">\
+                            append-to-body="true" placeholder="Выберите организацию" ng-if="isRecipientCreateMode() && isRecipientLegal()"\
+                            ng-change="checkNewCADuplicate(contract.recipient, \'recipient\')">\
                         </ui-select>\
                         <ui-select ng-model="contract.recipient.client" ext-select-client-search theme="select2"\
-                            append-to-body="true" placeholder="Выберите клиента" ng-if="isRecipientCreateMode() && isRecipientIndividual()">\
+                            append-to-body="true" placeholder="Выберите клиента" ng-if="isRecipientCreateMode() && isRecipientIndividual()"\
+                            ng-change="checkNewCADuplicate(contract.recipient, \'recipient\')">\
                         </ui-select>\
                     </div>\
+                    <div class="alert alert-danger" ng-if="isCARecipientDuplicate()">\
+                        Указанный контрагент уже существует. <a href="javascript:void(0);" class="text-bold"\
+                        ng-click="selectExistingCA(\'recipient\')">Выберите имеющуюся запись.</a></div>\
                 </div>\
                 </div>\
             </div>\
@@ -214,7 +224,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
-    <button type="button" class="btn btn-primary" ng-disabled="contractForm.$invalid" ng-click="saveAndClose()">Сохранить</button>\
+    <button type="button" class="btn btn-primary" ng-disabled="contractForm.$invalid || !canSave()"\
+        ng-click="saveAndClose()">Сохранить</button>\
 </div>');
 }]);
 
@@ -224,7 +235,11 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     $scope.client = client;
     $scope.ca_params = {
         payer_create_mode: false,
-        recipient_create_mode: false
+        recipient_create_mode: false,
+        new_ca_payer_duplicate: false,
+        new_ca_recipient_duplicate: false,
+        existing_payer_dupl: undefined,
+        existing_recipient_dupl: undefined
     };
     $scope.new_contingent = {
         client: null
@@ -250,6 +265,9 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     $scope.is_new_contract = function () {
         return !$scope.contract.id;
     };
+    $scope.canSave = function () {
+        return !$scope.ca_params.new_ca_payer_duplicate && !$scope.ca_params.new_ca_recipient_duplicate;
+    };
 
     // contragents
     function clearLegalPayer () {
@@ -260,6 +278,10 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
         $scope.contract.payer.client = null;
         $scope.contract.payer.short_descr = $scope.contract.payer.full_descr = null;
     }
+    function clearPayerDupl () {
+        $scope.ca_params.new_ca_payer_duplicate = false;
+        $scope.ca_params.existing_payer_dupl = undefined;
+    }
     $scope.isPayerIndividual = function () {
         return $scope.contract.payer.ca_type_code === 'individual';
     };
@@ -269,10 +291,14 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     $scope.isPayerCreateMode = function () {
         return $scope.ca_params.payer_create_mode;
     };
+    $scope.isCAPayerDuplicate = function () {
+        return $scope.ca_params.new_ca_payer_duplicate;
+    };
     $scope.switchPayerCreateMode = function () {
         $scope.ca_params.payer_create_mode = !$scope.ca_params.payer_create_mode;
         clearLegalPayer();
         clearIndividualPayer();
+        clearPayerDupl();
         $scope.contract.payer.id = null;
     };
     $scope.addNewClient = function () {
@@ -291,6 +317,7 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
             if (newVal === 'individual') clearLegalPayer();
             else if (newVal === 'legal') clearIndividualPayer();
         }
+        clearPayerDupl();
     });
     function clearLegalRecipient () {
         $scope.contract.recipient.org = null;
@@ -299,6 +326,10 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     function clearIndividualRecipient () {
         $scope.contract.recipient.client = null;
         $scope.contract.recipient.short_descr = $scope.contract.recipient.full_descr = null;
+    }
+    function clearRecipientDupl () {
+        $scope.ca_params.new_ca_recipient_duplicate = false;
+        $scope.ca_params.existing_recipient_dupl = undefined;
     }
     $scope.isRecipientIndividual = function () {
         return $scope.contract.recipient.ca_type_code === 'individual';
@@ -309,10 +340,14 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
     $scope.isRecipientCreateMode = function () {
         return $scope.ca_params.recipient_create_mode;
     };
+    $scope.isCARecipientDuplicate = function () {
+        return $scope.ca_params.new_ca_recipient_duplicate;
+    };
     $scope.switchRecipientCreateMode = function () {
         $scope.ca_params.recipient_create_mode = !$scope.ca_params.recipient_create_mode;
         clearLegalRecipient();
         clearIndividualRecipient();
+        clearRecipientDupl();
         $scope.contract.recipient.id = null;
     };
     $scope.$watch('contract.recipient.ca_type_code', function (newVal, oldVal) {
@@ -324,7 +359,37 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
             if (newVal === 'individual') clearLegalRecipient();
             else if (newVal === 'legal') clearIndividualRecipient();
         }
+        clearRecipientDupl();
     });
+    var setCADuplicateInfo = function (ca_kind, res) {
+        if (ca_kind === 'payer') {
+            $scope.ca_params.new_ca_payer_duplicate = res.duplicate;
+            $scope.ca_params.existing_payer_dupl = res.existing;
+        } else if (ca_kind === 'recipient') {
+            $scope.ca_params.new_ca_recipient_duplicate = res.duplicate;
+            $scope.ca_params.existing_recipient_dupl = res.existing;
+        } else {
+            clearPayerDupl();
+            clearRecipientDupl();
+        }
+    };
+    $scope.checkNewCADuplicate = function (c_agent, ca_kind) {
+        AccountingService.check_ca_duplicate(c_agent)
+            .then(function (res) {
+                setCADuplicateInfo(ca_kind, res);
+            });
+    };
+    $scope.selectExistingCA = function (ca_kind) {
+        if (ca_kind === 'payer') {
+            $scope.ca_params.payer_create_mode = !$scope.ca_params.payer_create_mode;
+            $scope.contract.payer = $scope.ca_params.existing_payer_dupl;
+            clearPayerDupl();
+        } else if (ca_kind === 'recipient') {
+            $scope.ca_params.recipient_create_mode = !$scope.ca_params.recipient_create_mode;
+            $scope.contract.recipient = $scope.ca_params.existing_recipient_dupl;
+            clearRecipientDupl();
+        }
+    };
 
     // pricelist
     $scope.formatPriceListDescr = function (pl) {
