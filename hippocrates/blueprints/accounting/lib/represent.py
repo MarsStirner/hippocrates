@@ -7,6 +7,8 @@ from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_i
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from nemesis.lib.data_ctrl.accounting.contract import ContragentController, ContractController
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
+from nemesis.lib.data import get_at_tissue_type_ids
+from nemesis.models.actions import rbTissueType
 
 
 class ContractRepr(object):
@@ -395,6 +397,9 @@ class ServiceRepr(object):
                 assignable.append([ap.type.id, ap.type.name, ap.pl_price if ap.has_pricelist_service else None])
                 if ap.isAssigned:
                     assigned.append(ap.type.id)
+        tissue_type_ids = get_at_tissue_type_ids(action.actionType_id)
+        selected_tissue_type = rbTissueType.query.get(tissue_type_ids[0]) if tissue_type_ids else None
+        tissue_type_visible = not safe_bool(action.id)
         return {
             'id': action.id,
             'code': action.actionType.code,
@@ -404,7 +409,10 @@ class ServiceRepr(object):
                 'assignable': assignable,
                 'assigned': assigned,
                 'planned_end_date': action.plannedEndDate,
-                'ped_disabled': safe_bool(action.id)
+                'ped_disabled': safe_bool(action.id),
+                'available_tissue_types': tissue_type_ids,
+                'selected_tissue_type': selected_tissue_type,
+                'tissue_type_visible': tissue_type_visible
             }
         }
 

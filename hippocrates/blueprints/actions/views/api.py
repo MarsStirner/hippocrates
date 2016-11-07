@@ -390,13 +390,15 @@ def api_create_lab_direction():
             'isUrgent': safe_bool(j.get('urgent', False))
         }
         service_data = j.get('service')
+        ttj_data = j.get('ttj')
         try:
             action = create_new_action(
                 action_type_id,
                 event_id,
                 assigned=assigned,
                 data=data,
-                service_data=service_data
+                service_data=service_data,
+                ttj_data=ttj_data
             )
         except Exception, e:
             logger.exception(e.message)
