@@ -228,7 +228,8 @@ WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisAp
             args.serviced_entity_from_search = {
                 action_type_id: args.serviced_entity_from_search.action_type_id,
                 at_code: args.serviced_entity_from_search.at_code,
-                at_name: args.serviced_entity_from_search.at_name
+                at_name: args.serviced_entity_from_search.at_name,
+                no_subservices: args.serviced_entity_from_search.no_subservices
             }
         }
         return WebMisApi.service.get(service_id, args);
