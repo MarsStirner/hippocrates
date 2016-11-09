@@ -383,11 +383,6 @@ def html_stats_org_birth_care():
     return render_template('risar/stats/obcl_orgs.html')
 
 
-@module.route('/stats/org-curation/')
-def html_stats_org_curation():
-    return render_template('risar/stats/org_curation.html')
-
-
 @module.route('/errands/errands_list.html')
 def html_errands_list():
     return render_template('risar/errands/errands_list.html')
