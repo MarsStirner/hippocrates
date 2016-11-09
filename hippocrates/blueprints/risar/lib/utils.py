@@ -15,7 +15,7 @@ from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
     inspection_preg_week_code, puerpera_inspection_flat_code, pc_inspection_flat_code,\
-    risar_gyn_checkup_flat_codes
+    risar_gyn_checkup_flat_codes, postpartal_nursing_code
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
@@ -444,3 +444,34 @@ def action_as_dict_with_id(action, prop_filter=None):
 def safe_action_property(action, prop_name, default=None):
     prop = action.propsByCode.get(prop_name)
     return prop.value if prop else default
+
+
+def get_actions_without_end_date(event_id, flat_code):
+    if not event_id or not flat_code:
+        return
+
+    if not isinstance(flat_code, (list, tuple, set)):
+        flat_code = [flat_code]
+
+    qr = db.session.query(Action).filter(
+        Action.event_id == event_id,
+        Action.endDate.is_(None),
+        Action.deleted == 0,
+        ActionType.id == Action.actionType_id,
+        ActionType.flatCode.in_(flat_code)
+    )
+    return qr
+
+
+def close_open_actions(event_id, flat_code, set_date=None):
+    actions = get_actions_without_end_date(event_id, flat_code)
+    if actions:
+        if not set_date:
+            set_date = datetime.datetime.now()
+        actions.update({Action.endDate: set_date,
+                        Action.status: ActionStatus.finished[0]},
+                       synchronize_session=False)
+
+
+def close_open_postpartal_nursing(event_id):
+    close_open_actions(event_id, postpartal_nursing_code)

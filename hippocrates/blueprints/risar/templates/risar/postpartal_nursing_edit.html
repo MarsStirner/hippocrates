@@ -1,0 +1,326 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+{%- block modules_css %}
+    {{ super() }}
+    <style type="text/css">
+       .box.box-primary {
+            line-height: 1.5em;
+            font-size: 110%;
+        }
+
+    </style>
+{% endblock -%}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="PartalNursingEditCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Ввод данных послеродового патронажа') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="tab-content">
+                        <form class="tab-pane active" id="common" name="commonForm" novalidate>
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header">
+                                <h3 class="box-title">&nbsp;</h3>
+                            </div>
+                            <div class="box-body">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-right col-md-4">Дата патронажа </td>
+                                            <td class="col-md-8">
+                                                <wm-date ng-class="{'has-error': commonForm.date.$invalid}" name="date"
+                                                         ng-model="pp_nursing.date" style="width: 250px" min-date="minDate" ></wm-date>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">День жизни </td>
+                                            <td><div class="row"
+                                                     ng-class="{'has-error': commonForm.day_of_age.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="day_of_age" ng-model="pp_nursing.day_of_age" class="form-control" valid-number
+                                                           maxlength="3"  autofocus>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">День выписки из роддома </td>
+                                            <td><div class="row"
+                                                     ng-class="{'has-error': commonForm.day_of_leaving.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="day_of_leaving" ng-model="pp_nursing.day_of_leaving" class="form-control" valid-number
+                                                           maxlength="3"  autofocus>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Жалобы <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.complaints" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Характер вскармливания </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <rb-select ng-model="pp_nursing.infant_feeding" ref-book="rbRisarInfantFeeding"
+
+                                                           ></rb-select></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Состояние питания </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.feeding_status"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Общее состояние </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.general_habitus"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Масса тела, г</td>
+                                            <td><div class="row"
+                                                     ng-class="{'has-error': commonForm.weight.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="weight" ng-model="pp_nursing.weight" class="form-control" valid-number
+                                                           maxlength="3"  autofocus>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Рост, см</td>
+                                            <td><div class="row"
+                                                     ng-class="{'has-error': commonForm.height.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="height" ng-model="pp_nursing.height" class="form-control" valid-number
+                                                           maxlength="3"  autofocus>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Окружность груди, см</td>
+                                            <td><div class="row"
+                                                     ng-class="{'has-error': commonForm.chest_circumference.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="chest_circumference" ng-model="pp_nursing.chest_circumference" class="form-control" valid-number
+                                                           maxlength="3"  autofocus>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Окружность головы, см</td>
+                                            <td><div class="row"
+                                                     ng-class="{'has-error': commonForm.head_circumference.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="head_circumference" ng-model="pp_nursing.head_circumference" class="form-control" valid-number
+                                                           maxlength="3"  autofocus>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Физиологические рефлексы </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.physiologic_reflex"></div></div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Мышечный тонус </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.muscle_tone"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Телосложение </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.body_build"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Кожа </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.skin"></div></div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Состояние слизистых </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.mucous"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Череп </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.skull"></div></div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Швы </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.rhaphe"></div></div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Роднички </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.fontanel"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Ключницы </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.collar_bone"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Состояние тазобедренных суставов </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.hip_joint"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Форма грудной клетки </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.chest_shape"></div></div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <th class="text-right">Дыхание<span>&nbsp;</span></th>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Характер </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.breathe_character"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Частота </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.breathe_frequency"></div></div>
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Сердечно-сосудистая система </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.heart_vascular_system"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">ЧСС </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.heart_rate"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Пупочная ранка </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.umbilical_wound"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-right">Живот<span>&nbsp;</span></th>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Состояние </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.stomach_status"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Окружность, см </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.stomach_circumference"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Печень </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.liver"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Селезёнка </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.spleen"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Половые органы</td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.genitals"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Физиологические отправления</td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <input type="text"  class="form-control" ng-model="pp_nursing.urination"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Семья </td>
+                                            <td><div class="row"><div class="col-md-8">
+                                                <rb-select ng-model="pp_nursing.family" ref-book="rbRisarNursingFamily"></rb-select></div></td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Социально-бытовые условия <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.social_conditions" /></div></div></td>
+                                        </tr>
+                                         <tr>
+                                            <td class="text-right">Уход за новорождённым <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.newborn_care" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Заключение <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.conclusion" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">План наблюдения <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.plan" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Рекомендации <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.recommendations" /></div></div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="box-footer">
+                        <div class="col-md-offset-5 col-sm-offset-5">
+                        <a class="pseudo-btn" ng-href="{{ url_for('.html_postpartal_nursing') }}?event_id=[[ header.event.id ]]">Перейти на форму послеродовых патронажей</a>
+                        <a class="btn btn-success" ng-click="save()"
+                           tooltip="[[$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/postpartal_nursing.js', v=app_version) }}"></script>
+    <script src="{{ url_for('actions.static', filename='js/action-layout.js', v=app_version) }}"></script>
+    <script src="{{ url_for('actions.static', filename='js/action_editor.js', v=app_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/ezekiel.js', v=nemesis_version) }}"></script>
+{% endblock %}

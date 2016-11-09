@@ -425,8 +425,50 @@ def html_radzinsky_risks():
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/radzinsky_risks.html', card=card)
 
+
 @module.route('/soc_prof_help.html')
 def html_soc_prof_help():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/soc_prof_help.html', card=card)
+
+
+@module.route('/nursing.html')
+def html_postpartal_nursing():
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/postpartal_nursing_view.html',
+                           card=card)
+
+
+@module.route('/nursing_edit.html')
+def html_postpartal_nursing_edit():
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    pp_nursing_id = request.args.get('pp_nursing_id')
+
+    if pp_nursing_id:
+        nursing = Action.query.filter(
+            Action.id == pp_nursing_id
+        ).with_entities(
+            Action.endDate
+        ).first()
+
+        if not nursing:
+            abort(404)
+
+        if nursing[0]:
+            return redirect(url_for('.html_postpartal_nursing_read', event_id=event_id,
+                                            pp_nursing_id=pp_nursing_id))
+
+    return render_template('risar/postpartal_nursing_edit.html',
+                           card=card)
+
+
+@module.route('/nursing_read.html')
+def html_postpartal_nursing_read():
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/postpartal_nursing_read.html', card=card)
+
+

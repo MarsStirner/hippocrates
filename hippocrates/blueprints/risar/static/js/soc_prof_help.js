@@ -1,7 +1,8 @@
 'use strict';
 
 
-WebMis20.controller('SocProfCtrl', ['$scope', '$modal', '$timeout', 'RisarApi', function ($scope, $modal, $timeout, RisarApi) {
+WebMis20.controller('SocProfCtrl', ['$scope', '$modal', '$timeout', 'RisarApi', 'CurrentUser',
+function ($scope, $modal, $timeout, RisarApi, CurrentUser) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     
@@ -27,7 +28,8 @@ WebMis20.controller('SocProfCtrl', ['$scope', '$modal', '$timeout', 'RisarApi', 
         open_edit(model, flatcode).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            RisarApi.soc_prof_help.save($scope.event_id, flatcode, result).then(function (result) {
+            var data = angular.extend({person:CurrentUser}, result);
+            RisarApi.soc_prof_help.save($scope.event_id, flatcode, data).then(function (result) {
                 $scope.soc_prof_help[flatcode+'_list'].push(result);
             });
             if (restart) {

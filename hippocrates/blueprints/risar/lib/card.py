@@ -18,7 +18,7 @@ from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, ri
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
     puerpera_inspection_flat_code, risar_gyn_general_anamnesis_flat_code, risar_gyn_checkup_flat_codes, \
     request_type_gynecological, request_type_pregnancy, risar_epicrisis, first_inspection_flat_code,\
-    second_inspection_flat_code, pc_inspection_flat_code, soc_prof_codes
+    second_inspection_flat_code, pc_inspection_flat_code, soc_prof_codes, postpartal_nursing_code
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType, create_property
 from nemesis.lib.utils import safe_bool
@@ -431,6 +431,10 @@ class PregnancyCard(AbstractCard):
     def soc_prof_help(self):
         return {code: get_action_list(self.event, code).all()
                 for code in soc_prof_codes}
+
+    @lazy
+    def postpartal_nursing(self):
+        return get_action_list(self.event, postpartal_nursing_code).all()
 
 
 class GynecologicCard(AbstractCard):

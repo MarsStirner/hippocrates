@@ -85,6 +85,7 @@ WebMis20
         epicrisis_html:'{{ url_for('.html_epicrisis') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
         card_fill_history: '{{ url_for('.html_card_fill_history') }}',
+        postpartal_nursing_edit: '{{ url_for('.html_postpartal_nursing_edit', event_id=-90).replace('-90', '{0}') }}',
         api_chart_measure_list: '{{ url_for('.api_0_chart_measure_list') }}',
         api_chart_header: '{{ url_for('.api_0_chart_header', event_id=-90).replace('-90', '{0}') }}',
         api_checkup_list: '{{ url_for('.api_0_pregnancy_checkup_list') }}',
@@ -125,7 +126,11 @@ WebMis20
         api_soc_prof_help: '{{ url_for('.api_0_soc_prof_post', action_id=-99, flat_code=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
         api_soc_prof_help_list: '{{ url_for('.api_0_soc_prof_help_list', event_id=-99).replace('-99', '{0}') }}',
         api_soc_prof_help_delete: '{{ url_for('.api_0_soc_prof_help_delete', action_id=-99).replace('-99', '{0}') }}',
-        api_soc_prof_help_undelete: '{{ url_for('.api_0_soc_prof_help_undelete', action_id=-99).replace('-99', '{0}') }}'
+        api_soc_prof_help_undelete: '{{ url_for('.api_0_soc_prof_help_undelete', action_id=-99).replace('-99', '{0}') }}',
+        api_postpartal_nursing: '{{ url_for('.api_0_postpartal_nursing', action_id=-99).replace('-99', '{0}') }}',
+        api_postpartal_nursing_list: '{{ url_for('.api_0_postpartal_nursing_list', event_id=-99).replace('-99', '{0}') }}'
+
+
     }
 })
 ;

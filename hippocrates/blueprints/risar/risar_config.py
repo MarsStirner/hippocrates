@@ -213,3 +213,10 @@ soc_prof_codes = OrderedDict(
      ('psychological_preparation', ['failure_reason', 'doctor', 'lessons_number', 'gestation_age']),
      ('legal_support', ['gestation_age', 'explanation', 'doctor', 'failure_reason'])))
 
+postpartal_nursing_code = 'postpartal_nursing'
+postpartal_nursing = ['date', 'day_of_age', 'day_of_leaving', 'complaints', 'infant_feeding', 'feeding_status',
+    'general_habitus', 'weight', 'height', 'chest_circumference', 'head_circumference',
+    'physiologic_reflex', 'muscle_tone', 'body_build', 'skin', 'mucous', 'skull', 'rhaphe', 'fontanel',
+    'collar_bone', 'hip_joint', 'chest_shape', 'breathe_character', 'breathe_frequency', 'heart_vascular_system',
+    'heart_rate', 'umbilical_wound', 'stomach_status', 'stomach_circumference', 'liver', 'spleen',
+    'genitals', 'urination', 'family', 'social_conditions', 'newborn_care', 'conclusion', 'plan', 'recommendations']
