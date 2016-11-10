@@ -195,7 +195,7 @@
                     </ul>
               </li>
                 {% if specifics_mng.ext_card_url_menu_enabled() %}
-                {% if event %}<li><a href="{{ specifics_mng.get_ext_card_url(event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
+                {% if card %}<li><a href="{{ specifics_mng.get_ext_card_url(card.event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
                 {% endif %}
             </ul>
         </div>

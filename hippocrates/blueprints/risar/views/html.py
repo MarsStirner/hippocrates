@@ -298,7 +298,7 @@ def html_inspection_pc_edit():
             abort(404)
 
         if checkup[0]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=card))
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, card=card))
     return render_template('risar/inspection_pc_edit.html', card=card)
 
 
@@ -306,7 +306,7 @@ def html_inspection_pc_edit():
 def html_inspection_puerpera():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
-    return render_template('risar/inspection_puerpera_view.html', event=card)
+    return render_template('risar/inspection_puerpera_view.html', card=card)
 
 
 @module.route('/inspection_puerpera_edit.html')
@@ -325,8 +325,8 @@ def html_inspection_puerpera_edit():
             abort(404)
 
         if checkup[0]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, event=card))
-    return render_template('risar/inspection_puerpera_edit.html', event=card)
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, card=card))
+    return render_template('risar/inspection_puerpera_edit.html', card=card)
 
 
 @module.route('/inspection_fetus.html')
