@@ -175,12 +175,14 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, PregnancyCheckupsXForm):
         for dd in diags_data:
             if dd['end_date']:
                 continue
-            kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
-            if kind['is_vector']:
-                res.setdefault(kind['attr'], []).append(mkb_code)
-            else:
-                res[kind['attr']] = mkb_code
+            kind_code = dd['diagnosis_types']['final'].code
+            if kind_code in self.DIAG_KINDS_MAP:
+                kind = self.DIAG_KINDS_MAP[kind_code]
+                mkb_code = dd['diagnostic']['mkb'].DiagID
+                if kind['is_vector']:
+                    res.setdefault(kind['attr'], []).append(mkb_code)
+                else:
+                    res[kind['attr']] = mkb_code
         return res
 
 
