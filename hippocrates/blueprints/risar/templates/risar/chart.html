@@ -90,7 +90,7 @@
                         <h3 class="box-title">Осмотры </h3>
                         <div class="box-tools">
                             <div class="btn-group">
-                                <a class="btn" ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" title="">
+                                <a class="btn {{ 'disabled' if card and card.epicrisis.exists }}" ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" title="">
                                     <span class="glyphicon glyphicon-plus"></span>&nbsp;Добавить
                                 </a>
                                 <a class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
