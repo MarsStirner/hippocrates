@@ -34,6 +34,6 @@ anamnesis_gyn_data = {
     'toxic': False,
     'work_group': '01',
     'professional_properties': 'chemical_factors',
-    # 'additional_info': '',
+    'additional_info': '789',
     'epidemic': 'z',
 }
