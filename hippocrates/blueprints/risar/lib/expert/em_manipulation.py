@@ -7,7 +7,7 @@ from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
 
 from hippocrates.blueprints.risar.lib.utils import format_action_data, get_action_by_id
-from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list
+from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list, em_final_status_list
 from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 from hippocrates.blueprints.risar.lib.diagnosis import get_inspection_primary_diag_mkb, DiagnosesSystemManager, \
     AdjasentInspectionsState
@@ -391,6 +391,16 @@ class EventMeasureController(BaseModelController):
             if appointment:
                 result.append(em)
         return result
+
+    def close_all_unfinished_ems(self, action):
+        event = action.event
+
+        db.session.query(EventMeasure).filter(
+            EventMeasure.event_id == event.id,
+            EventMeasure.status.notin_(em_final_status_list),
+        ).update({
+            EventMeasure.status: MeasureStatus.cancelled[0]
+        }, synchronize_session=False)
 
 
 class EventMeasureSelecter(BaseSelecter):

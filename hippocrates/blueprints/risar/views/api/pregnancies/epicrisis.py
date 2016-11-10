@@ -9,6 +9,7 @@ from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregn
     represent_chart_for_epicrisis
 from hippocrates.blueprints.risar.lib.utils import get_action, close_open_checkups
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.models.actions import Action
@@ -35,6 +36,7 @@ def api_0_chart_epicrisis(event_id):
 
         if not action.id:
             close_open_checkups(event_id)  # закрыть все незакрытые осмотры
+            EventMeasureController().close_all_unfinished_ems(action)
         for code, value in data.iteritems():
             if code in action.propsByCode:
                 action.propsByCode[code].value = value
