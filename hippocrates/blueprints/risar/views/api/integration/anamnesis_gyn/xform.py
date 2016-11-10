@@ -114,8 +114,8 @@ class AnamnesisGynXForm(AnamnesisGynSchema, XForm):
             'toxic': safe_bool_none(data.get('toxic')),
             'work_group': self.to_rb(data.get('work_group')),
             'professional_properties': self.to_rb(data.get('professional_properties')),
-            'additional_info': safe_bool_none(data.get('additional_info')),
-            'epidemic': safe_bool_none(data.get('epidemic')),
+            'additional_info': data.get('additional_info'),
+            'epidemic': data.get('epidemic'),
         })
         return res
 
