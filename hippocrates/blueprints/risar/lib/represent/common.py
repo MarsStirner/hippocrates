@@ -419,7 +419,6 @@ def represent_measures(action):
 
 def represent_ticket_25(action):
     if not action:
-        print(u'no ticket25')
         return {
             'id': None,
             'beg_date': None,
@@ -432,6 +431,7 @@ def represent_ticket_25(action):
             'initial_treatment': {},
             'treatment_result': {},
             'payment': {},
+            'ache_result': {},
             'services': [],
             'operations': [],
             'manipulations': [],

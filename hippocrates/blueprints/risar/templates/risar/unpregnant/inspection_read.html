@@ -1,5 +1,6 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/unpregnant/_macros.html' as rimacros with context %}
+{% import 'risar/_ticket_25_read.html' as ticket with context %}
 {%- block modules_css %}
     {{ super() }}
     <style type="text/css">
@@ -763,165 +764,11 @@
                             </div>
                         </div>
                     </div>
+                     <!-- START TICKET 25 -->
                     <div class="col-md-12">
-                        <div class="box box-primary">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Талон посещения</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
-                                   href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#ticket_25">
-                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                            </div>
-                            <div class="box-body">
-                            <!-- START TICKET 25 -->
-
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Дата открытия талона:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.ticket_25.beg_date|asDate]]</div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Дата закрытия талона:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.ticket_25.end_date|asDate]]</div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Оказываемая медицинская помощь:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.medical_care.name"></span></div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Место обращения (посещения):</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_place.name"></span></div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Посещение:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_type.name"></span></div>
-                            </div>
-                             <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Обращение (цель):</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_reason.name"></span></div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Случай закончен:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.finished_treatment.name"></span></div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Обращение:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.initial_treatment.name"></span></div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Результат обращения:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.treatment_result.name"></span></div>
-                            </div>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Оплата за счет:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.payment.name"></span></div>
-                            </div>
-                             <div class="row">
-                                <div class="col-sm-6 col-md-6 text-right">&nbsp;<br></div>
-                                <div class="col-sm-6 col-md-6"></div>
-                             </div>
-                           
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"><b>Медицинская услуги</b></div>
-                                    <div class="col-sm-6 col-md-6"></div>
-                            </div>
-                            <div class="row">
-                                 <table class="table table-condensed">
-                                    <thead>
-                                      <tr>
-                                        <th>Название</th>
-                                        <th>Код</th>
-                                        <th>Врач</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr ng-repeat="$row in checkup.ticket_25.services">
-                                        <td ng-bind="$row.service.name"></td>
-                                        <td ng-bind="$row.service.code"></td>
-                                        <td ng-bind="$row.person.full_name"></td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                            </div>
-                            <br/>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"><b>Операции</b></div>
-                                    <div class="col-sm-6 col-md-6"></div>
-                            </div>
-                            <div class="row">
-                                 <table class="table table-condensed">
-                                    <thead>
-                                      <tr>
-                                        <th>Название</th>
-                                        <th>Код</th>
-                                        <th>Анестезия</th>
-                                        <th>Аппаратура</th>
-                                        <th>Врач</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr ng-repeat="$row in checkup.ticket_25.operations">
-                                        <td ng-bind="$row.service.name"></td>
-                                        <td ng-bind="$row.service.code"></td>
-                                        <td ng-bind="$row.anesthetization.name"></td>
-                                        <td ng-bind="$row.equipment.name"></td>
-                                        <td ng-bind="$row.person.full_name"></td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                            </div>
-                            <br/>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"><b>Манипуляция и исследования</b></div>
-                                    <div class="col-sm-6 col-md-6"></div>
-                            </div>
-                            <div class="row">
-                                 <table class="table table-condensed">
-                                    <thead>
-                                      <tr>
-                                        <th>Название</th>
-                                        <th>Количество</th>
-                                        <th>Врач</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr ng-repeat="$row in checkup.ticket_25.manipulations">
-                                        <td ng-bind="$row.service.name"></td>
-                                        <td ng-bind="$row.amount"></td>
-                                        <td ng-bind="$row.person.full_name"></td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                            </div>
-                            <br/>
-                            <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"><b>Документ временной нетрудоспособности</b></div>
-                                    <div class="col-sm-6 col-md-6"></div>
-                            </div>
-                            <div class="row">
-                                 <table class="table table-condensed">
-                                    <thead>
-                                      <tr>
-                                        <th>Тип</th>
-                                        <th>Повод выдачи</th>
-                                        <th>Кому</th>
-                                        <th>Дата выдачи</th>
-                                        <th>Дата закрытия</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr ng-repeat="$row in checkup.ticket_25.temp_disability">
-                                        <td ng-bind="$row.type.name"></td>
-                                        <td ng-bind="$row.reason.name"></td>
-                                        <td ng-bind="$row.client"></td>
-                                        <td ng-bind="$row.beg_date|asDate"></td>
-                                        <td ng-bind="$row.end_date|asDate"></td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                            </div>
-                            <!-- END TICKET25 -->
-                            </div>
-                        </div>
+                        {{ ticket.ticket_25_read(url_for('.html_gyn_inspection_edit'))}}
                     </div>
+                     <!-- END TICKET 25 -->
                     <div class="col-md-12">
                         <div class="box box-primary">
                             <div class="box-header with-border">
