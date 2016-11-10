@@ -246,6 +246,10 @@ class Epicrisis(object):
     def action(self):
         return get_action(self._event, risar_epicrisis, True)
 
+    @property
+    def exists(self):
+        return self.action.id is not None
+
 
 class PregnancyCard(AbstractCard):
     """
