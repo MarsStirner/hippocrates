@@ -150,9 +150,15 @@
                 <li><a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}">Осмотры беременной</a></li>
                 <li><a ng-href="{{ url_for('.html_inspection_puerpera') }}?event_id={{ event_id_repl }}">Осмотры родильницы</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр акушером-гинекологом</a></li>
-                <li><a ng-href="{{ url_for('.html_inspection_pc_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр специалистом ПЦ</a></li>
-                <li><a ng-href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр родильницы</a></li>
+                {% if card and card.epicrisis.exists %}
+                    <li class="disabled"><a href="javascript:void(0);">Добавить осмотр акушером-гинекологом</a></li>
+                    <li class="disabled"><a href="javascript:void(0);">Добавить осмотр специалистом ПЦ</a></li>
+                    <li><a href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр родильницы</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('.html_inspection_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр акушером-гинекологом</a></li>
+                    <li><a href="{{ url_for('.html_inspection_pc_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр специалистом ПЦ</a></li>
+                    <li class="disabled"><a href="javascript:void(0);">Добавить осмотр родильницы</a></li>
+                {% endif %}
             </ul>
         </div>
         <a ng-href="{{ url_for('.html_inspection_fetus') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection_fetus']) }}>Плод</a>
