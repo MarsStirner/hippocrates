@@ -448,7 +448,8 @@ def calc_risk_groups(card):
 
     p2 = not card.prev_pregs
     p3 = card.event.client.age_tuple()[-1] > 35
-    p4 = (card.checkups and checkups[0]['BMI'].value >= 25)
+    bmi = checkups[0].get('BMI')
+    p4 = (card.checkups and checkups[0]['BMI'].value >= 25) if bmi else False
     p5 = card.anamnesis.mother['preeclampsia'].value
 
     p6 = any(
