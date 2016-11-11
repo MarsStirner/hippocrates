@@ -23,17 +23,20 @@ var BaseMeasureListCtrl = function ($scope, EventMeasureService, EMModalService)
     };
     $scope.executeEm = function (idx) {
         var em = $scope.model.measure_list[idx];
-        EventMeasureService.execute(em.data)
-            .then(function (upd_em) {
-                $scope.model.measure_list.splice(idx, 1, upd_em);
-            });
+        if ($scope.canExecuteEm(em)) {
+            EventMeasureService.execute(em.data)
+                .then(function (upd_em) {
+                    $scope.model.measure_list.splice(idx, 1, upd_em);
+                });
+        }
     };
     $scope.cancelEm = function (idx) {
         var em = $scope.model.measure_list[idx];
-        EventMeasureService.cancel(em.data)
-            .then(function (upd_em) {
+        if ($scope.canCancelEm(em)) {
+            EMModalService.openCancel(em.data).then(function (upd_em) {
                 $scope.model.measure_list.splice(idx, 1, upd_em);
             });
+        }
     };
     $scope.deleteEm = function (idx) {
         var em = $scope.model.measure_list[idx];
@@ -102,6 +105,12 @@ var BaseMeasureListCtrl = function ($scope, EventMeasureService, EMModalService)
     };
     $scope.canRestoreEm = function (em) {
         return em.access.can_restore;
+    };
+    $scope.canExecuteEm = function (em) {
+        return em.access.can_execute;
+    };
+    $scope.canCancelEm = function (em) {
+        return em.access.can_cancel;
     };
     $scope.isManualMeasure = function (em) {
         return !em.data.scheme && em.data.deleted === 0;

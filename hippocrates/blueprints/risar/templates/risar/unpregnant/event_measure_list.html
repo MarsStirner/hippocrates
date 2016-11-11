@@ -130,8 +130,12 @@
                                                 <a href="javascript:void(0);" ng-click="openEmResult($index)">Редактировать результат</a>
                                             </li>
                                             <li role="separator" class="divider"></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
+                                            <li role="menuitem" ng-class="{'disabled': !canExecuteEm(em)}">
+                                                <a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a>
+                                            </li>
+                                            <li role="menuitem" ng-class="{'disabled': !canCancelEm(em)}">
+                                                <a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a>
+                                            </li>
                                             <li role="menuitem" ng-show="canDeleteEm(em)"><a href="javascript:void(0);" ng-click="deleteEm($index)">Удалить</a></li>
                                             <li role="menuitem" ng-show="canRestoreEm(em)"><a href="javascript:void(0);" ng-click="restoreEm($index)">Восстановить</a></li>
                                         </ul>
@@ -177,6 +181,7 @@
     <script src="{{ url_for('.static', filename='js/event_measure/modal_appointment.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_result.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_create_list.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/modal_em_cancel.js', v=app_version) }}"></script>
     <script src="{{ url_for('actions.static', filename='js/action-layout.js', v=app_version) }}"></script>
     <script src="{{ url_for('actions.static', filename='js/action_editor.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/ezekiel.js', v=nemesis_version) }}"></script>

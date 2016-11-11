@@ -15,7 +15,7 @@ from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_measure_res
 from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
 from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes
 
-from nemesis.models.expert_protocol import EventMeasure, Measure
+from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureCancelReason
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
@@ -66,8 +66,11 @@ class EventMeasureController(BaseModelController):
         em.status = MeasureStatus.performed[0]
         return em
 
-    def cancel(self, em):
+    def cancel(self, em, data=None):
         em.status = MeasureStatus.cancelled[0]
+        if data and 'cancel_reason' in data:
+            cr_id = safe_traverse(data, 'cancel_reason', 'id')
+            em.cancel_reason = rbMeasureCancelReason.query.get(cr_id) if cr_id else None
         return em
 
     def delete(self, em):

@@ -84,3 +84,11 @@ def can_delete_em(em):
 
 def can_restore_em(em):
     return em.measure_id is not None and em.deleted == 1
+
+
+def can_cancel_em(em):
+    return not is_em_in_final_status(em)
+
+
+def can_execute_em(em):
+    return em.status in (MeasureStatus.assigned[0], MeasureStatus.waiting[0])
