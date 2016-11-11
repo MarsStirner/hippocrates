@@ -21,6 +21,7 @@ from hippocrates.blueprints.risar.lib.utils import get_action_property_value, ge
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_anamnesis_apt_mother_codes, risar_anamnesis_apt_father_codes, \
     risar_epicrisis, attach_codes, checkup_flat_codes
+from hippocrates.blueprints.risar.lib.contacts import get_person_phones
 from nemesis.app import app
 from nemesis.lib.utils import safe_traverse_attrs, safe_date
 from nemesis.lib.vesta import Vesta
@@ -61,6 +62,24 @@ def represent_pregnancy_event(event):
         'pregnancy_week': get_pregnancy_week(event),
         'has_diseases': check_disease(all_diagnostics),
         'maternal_cert': represent_mat_cert(event.maternal_cert)
+    })
+    return represent
+
+
+def represent_event_for_ambulance(event):
+    """
+    :type event: application.models.event.Event
+    """
+    card = PregnancyCard.get_for_event(event)
+    all_diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
+    card_attrs_action = card.get_card_attrs_action(auto=True)
+    represent = represent_event(event)
+    represent.update({
+        'anamnesis': represent_pregnancy_anamnesis(card),
+        'risk_rate': card_attrs_action['prenatal_risk_572'].value,
+        'card_fill_rates': represent_event_cfrs(card_attrs_action),
+        'has_diseases': check_disease(all_diagnostics),
+        'person_phones': get_person_phones(event.execPerson.id)
     })
     return represent
 

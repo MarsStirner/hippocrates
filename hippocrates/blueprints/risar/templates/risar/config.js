@@ -128,9 +128,8 @@ WebMis20
         api_soc_prof_help_delete: '{{ url_for('.api_0_soc_prof_help_delete', action_id=-99).replace('-99', '{0}') }}',
         api_soc_prof_help_undelete: '{{ url_for('.api_0_soc_prof_help_undelete', action_id=-99).replace('-99', '{0}') }}',
         api_postpartal_nursing: '{{ url_for('.api_0_postpartal_nursing', action_id=-99).replace('-99', '{0}') }}',
-        api_postpartal_nursing_list: '{{ url_for('.api_0_postpartal_nursing_list', event_id=-99).replace('-99', '{0}') }}'
-
-
+        api_postpartal_nursing_list: '{{ url_for('.api_0_postpartal_nursing_list', event_id=-99).replace('-99', '{0}') }}',
+        api_ambulance: '{{ url_for('.api_0_pregnancy_for_ambulance', event_id=-99).replace('-99', '{0}') }}'
     }
 })
 ;

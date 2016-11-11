@@ -3,7 +3,7 @@ var AmbulancPatientInfoCtrl = function ($scope, RisarApi) {
     var event_id = $scope.event_id = params.event_id;
     $scope.riskColor = '';
     var reload_patient_info = function () {
-        RisarApi.chart.get(event_id)
+        RisarApi.ambulance.get(event_id)
         .then(function (event) {
             $scope.chart = event;
             if ($scope.chart.risk_rate.code == "low") {

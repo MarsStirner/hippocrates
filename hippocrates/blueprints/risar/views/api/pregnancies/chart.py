@@ -11,7 +11,7 @@ from hippocrates.blueprints.risar.lib.anamnesis import copy_anamnesis_from_gyn_c
 from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_event, group_orgs_for_routing, \
     represent_pregnancy_card_attributes, represent_pregnancy_checkup_wm, represent_chart_for_routing, \
-    represent_chart_for_card_fill_rate_history
+    represent_chart_for_card_fill_rate_history, represent_event_for_ambulance
 from hippocrates.blueprints.risar.lib.utils import get_last_checkup_date
 from hippocrates.blueprints.risar.risar_config import attach_codes, request_type_pregnancy
 from nemesis.lib.apiutils import api_method, ApiException
@@ -71,6 +71,21 @@ def api_1_pregnancy_chart(event_id=None):
     try:
         chart_creator()
         return represent_pregnancy_event(chart_creator.event)
+    except PregnancyChartCreator.DoNotCreate:
+        raise ApiException(201, u'Сначала создайте Event')\
+
+
+@module.route('/api/0/ambulance/', methods=['GET'])
+@module.route('/api/0/ambulance/<int:event_id>', methods=['GET'])
+@api_method
+def api_0_pregnancy_for_ambulance(event_id=None):
+    ticket_id = request.args.get('ticket_id')
+    client_id = request.args.get('client_id')
+
+    chart_creator = PregnancyChartCreator(client_id, ticket_id, event_id)
+    try:
+        chart_creator()
+        return represent_event_for_ambulance(chart_creator.event)
     except PregnancyChartCreator.DoNotCreate:
         raise ApiException(201, u'Сначала создайте Event')
 

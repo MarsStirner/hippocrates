@@ -700,6 +700,11 @@ WebMis20
             return wrapper('POST', Config.url.api_errand_execute.format(errand.id), {}, errand)
         }
     };
+    this.ambulance = {
+        get: function(event_id){
+            return wrapper('GET', Config.url.api_ambulance.format(event_id));
+        }
+    };
 }])
 .service('UserErrand', [
         'Simargl', 'RisarApi', 'ApiCalls', 'Config', 'OneWayEvent',
