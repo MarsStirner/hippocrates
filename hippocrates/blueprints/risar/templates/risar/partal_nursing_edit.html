@@ -51,13 +51,27 @@
                     <td class="text-right">{{ prop_name }} <span>&nbsp;</span></td>
                     <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.{{ prop.code }}" /></div></div></td>
                 </tr>
-            {% elif prop.typeName in ['Integer', 'Double'] %}
+            {% elif prop.typeName == 'Integer' %}
                 <tr>
                     <td class="text-right">{{ prop_name }}</td>
                     <td><div class="row">
                         <div class="col-md-2">
                             <input name="{{ prop.code }}" ng-model="pp_nursing.{{ prop.code }}" class="form-control" valid-number
-                                   maxlength="3"  autofocus>
+                                   maxlength="3" >
+                        </div>
+                        </div>
+                    </td>
+                </tr>
+            {% elif prop.typeName == 'Double' %}
+                <tr>
+                    <td class="text-right">{{ prop_name }}</td>
+                    <td><div class="row">
+                        <div class="col-md-2">
+                            <input name="{{ prop.code }}" ng-model="pp_nursing.{{ prop.code }}"
+                                   maxlength="6"
+                                   valid-number
+                                   valid-number-float="true"
+                                   class="form-control" >
                         </div>
                         </div>
                     </td>
