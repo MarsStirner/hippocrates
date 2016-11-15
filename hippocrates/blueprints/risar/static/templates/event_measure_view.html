@@ -1,0 +1,119 @@
+<div class="modal-body">
+    <tabset>
+        <tab heading="Просмтотр информации о мероприятии" select="setTab(1)">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="measure_type" class="col-sm-3 control-label">Схема</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_type" ng-bind="getSchemeInfo()"></span>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="measure_type_name" class="col-sm-3 control-label">Тип мероприятия</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_type_name" ng-bind="event_measure.measure.measure_type.name"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure" class="col-sm-3 control-label">Мероприятие</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure" ng-bind="event_measure.measure.name"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure_status" class="col-sm-3 control-label">Статус</label>
+                    <div class="col-sm-9 form-control-static">
+                        <event-measure-status id="measure_status" status="event_measure.status"></event-measure-status>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure_dates" class="col-sm-3 control-label">Период выполнения</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_dates" ng-bind="getMeasureDateRange()"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure_exec_date" class="col-sm-3 control-label">Дата выполнения</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_exec_date" ng-bind="getRealizationDate()"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure_create" class="col-sm-3 control-label">Создано</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_create" ng-bind="getMeasureCreateInfo()"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure_modify" class="col-sm-3 control-label">Изменено</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_modify" ng-bind="getMeasureModifyInfo()"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="measure_comment" class="col-sm-3 control-label">Комментарий</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="measure_comment" ng-bind="getAppointmentComment()"></span>
+                    </div>
+                </div>
+            </form>
+        </tab>
+        <tab heading="Направление по мероприятию" select="setTab(2)" ng-attr-disabled="[[!canReadEmAppointment()]]">
+            <div class="modal-body">
+            <section class="content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <wm-action-layout ng-if="appointment" action="appointment_action"></wm-action-layout>
+                        <span ng-if="!appointment">
+                            <b>По данному мероприятию направлений нет</b>
+                        </span>
+                    </div>
+                </div>
+            </section>
+            </div>
+        </tab>
+        <tab heading="Результаты по мероприятию" select="setTab(3)" ng-attr-disabled="[[!canReadEmResult()]]">
+            <div class="modal-body">
+            <section class="content">
+                <div class="row">
+                <div class="col-md-12">
+                    <wm-action-layout ng-if="em_result" action="em_result_action"></wm-action-layout>
+                    <span ng-if="!em_result">
+                        <b>По данному мероприятию результатов нет</b>
+                    </span>
+                </div>
+                </div>
+            </section>
+            </div>
+        </tab>
+    </tabset>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default"
+            ng-class="{'disabled': !canEditEmAppointment()}"
+            ng-click="editAppointment()"
+            ng-if="tabNum == 2">Редактировать направление</button>
+    <button type="button" class="btn btn-default"
+            ng-class="{'disabled': !canEditEmResults()}"
+            ng-click="editEmResults()"
+            ng-if="tabNum == 3">Редактировать результаты</button>
+    <button type="button" class="btn btn-success pull-left"
+            ng-click="$close('execute')"
+            ng-if="tabNum == 1">Выполнить</button>
+    <button type="button" class="btn btn-danger pull-left"
+            ng-click="$close('cancel')"
+            ng-if="tabNum == 1">Отменить</button>
+    <button type="button" class="btn btn-default pull-left"
+            ng-class="{'disabled': !canNewAppointment()}"
+            ng-click="$close('new_appointment')"
+            ng-if="tabNum == 1 && displayNewAppointment()">Записать в расписание</button>
+    <button type="button" class="btn btn-default pull-left"
+            ng-click="$close('delete')"
+            ng-if="tabNum == 1 && canDelete()">Удалить</button>
+    <button type="button" class="btn btn-default pull-left"
+            ng-if="canRestore()"
+            ng-click="$close('restore')"
+            ng-if="tabNum == 1">Восстановить</button>
+    <button type="button" class="btn btn-default" ng-click="$close()">Закрыть</button>
+</div>

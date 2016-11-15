@@ -2,13 +2,17 @@
 
 WebMis20.service('EMModalService', ['$modal', function ($modal) {
     return {
-        openView: function (event_measure) {
+        openView: function (event_measure, options) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/RISAR/modal/event_measure_view.html',
+                size: 'lg',
                 controller: EventMeasureModalCtrl,
                 resolve: {
                     event_measure: function () {
                         return event_measure;
+                    },
+                    options: function () {
+                        return options;
                     }
                 }
             });

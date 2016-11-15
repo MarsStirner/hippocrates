@@ -41,6 +41,14 @@ class EventMeasureRepr(object):
             'deleted': measure.deleted
         }
 
+    def represent_event_measure_info(self, measure):
+        data = self.represent_event_measure(measure)
+        appointment_action = measure.appointment_action or ''
+        result_action = measure.result_action or None
+        data['appointment_comment'] = appointment_action and appointment_action.get_prop('Comment', '')
+        data['realization_date'] = result_action and result_action.get_prop('RealizationDate')
+        return data
+
     def _make_em_addtional_info(self, em):
         sm = em.scheme_measure
         if not sm:

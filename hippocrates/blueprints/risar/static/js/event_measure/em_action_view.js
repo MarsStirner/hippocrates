@@ -31,7 +31,30 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.viewEventMeasure = function (idx) {
         var em = $scope.checkup.measures[idx];
-        EMModalService.openView(em.data);
+        EMModalService.openView(em, {'display_new_appointment': true}).then(function (action) {
+            switch (action) {
+                case 'execute':
+                    $scope.executeEm(idx);
+                    break;
+                case 'cancel':
+                    $scope.cancelEm(idx);
+                    break;
+                case 'new_appointment':
+                    $scope.newAppointment(em, $scope.checkup, $scope.header);
+                    break;
+                case 'delete':
+                    $scope.deleteEm(idx);
+                    break;
+                case 'restore':
+                    $scope.restoreEm(idx);
+                    break;
+                default:
+                    EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.checkup.measures.splice(idx, 1, upd_em);
+                        });
+            }
+        });
     };
     $scope.executeEm = function (idx) {
         var em = $scope.checkup.measures[idx];

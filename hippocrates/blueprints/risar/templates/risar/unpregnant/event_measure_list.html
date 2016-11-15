@@ -119,22 +119,6 @@
                                         <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
                                             Просмотр
                                         </button>
-                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                            <li role="menuitem" ng-class="{'disabled': !canReadEmAppointment(em)}">
-                                                <a href="javascript:void(0);" ng-click="openEmAppointment($index)">Редактировать направление</a>
-                                            </li>
-                                            <li role="menuitem" ng-class="{'disabled': !canReadEmResult(em)}">
-                                                <a href="javascript:void(0);" ng-click="openEmResult($index)">Редактировать результат</a>
-                                            </li>
-                                            <li role="separator" class="divider"></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
-                                            <li role="menuitem" ng-show="canDeleteEm(em)"><a href="javascript:void(0);" ng-click="deleteEm($index)">Удалить</a></li>
-                                            <li role="menuitem" ng-show="canRestoreEm(em)"><a href="javascript:void(0);" ng-click="restoreEm($index)">Восстановить</a></li>
-                                        </ul>
                                     </div>
                                 </td>
                             </tr>

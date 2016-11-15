@@ -48,6 +48,39 @@ def api_0_event_measure_get(event_measure_id=None):
     return EventMeasureRepr().represent_em_full(em)
 
 
+@module.route('/api/0/event_measure_info/<int:event_measure_id>')
+@api_method
+def api_0_event_measure_get_info(event_measure_id):
+    em_ctrl = EventMeasureController()
+    with db.session.no_autoflush:
+        em = EventMeasure.query.get(event_measure_id)
+        appointment = em.appointment_action
+        em_result = em.result_action
+
+        if not em:
+            raise ApiException(404, u'Не найдено EM с id = {}'.format(event_measure_id))
+        if not appointment and em.measure.appointmentAt_id:
+            appointment = em_ctrl.get_new_appointment(em)
+            data = {
+                'em': em,
+                'checkup_id': safe_int(request.args.get('checkup_id'))
+            }
+            appointment = em_ctrl.fill_new_appointment(appointment, data)
+        if not em_result:
+            em_result = em.measure.resultAt_id and em_ctrl.get_new_em_result(em)
+
+        # FIXME: иначе будут insert-ы с последующим rollback
+        # Проблема в create_action, где при установке дефолтного значения для свойства
+        # объект помещается в сессию, после чего сессия становится грязной в flush-тся позднее
+        db.session.rollback()
+
+        return {
+            'event_measure': EventMeasureRepr().represent_event_measure_info(em),
+            'appointment': appointment and EmAppointmentRepr().represent_appointment(appointment),
+            'em_result': em_result and EmResultRepr().represent_em_result(em_result),
+        }
+
+
 @module.route('/api/0/event_measure/<int:event_id>/save-list/', methods=['POST'])
 @api_method
 def api_0_event_measure_save_list(event_id):
