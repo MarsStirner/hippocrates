@@ -646,21 +646,21 @@ WebMis20
             return wrapper('POST', Config.url.api_soc_prof_help_undelete.format(id));
         }
     };
-    this.postpartal_nursing = {
-        save: function(event_id, data) {
-            return wrapper('POST', Config.url.api_postpartal_nursing.format(data.id||''), {event_id: event_id}, data);
+    this.partal_nursing = {
+        save: function(flatcode, event_id, data) {
+            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, data.id||''), {event_id: event_id}, data);
         },
-        get: function(nursing_id, event_id) {
-            return wrapper('GET', Config.url.api_postpartal_nursing.format(nursing_id), {event_id: event_id});
+        get: function(flatcode, nursing_id, event_id) {
+            return wrapper('GET', Config.url.api_partal_nursing.format(flatcode, nursing_id), {event_id: event_id});
         },
-        get_list: function(event_id) {
-            return wrapper('GET', Config.url.api_postpartal_nursing_list.format(event_id));
+        get_list: function(flatcode, event_id) {
+            return wrapper('GET', Config.url.api_partal_nursing_list.format(flatcode, event_id));
         },
         delete: function (id) {
-            return wrapper('DELETE', Config.url.api_postpartal_nursing_delete.format(id));
+            return wrapper('DELETE', Config.url.api_partal_nursing_delete.format(id));
         },
         undelete: function (id) {
-            return wrapper('POST', Config.url.api_postpartal_nursing_undelete.format(id));
+            return wrapper('POST', Config.url.api_partal_nursing_undelete.format(id));
         }
     };
 

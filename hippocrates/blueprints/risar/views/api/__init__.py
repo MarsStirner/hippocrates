@@ -8,6 +8,6 @@ from . import jasper_printing_tails
 from . import radz_risks
 from . import maternal_cert
 from . import soc_prof_help
-from . import postpartal_nursing
+from . import partal_nursing
 
 __author__ = 'mmalkov'
