@@ -40,6 +40,15 @@ def api_checkup_obs_first_get(api_version, card_id, exam_obs_id):
     return xform.as_json()
 
 
+# @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/', methods=['GET'])
+# @api_method(hook=hook)
+# def api_checkup_obs_first_get(api_version, card_id, exam_obs_id=None):
+#     xform = CheckupObsFirstXForm(api_version)
+#     xform.check_params(exam_obs_id, card_id)
+#     xform.load_data()
+#     return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/', methods=['POST'])
 @api_method(hook=hook)

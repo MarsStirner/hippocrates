@@ -314,3 +314,18 @@ class ClientXForm(ClientSchema, XForm):
             "medicine_intolerance_power": intolerance.power,
             "medicine_substance": intolerance.name,
         }
+
+    def delete_target_obj_data(self):
+        """
+        Dmitry Paschenko, [11.10.16 17:34]
+        как правильно удалить пациента в рисар?
+
+        Евгений Коняев, [11.10.16 17:35]
+        deleted = 1 пациенту и всем вложенным сущностям, плюс всем связанным event
+
+        Евгений Коняев, [11.10.16 17:35]
+        подозреваю, что достаточно будет пациенут и event, но это не точно
+        """
+        self._find_target_obj_query().update({
+            'deleted': 1,
+        })

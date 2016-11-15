@@ -41,3 +41,12 @@ def api_client_save(api_version, client_id=None):
     xform.update_client(data)
     xform.store()
     return xform.as_json()
+
+
+@module.route('/api/integration/<int:api_version>/client/<int:client_id>', methods=['DELETE'])
+@api_method(hook=hook)
+def api_client_delete(api_version, client_id=None):
+    xform = ClientXForm(api_version)
+    xform.check_params(client_id)
+    xform.delete_target_obj_data()
+    xform.store()

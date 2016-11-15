@@ -2,6 +2,8 @@
 
 import logging
 
+from nemesis.models.expert_protocol import rbMeasureStatus, Measure, \
+    rbMeasureType
 from ..xform import XForm, wrap_simplify, VALIDATION_ERROR
 from .schemas import MeasureListSchema
 
@@ -24,6 +26,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
     def __init__(self, *args, **kwargs):
         XForm.__init__(self, *args, **kwargs)
         self.measure_list = []
+        self.measure = None
 
     def _find_target_obj_query(self):
         pass
@@ -31,24 +34,32 @@ class MeasureListXForm(MeasureListSchema, XForm):
     def check_duplicate(self, data):
         pass
 
-    def load_data(self, args):
-        if 'date_begin' in args:
-            date_begin = safe_date(args['date_begin'])
-            if not date_begin:
-                raise ApiException(
-                    VALIDATION_ERROR,
-                    u'Аргумент date_begin не соответствует формату даты YYYY-MM-DD'
-                )
-            args['date_begin'] = date_begin
-        if 'date_end' in args:
-            date_end = safe_date(args['date_end'])
-            if not date_end:
-                raise ApiException(
-                    VALIDATION_ERROR,
-                    u'Аргумент date_end не соответствует формату даты YYYY-MM-DD'
-                )
-            args['date_end'] = date_end
-        self.measure_list = self._get_measure_list(event_id=self.parent_obj_id, **args)
+    def load_data(self, args=None):
+        if self.target_obj_id:
+            self.measure = self._get_measure()
+        else:
+            if 'date_begin' in args:
+                date_begin = safe_date(args['date_begin'])
+                if not date_begin:
+                    raise ApiException(
+                        VALIDATION_ERROR,
+                        u'Аргумент date_begin не соответствует формату даты YYYY-MM-DD'
+                    )
+                args['date_begin'] = date_begin
+            if 'date_end' in args:
+                date_end = safe_date(args['date_end'])
+                if not date_end:
+                    raise ApiException(
+                        VALIDATION_ERROR,
+                        u'Аргумент date_end не соответствует формату даты YYYY-MM-DD'
+                    )
+                args['date_end'] = date_end
+            self.measure_list = self._get_measure_list(event_id=self.parent_obj_id, **args)
+
+    def _get_measure(self):
+        em_ctrl = EventMeasureController()
+        data = em_ctrl.get_measure(self.target_obj_id)
+        return data
 
     def _get_measure_list(self, **kwargs):
         event_id = kwargs['event_id']
@@ -64,9 +75,33 @@ class MeasureListXForm(MeasureListSchema, XForm):
         data = em_ctrl.get_measures_in_event(None, flt)
         return data
 
+    def update_target_obj(self, data):
+        event = None
+        measure_id = Measure.query.join(rbMeasureType).filter(
+            rbMeasureType.code == data['measure_type_code'],
+            Measure.resultAt_id.isnot(None),
+        ).first().id
+        em_ctrl = EventMeasureController()
+        em_data = [{
+            'id': data.get('measure_id'),
+            'data': {
+                'beg_datetime': data['begin_datetime'],
+                'end_datetime': data['end_datetime'],
+                'event_id': self.parent_obj_id,
+                'measure_id': measure_id,
+                'status': {'id': self.rb_validate(rbMeasureStatus, data['status'], 'code')},
+            }
+        }]
+        em_list = em_ctrl.save_list(event, em_data)
+        em_ctrl.store(*em_list)
+        self.measure = em_list[0]
+
     @wrap_simplify
     def as_json(self):
-        return map(self._represent_measure, self.measure_list)
+        if self.new:
+            return self._represent_measure(self.measure)
+        else:
+            return map(self._represent_measure, self.measure_list)
 
     def _represent_measure(self, measure):
         dc = {
