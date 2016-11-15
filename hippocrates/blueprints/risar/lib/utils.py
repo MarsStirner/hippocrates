@@ -15,7 +15,7 @@ from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
     inspection_preg_week_code, puerpera_inspection_flat_code, pc_inspection_flat_code,\
-    risar_gyn_checkup_flat_codes, postpartal_nursing_code
+    risar_gyn_checkup_flat_codes
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
@@ -254,6 +254,17 @@ def get_action_type_id(flat_code):
         return None
     return row[0]
 
+def get_action_type_by_flatcode(flat_code):
+    """
+    Получение ActionType по его flatCode
+    """
+    at = db.session.query(ActionType).filter(
+        ActionType.flatCode == flat_code,
+        ActionType.deleted == 0
+    ).order_by(
+        ActionType.createDatetime.desc()
+    ).first()
+    return at
 
 def get_action_property_value(action_id, prop_type_code):
     """
@@ -473,5 +484,7 @@ def close_open_actions(event_id, flat_code, set_date=None):
                        synchronize_session=False)
 
 
-def close_open_postpartal_nursing(event_id):
-    close_open_actions(event_id, postpartal_nursing_code)
+def close_open_partal_nursing(event_id, flatcode):
+    if flatcode == 'prepartal_nursing_repeat':
+        flatcode = ['prepartal_nursing', 'prepartal_nursing_repeat']
+    close_open_actions(event_id, flatcode)

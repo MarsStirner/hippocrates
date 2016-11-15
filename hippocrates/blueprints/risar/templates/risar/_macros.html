@@ -188,12 +188,19 @@
 {#                <li><a ng-href="{{ url_for('.html_soc_prof_help') }}?event_id={{ event_id_repl }}">Добавить данные послеродового патронажа</a></li>#}
                   <li role="separator" class="divider"></li>
                 <li class="dropdown-submenu">
+                    <a tabindex="-1" href="#">Дородовый патронаж</a>
+                    <ul class="dropdown-menu" style="overflow-y:inherit!important;">
+                        <li><a ng-href="{{ url_for('.html_partal_nursing', flatcode='prepartal_nursing') }}?event_id={{ event_id_repl }}">Сведения</a></li>
+                        <li><a ng-href="{{ url_for('.html_partal_nursing_edit', flatcode='prepartal_nursing') }}?event_id={{ event_id_repl }}">Добавить</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown-submenu">
                     <a tabindex="-1" href="#">Послеродовый патронаж</a>
                     <ul class="dropdown-menu" style="overflow-y:inherit!important;">
-                        <li><a ng-href="{{ url_for('.html_postpartal_nursing') }}?event_id={{ event_id_repl }}">Сведения</a></li>
-                        <li><a ng-href="{{ url_for('.html_postpartal_nursing_edit') }}?event_id={{ event_id_repl }}">Добавить</a></li>
+                        <li><a ng-href="{{ url_for('.html_partal_nursing', flatcode='postpartal_nursing') }}?event_id={{ event_id_repl }}">Сведения</a></li>
+                        <li><a ng-href="{{ url_for('.html_partal_nursing_edit', flatcode='postpartal_nursing') }}?event_id={{ event_id_repl }}">Добавить</a></li>
                     </ul>
-              </li>
+                </li>
                 {% if specifics_mng.ext_card_url_menu_enabled() %}
                 {% if card %}<li><a href="{{ specifics_mng.get_ext_card_url(card.event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
                 {% endif %}
