@@ -67,34 +67,57 @@
                     <label>Социальный статус</label>
                     <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>
                 </div>
-
                 <div class="form-group">
-
                     <label>Возраст</label>
-                    <div class="row center-block">
-                        <div class="input-group col-md-10">
+                    <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
                             <span  class="input-group-addon" id="age_min">От</span>
-                            <input type="number" ng-model="query.age_min" class="form-control" min="1" max="90" placeholder="от" aria-describedby="age_min">
-                            <span  class="input-group-addon" id="age_max">До</span>
-                            <input type="number" ng-model="query.age_max" class="form-control" min="5" max="100" placeholder="до" aria-describedby="age_max">
+                            <input type="number" ng-model="query.age_min" class="form-control" min="1" max="90">
                         </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span  class="input-group-addon" id="age_max">До</span>
+                            <input type="number" ng-model="query.age_max" class="form-control" min="5" max="100">
+                        </div>
+                    </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Степень риска</label>
                     <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding"
-                         ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'">
+                         ng-disabled="!filterForPregCardsAvailable()">
                         [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Неделя беременности</label>
+                    <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span  class="input-group-addon" id="preg_week_min">От</span>
+                            <input type="number" ng-model="query.preg_week_min" class="form-control" min="1" max="50"
+                                ng-disabled="!filterForPregCardsAvailable()">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span  class="input-group-addon" id="preg_week_max">До</span>
+                            <input type="number" ng-model="query.preg_week_max" class="form-control" min="1" max="50"
+                                ng-disabled="!filterForPregCardsAvailable()">
+                        </div>
+                    </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Дата родов</label>
                     <div class="row">
                         <div class="col-md-6">
-                            <wm-date ng-model="query.bdate_from" ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'"></wm-date>
+                            <wm-date ng-model="query.bdate_from" ng-disabled="!filterForPregCardsAvailable()"></wm-date>
                         </div>
                         <div class="col-md-6">
-                            <wm-date ng-model="query.bdate_to" ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'"
+                            <wm-date ng-model="query.bdate_to" ng-disabled="!filterForPregCardsAvailable()"
                                 min-date="query.bdate_from"></wm-date>
                         </div>
                     </div>
@@ -103,11 +126,21 @@
                     <label>Дата осмотра</label>
                     <div class="row">
                         <div class="col-md-6">
-                            <wm-date ng-model="query.checkup_date_from"></wm-date>
+                            <wm-date ng-model="query.checkup_date_from" ng-disabled="!filterForPregCardsAvailable()"></wm-date>
                         </div>
                         <div class="col-md-6">
-                            <wm-date ng-model="query.checkup_date_to" min-date="query.checkup_date_from"></wm-date>
+                            <wm-date ng-model="query.checkup_date_to" ng-disabled="!filterForPregCardsAvailable()"
+                                min-date="query.checkup_date_from"></wm-date>
                         </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Последний осмотр, дней назад</label>
+                    <div class="row">
+                    <div class="col-md-6">
+                        <input type="number" ng-model="query.latest_inspection_gt" class="form-control" valid-number min="1" max="500"
+                            ng-disabled="!filterForPregCardsAvailable()">
+                    </div>
                     </div>
                 </div>
                 <div class="form-group">

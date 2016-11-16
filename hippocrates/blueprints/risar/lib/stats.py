@@ -220,7 +220,7 @@ class StatsSelecter(BaseSelecter):
             func.sum(func.IF(
                 # с момента последнего осмотра (или даты постановки на учет) прошло более 2 месяцев (60 дней)
                 func.datediff(func.curdate(),
-                              func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) / 30 >= 2,
+                              func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) >= 60,
                 1, 0)
             ).label('count_event_2m_no_inspection'),
             func.sum(func.IF(

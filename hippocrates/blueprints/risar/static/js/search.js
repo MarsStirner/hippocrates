@@ -39,6 +39,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         curators: [],
         orgs: [],
         person: default_docs[0],
+        fio: null,
         checkup_date_from: null,
         checkup_date_to: null,
         bdate_from: null,
@@ -47,7 +48,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         closed: $scope.closed_items[0],
         client_work_group: {},
         age_min: null,
-        age_max: null
+        age_max: null,
+        request_types: [],
+        preg_week_min: null,
+        preg_week_max: null,
+        latest_inspection_gt: null
     };
 
     $scope.get_search_data = function () {
@@ -67,10 +72,17 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_to: $scope.query.bdate_to || undefined,
             risk: _.pluck($scope.query.risk, 'id') || undefined,
             closed: $scope.query.closed.value,
-            client_workgroup: $scope.query.client_workgroup,
-            age_max: $scope.query.age_max,
-            age_min: $scope.query.age_min,
-            request_types: _.pluck($scope.query.request_types, 'id') || undefined
+            client_workgroup: $scope.query.client_workgroup || undefined,
+            age_max: $scope.query.age_max || undefined,
+            age_min: $scope.query.age_min || undefined,
+            request_types: _.pluck($scope.query.request_types, 'id') || undefined,
+            preg_week_min: $scope.query.preg_week_min || undefined,
+            preg_week_max: $scope.query.preg_week_max || undefined,
+            latest_inspection_gt: (
+                _.isNumber($scope.query.latest_inspection_gt) &&
+                $scope.query.latest_inspection_gt >= 1 &&
+                $scope.query.latest_inspection_gt <= 500
+            ) ? $scope.query.latest_inspection_gt : undefined
         };
     };
     var perform = function (set_page) {
@@ -148,7 +160,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             age_max: null,
             request_types: [],
             person: $scope.query.person,
-            curators: $scope.query.curators
+            curators: $scope.query.curators,
+            preg_week_min: null,
+            preg_week_max: null,
+            latest_inspection_gt: null
         };
         return $scope.refresh_areas();
     };
@@ -166,6 +181,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     };
     $scope.canChangeCurator = function () {
         return CurrentUser.current_role_in('admin');
+    };
+    $scope.filterForPregCardsAvailable = function () {
+        return $scope.query.request_types.some(function (rt) {
+            return rt.code === 'pregnancy';
+        });
     };
 
     var setFltDoctor = function () {
@@ -197,11 +217,43 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.query.curators = [];
         }
     };
+    var setFilterFromArgs = function (args) {
+        if (args.hasOwnProperty('request_type')) {
+            $scope.query.request_types = $scope.request_types.filter(function (rt) {
+                return rt.code === args.request_type;
+            });
+        }
+        if (args.hasOwnProperty('person_id') && $scope.canChangeDoctor()) {
+            args.person_id = parseInt(args.person_id);
+            var new_person = $scope.doctors.filter(function (d) {
+                return d.id === args.person_id;
+            })[0];
+            if (new_person) $scope.query.person = new_person;
+        }
+        if (args.hasOwnProperty('closed')) {
+            args.closed = args.closed === 'false' ? false : args.closed === 'true' ? true : undefined;
+            var new_closed_status = $scope.closed_items.filter(function (cl) {
+                return cl.value === args.closed;
+            })[0];
+            if (new_closed_status) $scope.query.closed = new_closed_status;
+        }
+        if (args.hasOwnProperty('preg_week_min')) {
+            $scope.query.preg_week_min = parseInt(args.preg_week_min);
+        }
+        if (args.hasOwnProperty('latest_inspection_gt')) {
+            $scope.query.latest_inspection_gt = parseInt(args.latest_inspection_gt);
+        }
+        if (args.hasOwnProperty('risk_rate')) {
+            var new_risk = $scope.risks_rb.get_by_code(args.risk_rate);
+            if (new_risk) $scope.query.risk = [new_risk];
+        }
+    };
 
     // start
-    $q.all([areas_promise]).then(function () {
+    $q.all([areas_promise, $scope.risks_rb.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
+        setFilterFromArgs(aux.getQueryParams(window.location.search));
 
         $scope.$watchCollection('query', function () {
             tc.start()

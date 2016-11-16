@@ -62,6 +62,8 @@ def quick_search_events(query_string, limit=20, **kwargs):
 def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
+    now = datetime.datetime.now()
+
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
         query = query.match(u'@name={0}'.format(escape_sphinx_query(kwargs['fio'])), raw=True)
@@ -93,6 +95,10 @@ def search_events(paginated=True, **kwargs):
         query = query.filter(risk__in=risk)
     if 'request_types' in kwargs and kwargs['request_types']:
         query = query.filter(request_type_id__in=kwargs['request_types'])
+    if 'preg_week_min' in kwargs:
+        query = query.filter(preg_week__gte=safe_int(kwargs['preg_week_min']))
+    if 'preg_week_max' in kwargs:
+        query = query.filter(preg_week__lte=safe_int(kwargs['preg_week_max']))
     if 'bdate_from' in kwargs:
         query = query.filter(bdate__gte=safe_timestamp(kwargs['bdate_from'],
                                                        for_date=True, to_int=True))
@@ -113,6 +119,12 @@ def search_events(paginated=True, **kwargs):
         query = query.filter(checkups__gte=ch_date_from)
     elif ch_date_to:
         query = query.filter(checkups__lte=ch_date_to)
+
+    if 'latest_inspection_gt' in kwargs:
+        later_than_days = safe_int(kwargs['latest_inspection_gt'])
+        if later_than_days:
+            min_latest_date = safe_timestamp(now - datetime.timedelta(days=later_than_days), to_int=True)
+            query = query.filter(latest_checkup_date__lte=min_latest_date)
 
     client_workgroup = kwargs.get('client_workgroup')
     if client_workgroup:
@@ -230,7 +242,10 @@ def api_0_event_search():
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
                     datetime.date.fromtimestamp(row['psdate'])
                 ).days / 7 + 1) if row['psdate'] else None,
-                'request_type': rbRT_cache.get(row['request_type_id'])
+                'request_type': rbRT_cache.get(row['request_type_id']),
+                # test
+                # 'pweek': row['preg_week'],
+                # 'latest_checkup_date': datetime.date.fromtimestamp(row['latest_checkup_date']) if row['latest_checkup_date'] else None
             }
             for row in result['result']['items']
         ]

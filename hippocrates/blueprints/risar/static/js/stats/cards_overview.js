@@ -11,6 +11,23 @@ var CurrentCardsOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
                 $scope.stats_data = data;
             });
     };
+    $scope.getExtendedSearchUrl = function (type) {
+        var args = {
+            request_type: 'pregnancy',
+            person_id: CurrentUser.get_main_user().id,
+            closed: false
+        };
+        if (type === 'all') {
+
+        } else if (type === 'not_closed45') {
+            args.preg_week_min = 45;
+        } else if (type === 'missed_inspection') {
+            args.latest_inspection_gt = 60;
+        } else if (type === 'undefined_prenatal_risks') {
+            args.risk_rate = 'undefined';
+        }
+        return RisarApi.search_event.getExtendedSearchUrl(args);
+    };
 
     $scope.init = function () {
         $scope.refresh_data();

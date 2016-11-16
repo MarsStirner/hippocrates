@@ -62,6 +62,12 @@ WebMis20
         },
         lpu_doctors_list: function (orgs) {
             return wrapper('POST', Config.url.api_event_search_lpu_doctors_list, {}, {orgs: orgs})
+        },
+        openExtendedSearch: function (args) {
+            $window.open(Config.url.search_html + '?' + $.param(args), '_self');
+        },
+        getExtendedSearchUrl: function (args) {
+            return Config.url.search_html + '?' + $.param(args);
         }
     };
     this.search_event_ambulance = {
