@@ -2,6 +2,7 @@
 
 import logging
 
+from sqlalchemy import or_
 from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
 from .schemas import CardSchema
 
@@ -34,6 +35,16 @@ class CardXForm(CardSchema, XForm):
         return Event.query.join(EventType, rbRequestType).filter(
             Event.id == self.target_obj_id,
             Event.deleted == 0,
+            rbRequestType.code == request_type_pregnancy
+        )
+
+    def _find_list_query(self):
+        return Event.query.join(EventType, rbRequestType).filter(
+            Event.deleted == 0,
+            or_(
+                Event.execDate == None,
+                Event.result_id == None,
+            ),
             rbRequestType.code == request_type_pregnancy
         )
 
@@ -134,3 +145,7 @@ class CardXForm(CardSchema, XForm):
             'card_doctor': self.from_person_rb(event.execPerson),
             "card_LPU": self.from_org_rb(event.organisation)
         }
+
+    def get_list(self):
+        q = self._find_list_query()
+        return q.all()
