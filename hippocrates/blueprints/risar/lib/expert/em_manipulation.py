@@ -434,12 +434,13 @@ class EventMeasureSelecter(BaseSelecter):
                 )
             ).filter(Measure.id.in_(flt['measure_id_list']))
         if 'measure_type_id_list' in flt:
-            self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
-                Measure, or_(
-                    Measure.id == ExpertSchemeMeasureAssoc.measure_id,
-                    Measure.id == EventMeasure.measure_id,
-                )
-            ).filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
+            if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
+                self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+                    Measure, or_(
+                        Measure.id == ExpertSchemeMeasureAssoc.measure_id,
+                        Measure.id == EventMeasure.measure_id,
+                    ))
+            self.query = self.query.filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
         if 'beg_date_from' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:
