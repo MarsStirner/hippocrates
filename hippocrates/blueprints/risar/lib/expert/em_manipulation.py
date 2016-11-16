@@ -244,6 +244,9 @@ class EventMeasureController(BaseModelController):
             args['beg_date_to'] = end_date
         return self.get_selecter().get_measures_in_action(args)
 
+    def get_measure(self, measure_id):
+        return self.get_selecter().get_measure(measure_id)
+
     def calc_event_measure_stats(self, event):
         sel = self.get_selecter()
         sel.set_calc_event_stats(event.id)
@@ -507,6 +510,23 @@ class EventMeasureSelecter(BaseSelecter):
             joinedload(EventMeasure._measure).joinedload('measure_type', innerjoin=True),
         )
         return self.get_all()
+
+    def get_measure(self, measure_id):
+        EventMeasure = self.model_provider.get('EventMeasure')
+
+        self.query = self.query.options(
+            (joinedload(EventMeasure._scheme_measure).
+             joinedload('schedule', innerjoin=True).
+             joinedload('additional_mkbs')
+             ),
+            joinedload(EventMeasure._scheme_measure).joinedload('scheme', innerjoin=True),
+            (joinedload(EventMeasure._scheme_measure).
+             joinedload('measure', innerjoin=True).
+             joinedload('measure_type', innerjoin=True)
+             ),
+            joinedload(EventMeasure._measure).joinedload('measure_type', innerjoin=True),
+        )
+        return self.get_by_id(measure_id)
 
     def set_calc_event_stats(self, event_id):
         EventMeasure = self.model_provider.get('EventMeasure')

@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 
+from hippocrates.blueprints.risar.lib import sirius
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -12,7 +13,8 @@ from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_
     copy_attrs_from_last_action, set_action_apt_values
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
-from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
+from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, \
+    first_inspection_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -75,6 +77,16 @@ def api_0_pregnancy_checkup(event_id):
         create_or_update_fetuses(action, fetuses)
 
     db.session.commit()
+    if flat_code == first_inspection_flat_code:
+        checkup_method_name = 'risar.api_checkup_obs_first_ticket25_get'
+    else:
+        checkup_method_name = 'risar.api_checkup_obs_second_ticket25_get'
+    sirius.send_to_mis(
+        checkup_method_name,
+        obj=('exam_obs_id', action.id),
+        params={'card_id': event_id},
+        is_create=not checkup_id,
+    )
     card.reevaluate_card_attrs()
     db.session.commit()
 
@@ -84,6 +96,14 @@ def api_0_pregnancy_checkup(event_id):
     result = represent_pregnancy_checkup_wm(action)
     if em_ctrl.exception:
         result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
+
+    sirius.send_to_mis(
+        'api_measure_list_get',
+        obj=('exam_obs_id', action.id),
+        params={'card_id': event_id},
+        is_create=not checkup_id,
+    )
+
     return result
 
 

@@ -4,7 +4,7 @@ from flask import request, abort
 from ..app import module
 from nemesis.lib.settings import Settings
 
-__all__ = ['api', 'html']
+__all__ = ['api', 'html', 'html_integration']
 
 __author__ = 'mmalkov'
 

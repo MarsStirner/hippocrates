@@ -112,10 +112,13 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
         return res
 
-    def update_target_obj(self, data):
+    def load_data(self):
         self.find_parent_obj(self.parent_obj_id)
         self.set_pcard()
         self.target_obj = get_action_by_id(self.target_obj_id, self.parent_obj, second_inspection_flat_code, True)
+
+    def update_target_obj(self, data):
+        self.load_data()
         form_data = self.mapping_as_form(data)
         self.update_form(form_data)
         self.save_external_data()
