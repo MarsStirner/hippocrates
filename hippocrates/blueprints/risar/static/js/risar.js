@@ -437,8 +437,8 @@ WebMis20
         execute: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_execute + event_measure_id);
         },
-        cancel: function (event_measure_id) {
-            return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
+        cancel: function (event_measure_id, data) {
+            return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id, {}, data);
         },
         del: function (event_measure_id) {
             return wrapper('DELETE', Config.url.api_event_measure_delete.format(event_measure_id));
@@ -632,6 +632,38 @@ WebMis20
             self.file_get('POST', Config.url.api_radz_print, query);
         }
     };
+    this.soc_prof_help = {
+        save: function(event_id, flat_code, data) {
+            return wrapper('POST', Config.url.api_soc_prof_help.format(data.id||'', flat_code), {event_id: event_id}, data);
+        },
+        get_list: function(event_id) {
+            return wrapper('GET', Config.url.api_soc_prof_help_list.format(event_id));
+        },
+        delete: function (id) {
+            return wrapper('DELETE', Config.url.api_soc_prof_help_delete.format(id));
+        },
+        undelete: function (id) {
+            return wrapper('POST', Config.url.api_soc_prof_help_undelete.format(id));
+        }
+    };
+    this.partal_nursing = {
+        save: function(flatcode, event_id, data) {
+            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, data.id||''), {event_id: event_id}, data);
+        },
+        get: function(flatcode, nursing_id, event_id) {
+            return wrapper('GET', Config.url.api_partal_nursing.format(flatcode, nursing_id), {event_id: event_id});
+        },
+        get_list: function(flatcode, event_id) {
+            return wrapper('GET', Config.url.api_partal_nursing_list.format(flatcode, event_id));
+        },
+        delete: function (id) {
+            return wrapper('DELETE', Config.url.api_partal_nursing_delete.format(id));
+        },
+        undelete: function (id) {
+            return wrapper('POST', Config.url.api_partal_nursing_undelete.format(id));
+        }
+    };
+
     this.utils = {
         get_person_contacts: function(person_id){
             return wrapper('GET', Config.url.api_person_contacts_get.format(person_id))
@@ -666,6 +698,11 @@ WebMis20
         },
         execute: function (errand) {
             return wrapper('POST', Config.url.api_errand_execute.format(errand.id), {}, errand)
+        }
+    };
+    this.ambulance = {
+        get: function(event_id){
+            return wrapper('GET', Config.url.api_ambulance.format(event_id));
         }
     };
 }])

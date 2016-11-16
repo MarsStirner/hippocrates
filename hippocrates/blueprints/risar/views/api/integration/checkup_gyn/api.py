@@ -24,6 +24,15 @@ def api_checkup_gyn_schema(api_version):
     return CheckupGynXForm.get_schema(api_version)
 
 
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/gynecology/<int:exam_gyn_id>/', methods=['GET'])
+@api_method(hook=hook)
+def api_checkup_gyn_get(api_version, card_id, exam_gyn_id):
+    xform = CheckupGynXForm(api_version)
+    xform.check_params(exam_gyn_id, card_id)
+    xform.find_target_obj(exam_gyn_id)
+    return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/gynecology/<int:exam_gyn_id>/', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/gynecology/', methods=['POST'])
 @api_method(hook=hook)

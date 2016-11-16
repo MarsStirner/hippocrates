@@ -1,0 +1,44 @@
+<div class="modal-header">
+    <h3 class="modal-title">Cоциально-правовая помощь</h3>
+</div>
+<div class="modal-body">
+    <div class="das-form">
+        <ng-form name="SocForm">
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
+                    <td><div class="col-md-10"><input class="form-control" type="text"
+                                                      ng-model="model.gestation_age" ng-required="true" /></div></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Расшифровка <span class="text-danger">*</span></th>
+                    <td><div class="col-md-10"><input class="form-control" type="text"
+                                                      ng-model="model.explanation" ng-required="true" /></div></td>
+                </tr>
+               <tr ng-class="{'has-error': SocForm.doctor.$invalid}">
+                    <th class="text-right">Направивший врач <span class="text-danger">*</span></th>
+                    <td><div class="col-md-10"><rb-select ref-book="Person"
+                                                          name="doctor"
+                                                          ng-model="model.doctor" ng-required="true" /></div></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Причина невыполнения</th>
+                    <td><div class="col-md-10"><rb-select ref-book="rbRisarFailureReason" ng-model="model.failure_reason" /></div></td>
+                </tr>
+            </tbody>
+        </table>
+        </ng-form>
+    </div>
+</div>
+<div class="modal-footer">
+    <input type="checkbox" ng-model="restart" id="another"><label for="another"> Создать ещё </label>
+    <button class="btn btn-success" ng-click="$close([model, restart])" ng-disabled="!SocForm.$valid">Сохранить</button>
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+</div>

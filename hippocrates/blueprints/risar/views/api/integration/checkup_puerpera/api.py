@@ -27,6 +27,15 @@ def api_checkup_puerpera_schema(api_version):
     return CheckupPuerperaXForm.get_schema(api_version)
 
 
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/puerpera/<int:exam_puerpera_id>/', methods=['GET'])
+@api_method(hook=hook)
+def api_checkup_puerpera_get(api_version, card_id, exam_puerpera_id):
+    xform = CheckupPuerperaXForm(api_version)
+    xform.check_params(exam_puerpera_id, card_id)
+    xform.find_target_obj(exam_puerpera_id)
+    return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/puerpera/<int:exam_puerpera_id>/', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/puerpera/', methods=['POST'])
 @api_method(hook=hook)

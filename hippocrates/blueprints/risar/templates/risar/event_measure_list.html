@@ -7,7 +7,7 @@
 
 <div ng-controller="EventMeasureListCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title_n('Мероприятия случая') }}
+        {{ rimacros.page_title_n('План ведения беременности') }}
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
@@ -18,6 +18,13 @@
                 <h3 class="box-title">Фильтры</h3>
             </div>
             <div class="box-body">
+                <div class="form-group">
+                    <label>Наименование мероприятия</label>
+                    <div class="nopadding">
+                        <rb-select multiple="true" ref-book="Measure" ng-model="query.measure_list"></rb-select>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Осмотр</label>
                     <div class="nopadding">
@@ -130,8 +137,12 @@
                                                 <a href="javascript:void(0);" ng-click="openEmResult($index)">Редактировать результат</a>
                                             </li>
                                             <li role="separator" class="divider"></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a></li>
-                                            <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
+                                            <li role="menuitem" ng-class="{'disabled': !canExecuteEm(em)}">
+                                                <a href="javascript:void(0);" ng-click="executeEm($index)">Выполнить</a>
+                                            </li>
+                                            <li role="menuitem" ng-class="{'disabled': !canCancelEm(em)}">
+                                                <a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a>
+                                            </li>
                                             <li role="menuitem" ng-show="canDeleteEm(em)"><a href="javascript:void(0);" ng-click="deleteEm($index)">Удалить</a></li>
                                             <li role="menuitem" ng-show="canRestoreEm(em)"><a href="javascript:void(0);" ng-click="restoreEm($index)">Восстановить</a></li>
                                         </ul>
@@ -177,6 +188,7 @@
     <script src="{{ url_for('.static', filename='js/event_measure/modal_appointment.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_result.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/modal_em_create_list.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/modal_em_cancel.js', v=app_version) }}"></script>
     <script src="{{ url_for('actions.static', filename='js/action-layout.js', v=app_version) }}"></script>
     <script src="{{ url_for('actions.static', filename='js/action_editor.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/ezekiel.js', v=nemesis_version) }}"></script>

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
+
 __author__ = 'mmalkov'
 
 request_type_pregnancy = 'pregnancy'
@@ -201,3 +203,33 @@ gyn_checkup_simple_codes = [
 ]
 
 gyn_checkup_codes = gyn_checkup_simple_codes + ['ticket_25']
+
+
+soc_prof_codes = OrderedDict(
+    (('mother_employment', ['date', 'explanation', 'gestation_age', 'failure_reason']),
+     ('sanatorium_therapy', ['failure_reason', 'results', 'doctor', 'gestation_age', 'name']),
+     ('gymnastics', ['gestation_age', 'lessons_number', 'doctor', 'failure_reason']),
+     ('maternity_lessons', ['failure_reason', 'doctor', 'lessons_number', 'gestation_age']),
+     ('psychological_preparation', ['failure_reason', 'doctor', 'lessons_number', 'gestation_age']),
+     ('legal_support', ['gestation_age', 'explanation', 'doctor', 'failure_reason'])))
+
+nursing = dict(
+    (('prepartal_nursing', ['date', 'gestational_age', 'vacation_date', 'profession_husband', 'children',
+                           'other_family_members', 'living_conditions', 'psychological_environment', 'mother_health',
+                           'father_health', 'children_health', 'other_family_members_health', 'biological_anamnesis',
+                           'acute_disease', 'flareup_chronic_condition', 'operations', 'fetal_infection', 'medicines',
+                           'womens_consultation_clinic_visiting', 'maternity_school', 'day_regimen', 'nutrition',
+                           'hypogalactia', 'child_risk', 'recommendations']),
+    ('prepartal_nursing_repeat', ['date', 'gestational_age', 'arragements_completion', 'conditions_of_work',
+                                  'conditions_of_living', 'regimen', 'nutrition', 'corrective_measures',
+                                  'sanitation', 'sanitary_condition', 'newborn_acceptance_readiness',
+                                  'hypogalactia', 'child_risk', 'recommendations']),
+    ('postpartal_nursing', ['date', 'day_of_age', 'day_of_leaving', 'complaints', 'infant_feeding',
+                            'feeding_status', 'general_habitus', 'weight', 'height', 'chest_circumference',
+                            'head_circumference', 'physiologic_reflex', 'muscle_tone', 'body_build', 'skin', 'mucous',
+                            'skull', 'rhaphe', 'fontanel', 'collar_bone', 'hip_joint', 'chest_shape', 'breathe_character',
+                            'breathe_frequency', 'heart_vascular_system', 'heart_rate', 'umbilical_wound',
+                            'stomach_status', 'stomach_circumference', 'liver', 'spleen', 'genitals',
+                            'urination', 'family', 'social_conditions', 'newborn_care', 'conclusion',
+                            'plan', 'recommendations']))
+)

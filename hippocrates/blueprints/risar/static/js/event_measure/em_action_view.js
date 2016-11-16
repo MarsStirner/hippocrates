@@ -35,17 +35,20 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.executeEm = function (idx) {
         var em = $scope.checkup.measures[idx];
-        EventMeasureService.execute(em.data)
-            .then(function (upd_em) {
-                $scope.checkup.measures.splice(idx, 1, upd_em);
-            });
+        if ($scope.canExecuteEm(em)) {
+            EventMeasureService.execute(em.data)
+                .then(function (upd_em) {
+                    $scope.checkup.measures.splice(idx, 1, upd_em);
+                });
+        }
     };
     $scope.cancelEm = function (idx) {
         var em = $scope.checkup.measures[idx];
-        EventMeasureService.cancel(em.data)
-            .then(function (upd_em) {
+        if ($scope.canCancelEm(em)) {
+            EMModalService.openCancel(em.data).then(function (upd_em) {
                 $scope.checkup.measures.splice(idx, 1, upd_em);
             });
+        }
     };
     $scope.deleteEm = function (idx) {
         var em = $scope.checkup.measures[idx];
@@ -133,6 +136,24 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.canNewAppointment = function (em) {
         return em.data.measure.measure_type.code === 'checkup';
     };
+    $scope.canDeleteEm = function (em) {
+        return em.access.can_delete;
+    };
+    $scope.canRestoreEm = function (em) {
+        return em.access.can_restore;
+    };
+    $scope.canExecuteEm = function (em) {
+        return em.access.can_execute;
+    };
+    $scope.canCancelEm = function (em) {
+        return em.access.can_cancel;
+    };
+    $scope.isManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 0;
+    };
+    $scope.isDeletedManualMeasure = function (em) {
+        return !em.data.scheme && em.data.deleted === 1;
+    };
     $scope.newAppointment = function(em, checkup, header) {
         if($scope.canNewAppointment(em)) {
             EventMeasureService.new_appointment(em, checkup, header);
@@ -163,18 +184,6 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
                     return em_list;
                 });
         }
-    };
-    $scope.canDeleteEm = function (em) {
-        return em.access.can_delete;
-    };
-    $scope.canRestoreEm = function (em) {
-        return em.access.can_restore;
-    };
-    $scope.isManualMeasure = function (em) {
-        return !em.data.scheme && em.data.deleted === 0;
-    };
-    $scope.isDeletedManualMeasure = function (em) {
-        return !em.data.scheme && em.data.deleted === 1;
     };
 };
 

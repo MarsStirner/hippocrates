@@ -1,16 +1,12 @@
-{% extends 'risar/base/base.html' %}
-
-{% block title %}> {{ module_name }}{% endblock %}
-
-{% block main %}
-<section class="content-header">
-    <h1>Покрытие курации случаев в регионе по учреждениям</h1>
-</section>
-<section class="content">
-    <div ng-controller="OrgCurationCtrl" class="ng-cloak">
-    <div class="row">
-        <div class="box">
-        <div class="box-body no-padding">
+<div class="box box-info" ng-controller="PregnancyWeekDistributionCtrl">
+    <div class="box-header with-border">
+        <h3 class="box-title">Покрытие курации случаев в регионе по учреждениям</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <div ng-controller="OrgCurationCtrl" class="ng-cloak">
             <table class="table">
             <thead>
                 <tr>
@@ -37,13 +33,5 @@
             </tbody>
             </table>
         </div>
-        </div>
     </div>
-    </div>
-</section>
-{% endblock %}
-
-{% block modules_js %}
-    {{ super() }}
-    <script src="{{ url_for('.static', filename='js/stats/org_curation.js', v=app_version) }}"></script>
-{% endblock %}
+</div>

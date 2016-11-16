@@ -150,9 +150,15 @@
                 <li><a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}">Осмотры беременной</a></li>
                 <li><a ng-href="{{ url_for('.html_inspection_puerpera') }}?event_id={{ event_id_repl }}">Осмотры родильницы</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр акушером-гинекологом</a></li>
-                <li><a ng-href="{{ url_for('.html_inspection_pc_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр специалистом ПЦ</a></li>
-                <li><a ng-href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр родильницы</a></li>
+                {% if card and card.epicrisis.exists %}
+                    <li class="disabled"><a href="javascript:void(0);">Добавить осмотр акушером-гинекологом</a></li>
+                    <li class="disabled"><a href="javascript:void(0);">Добавить осмотр специалистом ПЦ</a></li>
+                    <li><a href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр родильницы</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('.html_inspection_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр акушером-гинекологом</a></li>
+                    <li><a href="{{ url_for('.html_inspection_pc_edit') }}?event_id={{ event_id_repl }}">Добавить осмотр специалистом ПЦ</a></li>
+                    <li class="disabled"><a href="javascript:void(0);">Добавить осмотр родильницы</a></li>
+                {% endif %}
             </ul>
         </div>
         <a ng-href="{{ url_for('.html_inspection_fetus') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection_fetus']) }}>Плод</a>
@@ -167,15 +173,36 @@
         <a ng-href="{{ url_for('.html_routing') }}?event_id={{ event_id_repl }}&emergency=1" {{ navigation_btn_class_attribute(['.html_routing']) }}>Маршрутизация</a>
         <a ng-href="{{ url_for('.html_epicrisis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_epicrisis', '.html_epicrisis_edit']) }}>Эпикриз</a>
         <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-        <a ng-class="{hidden: '{{ ext_header }}' != 'chart'}" ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
+        <a ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
         <div class="btn-group">
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-            <ul role="menu" class="dropdown-menu">
+            <ul role="menu" class="dropdown-menu dropdown-menu-right" style="overflow-y:inherit!important;">
                 <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">Диагнозы случая</a></li>
-                <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id={{ event_id_repl }}">Мероприятия случая</a></li>
+                <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id={{ event_id_repl }}">План ведения беременности</a></li>
                 <li><a ng-href="{{ url_for('.html_card_fill_history') }}?event_id={{ event_id_repl }}">Качество ведения карты</a></li>
+                <li><a ng-href="{{ url_for('.html_soc_prof_help') }}?event_id={{ event_id_repl }}">Социально-профилактическая помощь беременной</a></li>
+{#                <li role="separator" class="divider"></li>#}
+{#                <li class="dropdown-header" style="font-size:100%!important;">Послеродовый патронаж</li>#}
+{#                <li role="separator" class="divider"></li>#}
+{#                <li><a ng-href="{{ url_for('.html_soc_prof_help') }}?event_id={{ event_id_repl }}">Сведения по послеродовому патронажу</a></li>#}
+{#                <li><a ng-href="{{ url_for('.html_soc_prof_help') }}?event_id={{ event_id_repl }}">Добавить данные послеродового патронажа</a></li>#}
+                  <li role="separator" class="divider"></li>
+                <li class="dropdown-submenu">
+                    <a tabindex="-1" href="#">Дородовый патронаж</a>
+                    <ul class="dropdown-menu" style="overflow-y:inherit!important;">
+                        <li><a ng-href="{{ url_for('.html_partal_nursing', flatcode='prepartal_nursing') }}?event_id={{ event_id_repl }}">Сведения</a></li>
+                        <li><a ng-href="{{ url_for('.html_partal_nursing_edit', flatcode='prepartal_nursing') }}?event_id={{ event_id_repl }}">Добавить</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown-submenu">
+                    <a tabindex="-1" href="#">Послеродовый патронаж</a>
+                    <ul class="dropdown-menu" style="overflow-y:inherit!important;">
+                        <li><a ng-href="{{ url_for('.html_partal_nursing', flatcode='postpartal_nursing') }}?event_id={{ event_id_repl }}">Сведения</a></li>
+                        <li><a ng-href="{{ url_for('.html_partal_nursing_edit', flatcode='postpartal_nursing') }}?event_id={{ event_id_repl }}">Добавить</a></li>
+                    </ul>
+                </li>
                 {% if specifics_mng.ext_card_url_menu_enabled() %}
-                {% if event %}<li><a href="{{ specifics_mng.get_ext_card_url(event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
+                {% if card %}<li><a href="{{ specifics_mng.get_ext_card_url(card.event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
                 {% endif %}
             </ul>
         </div>

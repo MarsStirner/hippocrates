@@ -75,9 +75,10 @@ def api_0_event_measure_execute(event_measure_id):
 @module.route('/api/0/event_measure/cancel/<int:event_measure_id>', methods=['POST'])
 @api_method
 def api_0_event_measure_cancel(event_measure_id):
+    data = request.get_json()
     em = EventMeasure.query.get_or_404(event_measure_id)
     em_ctrl = EventMeasureController()
-    em_ctrl.cancel(em)
+    em_ctrl.cancel(em, data)
     em_ctrl.store(em)
     return EventMeasureRepr().represent_em_full(em)
 

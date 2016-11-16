@@ -85,6 +85,8 @@ WebMis20
         epicrisis_html:'{{ url_for('.html_epicrisis') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
         card_fill_history: '{{ url_for('.html_card_fill_history') }}',
+        partal_nursing_edit_html: '{{ url_for('.html_partal_nursing_edit', flatcode=-98).replace('-98','{0}') }}',
+        partal_nursing_read_html: '{{ url_for('.html_partal_nursing_read', flatcode=-98).replace('-98','{0}') }}',
         api_chart_measure_list: '{{ url_for('.api_0_chart_measure_list') }}',
         api_chart_header: '{{ url_for('.api_0_chart_header', event_id=-90).replace('-90', '{0}') }}',
         api_checkup_list: '{{ url_for('.api_0_pregnancy_checkup_list') }}',
@@ -121,7 +123,14 @@ WebMis20
         api_concilium_get: '{{ url_for('.api_0_concilium_get', event_id=-90) | replace("-90", "{0}") }}',
         api_chart_radzinsky_risks: '{{ url_for('.api_0_chart_radzinsky_risks', event_id=-90) | replace("-90", "{0}") }}',
         api_person_contacts_get: '{{ url_for('schedule.api_person_contacts_get') }}{0}',
-        api_radz_print: '{{ url_for('.api_0_radz_print') }}'
+        api_radz_print: '{{ url_for('.api_0_radz_print') }}',
+        api_soc_prof_help: '{{ url_for('.api_0_soc_prof_post', action_id=-99, flat_code=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
+        api_soc_prof_help_list: '{{ url_for('.api_0_soc_prof_help_list', event_id=-99).replace('-99', '{0}') }}',
+        api_soc_prof_help_delete: '{{ url_for('.api_0_soc_prof_help_delete', action_id=-99).replace('-99', '{0}') }}',
+        api_soc_prof_help_undelete: '{{ url_for('.api_0_soc_prof_help_undelete', action_id=-99).replace('-99', '{0}') }}',
+        api_partal_nursing: '{{ url_for('.api_0_partal_nursing', flatcode=-98, action_id=-99).replace('-98', '{0}').replace('-99', '{1}') }}',
+        api_partal_nursing_list: '{{ url_for('.api_0_partal_nursing_list',  flatcode=-98, event_id=-99).replace('-98', '{0}').replace('-99', '{1}') }}',
+        api_ambulance: '{{ url_for('.api_0_pregnancy_for_ambulance', event_id=-99).replace('-99', '{0}') }}'
     }
 })
 ;

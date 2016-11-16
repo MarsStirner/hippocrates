@@ -254,6 +254,17 @@ def get_action_type_id(flat_code):
         return None
     return row[0]
 
+def get_action_type_by_flatcode(flat_code):
+    """
+    Получение ActionType по его flatCode
+    """
+    at = db.session.query(ActionType).filter(
+        ActionType.flatCode == flat_code,
+        ActionType.deleted == 0
+    ).order_by(
+        ActionType.createDatetime.desc()
+    ).first()
+    return at
 
 def get_action_property_value(action_id, prop_type_code):
     """
@@ -437,6 +448,43 @@ def action_as_dict(action, prop_filter=None):
         return result
 
 
+def action_as_dict_with_id(action, prop_filter=None):
+    return dict(action_as_dict(action, prop_filter), id=action.id)
+
+
 def safe_action_property(action, prop_name, default=None):
     prop = action.propsByCode.get(prop_name)
     return prop.value if prop else default
+
+
+def get_actions_without_end_date(event_id, flat_code):
+    if not event_id or not flat_code:
+        return
+
+    if not isinstance(flat_code, (list, tuple, set)):
+        flat_code = [flat_code]
+
+    qr = db.session.query(Action).filter(
+        Action.event_id == event_id,
+        Action.endDate.is_(None),
+        Action.deleted == 0,
+        ActionType.id == Action.actionType_id,
+        ActionType.flatCode.in_(flat_code)
+    )
+    return qr
+
+
+def close_open_actions(event_id, flat_code, set_date=None):
+    actions = get_actions_without_end_date(event_id, flat_code)
+    if actions:
+        if not set_date:
+            set_date = datetime.datetime.now()
+        actions.update({Action.endDate: set_date,
+                        Action.status: ActionStatus.finished[0]},
+                       synchronize_session=False)
+
+
+def close_open_partal_nursing(event_id, flatcode):
+    if flatcode == 'prepartal_nursing_repeat':
+        flatcode = ['prepartal_nursing', 'prepartal_nursing_repeat']
+    close_open_actions(event_id, flatcode)

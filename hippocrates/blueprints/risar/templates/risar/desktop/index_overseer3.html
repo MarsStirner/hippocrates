@@ -20,6 +20,7 @@
                     </div>
                 </div>
                 {% include "risar/stats/diagram_pregnancy_week.html" %}
+                {% include "risar/stats/org_curation.html" %}
             </div>
             <div class="col-md-3">
                 {% include "risar/stats/cfrs_lpu_overview.html" %}
@@ -39,4 +40,5 @@
     <script src="{{ url_for('.static', filename='js/stats/card_fill_rates.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/preg_week_distribution.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/active_users.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/org_curation.js', v=app_version) }}"></script>
 {% endblock %}

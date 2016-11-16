@@ -1,5 +1,6 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros with context %}
+ {% import 'risar/_ticket_25_read.html' as ticket with context %}
 
 {% block title %}> Первичный осмотр{% endblock %}
 
@@ -401,6 +402,11 @@
                             </div>
                         </div>
                     </div>
+                    <!-- START TICKET 25 -->
+                    <div class="col-md-12">
+                        {{ ticket.ticket_25_read(url_for('.html_inspection_edit'))}}
+                    </div>
+                    <!-- END TICKET 25 -->
                     <div class="col-md-12">
                         <div class="box box-primary">
                             <div class="box-header with-border">
@@ -492,6 +498,7 @@
         </tabset>
     </section>
 </div>
+
 {% endblock %}
 
 {% block modules_js %}

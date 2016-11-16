@@ -31,6 +31,15 @@ def api_checkup_obs_second_schema(api_version):
     return CheckupObsSecondXForm.get_schema(api_version)
 
 
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/second/<int:exam_obs_id>/', methods=['GET'])
+@api_method(hook=hook)
+def api_checkup_obs_second_get(api_version, card_id, exam_obs_id):
+    xform = CheckupObsSecondXForm(api_version)
+    xform.check_params(exam_obs_id, card_id)
+    xform.find_target_obj(exam_obs_id)
+    return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/second/<int:exam_obs_id>/', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/second/', methods=['POST'])
 @api_method(hook=hook)

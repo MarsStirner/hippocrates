@@ -7,7 +7,7 @@ from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
 
 from hippocrates.blueprints.risar.lib.utils import format_action_data, get_action_by_id
-from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list
+from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list, em_final_status_list
 from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 from hippocrates.blueprints.risar.lib.diagnosis import get_inspection_primary_diag_mkb, DiagnosesSystemManager, \
     AdjasentInspectionsState
@@ -15,7 +15,7 @@ from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_measure_res
 from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
 from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes
 
-from nemesis.models.expert_protocol import EventMeasure, Measure
+from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureCancelReason
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
@@ -66,8 +66,11 @@ class EventMeasureController(BaseModelController):
         em.status = MeasureStatus.performed[0]
         return em
 
-    def cancel(self, em):
+    def cancel(self, em, data=None):
         em.status = MeasureStatus.cancelled[0]
+        if data and 'cancel_reason' in data:
+            cr_id = safe_traverse(data, 'cancel_reason', 'id')
+            em.cancel_reason = rbMeasureCancelReason.query.get(cr_id) if cr_id else None
         return em
 
     def delete(self, em):
@@ -392,6 +395,16 @@ class EventMeasureController(BaseModelController):
                 result.append(em)
         return result
 
+    def close_all_unfinished_ems(self, action):
+        event = action.event
+
+        db.session.query(EventMeasure).filter(
+            EventMeasure.event_id == event.id,
+            EventMeasure.status.notin_(em_final_status_list),
+        ).update({
+            EventMeasure.status: MeasureStatus.cancelled[0]
+        }, synchronize_session=False)
+
 
 class EventMeasureSelecter(BaseSelecter):
 
@@ -413,13 +426,21 @@ class EventMeasureSelecter(BaseSelecter):
             self.query = self.query.filter(EventMeasure.sourceAction_id == flt['action_id'])
         if 'action_id_list' in flt:
             self.query = self.query.filter(EventMeasure.sourceAction_id.in_(flt['action_id_list']))
-        if 'measure_type_id_list' in flt:
+        if 'measure_id_list' in flt:
             self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
                 Measure, or_(
                     Measure.id == ExpertSchemeMeasureAssoc.measure_id,
                     Measure.id == EventMeasure.measure_id,
                 )
-            ).filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
+            ).filter(Measure.id.in_(flt['measure_id_list']))
+        if 'measure_type_id_list' in flt:
+            if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
+                self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+                    Measure, or_(
+                        Measure.id == ExpertSchemeMeasureAssoc.measure_id,
+                        Measure.id == EventMeasure.measure_id,
+                    ))
+            self.query = self.query.filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
         if 'beg_date_from' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:
