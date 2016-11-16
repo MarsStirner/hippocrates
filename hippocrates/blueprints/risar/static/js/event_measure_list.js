@@ -163,6 +163,7 @@ var EventMeasureListCtrl = function ($scope, $controller, $q, RisarApi, RefBookS
     $scope.resetFilters = function () {
         $scope.query = {
             checkups: [],
+            measure_list: [],
             measure_type: [],
             beg_date_from: null,
             beg_date_to: null,
@@ -288,6 +289,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
         var query = {
             page: $scope.pager.current_page,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
+            measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             beg_date_from: $scope.query.beg_date_from ? moment($scope.query.beg_date_from).startOf('day').toDate() : undefined,
             beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
@@ -340,6 +342,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             paginate: false,
             beg_date_to: end.local().endOf('day').toDate(),
             end_date_from: start.local().startOf('day').toDate(),
+            measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined,

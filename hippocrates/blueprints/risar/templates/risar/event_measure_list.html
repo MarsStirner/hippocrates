@@ -19,6 +19,13 @@
             </div>
             <div class="box-body">
                 <div class="form-group">
+                    <label>Наименование мероприятия</label>
+                    <div class="nopadding">
+                        <rb-select multiple="true" ref-book="Measure" ng-model="query.measure_list"></rb-select>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Осмотр</label>
                     <div class="nopadding">
                         <ui-select multiple ng-model="query.checkups" theme="select2" close-on-select="false"

@@ -426,6 +426,13 @@ class EventMeasureSelecter(BaseSelecter):
             self.query = self.query.filter(EventMeasure.sourceAction_id == flt['action_id'])
         if 'action_id_list' in flt:
             self.query = self.query.filter(EventMeasure.sourceAction_id.in_(flt['action_id_list']))
+        if 'measure_id_list' in flt:
+            self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+                Measure, or_(
+                    Measure.id == ExpertSchemeMeasureAssoc.measure_id,
+                    Measure.id == EventMeasure.measure_id,
+                )
+            ).filter(Measure.id.in_(flt['measure_id_list']))
         if 'measure_type_id_list' in flt:
             self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
                 Measure, or_(
