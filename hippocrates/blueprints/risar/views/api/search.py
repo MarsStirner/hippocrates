@@ -131,6 +131,13 @@ def search_events(paginated=True, **kwargs):
             min_latest_date = safe_timestamp(now - datetime.timedelta(days=later_than_days), to_int=True)
             query = query.filter(latest_checkup_date__lte=min_latest_date)
 
+    if 'risk_groups' in kwargs:
+        risk_groups = kwargs['risk_groups']
+        if not isinstance(risk_groups, (list, tuple)):
+            risk_groups = [risk_groups]
+        rg_ors = '|'.join(risk_groups)
+        query = query.match(u'@risk_group_codes {0}'.format(escape_sphinx_query(rg_ors)), raw=True)
+
     client_workgroup = kwargs.get('client_workgroup')
     if client_workgroup:
         work_code = client_workgroup.get('code')

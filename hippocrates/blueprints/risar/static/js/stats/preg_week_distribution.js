@@ -76,6 +76,15 @@ var PregnancyWeekDistributionCtrl = function ($scope, RisarApi, CurrentUser, Ref
         };
         RisarApi.search_event.openExtendedSearch(args, mouse_button === 1)
     };
+    $scope.getExtendedSearchUrl = function (rg_code) {
+        var args = {
+            request_type: 'pregnancy',
+            person_id: CurrentUser.get_main_user().id,
+            closed: false,
+            risk_group: rg_code
+        };
+        return RisarApi.search_event.getExtendedSearchUrl(args);
+    };
 
     $scope.init = function () {
         $scope.refresh_data();

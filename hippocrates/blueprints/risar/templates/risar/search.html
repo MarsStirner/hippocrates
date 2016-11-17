@@ -85,11 +85,22 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label>Статус карт</label>
+                    <div fs-radio="" items="closed_items" ng-model="query.closed" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Степень риска</label>
 {#                    ng-disabled="!filterForPregCardsAvailable()"#}
                     <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding">
                         [[ item.name ]]
                     </div>
+                </div>
+                <div class="form-group">
+                    <label>Группа риска</label>
+                    <rb-select multiple="true" ref-book="rbRisarRiskGroup" ng-model="query.risk_groups"
+                        ng-disabled="!filterForPregCardsAvailable()"></rb-select>
                 </div>
                 <div class="form-group">
                     <label>Неделя беременности</label>
@@ -141,12 +152,6 @@
                         <input type="number" ng-model="query.latest_inspection_gt" class="form-control" valid-number min="1" max="500"
                             ng-disabled="!filterForPregCardsAvailable()">
                     </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Статус карт</label>
-                    <div fs-radio="" items="closed_items" ng-model="query.closed" class="nopadding">
-                        [[ item.name ]]
                     </div>
                 </div>
                 <div class="form-group">

@@ -29,6 +29,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
 
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
     $scope.pathology_rb = RefBookService.get('PregnancyPathology');
+    $scope.rbRisarRiskGroup = RefBookService.get('rbRisarRiskGroup');
 
     $scope.results = [];
     $scope.pager = {
@@ -55,30 +56,39 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         preg_week_min: null,
         preg_week_max: null,
         latest_inspection_gt: null,
-        pathology: []
+        pathology: [],
+        risk_groups: []
     };
 
     $scope.get_search_data = function () {
         var orgs = [];
         var from_orgs = $scope.query.orgs.length ? $scope.query.orgs: $scope.organisations;
         from_orgs.forEach(function(i) {if(i.id) orgs.push(i.id);});
+
+        var areas = $scope.query.areas,
+            curators = $scope.query.curators,
+            risks = _.pluck($scope.query.risk, 'id'),
+            request_types = _.pluck($scope.query.request_types, 'id'),
+            pathologies = _.pluck($scope.query.pathology, 'id'),
+            risk_groups = _.pluck($scope.query.risk_groups, 'code');
+
         return {
             page: $scope.pager.current_page,
-            areas: $scope.query.areas,
-            curators: $scope.query.curators,
-            org_ids: orgs,
+            areas: areas.length ? areas : undefined,
+            curators: curators.length ? curators : undefined,
+            org_ids: orgs.length ? orgs : undefined,
             doc_id: $scope.query.person.id,
             fio: $scope.query.fio || undefined,
             checkup_date_from: $scope.query.checkup_date_from || undefined,
             checkup_date_to: $scope.query.checkup_date_to || undefined,
             bdate_from: $scope.query.bdate_from || undefined,
             bdate_to: $scope.query.bdate_to || undefined,
-            risk: _.pluck($scope.query.risk, 'id') || undefined,
+            risk: risks.length ? risks : undefined,
             closed: $scope.query.closed.value,
             client_workgroup: $scope.query.client_workgroup || undefined,
             age_max: $scope.query.age_max || undefined,
             age_min: $scope.query.age_min || undefined,
-            request_types: _.pluck($scope.query.request_types, 'id') || undefined,
+            request_types: request_types.length ? request_types : undefined,
             preg_week_min: $scope.query.preg_week_min || undefined,
             preg_week_max: $scope.query.preg_week_max || undefined,
             latest_inspection_gt: (
@@ -86,7 +96,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 $scope.query.latest_inspection_gt >= 1 &&
                 $scope.query.latest_inspection_gt <= 500
             ) ? $scope.query.latest_inspection_gt : undefined,
-            pathology: _.pluck($scope.query.pathology, 'id') || undefined
+            pathology: pathologies.length ? pathologies : undefined,
+            risk_groups: risk_groups.length ? risk_groups : undefined
         };
     };
     var perform = function (set_page) {
@@ -166,7 +177,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             preg_week_min: null,
             preg_week_max: null,
             latest_inspection_gt: null,
-            pathology: []
+            pathology: [],
+            risk_groups: []
         };
         return $scope.refresh_areas();
     };
@@ -258,10 +270,16 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             var new_pathology = $scope.pathology_rb.get(args.pathology_id);
             if (new_pathology) $scope.query.pathology = [new_pathology];
         }
+        if (args.hasOwnProperty('risk_group')) {
+            $scope.query.risk_groups = $scope.rbRisarRiskGroup.objects.filter(function (rg) {
+                return rg.code === args.risk_group;
+            });
+        }
     };
 
     // start
-    $q.all([areas_promise, $scope.risks_rb.loading, $scope.pathology_rb.loading]).then(function () {
+    $q.all([areas_promise, $scope.risks_rb.loading, $scope.pathology_rb.loading,
+            $scope.rbRisarRiskGroup.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
         setFilterFromArgs(aux.getQueryParams(window.location.search));
