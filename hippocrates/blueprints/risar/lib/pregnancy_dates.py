@@ -39,3 +39,17 @@ def get_pregnancy_start_date(event):
     if isinstance(start_date, datetime.datetime):
         start_date = start_date.date()
     return start_date
+
+
+def get_pregnancy_week_for_ultrasonography(event, dt=None):
+    action = PregnancyCard.get_for_event(event).attrs
+    if 'pregnancy_start_date_by_ultrasonography' in action.propsByCode:
+        start_date = action['pregnancy_start_date_by_ultrasonography'].value
+        if start_date:
+            dt = dt or datetime.date.today()
+            if isinstance(dt, datetime.datetime):
+                dt = dt.date()
+            res = (dt - start_date).days / 7
+            if res > 0:
+                return res
+    return 0

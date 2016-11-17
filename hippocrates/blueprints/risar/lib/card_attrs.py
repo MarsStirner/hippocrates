@@ -89,6 +89,24 @@ def reevaluate_risk_rate(card):
     card.attrs['prenatal_risk_572'].value = safe_dict(new_prr)
 
 
+def reevaluate_pregnancy_start_date_by_ultrasonography(card):
+    """Сначала смотрим, есть ли у пациентки в мероприятия случая код 0028, у которого есть действие с результатами;
+        Иначе код 0025, ...
+        Иначе код 0023, .... с действием с результатами
+        """
+    em_by_code = card.latest_measures_with_result
+    codes = [u'0028', u'0025', u'0023']
+    for code in codes:
+        em = em_by_code.get(code)
+        if em:
+            ra = em.result_action
+            rd = ra.propsByCode['RealizationDate'].value
+            ga = ra.propsByCode['gestational_age'].value
+            if rd and ga:
+                card.attrs['pregnancy_start_date_by_ultrasonography'].value = rd - datetime.timedelta(weeks=ga)
+                break
+
+
 def reevaluate_dates(card):
     """
     Пересчёт даты начала беременности, предполагаемой даты родов, и даты редактирования карты пациентки
@@ -97,8 +115,8 @@ def reevaluate_dates(card):
     :rtype: datetime.date
     :return:
     """
+    reevaluate_pregnancy_start_date_by_ultrasonography(card)
     now = datetime.datetime.now()
-
     card.attrs['chart_modify_date'].value = now
     card.attrs['chart_modify_time'].value = now
     prev_start_date, prev_delivery_date = card.attrs['pregnancy_start_date'].value, card.attrs['predicted_delivery_date'].value
