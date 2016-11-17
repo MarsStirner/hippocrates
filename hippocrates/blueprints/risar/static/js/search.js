@@ -28,6 +28,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     });
 
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
+    $scope.pathology_rb = RefBookService.get('PregnancyPathology');
 
     $scope.results = [];
     $scope.pager = {
@@ -53,7 +54,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         request_types: [],
         preg_week_min: null,
         preg_week_max: null,
-        latest_inspection_gt: null
+        latest_inspection_gt: null,
+        pathology: []
     };
 
     $scope.get_search_data = function () {
@@ -83,7 +85,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 _.isNumber($scope.query.latest_inspection_gt) &&
                 $scope.query.latest_inspection_gt >= 1 &&
                 $scope.query.latest_inspection_gt <= 500
-            ) ? $scope.query.latest_inspection_gt : undefined
+            ) ? $scope.query.latest_inspection_gt : undefined,
+            pathology: _.pluck($scope.query.pathology, 'id') || undefined
         };
     };
     var perform = function (set_page) {
@@ -142,7 +145,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.doctors = default_docs.concat(result);
             setFltDoctor();
         });
-    }; 
+    };
 
     $scope.reset_filters = function () {
         $scope.query = {
@@ -162,7 +165,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             curators: $scope.query.curators,
             preg_week_min: null,
             preg_week_max: null,
-            latest_inspection_gt: null
+            latest_inspection_gt: null,
+            pathology: []
         };
         return $scope.refresh_areas();
     };
@@ -250,10 +254,14 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 return rr.code === args.risk_rate;
             });
         }
+        if (args.hasOwnProperty('pathology_id')) {
+            var new_pathology = $scope.pathology_rb.get(args.pathology_id);
+            if (new_pathology) $scope.query.pathology = [new_pathology];
+        }
     };
 
     // start
-    $q.all([areas_promise, $scope.risks_rb.loading]).then(function () {
+    $q.all([areas_promise, $scope.risks_rb.loading, $scope.pathology_rb.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
         setFilterFromArgs(aux.getQueryParams(window.location.search));
@@ -265,6 +273,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             tc.start()
         });
         $scope.$watchCollection('query.request_types', function () {
+            tc.start()
+        });
+        $scope.$watchCollection('query.pathology', function () {
             tc.start()
         });
     });

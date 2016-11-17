@@ -78,8 +78,20 @@ var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, 
     $scope.flt_pp = function (pp) {
         return pp.code !== 'undefined';
     };
+    $scope.getPregPathgCount = function (pp_code) {
+        return _.isEmpty($scope.preg_pathg_stats) ? null : '{0}'.format($scope.preg_pathg_stats[pp_code].count);
+    };
     $scope.getPregPathgPct = function (pp_code) {
-        return _.isEmpty($scope.preg_pathg_stats) ? null : '{0} %'.format($scope.preg_pathg_stats[pp_code].pct);
+        return _.isEmpty($scope.preg_pathg_stats) ? null : '{0}%'.format($scope.preg_pathg_stats[pp_code].pct);
+    };
+    $scope.getExtendedSearchUrl = function (pathology_id) {
+        var args = {
+            request_type: 'pregnancy',
+            person_id: CurrentUser.get_main_user().id,
+            closed: false,
+            pathology_id: pathology_id
+        };
+        return RisarApi.search_event.getExtendedSearchUrl(args);
     };
 
     $scope.init = function () {

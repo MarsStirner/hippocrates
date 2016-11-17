@@ -93,6 +93,11 @@ def search_events(paginated=True, **kwargs):
         else:
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
+    if 'pathology' in kwargs:
+        pathology = kwargs['pathology']
+        if isinstance(kwargs['pathology'], basestring):
+            pathology = map(int, pathology.split(','))
+        query = query.filter(pathology_list_id__in=pathology)
     if 'request_types' in kwargs and kwargs['request_types']:
         query = query.filter(request_type_id__in=kwargs['request_types'])
     if 'preg_week_min' in kwargs:
