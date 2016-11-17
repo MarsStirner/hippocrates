@@ -20,14 +20,15 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     }];
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.request_types = [];
-    
     $scope.$watchCollection('rbRequestType.objects', function (n, o) {
         if (!_.isArray(n) || _.isEqual(n, o)) return;
         $scope.request_types = _.filter(n, function (i) {
             return _.contains(['gynecological', 'pregnancy'], i.code)
         })
     });
-    
+
+    $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
+
     $scope.results = [];
     $scope.pager = {
         current_page: 1,
@@ -143,8 +144,6 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         });
     }; 
 
-    $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
-
     $scope.reset_filters = function () {
         $scope.query = {
             areas: [],
@@ -244,8 +243,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.query.latest_inspection_gt = parseInt(args.latest_inspection_gt);
         }
         if (args.hasOwnProperty('risk_rate')) {
-            var new_risk = $scope.risks_rb.get_by_code(args.risk_rate);
-            if (new_risk) $scope.query.risk = [new_risk];
+            $scope.query.risk = $scope.risks_rb.objects.filter(function (rr) {
+                return rr.code === args.risk_rate;
+            });
         }
     };
 

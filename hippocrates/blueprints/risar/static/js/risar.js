@@ -63,8 +63,8 @@ WebMis20
         lpu_doctors_list: function (orgs) {
             return wrapper('POST', Config.url.api_event_search_lpu_doctors_list, {}, {orgs: orgs})
         },
-        openExtendedSearch: function (args) {
-            $window.open(Config.url.search_html + '?' + $.param(args), '_self');
+        openExtendedSearch: function (args, external) {
+            $window.open(Config.url.search_html + '?' + $.param(args), external ? '_blank' : '_self');
         },
         getExtendedSearchUrl: function (args) {
             return Config.url.search_html + '?' + $.param(args);

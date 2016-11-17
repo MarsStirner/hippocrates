@@ -86,8 +86,8 @@
                 </div>
                 <div class="form-group">
                     <label>Степень риска</label>
-                    <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding"
-                         ng-disabled="!filterForPregCardsAvailable()">
+{#                    ng-disabled="!filterForPregCardsAvailable()"#}
+                    <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding">
                         [[ item.name ]]
                     </div>
                 </div>
