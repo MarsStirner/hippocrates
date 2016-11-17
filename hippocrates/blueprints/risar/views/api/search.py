@@ -131,6 +131,13 @@ def search_events(paginated=True, **kwargs):
             min_latest_date = safe_timestamp(now - datetime.timedelta(days=later_than_days), to_int=True)
             query = query.filter(latest_checkup_date__lte=min_latest_date)
 
+    if 'epicrisis_delivery_date_gt' in kwargs:
+        later_than_days = safe_int(kwargs['epicrisis_delivery_date_gt'])
+        if later_than_days:
+            min_latest_date = safe_timestamp(now - datetime.timedelta(days=later_than_days),
+                                             to_int=True, wo_time=True)
+            query = query.filter(epicrisis_id__gt=0, epicrisis_delivery_date__lte=min_latest_date)
+
     if 'risk_groups' in kwargs:
         risk_groups = kwargs['risk_groups']
         if not isinstance(risk_groups, (list, tuple)):

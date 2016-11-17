@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes, \
+    pregnancy_card_attrs, risar_epicrisis
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
 from sqlalchemy import func, and_, or_
@@ -18,12 +19,12 @@ class StatsController(BaseModelController):
         sel = self.get_selecter()
         data = sel.get_current_cards_overview(person_id, curation_level)
         events_all = float(data.count_all or 0) if data else 0
-        events_45 = float(data.count_event_45_not_closed or 0) if data else 0
+        events_not_closed_42 = float(data.count_event_not_closed_42 or 0) if data else 0
         events_2_months = float(data.count_event_2m_no_inspection or 0) if data else 0
         events_undefined_risk = float(data.count_event_prr_undefined or 0) if data else 0
         return {
             'events_all': events_all,
-            'events_45': events_45,
+            'events_not_closed_42': events_not_closed_42,
             'events_2_months': events_2_months,
             'events_undefined_risk': events_undefined_risk
         }
@@ -78,7 +79,7 @@ class StatsSelecter(BaseSelecter):
             EventType, rbRequestType, Action, ActionType
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
-            Action.deleted == 0, ActionType.flatCode == 'cardAttributes'
+            Action.deleted == 0, ActionType.flatCode == pregnancy_card_attrs
         )
         if curation_level:
             # карты куратора
@@ -133,9 +134,26 @@ class StatsSelecter(BaseSelecter):
             ).filter(
                 Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
                 Action.deleted == 0, ActionProperty.deleted == 0,
-                ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
+                ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'pregnancy_start_date'
             ).with_entities(
                 Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
+            )
+
+    def query_epicrisis(self):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        return self.model_provider.get_query('Action').join(
+                ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+            ).filter(
+                Action.deleted == 0, ActionProperty.deleted == 0,
+                ActionType.flatCode == risar_epicrisis, ActionPropertyType.code == 'delivery_date'
+            ).with_entities(
+                Action.event_id.label('event_id'), Action.id.label('action_id'),
+                ActionProperty_Date.value.label('delivery_date')
             )
 
     def get_current_cards_overview(self, person_id, curation_level=None):
@@ -149,8 +167,8 @@ class StatsSelecter(BaseSelecter):
         ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
 
         # subqueries
-        # 1) event pregnancy start date
-        q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
+        # 1) epicrisis with delivery_date
+        q_event_epicr = self.query_epicrisis().subquery('EventEpicrisis')
 
         # 2) event latest inspection
         # * самые поздние даты осмотров по обращениям
@@ -192,7 +210,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'prenatal_risk_572'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'prenatal_risk_572'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
         ).subquery('EventPerinatalRiskRate')
@@ -201,7 +219,7 @@ class StatsSelecter(BaseSelecter):
         query = self.query_main(person_id, curation_level)
 
         query = query.outerjoin(
-            q_event_psd, q_event_psd.c.event_id == Event.id
+            q_event_epicr, q_event_epicr.c.event_id == Event.id
         ).outerjoin(
             q_latest_inspections, q_latest_inspections.c.event_id == Event.id
         ).outerjoin(
@@ -211,12 +229,12 @@ class StatsSelecter(BaseSelecter):
         query = query.with_entities(
             func.count(Event.id.distinct()).label('count_all'),
             func.sum(func.IF(
-                and_(q_event_psd.c.psd.isnot(None),
-                     # с даты начала случая прошло от 45 недель
-                     func.floor(func.datediff(func.curdate(), q_event_psd.c.psd) / 7) + 1 >= 45
+                and_(q_event_epicr.c.delivery_date.isnot(None),
+                     # с даты родоразрешения прошло более 42 дней
+                     func.datediff(func.curdate(), q_event_epicr.c.delivery_date) >= 42
                      ),
                 1, 0)
-            ).label('count_event_45_not_closed'),
+            ).label('count_event_not_closed_42'),
             func.sum(func.IF(
                 # с момента последнего осмотра (или даты постановки на учет) прошло более 2 месяцев (60 дней)
                 func.datediff(func.curdate(),
@@ -254,7 +272,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'predicted_delivery_date'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'predicted_delivery_date'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
         ).subquery('EventPredictedDeliveryDate')
@@ -303,7 +321,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'prenatal_risk_572'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'prenatal_risk_572'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
         ).subquery('EventPerinatalRiskRate')
@@ -318,7 +336,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'predicted_delivery_date'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'predicted_delivery_date'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
         ).subquery('EventPredictedDeliveryDate')

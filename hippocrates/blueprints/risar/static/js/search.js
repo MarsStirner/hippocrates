@@ -57,7 +57,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         preg_week_max: null,
         latest_inspection_gt: null,
         pathology: [],
-        risk_groups: []
+        risk_groups: [],
+        epicrisis_delivery_date_gt: null
     };
 
     $scope.get_search_data = function () {
@@ -97,7 +98,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 $scope.query.latest_inspection_gt <= 500
             ) ? $scope.query.latest_inspection_gt : undefined,
             pathology: pathologies.length ? pathologies : undefined,
-            risk_groups: risk_groups.length ? risk_groups : undefined
+            risk_groups: risk_groups.length ? risk_groups : undefined,
+            epicrisis_delivery_date_gt: (
+                _.isNumber($scope.query.epicrisis_delivery_date_gt) &&
+                $scope.query.epicrisis_delivery_date_gt >= 1 &&
+                $scope.query.epicrisis_delivery_date_gt <= 500
+            ) ? $scope.query.epicrisis_delivery_date_gt : undefined
         };
     };
     var perform = function (set_page) {
@@ -178,7 +184,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             preg_week_max: null,
             latest_inspection_gt: null,
             pathology: [],
-            risk_groups: []
+            risk_groups: [],
+            epicrisis_delivery_date_gt: null
         };
         return $scope.refresh_areas();
     };
@@ -274,6 +281,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.query.risk_groups = $scope.rbRisarRiskGroup.objects.filter(function (rg) {
                 return rg.code === args.risk_group;
             });
+        }
+        if (args.hasOwnProperty('epicrisis_delivery_date_gt')) {
+            $scope.query.epicrisis_delivery_date_gt = parseInt(args.epicrisis_delivery_date_gt);
         }
     };
 

@@ -19,8 +19,8 @@ var CurrentCardsOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
         };
         if (type === 'all') {
 
-        } else if (type === 'not_closed45') {
-            args.preg_week_min = 45;
+        } else if (type === 'not_closed42') {
+            args.epicrisis_delivery_date_gt = 42;
         } else if (type === 'missed_inspection') {
             args.latest_inspection_gt = 60;
         } else if (type === 'undefined_prenatal_risks') {
