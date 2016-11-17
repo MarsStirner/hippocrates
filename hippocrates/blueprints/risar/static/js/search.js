@@ -239,6 +239,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         if (args.hasOwnProperty('preg_week_min')) {
             $scope.query.preg_week_min = parseInt(args.preg_week_min);
         }
+        if (args.hasOwnProperty('preg_week_max')) {
+            $scope.query.preg_week_max = parseInt(args.preg_week_max);
+        }
         if (args.hasOwnProperty('latest_inspection_gt')) {
             $scope.query.latest_inspection_gt = parseInt(args.latest_inspection_gt);
         }
