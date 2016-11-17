@@ -62,7 +62,7 @@ def api_get_ttj_records():
     if org_str:
         filtered = [
             record for record in filtered
-            if record.Event.current_org_structure.id == org_str['id']
+            if record.Event.current_org_structure and record.Event.current_org_structure.id == org_str['id']
         ]
     if lab:
         filtered = [

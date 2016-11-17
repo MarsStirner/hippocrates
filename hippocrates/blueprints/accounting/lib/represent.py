@@ -290,6 +290,7 @@ class ServiceRepr(object):
             'amount': service_data['amount'],
             'sum': format_money(service_data['sum']),
             'is_accumulative_price': safe_bool(service_data['is_accumulative_price']),
+            'is_complex_service': safe_bool(service_data['is_complex_service']),
             'in_invoice': False,
             'is_paid': False,
             'discount': None,
@@ -328,7 +329,8 @@ class ServiceRepr(object):
             'price': service.price_list_item.price,
             'amount': service.amount,
             'is_accumulative_price': safe_bool(service.price_list_item.isAccumulativePrice),
-            'discount': ServiceDiscountRepr.represent_discount_short(service.discount)
+            'discount': ServiceDiscountRepr.represent_discount_short(service.discount),
+            'is_complex_service': safe_bool(service.price_list_item.service.isComplex)
         }
 
     def represent_service_full(self, service):

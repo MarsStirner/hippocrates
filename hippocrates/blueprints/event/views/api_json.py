@@ -2,7 +2,7 @@
 
 import datetime
 import logging
-
+import blinker
 import collections
 
 from hippocrates.blueprints.event.app import module
@@ -527,6 +527,13 @@ def api_delete_event():
                 InvoiceItem.deleted: 1,
             }, synchronize_session=False)
         db.session.commit()
+        blinker.signal('Event-deleted').send(
+            None,
+            event_id=event_id,
+            deleted_data={
+                'invoices': invoice_ids
+            }
+        )
         return
 
     raise ApiException(403, msg.get('message', ''))
