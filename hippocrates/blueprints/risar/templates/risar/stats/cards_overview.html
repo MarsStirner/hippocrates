@@ -10,24 +10,24 @@
             <tr>
                 <td>Всего открытых карт</td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a ng-href="[[getExtendedSearchUrl('all')]]">
                         <span class="badge label-info pull-right">[[stats_data.events_all]]</span>
                     </a>
                 </td>
             </tr>
             <tr>
-                <td>Не закрыты карты пациенток (срок более 45 недель)</td>
+                <td>Родившие с незакрытыми картами (более 42 дней)</td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
-                        <span class="badge pull-right" ng-class="{'label-info': stats_data.events_45 === 0,
-                            'label-danger': stats_data.events_45 !== 0}">[[stats_data.events_45]]</span>
+                    <a ng-href="[[getExtendedSearchUrl('not_closed42')]]">
+                        <span class="badge pull-right" ng-class="{'label-info': stats_data.events_not_closed_42 === 0,
+                            'label-danger': stats_data.events_not_closed_42 !== 0}">[[stats_data.events_not_closed_42]]</span>
                     </a>
                 </td>
             </tr>
             <tr>
                 <td>Пропущено плановое посещение (2 месяца)</td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('missed_inspection')]]">
                         <span class="badge pull-right" ng-class="{'label-info': stats_data.events_2_months === 0,
                             'label-danger': stats_data.events_2_months !== 0}">[[stats_data.events_2_months]]</span>
                     </a>
@@ -36,7 +36,7 @@
             <tr>
                 <td>Карты с неопределенными степенями риска</td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('undefined_prenatal_risks')]]">
                         <span class="badge pull-right" ng-class="{'label-info': stats_data.events_undefined_risk === 0,
                             'label-danger': stats_data.events_undefined_risk !== 0}">[[stats_data.events_undefined_risk]]</span>
                     </a>
