@@ -45,11 +45,9 @@
                 <span ng-if="emIsNotActual(em)">(Неактуально)</span>
             </td>
             <td class="nowrap">
-                <div class="btn-group" style="min-width: 125px" ng-class="{'dropup': $index >= checkup.measures.length / 1.25}">
-                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
-                        Просмотр
-                    </button>
-                </div>
+                <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                    Просмотр
+                </button>
             </td>
         </tr>
     </tbody>

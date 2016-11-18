@@ -115,11 +115,9 @@
                                 <td>[[ em.data.beg_datetime | asDate ]]</td>
                                 <td>[[ em.data.end_datetime | asDate ]]</td>
                                 <td class="nowrap">
-                                    <div class="btn-group" style="min-width: 125px" ng-class="{'dropup': $index >= model.measure_list.length / 1.25}">
-                                        <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
-                                            Просмотр
-                                        </button>
-                                    </div>
+                                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                                        Просмотр
+                                    </button>
                                 </td>
                             </tr>
                             </tbody>

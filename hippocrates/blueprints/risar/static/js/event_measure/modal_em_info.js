@@ -46,10 +46,12 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     };
 
     $scope.editAppointment = function () {
-        EMModalService.openAppointmentEdit(event_measure, $scope.appointment);
+        var appointment = _.deepCopy($scope.appointment);
+        EMModalService.openAppointmentEdit(event_measure, appointment).then($scope.refresh);
     };
     $scope.editEmResults = function () {
-        EMModalService.openEmResultEdit(event_measure, $scope.em_result);
+        var em_result = _.deepCopy($scope.em_result);
+        EMModalService.openEmResultEdit(event_measure, em_result).then($scope.refresh);
     };
     $scope.getSchemeInfo = function () {
         if($scope.event_measure.scheme) {
@@ -89,19 +91,17 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
             $scope.event_measure = data.event_measure;
             $scope.appointment = data.appointment;
             $scope.em_result = data.em_result;
-        }).then(function (result) {
             if ($scope.appointment) {
                 $scope.appointment_action = $scope.appointment_action.merge($scope.appointment);
                 $scope.appointment_action.readonly = $scope.appointment_action.ro = $scope.ro;
                 update_print_templates($scope.appointment.action_type.context_name);
-            };
+            }
             if ($scope.em_result) {
                 $scope.em_result_action = $scope.em_result_action.merge($scope.em_result);
                 $scope.em_result_action.readonly = $scope.em_result_action.ro = $scope.ro;
                 update_print_templates($scope.em_result.action_type.context_name);
-                $scope.action_attach_type_id = $scope.FileAttachType.get_by_code('action').id;
-            };
-        });
+            }
+        })
     };
 
     $scope.init = function () {
@@ -110,6 +110,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         $scope.ActionStatus = RefBookService.get('ActionStatus');
         $scope.FileAttachType = RefBookService.get('FileAttachType');
         $q.all([$scope.ActionStatus.loading, $scope.FileAttachType.loading]).then(function () {
+            $scope.action_attach_type_id = $scope.FileAttachType.get_by_code('action').id;
             $scope.refresh();
         });
     };
