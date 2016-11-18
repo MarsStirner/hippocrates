@@ -340,6 +340,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             var card_section_opt = parseInt(args.card_section_opt);
             $scope.query.card_section = $scope.card_sections[card_section_opt];
         }
+        if (args.hasOwnProperty('org_id')) {
+            var organization = $scope.organisations.filter(function (organization) {
+                return organization.id == args.org_id;
+            })[0];
+            $scope.query.orgs = organization ? [organization] : [];
+        }
     };
 
     // start

@@ -52,6 +52,15 @@ var CardFillRatesLpuOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
                 $scope.stats_data = data;
             });
     };
+    $scope.getExtendedSearchUrl = function (org_id) {
+        var args = {
+            request_type: 'pregnancy',
+            org_id: org_id,
+            card_fill_opt: 2,
+            closed: false
+        };
+        return RisarApi.search_event.getExtendedSearchUrl(args);
+    };
     $scope.init = function () {
         $scope.refresh_data();
     };
