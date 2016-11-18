@@ -43,6 +43,22 @@ class EventMeasureRepr(object):
             'cancel_reason': measure.cancel_reason
         }
 
+    def represent_event_measure_info(self, em):
+        from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
+        from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
+
+        event_measure = self.represent_event_measure(em)
+        appointment = em.appointment_action
+        em_result = em.result_action
+        event_measure['appointment_comment'] = appointment and appointment.get_prop_value('Comment', '')
+        event_measure['realization_date'] = em_result and em_result.get_prop_value('RealizationDate')
+
+        return {
+            'event_measure': event_measure,
+            'appointment': appointment and EmAppointmentRepr().represent_appointment(appointment),
+            'em_result': em_result and EmResultRepr().represent_em_result(em_result),
+        }
+
     def _make_em_addtional_info(self, em):
         sm = em.scheme_measure
         if not sm:

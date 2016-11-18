@@ -19,7 +19,27 @@ var BaseMeasureListCtrl = function ($scope, EventMeasureService, EMModalService)
     };
     $scope.viewEventMeasure = function (idx) {
         var em = $scope.model.measure_list[idx];
-        EMModalService.openView(em.data);
+        EMModalService.openView(em).then(function (action) {
+            switch (action) {
+                case 'execute':
+                    $scope.executeEm(idx);
+                    break;
+                case 'cancel':
+                    $scope.cancelEm(idx);
+                    break;
+                case 'delete':
+                    $scope.deleteEm(idx);
+                    break;
+                case 'restore':
+                    $scope.restoreEm(idx);
+                    break;
+                default:
+                    EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.model.measure_list.splice(idx, 1, upd_em);
+                        });
+            }
+        });
     };
     $scope.executeEm = function (idx) {
         var em = $scope.model.measure_list[idx];
