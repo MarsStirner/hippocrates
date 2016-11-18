@@ -28,6 +28,12 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="cancel_reason" class="col-sm-3 control-label">Причина отказа</label>
+                    <div class="col-sm-9 form-control-static">
+                        <span id="cancel_reason" ng-bind="event_measure.cancel_reason.name"></span>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="measure_dates" class="col-sm-3 control-label">Период выполнения</label>
                     <div class="col-sm-9 form-control-static">
                         <span id="measure_dates" ng-bind="getMeasureDateRange()"></span>
