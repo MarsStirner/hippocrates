@@ -53,6 +53,7 @@
             <button class="btn btn-lg btn-default" ng-click="template_prev()" ng-if="!action.readonly">Загрузить из предыдущего</button>
         </div>
         <div class="pull-right">
+            <ui-print-button size="lg" ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
             <button class="btn btn-lg btn-success" ng-click="save_action()" ng-if="!action.readonly">Сохранить</button>
             <button class="btn btn-lg btn-danger" ng-click="cancel()">Закрыть</button>
         </div>
