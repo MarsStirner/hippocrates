@@ -77,6 +77,7 @@ WebMis20
         chart_pregnancy_html: '{{ url_for('.html_pregnancy_chart') }}',
         chart_gynecological_html: '{{ url_for('.html_gynecological_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
+        search_html: '{{ url_for('.html_search') }}',
         anamnesis_html: '{{ url_for('.html_anamnesis') }}',
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
