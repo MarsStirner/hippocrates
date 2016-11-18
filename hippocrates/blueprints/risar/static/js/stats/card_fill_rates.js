@@ -71,7 +71,7 @@ var CardFillRatesDoctorOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
     }];
 
     var makeStatsItem = function (stat) {
-        return [stat.doctor_name, stat.cfr_not_filled];
+        return [stat.doctor_name, stat.cfr_not_filled, stat.doctor_id];
     };
     $scope.refresh_data = function () {
         RisarApi.stats.get_card_fill_rates_overview_doctor(curator_id, $scope.curation_level_code)
@@ -91,6 +91,19 @@ var CardFillRatesDoctorOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
         return function (d) {
             return format(d);
         }
+    };
+    $scope.$on('elementClick.directive', function (angularEvent, event) {
+        $scope.openExtendedSearchFromDiagram(event);
+    });
+    $scope.openExtendedSearchFromDiagram = function (event) {
+        var mouse_button = event.e.button;  // 0-left, 1-middle
+        var args = {
+            request_type: 'pregnancy',
+            person_id: event.point[2],
+            closed: false,
+            card_fill_opt: 2
+        };
+        RisarApi.search_event.openExtendedSearch(args, mouse_button === 1)
     };
 
     $scope.init = function () {
