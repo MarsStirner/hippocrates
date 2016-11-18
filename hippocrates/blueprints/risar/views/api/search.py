@@ -163,6 +163,20 @@ def search_events(paginated=True, **kwargs):
         else:
             query = query.filter(exec_date__eq=0)
 
+    card_fill = kwargs.get('card_fill')
+    if card_fill:
+        card_section = kwargs.get('card_section')
+        if card_section == 'card_completely':
+            query = query.filter(card_fill_rate__eq=card_fill)
+        elif card_section == 'anamnesis':
+            query = query.filter(card_fill_rate_anamnesis__eq=card_fill)
+        elif card_section == 'first_inspection':
+            query = query.filter(card_fill_rate_first_inspection__eq=card_fill)
+        elif card_section == 'repeated_inspection':
+            query = query.filter(card_fill_rate_repeated_inspection__eq=card_fill)
+        elif card_section == 'epicrisis':
+            query = query.filter(card_fill_rate_epicrisis__eq=card_fill)
+
     if paginated:
         per_page = kwargs.get('per_page', 10)
         page = kwargs.get('page', 1)

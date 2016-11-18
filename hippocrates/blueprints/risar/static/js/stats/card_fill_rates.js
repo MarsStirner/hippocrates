@@ -9,6 +9,32 @@ var DoctorCardFillRatesCtrl = function ($scope, RisarApi, CurrentUser) {
                 $scope.stats_data = data;
             });
     };
+    $scope.getExtendedSearchUrl = function (type) {
+        var args = {
+            request_type: 'pregnancy',
+            person_id: CurrentUser.get_main_user().id,
+            closed: false
+        };
+        if (type === 'filled') {
+            args.card_fill_opt = 1;
+        } else if (type === 'not_filled') {
+            args.card_fill_opt = 2;
+            args.card_section_opt = 0;
+        } else if (type === 'anamnesis') {
+            args.card_fill_opt = 2;
+            args.card_section_opt = 1;
+        } else if (type === 'first_inspection') {
+            args.card_fill_opt = 2;
+            args.card_section_opt = 2;
+        } else if (type === 'repeated_inspection') {
+            args.card_fill_opt = 2;
+            args.card_section_opt = 3;
+        } else if (type === 'epicrisis') {
+            args.card_fill_opt = 2;
+            args.card_section_opt = 4;
+        }
+        return RisarApi.search_event.getExtendedSearchUrl(args);
+    };
     $scope.init = function () {
         $scope.refresh_data();
     };

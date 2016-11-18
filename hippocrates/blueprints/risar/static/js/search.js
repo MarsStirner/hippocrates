@@ -18,6 +18,32 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         name: 'Открытые',
         value: false
     }];
+    /* Значения взяты из CardFillRate */
+    $scope.card_fill_rate = [{
+        name: 'Все'
+    }, {
+        name: 'Заполнена',
+        value: 2
+    }, {
+        name: 'Не заполнена',
+        value: 3
+    }];
+    $scope.card_sections = [{
+        name: 'Карта целиком',
+        value: 'card_completely'
+    }, {
+        name: 'Анамнез',
+        value: 'anamnesis'
+    }, {
+        name: 'Первичный осмотр',
+        value: 'first_inspection'
+    }, {
+        name: 'Вторичный осмотр',
+        value: 'repeated_inspection'
+    }, {
+        name: 'Эпикриз',
+        value: 'epicrisis'
+    }];
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.request_types = [];
     $scope.$watchCollection('rbRequestType.objects', function (n, o) {
@@ -58,7 +84,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         latest_inspection_gt: null,
         pathology: [],
         risk_groups: [],
-        epicrisis_delivery_date_gt: null
+        epicrisis_delivery_date_gt: null,
+        card_fill: $scope.card_fill_rate[0],
+        card_section: $scope.card_sections[0]
     };
 
     $scope.get_search_data = function () {
@@ -103,9 +131,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 _.isNumber($scope.query.epicrisis_delivery_date_gt) &&
                 $scope.query.epicrisis_delivery_date_gt >= 1 &&
                 $scope.query.epicrisis_delivery_date_gt <= 500
-            ) ? $scope.query.epicrisis_delivery_date_gt : undefined
+            ) ? $scope.query.epicrisis_delivery_date_gt : undefined,
+            card_fill: $scope.query.card_fill.value,
+            card_section: $scope.query.card_section.value
         };
     };
+
     var perform = function (set_page) {
         if (!set_page) {
             $scope.pager.current_page = 1;
@@ -185,7 +216,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             latest_inspection_gt: null,
             pathology: [],
             risk_groups: [],
-            epicrisis_delivery_date_gt: null
+            epicrisis_delivery_date_gt: null,
+            card_fill: $scope.card_fill_rate[0],
+            card_section: $scope.card_sections[0]
         };
         return $scope.refresh_areas();
     };
@@ -203,6 +236,13 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     };
     $scope.canChangeCurator = function () {
         return CurrentUser.current_role_in('admin');
+    };
+    $scope.isCardSectionDisabled = function () {
+        if ($scope.query.card_fill == $scope.card_fill_rate[0]) {
+            $scope.query.card_section = $scope.card_sections[0];
+            return true;
+        }
+        return false;
     };
     $scope.filterForPregCardsAvailable = function () {
         return $scope.query.request_types.some(function (rt) {
@@ -285,6 +325,14 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         if (args.hasOwnProperty('epicrisis_delivery_date_gt')) {
             $scope.query.epicrisis_delivery_date_gt = parseInt(args.epicrisis_delivery_date_gt);
         }
+        if (args.hasOwnProperty('card_fill_opt')) {
+            var card_fill_opt = parseInt(args.card_fill_opt);
+            $scope.query.card_fill = $scope.card_fill_rate[card_fill_opt];
+        }
+        if (args.hasOwnProperty('card_section_opt')) {
+            var card_section_opt = parseInt(args.card_section_opt);
+            $scope.query.card_section = $scope.card_sections[card_section_opt];
+        }
     };
 
     // start
@@ -301,9 +349,6 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             tc.start()
         });
         $scope.$watchCollection('query.request_types', function () {
-            tc.start()
-        });
-        $scope.$watchCollection('query.pathology', function () {
             tc.start()
         });
     });

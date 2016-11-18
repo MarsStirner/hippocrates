@@ -160,6 +160,21 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label>Заполненность карты</label>
+                    <div fs-radio="" items="card_fill_rate" ng-model="query.card_fill" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Разделы карты</label>
+                    <ui-select ng-model="query.card_section" theme="select2" class="form-control" ng-disabled="isCardSectionDisabled()" ng-init="any_section">
+                        <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                        <ui-select-choices repeat="section in card_sections">
+                            <div ng-bind-html="section.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
                     <label>Патология</label>
                     <div fs-checkbox="" items="pathology_rb.objects" ng-model="query.pathology" class="nopadding">
                         [[ item.name ]]
