@@ -100,6 +100,11 @@ def search_events(paginated=True, **kwargs):
         query = query.filter(pathology_list_id__in=pathology)
     if 'request_types' in kwargs and kwargs['request_types']:
         query = query.filter(request_type_id__in=kwargs['request_types'])
+    if 'mkbs' in kwargs and kwargs['mkbs']:
+        if kwargs.get('closed_diags', False):
+            query = query.filter(diag_closed_mkb_ids__in=kwargs['mkbs'])
+        else:
+            query = query.filter(diag_mkb_ids__in=kwargs['mkbs'])
     if 'preg_week_min' in kwargs:
         query = query.filter(preg_week__gte=safe_int(kwargs['preg_week_min']))
     if 'preg_week_max' in kwargs:
@@ -277,6 +282,8 @@ def api_0_event_search():
                 ).days / 7 + 1) if row['psdate'] else None,
                 'request_type': rbRT_cache.get(row['request_type_id']),
                 # test
+                # 'diag_mkbs': row['diag_mkbs'],
+                # 'diag_closed_mkbs': row['diag_closed_mkbs'],
                 # 'pweek': row['preg_week'],
                 # 'latest_checkup_date': datetime.date.fromtimestamp(row['latest_checkup_date']) if row['latest_checkup_date'] else None
             }

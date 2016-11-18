@@ -86,7 +86,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         risk_groups: [],
         epicrisis_delivery_date_gt: null,
         card_fill: $scope.card_fill_rate[0],
-        card_section: $scope.card_sections[0]
+        card_section: $scope.card_sections[0],
+        mkbs: [],
+        closed_diags: null
     };
 
     $scope.get_search_data = function () {
@@ -99,7 +101,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             risks = _.pluck($scope.query.risk, 'id'),
             request_types = _.pluck($scope.query.request_types, 'id'),
             pathologies = _.pluck($scope.query.pathology, 'id'),
-            risk_groups = _.pluck($scope.query.risk_groups, 'code');
+            risk_groups = _.pluck($scope.query.risk_groups, 'code'),
+            mkbs = _.pluck($scope.query.mkbs, 'id');
 
         return {
             page: $scope.pager.current_page,
@@ -133,7 +136,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 $scope.query.epicrisis_delivery_date_gt <= 500
             ) ? $scope.query.epicrisis_delivery_date_gt : undefined,
             card_fill: $scope.query.card_fill.value,
-            card_section: $scope.query.card_section.value
+            card_section: $scope.query.card_fill.value !== undefined ? $scope.query.card_section.value : undefined,
+            mkbs: mkbs.length ? mkbs : undefined,
+            closed_diags: $scope.query.closed_diags || undefined
         };
     };
 
@@ -218,7 +223,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             risk_groups: [],
             epicrisis_delivery_date_gt: null,
             card_fill: $scope.card_fill_rate[0],
-            card_section: $scope.card_sections[0]
+            card_section: $scope.card_sections[0],
+            mkbs: [],
+            closed_diags: null
         };
         return $scope.refresh_areas();
     };
