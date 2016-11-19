@@ -182,6 +182,22 @@ def search_events(paginated=True, **kwargs):
         elif card_section == 'epicrisis':
             query = query.filter(card_fill_rate_epicrisis__eq=card_fill)
 
+    overdue = kwargs.get('overdue')
+    if overdue == 'any':
+        query = query.filter(has_overdue__eq=1)
+    elif overdue == 'lab_test':
+        query = query.filter(has_overdue_lab_test__eq=1)
+    elif overdue == 'func_test':
+        query = query.filter(has_overdue_func_test__eq=1)
+    elif overdue == 'checkup':
+        query = query.filter(has_overdue_checkup__eq=1)
+    elif overdue == 'healthcare':
+        query = query.filter(has_overdue_healthcare__eq=1)
+    elif overdue == 'hospitalization':
+        query = query.filter(has_overdue_hospitalization__eq=1)
+    elif overdue == 'social-preventiv':
+        query = query.filter(has_overdue_social_preventiv__eq=1)
+
     if paginated:
         per_page = kwargs.get('per_page', 10)
         page = kwargs.get('page', 1)

@@ -168,6 +168,20 @@
                         <input type="checkbox" ng-model="query.closed_diags">Только закрытые диагнозы
                     </label>
                 </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.overdue">Просроченные мероприятия
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Тип мероприятия</label>
+                    <ui-select ng-model="query.measure_type" theme="select2" class="form-control" ng-disabled="isMeasureTypeDisabled()">
+                        <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                        <ui-select-choices repeat="measure in rbMeasureType.objects">
+                            <div ng-bind-html="measure.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
                 <div class="form-group">
                     <label>Заполненность карты</label>
                     <div fs-radio="" items="card_fill_rate" ng-model="query.card_fill" class="nopadding">
@@ -176,7 +190,7 @@
                 </div>
                 <div class="form-group">
                     <label>Разделы карты</label>
-                    <ui-select ng-model="query.card_section" theme="select2" class="form-control" ng-disabled="isCardSectionDisabled()" ng-init="any_section">
+                    <ui-select ng-model="query.card_section" theme="select2" class="form-control" ng-disabled="isCardSectionDisabled()">
                         <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
                         <ui-select-choices repeat="section in card_sections">
                             <div ng-bind-html="section.name | highlight: $select.search"></div>
