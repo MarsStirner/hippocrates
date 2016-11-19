@@ -373,6 +373,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         $scope.$watchCollection('query.request_types', function () {
             tc.start()
         });
+        $scope.$watchCollection('query.pathology', function () {
+            tc.start()
+        });
         var empty_measure = {
             id: 0,
             name: 'Любой тип',
