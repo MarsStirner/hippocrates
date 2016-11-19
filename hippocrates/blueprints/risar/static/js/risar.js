@@ -135,7 +135,12 @@ WebMis20
                 return event;
             })
         }
-
+        this.take_control_by_current_user = function(event_id) {
+          return wrapper('POST', Config.url.api_chart_under_control.format('take_control', event_id, 0));
+        };
+        this.off_control_by_current_user = function(event_id){
+           return wrapper('POST', Config.url.api_chart_under_control.format('off_control', event_id, 0));
+        };
         this.get_header = function (event_id) {
             return wrapper('GET', urls.header.format(event_id));
         };
@@ -1081,6 +1086,30 @@ WebMis20
                     };
                 }
             }
+        }
+    }
+}])
+.directive('wmControlEventByPersonBtn', ['RisarApi', 'NotificationService', function (RisarApi, NotificationService) {
+    return {
+        restrict: 'E',
+        scope: {
+            eventId: '@'
+        },
+        replace: true,
+        template: '<button class="btn btn-default" ng-click="toggle()"><i class="fa text-yellow" ng-class="{\'fa-star\': subscribed, \'fa-star-o\': !subscribed}"></i></button>',
+        link: function (scope, iElement, iAttr) {
+            scope.subscribed = scope.subscribed || false;
+            function toggle() {
+                return RisarApi.chart[!scope.subscribed ? 'take_control_by_current_user': 'off_control_by_current_user'](scope.eventId, 0).then(function (result) {
+                        scope.subscribed = result.controlled;
+                        return result
+                });
+            };
+            scope.toggle = function () {
+                console.log(scope.eventId);
+                process()
+                NotificationService.notify('subs', ([1,2,3]) ? 'Пациентка взята под контроль' : 'Пациентка снята с контроля', 'info', 5000);
+            };
         }
     }
 }])

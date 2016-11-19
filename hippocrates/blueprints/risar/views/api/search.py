@@ -20,6 +20,7 @@ from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person, rbRequestType
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+from nemesis.models.utils import safe_current_user_id
 
 __author__ = 'mmalkov'
 
@@ -78,7 +79,9 @@ def search_events(paginated=True, **kwargs):
                 ors.append(area_code[:2])
 
         query = query.filter(areas__in=ors)
-
+    if 'controlled_by_persons' in kwargs:
+        current_user_id = safe_current_user_id()
+        query = query.filter(controlled_by__in=[current_user_id])
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
     if 'doc_id' in kwargs:

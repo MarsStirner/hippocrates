@@ -47,7 +47,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         closed: $scope.closed_items[0],
         client_work_group: {},
         age_min: null,
-        age_max: null
+        age_max: null,
+        controlled_events: null
     };
 
     $scope.get_search_data = function () {
@@ -70,7 +71,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             client_workgroup: $scope.query.client_workgroup,
             age_max: $scope.query.age_max,
             age_min: $scope.query.age_min,
-            request_types: _.pluck($scope.query.request_types, 'id') || undefined
+            request_types: _.pluck($scope.query.request_types, 'id') || undefined,
+            controlled_events: $scope.query.controlled_events
         };
     };
     var perform = function (set_page) {
