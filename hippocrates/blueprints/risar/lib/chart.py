@@ -1,8 +1,12 @@
 # coding: utf-8
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
-from nemesis.models.event import Event, EventType
+import datetime
 
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
+from nemesis.models.event import Event, EventType, EventPersonsControl
 from nemesis.models.exists import rbRequestType
+from nemesis.lib.user import UserProfileManager
+from nemesis.models.utils import safe_current_user_id
+from nemesis.systemwide import db
 
 
 def get_event(event_id):
@@ -18,3 +22,43 @@ def get_latest_pregnancy_event(client_id):
         rbRequestType.code == request_type_pregnancy,
         Event.execDate.is_(None)
     ).order_by(Event.setDate.desc()).first()
+
+
+def can_control_events():
+    return UserProfileManager.has_ui_overseers()
+
+
+def check_event_controlled(event):
+    if not event.id or not can_control_events():
+        return False
+    return EventPersonsControl.query.filter(
+        EventPersonsControl.event_id == event.id,
+        EventPersonsControl.person_id == safe_current_user_id(),
+        EventPersonsControl.endDate.is_(None)
+    ).count() > 0
+
+
+def take_event_control(event):
+    person_id = safe_current_user_id()
+    if not check_event_controlled(event):
+        epc = EventPersonsControl(
+            event_id=event.id,
+            person_id=person_id,
+            begDate=datetime.datetime.now()
+        )
+        db.session.add(epc)
+        db.session.commit()
+    return True
+
+
+def remove_event_control(event):
+    person_id = safe_current_user_id()
+    EventPersonsControl.query.filter(
+        EventPersonsControl.event_id == event.id,
+        EventPersonsControl.person_id == person_id,
+        EventPersonsControl.endDate.is_(None)
+    ).update({
+        EventPersonsControl.endDate: datetime.datetime.now()
+    }, synchronize_session=False)
+    db.session.commit()
+    return False

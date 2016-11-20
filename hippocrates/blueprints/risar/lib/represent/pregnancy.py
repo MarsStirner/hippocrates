@@ -30,15 +30,9 @@ from nemesis.models.client import BloodHistory
 from nemesis.models.enums import PregnancyPathology, CardFillRate, Gender
 from nemesis.models.exists import rbAttachType
 from nemesis.models.risar import rbPerinatalRiskRate, rbPerinatalRiskRateMkbAssoc
-from nemesis.models.utils import safe_current_user_id
+
 __author__ = 'viruzzz-kun'
 
-
-def is_controlled_by_user(event, person_id):
-    if not person_id or not event:
-        return False
-    return True
-    # return True if event.controlled_by_persons.filter(person_id=person_id, endDate=).all() else False
 
 def represent_pregnancy_event(event):
     """
@@ -68,7 +62,6 @@ def represent_pregnancy_event(event):
         'pregnancy_week': get_pregnancy_week(event),
         'has_diseases': check_disease(all_diagnostics),
         'maternal_cert': represent_mat_cert(event.maternal_cert),
-        'controlled_by_current_user': is_controlled_by_user(event, safe_current_user_id()),
     })
     return represent
 

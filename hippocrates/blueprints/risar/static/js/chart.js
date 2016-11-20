@@ -68,11 +68,6 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
     var client_id = params.client_id;
     var event_id = params.event_id;
     var gyn_event_id = params.gyn_event_id;
-    $scope.star = function() {
-        RisarApi.chart.off_control_by_current_user(event_id).then(function(result){
-            console.log(result);
-        });
-    }
 
     $scope.open_edit_epicrisis = function(e){
         var scope = $scope.$new();
