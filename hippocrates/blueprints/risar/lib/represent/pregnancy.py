@@ -61,7 +61,7 @@ def represent_pregnancy_event(event):
         'radz_risk_rate': get_radz_risk_rate(card.radz_risk),
         'pregnancy_week': get_pregnancy_week(event),
         'has_diseases': check_disease(all_diagnostics),
-        'maternal_cert': represent_mat_cert(event.maternal_cert)
+        'maternal_cert': represent_mat_cert(event.maternal_cert),
     })
     return represent
 

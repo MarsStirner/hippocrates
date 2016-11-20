@@ -56,6 +56,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
     $scope.pathology_rb = RefBookService.get('PregnancyPathology');
     $scope.rbRisarRiskGroup = RefBookService.get('rbRisarRiskGroup');
+    $scope.rbMeasureType = RefBookService.get('rbMeasureType');
 
     $scope.results = [];
     $scope.pager = {
@@ -88,7 +89,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         card_fill: $scope.card_fill_rate[0],
         card_section: $scope.card_sections[0],
         mkbs: [],
-        closed_diags: null
+        closed_diags: null,
+        overdue: null,
+        measure_type: $scope.rbMeasureType.objects[0],
+        controlled_events: null
     };
 
     $scope.get_search_data = function () {
@@ -138,7 +142,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             card_fill: $scope.query.card_fill.value,
             card_section: $scope.query.card_fill.value !== undefined ? $scope.query.card_section.value : undefined,
             mkbs: mkbs.length ? mkbs : undefined,
-            closed_diags: $scope.query.closed_diags || undefined
+            closed_diags: $scope.query.closed_diags || undefined,
+            overdue: $scope.query.overdue && $scope.query.measure_type.code,
+            controlled_events: $scope.query.controlled_events || undefined
         };
     };
 
@@ -225,7 +231,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             card_fill: $scope.card_fill_rate[0],
             card_section: $scope.card_sections[0],
             mkbs: [],
-            closed_diags: null
+            closed_diags: null,
+            overdue: null,
+            measure_type: $scope.rbMeasureType.objects[0],
+            controlled_events: null
         };
         return $scope.refresh_areas();
     };
@@ -250,6 +259,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             return true;
         }
         return false;
+    };
+    $scope.isMeasureTypeDisabled = function () {
+        return !$scope.query.overdue;
     };
     $scope.filterForPregCardsAvailable = function () {
         return $scope.query.request_types.some(function (rt) {
@@ -350,7 +362,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
 
     // start
     $q.all([areas_promise, $scope.risks_rb.loading, $scope.pathology_rb.loading,
-            $scope.rbRisarRiskGroup.loading]).then(function () {
+            $scope.rbRisarRiskGroup.loading, $scope.rbMeasureType.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
         setFilterFromArgs(aux.getQueryParams(window.location.search));
@@ -364,6 +376,16 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         $scope.$watchCollection('query.request_types', function () {
             tc.start()
         });
+        $scope.$watchCollection('query.pathology', function () {
+            tc.start()
+        });
+        var empty_measure = {
+            id: 0,
+            name: 'Любой тип',
+            code: 'any'
+        };
+        $scope.rbMeasureType.objects.unshift(empty_measure);
+        $scope.query.measure_type = $scope.rbMeasureType.objects[0];
     });
 };
 

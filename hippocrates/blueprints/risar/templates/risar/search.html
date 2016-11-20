@@ -58,12 +58,6 @@
                     <input class="form-control" ng-model="query.fio">
                 </div>
                 <div class="form-group">
-                    <label></label>
-                    <div fs-checkbox items="request_types" ng-model="query.request_types" class="nopadding">
-                        [[ item.name ]]
-                    </div>
-                </div>
-                <div class="form-group">
                     <label>Социальный статус</label>
                     <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>
                 </div>
@@ -89,6 +83,11 @@
                     <div fs-radio="" items="closed_items" ng-model="query.closed" class="nopadding">
                         [[ item.name ]]
                     </div>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.controlled_events">Пациентки на контроле
+                    </label>
                 </div>
                 <div class="form-group">
                     <label>Степень риска</label>
@@ -168,6 +167,20 @@
                         <input type="checkbox" ng-model="query.closed_diags">Только закрытые диагнозы
                     </label>
                 </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.overdue">Просроченные мероприятия
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Тип мероприятия</label>
+                    <ui-select ng-model="query.measure_type" theme="select2" class="form-control" ng-disabled="isMeasureTypeDisabled()">
+                        <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                        <ui-select-choices repeat="measure in rbMeasureType.objects">
+                            <div ng-bind-html="measure.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
                 <div class="form-group">
                     <label>Заполненность карты</label>
                     <div fs-radio="" items="card_fill_rate" ng-model="query.card_fill" class="nopadding">
@@ -176,7 +189,7 @@
                 </div>
                 <div class="form-group">
                     <label>Разделы карты</label>
-                    <ui-select ng-model="query.card_section" theme="select2" class="form-control" ng-disabled="isCardSectionDisabled()" ng-init="any_section">
+                    <ui-select ng-model="query.card_section" theme="select2" class="form-control" ng-disabled="isCardSectionDisabled()">
                         <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
                         <ui-select-choices repeat="section in card_sections">
                             <div ng-bind-html="section.name | highlight: $select.search"></div>
@@ -218,6 +231,9 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
+                                {% if user_profiles_mng.has_ui_overseers() %}
+                                <th></th>
+                                {% endif %}
                                 <th>Риск</th>
                                 <th>№ карты</th>
                                 <th>ФИО</th>
@@ -233,6 +249,11 @@
                             </thead>
                             <tbody>
                             <tr ng-repeat="row in results">
+                                {% if user_profiles_mng.has_ui_overseers() %}
+                                <td>
+                                    <wm-btn-control-event event-id="row.event_id" is-controlled="row.is_controlled"></wm-btn-control-event>
+                                </td>
+                                {% endif %}
                                 <td ng-switch="row.request_type.code" class="text-center">
                                     <span risk-rate-icon="row.risk" ng-switch-when="pregnancy"></span>
                                     <span ng-switch-default class="fa fa-minus text-gray"></span>

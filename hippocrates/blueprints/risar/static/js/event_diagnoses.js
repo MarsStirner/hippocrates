@@ -16,6 +16,9 @@ var EventDiagnosesCtrl = function ($scope, RisarApi, DiagnosisModal, WMEventServ
         }
     };
     var reload_anamnesis = function () {
+        RisarApi.chart.get_header(event_id).then(function (data) {
+            $scope.header = data.header;
+        });
         RisarApi.chart.get(event_id)
         .then(function (event) {
             $scope.chart = event;
