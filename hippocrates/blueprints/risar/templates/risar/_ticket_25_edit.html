@@ -74,7 +74,7 @@
                 <tr>
                     <th class="text-right col-md-4">Профиль медицинской помощи</th>
                     <td class="col-md-8">
-                        <wysiwyg ng-model="checkup.ticket_25.prof_med_help" />
+                        <rb-select ref-book="rbProfMedHelp" ng-model="checkup.ticket_25.prof_med_help"></rb-select>
                     </td>
                 </tr>
                 <tr>
@@ -84,9 +84,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <th class="text-right col-md-4">Условия оказания медицинской помощи </th>
+                    <td class="col-md-8">
+                        <rb-select ref-book="rbConditionMedHelp" ng-model="checkup.ticket_25.condit_med_help"></rb-select>
+                    </td>
+                </tr>
+                <tr>
                     <th class="text-right col-md-4">Медицинские услуги</th>
                     <td></td>
                 </tr>
+
                 <tr>
                     <td colspan="2">
                         <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.services"
