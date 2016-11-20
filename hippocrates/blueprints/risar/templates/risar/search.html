@@ -84,11 +84,13 @@
                         [[ item.name ]]
                     </div>
                 </div>
+                {% if user_profiles_mng.has_ui_overseers() %}
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" ng-model="query.controlled_events">Пациентки на контроле
                     </label>
                 </div>
+                {% endif %}
                 <div class="form-group">
                     <label>Степень риска</label>
 {#                    ng-disabled="!filterForPregCardsAvailable()"#}
