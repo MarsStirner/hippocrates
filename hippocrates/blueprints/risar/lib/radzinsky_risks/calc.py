@@ -252,8 +252,9 @@ def on_patient_info_saved(sender, client_id, **extra):
     event = get_latest_pregnancy_event(client_id)
     if event:
         card = PregnancyCard.get_for_event(event)
-        reevaluate_radzinsky_risks(card)
-        db.session.commit()
+        if card.attrs:
+            reevaluate_radzinsky_risks(card)
+            db.session.commit()
 
 
 patient_saved.connect(on_patient_info_saved)

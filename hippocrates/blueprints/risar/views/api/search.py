@@ -195,7 +195,7 @@ def search_events(paginated=True, **kwargs):
         query = query.filter(has_overdue_healthcare__eq=1)
     elif overdue == 'hospitalization':
         query = query.filter(has_overdue_hospitalization__eq=1)
-    elif overdue == 'social-preventiv':
+    elif overdue == 'social_preventiv':
         query = query.filter(has_overdue_social_preventiv__eq=1)
 
     if paginated:
