@@ -37,9 +37,11 @@
             <div class="col-md-4" ng-repeat="group in risks_layouting">
                 <div class="progress-group" ng-repeat="code in group">
                     <span class="progress-text" ng-bind="rbRisarRiskGroup.get_by_code(code).name"></span>
-                    <span class="progress-number">
-                        <b ng-bind="risks_data[code]"></b>/[[ stats_data.total_cards ]]
-                    </span>
+                    <a ng-href="[[getExtendedSearchUrl(code)]]" class="text-black">
+                        <span class="progress-number">
+                            <b ng-bind="risks_data[code]"></b>/[[ stats_data.total_cards ]]
+                        </span>
+                    </a>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" ng-style="{width: '{0}%'.format(
                       (stats_data.total_cards)

@@ -10,7 +10,7 @@
             <tr>
                 <td>Заполненные карты</td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('filled')]]">
                         <span class="badge label-info pull-right" ng-bind="stats_data.cfr_filled"></span>
                     </a>
                 </td>
@@ -18,7 +18,7 @@
             <tr>
                 <td>Незаполненные карты</td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('not_filled')]]">
                         <span class="badge label-danger pull-right" ng-bind="stats_data.cfr_not_filled"></span>
                     </a>
                 </td>
@@ -30,7 +30,7 @@
             <tr>
                 <td><span class="small-left-margin">Анамнез</span></td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('anamnesis')]]">
                         <span class="badge pull-right label-[[ stats_data.cfr_anamnesis_not_filled > 0 ? 'danger' : 'info' ]]"
                             ng-bind="stats_data.cfr_anamnesis_not_filled"></span>
                     </a>
@@ -39,7 +39,7 @@
             <tr>
                 <td><span class="small-left-margin">Первичный осмотр</span></td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('first_inspection')]]">
                         <span class="badge pull-right label-[[ stats_data.cfr_fi_not_filled > 0 ? 'danger' : 'info' ]]"
                             ng-bind="stats_data.cfr_fi_not_filled"></span>
                     </a>
@@ -48,7 +48,7 @@
             <tr>
                 <td><span class="small-left-margin">Повторный осмотр</span></td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('repeated_inspection')]]">
                         <span class="badge pull-right label-[[ stats_data.cfr_ri_not_filled > 0 ? 'danger' : 'info' ]]"
                             ng-bind="stats_data.cfr_ri_not_filled"></span>
                     </a>
@@ -57,7 +57,7 @@
             <tr>
                 <td><span class="small-left-margin">Эпикриз</span></td>
                 <td>
-                    <a href="{{ url_for('risar.html_search') }}">
+                    <a href="[[getExtendedSearchUrl('epicrisis')]]">
                         <span class="badge pull-right label-[[ stats_data.cfr_epicrisis_not_filled > 0 ? 'danger' : 'info' ]]"
                             ng-bind="stats_data.cfr_epicrisis_not_filled"></span>
                     </a>

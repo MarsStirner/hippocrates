@@ -62,6 +62,12 @@ WebMis20
         },
         lpu_doctors_list: function (orgs) {
             return wrapper('POST', Config.url.api_event_search_lpu_doctors_list, {}, {orgs: orgs})
+        },
+        openExtendedSearch: function (args, external) {
+            $window.open(Config.url.search_html + '?' + $.param(args), external ? '_blank' : '_self');
+        },
+        getExtendedSearchUrl: function (args) {
+            return Config.url.search_html + '?' + $.param(args);
         }
     };
     this.search_event_ambulance = {
@@ -435,6 +441,9 @@ WebMis20
                 url += '?new=true';
             }
             return wrapper('GET', url, args);
+        },
+        get_info: function (event_measure_id) {
+            return wrapper('GET', Config.url.api_event_measure_get_info.format(event_measure_id))
         },
         save_list: function (event_id, data) {
             return wrapper('POST', Config.url.api_event_measure_save_list.format(event_id), {}, data);

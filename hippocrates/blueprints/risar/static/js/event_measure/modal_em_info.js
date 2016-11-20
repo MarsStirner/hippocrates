@@ -1,119 +1,124 @@
 'use strict';
 
-WebMis20.run(['$templateCache', function ($templateCache) {
-    $templateCache.put(
-        '/WebMis20/RISAR/modal/event_measure_view.html',
-        '\
-<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
-    <button type="button" class="close" ng-click="$dismiss(\'cancel\')">&times;</button>\
-    <h4 class="modal-title">Просмотр информации о мероприятии</h4>\
-</div>\
-<div class="modal-body">\
-    <form class="form-horizontal">\
-        <div class="form-group">\
-            <label for="measure_type" class="col-sm-3 control-label">Схема</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure_type" ng-bind="getSchemeInfo()"></span>\
-            </div>\
-        </div>\
-        <hr>\
-        <div class="form-group">\
-            <label for="measure_type" class="col-sm-3 control-label">Тип мероприятия</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure_type" ng-bind="event_measure.measure.measure_type.name"></span>\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure" class="col-sm-3 control-label">Мероприятие</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure" ng-bind="event_measure.measure.name"></span>\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure_status" class="col-sm-3 control-label">Статус</label>\
-            <div class="col-sm-9 form-control-static">\
-                <event-measure-status id="measure_status" status="event_measure.status"></event-measure-status>\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure_dates" class="col-sm-3 control-label">Период выполнения</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure_dates" ng-bind="getMeasureDateRange()"></span>\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure_dates" class="col-sm-3 control-label">Документы</label>\
-            <div class="col-sm-9 form-control-static">\
-                Направление: [[ getAppointmentInfo() ]]\
-            </div>\
-            <div class="col-sm-offset-3 col-sm-9 form-control-static">\
-                Результат: -\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure_exec_date" class="col-sm-3 control-label">Дата выполнения</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure_exec_date">-</span>\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure_create" class="col-sm-3 control-label">Создано</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure_create" ng-bind="getMeasureCreateInfo()"></span>\
-            </div>\
-        </div>\
-        <div class="form-group">\
-            <label for="measure_modify" class="col-sm-3 control-label">Изменено</label>\
-            <div class="col-sm-9 form-control-static">\
-                <span id="measure_modify" ng-bind="getMeasureModifyInfo()"></span>\
-            </div>\
-        </div>\
-    </form>\
-</div>\
-<div class="modal-footer">\
-    <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
-</div>');
+WebMis20.run(['$templateCache', '$http', function ($templateCache, $http) {
+    $http.get('static/templates/event_measure_view.html').then(function(response) {
+        $templateCache.put('/WebMis20/RISAR/modal/event_measure_view.html', response.data);
+    });
 }]);
 
+var EventMeasureModalCtrl = function ($scope, $filter, $q,
+    RisarApi, RefBookService, WMAction, PrintingService, EMModalService,
+    event_measure, options) {
+    $scope.event_measure = event_measure.data;
+    $scope.access = event_measure.access
+    $scope.ro = true;
+    $scope.ps = new PrintingService("event_measure");
+    function update_print_templates (context_name) {
+        $scope.ps.set_context(context_name);
+    };
+    $scope.setTab = function (num) {
+        $scope.tabNum = num;
+    };
 
-var EventMeasureModalCtrl = function ($scope, $filter, RisarApi, RefBookService, event_measure) {
-    $scope.event_measure = event_measure;
+    $scope.canEditEmAppointment = function () {
+        return $scope.access.can_edit_appointment;
+    };
+    $scope.canEditEmResults = function () {
+        return $scope.access.can_edit_result;
+    };
+    $scope.canReadEmAppointment = function () {
+        return $scope.access.can_read_appointment;
+    };
+    $scope.canReadEmResult = function () {
+        return $scope.access.can_read_result;
+    };
+    $scope.canNewAppointment = function () {
+        return options && options.display_new_appointment && $scope.event_measure.measure.measure_type.code === 'checkup';
+    };
+    $scope.canDelete = function () {
+        return $scope.access.can_delete;
+    };
+    $scope.canRestore = function () {
+        return $scope.access.can_restore;
+    };
+    $scope.displayNewAppointment = function () {
+        return options && options.display_new_appointment;
+    };
 
+    $scope.editAppointment = function () {
+        var appointment = _.deepCopy($scope.appointment);
+        EMModalService.openAppointmentEdit(event_measure, appointment).then($scope.refresh);
+    };
+    $scope.editEmResults = function () {
+        var em_result = _.deepCopy($scope.em_result);
+        EMModalService.openEmResultEdit(event_measure, em_result).then($scope.refresh);
+    };
     $scope.getSchemeInfo = function () {
-        if(event_measure.scheme) {
-            return '{0}. {1}'.format(event_measure.scheme.number, event_measure.scheme.name);
+        if($scope.event_measure.scheme) {
+            return '{0}{. |1}'.formatNonEmpty($scope.event_measure.scheme.number, $scope.event_measure.scheme.name);
         }
     };
     $scope.getMeasureDateRange = function () {
-        return '{0} - {1}'.format(
-            $filter('asDateTime')(event_measure.beg_datetime),
-            $filter('asDateTime')(event_measure.end_datetime)
+        return '{0}{ - |1}'.formatNonEmpty(
+            $filter('asDateTime')($scope.event_measure.beg_datetime),
+            $filter('asDateTime')($scope.event_measure.end_datetime)
         );
     };
+    $scope.getRealizationDate = function () {
+        return $scope.event_measure.realization_date || '';
+    };
     $scope.getMeasureCreateInfo = function () {
-        return '{0}, {1}'.format(
-            $filter('asDateTime')(event_measure.create_datetime),
-            safe_traverse(event_measure, ['create_person', 'short_name'])
+        return '{0}{, |1}'.formatNonEmpty(
+            $filter('asDateTime')($scope.event_measure.create_datetime),
+            safe_traverse($scope.event_measure, ['create_person', 'short_name'])
         );
     };
     $scope.getMeasureModifyInfo = function () {
-        return '{0}, {1}'.format(
-            $filter('asDateTime')(event_measure.modify_datetime),
-            safe_traverse(event_measure, ['modify_person', 'short_name'])
+        return '{0}{, |1}'.formatNonEmpty(
+            $filter('asDateTime')($scope.event_measure.modify_datetime),
+            safe_traverse($scope.event_measure, ['modify_person', 'short_name'])
         );
     };
     $scope.getAppointmentInfo = function () {
-        return '{0}'.format(
-            event_measure.appointment_action_id || ' - '
-        );
+        return $scope.event_measure.appointment_action_id || '';
     };
+    $scope.getAppointmentComment = function () {
+        return $scope.event_measure.appointment_comment || '';
+    };
+
+    $scope.refresh = function () {
+        return RisarApi.measure.get_info($scope.event_measure.id, $scope.event_measure.appointment_action_id).then(function(data){
+            $scope.event_measure = data.event_measure;
+            $scope.appointment = data.appointment;
+            $scope.em_result = data.em_result;
+            if ($scope.appointment) {
+                $scope.appointment_action = $scope.appointment_action.merge($scope.appointment);
+                $scope.appointment_action.readonly = $scope.appointment_action.ro = $scope.ro;
+                update_print_templates($scope.appointment.action_type.context_name);
+            }
+            if ($scope.em_result) {
+                $scope.em_result_action = $scope.em_result_action.merge($scope.em_result);
+                $scope.em_result_action.readonly = $scope.em_result_action.ro = $scope.ro;
+                update_print_templates($scope.em_result.action_type.context_name);
+            }
+        })
+    };
+
     $scope.init = function () {
-
+        $scope.appointment_action = new WMAction();
+        $scope.em_result_action = new WMAction();
+        $scope.ActionStatus = RefBookService.get('ActionStatus');
+        $scope.FileAttachType = RefBookService.get('FileAttachType');
+        $q.all([$scope.ActionStatus.loading, $scope.FileAttachType.loading]).then(function () {
+            $scope.action_attach_type_id = $scope.FileAttachType.get_by_code('action').id;
+            $scope.refresh();
+        });
     };
-
     $scope.init();
 };
 
 
-WebMis20.controller('EventMeasureModalCtrl', ['$scope', 'RisarApi', 'RefBookService',
+WebMis20.controller('EventMeasureModalCtrl', [
+    '$scope', '$filter', '$q',
+    'RisarApi', 'RefBookService', 'WMAction', 'PrintingService', 'EMModalService',
     EventMeasureModalCtrl]);

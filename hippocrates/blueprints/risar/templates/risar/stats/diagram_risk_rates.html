@@ -26,10 +26,18 @@
     </div>
     <div class="box-footer">
         <h4>По патологиям</h4>
-        <ul class="nav nav-pills nav-stacked">
-            <li ng-repeat="pp in PregnancyPathology.objects | filter:flt_pp">
-                <a href="javascript:void(0);">[[ pp.name ]] <span class="pull-right text-bold" ng-bind="getPregPathgPct(pp.code)"></span></a>
-            </li>
-        </ul>
+        <table class="table table-condensed no-border">
+            <tr ng-repeat="pp in PregnancyPathology.objects | filter:flt_pp">
+                <td>[[ pp.name ]]</td>
+                <td>
+                    <a ng-href="[[getExtendedSearchUrl(pp.id)]]" >
+                        <span class="badge label-info pull-right text-bold" ng-bind="getPregPathgCount(pp.code)"></span>
+                    </a>
+                </td>
+                <td>
+                    <span class="pull-right text-bold" ng-bind="getPregPathgPct(pp.code)"></span>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
