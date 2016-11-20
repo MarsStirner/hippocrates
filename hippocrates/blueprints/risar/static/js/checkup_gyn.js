@@ -79,9 +79,16 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 $scope.clientBd = $scope.header.client.birth_date;
             });
         if (!checkup_id) {
-            RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp').then(function (checkup) {$scope.checkup = checkup});
+            RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp')
+                .then(function (checkup) {
+                    $scope.checkup = checkup;
+                    $scope.$broadcast('checkupLoaded');
+                });
         } else {
-            RisarApi.checkup_gyn.get(event_id, checkup_id).then(function (checkup) {$scope.checkup = checkup});
+            RisarApi.checkup_gyn.get(event_id, checkup_id).then(function (checkup) {
+                $scope.checkup = checkup;
+                $scope.$broadcast('checkupLoaded');
+            });
         }
     };
 
