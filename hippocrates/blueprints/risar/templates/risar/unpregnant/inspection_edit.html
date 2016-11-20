@@ -1392,16 +1392,7 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 9. Диагностические мероприятия</h3>
-                            </div>
-                            <div class="box-body">
-                            {% include 'risar/unpregnant/inspection_measure_list.html' %}
-                            </div>
-                            </div>
-                        </ng-form>
+                        {{ inspection_macros.diagnostics(9) }}
                         {{ inspection_macros.ticket_25(10) }}
                     </div>
                 </div>

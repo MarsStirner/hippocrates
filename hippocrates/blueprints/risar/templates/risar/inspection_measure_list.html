@@ -1,4 +1,4 @@
-<div ng-controller="EventMeasureActionViewCtrl">
+<div>
 <div ng-if="checkup.measures.length">
 <div class="text-right marginal">
     <div class="btn-group">
@@ -14,10 +14,155 @@
 <div ng-if="checkup.em_error" class="alert alert-danger">
     [[ checkup.em_error ]]
 </div>
+
+<div id="grouped_view" ng-if="isGroupedView()">
+<tabset>
+<tab heading="Мероприятия">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <input class="measure-checkbox-main" type="checkbox"
+                           ng-checked="checkSelectedAll('measures')" ng-click="toggleSelection('measures')">
+                </th>
+                <th width="30%">Название мероприятия</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th>Статус</th>
+                <th width="1%"></th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="status in grouped.statuses" ng-if="grouped.measures.hasOwnProperty(status.code)">
+            <tr>
+                <td colspan="7" class="text-bold" style="font-size: larger">
+                    <input class="measure-checkbox-main" type="checkbox"
+                           ng-checked="checkSelectedByStatus('measures', status.code)"
+                           ng-click="toggleByStatus('measures', status.code)"
+                           style="margin-left: 0px!important; margin-right: 10px">
+                    <event-measure-status status="status"></event-measure-status>
+                </td>
+            </tr>
+            <tr ng-repeat-start="measure_type in grouped.measures_types_info"
+                ng-if="grouped.measures[status.code].hasOwnProperty(measure_type.code)">
+                <td>
+                    <input class="measure-checkbox-main" type="checkbox"
+                           ng-checked="checkSelectedByMeasure('measures', status.code, measure_type.code)"
+                           ng-click="toggleByMeasure('measures', status.code, measure_type.code)"
+                           ng-disabled="!canSelectMeasureGroup('measures', status.code, measure_type.code)"
+                           style="margin-left: 20px!important">
+                </td>
+                <td colspan="6" class="text-bold">[[ measure_type.name ]]
+                    <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
+                        [[ measure_type.max_date | asDateTime ]])</span></td>
+            </tr>
+            <tr ng-repeat="em in grouped.measures[status.code][measure_type.code] track by em.data.id"
+                ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }"
+                ng-repeat-end>
+                <td>
+                    <input id="inp_[[ $index + 1 ]]" class="measure-checkbox" type="checkbox"
+                           ng-disabled="!canSelectEMAppointment(em)"
+                           ng-model="checkboxes[em.data.id]"
+                           style="margin-left: 20px!important">
+                </td>
+                <td>
+                    <span ng-bind="em.data.measure.name"></span>
+                    <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
+                    <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
+                    <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
+                </td>
+                <td>[[ em.data.beg_datetime | asDateTime ]]</td>
+                <td>[[ em.data.end_datetime | asDateTime ]]</td>
+                <td>
+                    <event-measure-status status="em.data.status"></event-measure-status>
+                    <span ng-if="emIsNotActual(em)">(Неактуально)</span>
+                </td>
+                <td class="nowrap">
+                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                        Просмотр
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</tab>
+<tab heading="Рекомедации">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <input class="measure-checkbox-main" type="checkbox"
+                           ng-checked="checkSelectedAll('recommendations')" ng-click="toggleSelection('recommendations')">
+                </th>
+                <th width="30%">Название мероприятия</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th>Статус</th>
+                <th width="1%"></th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="status in grouped.statuses" ng-if="grouped.recommendations.hasOwnProperty(status.code)">
+            <tr>
+                <td colspan="7" class="text-bold" style="font-size: larger">
+                    <input class="measure-checkbox-main" type="checkbox"
+                           ng-checked="checkSelectedByStatus('recommendations', status.code)"
+                           ng-click="toggleByStatus('recommendations', status.code)"
+                           style="margin-left: 0px!important; margin-right: 10px">
+                    <event-measure-status status="status"></event-measure-status>
+                </td>
+            </tr>
+            <tr ng-repeat-start="measure_type in grouped.recommend_types_info"
+                ng-if="grouped.recommendations[status.code].hasOwnProperty(measure_type.code)">
+                <td>
+                    <input class="measure-checkbox-main" type="checkbox"
+                           ng-checked="checkSelectedByMeasure('recommendations', status.code, measure_type.code)"
+                           ng-click="toggleByMeasure('recommendations', status.code, measure_type.code)"
+                           ng-disabled="!canSelectMeasureGroup('recommendations', status.code, measure_type.code)"
+                           style="margin-left: 20px!important">
+                </td>
+                <td colspan="6" class="text-bold">[[ measure_type.name ]]
+                    <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
+                        [[ measure_type.max_date | asDateTime ]])</span></td>
+            </tr>
+            <tr ng-repeat="em in grouped.recommendations[status.code][measure_type.code] track by em.data.id"
+                ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }"
+                ng-repeat-end>
+                <td>
+                    <input id="inp_[[ $index + 1 ]]" class="measure-checkbox" type="checkbox"
+                           ng-disabled="!canSelectEMAppointment(em)"
+                           ng-model="checkboxes[em.data.id]"
+                           style="margin-left: 20px!important">
+                </td>
+                <td>
+                    <span ng-bind="em.data.measure.name"></span>
+                    <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
+                    <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
+                    <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
+                </td>
+                <td>[[ em.data.beg_datetime | asDateTime ]]</td>
+                <td>[[ em.data.end_datetime | asDateTime ]]</td>
+                <td>
+                    <event-measure-status status="em.data.status"></event-measure-status>
+                    <span ng-if="emIsNotActual(em)">(Неактуально)</span>
+                </td>
+                <td class="nowrap">
+                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                        Просмотр
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</tab>
+</div>
+
+<div id="listed_view" ng-if="isListedView()">
 <table class="table">
     <thead>
         <tr>
-            <th><label for="allChecks">#&nbsp;</label><input class="measure-checkbox-main" id="allChecks" type="checkbox"  ng-click="toggleSelection()"></th>
+            <th>
+                <label for="allChecks">#&nbsp;</label>
+                <input class="measure-checkbox-main" id="allChecks" type="checkbox"
+                       ng-click="toggleSelection()" ng-checked="checkSelectedAll()"></th>
             <th width="30%">Название мероприятия</th>
             <th>Дата начала</th>
             <th>Дата окончания</th>
@@ -52,6 +197,8 @@
         </tr>
     </tbody>
 </table>
+</div>
+
 </div>
 <div ng-if="!checkup.measures.length && !checkup.em_error">
     <div class="text-right">

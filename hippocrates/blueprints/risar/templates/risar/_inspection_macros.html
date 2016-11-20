@@ -11,10 +11,19 @@
 {% endmacro %}
 
 {% macro diagnostics(step) %}
-<ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step>
+<ng-form class="tab-pane" id="diagnostic" name="diagnosticForm" novalidate rc-submit rc-step
+    ng-controller="EventMeasureActionViewCtrl">
     <div class="box box-primary box-wizard">
         <div class="box-header">
             <h3 class="box-title">Шаг {{ step }}. Диагностические мероприятия</h3>
+            <div class="box-tools">
+                <a href="javascript:void(0);" class="fa fa-list btn-box-tool" style="font-size: x-large"
+                    title="Отображать в виде списка" ng-show="isGroupedView()"
+                    ng-click="setViewMode('listed')"></a>
+                <a href="javascript:void(0);" class="fa fa-indent btn-box-tool" style="font-size: x-large"
+                    title="Отображать по группам" ng-show="isListedView()"
+                    ng-click="setViewMode('grouped')"></a>
+            </div>
         </div>
         <div class="box-body">
             {% include 'risar/inspection_measure_list.html' %}
