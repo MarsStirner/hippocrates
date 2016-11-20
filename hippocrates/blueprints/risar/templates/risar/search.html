@@ -58,12 +58,6 @@
                     <input class="form-control" ng-model="query.fio">
                 </div>
                 <div class="form-group">
-                    <label></label>
-                    <div fs-checkbox items="request_types" ng-model="query.request_types" class="nopadding">
-                        [[ item.name ]]
-                    </div>
-                </div>
-                <div class="form-group">
                     <label>Социальный статус</label>
                     <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>
                 </div>
@@ -89,6 +83,11 @@
                     <div fs-radio="" items="closed_items" ng-model="query.closed" class="nopadding">
                         [[ item.name ]]
                     </div>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.controlled_events">Пациентки на контроле
+                    </label>
                 </div>
                 <div class="form-group">
                     <label>Степень риска</label>
@@ -232,6 +231,9 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
+                                {% if user_profiles_mng.has_ui_overseers() %}
+                                <th></th>
+                                {% endif %}
                                 <th>Риск</th>
                                 <th>№ карты</th>
                                 <th>ФИО</th>
@@ -247,6 +249,11 @@
                             </thead>
                             <tbody>
                             <tr ng-repeat="row in results">
+                                {% if user_profiles_mng.has_ui_overseers() %}
+                                <td>
+                                    <wm-btn-control-event event-id="row.event_id" is-controlled="row.is_controlled"></wm-btn-control-event>
+                                </td>
+                                {% endif %}
                                 <td ng-switch="row.request_type.code" class="text-center">
                                     <span risk-rate-icon="row.risk" ng-switch-when="pregnancy"></span>
                                     <span ng-switch-default class="fa fa-minus text-gray"></span>

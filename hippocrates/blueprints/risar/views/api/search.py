@@ -12,6 +12,7 @@ from hippocrates.blueprints.reports.jasper_client import JasperReport
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.represent.common import represent_age
 from hippocrates.blueprints.risar.lib.search import get_workgroupname_by_code
+from hippocrates.blueprints.risar.lib.chart import check_events_controlled
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int, safe_timestamp
@@ -20,6 +21,7 @@ from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person, rbRequestType
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+from nemesis.models.utils import safe_current_user_id
 
 __author__ = 'mmalkov'
 
@@ -80,7 +82,6 @@ def search_events(paginated=True, **kwargs):
                 ors.append(area_code[:2])
 
         query = query.filter(areas__in=ors)
-
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
     if 'doc_id' in kwargs:
@@ -198,6 +199,10 @@ def search_events(paginated=True, **kwargs):
     elif overdue == 'social_preventiv':
         query = query.filter(has_overdue_social_preventiv__eq=1)
 
+    if kwargs.get('controlled_events', False):
+        current_user_id = safe_current_user_id()
+        query = query.filter(epc_persons__eq=current_user_id)
+
     if paginated:
         per_page = kwargs.get('per_page', 10)
         page = kwargs.get('page', 1)
@@ -271,6 +276,10 @@ def api_0_event_search():
 
     rbRT_cache = rbRequestType.cache().dict('id')
 
+    # controlled events
+    event_ids = [safe_int(item['id']) for item in result['result']['items']]
+    control_map = check_events_controlled(event_ids)
+
     return {
         'count': total,
         'total_pages': pages,
@@ -297,6 +306,7 @@ def api_0_event_search():
                     datetime.date.fromtimestamp(row['psdate'])
                 ).days / 7 + 1) if row['psdate'] else None,
                 'request_type': rbRT_cache.get(row['request_type_id']),
+                'is_controlled': control_map.get(row['id'], False)
                 # test
                 # 'diag_mkbs': row['diag_mkbs'],
                 # 'diag_closed_mkbs': row['diag_closed_mkbs'],

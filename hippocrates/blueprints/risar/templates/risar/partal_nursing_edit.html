@@ -86,7 +86,7 @@
     {% endfor %}
 {% endmacro %}
 <div ng-controller="PartalNursingEditCtrl" ng-cloak  >
-    <section class="content-header" >
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
          {%- set right_word =  dict((('postpartal_nursing', 'послеродового'),
                                                     ('prepartal_nursing', 'дородового'),
                                                     ('prepartal_nursing_repeat', 'дородового'))).get(flat_code) -%}

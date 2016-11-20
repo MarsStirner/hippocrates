@@ -91,7 +91,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         mkbs: [],
         closed_diags: null,
         overdue: null,
-        measure_type: $scope.rbMeasureType.objects[0]
+        measure_type: $scope.rbMeasureType.objects[0],
+        controlled_events: null
     };
 
     $scope.get_search_data = function () {
@@ -142,7 +143,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             card_section: $scope.query.card_fill.value !== undefined ? $scope.query.card_section.value : undefined,
             mkbs: mkbs.length ? mkbs : undefined,
             closed_diags: $scope.query.closed_diags || undefined,
-            overdue: $scope.query.overdue && $scope.query.measure_type.code
+            overdue: $scope.query.overdue && $scope.query.measure_type.code,
+            controlled_events: $scope.query.controlled_events || undefined
         };
     };
 
@@ -231,7 +233,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             mkbs: [],
             closed_diags: null,
             overdue: null,
-            measure_type: $scope.rbMeasureType.objects[0]
+            measure_type: $scope.rbMeasureType.objects[0],
+            controlled_events: null
         };
         return $scope.refresh_areas();
     };

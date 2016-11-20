@@ -6,7 +6,7 @@
 
 {% block main %}
 <div ng-controller="CheckupPCEditCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.page_title_n('Осмотр специалистом ПЦ') }}
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>

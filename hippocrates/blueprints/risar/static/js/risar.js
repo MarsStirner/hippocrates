@@ -46,7 +46,7 @@ WebMis20
     };
     this.search_event = {
         get: function (query) {
-            return wrapper('POST', Config.url.api_event_search, {}, query)
+            return wrapper('POST', Config.url.api_event_search, {}, query);
         },
         print: function (query) {
             self.file_get('POST', Config.url.api_event_print, query);
@@ -141,7 +141,12 @@ WebMis20
                 return event;
             })
         }
-
+        this.take_control = function(event_id) {
+          return wrapper('POST', Config.url.api_chart_control.format('take_control', event_id, ''));
+        };
+        this.remove_control = function(event_id) {
+           return wrapper('POST', Config.url.api_chart_control.format('remove_control', event_id, ''));
+        };
         this.get_header = function (event_id) {
             return wrapper('GET', urls.header.format(event_id));
         };
@@ -715,6 +720,10 @@ WebMis20
         }
     };
 }])
+WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser',
+    function ($scope, RisarApi, CurrentUser) {
+
+}])
 .service('UserErrand', [
         'Simargl', 'RisarApi', 'ApiCalls', 'Config', 'OneWayEvent',
         function (Simargl, RisarApi, ApiCalls, Config, OneWayEvent) {
@@ -1090,6 +1099,41 @@ WebMis20
                     };
                 }
             }
+        }
+    }
+}])
+.directive('wmBtnControlEvent', ['RisarApi', 'NotificationService', function (RisarApi, NotificationService) {
+    return {
+        restrict: 'E',
+        scope: {
+            eventId: '=',
+            isControlled: '='
+        },
+        template: '\
+<a href="javascript:void(0);" ng-click="toggle()"\
+    tooltip="[[isControlled ? \'Карта взята на контроль\' : \'Взять карту на контроль\']]">\
+    <i class="fa text-yellow" ng-class="{\'fa-star\': isControlled, \'fa-star-o\': !isControlled}"></i>\
+</a>',
+        link: function (scope, iElement, iAttr) {
+            scope.toggle = function () {
+                if (scope.isControlled) {
+                    RisarApi.chart.remove_control(scope.eventId)
+                        .then(function (result) {
+                            scope.isControlled = result.controlled;
+                            NotificationService.notify(200,
+                                'Пациентка снята с контроля',
+                                'info', 5000);
+                        });
+                } else {
+                    RisarApi.chart.take_control(scope.eventId)
+                        .then(function (result) {
+                            scope.isControlled = result.controlled;
+                            NotificationService.notify(200,
+                                'Пациентка взята на контроль',
+                                'info', 5000);
+                        });
+                }
+            };
         }
     }
 }])

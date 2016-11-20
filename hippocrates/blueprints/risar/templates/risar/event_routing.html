@@ -5,21 +5,13 @@
 
 {% block main %}
     <div ng-controller="EventRoutingCtrl" class="ng-cloak">
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         <div alert-notify></div>
-        <h1>
-            Выбор ЛПУ для {% if 'emergency' in request.args %}экстренной{% else %}плановой{% endif %} госпитализации
-            ([[ header.event.external_id ]])
-            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
-        </h1>
-        <div class="row vmargin10">
-            <div class="col-md-12 col-lg-12">
-                <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
-                    у <b>[[ header.event.person.name ]]</b>
-                    с <b>[[ header.event.set_date | asDate ]]</b>
-                </div>
-            </div>
-        </div>
+        {% if 'emergency' in request.args %}
+        {{ rimacros.page_title_n("Выбор ЛПУ для экстренной госпитализации") }}
+        {% else %}
+        {{ rimacros.page_title_n("Выбор ЛПУ для плановой госпитализации") }}
+        {% endif %}
         {{ rimacros.navigation('[[ chart.id ]]') }}
     </section>
     <section class="content">

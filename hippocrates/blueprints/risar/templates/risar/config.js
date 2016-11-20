@@ -31,6 +31,7 @@ WebMis20
         api_event_routing: '{{ url_for('.api_0_event_routing') }}',
         api_chart_delete: '{{ url_for('.api_0_chart_delete') }}',
         api_chart_close: '{{ url_for('.api_0_chart_close') }}{0}',
+        api_chart_control: '{{ url_for('.api_0_chart_control', do=-96, event_id=-99, person_id=-98).replace('-96', '{0}').replace('-99', '{1}').replace('-98', '{2}') }}',
         api_attach_lpu: '{{ url_for('.api_0_attach_lpu') }}',
         api_attach_lpu_mini: '{{ url_for('.api_0_mini_attach_lpu', client_id=-99).replace('-99', '{0}') }}',
         api_anamnesis: '{{ url_for('.api_0_chart_anamnesis', event_id=-99).replace('-99', '{0}') }}',

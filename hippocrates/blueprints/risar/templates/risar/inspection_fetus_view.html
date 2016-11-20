@@ -5,7 +5,7 @@
 
 {% block main %}
 <div ng-controller="InspectionFetusViewCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.page_title_ext_n('Осмотры плода беременной', 'inspection_fetus') }}
         {{ rimacros.navigation('[[ header.event.id ]]') }}
     </section>
