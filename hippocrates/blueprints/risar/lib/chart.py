@@ -1,6 +1,8 @@
 # coding: utf-8
 import datetime
 
+from sqlalchemy import func
+
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.models.event import Event, EventType, EventPersonsControl
 from nemesis.models.exists import rbRequestType
@@ -36,6 +38,27 @@ def check_event_controlled(event):
         EventPersonsControl.person_id == safe_current_user_id(),
         EventPersonsControl.endDate.is_(None)
     ).count() > 0
+
+
+def check_events_controlled(event_ids):
+    res = dict((e_id, False) for e_id in event_ids)
+
+    if not can_control_events():
+        return res
+
+    query = EventPersonsControl.query.filter(
+        EventPersonsControl.event_id.in_(event_ids),
+        EventPersonsControl.person_id == safe_current_user_id(),
+        EventPersonsControl.endDate.is_(None)
+    ).group_by(
+        EventPersonsControl.event_id
+    ).with_entities(
+        EventPersonsControl.event_id.label('event_id'),
+        func.count(EventPersonsControl.id) > 0
+    )
+    for event_id, cnt in query:
+        res[event_id] = bool(cnt)
+    return res
 
 
 def take_event_control(event):

@@ -46,7 +46,7 @@ WebMis20
     };
     this.search_event = {
         get: function (query) {
-            return wrapper('POST', Config.url.api_event_search, {}, query)
+            return wrapper('POST', Config.url.api_event_search, {}, query);
         },
         print: function (query) {
             self.file_get('POST', Config.url.api_event_print, query);
@@ -142,10 +142,10 @@ WebMis20
             })
         }
         this.take_control = function(event_id) {
-          return wrapper('POST', Config.url.api_chart_under_control.format('take_control', event_id, ''));
+          return wrapper('POST', Config.url.api_chart_control.format('take_control', event_id, ''));
         };
         this.remove_control = function(event_id) {
-           return wrapper('POST', Config.url.api_chart_under_control.format('remove_control', event_id, ''));
+           return wrapper('POST', Config.url.api_chart_control.format('remove_control', event_id, ''));
         };
         this.get_header = function (event_id) {
             return wrapper('GET', urls.header.format(event_id));

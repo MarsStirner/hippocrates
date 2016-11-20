@@ -31,7 +31,7 @@ def api_0_chart_header(event_id=None):
 @module.route('/api/0/event_control/<do>/<int:event_id>/', methods=['POST'])
 @module.route('/api/0/event_control/<do>/<int:event_id>/<int:person_id>', methods=['POST'])
 @api_method
-def api_0_chart_under_control(event_id, do='take_control', person_id=None):
+def api_0_chart_control(event_id, do='take_control', person_id=None):
     person_id = person_id or safe_current_user_id()
     if not person_id:
         raise ApiException(400, u'Неизвестно к кому привязывать')

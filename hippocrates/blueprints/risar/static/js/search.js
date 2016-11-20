@@ -233,7 +233,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             mkbs: [],
             closed_diags: null,
             overdue: null,
-            measure_type: $scope.rbMeasureType.objects[0]
+            measure_type: $scope.rbMeasureType.objects[0],
+            controlled_events: null
         };
         return $scope.refresh_areas();
     };
