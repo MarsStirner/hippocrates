@@ -58,6 +58,12 @@
                     <input class="form-control" ng-model="query.fio">
                 </div>
                 <div class="form-group">
+                    <label></label>
+                    <div fs-checkbox items="request_types" ng-model="query.request_types" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Социальный статус</label>
                     <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>
                 </div>
