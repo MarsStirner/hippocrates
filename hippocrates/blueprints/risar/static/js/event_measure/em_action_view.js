@@ -338,19 +338,20 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
 
     $scope.rbMeasureType = RefBookService.get('MeasureType');
     $scope.rbMeasureStatus = RefBookService.get('MeasureStatus');
-    $q.all([$scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading])
-        .then(function () {
-            $scope.$watch('checkup.measures', function (n, o) {
-                if (!angular.equals(n, o)) {
-                    refreshGroupedData(n);
-                }
+    $scope.$on('checkupLoaded', function () {
+        $q.all([$scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading])
+            .then(function () {
+                $scope.$watch('checkup.measures', function (n, o) {
+                    if (!angular.equals(n, o)) {
+                        refreshGroupedData(n);
+                    }
+                });
+                refreshGroupedData($scope.checkup.measures);
+                angular.forEach(status_order, function (code) {
+                    $scope.grouped.statuses.push($scope.rbMeasureStatus.get_by_code(code));
+                });
             });
-            refreshGroupedData($scope.checkup.measures);
-            angular.forEach(status_order, function (code) {
-                $scope.grouped.statuses.push($scope.rbMeasureStatus.get_by_code(code));
-            });
-        });
-
+    })
 };
 
 

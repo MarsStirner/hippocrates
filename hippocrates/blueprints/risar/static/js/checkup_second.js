@@ -66,6 +66,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 if(!$scope.checkup.fetuses.length) {
                     $scope.add_child();
                 }
+                $scope.$broadcast('checkupLoaded');
             });
         } else {
             RisarApi.checkup.get(checkup_id)
@@ -74,6 +75,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                     if(!$scope.checkup.fetuses.length) {
                         $scope.add_child();
                     }
+                    $scope.$broadcast('checkupLoaded');
                 });
         }
     };
