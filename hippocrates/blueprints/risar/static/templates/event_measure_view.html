@@ -96,30 +96,26 @@
     </tabset>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-default"
-            ng-class="{'disabled': !canEditEmAppointment()}"
+    <button type="button" class="btn btn-default" ng-disabled="!canEditEmAppointment()"
             ng-click="editAppointment()"
             ng-if="tabNum == 2">Редактировать направление</button>
-    <button type="button" class="btn btn-default"
-            ng-class="{'disabled': !canEditEmResults()}"
+    <button type="button" class="btn btn-default" ng-disabled="!canEditEmResults()"
             ng-click="editEmResults()"
             ng-if="tabNum == 3">Редактировать результаты</button>
-    <button type="button" class="btn btn-success pull-left"
+    <button type="button" class="btn btn-success pull-left" ng-disabled="!canExecuteEm()"
             ng-click="$close('execute')"
             ng-if="tabNum == 1">Выполнить</button>
-    <button type="button" class="btn btn-danger pull-left"
+    <button type="button" class="btn btn-danger pull-left" ng-disabled="!canCancelEm()"
             ng-click="$close('cancel')"
             ng-if="tabNum == 1">Отменить</button>
-    <button type="button" class="btn btn-default pull-left"
-            ng-class="{'disabled': !canNewAppointment()}"
+    <button type="button" class="btn btn-default pull-left" ng-disabled="!canNewAppointment()"
             ng-click="$close('new_appointment')"
             ng-if="tabNum == 1 && displayNewAppointment()">Записать в расписание</button>
     <button type="button" class="btn btn-default pull-left"
-            ng-click="$close('delete')"
-            ng-if="tabNum == 1 && canDelete()">Удалить</button>
+            ng-if="tabNum == 1 && canDelete()"
+            ng-click="$close('delete')">Удалить</button>
     <button type="button" class="btn btn-default pull-left"
-            ng-if="canRestore()"
-            ng-click="$close('restore')"
-            ng-if="tabNum == 1">Восстановить</button>
+            ng-if="tabNum == 1 && canRestore()"
+            ng-click="$close('restore')">Восстановить</button>
     <button type="button" class="btn btn-default" ng-click="$close()">Закрыть</button>
 </div>

@@ -1,7 +1,7 @@
 'use strict';
 
 WebMis20.run(['$templateCache', '$http', function ($templateCache, $http) {
-    $http.get('static/templates/event_measure_view.html').then(function(response) {
+    $http.get('/risar/static/templates/event_measure_view.html').then(function(response) {
         $templateCache.put('/WebMis20/RISAR/modal/event_measure_view.html', response.data);
     });
 }]);
@@ -31,6 +31,12 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     };
     $scope.canReadEmResult = function () {
         return $scope.access.can_read_result;
+    };
+    $scope.canExecuteEm = function () {
+        return $scope.access.can_execute;
+    };
+    $scope.canCancelEm = function (em) {
+        return $scope.access.can_cancel;
     };
     $scope.canNewAppointment = function () {
         return options && options.display_new_appointment && $scope.event_measure.measure.measure_type.code === 'checkup';

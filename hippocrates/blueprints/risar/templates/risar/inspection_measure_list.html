@@ -21,7 +21,7 @@
     <table class="table">
         <thead>
             <tr>
-                <th>
+                <th width="7%">
                     <input class="measure-checkbox-main" type="checkbox"
                            ng-checked="checkSelectedAll('measures')" ng-click="toggleSelection('measures')">
                 </th>
@@ -32,18 +32,21 @@
                 <th width="1%"></th>
             </tr>
         </thead>
-        <tbody ng-repeat="status in grouped.statuses" ng-if="grouped.measures.hasOwnProperty(status.code)">
+        <tbody ng-repeat="status in grouped.statuses" ng-if="grouped.measures.hasOwnProperty(status.code)"
+            ng-init="show_groups=true; show_group={}">
             <tr>
                 <td colspan="7" class="text-bold" style="font-size: larger">
                     <input class="measure-checkbox-main" type="checkbox"
                            ng-checked="checkSelectedByStatus('measures', status.code)"
                            ng-click="toggleByStatus('measures', status.code)"
                            style="margin-left: 0px!important; margin-right: 10px">
-                    <event-measure-status status="status"></event-measure-status>
+                    <event-measure-status status="status" ng-click="show_groups = !show_groups"
+                        class="cursor-pointer"></event-measure-status>
                 </td>
             </tr>
             <tr ng-repeat-start="measure_type in grouped.measures_types_info"
-                ng-if="grouped.measures[status.code].hasOwnProperty(measure_type.code)">
+                ng-if="grouped.measures[status.code].hasOwnProperty(measure_type.code)"
+                ng-show="show_groups">
                 <td>
                     <input class="measure-checkbox-main" type="checkbox"
                            ng-checked="checkSelectedByMeasure('measures', status.code, measure_type.code)"
@@ -51,18 +54,20 @@
                            ng-disabled="!canSelectMeasureGroup('measures', status.code, measure_type.code)"
                            style="margin-left: 20px!important">
                 </td>
-                <td colspan="6" class="text-bold">[[ measure_type.name ]]
-                    <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
-                        [[ measure_type.max_date | asDateTime ]])</span></td>
+                <td colspan="6" class="text-bold">
+                    <span class="cursor-pointer" ng-click="show_group[measure_type.code] = !show_group[measure_type.code]">[[ measure_type.name ]]
+                        <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
+                            [[ measure_type.max_date | asDateTime ]])</span></span></td>
             </tr>
             <tr ng-repeat="em in grouped.measures[status.code][measure_type.code] track by em.data.id"
                 ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }"
-                ng-repeat-end>
+                ng-repeat-end
+                ng-show="show_groups && show_group[measure_type.code]">
                 <td>
                     <input id="inp_[[ $index + 1 ]]" class="measure-checkbox" type="checkbox"
                            ng-disabled="!canSelectEMAppointment(em)"
                            ng-model="checkboxes[em.data.id]"
-                           style="margin-left: 20px!important">
+                           style="margin-left: 30px!important">
                 </td>
                 <td>
                     <span ng-bind="em.data.measure.name"></span>
@@ -77,7 +82,7 @@
                     <span ng-if="emIsNotActual(em)">(Неактуально)</span>
                 </td>
                 <td class="nowrap">
-                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure(grouped.listed[em.data.id])">
                         Просмотр
                     </button>
                 </td>
@@ -89,7 +94,7 @@
     <table class="table">
         <thead>
             <tr>
-                <th>
+                <th width="7%">
                     <input class="measure-checkbox-main" type="checkbox"
                            ng-checked="checkSelectedAll('recommendations')" ng-click="toggleSelection('recommendations')">
                 </th>
@@ -100,18 +105,21 @@
                 <th width="1%"></th>
             </tr>
         </thead>
-        <tbody ng-repeat="status in grouped.statuses" ng-if="grouped.recommendations.hasOwnProperty(status.code)">
+        <tbody ng-repeat="status in grouped.statuses" ng-if="grouped.recommendations.hasOwnProperty(status.code)"
+            ng-init="show_groups=true; show_group={}">
             <tr>
                 <td colspan="7" class="text-bold" style="font-size: larger">
                     <input class="measure-checkbox-main" type="checkbox"
                            ng-checked="checkSelectedByStatus('recommendations', status.code)"
                            ng-click="toggleByStatus('recommendations', status.code)"
                            style="margin-left: 0px!important; margin-right: 10px">
-                    <event-measure-status status="status"></event-measure-status>
+                    <event-measure-status status="status" ng-click="show_groups = !show_groups"
+                        class="cursor-pointer"></event-measure-status>
                 </td>
             </tr>
             <tr ng-repeat-start="measure_type in grouped.recommend_types_info"
-                ng-if="grouped.recommendations[status.code].hasOwnProperty(measure_type.code)">
+                ng-if="grouped.recommendations[status.code].hasOwnProperty(measure_type.code)"
+                ng-show="show_groups">
                 <td>
                     <input class="measure-checkbox-main" type="checkbox"
                            ng-checked="checkSelectedByMeasure('recommendations', status.code, measure_type.code)"
@@ -119,18 +127,20 @@
                            ng-disabled="!canSelectMeasureGroup('recommendations', status.code, measure_type.code)"
                            style="margin-left: 20px!important">
                 </td>
-                <td colspan="6" class="text-bold">[[ measure_type.name ]]
-                    <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
-                        [[ measure_type.max_date | asDateTime ]])</span></td>
+                <td colspan="6" class="text-bold">
+                    <span class="cursor-pointer" ng-click="show_group[measure_type.code] = !show_group[measure_type.code]">[[ measure_type.name ]]
+                        <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
+                            [[ measure_type.max_date | asDateTime ]])</span></span></td>
             </tr>
             <tr ng-repeat="em in grouped.recommendations[status.code][measure_type.code] track by em.data.id"
                 ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }"
-                ng-repeat-end>
+                ng-repeat-end
+                ng-show="show_groups && show_group[measure_type.code]">
                 <td>
                     <input id="inp_[[ $index + 1 ]]" class="measure-checkbox" type="checkbox"
                            ng-disabled="!canSelectEMAppointment(em)"
                            ng-model="checkboxes[em.data.id]"
-                           style="margin-left: 20px!important">
+                           style="margin-left: 30px!important">
                 </td>
                 <td>
                     <span ng-bind="em.data.measure.name"></span>
@@ -145,7 +155,7 @@
                     <span ng-if="emIsNotActual(em)">(Неактуально)</span>
                 </td>
                 <td class="nowrap">
-                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure(grouped.listed[em.data.id])">
                         Просмотр
                     </button>
                 </td>
