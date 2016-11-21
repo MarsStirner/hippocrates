@@ -139,5 +139,6 @@
     <script>
         WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
     </script>
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
 {% endblock %}

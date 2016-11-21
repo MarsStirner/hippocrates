@@ -4,6 +4,7 @@ WebMis20.controller('PartalNursingEditCtrl', ['$scope', '$controller', '$window'
 function ($scope, $controller, $window, $location, $document, $timeout, RisarApi, Config, CurrentUser, jinjaVariables) {
     var params = aux.getQueryParams(window.location.search);
     var pp_nursing_id = $scope.pp_nursing_id = params.pp_nursing_id;
+    $controller('commonPrintCtrl', {$scope: $scope});
     var jv = jinjaVariables;
     $scope.flatcode = jv.flatcode;
     var event_id = $scope.event_id = params.event_id;
@@ -43,6 +44,7 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
     var event_id = params.event_id;
     $scope.path_to_read = Config.url.partal_nursing_read_html;
     $scope.path_to_edit = Config.url.partal_nursing_edit_html;
+    $controller('commonPrintCtrl', {$scope: $scope});
     function reload () {
         RisarApi.chart.get_header(event_id).then(function (data) {
                 $scope.header = data.header;

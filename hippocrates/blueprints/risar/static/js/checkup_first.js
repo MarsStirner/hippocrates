@@ -4,7 +4,7 @@
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
-    $scope.$on('mayBeUziSrokChanged', function(a, b, c) {
+    $scope.$on('mayBeUziSrokChanged', function() {
         RisarApi.checkup.get(checkup_id).then(function (checkup) {
             $scope.checkup.calculated_pregnancy_week_by_ultrason = checkup.calculated_pregnancy_week_by_ultrason;
         });
