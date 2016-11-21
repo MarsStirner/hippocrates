@@ -29,6 +29,7 @@
             <div class="col-md-3">
                 {% include "risar/stats/cfrs_doctor_overview.html" %}
                 {% include "risar/stats/cards_overview.html" %}
+                {% include "risar/stats/controlled_events.html" %}
                 {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
         </div>
@@ -43,4 +44,5 @@
     <script src="{{ url_for('.static', filename='js/stats/card_fill_rates.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/cards_overview.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/preg_week_distribution.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/controlled_events.js', v=app_version) }}"></script>
 {% endblock %}

@@ -112,6 +112,7 @@ WebMis20
         api_stats_card_fill_rates_lpu_overview: '{{ url_for('.api_0_stats_card_fill_rates_lpu_overview') }}',
         api_stats_card_fill_rates_doctor_overview: '{{ url_for('.api_0_stats_card_fill_rates_doctor_overview') }}',
         api_stats_risk_group_distribution: '{{ url_for('.api_0_stats_risk_group_distribution') }}',
+        api_stats_controlled_events: '{{ url_for('.api_0_stats_controlled_events') }}',
         api_errands_get: '{{ url_for('.api_0_errands_get') }}',
         api_errands_summary: '{{ url_for('.api_0_errands_summary') }}',
         api_errand_get: '{{ url_for('.api_0_errand_get') }}',

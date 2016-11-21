@@ -358,6 +358,13 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             })[0];
             $scope.query.orgs = organization ? [organization] : [];
         }
+        if (args.hasOwnProperty('controlled_events')) {
+            $scope.query.controlled_events = args.controlled_events === 'false' ?
+                false :
+                args.controlled_events === 'true' ?
+                    true :
+                    undefined;
+        }
     };
 
     // start

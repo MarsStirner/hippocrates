@@ -618,6 +618,9 @@ WebMis20
         },
         urgent_errands: function() {
             return wrapper('GET', Config.url.api_stats_urgent_errands)
+        },
+        controlled_events: function() {
+            return wrapper('GET', Config.url.api_stats_controlled_events)
         }
     };
     this.card_fill_rate = {
