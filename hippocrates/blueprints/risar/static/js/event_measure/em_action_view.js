@@ -279,6 +279,7 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
         measure_types = ['lab_test', 'func_test', 'checkup', 'hospitalization'],
         recommend_types = ['healthcare', 'social_preventiv'];
     $scope.grouped = {
+        listed: {},
         measures: {},
         recommendations: {},
         statuses: [],
@@ -293,10 +294,13 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
         $scope.grouped.measures_types_info = [];
         $scope.grouped.recommend_types_info = [];
         // measure_list is sorted by begDateTime ASC
-        angular.forEach(measure_list, function (em) {
+        angular.forEach(measure_list, function (em, idx) {
             var status_code = em.data.status.code,
                 type_code = em.data.measure.measure_type.code,
                 m_code = em.data.measure.code;
+
+            $scope.grouped.listed[em.data.id] = idx;
+
             if (measure_types.has(type_code)) {
                 if (!$scope.grouped.measures[status_code]) $scope.grouped.measures[status_code] = {};
                 if (!$scope.grouped.measures[status_code][m_code]) $scope.grouped.measures[status_code][m_code] = [];
@@ -306,7 +310,7 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
                     max_date: null,
                     name: em.data.measure.name,
                     code: em.data.measure.code
-                }
+                };
                 measure_types_info[m_code].min_date = !measure_types_info[m_code].min_date || moment(em.data.beg_datetime)
                     .isBefore(moment(measure_types_info[m_code].min_date)) ? em.data.beg_datetime : measure_types_info[m_code].min_date;
                 measure_types_info[m_code].max_date = !measure_types_info[m_code].max_date || moment(em.data.end_datetime)
@@ -321,7 +325,7 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
                     max_date: null,
                     name: em.data.measure.name,
                     code: em.data.measure.code
-                }
+                };
                 recommend_types_info[m_code].min_date = !recommend_types_info[m_code].min_date || moment(em.data.beg_datetime)
                     .isBefore(moment(recommend_types_info[m_code].min_date)) ? em.data.beg_datetime : recommend_types_info[m_code].min_date;
                 recommend_types_info[m_code].max_date = !recommend_types_info[m_code].max_date || moment(em.data.end_datetime)
@@ -341,7 +345,7 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
     $scope.$on('checkupLoaded', function () {
         $q.all([$scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading])
             .then(function () {
-                $scope.$watch('checkup.measures', function (n, o) {
+                $scope.$watchCollection('checkup.measures', function (n, o) {
                     if (!angular.equals(n, o)) {
                         refreshGroupedData(n);
                     }

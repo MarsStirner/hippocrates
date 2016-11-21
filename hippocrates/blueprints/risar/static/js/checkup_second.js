@@ -4,6 +4,11 @@
 WebMis20.controller('CheckupSecondEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
+    $scope.$on('mayBeUziSrokChanged', function() {
+        RisarApi.checkup.get(checkup_id).then(function (checkup) {
+            $scope.checkup.calculated_pregnancy_week_by_ultrason = checkup.calculated_pregnancy_week_by_ultrason;
+        });
+    });
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
         return $scope.checkup

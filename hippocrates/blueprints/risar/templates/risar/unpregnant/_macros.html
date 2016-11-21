@@ -53,6 +53,9 @@
     {{ title }}
     ([[ header.event.external_id ]])
     <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+    {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+    <wm-btn-control-event event-id="header.event.id" is-controlled="header.event.is_controlled"></wm-btn-control-event>
+    {% endif %}
 </h1>
 <div class="row vmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
@@ -77,6 +80,9 @@
         {{ title }}
         ([[ header.event.external_id ]])
         <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+        {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+        <wm-btn-control-event event-id="header.event.id" is-controlled="header.event.is_controlled"></wm-btn-control-event>
+        {% endif %}
     </h1>
     </div>
     <div class="col-md-4 col-lg-4 col-sm-12">

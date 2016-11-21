@@ -9,7 +9,7 @@ from nemesis.systemwide import db
 
 
 def get_latest_measures_in_event(event_id, upto_date=None, with_result=False):
-    """Самые последние мероприятия случая на дату upto_date или текщую дату.
+    """Самые последние мероприятия случая на дату upto_date или текущую дату.
 
     По одному EventMeasure на каждый тип мероприятия Measure.
     При этом берутся как автоматически созданные мероприятия на основе схем

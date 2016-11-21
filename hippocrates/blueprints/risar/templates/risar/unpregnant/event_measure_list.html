@@ -6,7 +6,7 @@
 {% block main %}
 
 <div ng-controller="GynecolEventMeasureListCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.unpregnant_page_title_ext_n('Мероприятия') }}
         {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
     </section>

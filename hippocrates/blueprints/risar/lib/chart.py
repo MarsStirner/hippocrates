@@ -27,7 +27,7 @@ def get_latest_pregnancy_event(client_id):
 
 
 def can_control_events():
-    return UserProfileManager.has_ui_overseers()
+    return UserProfileManager.has_ui_overseers() or UserProfileManager.has_ui_obstetrician()
 
 
 def check_event_controlled(event):

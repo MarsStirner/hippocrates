@@ -1,0 +1,20 @@
+<div class="box box-warning" ng-controller="ControlledEventsStatsCtrl">
+    <div class="box-header with-border">
+        <h3 class="box-title">Пациентки на контроле</h3>
+        <div class="box-tools pull-right">
+          <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <table class="table table-condensed no-border">
+            <tr>
+                <td>Количество карт пациенток, взятых на контроль</td>
+                <td>
+                    <a ng-href="[[getExtendedSearchUrl()]]">
+                        <span class="badge label-info pull-right">[[stats_data.cards_count]]</span>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

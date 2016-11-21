@@ -21,12 +21,10 @@ class StatsController(BaseModelController):
         events_all = float(data.count_all or 0) if data else 0
         events_not_closed_42 = float(data.count_event_not_closed_42 or 0) if data else 0
         events_2_months = float(data.count_event_2m_no_inspection or 0) if data else 0
-        events_undefined_risk = float(data.count_event_prr_undefined or 0) if data else 0
         return {
             'events_all': events_all,
             'events_not_closed_42': events_not_closed_42,
-            'events_2_months': events_2_months,
-            'events_undefined_risk': events_undefined_risk
+            'events_2_months': events_2_months
         }
 
     def get_cards_pregnancy_week_distribution(self, person_id, curation_level):
@@ -57,6 +55,15 @@ class StatsController(BaseModelController):
         sel = self.get_selecter()
         events = sel.get_events_urgent_hosp(person_id)
         return events
+
+    def get_controlled_events(self, person_id):
+        """Карты пациенток, взятые на контроль пользователем"""
+        sel = self.get_selecter()
+        data = sel.get_controlled_events(person_id)
+        cards_count = int(data.cards_count or 0) if data else 0
+        return {
+            'cards_count': cards_count
+        }
 
 
 class StatsSelecter(BaseSelecter):
@@ -203,18 +210,6 @@ class StatsSelecter(BaseSelecter):
             Action.begDate.label('beg_date'), Action.endDate.label('end_date')
         ).subquery('EventLatestInspections')
 
-        # 3) event perinatal risk rate
-        q_event_prr = self.model_provider.get_query('Event')
-        q_event_prr = q_event_prr.join(
-            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
-        ).filter(
-            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
-            Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'prenatal_risk_572'
-        ).with_entities(
-            Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
-        ).subquery('EventPerinatalRiskRate')
-
         # main query
         query = self.query_main(person_id, curation_level)
 
@@ -222,8 +217,6 @@ class StatsSelecter(BaseSelecter):
             q_event_epicr, q_event_epicr.c.event_id == Event.id
         ).outerjoin(
             q_latest_inspections, q_latest_inspections.c.event_id == Event.id
-        ).outerjoin(
-            q_event_prr, q_event_prr.c.event_id == Event.id
         )
 
         query = query.with_entities(
@@ -240,13 +233,7 @@ class StatsSelecter(BaseSelecter):
                 func.datediff(func.curdate(),
                               func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) >= 60,
                 1, 0)
-            ).label('count_event_2m_no_inspection'),
-            func.sum(func.IF(
-                # степень перинатального риска не определена (или отсутствует в случае)
-                or_(q_event_prr.c.prr.is_(None),
-                     q_event_prr.c.prr == PerinatalRiskRate.undefined[0]),
-                1, 0)
-            ).label('count_event_prr_undefined')
+            ).label('count_event_2m_no_inspection')
         )
 
         self.query = query
@@ -365,6 +352,22 @@ class StatsSelecter(BaseSelecter):
 
         self.query = query
         return self.get_all()
+
+    def get_controlled_events(self, person_id):
+        Event = self.model_provider.get('Event')
+        EventPersonsControl = self.model_provider.get('EventPersonsControl')
+
+        query = self.model_provider.get_query('Event')
+        query = query.join(
+            EventPersonsControl
+        ).filter(
+            Event.deleted == 0, EventPersonsControl.person_id == person_id,
+            EventPersonsControl.endDate.is_(None)
+        ).with_entities(
+            func.count(Event.id.distinct()).label('cards_count'),
+        )
+        self.query = query
+        return self.get_one()
 
 
 mather_death_koef_diags = (

@@ -538,3 +538,15 @@ def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
     cfr_ctrl = CFRController()
     data = cfr_ctrl.get_card_fill_rates_doctor_overview(curator_id, curation_level)
     return data
+
+
+@module.route('/api/0/stats/controlled_events/')
+@module.route('/api/0/stats/controlled_events/<int:person_id>')
+@api_method
+def api_0_stats_controlled_events(person_id=None):
+    if not person_id:
+        person_id = safe_current_user_id()
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_controlled_events(person_id)
+    return data

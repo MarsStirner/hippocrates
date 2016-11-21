@@ -1,11 +1,11 @@
 'use strict';
 
-
-WebMis20.controller('SocProfCtrl', ['$scope', '$modal', '$timeout', 'RisarApi', 'CurrentUser',
-function ($scope, $modal, $timeout, RisarApi, CurrentUser) {
+WebMis20.controller('SocProfCtrl', ['$scope', '$modal', '$timeout','$controller',  'RisarApi', 'CurrentUser', 'PrintingService', 'PrintingDialog',
+function ($scope, $modal, $timeout, $controller, RisarApi, CurrentUser, PrintingService, PrintingDialog) {
+    $controller('commonPrintCtrl', {$scope: $scope});
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
-    
+
     $scope.selectedStage = 'mother_employment';
 
     var reloadChart = function () {
