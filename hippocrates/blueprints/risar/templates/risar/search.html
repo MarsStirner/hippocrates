@@ -259,7 +259,8 @@
                             <tr ng-repeat="row in results">
                                 {% if user_profiles_mng.has_ui_overseers() %}
                                 <td>
-                                    <wm-btn-control-event event-id="row.event_id" is-controlled="row.is_controlled"></wm-btn-control-event>
+                                    <wm-btn-control-event event-id="row.event_id" is-controlled="row.is_controlled"
+                                        ng-if="row.request_type.code === 'pregnancy'"></wm-btn-control-event>
                                 </td>
                                 {% endif %}
                                 <td ng-switch="row.request_type.code" class="text-center">
