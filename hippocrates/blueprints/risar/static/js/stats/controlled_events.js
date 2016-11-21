@@ -11,7 +11,6 @@ var ControlledEventsStatsCtrl = function ($scope, RisarApi, CurrentUser) {
     };
     $scope.getExtendedSearchUrl = function () {
         var args = {
-            request_type: 'pregnancy',
             person_id: CurrentUser.get_main_user().id,
             closed: false,
             controlled_events: true
