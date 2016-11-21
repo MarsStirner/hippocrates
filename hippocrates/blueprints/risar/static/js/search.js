@@ -248,7 +248,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         perform(true);
     };
     $scope.canChangeDoctor = function () {
-        return CurrentUser.current_role_in('admin');
+        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
     };
     $scope.canChangeCurator = function () {
         return CurrentUser.current_role_in('admin');
