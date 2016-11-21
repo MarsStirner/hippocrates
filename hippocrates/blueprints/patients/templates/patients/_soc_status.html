@@ -178,4 +178,31 @@
                     ng-click="clientServices.add_new_nationality(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить гражданство</button>
         </div>
     </ng-form>
+    <ng-form name="_priviliges" toc-element="Категория льгот">
+        <div ng-repeat="socstat in client.priviliges | flt_not_deleted">
+            <ng-form name="socPriviligesForm">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Категория льгот</h3>
+                        <div class="box-tools pull-right">
+                            <button ng-show="socstat.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                            <button type="button" class="btn btn-box-tool" title="Удалить"
+                                    ng-click="clientServices.delete_privilige(client, socstat)"><span class="glyphicon glyphicon-trash text-danger"></span></button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <wm-soc-status ss-class="5" id-postfix="n[[$index]]"
+                            model-soc-status="socstat"
+                            edit-mode="socstat.id ? edit.activated : true">
+                        </wm-soc-status>
+                    </div>
+                </div>
+            </ng-form>
+        </div>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-link btn-lg btn-block"
+                    ng-click="clientServices.add_new_privilige(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить категорию льгот</button>
+        </div>
+    </ng-form>
 </ng-form>
