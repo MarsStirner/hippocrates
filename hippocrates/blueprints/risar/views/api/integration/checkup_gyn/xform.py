@@ -394,6 +394,7 @@ class CheckupGynXForm(CheckupGynSchema, GynecologyCheckupsXForm):
         return {
             "exam_gyn_id": self.target_obj.id,
             "external_id": self.external_id,
+            'date': self.target_obj.begDate,
             'hospital': self.from_org_rb(person.organisation) if person else None,
             'doctor': self.from_person_rb(person),
             "general_info": self._represent_general_info(data),
