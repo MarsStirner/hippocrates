@@ -260,6 +260,7 @@ var GynecolEventMeasureListCtrl = function ($scope, $controller, $q, RisarApi, R
     $scope.resetFilters = function () {
         $scope.query = {
             checkups: [],
+            measure_list: [],
             measure_type: [],
             beg_date_from: null,
             beg_date_to: null,

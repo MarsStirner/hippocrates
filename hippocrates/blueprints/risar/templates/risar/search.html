@@ -90,7 +90,7 @@
                         [[ item.name ]]
                     </div>
                 </div>
-                {% if user_profiles_mng.has_ui_overseers() %}
+                {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" ng-model="query.controlled_events">Пациентки на контроле
@@ -239,7 +239,7 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                {% if user_profiles_mng.has_ui_overseers() %}
+                                {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
                                 <th></th>
                                 {% endif %}
                                 <th>Риск</th>
@@ -257,10 +257,10 @@
                             </thead>
                             <tbody>
                             <tr ng-repeat="row in results">
-                                {% if user_profiles_mng.has_ui_overseers() %}
+                                {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
                                 <td>
                                     <wm-btn-control-event event-id="row.event_id" is-controlled="row.is_controlled"
-                                        ng-if="row.request_type.code === 'pregnancy'"></wm-btn-control-event>
+                                        ></wm-btn-control-event>
                                 </td>
                                 {% endif %}
                                 <td ng-switch="row.request_type.code" class="text-center">
