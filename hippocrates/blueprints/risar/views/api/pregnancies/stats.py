@@ -553,7 +553,9 @@ def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
 def api_0_stats_controlled_events(person_id=None):
     if not person_id:
         person_id = safe_current_user_id()
+    args = request.args.to_dict()
+    curation_level = safe_unicode(args.get('curation_level_code'))
 
     stats_ctrl = StatsController()
-    data = stats_ctrl.get_controlled_events(person_id)
+    data = stats_ctrl.get_controlled_events(person_id, curation_level)
     return data

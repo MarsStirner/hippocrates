@@ -1,10 +1,11 @@
 'use strict';
 
 var ControlledEventsStatsCtrl = function ($scope, RisarApi, CurrentUser) {
+    $scope.curation_level_code = $scope.curation_level.code; // from parent ctrl
     $scope.stats_data = {};
 
     $scope.refresh_data = function () {
-        RisarApi.stats.controlled_events()
+        RisarApi.stats.controlled_events($scope.curation_level_code)
             .then(function (data) {
                 $scope.stats_data = data;
             });

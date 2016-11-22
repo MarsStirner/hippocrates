@@ -619,8 +619,10 @@ WebMis20
         urgent_errands: function() {
             return wrapper('GET', Config.url.api_stats_urgent_errands)
         },
-        controlled_events: function() {
-            return wrapper('GET', Config.url.api_stats_controlled_events)
+        controlled_events: function(curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_controlled_events, {
+                curation_level_code: curation_level_code
+            })
         }
     };
     this.card_fill_rate = {
