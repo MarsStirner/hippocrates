@@ -283,6 +283,10 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.can_create_action = function () {
                 return scope.event.can_create_actions[at_class[scope.actionTypeGroup]];
             };
+            scope.is_planned_end_date_needed = function () {
+                var types_allowed = ['diagnostics', 'lab', 'treatments'];
+                return types_allowed.indexOf(scope.actionTypeGroup) !== -1;
+            };
             scope.open_action = function (action_id) {
                 var url = WMConfig.url.actions.action_html + '?action_id=' + action_id;
                 WMWindowSync.openTab(url, scope.update_event);
@@ -338,6 +342,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     <tr>\
         <th width="45%" wm-sortable-column="at_name" on-change-order="sort_by_column(params)">Тип действия</th>\
         <th width="10%" wm-sortable-column="status_code" on-change-order="sort_by_column(params)">Состояние</th>\
+        <th width="10%" ng-if="is_planned_end_date_needed()" wm-sortable-column="planned_end_date" on-change-order="sort_by_column(params)">Назначено на</th>\
         <th width="10%" wm-sortable-column="beg_date" on-change-order="sort_by_column(params)">Начало</th>\
         <th width="10%" wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Конец</th>\
         <th width="20%" wm-sortable-column="person_name" on-change-order="sort_by_column(params)">Исполнитель</th>\
@@ -355,6 +360,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             ng-show="action.payment.is_paid"></span>\
         </td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
+        <td ng-if="is_planned_end_date_needed()" ng-click="open_action(action.id)"><b>[[ action.plannedEndDate | asDate ]]</b></td>\
         <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>\
