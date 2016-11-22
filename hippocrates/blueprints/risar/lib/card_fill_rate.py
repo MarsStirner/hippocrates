@@ -398,7 +398,7 @@ class CFRSelecter(BaseSelecter):
             Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ).filter(
             Person.id == curator_id,
-            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+            Event.deleted == 0,
             Action.deleted == 0, ActionProperty.deleted == 0,
             ActionType.flatCode == 'cardAttributes',
             ActionPropertyType.code == 'card_fill_rate',

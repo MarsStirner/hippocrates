@@ -313,7 +313,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 return rt.code === args.request_type;
             });
         }
-        if (args.hasOwnProperty('person_id') && !$scope.isCurator()) {
+        if (args.hasOwnProperty('person_id')) {
             args.person_id = parseInt(args.person_id);
             var new_person = $scope.doctors.filter(function (d) {
                 return d.id === args.person_id;

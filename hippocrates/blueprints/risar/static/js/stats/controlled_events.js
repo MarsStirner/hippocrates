@@ -12,10 +12,12 @@ var ControlledEventsStatsCtrl = function ($scope, RisarApi, CurrentUser) {
     };
     $scope.getExtendedSearchUrl = function () {
         var args = {
-            person_id: CurrentUser.get_main_user().id,
             closed: false,
             controlled_events: true
         };
+        if (!$scope.curation_level_code) {
+            args.person_id = CurrentUser.get_main_user().id;
+        }
         return RisarApi.search_event.getExtendedSearchUrl(args);
     };
 
