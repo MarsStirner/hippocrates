@@ -26,7 +26,7 @@ from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
-from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+from nemesis.models.person import Person, PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
@@ -272,13 +272,20 @@ def api_0_stats_perinatal_risk_rate():
              rbRequestType.id == EventType.requestType_id,
              Event.deleted == 0,
              Action.deleted == 0]
-    from_obj = Event.__table__.join(EventType).join(rbRequestType).join(Action).join(ActionType)\
+    from_obj = Event.__table__.join(EventType).join(rbRequestType).join(
+        Person, Event.execPerson_id == Person.id
+    ).join(
+        Action, Action.event_id == Event.id
+    ).join(ActionType)\
         .join(ActionProperty).join(ActionPropertyType).outerjoin(ActionProperty_Integer)
 
     if curation_level:
-        from_obj.join(Organisation).join(OrganisationCurationAssoc).join(PersonCurationAssoc).join(rbOrgCurationLevel)
+        from_obj.join(
+            Organisation, Person.org_id == Organisation.id
+        ).join(OrganisationCurationAssoc).join(PersonCurationAssoc).join(rbOrgCurationLevel)
         where.extend([
-            Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
+            Person.org_id == Organisation.id,
+            OrganisationCurationAssoc.org_id == Organisation.id,
             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
             PersonCurationAssoc.person_id == person_id,
             PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id,

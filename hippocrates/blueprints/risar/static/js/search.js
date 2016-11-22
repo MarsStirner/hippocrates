@@ -183,6 +183,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         return RisarApi.search_event.area_curator_list(areas)
         .then(function (result) {
             $scope.curators = result;
+            $scope.curators_filtered = result.filter(function (item) {
+                return CurrentUser.current_role_in('admin') ||
+                    item.person_id === CurrentUser.id;
+            });
             setFltCurators();
             return $scope.refresh_organisations();
         });
@@ -251,7 +255,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
     };
     $scope.canChangeCurator = function () {
-        return CurrentUser.current_role_in('admin');
+        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
+    };
+    $scope.isCurator = function () {
+        return CurrentUser.current_role_in('overseer1', 'overseer2', 'overseer3');
     };
     $scope.isCardSectionDisabled = function () {
         if ($scope.query.card_fill == $scope.card_fill_rate[0]) {
@@ -285,9 +292,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     var setFltCurators = function () {
         if (CurrentUser.current_role_in('overseer1', 'overseer2', 'overseer3')) {
             var cur_id = CurrentUser.get_main_user().id,
-                curators_list = [];
+                curators_list = [],
+                cur_role_code = CurrentUser.current_role.substr(-1);
             for (var i = 0; i < $scope.curators.length; i++) {
-                if ($scope.curators[i].person_id === cur_id) {
+                if ($scope.curators[i].person_id === cur_id &&
+                        $scope.curators[i].level_code === cur_role_code) {
                     curators_list.push($scope.curators[i]);
                 }
             }
@@ -304,7 +313,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 return rt.code === args.request_type;
             });
         }
-        if (args.hasOwnProperty('person_id')) {
+        if (args.hasOwnProperty('person_id') && !$scope.isCurator()) {
             args.person_id = parseInt(args.person_id);
             var new_person = $scope.doctors.filter(function (d) {
                 return d.id === args.person_id;

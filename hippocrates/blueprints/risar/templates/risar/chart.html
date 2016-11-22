@@ -396,7 +396,6 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/maternal_cert.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/edit_epicrisis.html">{% include 'risar/modals/_modal_epicrisis.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/maternal_cert.html">{% include 'risar/modals/_modal_matcert.html' %}</script>
