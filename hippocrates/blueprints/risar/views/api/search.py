@@ -456,7 +456,8 @@ def api_0_area_curator_list():
         Person.lastName, Person.firstName, Person.patrName, rbOrgCurationLevel.name
     )
     return list(query.values(PersonCurationAssoc.id, Person.lastName, Person.firstName, Person.patrName,
-                             Person.id.label('person_id'), rbOrgCurationLevel.name))
+                             Person.id.label('person_id'), rbOrgCurationLevel.name,
+                             rbOrgCurationLevel.code.label('level_code')))
 
 
 @module.route('/api/0/curator_lpu_list.json', methods=['POST', 'GET'])
