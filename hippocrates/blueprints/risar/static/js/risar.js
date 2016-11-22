@@ -725,26 +725,14 @@ WebMis20
 }]);
 WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService', 'ErrandModalService',
 function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
-    var params = aux.getQueryParams(window.location.search);
-    var ticket_id = params.ticket_id;
-    var client_id = params.client_id;
-    var event_id = params.event_id;
-    var gyn_event_id = params.gyn_event_id;
 
-    $scope.load_chart = function () {
-        RisarApi.chart.get(
-            event_id, ticket_id, client_id, gyn_event_id
-        ).then(function (event) {
-            $scope.chart = event;
-        });
-    };
     $scope.create_errand = function () {
         var errand = {
-            event_id: $scope.chart.id,
+            event_id: $scope.header.event.id,
             set_person: CurrentUser.info,
             communications: '',
-            exec_person: $scope.chart.person,
-            event: {external_id: $scope.chart.external_id},
+            exec_person: $scope.header.event.person,
+            event: {external_id: $scope.header.event.external_id},
             status: $scope.rbErrandStatus.get_by_code('waiting')
         };
 
@@ -755,7 +743,6 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
         });
     };
     $scope.init = function () {
-        $scope.load_chart();
         $scope.rbErrandStatus = RefBookService.get('ErrandStatus');
     };
     $scope.init();
