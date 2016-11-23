@@ -239,6 +239,7 @@ class CFRSelecter(BaseSelecter):
     def get_doctor_cfrs(self, doctor_id, only_open=True):
         Action = self.model_provider.get('Action')
         Event = self.model_provider.get('Event')
+        Client = self.model_provider.get('Client')
         ActionType = self.model_provider.get('ActionType')
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
@@ -246,7 +247,7 @@ class CFRSelecter(BaseSelecter):
         query = self.model_provider.get_query('Action')
 
         query = query.join(
-            Event, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+            Event, Client, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ).filter(
             Action.deleted == 0, Event.deleted == 0, ActionProperty.deleted == 0,
             ActionType.flatCode == 'cardAttributes',
@@ -281,6 +282,7 @@ class CFRSelecter(BaseSelecter):
 
     def get_cfrs_lpu_overview(self, curator_id, only_open=True):
         Event = self.model_provider.get('Event')
+        Client = self.model_provider.get('Client')
         Person = self.model_provider.get('Person')
         PersonInEvent = aliased(Person, name='PersonInEvent')
         PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
@@ -305,7 +307,11 @@ class CFRSelecter(BaseSelecter):
         ).join(
             Event, Event.execPerson_id == PersonInEvent.id
         ).join(
-            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+            Client, Event.client_id == Client.id
+        ).join(
+            Action, Action.event_id == Event.id
+        ).join(
+            ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ).filter(
             Person.id == curator_id,
             rbOrgCurationLevel.code == '3',
@@ -371,6 +377,7 @@ class CFRSelecter(BaseSelecter):
 
     def get_cfrs_doctor_overview(self, curator_id, curation_level, only_open=True):
         Event = self.model_provider.get('Event')
+        Client = self.model_provider.get('Client')
         Person = self.model_provider.get('Person')
         PersonInEvent = aliased(Person, name='PersonInEvent')
         PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
@@ -395,7 +402,11 @@ class CFRSelecter(BaseSelecter):
         ).join(
             Event, Event.execPerson_id == PersonInEvent.id
         ).join(
-            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+            Client, Event.client_id == Client.id
+        ).join(
+            Action, Action.event_id == Event.id
+        ).join(
+            ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ).filter(
             Person.id == curator_id,
             Event.deleted == 0,

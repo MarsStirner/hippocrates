@@ -330,6 +330,7 @@ class EventFetcher(BaseFetcher):
 
     def apply_with_pregnancy_pathology_percent(self, person_id=None, curation_level_code=None):
         self.query = self.query.join(
+            Client,
             (Person, Event.execPerson_id == Person.id),
             (Action, Action.event_id == Event.id),
             (ActionType, and_(Action.actionType_id == ActionType.id, ActionType.flatCode == 'cardAttributes')),

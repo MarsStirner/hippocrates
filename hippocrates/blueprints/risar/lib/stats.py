@@ -77,13 +77,14 @@ class StatsSelecter(BaseSelecter):
         Organisation = self.model_provider.get('Organisation')
         Event = self.model_provider.get('Event')
         EventType = self.model_provider.get('EventType')
+        Client = self.model_provider.get('Client')
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
 
         query = self.model_provider.get_query('Event')
         query = query.join(
-            EventType, rbRequestType, Action, ActionType
+            EventType, rbRequestType, Client, Action, ActionType
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
             Action.deleted == 0, ActionType.flatCode == pregnancy_card_attrs
@@ -169,9 +170,6 @@ class StatsSelecter(BaseSelecter):
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
-        ActionProperty = self.model_provider.get('ActionProperty')
-        ActionPropertyType = self.model_provider.get('ActionPropertyType')
-        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
 
         # subqueries
         # 1) epicrisis with delivery_date
@@ -362,12 +360,13 @@ class StatsSelecter(BaseSelecter):
         Organisation = self.model_provider.get('Organisation')
         Event = self.model_provider.get('Event')
         EventType = self.model_provider.get('EventType')
+        Client = self.model_provider.get('Client')
         rbRequestType = self.model_provider.get('rbRequestType')
         EventPersonsControl = self.model_provider.get('EventPersonsControl')
 
         query = self.model_provider.get_query('Event')
         query = query.join(
-            EventType, rbRequestType
+            EventType, rbRequestType, Client
         ).join(
             EventPersonsControl
         ).filter(
