@@ -154,33 +154,34 @@ WebMis20
             return wrapper('DELETE', urls.delete.format(ticket_id));
         };
         this.close_event = function (event_id, data, edit_callback, cancel_callback) {
+            var show_notify = !data.cancel;
             return wrapper(
                 'POST', urls.close.format(event_id), {}, data
             ).then(function (data) {
-                var notify_id = NotificationService.notify(
-                    200,
-                    [
-                        'Случай беременности закрыт. ',
-                        {
-                            click: function () {
-                                edit_callback(data);
-                                close_notify();
-                            },
-                            text: 'Изменить'
-                        }, ' ',
-                        {
-                            click: function () {
-                                cancel_callback(data);
-                                close_notify();
-                            },
-                            text: 'Отменить'
-                        }
-                    ],
-                    'success'
-                );
                 var close_notify = function() {
                     NotificationService.dismiss(notify_id);
                 };
+                if (show_notify) {
+                    var notify_id = NotificationService.notify(
+                        200,
+                        [
+                            'Случай беременности закрыт. ',
+                            {
+                                click: function () {
+                                    edit_callback(data).then(close_notify);
+                                },
+                                text: 'Изменить'
+                            }, ' ',
+                            {
+                                click: function () {
+                                    cancel_callback(data).then(close_notify);
+                                },
+                                text: 'Отменить'
+                            }
+                        ],
+                        'success'
+                    );
+                }
             })
         };
         this.get = function (event_id, ticket_id, client_id, gyn_event_id) {
