@@ -68,10 +68,12 @@ var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, 
             mouse_button = event.pos.button;  // 0-left, 1-middle
         var args = {
             request_type: 'pregnancy',
-            person_id: CurrentUser.get_main_user().id,
             closed: false,
             risk_rate: rr.code
         };
+        if (!$scope.curation_level_code) {
+            args.person_id = CurrentUser.get_main_user().id;
+        }
         RisarApi.search_event.openExtendedSearch(args, mouse_button === 1)
     };
 
@@ -87,10 +89,12 @@ var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, 
     $scope.getExtendedSearchUrl = function (pathology_id) {
         var args = {
             request_type: 'pregnancy',
-            person_id: CurrentUser.get_main_user().id,
             closed: false,
             pathology_id: pathology_id
         };
+        if (!$scope.curation_level_code) {
+            args.person_id = CurrentUser.get_main_user().id;
+        }
         return RisarApi.search_event.getExtendedSearchUrl(args);
     };
 

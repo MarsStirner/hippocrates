@@ -73,20 +73,24 @@ var PregnancyWeekDistributionCtrl = function ($scope, RisarApi, CurrentUser, Ref
         pw_max = pw === '40+' ? undefined : pw_min;
         var args = {
             request_type: 'pregnancy',
-            person_id: CurrentUser.get_main_user().id,
             closed: false,
             preg_week_min: pw_min
         };
+        if (!$scope.curation_level_code) {
+            args.person_id = CurrentUser.get_main_user().id;
+        }
         if (pw_max !== undefined) args.preg_week_max = pw_max;
         RisarApi.search_event.openExtendedSearch(args, mouse_button === 1)
     };
     $scope.getExtendedSearchUrl = function (rg_code) {
         var args = {
             request_type: 'pregnancy',
-            person_id: CurrentUser.get_main_user().id,
             closed: false,
             risk_group: rg_code
         };
+        if (!$scope.curation_level_code) {
+            args.person_id = CurrentUser.get_main_user().id;
+        }
         return RisarApi.search_event.getExtendedSearchUrl(args);
     };
 

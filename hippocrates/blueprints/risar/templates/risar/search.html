@@ -30,7 +30,7 @@
                     <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control"
                             ng-disabled="!canChangeCurator()">
                         <ui-select-match placeholder="Выберите кураторов">[[ $item.lastName + ' ' + $item.firstName + ', ' + $item.name ]]</ui-select-match>
-                        <ui-select-choices repeat="curator in curators_filtered | filter: {name: $select.search} | limitTo:50">
+                        <ui-select-choices repeat="curator in curators_filtered | filter: $select.search | limitTo:50">
                             <div ng-bind-html="curator.lastName + ' ' + curator.firstName + ', ' + curator.name | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>

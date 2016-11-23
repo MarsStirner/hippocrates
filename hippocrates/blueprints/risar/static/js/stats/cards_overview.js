@@ -14,9 +14,12 @@ var CurrentCardsOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
     $scope.getExtendedSearchUrl = function (type) {
         var args = {
             request_type: 'pregnancy',
-            person_id: CurrentUser.get_main_user().id,
             closed: false
         };
+        // user is doctor
+        if (!$scope.curation_level_code) {
+            args.person_id = CurrentUser.get_main_user().id;
+        }
         if (type === 'all') {
 
         } else if (type === 'not_closed42') {

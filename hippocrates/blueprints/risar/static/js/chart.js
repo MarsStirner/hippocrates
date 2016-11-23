@@ -117,24 +117,16 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
 
     $scope.close_event = function() {
         var model = _.extend({}, $scope.header.event);
-        $scope.open_edit_epicrisis(model).result.then(function (rslt) {
+        return $scope.open_edit_epicrisis(model).result.then(function (rslt) {
             var result = rslt[0],
-                edit_callback = function (data) {
-                    $scope.close_event();
+                edit_callback = function () {
+                    return $scope.close_event();
                 },
-                cancel_callback = function (data) {
-                RisarApi.chart.close_event(
-                    $scope.chart.id, {cancel: true}
-                ).then(function(data) {
-                    _.extend($scope.header.event, data);
-                });
-            };
-            RisarApi.chart.close_event(
-                $scope.chart.id, result, edit_callback, cancel_callback
-            ).then(function (data) {
-                _.extend($scope.header.event, data);
-            });
-        })
+                cancel_callback = function () {
+                    return RisarApi.chart.close_event($scope.chart.id, {cancel: true}).then(reload_chart);
+                };
+            RisarApi.chart.close_event($scope.chart.id, result, edit_callback, cancel_callback).then(reload_chart);
+        });
     };
     $scope.openMaternalCert = function () {
         MaternalCertModalService.openMaternal(event_id).then(function(rslt){

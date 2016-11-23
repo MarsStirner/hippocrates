@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes, \
-    pregnancy_card_attrs, risar_epicrisis
+    pregnancy_card_attrs, risar_epicrisis, request_type_gynecological
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
 from sqlalchemy import func, and_, or_
@@ -56,10 +56,10 @@ class StatsController(BaseModelController):
         events = sel.get_events_urgent_hosp(person_id)
         return events
 
-    def get_controlled_events(self, person_id):
+    def get_controlled_events(self, person_id, curation_level):
         """Карты пациенток, взятые на контроль пользователем"""
         sel = self.get_selecter()
-        data = sel.get_controlled_events(person_id)
+        data = sel.get_controlled_events(person_id, curation_level)
         cards_count = int(data.cards_count or 0) if data else 0
         return {
             'cards_count': cards_count
@@ -77,13 +77,14 @@ class StatsSelecter(BaseSelecter):
         Organisation = self.model_provider.get('Organisation')
         Event = self.model_provider.get('Event')
         EventType = self.model_provider.get('EventType')
+        Client = self.model_provider.get('Client')
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
 
         query = self.model_provider.get_query('Event')
         query = query.join(
-            EventType, rbRequestType, Action, ActionType
+            EventType, rbRequestType, Client, Action, ActionType
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
             Action.deleted == 0, ActionType.flatCode == pregnancy_card_attrs
@@ -169,9 +170,6 @@ class StatsSelecter(BaseSelecter):
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
-        ActionProperty = self.model_provider.get('ActionProperty')
-        ActionPropertyType = self.model_provider.get('ActionPropertyType')
-        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
 
         # subqueries
         # 1) epicrisis with delivery_date
@@ -353,19 +351,54 @@ class StatsSelecter(BaseSelecter):
         self.query = query
         return self.get_all()
 
-    def get_controlled_events(self, person_id):
+    def get_controlled_events(self, person_id, curation_level=None):
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
         Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        Client = self.model_provider.get('Client')
+        rbRequestType = self.model_provider.get('rbRequestType')
         EventPersonsControl = self.model_provider.get('EventPersonsControl')
 
         query = self.model_provider.get_query('Event')
         query = query.join(
+            EventType, rbRequestType, Client
+        ).join(
             EventPersonsControl
         ).filter(
-            Event.deleted == 0, EventPersonsControl.person_id == person_id,
-            EventPersonsControl.endDate.is_(None)
-        ).with_entities(
+            Event.deleted == 0,
+            rbRequestType.code.in_((request_type_pregnancy, request_type_gynecological)),
+            Event.execDate.is_(None),
+            EventPersonsControl.endDate.is_(None),
+            EventPersonsControl.person_id == person_id
+        )
+        if curation_level:
+            # карты куратора
+            query = query.join(
+                PersonInEvent, Event.execPerson_id == PersonInEvent.id
+            ).join(
+                Organisation, PersonInEvent.org_id == Organisation.id
+            ).join(
+                OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Organisation.id
+            ).join(
+                PersonCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+            ).join(
+                rbOrgCurationLevel, PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id
+            ).filter(
+                PersonCurationAssoc.person_id == person_id,
+                rbOrgCurationLevel.code == curation_level
+            )
+        else:
+            # карты врача
+            query = query.filter(Event.execPerson_id == person_id)
+        query = query.with_entities(
             func.count(Event.id.distinct()).label('cards_count'),
         )
+
         self.query = query
         return self.get_one()
 

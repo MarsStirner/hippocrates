@@ -154,33 +154,34 @@ WebMis20
             return wrapper('DELETE', urls.delete.format(ticket_id));
         };
         this.close_event = function (event_id, data, edit_callback, cancel_callback) {
+            var show_notify = !data.cancel;
             return wrapper(
                 'POST', urls.close.format(event_id), {}, data
             ).then(function (data) {
-                var notify_id = NotificationService.notify(
-                    200,
-                    [
-                        'Случай беременности закрыт. ',
-                        {
-                            click: function () {
-                                edit_callback(data);
-                                close_notify();
-                            },
-                            text: 'Изменить'
-                        }, ' ',
-                        {
-                            click: function () {
-                                cancel_callback(data);
-                                close_notify();
-                            },
-                            text: 'Отменить'
-                        }
-                    ],
-                    'success'
-                );
                 var close_notify = function() {
                     NotificationService.dismiss(notify_id);
                 };
+                if (show_notify) {
+                    var notify_id = NotificationService.notify(
+                        200,
+                        [
+                            'Случай беременности закрыт. ',
+                            {
+                                click: function () {
+                                    edit_callback(data).then(close_notify);
+                                },
+                                text: 'Изменить'
+                            }, ' ',
+                            {
+                                click: function () {
+                                    cancel_callback(data).then(close_notify);
+                                },
+                                text: 'Отменить'
+                            }
+                        ],
+                        'success'
+                    );
+                }
             })
         };
         this.get = function (event_id, ticket_id, client_id, gyn_event_id) {
@@ -619,8 +620,10 @@ WebMis20
         urgent_errands: function() {
             return wrapper('GET', Config.url.api_stats_urgent_errands)
         },
-        controlled_events: function() {
-            return wrapper('GET', Config.url.api_stats_controlled_events)
+        controlled_events: function(curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_controlled_events, {
+                curation_level_code: curation_level_code
+            })
         }
     };
     this.card_fill_rate = {
@@ -725,26 +728,14 @@ WebMis20
 }]);
 WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService', 'ErrandModalService',
 function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
-    var params = aux.getQueryParams(window.location.search);
-    var ticket_id = params.ticket_id;
-    var client_id = params.client_id;
-    var event_id = params.event_id;
-    var gyn_event_id = params.gyn_event_id;
 
-    $scope.load_chart = function () {
-        RisarApi.chart.get(
-            event_id, ticket_id, client_id, gyn_event_id
-        ).then(function (event) {
-            $scope.chart = event;
-        });
-    };
     $scope.create_errand = function () {
         var errand = {
-            event_id: $scope.chart.id,
+            event_id: $scope.header.event.id,
             set_person: CurrentUser.info,
             communications: '',
-            exec_person: $scope.chart.person,
-            event: {external_id: $scope.chart.external_id},
+            exec_person: $scope.header.event.person,
+            event: {external_id: $scope.header.event.external_id},
             status: $scope.rbErrandStatus.get_by_code('waiting')
         };
 
@@ -755,7 +746,6 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
         });
     };
     $scope.init = function () {
-        $scope.load_chart();
         $scope.rbErrandStatus = RefBookService.get('ErrandStatus');
     };
     $scope.init();
