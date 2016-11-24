@@ -59,8 +59,8 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         return options && options.display_new_appointment;
     };
     $scope.filesTableVisible = function () {
-        return $scope.em_result.attached_files && $scope.em_result.attached_files.length > 0 &&
-            $scope.canReadEmResult() || $scope.new_files.length > 0;
+        return $scope.em_result && $scope.em_result.attached_files && $scope.em_result.attached_files.length > 0 &&
+            $scope.canReadEmResult();
     };
     $scope.editAppointment = function () {
         var appointment = _.deepCopy($scope.appointment);
