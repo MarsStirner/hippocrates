@@ -50,10 +50,10 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         return $scope.access.can_restore;
     };
     $scope.canPrintAppointment = function () {
-        return $scope.appointment.id ? $scope.canReadEmAppointment : $scope.canEditEmAppointment;
+        return $scope.appointment.id ? $scope.canReadEmAppointment() : $scope.canEditEmAppointment();
     };
     $scope.canPrintEmResult = function () {
-        return $scope.em_result.id ? $scope.canReadEmResult : $scope.canEditEmResult;
+        return $scope.em_result.id ? $scope.canReadEmResult() : $scope.canEditEmResult();
     };
     $scope.displayNewAppointment = function () {
         return options && options.display_new_appointment;
@@ -106,7 +106,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         return $scope.em_result.action_type.context_name;
     };
     $scope.createAppointmentIfNeed = function () {
-        if ($scope.appointment.id) {return $q.defer().promise}
+        if ($scope.appointment.id) {return $q.when()}
 
         var data = $scope.appointment_action.get_data(),
             event_measure_id = event_measure.data.id,
@@ -121,7 +121,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         })
     };
     $scope.createEmResultIfNeed = function () {
-        if ($scope.em_result.id) {return $q.defer().promise}
+        if ($scope.em_result.id) {return $q.when()}
 
         var data = $scope.em_result_action.get_data(),
             event_measure_id = event_measure.data.id,
