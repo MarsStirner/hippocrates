@@ -52,15 +52,16 @@ class ClientXForm(ClientSchema, XForm):
         )
         if pn:
             q = q.filter(Client.patrName == pn)
-        target_obj_exist = db.session.query(q.exists()).scalar()
-        if target_obj_exist:
+        target_obj_exist_id = q.value(Client.id)
+        if target_obj_exist_id:
             raise ApiException(
                 ALREADY_PRESENT_ERROR,
                 (u'Уже существует пациент со следующими данными: '
                  u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
                  u'номер документа - {4}').format(
                     fn, ln, pn, bd, doc_number
-                )
+                ),
+                client_id=str(target_obj_exist_id)
             )
 
     def load_data(self):
