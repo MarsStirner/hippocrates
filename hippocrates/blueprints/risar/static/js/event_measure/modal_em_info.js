@@ -10,11 +10,13 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     RisarApi, RefBookService, WMAction, PrintingService, EMModalService,
     event_measure, options) {
     $scope.event_measure = event_measure.data;
-    $scope.access = event_measure.access
+    $scope.access = event_measure.access;
     $scope.ro = true;
     $scope.ps = new PrintingService("event_measure");
-    function update_print_templates (context_name) {
-        $scope.ps.set_context(context_name);
+    $scope.ps_resolve = function () {
+        return {
+            event_measure_id: event_measure.data.id
+        }
     };
     $scope.setTab = function (num) {
         $scope.tabNum = num;
@@ -23,7 +25,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     $scope.canEditEmAppointment = function () {
         return $scope.access.can_edit_appointment;
     };
-    $scope.canEditEmResults = function () {
+    $scope.canEditEmResult = function () {
         return $scope.access.can_edit_result;
     };
     $scope.canReadEmAppointment = function () {
@@ -47,10 +49,19 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     $scope.canRestore = function () {
         return $scope.access.can_restore;
     };
+    $scope.canPrintAppointment = function () {
+        return $scope.appointment.id ? $scope.canReadEmAppointment() : $scope.canEditEmAppointment();
+    };
+    $scope.canPrintEmResult = function () {
+        return $scope.em_result.id ? $scope.canReadEmResult() : $scope.canEditEmResult();
+    };
     $scope.displayNewAppointment = function () {
         return options && options.display_new_appointment;
     };
-
+    $scope.filesTableVisible = function () {
+        return $scope.em_result && $scope.em_result.attached_files && $scope.em_result.attached_files.length > 0 &&
+            $scope.canReadEmResult();
+    };
     $scope.editAppointment = function () {
         var appointment = _.deepCopy($scope.appointment);
         EMModalService.openAppointmentEdit(event_measure, appointment).then($scope.refresh);
@@ -91,6 +102,42 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     $scope.getAppointmentComment = function () {
         return $scope.event_measure.appointment_comment || '';
     };
+    $scope.getAppointmentContextName = function () {
+        return $scope.appointment.action_type.context_name;
+    };
+    $scope.getEmResultContextName = function () {
+        return $scope.em_result.action_type.context_name;
+    };
+    $scope.createAppointmentIfNeed = function () {
+        if ($scope.appointment.id) {return $q.when()}
+
+        var data = $scope.appointment_action.get_data(),
+            event_measure_id = event_measure.data.id,
+            appointment_id = $scope.appointment.id;
+        return RisarApi.measure.save_appointment(
+            event_measure_id,
+            appointment_id,
+            data
+        ).then(function (appointment) {
+            $scope.appointment = appointment;
+            $scope.appointment_action.merge(appointment);
+        })
+    };
+    $scope.createEmResultIfNeed = function () {
+        if ($scope.em_result.id) {return $q.when()}
+
+        var data = $scope.em_result_action.get_data(),
+            event_measure_id = event_measure.data.id,
+            em_result_id = $scope.em_result.id;
+        return RisarApi.measure.save_em_result(
+            event_measure_id,
+            em_result_id,
+            data
+        ).then(function (em_result) {
+            $scope.em_result = em_result;
+            $scope.em_result_action.merge(em_result);
+        })
+    };
 
     $scope.refresh = function () {
         return RisarApi.measure.get_info($scope.event_measure.id, $scope.event_measure.appointment_action_id).then(function(data){
@@ -100,12 +147,10 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
             if ($scope.appointment) {
                 $scope.appointment_action = $scope.appointment_action.merge($scope.appointment);
                 $scope.appointment_action.readonly = $scope.appointment_action.ro = $scope.ro;
-                update_print_templates($scope.appointment.action_type.context_name);
             }
             if ($scope.em_result) {
                 $scope.em_result_action = $scope.em_result_action.merge($scope.em_result);
                 $scope.em_result_action.readonly = $scope.em_result_action.ro = $scope.ro;
-                update_print_templates($scope.em_result.action_type.context_name);
             }
         })
     };

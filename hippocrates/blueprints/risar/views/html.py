@@ -10,6 +10,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, re
     puerpera_inspection_flat_code
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_template
+from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
 from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode
 from hitsl_utils.api import ApiException
 from nemesis.app import app
@@ -95,6 +96,7 @@ def html_gynecological_chart():
 chart_mapping = {
     request_type_pregnancy: '.html_pregnancy_chart',
     request_type_gynecological: '.html_gynecological_chart',
+    'empty': '.html_gynecological_chart',
 }
 
 
@@ -137,6 +139,8 @@ def html_auto_chart():
     else:
         raise abort(400, u'Невозможно определить тип карты по передаваемым параметрам')
 
+    request_type_code = request.args.get('ticket_type') or request_type_code
+
     if event_id:
         if not request_type_code:
             request_type_code, = db.session.query(rbRequestType.code).join(EventType, Event).filter(
@@ -148,7 +152,7 @@ def html_auto_chart():
         kwargs = {'event_id': event_id}
     else:
         kwargs = request.args.to_dict()
-        request_type_code = request_type_gynecological
+        request_type_code = request_type_code or request_type_gynecological
 
     if request_type_code not in chart_mapping:
         raise abort(500, u'Невозможно определить тип карты по передаваемым параметрам')
@@ -401,6 +405,17 @@ def html_card_fill_history():
         raise abort(404)
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/card_fill_history.html', card=card)
+
+
+@module.route('/card_predicted_pregnancy.html')
+def html_card_predicted_pregnancy():
+    args = request.args.to_dict()
+    event_id = safe_int(args.get('event_id'))
+    if not event_id:
+        raise abort(404)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/card_predicted_pregnancy.html', card=card,
+                           tm_data=represent_predicted_pregnancy(card))
 
 
 @module.route('/risk_groups_list.html')

@@ -233,3 +233,9 @@ nursing = dict(
                             'urination', 'family', 'social_conditions', 'newborn_care', 'conclusion',
                             'plan', 'recommendations']))
 )
+
+
+pregnancy_apts = ['pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed',
+    'card_fill_rate', 'card_fill_rate_anamnesis', 'card_fill_rate_first_inspection',
+    'card_fill_rate_repeated_inspection', 'card_fill_rate_epicrisis', 'pregnancy_start_date_by_ultrasonography',
+    'pdd_mensis']
