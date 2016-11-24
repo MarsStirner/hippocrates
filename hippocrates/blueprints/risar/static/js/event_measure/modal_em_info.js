@@ -58,7 +58,10 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     $scope.displayNewAppointment = function () {
         return options && options.display_new_appointment;
     };
-
+    $scope.filesTableVisible = function () {
+        return $scope.em_result && $scope.em_result.attached_files && $scope.em_result.attached_files.length > 0 &&
+            $scope.canReadEmResult();
+    };
     $scope.editAppointment = function () {
         var appointment = _.deepCopy($scope.appointment);
         EMModalService.openAppointmentEdit(event_measure, appointment).then($scope.refresh);
