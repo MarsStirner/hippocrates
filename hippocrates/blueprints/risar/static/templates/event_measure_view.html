@@ -85,6 +85,26 @@
                 <div class="row">
                 <div class="col-md-12">
                     <wm-action-layout ng-if="em_result" action="em_result_action"></wm-action-layout>
+                    <table class="table table-condensed" ng-show="filesTableVisible()">
+                        <thead>
+                            <tr>
+                                <th>Наименование</th>
+                                <th>Файл</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="attach in em_result.attached_files">
+                                <td><input type="text" class="form-control" ng-model="attach.file_meta.name" ng-required="true"
+                                    ng-disabled="true"></td>
+                                <td>
+                                    <a ng-href="[[attach.file_meta.url]]" target="_blank" class="btn btn-sm btn-primary" title="Скачать"
+                                        ng-disabled="!canReadEmResult()">
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <span ng-if="!em_result">
                         <b>По данному мероприятию результатов нет</b>
                     </span>
