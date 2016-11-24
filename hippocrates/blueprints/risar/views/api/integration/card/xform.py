@@ -65,6 +65,9 @@ class CardXForm(CardSchema, XForm):
                     )
                 )
 
+    def find_target(self):
+        self.target_obj = self._find_target_obj_query().first()
+
     def get_target_nf_msg(self):
         return u'Не найдена карта с id = {0}'.format(self.target_obj_id)
 

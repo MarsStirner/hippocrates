@@ -37,7 +37,10 @@ class OrganizationXForm(OrganizationSchema, XForm):
             )
 
     def _find_target_obj_query(self):
-        pass
+        query = Organisation.query.filter(
+            Organisation.deleted == 0
+        )
+        return query
 
     def init_and_check_params(self, org_code=None, data=None):
         if not self.new:
@@ -83,19 +86,32 @@ class OrganizationXForm(OrganizationSchema, XForm):
         self.target_obj.miacCode = ''
 
     def as_json(self):
+        if self.target_obj:
+            return self.org_represent(self.target_obj)
+        else:
+            res = []
+            for org in self._find_target_obj_query():
+                res.append(self.org_represent(org))
+            return res
+
+    def org_represent(self, target_obj):
         return {
-            'full_name': self.target_obj.fullName,
-            'short_name': self.target_obj.shortName,
-            'infis_code': self.target_obj.infisCode,
-            'address': self.target_obj.Address,
-            'area': self.target_obj.area,
-            'phone': self.target_obj.phone,
-            'TFOMSCode': self.target_obj.TFOMSCode,
-            'INN': self.target_obj.INN,
-            'KPP': self.target_obj.KPP,
-            'OGRN': self.target_obj.OGRN,
-            'OKATO': self.target_obj.OKATO,
-            'is_LPU': self.target_obj.isLPU,
-            'is_stationary': self.target_obj.isStationary,
-            'is_insurer': self.target_obj.isInsurer,
+            'full_name': target_obj.fullName,
+            'short_name': target_obj.shortName,
+            'infis_code': target_obj.infisCode,
+            'address': target_obj.Address,
+            'area': target_obj.area,
+            'phone': target_obj.phone,
+            'TFOMSCode': target_obj.TFOMSCode,
+            'INN': target_obj.INN,
+            'KPP': target_obj.KPP,
+            'OGRN': target_obj.OGRN,
+            'OKATO': target_obj.OKATO,
+            'is_LPU': target_obj.isLPU,
+            'is_stationary': target_obj.isStationary,
+            'is_insurer': target_obj.isInsurer,
         }
+
+    def delete_target_obj(self):
+        self.target_obj.deleted = 1
+        self._changed.extend(self.target_obj)

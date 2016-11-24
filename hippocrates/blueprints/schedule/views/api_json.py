@@ -5,7 +5,7 @@ import datetime
 import logging
 from collections import defaultdict
 
-
+from blueprints.risar.lib import sirius
 from flask import abort, request
 from flask_login import current_user
 
@@ -322,6 +322,20 @@ def api_appointment():
     ticket = ScheduleTicket.query.get(ticket_id)
     if not ticket:
         return abort(404)
+
+    schedule = ticket.schedule
+    res = sirius.check_mis_schedule_ticket(
+        client_id,
+        ticket_id,
+        delete,
+        schedule.person.organisation,
+        schedule.person,
+        schedule.date,
+        ticket.begTime,
+    )
+    if not res:
+        return jsonify(None, 400, u'Не удалось занять талончик в РМИС')
+
     client_ticket = ticket.client_ticket
     if client_ticket and client_ticket.client_id != client_id:
         return jsonify(None, 400, u'Талончик занят другим пациентом (%d)' % client_ticket.client_id)

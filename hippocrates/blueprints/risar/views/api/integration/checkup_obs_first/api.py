@@ -124,3 +124,16 @@ def api_checkup_obs_first_ticket25_get(api_version, card_id, exam_obs_id):
     xform.check_params(exam_obs_id, card_id)
     xform.find_ticket25()
     return xform.as_json()
+
+
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/first/<int:exam_obs_id>/ticket25', methods=['PUT'])
+@api_method(hook=hook)
+def api_checkup_obs_first_ticket25_save(api_version, card_id, exam_obs_id):
+    data = request.get_json()
+    create = request.method == 'POST'
+    xform = CheckupObsFirstTicket25XForm(api_version, create)
+    xform.validate(data)
+    xform.check_params(exam_obs_id, card_id, data)
+    xform.find_ticket25()
+    xform.update_target_obj(data)
+    return xform.as_json()

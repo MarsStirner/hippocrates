@@ -13,8 +13,7 @@ from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.lib.apiutils import RawApiResult
 
-from blueprints.risar.lib.sirius import update_entity_from_mis, \
-    get_risar_id_by_mis_id, save_card_ids_match
+from blueprints.risar.lib import sirius
 from blueprints.risar.risar_config import request_type_pregnancy
 from ..app import module
 from hippocrates.blueprints.risar.views.api.integration.const import (
@@ -30,9 +29,9 @@ logger = logging.getLogger('simple')
 def api_card_by_remote_id(api_version, region, entity, remote_id):
 
     # Добавляем/обновляем пациента по UID РМИС
-    update_entity_from_mis(region, entity, remote_id)
+    sirius.update_entity_from_mis(region, entity, remote_id)
     # Запрашиваем ID МР по UID РМИС
-    client_id = get_risar_id_by_mis_id(region, entity, remote_id)
+    client_id = sirius.get_risar_id_by_mis_id(region, entity, remote_id)
 
     # ищем первую открытую карту пациента
     cards = Event.query.join(EventType, rbRequestType).filter(
@@ -60,7 +59,7 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
         card_id = xform.target_obj.id
 
         # запись ID карты в шину
-        save_card_ids_match(card_id, region, entity, remote_id)
+        sirius.save_card_ids_match(card_id, region, entity, remote_id)
 
     # переход на страницу карты пациента по ID карты
     return redirect(url_for('.html_inspection', event_id=card_id))

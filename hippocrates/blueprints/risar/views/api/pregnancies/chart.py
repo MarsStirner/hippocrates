@@ -14,6 +14,7 @@ from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregn
     represent_chart_for_card_fill_rate_history, represent_event_for_ambulance
 from hippocrates.blueprints.risar.lib.utils import get_last_checkup_date
 from hippocrates.blueprints.risar.risar_config import attach_codes, request_type_pregnancy
+from hippocrates.blueprints.risar.lib import sirius
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_traverse, safe_datetime
 from nemesis.models.client import Client, ClientAttach
@@ -206,6 +207,15 @@ def api_0_chart_close(event_id=None):
             event.execDate = safe_datetime(data['exec_date'])
             event.manager_id = data['manager']['id']
         db.session.commit()
+
+        sirius.send_to_mis(
+            sirius.RisarEvents.CLOSE_CARD,
+            'risar.api_integr_epicrisis_get',
+            obj=('card_id', event_id),
+            params={'card_id': event_id},
+            is_create=False,
+        )
+
     return represent_chart_for_close_event(event)
 
 

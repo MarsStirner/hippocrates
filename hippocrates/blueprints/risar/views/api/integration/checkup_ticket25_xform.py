@@ -25,6 +25,10 @@ class CheckupsTicket25XFormSchema(Schema):
             "description": "Талон",
             "type": "object",
             "properties": {
+                "external_id": {
+                    "description": "Внешний ID",
+                    "type": "string"
+                },
                 "hospital": {
                     "description": "Место обращения (код ЛПУ)",
                     "type": "string"
@@ -240,6 +244,9 @@ class CheckupsTicket25XForm(XForm):
         if not self.checkup_xform.target_obj:
             self.checkup_xform.find_target_obj(self.checkup_xform.target_obj_id)
         self.ticket25 = self.checkup_xform.target_obj.propsByCode['ticket_25'].value
+
+    def update_target_obj(self, data):
+        raise NotImplementedError
 
     @wrap_simplify
     def as_json(self):

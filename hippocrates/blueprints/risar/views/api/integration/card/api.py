@@ -38,6 +38,15 @@ def api_card_list(api_version):
     return res
 
 
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>', methods=['GET'])
+@api_method(hook=hook)
+def api_card_get(api_version, card_id=None):
+    xform = CardXForm(api_version, False)
+    xform.check_params(card_id)
+    xform.find_target()
+    return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/', methods=['POST'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>', methods=['PUT'])
 @api_method(hook=hook)
