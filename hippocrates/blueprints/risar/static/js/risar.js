@@ -1128,6 +1128,21 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
         }
     }
 }])
+.directive('clickAndGo', ["$window", function ($window) {
+        return {
+            scope: {
+                uri: '@'
+            },
+            link: function (scope, element, attrs) {
+                element.bind('click', function(e) {
+                    scope.$apply(function() {
+                        $window.open(attrs.uri, '_self');
+                    });
+                });
+
+            }
+        }
+}])
 .directive('wmBtnControlEvent', ['RisarApi', 'NotificationService', function (RisarApi, NotificationService) {
     return {
         restrict: 'E',

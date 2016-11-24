@@ -266,8 +266,10 @@ def represent_father_action(action):
 def represent_pregnancy_checkup(action):
     result = represent_checkup(action, checkup_flat_codes)
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
-    result['calculated_pregnancy_week_by_ultrason'] = get_pregnancy_week_for_ultrasonography(action.event,
-                                                                                             dt=action.begDate)
+    card = PregnancyCard.get_for_event(action.event).attrs
+    ultrason_start_date = card['pregnancy_start_date_by_ultrasonography'].value if 'pregnancy_start_date_by_ultrasonography' in card.propsByCode else None
+    week_by_ultrason = get_pregnancy_week_for_ultrasonography(start_date=ultrason_start_date, dt=action.begDate)
+    result['calculated_pregnancy_week_by_ultrason'] = week_by_ultrason
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
     result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
     return result

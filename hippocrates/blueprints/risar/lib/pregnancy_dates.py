@@ -41,11 +41,9 @@ def get_pregnancy_start_date(event):
     return start_date
 
 
-def get_pregnancy_week_for_ultrasonography(event, dt=None):
-    action = PregnancyCard.get_for_event(event).attrs
-    if 'pregnancy_start_date_by_ultrasonography' in action.propsByCode:
-        start_date = action['pregnancy_start_date_by_ultrasonography'].value
-        if start_date:
+def get_pregnancy_week_for_ultrasonography(start_date, dt=None):
+    if start_date:
+        if isinstance(start_date, (datetime.date, datetime.datetime)):
             dt = dt or datetime.date.today()
             if isinstance(dt, datetime.datetime):
                 dt = dt.date()

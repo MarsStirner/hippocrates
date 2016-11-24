@@ -46,6 +46,7 @@ def fc_risar_settings():
         }
     }
 
+from .template_filters import *
 
 # noinspection PyUnresolvedReferences
 from .views import *
