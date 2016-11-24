@@ -96,6 +96,7 @@ def html_gynecological_chart():
 chart_mapping = {
     request_type_pregnancy: '.html_pregnancy_chart',
     request_type_gynecological: '.html_gynecological_chart',
+    'empty': '.html_gynecological_chart',
 }
 
 
@@ -138,6 +139,8 @@ def html_auto_chart():
     else:
         raise abort(400, u'Невозможно определить тип карты по передаваемым параметрам')
 
+    request_type_code = request.args.get('ticket_type') or request_type_code
+
     if event_id:
         if not request_type_code:
             request_type_code, = db.session.query(rbRequestType.code).join(EventType, Event).filter(
@@ -149,7 +152,7 @@ def html_auto_chart():
         kwargs = {'event_id': event_id}
     else:
         kwargs = request.args.to_dict()
-        request_type_code = request_type_gynecological
+        request_type_code = request_type_code or request_type_gynecological
 
     if request_type_code not in chart_mapping:
         raise abort(500, u'Невозможно определить тип карты по передаваемым параметрам')
