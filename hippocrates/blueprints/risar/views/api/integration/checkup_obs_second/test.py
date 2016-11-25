@@ -8,7 +8,7 @@
 """
 
 from ..test import make_login, make_api_request
-from test_data import (obs_second_data)
+from test_data import (obs_second_data, ticket25_data)
 
 
 def create_checkup(session, card_id, data):
@@ -17,8 +17,8 @@ def create_checkup(session, card_id, data):
     return result
 
 
-def edit_checkup(session, card_id, concilium_id, data):
-    url = u'/risar/api/integration/0/card/%s/checkup/obs/second/%s/' % (card_id, concilium_id)
+def edit_checkup(session, card_id, checkup_id, data):
+    url = u'/risar/api/integration/0/card/%s/checkup/obs/second/%s/' % (card_id, checkup_id)
     result = make_api_request('put', url, session, data)
     return result
 
@@ -45,11 +45,11 @@ def test_register_edit_delete_second_checkup(card_id):
         #         raise e
         #
         checkup_id = 4563
-        result = edit_checkup(session, card_id, checkup_id, obs_second_data)
-        checkup = result['result']
-        meta = result['meta']
-        print u'edited checkup meta: {0}'.format(repr(meta).decode("unicode-escape"))
-        print u'edited checkup data: {0}'.format(repr(checkup).decode("unicode-escape"))
+        # result = edit_checkup(session, card_id, checkup_id, obs_second_data)
+        # checkup = result['result']
+        # meta = result['meta']
+        # print u'edited checkup meta: {0}'.format(repr(meta).decode("unicode-escape"))
+        # print u'edited checkup data: {0}'.format(repr(checkup).decode("unicode-escape"))
         #
         # obs_second_data['external_id'] = 'x'
         # try:
@@ -62,3 +62,16 @@ def test_register_edit_delete_second_checkup(card_id):
         #
         # result = delete_checkup(session, card_id, checkup_id)
         # print u'deleted checkup id = {0}'.format(checkup_id)
+
+
+def edit_ticket25(session, card_id, checkup_id, data):
+    url = u'/risar/api/integration/0/card/%s/checkup/obs/second/%s/ticket25' % (card_id, checkup_id)
+    result = make_api_request('put', url, session, data)
+    return result
+
+
+def test_edit_ticket25(card_id, checkup_id):
+    with make_login() as session:
+        result = edit_ticket25(session, card_id, checkup_id, ticket25_data)
+        ticket25 = result['result']
+        print u'edit ticket25 data: {0}'.format(repr(ticket25).decode("unicode-escape"))
