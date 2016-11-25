@@ -4,7 +4,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 {% block main %}
 <div ng-controller="SocProfCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.page_title_n('Социально-профилактическая помощь беременной ') }}
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
@@ -272,6 +272,7 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/soc_prof_help.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/mother_employment.html">{% include 'risar/modals/soc_prof_help/_mother_employment.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/soc_prof_help/sanatorium_therapy.html">{% include 'risar/modals/soc_prof_help/_sanatorium_therapy.html' %}</script>

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes, \
+    pregnancy_card_attrs, risar_epicrisis, request_type_gynecological
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
 from sqlalchemy import func, and_, or_
@@ -18,14 +19,12 @@ class StatsController(BaseModelController):
         sel = self.get_selecter()
         data = sel.get_current_cards_overview(person_id, curation_level)
         events_all = float(data.count_all or 0) if data else 0
-        events_45 = float(data.count_event_45_not_closed or 0) if data else 0
+        events_not_closed_42 = float(data.count_event_not_closed_42 or 0) if data else 0
         events_2_months = float(data.count_event_2m_no_inspection or 0) if data else 0
-        events_undefined_risk = float(data.count_event_prr_undefined or 0) if data else 0
         return {
             'events_all': events_all,
-            'events_45': events_45,
-            'events_2_months': events_2_months,
-            'events_undefined_risk': events_undefined_risk
+            'events_not_closed_42': events_not_closed_42,
+            'events_2_months': events_2_months
         }
 
     def get_cards_pregnancy_week_distribution(self, person_id, curation_level):
@@ -57,6 +56,15 @@ class StatsController(BaseModelController):
         events = sel.get_events_urgent_hosp(person_id)
         return events
 
+    def get_controlled_events(self, person_id, curation_level):
+        """Карты пациенток, взятые на контроль пользователем"""
+        sel = self.get_selecter()
+        data = sel.get_controlled_events(person_id, curation_level)
+        cards_count = int(data.cards_count or 0) if data else 0
+        return {
+            'cards_count': cards_count
+        }
+
 
 class StatsSelecter(BaseSelecter):
 
@@ -69,16 +77,17 @@ class StatsSelecter(BaseSelecter):
         Organisation = self.model_provider.get('Organisation')
         Event = self.model_provider.get('Event')
         EventType = self.model_provider.get('EventType')
+        Client = self.model_provider.get('Client')
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
 
         query = self.model_provider.get_query('Event')
         query = query.join(
-            EventType, rbRequestType, Action, ActionType
+            EventType, rbRequestType, Client, Action, ActionType
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
-            Action.deleted == 0, ActionType.flatCode == 'cardAttributes'
+            Action.deleted == 0, ActionType.flatCode == pregnancy_card_attrs
         )
         if curation_level:
             # карты куратора
@@ -133,9 +142,26 @@ class StatsSelecter(BaseSelecter):
             ).filter(
                 Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
                 Action.deleted == 0, ActionProperty.deleted == 0,
-                ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
+                ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'pregnancy_start_date'
             ).with_entities(
                 Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
+            )
+
+    def query_epicrisis(self):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        return self.model_provider.get_query('Action').join(
+                ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+            ).filter(
+                Action.deleted == 0, ActionProperty.deleted == 0,
+                ActionType.flatCode == risar_epicrisis, ActionPropertyType.code == 'delivery_date'
+            ).with_entities(
+                Action.event_id.label('event_id'), Action.id.label('action_id'),
+                ActionProperty_Date.value.label('delivery_date')
             )
 
     def get_current_cards_overview(self, person_id, curation_level=None):
@@ -144,13 +170,10 @@ class StatsSelecter(BaseSelecter):
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
-        ActionProperty = self.model_provider.get('ActionProperty')
-        ActionPropertyType = self.model_provider.get('ActionPropertyType')
-        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
 
         # subqueries
-        # 1) event pregnancy start date
-        q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
+        # 1) epicrisis with delivery_date
+        q_event_epicr = self.query_epicrisis().subquery('EventEpicrisis')
 
         # 2) event latest inspection
         # * самые поздние даты осмотров по обращениям
@@ -185,50 +208,30 @@ class StatsSelecter(BaseSelecter):
             Action.begDate.label('beg_date'), Action.endDate.label('end_date')
         ).subquery('EventLatestInspections')
 
-        # 3) event perinatal risk rate
-        q_event_prr = self.model_provider.get_query('Event')
-        q_event_prr = q_event_prr.join(
-            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
-        ).filter(
-            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
-            Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'prenatal_risk_572'
-        ).with_entities(
-            Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
-        ).subquery('EventPerinatalRiskRate')
-
         # main query
         query = self.query_main(person_id, curation_level)
 
         query = query.outerjoin(
-            q_event_psd, q_event_psd.c.event_id == Event.id
+            q_event_epicr, q_event_epicr.c.event_id == Event.id
         ).outerjoin(
             q_latest_inspections, q_latest_inspections.c.event_id == Event.id
-        ).outerjoin(
-            q_event_prr, q_event_prr.c.event_id == Event.id
         )
 
         query = query.with_entities(
             func.count(Event.id.distinct()).label('count_all'),
             func.sum(func.IF(
-                and_(q_event_psd.c.psd.isnot(None),
-                     # с даты начала случая прошло от 45 недель
-                     func.floor(func.datediff(func.curdate(), q_event_psd.c.psd) / 7) + 1 >= 45
+                and_(q_event_epicr.c.delivery_date.isnot(None),
+                     # с даты родоразрешения прошло более 42 дней
+                     func.datediff(func.curdate(), q_event_epicr.c.delivery_date) >= 42
                      ),
                 1, 0)
-            ).label('count_event_45_not_closed'),
+            ).label('count_event_not_closed_42'),
             func.sum(func.IF(
                 # с момента последнего осмотра (или даты постановки на учет) прошло более 2 месяцев (60 дней)
                 func.datediff(func.curdate(),
-                              func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) / 30 >= 2,
+                              func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) >= 60,
                 1, 0)
-            ).label('count_event_2m_no_inspection'),
-            func.sum(func.IF(
-                # степень перинатального риска не определена (или отсутствует в случае)
-                or_(q_event_prr.c.prr.is_(None),
-                     q_event_prr.c.prr == PerinatalRiskRate.undefined[0]),
-                1, 0)
-            ).label('count_event_prr_undefined')
+            ).label('count_event_2m_no_inspection')
         )
 
         self.query = query
@@ -254,7 +257,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'predicted_delivery_date'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'predicted_delivery_date'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
         ).subquery('EventPredictedDeliveryDate')
@@ -303,7 +306,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'prenatal_risk_572'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'prenatal_risk_572'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
         ).subquery('EventPerinatalRiskRate')
@@ -318,7 +321,7 @@ class StatsSelecter(BaseSelecter):
         ).filter(
             Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
             Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'predicted_delivery_date'
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'predicted_delivery_date'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
         ).subquery('EventPredictedDeliveryDate')
@@ -347,6 +350,57 @@ class StatsSelecter(BaseSelecter):
 
         self.query = query
         return self.get_all()
+
+    def get_controlled_events(self, person_id, curation_level=None):
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        Client = self.model_provider.get('Client')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        EventPersonsControl = self.model_provider.get('EventPersonsControl')
+
+        query = self.model_provider.get_query('Event')
+        query = query.join(
+            EventType, rbRequestType, Client
+        ).join(
+            EventPersonsControl
+        ).filter(
+            Event.deleted == 0,
+            rbRequestType.code.in_((request_type_pregnancy, request_type_gynecological)),
+            Event.execDate.is_(None),
+            EventPersonsControl.endDate.is_(None),
+            EventPersonsControl.person_id == person_id
+        )
+        if curation_level:
+            # карты куратора
+            query = query.join(
+                PersonInEvent, Event.execPerson_id == PersonInEvent.id
+            ).join(
+                Organisation, PersonInEvent.org_id == Organisation.id
+            ).join(
+                OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Organisation.id
+            ).join(
+                PersonCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+            ).join(
+                rbOrgCurationLevel, PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id
+            ).filter(
+                PersonCurationAssoc.person_id == person_id,
+                rbOrgCurationLevel.code == curation_level
+            )
+        else:
+            # карты врача
+            query = query.filter(Event.execPerson_id == person_id)
+        query = query.with_entities(
+            func.count(Event.id.distinct()).label('cards_count'),
+        )
+
+        self.query = query
+        return self.get_one()
 
 
 mather_death_koef_diags = (

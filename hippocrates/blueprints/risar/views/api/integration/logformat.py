@@ -46,6 +46,6 @@ def format_logger_message(code, j, exception=None):
 
 def hook(code, j, e=None):
     if e:
-        logger.error(format_logger_message(code, j))
+        logger.error(format_logger_message(code, j), extra=dict(tags=['RISAR_INTGR']))
     else:
-        logger.debug(format_logger_message(code, j))
+        logger.debug(format_logger_message(code, j), extra=dict(tags=['RISAR_INTGR']))

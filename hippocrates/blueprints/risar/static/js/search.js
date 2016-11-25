@@ -18,16 +18,46 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         name: 'Открытые',
         value: false
     }];
+    /* Значения взяты из CardFillRate */
+    $scope.card_fill_rate = [{
+        name: 'Все'
+    }, {
+        name: 'Заполнена',
+        value: 2
+    }, {
+        name: 'Не заполнена',
+        value: 3
+    }];
+    $scope.card_sections = [{
+        name: 'Карта целиком',
+        value: 'card_completely'
+    }, {
+        name: 'Анамнез',
+        value: 'anamnesis'
+    }, {
+        name: 'Первичный осмотр',
+        value: 'first_inspection'
+    }, {
+        name: 'Вторичный осмотр',
+        value: 'repeated_inspection'
+    }, {
+        name: 'Эпикриз',
+        value: 'epicrisis'
+    }];
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.request_types = [];
-    
     $scope.$watchCollection('rbRequestType.objects', function (n, o) {
         if (!_.isArray(n) || _.isEqual(n, o)) return;
         $scope.request_types = _.filter(n, function (i) {
             return _.contains(['gynecological', 'pregnancy'], i.code)
         })
     });
-    
+
+    $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
+    $scope.pathology_rb = RefBookService.get('PregnancyPathology');
+    $scope.rbRisarRiskGroup = RefBookService.get('rbRisarRiskGroup');
+    $scope.rbMeasureType = RefBookService.get('rbMeasureType');
+
     $scope.results = [];
     $scope.pager = {
         current_page: 1,
@@ -39,6 +69,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         curators: [],
         orgs: [],
         person: default_docs[0],
+        fio: null,
         checkup_date_from: null,
         checkup_date_to: null,
         bdate_from: null,
@@ -47,32 +78,76 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         closed: $scope.closed_items[0],
         client_work_group: {},
         age_min: null,
-        age_max: null
+        age_max: null,
+        request_types: [],
+        preg_week_min: null,
+        preg_week_max: null,
+        latest_inspection_gt: null,
+        pathology: [],
+        risk_groups: [],
+        epicrisis_delivery_date_gt: null,
+        card_fill: $scope.card_fill_rate[0],
+        card_section: $scope.card_sections[0],
+        mkbs: [],
+        closed_diags: null,
+        overdue: null,
+        measure_type: $scope.rbMeasureType.objects[0],
+        controlled_events: null
     };
 
     $scope.get_search_data = function () {
         var orgs = [];
         var from_orgs = $scope.query.orgs.length ? $scope.query.orgs: $scope.organisations;
         from_orgs.forEach(function(i) {if(i.id) orgs.push(i.id);});
+
+        var areas = $scope.query.areas,
+            curators = $scope.query.curators,
+            risks = _.pluck($scope.query.risk, 'id'),
+            request_types = _.pluck($scope.query.request_types, 'id'),
+            pathologies = _.pluck($scope.query.pathology, 'id'),
+            risk_groups = _.pluck($scope.query.risk_groups, 'code'),
+            mkbs = _.pluck($scope.query.mkbs, 'id');
+
         return {
             page: $scope.pager.current_page,
-            areas: $scope.query.areas,
-            curators: $scope.query.curators,
-            org_ids: orgs,
+            areas: areas.length ? areas : undefined,
+            curators: curators.length ? curators : undefined,
+            org_ids: orgs.length ? orgs : undefined,
             doc_id: $scope.query.person.id,
             fio: $scope.query.fio || undefined,
             checkup_date_from: $scope.query.checkup_date_from || undefined,
             checkup_date_to: $scope.query.checkup_date_to || undefined,
             bdate_from: $scope.query.bdate_from || undefined,
             bdate_to: $scope.query.bdate_to || undefined,
-            risk: _.pluck($scope.query.risk, 'id') || undefined,
+            risk: risks.length ? risks : undefined,
             closed: $scope.query.closed.value,
-            client_workgroup: $scope.query.client_workgroup,
-            age_max: $scope.query.age_max,
-            age_min: $scope.query.age_min,
-            request_types: _.pluck($scope.query.request_types, 'id') || undefined
+            client_workgroup: $scope.query.client_workgroup || undefined,
+            age_max: $scope.query.age_max || undefined,
+            age_min: $scope.query.age_min || undefined,
+            request_types: request_types.length ? request_types : undefined,
+            preg_week_min: $scope.query.preg_week_min || undefined,
+            preg_week_max: $scope.query.preg_week_max || undefined,
+            latest_inspection_gt: (
+                _.isNumber($scope.query.latest_inspection_gt) &&
+                $scope.query.latest_inspection_gt >= 1 &&
+                $scope.query.latest_inspection_gt <= 500
+            ) ? $scope.query.latest_inspection_gt : undefined,
+            pathology: pathologies.length ? pathologies : undefined,
+            risk_groups: risk_groups.length ? risk_groups : undefined,
+            epicrisis_delivery_date_gt: (
+                _.isNumber($scope.query.epicrisis_delivery_date_gt) &&
+                $scope.query.epicrisis_delivery_date_gt >= 1 &&
+                $scope.query.epicrisis_delivery_date_gt <= 500
+            ) ? $scope.query.epicrisis_delivery_date_gt : undefined,
+            card_fill: $scope.query.card_fill.value,
+            card_section: $scope.query.card_fill.value !== undefined ? $scope.query.card_section.value : undefined,
+            mkbs: mkbs.length ? mkbs : undefined,
+            closed_diags: $scope.query.closed_diags || undefined,
+            overdue: $scope.query.overdue && $scope.query.measure_type.code,
+            controlled_events: $scope.query.controlled_events || undefined
         };
     };
+
     var perform = function (set_page) {
         if (!set_page) {
             $scope.pager.current_page = 1;
@@ -108,6 +183,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         return RisarApi.search_event.area_curator_list(areas)
         .then(function (result) {
             $scope.curators = result;
+            $scope.curators_filtered = result.filter(function (item) {
+                return CurrentUser.current_role_in('admin') ||
+                    item.person_id === CurrentUser.id;
+            });
             setFltCurators();
             return $scope.refresh_organisations();
         });
@@ -129,9 +208,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.doctors = default_docs.concat(result);
             setFltDoctor();
         });
-    }; 
-
-    $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
+    };
 
     $scope.reset_filters = function () {
         $scope.query = {
@@ -148,7 +225,20 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             age_max: null,
             request_types: [],
             person: $scope.query.person,
-            curators: $scope.query.curators
+            curators: $scope.query.curators,
+            preg_week_min: null,
+            preg_week_max: null,
+            latest_inspection_gt: null,
+            pathology: [],
+            risk_groups: [],
+            epicrisis_delivery_date_gt: null,
+            card_fill: $scope.card_fill_rate[0],
+            card_section: $scope.card_sections[0],
+            mkbs: [],
+            closed_diags: null,
+            overdue: null,
+            measure_type: $scope.rbMeasureType.objects[0],
+            controlled_events: null
         };
         return $scope.refresh_areas();
     };
@@ -162,10 +252,28 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         perform(true);
     };
     $scope.canChangeDoctor = function () {
-        return CurrentUser.current_role_in('admin');
+        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
     };
     $scope.canChangeCurator = function () {
-        return CurrentUser.current_role_in('admin');
+        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
+    };
+    $scope.isCurator = function () {
+        return CurrentUser.current_role_in('overseer1', 'overseer2', 'overseer3');
+    };
+    $scope.isCardSectionDisabled = function () {
+        if ($scope.query.card_fill == $scope.card_fill_rate[0]) {
+            $scope.query.card_section = $scope.card_sections[0];
+            return true;
+        }
+        return false;
+    };
+    $scope.isMeasureTypeDisabled = function () {
+        return !$scope.query.overdue;
+    };
+    $scope.filterForPregCardsAvailable = function () {
+        return $scope.query.request_types.some(function (rt) {
+            return rt.code === 'pregnancy';
+        });
     };
 
     var setFltDoctor = function () {
@@ -184,9 +292,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     var setFltCurators = function () {
         if (CurrentUser.current_role_in('overseer1', 'overseer2', 'overseer3')) {
             var cur_id = CurrentUser.get_main_user().id,
-                curators_list = [];
+                curators_list = [],
+                cur_role_code = CurrentUser.current_role.substr(-1);
             for (var i = 0; i < $scope.curators.length; i++) {
-                if ($scope.curators[i].person_id === cur_id) {
+                if ($scope.curators[i].person_id === cur_id &&
+                        $scope.curators[i].level_code === cur_role_code) {
                     curators_list.push($scope.curators[i]);
                 }
             }
@@ -197,11 +307,81 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.query.curators = [];
         }
     };
+    var setFilterFromArgs = function (args) {
+        if (args.hasOwnProperty('request_type')) {
+            $scope.query.request_types = $scope.request_types.filter(function (rt) {
+                return rt.code === args.request_type;
+            });
+        }
+        if (args.hasOwnProperty('person_id')) {
+            args.person_id = parseInt(args.person_id);
+            var new_person = $scope.doctors.filter(function (d) {
+                return d.id === args.person_id;
+            })[0];
+            if (new_person) $scope.query.person = new_person;
+        }
+        if (args.hasOwnProperty('closed')) {
+            args.closed = args.closed === 'false' ? false : args.closed === 'true' ? true : undefined;
+            var new_closed_status = $scope.closed_items.filter(function (cl) {
+                return cl.value === args.closed;
+            })[0];
+            if (new_closed_status) $scope.query.closed = new_closed_status;
+        }
+        if (args.hasOwnProperty('preg_week_min')) {
+            $scope.query.preg_week_min = parseInt(args.preg_week_min);
+        }
+        if (args.hasOwnProperty('preg_week_max')) {
+            $scope.query.preg_week_max = parseInt(args.preg_week_max);
+        }
+        if (args.hasOwnProperty('latest_inspection_gt')) {
+            $scope.query.latest_inspection_gt = parseInt(args.latest_inspection_gt);
+        }
+        if (args.hasOwnProperty('risk_rate')) {
+            $scope.query.risk = $scope.risks_rb.objects.filter(function (rr) {
+                return rr.code === args.risk_rate;
+            });
+        }
+        if (args.hasOwnProperty('pathology_id')) {
+            var new_pathology = $scope.pathology_rb.get(args.pathology_id);
+            if (new_pathology) $scope.query.pathology = [new_pathology];
+        }
+        if (args.hasOwnProperty('risk_group')) {
+            $scope.query.risk_groups = $scope.rbRisarRiskGroup.objects.filter(function (rg) {
+                return rg.code === args.risk_group;
+            });
+        }
+        if (args.hasOwnProperty('epicrisis_delivery_date_gt')) {
+            $scope.query.epicrisis_delivery_date_gt = parseInt(args.epicrisis_delivery_date_gt);
+        }
+        if (args.hasOwnProperty('card_fill_opt')) {
+            var card_fill_opt = parseInt(args.card_fill_opt);
+            $scope.query.card_fill = $scope.card_fill_rate[card_fill_opt];
+        }
+        if (args.hasOwnProperty('card_section_opt')) {
+            var card_section_opt = parseInt(args.card_section_opt);
+            $scope.query.card_section = $scope.card_sections[card_section_opt];
+        }
+        if (args.hasOwnProperty('org_id')) {
+            var organization = $scope.organisations.filter(function (organization) {
+                return organization.id == args.org_id;
+            })[0];
+            $scope.query.orgs = organization ? [organization] : [];
+        }
+        if (args.hasOwnProperty('controlled_events')) {
+            $scope.query.controlled_events = args.controlled_events === 'false' ?
+                false :
+                args.controlled_events === 'true' ?
+                    true :
+                    undefined;
+        }
+    };
 
     // start
-    $q.all([areas_promise]).then(function () {
+    $q.all([areas_promise, $scope.risks_rb.loading, $scope.pathology_rb.loading,
+            $scope.rbRisarRiskGroup.loading, $scope.rbMeasureType.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
+        setFilterFromArgs(aux.getQueryParams(window.location.search));
 
         $scope.$watchCollection('query', function () {
             tc.start()
@@ -212,6 +392,16 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         $scope.$watchCollection('query.request_types', function () {
             tc.start()
         });
+        $scope.$watchCollection('query.pathology', function () {
+            tc.start()
+        });
+        var empty_measure = {
+            id: 0,
+            name: 'Любой тип',
+            code: 'any'
+        };
+        $scope.rbMeasureType.objects.unshift(empty_measure);
+        $scope.query.measure_type = $scope.rbMeasureType.objects[0];
     });
 };
 

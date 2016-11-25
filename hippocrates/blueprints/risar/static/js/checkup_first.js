@@ -4,6 +4,11 @@
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
+    $scope.$on('mayBeUziSrokChanged', function() {
+        RisarApi.checkup.get(checkup_id).then(function (checkup) {
+            $scope.checkup.calculated_pregnancy_week_by_ultrason = checkup.calculated_pregnancy_week_by_ultrason;
+        });
+    });
 
     var updateHW_Ratio = function (){
         $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
@@ -77,6 +82,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 if(!$scope.checkup.fetuses.length) {
                     $scope.add_child();
                 }
+                $scope.$broadcast('checkupLoaded');
             });
         } else {
             RisarApi.checkup.get(checkup_id)
@@ -85,6 +91,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                     if(!$scope.checkup.fetuses.length) {
                         $scope.add_child();
                     }
+                    $scope.$broadcast('checkupLoaded');
                 });
         }
     };

@@ -1,0 +1,61 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="PredictedPregnancyCtrl" ng-cloak>
+    <section class="content-header" >
+        {{ rimacros.page_title_n('Предполагаемая дата родов пациентки') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Предполагаемая дата родов пациентки</h3>
+            </div>
+            <div class="box-body">
+                <div class="row marginal">
+                    <div class="col-md-4 text-right">Дата родов по последней менструации</div>
+                    <div class="col-md-8">{{ tm_data['pdd_mensis'] | as_date | ifempty('Нет данных для расчета') }}</div>
+                </div>
+                <div class="row marginal">
+                    <div class="col-md-4 text-right">Дата родов по УЗИ I триместр</div>
+                    <div class="col-md-8">{{ tm_data['0028'] | as_date | ifempty('Нет данных для расчета') }}</div>
+                </div>
+                <div class="row marginal">
+                    <div class="col-md-4 text-right">Дата родов по УЗИ II триместра</div>
+                    <div class="col-md-8">{{ tm_data['0025'] | as_date | ifempty('Нет данных для расчета') }}</div>
+                </div>
+                <div class="row marginal">
+                    <div class="col-md-4 text-right">Дата родов по УЗИ III триместра</div>
+                    <div class="col-md-8">{{ tm_data['0023'] | as_date | ifempty('Нет данных для расчета') }}</div>
+                </div>
+                <div class="row marginal">
+                    {%- if tm_data.fact_delivery_date -%}
+                        <div class="col-md-4 text-right">Фактическая дата</div>
+                        <div class="col-md-8">
+                            <span>
+                                    {{ tm_data['fact_delivery_date'] | as_date | ifempty('Нет данных для расчета') }}
+                            </span>
+                        </div>
+                    {%- else -%}
+                        <div class="col-md-4 text-right">Рассчётная дата</div>
+                        <div class="col-md-8">
+                            <span class="bottom_dotted" tooltip="Рассчитана на основе срока беременности в последнем осмотре">
+                                    {{ tm_data['predicted_delivery_date'] | as_date | ifempty('Нет данных для расчета') }}
+                            </span>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/predicted_pregnancy.js', v=app_version) }}"></script>
+{% endblock %}

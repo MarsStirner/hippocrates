@@ -7,7 +7,7 @@
 
 {% block main %}
 <div ng-controller="PartalNursingListCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.page_title_ext_n('Сведения по послеродовому патронажу') }}
         {{ rimacros.navigation('[[ header.event.id ]]') }}
     </section>
@@ -109,5 +109,6 @@
     <script>
         WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
     </script>
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
 {% endblock %}

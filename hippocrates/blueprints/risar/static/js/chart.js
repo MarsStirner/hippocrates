@@ -117,24 +117,16 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
 
     $scope.close_event = function() {
         var model = _.extend({}, $scope.header.event);
-        $scope.open_edit_epicrisis(model).result.then(function (rslt) {
+        return $scope.open_edit_epicrisis(model).result.then(function (rslt) {
             var result = rslt[0],
-                edit_callback = function (data) {
-                    $scope.close_event();
+                edit_callback = function () {
+                    return $scope.close_event();
                 },
-                cancel_callback = function (data) {
-                RisarApi.chart.close_event(
-                    $scope.chart.id, {cancel: true}
-                ).then(function(data) {
-                    _.extend($scope.header.event, data);
-                });
-            };
-            RisarApi.chart.close_event(
-                $scope.chart.id, result, edit_callback, cancel_callback
-            ).then(function (data) {
-                _.extend($scope.header.event, data);
-            });
-        })
+                cancel_callback = function () {
+                    return RisarApi.chart.close_event($scope.chart.id, {cancel: true}).then(reload_chart);
+                };
+            RisarApi.chart.close_event($scope.chart.id, result, edit_callback, cancel_callback).then(reload_chart);
+        });
     };
     $scope.openMaternalCert = function () {
         MaternalCertModalService.openMaternal(event_id).then(function(rslt){
@@ -340,21 +332,22 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
         };
         reload();
     }])
-.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', function ($scope, $modal, RisarApi) {
-    var params = aux.getQueryParams(window.location.search);
-    var event_id = params.event_id;
-    $scope.checkup = {};
+.controller('InspectionFetusViewCtrl', ['$scope', '$modal', '$controller', 'RisarApi',
+    function ($scope, $modal, $controller, RisarApi) {
+        var params = aux.getQueryParams(window.location.search);
+        var event_id = params.event_id;
+        $controller('commonPrintCtrl', {$scope: $scope});
+        $scope.checkup = {};
+        var reload = function () {
+            RisarApi.chart.get_header(event_id).
+                then(function (data) {
+                    $scope.header = data.header;
+                });
+            RisarApi.fetus.get_fetus_list(event_id)
+                .then(function (checkup) {
+                    $scope.checkup = checkup;
+                });
+        };
 
-    var reload = function () {
-        RisarApi.chart.get_header(event_id).
-            then(function (data) {
-                $scope.header = data.header;
-            });
-        RisarApi.fetus.get_fetus_list(event_id)
-            .then(function (checkup) {
-                $scope.checkup = checkup;
-            });
-    };
-
-    reload();
+        reload();
 }]);

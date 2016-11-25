@@ -39,3 +39,15 @@ def get_pregnancy_start_date(event):
     if isinstance(start_date, datetime.datetime):
         start_date = start_date.date()
     return start_date
+
+
+def get_pregnancy_week_for_ultrasonography(start_date, dt=None):
+    if start_date:
+        if isinstance(start_date, (datetime.date, datetime.datetime)):
+            dt = dt or datetime.date.today()
+            if isinstance(dt, datetime.datetime):
+                dt = dt.date()
+            res = (dt - start_date).days / 7
+            if res > 0:
+                return res
+    return 0

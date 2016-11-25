@@ -1,19 +1,88 @@
 'use strict';
 
-var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, EventMeasureService) {
-    $scope.selectAll = false;
+var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService, EventMeasureService,
+        RefBookService) {
     $scope.checkboxes = {};
+    var viewMode = 'grouped';
     var cancelled_statuses = ['cancelled', 'cancelled_invalid', 'cancelled_dupl',
         'cancelled_changed_data', 'overdue'];
 
-    $scope.toggleSelection = function () {
-        $scope.selectAll = !$scope.selectAll;
+    $scope.setViewMode = function (vm) {
+        viewMode = vm;
+    };
+    $scope.isGroupedView = function () {
+        return viewMode === 'grouped';
+    };
+    $scope.isListedView = function () {
+        return viewMode === 'listed';
+    };
+
+    $scope.toggleSelection = function (group) {
+        var enabled = !$scope.checkSelectedAll(group);
         _.map($scope.checkup.measures, function (em) {
-            if ( $scope.canSelectEMAppointment(em) ) {
-                $scope.checkboxes[em.data.id] =  $scope.selectAll;
+            if ($scope.canSelectEMAppointment(em)) {
+                $scope.checkboxes[em.data.id] = enabled;
             }
         });
     };
+    $scope.toggleByStatus = function (group, status) {
+        var enabled = !$scope.checkSelectedByStatus(group, status);
+        angular.forEach($scope.grouped[group][status], function (list, mcode) {
+            $scope.toggleByMeasure(group, status, mcode, enabled);
+        });
+    };
+    $scope.toggleByMeasure = function (group, status, mcode, enabled) {
+        var enabled = enabled !== undefined ?
+            enabled :
+            !$scope.checkSelectedByMeasure (group, status, mcode);
+        $scope.grouped[group][status][mcode].forEach(function (em) {
+            if ($scope.canSelectEMAppointment(em)) {
+                $scope.checkboxes[em.data.id] = enabled;
+            }
+        });
+    };
+    $scope.checkSelectedByStatus = function (group, status) {
+        var mcodes = $scope.grouped[group] && _.keys($scope.grouped[group][status]);
+        return mcodes && (
+            mcodes.every(function (mcode) {
+                return (
+                    // can't be selected at all
+                    !$scope.canSelectMeasureGroup(group, status, mcode) ||
+                    // or all selected
+                    $scope.checkSelectedByMeasure(group, status, mcode)
+                );
+            })
+        );
+    };
+    $scope.checkSelectedByMeasure = function (group, status, mcode) {
+        return $scope.grouped[group] &&
+            $scope.grouped[group][status][mcode].every(function (em) {
+                return Boolean($scope.checkboxes[em.data.id]);
+            });
+    };
+    $scope.checkSelectedAll = function (group) {
+        if (group !== undefined) {
+            return $scope.grouped[group] &&
+                _.keys($scope.grouped[group])
+                .every(function (status) {
+                    return $scope.checkSelectedByStatus(group, status);
+                });
+        } else {
+            return $scope.checkup.measures &&
+                $scope.checkup.measures.every(function (em) {
+                    return Boolean($scope.checkboxes[em.data.id]) || !$scope.canSelectEMAppointment(em);
+                });
+        }
+    };
+    $scope.canSelectMeasureGroup = function (group, status, mcode) {
+        return $scope.canSelectEMAppointment($scope.grouped[group][status][mcode][0])
+    };
+    $scope.canSelectEMAppointment = function (em) {
+        return em.access.can_edit_appointment && (
+            em.data.id || !cancelled_statuses.has(em.data.status.code)
+        );
+    };
+
     $scope.printButtonActive = function () {
         return _.any(_.values($scope.checkboxes));
     };
@@ -31,7 +100,30 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.viewEventMeasure = function (idx) {
         var em = $scope.checkup.measures[idx];
-        EMModalService.openView(em.data);
+        EMModalService.openView(em, {'display_new_appointment': true}).then(function (action) {
+            switch (action) {
+                case 'execute':
+                    $scope.executeEm(idx);
+                    break;
+                case 'cancel':
+                    $scope.cancelEm(idx);
+                    break;
+                case 'new_appointment':
+                    $scope.newAppointment(em, $scope.checkup, $scope.header);
+                    break;
+                case 'delete':
+                    $scope.deleteEm(idx);
+                    break;
+                case 'restore':
+                    $scope.restoreEm(idx);
+                    break;
+                default:
+                    EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.checkup.measures.splice(idx, 1, upd_em);
+                        });
+            }
+        });
     };
     $scope.executeEm = function (idx) {
         var em = $scope.checkup.measures[idx];
@@ -119,11 +211,6 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     $scope.canEditEmAppointment = function (em) {
         return em.access.can_edit_appointment;
     };
-    $scope.canSelectEMAppointment = function (em) {
-        return em.access.can_edit_appointment && (
-            em.data.id || !cancelled_statuses.has(em.data.status.code)
-        );
-    };
     $scope.canEditEmResult = function (em) {
         return em.access.can_edit_result;
     };
@@ -185,8 +272,92 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
                 });
         }
     };
+
+    // init and refresh data
+    var status_order = ['created', 'assigned','waiting', 'upon_med_indications', 'overdue', 'performed',
+        'cancelled', 'cancelled_dupl', 'cancelled_changed_data', 'cancelled_invalid'],
+        measure_types = ['lab_test', 'func_test', 'checkup', 'hospitalization'],
+        recommend_types = ['healthcare', 'social_preventiv'];
+    $scope.grouped = {
+        listed: {},
+        measures: {},
+        recommendations: {},
+        statuses: [],
+        measures_types_info: [],
+        recommend_types_info: []
+    };
+    var refreshGroupedData = function (measure_list) {
+        var measure_types_info = {},
+            recommend_types_info = {};
+        $scope.grouped.measures = {};
+        $scope.grouped.recommendations = {};
+        $scope.grouped.measures_types_info = [];
+        $scope.grouped.recommend_types_info = [];
+        // measure_list is sorted by begDateTime ASC
+        angular.forEach(measure_list, function (em, idx) {
+            var status_code = em.data.status.code,
+                type_code = em.data.measure.measure_type.code,
+                m_code = em.data.measure.code;
+
+            $scope.grouped.listed[em.data.id] = idx;
+
+            if (measure_types.has(type_code)) {
+                if (!$scope.grouped.measures[status_code]) $scope.grouped.measures[status_code] = {};
+                if (!$scope.grouped.measures[status_code][m_code]) $scope.grouped.measures[status_code][m_code] = [];
+                $scope.grouped.measures[status_code][m_code].push(em);
+                if (!measure_types_info[m_code]) measure_types_info[m_code] = {
+                    min_date: null,
+                    max_date: null,
+                    name: em.data.measure.name,
+                    code: em.data.measure.code
+                };
+                measure_types_info[m_code].min_date = !measure_types_info[m_code].min_date || moment(em.data.beg_datetime)
+                    .isBefore(moment(measure_types_info[m_code].min_date)) ? em.data.beg_datetime : measure_types_info[m_code].min_date;
+                measure_types_info[m_code].max_date = !measure_types_info[m_code].max_date || moment(em.data.end_datetime)
+                    .isAfter(moment(measure_types_info[m_code].max_date)) ? em.data.end_datetime : measure_types_info[m_code].max_date;
+            }
+            if (recommend_types.has(type_code)) {
+                if (!$scope.grouped.recommendations[status_code]) $scope.grouped.recommendations[status_code] = {};
+                if (!$scope.grouped.recommendations[status_code][m_code]) $scope.grouped.recommendations[status_code][m_code] = [];
+                $scope.grouped.recommendations[status_code][m_code].push(em);
+                if (!recommend_types_info[m_code]) recommend_types_info[m_code] = {
+                    min_date: null,
+                    max_date: null,
+                    name: em.data.measure.name,
+                    code: em.data.measure.code
+                };
+                recommend_types_info[m_code].min_date = !recommend_types_info[m_code].min_date || moment(em.data.beg_datetime)
+                    .isBefore(moment(recommend_types_info[m_code].min_date)) ? em.data.beg_datetime : recommend_types_info[m_code].min_date;
+                recommend_types_info[m_code].max_date = !recommend_types_info[m_code].max_date || moment(em.data.end_datetime)
+                    .isAfter(moment(recommend_types_info[m_code].max_date)) ? em.data.end_datetime : recommend_types_info[m_code].max_date;
+            }
+        });
+        angular.forEach(measure_types_info, function (info, code) {
+            $scope.grouped.measures_types_info.push(info);
+        });
+        angular.forEach(recommend_types_info, function (info, code) {
+            $scope.grouped.recommend_types_info.push(info);
+        });
+    };
+
+    $scope.rbMeasureType = RefBookService.get('MeasureType');
+    $scope.rbMeasureStatus = RefBookService.get('MeasureStatus');
+    $scope.$on('checkupLoaded', function () {
+        $q.all([$scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading])
+            .then(function () {
+                $scope.$watchCollection('checkup.measures', function (n, o) {
+                    if (!angular.equals(n, o)) {
+                        refreshGroupedData(n);
+                    }
+                });
+                refreshGroupedData($scope.checkup.measures);
+                angular.forEach(status_order, function (code) {
+                    $scope.grouped.statuses.push($scope.rbMeasureStatus.get_by_code(code));
+                });
+            });
+    })
 };
 
 
-WebMis20.controller('EventMeasureActionViewCtrl', ['$scope', 'RisarApi', 'EMModalService', 'EventMeasureService',
-    EventMeasureActionViewCtrl]);
+WebMis20.controller('EventMeasureActionViewCtrl', ['$scope', '$q', 'RisarApi', 'EMModalService',
+    'EventMeasureService', 'RefBookService', EventMeasureActionViewCtrl]);

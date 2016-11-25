@@ -221,6 +221,12 @@ def api_patient_save():
             sstat = add_or_update_soc_status(client, ss)
             db.session.add(sstat)
 
+    ss_info = client_data.get('priviliges')
+    if ss_info:
+        for ss in ss_info:
+            sstat = add_or_update_soc_status(client, ss)
+            db.session.add(sstat)
+
     relation_info = client_data.get('relations')
     if relation_info:
         for relation in relation_info:

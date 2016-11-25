@@ -116,10 +116,32 @@ def api_checkup_obs_second_delete(api_version, card_id, exam_obs_id):
             u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
         )
 
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/second/<int:exam_obs_id>/ticket25')
 @api_method(hook=hook)
 def api_checkup_obs_second_ticket25_get(api_version, card_id, exam_obs_id):
     xform = CheckupObsSecondTicket25XForm(api_version)
     xform.check_params(exam_obs_id, card_id)
     xform.find_ticket25()
+    return xform.as_json()
+
+
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/obs/second/<int:exam_obs_id>/ticket25', methods=['PUT'])
+@api_method(hook=hook)
+def api_checkup_obs_second_ticket25_save(api_version, card_id, exam_obs_id):
+    data = request.get_json()
+    xform = CheckupObsSecondTicket25XForm(api_version)
+    xform.check_params(exam_obs_id, card_id)
+    xform.update_target_obj(data)
+    xform.store()
+    try:
+        xform.reevaluate_data()
+        xform.store()
+    except Exception, e:
+        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
+        return RawApiResult(
+            xform.as_json(),
+            card_attrs_save_error_code,
+            u'Талон сохранён, но произошла ошибка при пересчёте атрибутов карты'
+        )
     return xform.as_json()

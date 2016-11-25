@@ -68,7 +68,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var EMResultModalCtrl = function ($scope, $q, RisarApi, RefBookService, Upload, WMAction,
+var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookService, Upload, WMAction,
                                   PrintingService, PrintingDialog, MessageBox, WMConfig, EventMeasureService,
                                   CurrentUser, event_measure, em_result) {
     $scope.action_attach_type_id = null;
@@ -111,6 +111,7 @@ var EMResultModalCtrl = function ($scope, $q, RisarApi, RefBookService, Upload, 
                     data
                 ).
                     then(function (action) {
+
                         _saved = true;
                         $scope.action.merge(action);
                         event_measure.data.result_action_id = action.id;
@@ -122,6 +123,7 @@ var EMResultModalCtrl = function ($scope, $q, RisarApi, RefBookService, Upload, 
                                 return EventMeasureService.get_em_result(event_measure)
                                     .then(function (action) {
                                         $scope.action.merge(action);
+                                        $rootScope.$broadcast('mayBeUziSrokChanged');
                                     })
                             });
                     });

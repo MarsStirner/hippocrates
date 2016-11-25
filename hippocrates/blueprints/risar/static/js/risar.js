@@ -46,7 +46,7 @@ WebMis20
     };
     this.search_event = {
         get: function (query) {
-            return wrapper('POST', Config.url.api_event_search, {}, query)
+            return wrapper('POST', Config.url.api_event_search, {}, query);
         },
         print: function (query) {
             self.file_get('POST', Config.url.api_event_print, query);
@@ -62,6 +62,12 @@ WebMis20
         },
         lpu_doctors_list: function (orgs) {
             return wrapper('POST', Config.url.api_event_search_lpu_doctors_list, {}, {orgs: orgs})
+        },
+        openExtendedSearch: function (args, external) {
+            $window.open(Config.url.search_html + '?' + $.param(args), external ? '_blank' : '_self');
+        },
+        getExtendedSearchUrl: function (args) {
+            return Config.url.search_html + '?' + $.param(args);
         }
     };
     this.search_event_ambulance = {
@@ -135,7 +141,12 @@ WebMis20
                 return event;
             })
         }
-
+        this.take_control = function(event_id) {
+          return wrapper('POST', Config.url.api_chart_control.format('take_control', event_id, ''));
+        };
+        this.remove_control = function(event_id) {
+           return wrapper('POST', Config.url.api_chart_control.format('remove_control', event_id, ''));
+        };
         this.get_header = function (event_id) {
             return wrapper('GET', urls.header.format(event_id));
         };
@@ -143,33 +154,34 @@ WebMis20
             return wrapper('DELETE', urls.delete.format(ticket_id));
         };
         this.close_event = function (event_id, data, edit_callback, cancel_callback) {
+            var show_notify = !data.cancel;
             return wrapper(
                 'POST', urls.close.format(event_id), {}, data
             ).then(function (data) {
-                var notify_id = NotificationService.notify(
-                    200,
-                    [
-                        'Случай беременности закрыт. ',
-                        {
-                            click: function () {
-                                edit_callback(data);
-                                close_notify();
-                            },
-                            text: 'Изменить'
-                        }, ' ',
-                        {
-                            click: function () {
-                                cancel_callback(data);
-                                close_notify();
-                            },
-                            text: 'Отменить'
-                        }
-                    ],
-                    'success'
-                );
                 var close_notify = function() {
                     NotificationService.dismiss(notify_id);
                 };
+                if (show_notify) {
+                    var notify_id = NotificationService.notify(
+                        200,
+                        [
+                            'Случай беременности закрыт. ',
+                            {
+                                click: function () {
+                                    edit_callback(data).then(close_notify);
+                                },
+                                text: 'Изменить'
+                            }, ' ',
+                            {
+                                click: function () {
+                                    cancel_callback(data).then(close_notify);
+                                },
+                                text: 'Отменить'
+                            }
+                        ],
+                        'success'
+                    );
+                }
             })
         };
         this.get = function (event_id, ticket_id, client_id, gyn_event_id) {
@@ -431,6 +443,9 @@ WebMis20
             }
             return wrapper('GET', url, args);
         },
+        get_info: function (event_measure_id) {
+            return wrapper('GET', Config.url.api_event_measure_get_info.format(event_measure_id))
+        },
         save_list: function (event_id, data) {
             return wrapper('POST', Config.url.api_event_measure_save_list.format(event_id), {}, data);
         },
@@ -604,6 +619,11 @@ WebMis20
         },
         urgent_errands: function() {
             return wrapper('GET', Config.url.api_stats_urgent_errands)
+        },
+        controlled_events: function(curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_controlled_events, {
+                curation_level_code: curation_level_code
+            })
         }
     };
     this.card_fill_rate = {
@@ -647,8 +667,8 @@ WebMis20
         }
     };
     this.partal_nursing = {
-        save: function(flatcode, event_id, data) {
-            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, data.id||''), {event_id: event_id}, data);
+        save: function(pp_id, flatcode, event_id, data) {
+            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, pp_id||''), {event_id: event_id}, data);
         },
         get: function(flatcode, nursing_id, event_id) {
             return wrapper('GET', Config.url.api_partal_nursing.format(flatcode, nursing_id), {event_id: event_id});
@@ -705,6 +725,30 @@ WebMis20
             return wrapper('GET', Config.url.api_ambulance.format(event_id));
         }
     };
+}]);
+WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService', 'ErrandModalService',
+function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
+
+    $scope.create_errand = function () {
+        var errand = {
+            event_id: $scope.header.event.id,
+            set_person: CurrentUser.info,
+            communications: '',
+            exec_person: $scope.header.event.person,
+            event: {external_id: $scope.header.event.external_id},
+            status: $scope.rbErrandStatus.get_by_code('waiting')
+        };
+
+        RisarApi.utils.get_person_contacts(errand.set_person.id).then(function (contacts) {
+            errand.communications = contacts;
+            ErrandModalService.openNew(errand, true)
+                .then()
+        });
+    };
+    $scope.init = function () {
+        $scope.rbErrandStatus = RefBookService.get('ErrandStatus');
+    };
+    $scope.init();
 }])
 .service('UserErrand', [
         'Simargl', 'RisarApi', 'ApiCalls', 'Config', 'OneWayEvent',
@@ -1081,6 +1125,56 @@ WebMis20
                     };
                 }
             }
+        }
+    }
+}])
+.directive('clickAndGo', ["$window", function ($window) {
+        return {
+            scope: {
+                uri: '@'
+            },
+            link: function (scope, element, attrs) {
+                element.bind('click', function(e) {
+                    scope.$apply(function() {
+                        $window.open(attrs.uri, '_self');
+                    });
+                });
+
+            }
+        }
+}])
+.directive('wmBtnControlEvent', ['RisarApi', 'NotificationService', function (RisarApi, NotificationService) {
+    return {
+        restrict: 'E',
+        scope: {
+            eventId: '=',
+            isControlled: '='
+        },
+        template: '\
+<a href="javascript:void(0);" ng-click="toggle()"\
+    tooltip="[[isControlled ? \'Карта взята на контроль\' : \'Взять карту на контроль\']]">\
+    <i class="fa text-yellow" ng-class="{\'fa-star\': isControlled, \'fa-star-o\': !isControlled}"></i>\
+</a>',
+        link: function (scope, iElement, iAttr) {
+            scope.toggle = function () {
+                if (scope.isControlled) {
+                    RisarApi.chart.remove_control(scope.eventId)
+                        .then(function (result) {
+                            scope.isControlled = result.controlled;
+                            NotificationService.notify(200,
+                                'Пациентка снята с контроля',
+                                'info', 5000);
+                        });
+                } else {
+                    RisarApi.chart.take_control(scope.eventId)
+                        .then(function (result) {
+                            scope.isControlled = result.controlled;
+                            NotificationService.notify(200,
+                                'Пациентка взята на контроль',
+                                'info', 5000);
+                        });
+                }
+            };
         }
     }
 }])

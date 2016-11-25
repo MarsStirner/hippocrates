@@ -89,7 +89,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
                 'end_datetime': data['end_datetime'],
                 'event_id': self.parent_obj_id,
                 'measure_id': measure_id,
-                'status': {'id': self.rb_validate(rbMeasureStatus, data['status'], 'code')},
+                'status': {'id': self.rb(rbMeasureStatus, data['status'], 'code')[0]},
             }
         }]
         em_list = em_ctrl.save_list(event, em_data)

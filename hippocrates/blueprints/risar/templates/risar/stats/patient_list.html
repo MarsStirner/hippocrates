@@ -34,8 +34,8 @@
                                      'label-success': row.risk_rate.code == 'low',
                                      'label-warning': row.risk_rate.code == 'medium',
                                      'label-danger': row.risk_rate.code == 'high'}">[[ row.risk_rate.name ]]</span></td>
-                <td><a ng-href="{{ url_for('.html_auto_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[
-                    row.client.full_name ]]</a></td>
+                <td><a ng-href="{{ url_for('.html_auto_chart') }}?ticket_id=[[ row.client_ticket_id ]]&ticket_type=[[ row.ticket_type ]]">
+                    [[ row.client.full_name ]]</a></td>
                 <td>[[ row.pregnancy_week ]]<i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
                 <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>
             </tr>

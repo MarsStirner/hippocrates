@@ -488,3 +488,18 @@ def close_open_partal_nursing(event_id, flatcode):
     if flatcode == 'prepartal_nursing_repeat':
         flatcode = ['prepartal_nursing', 'prepartal_nursing_repeat']
     close_open_actions(event_id, flatcode)
+
+
+def get_apt_from_at(at, codes=None):
+    qr = at.property_types.filter(
+        ActionPropertyType.deleted == 0
+    )
+    if codes:
+        if not isinstance(codes, (list, tuple, set)):
+            codes = [codes]
+        qr = qr.filter(
+            ActionPropertyType.code.in_(codes),
+        )
+    return qr.order_by(
+        ActionPropertyType.idx
+    )

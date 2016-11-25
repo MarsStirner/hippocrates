@@ -24,9 +24,10 @@ from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPro
 from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
     Diagnosis, Diagnostic, Action_Diagnosis
 from nemesis.models.event import Event, EventType
+from nemesis.models.client import Client
 from nemesis.models.exists import rbRequestType
 from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
-from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+from nemesis.models.person import Person, PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
@@ -124,7 +125,7 @@ def api_0_recent_charts():
     boundary_date = datetime.datetime.now() - datetime.timedelta(days=7)
     curation_level = request.args.get('curation_level')
 
-    query = Event.query.join(EventType, rbRequestType)\
+    query = Event.query.join(EventType, rbRequestType, Client)\
         .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None),
                 Event.setDate >= boundary_date)
 
@@ -155,11 +156,12 @@ def api_0_recently_modified_charts():
     curation_level = j.get('curation_level')
     risk_rate = j.get('risk_rate')
 
-    query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+    query = Event.query.join(EventType, rbRequestType, Client, Action, ActionType,
+                             ActionProperty, ActionPropertyType,
                              ActionProperty_Integer)\
-        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None), Action.deleted == 0,
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None),
+                Action.deleted == 0, ActionProperty.deleted == 0,
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
-                ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_(risk_rate))
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
@@ -263,7 +265,6 @@ def api_0_stats_perinatal_risk_rate():
     where = [ActionType.flatCode == 'cardAttributes',
              ActionPropertyType.code == 'prenatal_risk_572',
              rbRequestType.code == request_type_pregnancy,
-             Action.event_id == Event.id,
              ActionProperty.action_id == Action.id,
              ActionPropertyType.id == ActionProperty.type_id,
              ActionType.id == Action.actionType_id,
@@ -272,13 +273,20 @@ def api_0_stats_perinatal_risk_rate():
              rbRequestType.id == EventType.requestType_id,
              Event.deleted == 0,
              Action.deleted == 0]
-    from_obj = Event.__table__.join(EventType).join(rbRequestType).join(Action).join(ActionType)\
+    from_obj = Event.__table__.join(EventType).join(rbRequestType).join(Client).join(
+        Person, Event.execPerson_id == Person.id
+    ).join(
+        Action, Action.event_id == Event.id
+    ).join(ActionType)\
         .join(ActionProperty).join(ActionPropertyType).outerjoin(ActionProperty_Integer)
 
     if curation_level:
-        from_obj.join(Organisation).join(OrganisationCurationAssoc).join(PersonCurationAssoc).join(rbOrgCurationLevel)
+        from_obj.join(
+            Organisation, Person.org_id == Organisation.id
+        ).join(OrganisationCurationAssoc).join(PersonCurationAssoc).join(rbOrgCurationLevel)
         where.extend([
-            Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
+            Person.org_id == Organisation.id,
+            OrganisationCurationAssoc.org_id == Organisation.id,
             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
             PersonCurationAssoc.person_id == person_id,
             PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id,
@@ -328,7 +336,7 @@ def api_0_death_stats():
             Action.deleted == 0
         ),
         from_obj=(
-            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+            Event, EventType, rbRequestType, Client, Action, ActionType, ActionProperty, ActionPropertyType,
             ActionProperty_Integer
         ))
     for (id, value) in db.session.execute(selectable):  # 0-dead, 1-alive
@@ -357,7 +365,7 @@ def api_0_death_stats():
                     Action.id.in_(result[value])
                 ),
                 from_obj=(
-                    Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+                    Event, EventType, rbRequestType, Client, Action, ActionType, ActionProperty, ActionPropertyType,
                     ActionProperty_Date
                 ))
             result1[value].append([i, db.session.execute(selectable1).rowcount])
@@ -383,7 +391,7 @@ def api_0_death_stats():
         return res
 
     for i in range(1, 13):
-        actions = Action.query.join(Event, EventType, rbRequestType, ActionType, ActionProperty,
+        actions = Action.query.join(Event, EventType, rbRequestType, Client, ActionType, ActionProperty,
                                    ActionPropertyType, ActionProperty_Date)\
             .filter(ActionType.flatCode == 'epicrisis',
                     ActionPropertyType.code == 'death_date',
@@ -431,7 +439,7 @@ def api_0_pregnancy_final_stats():
             func.year(ActionProperty_Date.value) == now.strftime('%Y')
         ),
         from_obj=(
-            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+            Event, EventType, rbRequestType, Client, Action, ActionType, ActionProperty, ActionPropertyType,
             ActionProperty_Date
         ))
     for (id, ) in db.session.execute(selectable):
@@ -494,7 +502,8 @@ def api_0_stats_pregnancy_pathology():
 @api_method
 def api_0_stats_urgent_errands():
     person_id = safe_current_user_id()
-    errands = Errand.query.join(rbErrandStatus, Event, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer)\
+    errands = Errand.query.join(rbErrandStatus, Event, Client,
+                                Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer)\
         .filter(Errand.execPerson_id == person_id, rbErrandStatus.code.in_(['waiting', 'expired']),
                 ActionType.flatCode == 'cardAttributes',
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,)\
@@ -537,4 +546,18 @@ def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
 
     cfr_ctrl = CFRController()
     data = cfr_ctrl.get_card_fill_rates_doctor_overview(curator_id, curation_level)
+    return data
+
+
+@module.route('/api/0/stats/controlled_events/')
+@module.route('/api/0/stats/controlled_events/<int:person_id>')
+@api_method
+def api_0_stats_controlled_events(person_id=None):
+    if not person_id:
+        person_id = safe_current_user_id()
+    args = request.args.to_dict()
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_controlled_events(person_id, curation_level)
     return data

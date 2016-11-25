@@ -6,7 +6,7 @@
 
 {% block main %}
 <div ng-controller="CheckupFirstEditCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.page_title_n('Повторный осмотр') }}
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
@@ -172,6 +172,11 @@
                                     <div class="col-sm-6 col-md-6  text-right">Срок беременности:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_week]]</div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Срок по последнему УЗИ:</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason :'Нет данных УЗИ для расчета']]</div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Возможность сохранения беременности:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation ? 'да': 'нет']]</div>

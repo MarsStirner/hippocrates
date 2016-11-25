@@ -5,7 +5,7 @@
 
 {% block main %}
 <div ng-controller="PregnancyChartCtrl" ng-cloak>
-    <section class="content-header">
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
         <div alert-notify></div>
         {{ rimacros.page_title_ext_n('Карта пациентки', 'chart') }}
         {{ rimacros.navigation('[[ chart.id ]]', undefined, 'chart') }}
@@ -17,6 +17,7 @@
                     <div class="box-header">
                         <h3 class="box-title">Личные данные</h3>
                     </div>
+
                     <table class="table table-condensed table-personal-data">
                         <tbody>
                         <tr>
@@ -315,7 +316,7 @@
                     </table>
                 </div>
                 <div class="box box-primary">
-                    <div class="box-header"><h3 class="box-title">Мероприятия случая (<a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3></div>
+                    <div class="box-header"><h3 class="box-title">План ведения беременности (<a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">подробнее</a>)</h3></div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
@@ -395,7 +396,6 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/maternal_cert.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/edit_epicrisis.html">{% include 'risar/modals/_modal_epicrisis.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/maternal_cert.html">{% include 'risar/modals/_modal_matcert.html' %}</script>

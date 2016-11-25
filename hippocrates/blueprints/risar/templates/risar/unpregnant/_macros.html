@@ -19,7 +19,7 @@
             </div>
             {#  <a ng-href="{{ url_for('.html_concilium_list') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_concilium_list', '.html_concilium']) }}>Консилиумы</a> #}
             <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-            <a ng-class="{hidden: '{{ ext_header }}' != 'chart'}" ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
+            <a ng-click="create_errand()" class="btn btn-default">Создать поручение</a>
             {% if card and card.latest_pregnancy_event %}
             <a class="btn btn-default" href="{{ url_for('.html_pregnancy_chart', event_id=card.latest_pregnancy_event.id) }}">
                 Открыть текущую карту беременной</a>
@@ -53,6 +53,9 @@
     {{ title }}
     ([[ header.event.external_id ]])
     <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+    {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+    <wm-btn-control-event event-id="header.event.id" is-controlled="header.event.is_controlled"></wm-btn-control-event>
+    {% endif %}
 </h1>
 <div class="row vmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
@@ -77,6 +80,9 @@
         {{ title }}
         ([[ header.event.external_id ]])
         <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+        {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+        <wm-btn-control-event event-id="header.event.id" is-controlled="header.event.is_controlled"></wm-btn-control-event>
+        {% endif %}
     </h1>
     </div>
     <div class="col-md-4 col-lg-4 col-sm-12">

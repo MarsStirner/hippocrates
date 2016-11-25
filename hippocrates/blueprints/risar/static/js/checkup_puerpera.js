@@ -53,11 +53,13 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             RisarApi.checkup_puerpera.create(event_id, 'risarPuerperaCheckUp').
             then(function (checkup) {
                 $scope.checkup = checkup;
+                $scope.$broadcast('checkupLoaded');
             });
         } else {
             RisarApi.checkup_puerpera.get(checkup_id)
                 .then(function (checkup) {
                     $scope.checkup = checkup;
+                    $scope.$broadcast('checkupLoaded');
                 });
         }
     };

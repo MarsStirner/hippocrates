@@ -54,19 +54,18 @@
         <div class="col-sm-6 col-md-6 text-right">Неотложная:</div>
         <div class="col-sm-6 col-md-6">[[checkup.ticket_25.urgent ? 'да': 'нет']]</div>
     </div>
-        <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Профиль медицинской помощи:</div>
-            <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.ticket_25.prof_med_help"></span></div>
-        </div>
     <div class="row">
-        <div class="col-sm-6 col-md-6 text-right">Исход заболевания:</div>
-        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.ache_result.name"></span></div>
+        <div class="col-sm-6 col-md-6 text-right">Профиль медицинской помощи:</div>
+        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.prof_med_help.name"></span></div>
     </div>
-     <div class="row">
+    <div class="row">
+        <div class="col-sm-6 col-md-6 text-right">Условия оказания медицинской помощи:</div>
+        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.condit_med_help.name"></span></div>
+    </div>
+    <div class="row">
         <div class="col-sm-6 col-md-6 text-right">&nbsp;<br></div>
         <div class="col-sm-6 col-md-6"></div>
-     </div>
-
+    </div>
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right"><b>Медицинская услуги</b></div>
             <div class="col-sm-6 col-md-6"></div>

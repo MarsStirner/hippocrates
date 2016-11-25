@@ -7,7 +7,7 @@
     </div>
     <div class="box-body">
         <div class="progress-group" ng-repeat="lpu_stats in stats_data">
-            <span class="progress-text" ng-bind="lpu_stats.org_name"></span>
+            <a href="[[getExtendedSearchUrl(lpu_stats.org_id)]]" class="text-black"><span class="progress-text" ng-bind="lpu_stats.org_name"></span></a>
             <span class="progress-number"><b ng-bind="lpu_stats.cfr_not_filled"></b></span>
             <div class="progress sm">
               <div class="progress-bar progress-bar-danger" style="width: [[ lpu_stats.fill_pct ]]%"></div>

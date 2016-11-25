@@ -1,0 +1,157 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+{%- block modules_css %}
+    {{ super() }}
+    <style type="text/css">
+       .box.box-primary {
+            line-height: 1.5em;
+            font-size: 110%;
+        }
+
+    </style>
+{% endblock -%}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+{% set flat_code = template_data.flatcode %}
+
+<div ng-controller="PartalNursingEditCtrl" ng-cloak  >
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
+         {%- set right_word =  dict((('postpartal_nursing', 'послеродового'),
+                                                    ('prepartal_nursing', 'дородового'),
+                                                    ('prepartal_nursing_repeat', 'дородового'))).get(flat_code) -%}
+        {{ rimacros.page_title_n('Ввод данных '+right_word+' патронажа') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="tab-content">
+                        <form class="tab-pane active" id="common" name="commonForm" novalidate>
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header">
+                                <h3 class="box-title">&nbsp;</h3>
+                            </div>
+                            <div class="box-body">
+                                <table class="table table-condensed">
+                                    <tbody>
+
+                <tr>
+                    <td class="text-right col-md-4">Дата проведения</td>
+                    <td class="col-md-8">
+                        <wm-date name="date"
+                                 ng-model="pp_nursing.date" style="width: 250px" min-date="minDate" ></wm-date>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-right">Срок беременности</td>
+                    <td><div class="row">
+                        <div class="col-md-2">
+                            <input name="gestational_age" ng-model="pp_nursing.gestational_age" class="form-control" valid-number
+                                   maxlength="3" >
+                        </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr><td class="text-right">Выполнение рекомендованных мероприятий</td>
+                <td><div class="row">
+                        <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.arragements_completion"></div></div>
+                </td>
+                </tr>
+
+                <tr><td class="text-right">Изменение условий труда</td>
+                <td><div class="row">
+                        <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.conditions_of_work"></div></div>
+                </td>
+                </tr>
+
+                <tr><td class="text-right">Изменение условий быта</td>
+                <td><div class="row">
+                        <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.conditions_of_living"></div></div>
+                </td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">Режим <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.regimen" /></div></div></td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">Питание <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.nutrition" /></div></div></td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">Мероприятия по оздоровлению <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.corrective_measures" /></div></div></td>
+                </tr>
+
+                <tr><td class="text-right">Санация очагов инфекции</td>
+                <td><div class="row">
+                        <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.sanitation"></div></div>
+                </td>
+                </tr>
+
+                <tr><td class="text-right">Санитарно-гигиеническое состояние помещений</td>
+                <td><div class="row">
+                        <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.sanitary_condition"></div></div>
+                </td>
+                </tr>
+
+                <tr><td class="text-right">Подготовка к принятию новорождённого</td>
+                <td><div class="row">
+                        <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.newborn_acceptance_readiness"></div></div>
+                </td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">Прогноз гипогалактии <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.hypogalactia" /></div></div></td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">Прогноз группы риска ребёнка <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.child_risk" /></div></div></td>
+                </tr>
+
+                <tr>
+                    <td class="text-right">Рекомендации <span>&nbsp;</span></td>
+                    <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.recommendations" /></div></div></td>
+                </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="box-footer">
+                        <div class="col-md-offset-5 col-sm-offset-5">
+                            {% set right_word =  dict((('postpartal_nursing', 'послеродовых'),
+                                                    ('prepartal_nursing', 'дородовых'),
+                                                    ('prepartal_nursing_repeat', 'дородовых'))).get(flat_code) %}
+                            <a class="pseudo-btn" ng-href="{{ url_for('.html_partal_nursing', flatcode=template_data.flatcode) }}?event_id=[[ header.event.id ]]">Перейти на форму {{ right_word }} патронажей</a>
+                        <a class="btn btn-success" ng-click="save()"
+                           tooltip="[[$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script>
+        WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
+    </script>
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
+{% endblock %}

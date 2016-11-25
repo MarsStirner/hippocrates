@@ -19,7 +19,27 @@ var BaseMeasureListCtrl = function ($scope, EventMeasureService, EMModalService)
     };
     $scope.viewEventMeasure = function (idx) {
         var em = $scope.model.measure_list[idx];
-        EMModalService.openView(em.data);
+        EMModalService.openView(em).then(function (action) {
+            switch (action) {
+                case 'execute':
+                    $scope.executeEm(idx);
+                    break;
+                case 'cancel':
+                    $scope.cancelEm(idx);
+                    break;
+                case 'delete':
+                    $scope.deleteEm(idx);
+                    break;
+                case 'restore':
+                    $scope.restoreEm(idx);
+                    break;
+                default:
+                    EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.model.measure_list.splice(idx, 1, upd_em);
+                        });
+            }
+        });
     };
     $scope.executeEm = function (idx) {
         var em = $scope.model.measure_list[idx];
@@ -163,6 +183,7 @@ var EventMeasureListCtrl = function ($scope, $controller, $q, RisarApi, RefBookS
     $scope.resetFilters = function () {
         $scope.query = {
             checkups: [],
+            measure_list: [],
             measure_type: [],
             beg_date_from: null,
             beg_date_to: null,
@@ -239,6 +260,7 @@ var GynecolEventMeasureListCtrl = function ($scope, $controller, $q, RisarApi, R
     $scope.resetFilters = function () {
         $scope.query = {
             checkups: [],
+            measure_list: [],
             measure_type: [],
             beg_date_from: null,
             beg_date_to: null,
@@ -288,6 +310,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
         var query = {
             page: $scope.pager.current_page,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
+            measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             beg_date_from: $scope.query.beg_date_from ? moment($scope.query.beg_date_from).startOf('day').toDate() : undefined,
             beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
@@ -340,6 +363,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             paginate: false,
             beg_date_to: end.local().endOf('day').toDate(),
             end_date_from: start.local().startOf('day').toDate(),
+            measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined,

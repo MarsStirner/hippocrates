@@ -12,6 +12,7 @@ from hippocrates.blueprints.reports.jasper_client import JasperReport
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.represent.common import represent_age
 from hippocrates.blueprints.risar.lib.search import get_workgroupname_by_code
+from hippocrates.blueprints.risar.lib.chart import check_events_controlled
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int, safe_timestamp
@@ -20,6 +21,7 @@ from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person, rbRequestType
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
+from nemesis.models.utils import safe_current_user_id
 
 __author__ = 'mmalkov'
 
@@ -62,6 +64,8 @@ def quick_search_events(query_string, limit=20, **kwargs):
 def search_events(paginated=True, **kwargs):
     from nemesis.lib.sphinx_search import Search, SearchConfig
 
+    now = datetime.datetime.now()
+
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
         query = query.match(u'@name={0}'.format(escape_sphinx_query(kwargs['fio'])), raw=True)
@@ -78,7 +82,6 @@ def search_events(paginated=True, **kwargs):
                 ors.append(area_code[:2])
 
         query = query.filter(areas__in=ors)
-
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
     if 'doc_id' in kwargs:
@@ -91,8 +94,22 @@ def search_events(paginated=True, **kwargs):
         else:
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
+    if 'pathology' in kwargs:
+        pathology = kwargs['pathology']
+        if isinstance(kwargs['pathology'], basestring):
+            pathology = map(int, pathology.split(','))
+        query = query.filter(pathology_list_id__in=pathology)
     if 'request_types' in kwargs and kwargs['request_types']:
         query = query.filter(request_type_id__in=kwargs['request_types'])
+    if 'mkbs' in kwargs and kwargs['mkbs']:
+        if kwargs.get('closed_diags', False):
+            query = query.filter(diag_closed_mkb_ids__in=kwargs['mkbs'])
+        else:
+            query = query.filter(diag_mkb_ids__in=kwargs['mkbs'])
+    if 'preg_week_min' in kwargs:
+        query = query.filter(preg_week__gte=safe_int(kwargs['preg_week_min']))
+    if 'preg_week_max' in kwargs:
+        query = query.filter(preg_week__lte=safe_int(kwargs['preg_week_max']))
     if 'bdate_from' in kwargs:
         query = query.filter(bdate__gte=safe_timestamp(kwargs['bdate_from'],
                                                        for_date=True, to_int=True))
@@ -114,6 +131,27 @@ def search_events(paginated=True, **kwargs):
     elif ch_date_to:
         query = query.filter(checkups__lte=ch_date_to)
 
+    if 'latest_inspection_gt' in kwargs:
+        later_than_days = safe_int(kwargs['latest_inspection_gt'])
+        if later_than_days:
+            min_latest_date = safe_timestamp(now - datetime.timedelta(days=later_than_days),
+                                             for_date=True, to_int=True, wo_time=True)
+            query = query.filter(latest_checkup_date__lte=min_latest_date)
+
+    if 'epicrisis_delivery_date_gt' in kwargs:
+        later_than_days = safe_int(kwargs['epicrisis_delivery_date_gt'])
+        if later_than_days:
+            min_latest_date = safe_timestamp(now - datetime.timedelta(days=later_than_days),
+                                             for_date=True, to_int=True, wo_time=True)
+            query = query.filter(epicrisis_id__gt=0, epicrisis_delivery_date__lte=min_latest_date)
+
+    if 'risk_groups' in kwargs:
+        risk_groups = kwargs['risk_groups']
+        if not isinstance(risk_groups, (list, tuple)):
+            risk_groups = [risk_groups]
+        rg_ors = '|'.join(risk_groups)
+        query = query.match(u'@risk_group_codes {0}'.format(escape_sphinx_query(rg_ors)), raw=True)
+
     client_workgroup = kwargs.get('client_workgroup')
     if client_workgroup:
         work_code = client_workgroup.get('code')
@@ -131,6 +169,40 @@ def search_events(paginated=True, **kwargs):
             query = query.filter(exec_date__neq=0)
         else:
             query = query.filter(exec_date__eq=0)
+
+    card_fill = kwargs.get('card_fill')
+    if card_fill:
+        card_section = kwargs.get('card_section')
+        if card_section == 'card_completely':
+            query = query.filter(card_fill_rate__eq=card_fill)
+        elif card_section == 'anamnesis':
+            query = query.filter(card_fill_rate_anamnesis__eq=card_fill)
+        elif card_section == 'first_inspection':
+            query = query.filter(card_fill_rate_first_inspection__eq=card_fill)
+        elif card_section == 'repeated_inspection':
+            query = query.filter(card_fill_rate_repeated_inspection__eq=card_fill)
+        elif card_section == 'epicrisis':
+            query = query.filter(card_fill_rate_epicrisis__eq=card_fill)
+
+    overdue = kwargs.get('overdue')
+    if overdue == 'any':
+        query = query.filter(has_overdue__eq=1)
+    elif overdue == 'lab_test':
+        query = query.filter(has_overdue_lab_test__eq=1)
+    elif overdue == 'func_test':
+        query = query.filter(has_overdue_func_test__eq=1)
+    elif overdue == 'checkup':
+        query = query.filter(has_overdue_checkup__eq=1)
+    elif overdue == 'healthcare':
+        query = query.filter(has_overdue_healthcare__eq=1)
+    elif overdue == 'hospitalization':
+        query = query.filter(has_overdue_hospitalization__eq=1)
+    elif overdue == 'social_preventiv':
+        query = query.filter(has_overdue_social_preventiv__eq=1)
+
+    if kwargs.get('controlled_events', False):
+        current_user_id = safe_current_user_id()
+        query = query.filter(epc_persons__eq=current_user_id)
 
     if paginated:
         per_page = kwargs.get('per_page', 10)
@@ -205,6 +277,10 @@ def api_0_event_search():
 
     rbRT_cache = rbRequestType.cache().dict('id')
 
+    # controlled events
+    event_ids = [safe_int(item['id']) for item in result['result']['items']]
+    control_map = check_events_controlled(event_ids)
+
     return {
         'count': total,
         'total_pages': pages,
@@ -230,7 +306,13 @@ def api_0_event_search():
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
                     datetime.date.fromtimestamp(row['psdate'])
                 ).days / 7 + 1) if row['psdate'] else None,
-                'request_type': rbRT_cache.get(row['request_type_id'])
+                'request_type': rbRT_cache.get(row['request_type_id']),
+                'is_controlled': control_map.get(row['id'], False)
+                # test
+                # 'diag_mkbs': row['diag_mkbs'],
+                # 'diag_closed_mkbs': row['diag_closed_mkbs'],
+                # 'pweek': row['preg_week'],
+                # 'latest_checkup_date': datetime.date.fromtimestamp(row['latest_checkup_date']) if row['latest_checkup_date'] else None
             }
             for row in result['result']['items']
         ]
@@ -374,7 +456,8 @@ def api_0_area_curator_list():
         Person.lastName, Person.firstName, Person.patrName, rbOrgCurationLevel.name
     )
     return list(query.values(PersonCurationAssoc.id, Person.lastName, Person.firstName, Person.patrName,
-                             Person.id.label('person_id'), rbOrgCurationLevel.name))
+                             Person.id.label('person_id'), rbOrgCurationLevel.name,
+                             rbOrgCurationLevel.code.label('level_code')))
 
 
 @module.route('/api/0/curator_lpu_list.json', methods=['POST', 'GET'])

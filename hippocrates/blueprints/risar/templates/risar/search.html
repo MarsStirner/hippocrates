@@ -30,7 +30,7 @@
                     <ui-select multiple ng-model="query.curators" theme="select2" ng-change="refresh_organisations()" class="form-control"
                             ng-disabled="!canChangeCurator()">
                         <ui-select-match placeholder="Выберите кураторов">[[ $item.lastName + ' ' + $item.firstName + ', ' + $item.name ]]</ui-select-match>
-                        <ui-select-choices repeat="curator in curators | filter: {name: $select.search} | limitTo:50">
+                        <ui-select-choices repeat="curator in curators_filtered | filter: $select.search | limitTo:50">
                             <div ng-bind-html="curator.lastName + ' ' + curator.firstName + ', ' + curator.name | highlight: $select.search"></div>
                         </ui-select-choices>
                     </ui-select>
@@ -67,34 +67,75 @@
                     <label>Социальный статус</label>
                     <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>
                 </div>
-
                 <div class="form-group">
-
                     <label>Возраст</label>
-                    <div class="row center-block">
-                        <div class="input-group col-md-10">
-                            <span  class="input-group-addon" id="age_min">От</span>
-                            <input type="number" ng-model="query.age_min" class="form-control" min="1" max="90" placeholder="от" aria-describedby="age_min">
-                            <span  class="input-group-addon" id="age_max">До</span>
-                            <input type="number" ng-model="query.age_max" class="form-control" min="5" max="100" placeholder="до" aria-describedby="age_max">
+                    <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="age_min">От</span>
+                            <input type="number" ng-model="query.age_min" class="form-control" min="1" max="90">
                         </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="age_max">До</span>
+                            <input type="number" ng-model="query.age_max" class="form-control" min="5" max="100">
+                        </div>
+                    </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Степень риска</label>
-                    <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding"
-                         ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'">
+                    <label>Статус карт</label>
+                    <div fs-radio="" items="closed_items" ng-model="query.closed" class="nopadding">
                         [[ item.name ]]
+                    </div>
+                </div>
+                {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.controlled_events">Пациентки на контроле
+                    </label>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label>Степень риска</label>
+{#                    ng-disabled="!filterForPregCardsAvailable()"#}
+                    <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Группа риска</label>
+                    <rb-select multiple="true" ref-book="rbRisarRiskGroup" ng-model="query.risk_groups"
+                        ng-disabled="!filterForPregCardsAvailable()"></rb-select>
+                </div>
+                <div class="form-group">
+                    <label>Неделя беременности</label>
+                    <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="preg_week_min">От</span>
+                            <input type="number" ng-model="query.preg_week_min" class="form-control" min="1" max="50"
+                                ng-disabled="!filterForPregCardsAvailable()">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="preg_week_max">До</span>
+                            <input type="number" ng-model="query.preg_week_max" class="form-control" min="1" max="50"
+                                ng-disabled="!filterForPregCardsAvailable()">
+                        </div>
+                    </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Дата родов</label>
                     <div class="row">
                         <div class="col-md-6">
-                            <wm-date ng-model="query.bdate_from" ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'"></wm-date>
+                            <wm-date ng-model="query.bdate_from" ng-disabled="!filterForPregCardsAvailable()"></wm-date>
                         </div>
                         <div class="col-md-6">
-                            <wm-date ng-model="query.bdate_to" ng-disabled="query.request_types | pluck:'code' | contains:'gynecological'"
+                            <wm-date ng-model="query.bdate_to" ng-disabled="!filterForPregCardsAvailable()"
                                 min-date="query.bdate_from"></wm-date>
                         </div>
                     </div>
@@ -103,16 +144,69 @@
                     <label>Дата осмотра</label>
                     <div class="row">
                         <div class="col-md-6">
-                            <wm-date ng-model="query.checkup_date_from"></wm-date>
+                            <wm-date ng-model="query.checkup_date_from" ng-disabled="!filterForPregCardsAvailable()"></wm-date>
                         </div>
                         <div class="col-md-6">
-                            <wm-date ng-model="query.checkup_date_to" min-date="query.checkup_date_from"></wm-date>
+                            <wm-date ng-model="query.checkup_date_to" ng-disabled="!filterForPregCardsAvailable()"
+                                min-date="query.checkup_date_from"></wm-date>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Статус карт</label>
-                    <div fs-radio="" items="closed_items" ng-model="query.closed" class="nopadding">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Последний осмотр, дней назад</label>
+                            <input type="number" ng-model="query.latest_inspection_gt" class="form-control" valid-number min="1" max="500"
+                                ng-disabled="!filterForPregCardsAvailable()">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Прошло дней от родоразрешения</label>
+                            <input type="number" ng-model="query.epicrisis_delivery_date_gt" class="form-control" valid-number min="1" max="500"
+                                ng-disabled="!filterForPregCardsAvailable()">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Код МКБ</label>
+                    <wm-mkb-multiple ng-model="query.mkbs"></wm-mkb-multiple>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.closed_diags">Только закрытые диагнозы
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.overdue">Просроченные мероприятия
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Тип мероприятия</label>
+                    <ui-select ng-model="query.measure_type" theme="select2" class="form-control" ng-disabled="isMeasureTypeDisabled()">
+                        <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                        <ui-select-choices repeat="measure in rbMeasureType.objects">
+                            <div ng-bind-html="measure.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
+                    <label>Заполненность карты</label>
+                    <div fs-radio="" items="card_fill_rate" ng-model="query.card_fill" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Разделы карты</label>
+                    <ui-select ng-model="query.card_section" theme="select2" class="form-control" ng-disabled="isCardSectionDisabled()">
+                        <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                        <ui-select-choices repeat="section in card_sections">
+                            <div ng-bind-html="section.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="form-group">
+                    <label>Патология</label>
+                    <div fs-checkbox="" items="pathology_rb.objects" ng-model="query.pathology" class="nopadding">
                         [[ item.name ]]
                     </div>
                 </div>
@@ -145,6 +239,9 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
+                                {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+                                <th></th>
+                                {% endif %}
                                 <th>Риск</th>
                                 <th>№ карты</th>
                                 <th>ФИО</th>
@@ -160,6 +257,12 @@
                             </thead>
                             <tbody>
                             <tr ng-repeat="row in results">
+                                {% if user_profiles_mng.has_ui_overseers() or user_profiles_mng.has_ui_obstetrician() %}
+                                <td>
+                                    <wm-btn-control-event event-id="row.event_id" is-controlled="row.is_controlled"
+                                        ></wm-btn-control-event>
+                                </td>
+                                {% endif %}
                                 <td ng-switch="row.request_type.code" class="text-center">
                                     <span risk-rate-icon="row.risk" ng-switch-when="pregnancy"></span>
                                     <span ng-switch-default class="fa fa-minus text-gray"></span>

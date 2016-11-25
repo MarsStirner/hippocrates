@@ -9,7 +9,8 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, re
     first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, \
     puerpera_inspection_flat_code
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PregnancyCard
-from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_template
+from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_nursing
+from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
 from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode
 from hitsl_utils.api import ApiException
 from nemesis.app import app
@@ -95,6 +96,7 @@ def html_gynecological_chart():
 chart_mapping = {
     request_type_pregnancy: '.html_pregnancy_chart',
     request_type_gynecological: '.html_gynecological_chart',
+    'empty': '.html_gynecological_chart',
 }
 
 
@@ -137,6 +139,8 @@ def html_auto_chart():
     else:
         raise abort(400, u'Невозможно определить тип карты по передаваемым параметрам')
 
+    request_type_code = request.args.get('ticket_type') or request_type_code
+
     if event_id:
         if not request_type_code:
             request_type_code, = db.session.query(rbRequestType.code).join(EventType, Event).filter(
@@ -148,7 +152,7 @@ def html_auto_chart():
         kwargs = {'event_id': event_id}
     else:
         kwargs = request.args.to_dict()
-        request_type_code = request_type_gynecological
+        request_type_code = request_type_code or request_type_gynecological
 
     if request_type_code not in chart_mapping:
         raise abort(500, u'Невозможно определить тип карты по передаваемым параметрам')
@@ -403,6 +407,17 @@ def html_card_fill_history():
     return render_template('risar/card_fill_history.html', card=card)
 
 
+@module.route('/card_predicted_pregnancy.html')
+def html_card_predicted_pregnancy():
+    args = request.args.to_dict()
+    event_id = safe_int(args.get('event_id'))
+    if not event_id:
+        raise abort(404)
+    card = AbstractCard.get_by_id(event_id)
+    return render_template('risar/card_predicted_pregnancy.html', card=card,
+                           tm_data=represent_predicted_pregnancy(card))
+
+
 @module.route('/risk_groups_list.html')
 def html_risk_groups_list():
     event_id = safe_int(request.args.get('event_id'))
@@ -444,8 +459,8 @@ def html_partal_nursing(flatcode):
     event_id = safe_int(request.args.get('event_id'))
     card = PregnancyCard.get_by_id(event_id)
     at = get_action_type_by_flatcode(flatcode)
-    return render_template('risar/partal_nursing_view.html',
-                           template_data=represent_action_type_for_template(at),
+    return render_template('risar/partal_nursing/partal_nursing_view.html',
+                           template_data=represent_action_type_for_nursing(at),
                            card=card)
 
 
@@ -474,15 +489,16 @@ def html_partal_nursing_edit(flatcode):
                                             flatcode=flatcode,
                                             pp_nursing_id=pp_nursing_id))
     else:
-        # если мы хотим создать дородовый патронаж и у нас уже есть хотя бы один такой,
-        # то создаём повторный дородовой
         if flatcode == 'prepartal_nursing':
+            # если мы хотим создать дородовый патронаж и у нас уже есть хотя бы один такой,
+            # то создаём повторный дородовой
             if not all([x.deleted for x in card.get_action_list(flatcode)]):
                 flatcode = 'prepartal_nursing_repeat'
 
     at = get_action_type_by_flatcode(flatcode)
-    return render_template('risar/partal_nursing_edit.html', card=card,
-                           template_data=represent_action_type_for_template(at))
+    tpl_path = 'risar/partal_nursing/%s_edit.html' % flatcode
+    return render_template(tpl_path, card=card,
+                           template_data=represent_action_type_for_nursing(at))
 
 
 @module.route('/nursing/<flatcode>_read.html')
@@ -490,6 +506,7 @@ def html_partal_nursing_read(flatcode):
     event_id = safe_int(request.args.get('event_id'))
     card = PregnancyCard.get_by_id(event_id)
     at = get_action_type_by_flatcode(flatcode)
-    return render_template('risar/partal_nursing_read.html',
+    tpl_path = 'risar/partal_nursing/%s_read.html' % flatcode
+    return render_template(tpl_path,
                            card=card,
-                           template_data=represent_action_type_for_template(at))
+                           template_data=represent_action_type_for_nursing(at))

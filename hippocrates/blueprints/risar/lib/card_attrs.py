@@ -8,6 +8,7 @@ from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
 from hippocrates.blueprints.risar.lib.utils import get_action_list, HIV_diags, syphilis_diags, \
     hepatitis_diags, tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, \
     belongs_to_mkbgroup, notify_risk_rate_changes, mkb_match
+from hippocrates.blueprints.risar.lib.ultrasonography import reevaluate_pregnancy_start_date_by_ultrasonography
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code, rtc_2_atc, pc_inspection_flat_code
 from nemesis.lib.utils import safe_dict, safe_date
@@ -89,6 +90,15 @@ def reevaluate_risk_rate(card):
     card.attrs['prenatal_risk_572'].value = safe_dict(new_prr)
 
 
+def get_delivery_date_by_last_menstruation(card):
+    weeks = 40
+    mother_action = card.anamnesis.mother
+    if mother_action:
+        start_date = mother_action['menstruation_last_date'].value
+        if start_date:
+            return start_date + datetime.timedelta(weeks=weeks)
+
+
 def reevaluate_dates(card):
     """
     Пересчёт даты начала беременности, предполагаемой даты родов, и даты редактирования карты пациентки
@@ -97,10 +107,11 @@ def reevaluate_dates(card):
     :rtype: datetime.date
     :return:
     """
+    reevaluate_pregnancy_start_date_by_ultrasonography(card)
     now = datetime.datetime.now()
-
     card.attrs['chart_modify_date'].value = now
     card.attrs['chart_modify_time'].value = now
+    card.attrs['pdd_mensis'].value = get_delivery_date_by_last_menstruation(card)
     prev_start_date, prev_delivery_date = card.attrs['pregnancy_start_date'].value, card.attrs['predicted_delivery_date'].value
     start_date, delivery_date, p_week = None, None, None
     epicrisis = card.epicrisis
