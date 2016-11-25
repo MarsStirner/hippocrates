@@ -323,6 +323,7 @@ def api_appointment():
     if not ticket:
         return abort(404)
 
+    # todo: запрос вынести на клиент, чтобы лишнее соединение не держать
     schedule = ticket.schedule
     res = sirius.check_mis_schedule_ticket(
         client_id,
@@ -332,6 +333,8 @@ def api_appointment():
         schedule.person,
         schedule.date,
         ticket.begTime,
+        ticket.endTime,
+        schedule.id,
     )
     if not res:
         return jsonify(None, 400, u'Не удалось занять талончик в РМИС')

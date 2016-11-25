@@ -115,4 +115,4 @@ class DoctorXForm(DoctorSchema, XForm):
 
     def delete_target_obj(self):
         self.target_obj.deleted = 1
-        self._changed.extend(self.target_obj)
+        self._changed.append(self.target_obj)

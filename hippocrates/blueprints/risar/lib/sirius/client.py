@@ -61,7 +61,8 @@ def update_entity_from_mis(region, entity, remote_id):
     return code
 
 
-def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person, date, time):
+def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
+                              date, beg_time, end_time, schedule_id):
     # нет информации по методу мис
     if 1 or not app.config.get('SIRIUS_ENABLED'):
         return True
@@ -74,10 +75,12 @@ def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person, date,
         "main_id": ticket_id,
         "main_param_name": 'schedule_ticket_id',
         "data": {
+            "schedule_id": schedule_id,
             "hospital": org.TFOMSCode,
             "doctor": person.regionalCode,
             "date": date.isoformat(),
-            "time": time.isoformat()[:5],
+            "beg_time": beg_time.isoformat()[:5],
+            "end_time": end_time.isoformat()[:5],
         }
     }
     result = send_event_remote(data)
