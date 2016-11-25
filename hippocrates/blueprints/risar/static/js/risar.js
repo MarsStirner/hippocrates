@@ -667,8 +667,8 @@ WebMis20
         }
     };
     this.partal_nursing = {
-        save: function(flatcode, event_id, data) {
-            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, data.id||''), {event_id: event_id}, data);
+        save: function(pp_id, flatcode, event_id, data) {
+            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, pp_id||''), {event_id: event_id}, data);
         },
         get: function(flatcode, nursing_id, event_id) {
             return wrapper('GET', Config.url.api_partal_nursing.format(flatcode, nursing_id), {event_id: event_id});

@@ -1,0 +1,231 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+{%- block modules_css %}
+    {{ super() }}
+    <style type="text/css">
+       .box.box-primary {
+            line-height: 1.5em;
+            font-size: 110%;
+        }
+    </style>
+{% endblock -%}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% set flat_code = template_data.flatcode %}
+{% block main %}
+<div ng-controller="PartalNursingEditCtrl" ng-cloak>
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
+        {{ rimacros.page_title_n('') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="tab-content">
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header with-border">
+                             {% set right_word =  dict((('postpartal_nursing', 'послеродовому'),
+                                            ('prepartal_nursing', 'дородовому'),
+                                            ('prepartal_nursing_repeat', 'дородовому'))).get(flat_code) %}
+                               <h3 class="box-title">&nbsp;Сведения по {{ right_word }} патронажу</h3>
+                                <span class="col-sm-offset-3" ><a  class="print_link"  ng-if="!pp_nursing.end_date"
+                                   href="{{ url_for('.html_partal_nursing_edit', flatcode=flat_code) }}?event_id=[[ header.event.id ]]&pp_nursing_id=[[ pp_nursing.id ]]">
+                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a></span>
+                            </div>
+                            <div class="box-body">
+                                <table class="table table-condensed">
+                                   <tbody>
+                                    <td class="text-right col-md-4">Дата патронажа</td>
+                                    <td class="col-md-8">[[pp_nursing.date | asDate]]</td>
+                                     <tr>
+                                        <td class="text-right">День жизни </td>
+                                        <td>[[pp_nursing.day_of_age]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">День выписки из роддома </td>
+                                        <td>[[pp_nursing.day_of_leaving]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Жалобы</td>
+                                        <td ng-bind-html="pp_nursing.complaints"></td>
+                                    </tr>
+                                      <tr>
+                                        <td class="text-right">Характер вскармливания </td>
+                                        <td>[[pp_nursing.infant_feeding.name]]</td>
+                                      </tr>
+                                     <tr>
+                                        <td class="text-right">Состояние питания </td>
+                                        <td>[[pp_nursing.feeding_status]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Общее состояние </td>
+                                        <td>[[pp_nursing.general_habitus]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Масса тела, г </td>
+                                        <td>[[pp_nursing.weight]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Рост, см </td>
+                                        <td>[[pp_nursing.height]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Окружность груди, см </td>
+                                        <td>[[pp_nursing.chest_circumference]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Окружность головы, см </td>
+                                        <td>[[pp_nursing.head_circumference]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Физиологические рефлексы </td>
+                                        <td>[[pp_nursing.physiologic_reflex]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Мышечный тонус </td>
+                                        <td>[[pp_nursing.muscle_tone]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Телосложение </td>
+                                        <td>[[pp_nursing.body_build]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Кожа </td>
+                                        <td>[[pp_nursing.skin]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Состояние слизистых </td>
+                                        <td>[[pp_nursing.mucous]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Череп </td>
+                                        <td>[[pp_nursing.skull]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Швы </td>
+                                        <td>[[pp_nursing.rhaphe]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Роднички </td>
+                                        <td>[[pp_nursing.fontanel]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Ключицы </td>
+                                        <td>[[pp_nursing.collar_bone]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Состояние тазобедренных суставов </td>
+                                        <td>[[pp_nursing.hip_joint]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Форма грудной клетки </td>
+                                        <td>[[pp_nursing.chest_shape]]</td>
+                                    </tr>
+                                     <tr>
+                                        <th class="text-right">Дыхание <span>&nbsp;</span></th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Характер </td>
+                                        <td>[[pp_nursing.breathe_character]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Частота </td>
+                                        <td>[[pp_nursing.breathe_frequency]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Сердечно-сосудистая система </td>
+                                        <td>[[pp_nursing.heart_vascular_system]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">ЧСС </td>
+                                        <td>[[pp_nursing.heart_rate]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Пупочная ранка </td>
+                                        <td>[[pp_nursing.umbilical_wound]]</td>
+                                    </tr>
+                                     <tr>
+                                        <th class="text-right">Живот <span>&nbsp;</span></th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Состояние </td>
+                                        <td>[[pp_nursing.stomach_status]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Окружность, см </td>
+                                        <td>[[pp_nursing.stomach_circumference]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Печень </td>
+                                        <td>[[pp_nursing.liver]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Селезёнка </td>
+                                        <td>[[pp_nursing.spleen]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Половые органы </td>
+                                        <td>[[pp_nursing.genitals]]</td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-right">Физиологические отправления </td>
+                                        <td>[[pp_nursing.urination]]</td>
+                                    </tr>
+                                      <tr>
+                                        <td class="text-right">Семья </td>
+                                        <td>[[pp_nursing.family.name]]</td>
+                                      </tr>
+                                    <tr>
+                                        <td class="text-right">Социально-бытовые условия</td>
+                                        <td ng-bind-html="pp_nursing.social_conditions"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Уход за новорождённым</td>
+                                        <td ng-bind-html="pp_nursing.newborn_care"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Заключение</td>
+                                        <td ng-bind-html="pp_nursing.conclusion"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">План наблюдения</td>
+                                        <td ng-bind-html="pp_nursing.plan"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Рекомендации</td>
+                                        <td ng-bind-html="pp_nursing.recommendations"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="box-footer">
+                        <div class="col-md-offset-5 col-sm-offset-5">
+                         {% set right_word =  dict((('postpartal_nursing', 'послеродовых'),
+                                                ('prepartal_nursing', 'дородовых'),
+                                                ('prepartal_nursing_repeat', 'дородовых'))).get(flat_code) %}
+                        <a class="pseudo-btn" ng-href="{{ url_for('.html_partal_nursing', flatcode=flat_code) }}?event_id=[[ header.event.id ]]">Перейти на форму {{ right_word }} патронажей</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script>
+        WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
+    </script>
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
+{% endblock %}

@@ -9,14 +9,22 @@ function ($scope, $controller, $window, $location, $document, $timeout, RisarApi
     $scope.flatcode = jv.flatcode;
     var event_id = $scope.event_id = params.event_id;
     $scope.pp_nursing = pp_nursing_id ===undefined ? {person: CurrentUser, date: new Date()} : {};
+    $scope.mother_anamnesis = {};
+    $scope.father_anamnesis = {};
     $scope.save = function () {
-            return RisarApi.partal_nursing.save($scope.flatcode, event_id, $scope.pp_nursing).then(function (data) {
-
+            return RisarApi.partal_nursing.save(pp_nursing_id, $scope.flatcode, event_id,
+                {pp_nursing: $scope.pp_nursing,
+                mother_anamnesis: $scope.mother_anamnesis,
+                father_anamnesis: $scope.father_anamnesis,
+                }
+            ).then(function (data) {
                 if ($scope.pp_nursing.hasOwnProperty('id')) {
-                    $scope.pp_nursing = data;
+                    $scope.pp_nursing = data['pp_nursing'];
+                    $scope.mother_anamnesis = data['mother_anamnesis'];
+                    $scope.father_anamnesis = data['father_anamnesis'];
                 } else {
                     //в урле нужно отобразить pp_nursing_id
-                    $window.open(Config.url.partal_nursing_edit_html.format($scope.flatcode)+'?event_id='+event_id+'&pp_nursing_id='+data.id, '_self');
+                    $window.open(Config.url.partal_nursing_edit_html.format($scope.flatcode)+'?event_id='+event_id+'&pp_nursing_id='+data['pp_nursing'].id, '_self');
                 };
             });
     };
@@ -27,9 +35,11 @@ function ($scope, $controller, $window, $location, $document, $timeout, RisarApi
         });
         if (pp_nursing_id !== undefined) {
             RisarApi.partal_nursing.get($scope.flatcode, pp_nursing_id, event_id).then(function (data) {
-                    $scope.pp_nursing = data;
+                    $scope.pp_nursing = data['pp_nursing'];
+                    $scope.mother_anamnesis = data['mother_anamnesis'];
+                    $scope.father_anamnesis = data['father_anamnesis'];
             }, function (error) {
-                // редиректим на создание нового патронажа
+                // // редиректим на создание нового патронажа
                 $window.open(Config.url.partal_nursing_edit_html.format($scope.flatcode)+'?event_id='+event_id, '_self');
             });
         }

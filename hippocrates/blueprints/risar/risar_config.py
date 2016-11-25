@@ -219,7 +219,7 @@ nursing = dict(
                            'father_health', 'children_health', 'other_family_members_health', 'biological_anamnesis',
                            'acute_disease', 'flareup_chronic_condition', 'operations', 'fetal_infection', 'medicines',
                            'womens_consultation_clinic_visiting', 'maternity_school', 'day_regimen', 'nutrition',
-                           'hypogalactia', 'child_risk', 'recommendations']),
+                           'hypogalactia', 'child_risk', 'recommendations', 'profession']),
     ('prepartal_nursing_repeat', ['date', 'gestational_age', 'arragements_completion', 'conditions_of_work',
                                   'conditions_of_living', 'regimen', 'nutrition', 'corrective_measures',
                                   'sanitation', 'sanitary_condition', 'newborn_acceptance_readiness',
