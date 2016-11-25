@@ -42,6 +42,11 @@
                     <td></td>
                 </tr>
                 <tr>
+                    <th>Срок по УЗИ</th>
+                    <td ng-repeat="checkup in checkups">[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason :'Нет данных УЗИ для расчета']]</td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Диагнозы</th>
                     <td colspan="[[ checkups.length + 1 ]]"></td>
                 </tr>
