@@ -33,7 +33,7 @@
                 <tr>
                     <th class="text-right col-md-4">Посещение</th>
                     <td class="col-md-8">
-                        <ui-select ng-model="checkup.ticket_25.visit_type">
+                        <ui-select ng-model="checkup.ticket_25.visit_type" theme="select2">
                             <ui-select-choices repeat="item in checkup.ticket_25.visit_reason.types | filter: $select.search track by item._id">
                                 <div style="text-align: justify" ng-bind-html="item.name | highlight: $select.search"></div>
                             </ui-select-choices>
@@ -94,14 +94,15 @@
                                style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th width="50%">Название</th>
-                                <th width="40%">Врач</th>
+                                <th width="45%">Название</th>
+                                <th width="10%">Количество</th>
+                                <th width="35%">Врач</th>
                                 <th width="10%">&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr ng-repeat="$row in $table.$model">
-                                <td class="col-md-5">
+                                <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
                                     <span ng-if="$table.$edited($index)">
                                         {% if specifics_mng.uses_regional_services() %}
@@ -114,7 +115,13 @@
                                     </span>
                                 </td>
 
-                                <td class="col-md-5">
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.amount"></span>
+                                    <span ng-if="$table.$edited($index)">
+                                        <input valid-number maxlength="3" class="form-control" ng-model="$table.$tmp.amount" /></span>
+                                </td>
+
+                                <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
                                     <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
                                 </td>

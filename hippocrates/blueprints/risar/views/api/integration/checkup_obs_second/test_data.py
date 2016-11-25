@@ -91,3 +91,56 @@ obs_second_data = {
         # "treatment": "",  # Лечение
     }
 }
+
+
+ticket25_data = {
+    "date_open": "2016-11-26",
+    "doctor": "999",
+    "hospital": "-2",
+    "visit_dates": [
+        "2016-11-23"
+    ],
+    "diagnosis": "O15.0",
+    "reason": "B00",
+    "trauma": "01",
+    "disease_character": "2",
+    "disease_outcome": "improvement",
+    "medical_care": "3",
+    "medical_care_profile": "2",
+    "medical_care_place": "ambulatorno",
+    "medical_care_emergency": True,
+    "finished_treatment": "1",
+    "treatment_result": "01",
+    "initial_treatment": "2",
+    "payment": "4",
+    "medical_services": [
+        {
+            "medical_service": "00000023",
+            "medical_service_doctor": "999",
+            "medical_service_quantity": 5
+        }
+    ],
+    "operations": [
+        {
+            "operation_code": "00000023",
+            "operation_doctor": "999",
+            "operation_anesthesia": "1",
+            "operation_equipment": "1"
+        }
+    ],
+    "manipulations": [
+        {
+            "manipulation_doctor": "999",
+            "manipulation_quantity": 3,
+            "manipulation": "A16.06.016.005"
+        }
+    ],
+    "sick_leaves": [
+        {
+            "sick_leave_reason": "1",
+            "sick_leave_date_open": "2016-11-26",
+            "sick_leave_type": "2",
+            "sick_leave_date_close": "2016-11-26"
+        }
+    ],
+}

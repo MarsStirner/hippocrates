@@ -67,3 +67,15 @@ def api_checkup_puerpera_ticket25_get(api_version, card_id, exam_puerpera_id):
     xform.check_params(exam_puerpera_id, card_id)
     xform.find_ticket25()
     return xform.as_json()
+
+
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/puerpera/<int:exam_puerpera_id>/ticket25', methods=['PUT'])
+@api_method(hook=hook)
+def api_checkup_puerpera_ticket25_save(api_version, card_id, exam_puerpera_id):
+    data = request.get_json()
+    xform = CheckupPuerperaTicket25XForm(api_version)
+    xform.check_params(exam_puerpera_id, card_id)
+    xform.update_target_obj(data)
+    xform.store()
+    return xform.as_json()
+

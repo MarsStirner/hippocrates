@@ -397,8 +397,8 @@ class XForm(object):
         return enum if enum.is_valid() else None
 
     def rb(self, code, rb_model, rb_code_field='code'):
-        id_ = self.rb_validate(rb_model, code, rb_code_field)
-        return code and {'code': code, 'id': id_} or None
+        id_, name = self.rb_validate(rb_model, code, rb_code_field)
+        return code and {'code': code, 'id': id_, 'name': name} or None
 
     @staticmethod
     def arr(rb_func, codes, rb_name, rb_code_field='code'):
@@ -406,7 +406,7 @@ class XForm(object):
 
     @staticmethod
     def rb_validate(rb_model, code, rb_code_field):
-        row_id = None
+        row_id = name = None
         if code is not None:
             if isinstance(rb_model, basestring):
                 try:
@@ -417,20 +417,23 @@ class XForm(object):
                     row_id = rb and rb.get('_id')
                     if row_id == 'None':
                         row_id = None
+                    name = rb.get('name')
             else:
                 field = getattr(rb_model, rb_code_field)
-                row_id = rb_model.query.filter(
+                rb = rb_model.query.filter(
                     field == code
-                ).value(rb_model.id)
+                ).first()
+                row_id = rb.id if rb else None
+                name = getattr(rb, 'name', None) if rb else None
             if not row_id:
                 raise ApiException(
                     NOT_FOUND_ERROR,
                     u'В справочнике "%s" запись с кодом "%s" не найдена' % (
-                        rb_model,
+                        rb_model if isinstance(rb_model, basestring) else rb_model.__name__,
                         code,
                     )
                 )
-        return row_id
+        return row_id, name
 
     def mapping_part(self, part_map, data, res):
         if not data:
@@ -578,7 +581,8 @@ class CheckupsXForm(ExternalXForm):
             if flt_mkbs:
                 flt_mis_diags.append({
                     'kind': diag_data['kind'],
-                    'mkbs': flt_mkbs
+                    'mkbs': flt_mkbs,
+                    'additional_info': diag_data.get('additional_info')
                 })
         return flt_mis_diags
 
@@ -729,7 +733,7 @@ class MeasuresResultsXForm(ExternalXForm):
     def update_measure_data(self, data):
         status = data.get('status')
         if status:
-            self.em.status = self.rb_validate(rbMeasureStatus, status, 'code')
+            self.em.status = self.rb(rbMeasureStatus, status, 'code')['id']
 
     def changes_diagnoses_system(self):
         return bool(self.diagnosis_codes)
