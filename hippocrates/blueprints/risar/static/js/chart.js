@@ -332,21 +332,22 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
         };
         reload();
     }])
-.controller('InspectionFetusViewCtrl', ['$scope', '$modal', 'RisarApi', function ($scope, $modal, RisarApi) {
-    var params = aux.getQueryParams(window.location.search);
-    var event_id = params.event_id;
-    $scope.checkup = {};
+.controller('InspectionFetusViewCtrl', ['$scope', '$modal', '$controller', 'RisarApi',
+    function ($scope, $modal, $controller, RisarApi) {
+        var params = aux.getQueryParams(window.location.search);
+        var event_id = params.event_id;
+        $controller('commonPrintCtrl', {$scope: $scope});
+        $scope.checkup = {};
+        var reload = function () {
+            RisarApi.chart.get_header(event_id).
+                then(function (data) {
+                    $scope.header = data.header;
+                });
+            RisarApi.fetus.get_fetus_list(event_id)
+                .then(function (checkup) {
+                    $scope.checkup = checkup;
+                });
+        };
 
-    var reload = function () {
-        RisarApi.chart.get_header(event_id).
-            then(function (data) {
-                $scope.header = data.header;
-            });
-        RisarApi.fetus.get_fetus_list(event_id)
-            .then(function (checkup) {
-                $scope.checkup = checkup;
-            });
-    };
-
-    reload();
+        reload();
 }]);

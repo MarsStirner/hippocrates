@@ -2,7 +2,6 @@
 import datetime
 import logging
 
-from collections import OrderedDict
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil

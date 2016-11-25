@@ -235,7 +235,8 @@ nursing = dict(
 )
 
 
-pregnancy_apts = ['pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed',
-    'card_fill_rate', 'card_fill_rate_anamnesis', 'card_fill_rate_first_inspection',
-    'card_fill_rate_repeated_inspection', 'card_fill_rate_epicrisis', 'pregnancy_start_date_by_ultrasonography',
-    'pdd_mensis']
+pregnancy_card_apts = ['prenatal_risk_572', 'predicted_delivery_date', 'pregnancy_start_date', 'preeclampsia_risk',
+                       'chart_modify_date', 'chart_modify_time', 'pregnancy_pathology_list',
+                       'preeclampsia_susp', 'preeclampsia_comfirmed', 'card_fill_rate', 'card_fill_rate_anamnesis',
+                       'card_fill_rate_first_inspection', 'card_fill_rate_repeated_inspection',
+                       'card_fill_rate_epicrisis', 'pregnancy_start_date_by_ultrasonography', 'pdd_mensis']
