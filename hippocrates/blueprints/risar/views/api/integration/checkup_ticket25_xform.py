@@ -68,6 +68,10 @@ class CheckupsTicket25XFormSchema(Schema):
                     "description": "Детское обращение (пациентка до 14 лет - да/нет)",
                     "type": "boolean"
                 },
+                "visit_type": {
+                    "description": "Посещение (тип), справочник rbRisarVisit_Type",
+                    "type": "string"
+                },
                 "finished_treatment": {
                     "description": "Обращение (законченный случай лечения), справочник rbRisarFinishedTreatment",
                     "type": "string"
@@ -239,7 +243,7 @@ class CheckupsTicket25XFormSchema(Schema):
                     "type": "string"
                 }
             },
-            "required":["doctor", "hospital", "diagnosis", "date_open"]
+            "required": ["doctor", "hospital", "diagnosis", "date_open"]
         }
     ]
 
@@ -295,6 +299,7 @@ class CheckupsTicket25XForm(XForm):
             'finished_treatment': self.to_rb(data.get('finished_treatment')),
             'initial_treatment': self.to_rb(data.get('initial_treatment')),
             'treatment_result': self.rb(data.get('treatment_result'), rbResult),
+            'visit_type': self.to_rb(data.get('visit_type')),
             'payment': self.rb(data.get('payment'), rbFinance),
             # 'visit_dates': [],  # ignore this
             # 'children': None,  # ignore this
@@ -459,6 +464,7 @@ class CheckupsTicket25XForm(XForm):
             'finished_treatment': self.or_undefined(self.from_rb(action['finished_treatment'].value)),
             'initial_treatment': self.or_undefined(self.from_rb(action['initial_treatment'].value)),
             'treatment_result': self.or_undefined(self.from_rb(action['treatment_result'].value)),
+            'visit_type': self.or_undefined(self.from_rb(action['visit_type'].value)),
             'payment': self.or_undefined(self.from_rb(action['payment'].value)),
             'visit_dates': self.or_undefined(safe_date(inspection.begDate) and [safe_date(inspection.begDate)]),
             'children': self._repr_is_child(),

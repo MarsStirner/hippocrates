@@ -123,6 +123,7 @@ def api_checkup_pc_ticket25_save(api_version, card_id, exam_pc_id):
     data = request.get_json()
     xform = CheckupPCTicket25XForm(api_version)
     xform.check_params(exam_pc_id, card_id)
+    xform.validate(data)
     xform.update_target_obj(data)
     xform.store()
     try:

@@ -142,11 +142,11 @@ if __name__ == '__main__':
         # card_id = '278'
         # test_register_edit_delete_first_checkup(card_id)
 
-        from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.test import \
-            test_register_edit_delete_second_checkup, test_edit_ticket25
+        # from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.test import \
+        #     test_register_edit_delete_second_checkup, test_edit_ticket25
         # card_id = '278'
         # test_register_edit_delete_second_checkup(card_id)
-        test_edit_ticket25(377, 8303)
+        # test_edit_ticket25(377, 8303)
 
         # from hippocrates.blueprints.risar.views.api.integration.checkup_pc.test import \
         #     test_register_edit_delete_pc_checkup

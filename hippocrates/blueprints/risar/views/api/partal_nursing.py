@@ -3,8 +3,8 @@
 import datetime
 
 from flask import request
-from blueprints.risar.lib.utils import get_action_type_by_flatcode
-from blueprints.risar.risar_config import nursing
+from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode
+from hippocrates.blueprints.risar.risar_config import nursing
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard

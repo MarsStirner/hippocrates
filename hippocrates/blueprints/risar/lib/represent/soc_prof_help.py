@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from blueprints.risar.lib.utils import action_as_dict_with_id
+from hippocrates.blueprints.risar.lib.utils import action_as_dict_with_id
 
 
 def represent_soc_prof_item(action, fields=None):

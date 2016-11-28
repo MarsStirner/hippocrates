@@ -132,6 +132,7 @@ def api_checkup_obs_second_ticket25_save(api_version, card_id, exam_obs_id):
     data = request.get_json()
     xform = CheckupObsSecondTicket25XForm(api_version)
     xform.check_params(exam_obs_id, card_id)
+    xform.validate(data)
     xform.update_target_obj(data)
     xform.store()
     try:

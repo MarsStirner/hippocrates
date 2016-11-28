@@ -103,6 +103,7 @@ ticket25_data = {
     "diagnosis": "O15.0",
     "reason": "B00",
     "trauma": "01",
+    "visit_type": "1",
     "disease_character": "2",
     "disease_outcome": "improvement",
     "medical_care": "3",
@@ -117,7 +118,7 @@ ticket25_data = {
         {
             "medical_service": "00000023",
             "medical_service_doctor": "999",
-            "medical_service_quantity": 5
+            "medical_service_quantity": "5"
         }
     ],
     "operations": [

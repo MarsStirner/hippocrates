@@ -75,6 +75,7 @@ def api_checkup_puerpera_ticket25_save(api_version, card_id, exam_puerpera_id):
     data = request.get_json()
     xform = CheckupPuerperaTicket25XForm(api_version)
     xform.check_params(exam_puerpera_id, card_id)
+    xform.validate(data)
     xform.update_target_obj(data)
     xform.store()
     return xform.as_json()

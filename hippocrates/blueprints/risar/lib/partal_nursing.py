@@ -2,8 +2,8 @@
 
 import datetime
 
-from blueprints.risar.lib.utils import close_open_partal_nursing
-from blueprints.risar.risar_config import nursing
+from hippocrates.blueprints.risar.lib.utils import close_open_partal_nursing
+from hippocrates.blueprints.risar.risar_config import nursing
 
 from nemesis.lib.utils import safe_datetime
 from nemesis.lib.data import create_action

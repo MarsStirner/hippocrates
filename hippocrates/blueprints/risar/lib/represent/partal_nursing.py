@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from blueprints.risar.lib.utils import action_as_dict_with_id, action_as_dict, get_apt_from_at
-from blueprints.risar.risar_config import nursing
+from hippocrates.blueprints.risar.lib.utils import action_as_dict_with_id, action_as_dict, get_apt_from_at
+from hippocrates.blueprints.risar.risar_config import nursing
 
 
 def represent_partal_nursing(action, flatcode):
