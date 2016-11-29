@@ -137,6 +137,88 @@
                     <div class="col-md-6">
                         <div class="box box-primary">
                             <div class="box-header with-border">
+                                <h3 class="box-title">Влагалищное исследование</h3>
+                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                   href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_vagina">
+                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Наружные половые органы:</div>
+                                    <div class="col-sm-7 col-md-7 long-words">[[checkup.externalia]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Влагалище:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.vagina.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Шейка матки:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervix.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Длина шейки матки:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervix_length.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Позиция шейки матки:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervix_position.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Зрелость шейки матки:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervix_maturity.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Консистенция шейки матки:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervix_consistency.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Цервикальный канал:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervical_canal.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Тело матки:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <span ng-repeat="elem in checkup.body_of_womb" >[[elem.name]][[$last ? '' : ', ']]</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Придатки:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.appendages.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Околоматочное пространство :</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.parametrium.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Особенности:</div>
+                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.features"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right"><b>Взято на анализ</b></div>
+                                    <div class="col-sm-7 col-md-7"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Отделяемое из влагалища:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.vagina_secretion ? 'да': 'нет']]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Отделяемое из цервикального канала:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.cervical_canal_secretion ? 'да': 'нет']]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Отделяемое из уретры:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.urethra_secretion ? 'да': 'нет']]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">Мазок на онкоцитологию:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.onco_smear ? 'да': 'нет']]</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
                                 <h3 class="box-title">Заключение</h3>
                                 <a class="print_link pull-right" ng-if="!checkup.end_date"
                                    href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_conclusion">
