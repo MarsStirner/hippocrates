@@ -1261,38 +1261,6 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
             }
         }
 }])
-.directive('ownMedicos', ["$q", "RefBookService", function ($q, RefBookService) {
-        return {
-            scope: {
-                orgId: '=',
-                medicoOrgId: '='
-            },
-            link: function (scope, element, attrs) {
-                scope.allMedicos = RefBookService.get('Person');
-                $q.all([scope.allMedicos.loading]).then(function () {
-                        scope.groupedMedicos = _.groupBy(scope.allMedicos.objects, function(obj) {
-                            return obj.organisation != undefined ? obj.organisation.id: null
-                        });
-                        scope.loadOwnMedicos();
-                });
-                scope.loadOwnMedicos = function() {
-                    var orgId = scope.orgId,
-                        medicoOrgId = scope.medicoOrgId,
-                        isSameOrganisation = medicoOrgId === orgId;
-                    if (!isSameOrganisation) {
-                        this.epicrisis.maternity_hosp_medico = null;
-                    }
-                    scope.filteredMedicos = safe_traverse(scope, ['groupedMedicos', orgId]);
-                    console.log(scope.groupedMedicos);
-                    console.log(scope.filteredMedicos);
-                };
-                scope.chooseNativeLpu = function() {
-                    scope.loadOwnMedicos();
-                };
-
-            }
-        }
-}])
 .directive('wmBtnControlEvent', ['RisarApi', 'NotificationService', function (RisarApi, NotificationService) {
     return {
         restrict: 'E',
