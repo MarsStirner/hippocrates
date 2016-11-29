@@ -75,6 +75,29 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'delay': {'attr': 'intrauterine_growth_retardation', 'default': None, 'rb': 'rbRisarFetus_Delay', 'is_vector': False},
     }
 
+    VAGINAL_MAP = {
+        'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
+        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': False},
+        'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
+        'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal',
+                           'is_vector': False},
+        'cervix_consistency': {'attr': 'cervix_consistency', 'default': None, 'rb': 'rbRisarCervix_Consistency',
+                               'is_vector': False},
+        'cervix_position': {'attr': 'cervix_position', 'default': None, 'rb': 'rbRisarCervix_Position',
+                            'is_vector': False},
+        'cervix_maturity': {'attr': 'cervix_maturity', 'default': None, 'rb': 'rbRisarCervix_Maturity',
+                            'is_vector': False},
+        'body_of_womb': {'attr': 'body_of_uterus', 'default': [], 'rb': 'rbRisarBody_Of_Womb', 'is_vector': True},
+        'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
+        'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
+        'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
+        'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
+        'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
+        'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},
+        'onco_smear': {'attr': 'onco_smear', 'default': None, 'rb': None, 'is_vector': False},
+        'urethra_secretion': {'attr': 'urethra_smear', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
     FETUS_CTG_MAP = {
         'basal': {'attr': 'fhr', 'default': None, 'rb': 'rbRisarBasal', 'is_vector': False},
         'variability_range': {'attr': 'fhr_variability_amp', 'default': None, 'rb': 'rbRisarVariabilityRange', 'is_vector': False},
@@ -129,6 +152,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         self.mapping_somatic_status(data, res)
         self.mapping_obstetric_status(data, res)
         self.mapping_fetus(data, res)
+        self.mapping_vaginal_examination(data, res)
         self.mapping_medical_report(data, res)
         return res
 
@@ -174,6 +198,10 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
                 'deleted': deleted,
                 'state': f_state,
             })
+
+    def mapping_vaginal_examination(self, data, res):
+        ve = data.get('vaginal_examination', {})
+        self.mapping_part(self.VAGINAL_MAP, ve, res)
 
     def mapping_medical_report(self, data, res):
         mr = data.get('medical_report', {})
@@ -272,6 +300,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
             "somatic_status": self._represent_somatic_status(data),
             "obstetric_status": self._represent_obstetric_status(data),
             "fetus": self._represent_fetus(data),
+            "vaginal_examination": self._represent_vaginal_examination(data),
             "medical_report": self._represent_medical_report(data),
         }
 
@@ -302,6 +331,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
                 fs['ctg_data'] = r
             res.append(fs)
         return res
+
+    def _represent_vaginal_examination(self, data):
+        return self._represent_part(self.VAGINAL_MAP, data)
 
     def _represent_medical_report(self, data):
         res = self._represent_part(self.REPORT_MAP, data)

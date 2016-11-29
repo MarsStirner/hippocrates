@@ -75,15 +75,50 @@ obs_second_data = {
             }
         },
     ],
+    "vaginal_examination": {  # Влагалищное исследование
+        "vagina": "svobodnoe",  # * Влагалище ["svobodnoe", "uzkoe"]
+        "cervix": "koniceskaacistaa",
+    # * Шейка матки ["koniceskaacistaa", "koniceskaaerozirovannaa", "zilindriceskaacistaa", "zilindriceskaaerozirovanaa"]
+        # "cervix_length": None,  # Длина шейки матки ["bolee2sm", "menee1sm", "menee2smnobolee1sm"]
+        # "cervical_canal": None,  # Цервикальный канал ["narujnyjzevprohodimdla1poperecnogopal_za", "narujnyjzevzakryt", "vnutrennijzevpriotkryt"]
+        # "cervix_consistency": None,  # Консистенция шейки матки ["magkaa", "plotnaa", "razmagcennaa"]
+        # "cervix_position": None,  # Позиция шейки матки ["kperediotprovodnoj", "kzadiotprovodnojosi", "poprovodnojositaza"]
+        # "cervix_maturity": None,  # Зрелость шейки матки ["nezrelaa", "sozrevausaa", "zrelaa"]
+        # "body_of_uterus": [],  # Тело матки ["bezboleznennopripal_pazii", "boleznennopripal_pazii", "magkovatojkonsistenzii", "nepodvijno", "podvijno"]
+        # "adnexa": None,  # Придатки ["bezosobennostej", "uveliceny"]
+        # "specialities": "",  # Особенности
+        # "vulva": "",  # Наружные половые органы
+        "parametrium": 'plotnoe',  # Околоматочное пространство
+        # "vaginal_smear": False,  # Отделяемое из влагалища взято на анализ
+        # "cervical_canal_smear": False,  # Отделяемое из цервикального канала взято на анализ
+        # "onco_smear": False,  # Мазок на онкоцитологию взято на анализ
+        # "urethra_smear": False,  # Отделяемое и при наличии данных з уретры взято на анализ
+    },
     "medical_report": {  # Заключение
         "pregnancy_week": 07,  # * Беременность (недель)
         "next_visit_date": "2016-04-15",  # * Плановая дата следующей явки
         "pregnancy_continuation": False,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "Z34.0",  # Основной диагноз
-        "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
-        "diagnosis_osl": ["H01", "H02"],  # Диагноз осложнения
+        "diagnosis_osn": {      # Основной диагноз
+            "MKB": "Z34.0",
+            "descr": "Описание основного диагноза",
+        },
+        "diagnosis_sop": [
+            {     # Диагноз сопутствующий
+                "MKB": "G01",
+                "descr": "Описание сопутствующего диагноза",
+            }
+        ],
+        "diagnosis_osl": [
+            {     # Диагноз осложнения
+                "MKB": "H01",
+                "descr": "Описание осложнения диагноза",
+            }, {
+                "MKB": "H02",
+                "descr": "Описание осложнения диагноза",
+            }
+        ],
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания
         # "vitaminization": "",  # Витаминизация
