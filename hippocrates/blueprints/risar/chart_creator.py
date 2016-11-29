@@ -7,6 +7,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
+from hippocrates.blueprints.risar.lib.chart import transfer_to_person
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import get_new_event_ext_id, bail_out
@@ -51,13 +52,15 @@ class ChartCreator(object):
 
         note = self.ticket.note if self.ticket else ''
         self.event.client = self.client
-        self.event.setDate = datetime.now()
+        right_now = datetime.now()
+        self.event.setDate = right_now
         self.event.note = note
         self.event.externalId = get_new_event_ext_id(self.event.eventType.id, self.client_id)
         self.event.payStatus = 0
         db.session.add(self.event)
         self.action = create_action(at, self.event)
         db.session.add(self.action)
+        transfer_to_person(self.event, exec_person, right_now)
 
     def __call__(self, create=False):
         if not self.event_id and not (self.ticket_id or self.client_id):

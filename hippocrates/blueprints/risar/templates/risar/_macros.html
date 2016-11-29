@@ -14,6 +14,24 @@
 
 {% endmacro %}
 
+{% macro old_pregnancy_case(lpu) %}
+    # на случай, если понадобится вернуть
+    Случай беременности. На учёте в <b>{{ lpu }}</b>
+    у <b>[[ header.event.person.name ]]</b>
+    с <b>[[ header.event.set_date | asDate ]]</b>
+{% endmacro %}
+
+{% macro pregnancy_case(lpu) %}
+    Случай беременности. На учёте по беременности
+    с <b>[[ header.event.set_date | asDate ]]</b>
+    Наблюдается в <b>{{ lpu }}</b> у <b>[[ header.event.person.short_name ]]</b>
+    <span>
+    {#  как вариант цвет  #26FF22#}
+        &nbsp;&nbsp;
+        <a class="btn-link" href="javascript:void(0)"  ng-click="openTransferModal()"> Изменить</a>
+    </span>
+    <span></span>
+{% endmacro %}
 
 {% macro page_title_n(title) %}
 <h1>
@@ -26,10 +44,7 @@
 </h1>
 <div class="row vmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
-        <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
-            у <b>[[ header.event.person.name ]]</b>
-            с <b>[[ header.event.set_date | asDate ]]</b>
-        </div>
+        <div class="alert-warning">{{ pregnancy_case('[[ header.event.person.organisation.short_name ]]') }}</div>
     </div>
 </div>
 {% endmacro %}
@@ -77,10 +92,7 @@
     </div>
 <div class="row tmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
-        <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
-            у <b>[[ header.event.person.name ]]</b>
-            с <b>[[ header.event.set_date | asDate ]]</b>
-        </div>
+        <div class="alert-warning">{{ pregnancy_case('[[ header.event.person.organisation.short_name ]]') }}</div>
     </div>
 </div>
 {% endmacro %}
@@ -141,11 +153,9 @@
 </div>
 <div class="row vmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
-        <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
-            у <b>[[ header.event.person.name ]]</b>
-            с <b>[[ header.event.set_date | asDate ]]</b>
-        </div>
+        <div class="alert-warning">{{ pregnancy_case('[[ header.event.person.organisation.short_name ]]') }}</div>
     </div>
+
 </div>
 {% endmacro %}
 
