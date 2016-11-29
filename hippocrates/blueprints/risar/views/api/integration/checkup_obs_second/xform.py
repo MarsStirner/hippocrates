@@ -311,14 +311,11 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
             if dd['end_date']:
                 continue
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
-            diagnosis = {
-                'MKB': dd['diagnostic']['mkb'].DiagID,
-                'descr': dd['diagnostic']['diagnosis_description'],
-            }
+            mkb_code = dd['diagnostic']['mkb'].DiagID
             if kind['is_vector']:
-                res.setdefault(kind['attr'], []).append(diagnosis)
+                res.setdefault(kind['attr'], []).append(mkb_code)
             else:
-                res[kind['attr']] = diagnosis
+                res[kind['attr']] = mkb_code
         return res
 
 

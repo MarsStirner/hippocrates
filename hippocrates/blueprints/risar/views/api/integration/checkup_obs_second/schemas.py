@@ -272,82 +272,8 @@ class CheckupObsSecondSchema(Schema):
                                         "type": "string"
                                     }
                                 },
-                                "required": ["fhr", "fhr_variability_amp", "fhr_variability_freq", "fhr_acceleration",
-                                             "fhr_deceleration"]
+                                "required": ["fhr", "fhr_variability_amp", "fhr_variability_freq", "fhr_acceleration", "fhr_deceleration"]
                             }
-                        }
-                    }
-                },
-                "vaginal_examination": {
-                    "description": "Влагалищное исследование",
-                    "type": "object",
-                    "properties": {
-                        "vagina": {
-                            "description": "Влагалище, справочник rbRisarVagina",
-                            "type": "string"
-                        },
-                        "cervix": {
-                            "description": "Шейка матки, справочник rbRisarCervix",
-                            "type": "string"
-                        },
-                        "cervix_length": {
-                            "description": "Длина шейки матки, справочник rbRisarCervix_Length",
-                            "type": "string"
-                        },
-                        "cervical_canal": {
-                            "description": "Цервикальный канал, справочник rbRisarCervical_Canal",
-                            "type": "string"
-                        },
-                        "cervix_consistency": {
-                            "description": "Консистенция шейки матки, справочник rbRisarCervix_Consistency",
-                            "type": "string"
-                        },
-                        "cervix_position": {
-                            "description": "Позиция шейки матки, справочник rbRisarCervix_Position",
-                            "type": "string"
-                        },
-                        "cervix_maturity": {
-                            "description": "Зрелость шейки матки, справочник rbRisarCervix_Maturity",
-                            "type": "string"
-                        },
-                        "body_of_uterus": {
-                            "description": "Тело матки, справочник rbRisarBody_Of_Womb",
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "adnexa": {
-                            "description": "Придатки, справочник rbRisarAppendages",
-                            "type": "string"
-                        },
-                        "specialities": {
-                            "description": "Особенности",
-                            "type": "string"
-                        },
-                        "vulva": {
-                            "description": "Наружные половые органы",
-                            "type": "string"
-                        },
-                        "parametrium": {
-                            "description": "Околоматочное пространство, справочник rbRisarParametrium",
-                            "type": "string"
-                        },
-                        "vaginal_smear": {
-                            "description": "Отделяемое из влагалища взято на анализ",
-                            "type": "boolean"
-                        },
-                        "cervical_canal_smear": {
-                            "description": "Отделяемое из цервикального канала взято на анализ",
-                            "type": "boolean"
-                        },
-                        "onco_smear": {
-                            "description": "Мазок на онкоцитологию взято на анализ",
-                            "type": "boolean"
-                        },
-                        "urethra_smear": {
-                            "description": "Отделяемое и при наличии данных з уретры взято на анализ",
-                            "type": "boolean"
                         }
                     }
                 },
@@ -378,33 +304,15 @@ class CheckupObsSecondSchema(Schema):
                         },
                         "diagnosis_osn": {
                             "description": "Основной диагноз, код диагноза по МКБ-10",
-                            "type": "object",
-                            "properties": {
-                                "MKB": {
-                                    "type": "string",
-                                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                                },
-                                "descr": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": ["MKB"]
+                            "type": "string",
+                            "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                         },
                         "diagnosis_sop": {
                             "description": "Диагноз сопутствующий (массив, код диагноза по МКБ-10)",
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "properties": {
-                                    "MKB": {
-                                        "type": "string",
-                                        "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                                    },
-                                    "descr": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["MKB"]
+                                "type": "string",
+                                "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                             },
                             "minItems": 0
                         },
@@ -412,17 +320,8 @@ class CheckupObsSecondSchema(Schema):
                             "description": "Диагноз осложнения (массив, код диагноза по МКБ-10)",
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "properties": {
-                                    "MKB": {
-                                        "type": "string",
-                                        "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                                    },
-                                    "descr": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["MKB"]
+                                "type": "string",
+                                "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                             },
                             "minItems": 0
                         },
@@ -434,15 +333,15 @@ class CheckupObsSecondSchema(Schema):
                             "description": "Примечания",
                             "type": "string"
                         },
-                        "vitaminization": {
+                        "vitaminization":{
                             "description": "Витаминизация",
                             "type": "string"
                         },
-                        "nutrition": {
+                        "nutrition":{
                             "description": "Коррекция питания",
                             "type": "string"
                         },
-                        "treatment": {
+                        "treatment":{
                             "description": "Лечение",
                             "type": "string"
                         }

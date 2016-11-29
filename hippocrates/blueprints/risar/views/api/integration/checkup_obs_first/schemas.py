@@ -434,33 +434,15 @@ class CheckupObsFirstSchema(Schema):
                         },
                         "diagnosis_osn": {
                             "description": "Основной диагноз, код диагноза по МКБ-10",
-                            "type": "object",
-                            "properties": {
-                                "MKB": {
-                                    "type": "string",
-                                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                                },
-                                "descr": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": ["MKB"]
+                            "type": "string",
+                            "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                         },
                         "diagnosis_sop": {
                             "description": "Диагноз сопутствующий (массив, код диагноза по МКБ-10)",
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "properties": {
-                                    "MKB": {
-                                        "type": "string",
-                                        "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                                    },
-                                    "descr": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["MKB"]
+                                "type": "string",
+                                "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                             },
                             "minItems": 0
                         },
@@ -468,17 +450,8 @@ class CheckupObsFirstSchema(Schema):
                             "description": "Диагноз осложнения (массив, код диагноза по МКБ-10)",
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "properties": {
-                                    "MKB": {
-                                        "type": "string",
-                                        "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                                    },
-                                    "descr": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["MKB"]
+                                "type": "string",
+                                "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                             },
                             "minItems": 0
                         },
@@ -491,7 +464,7 @@ class CheckupObsFirstSchema(Schema):
                             "type": "string"
                         }
                     },
-                    "required": [
+                    "required":[
                         "pregnancy_week",
                         "next_visit_date",
                         "pregnancy_continuation",
