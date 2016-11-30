@@ -7,7 +7,11 @@ class MeasureListSchema(Schema):
     Схемы для проверки валидности данных списка
     """
     schema = [{
-        "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "measure_list",
+    "description": "Список мероприятий случая",
+    "type": "array",
+    "items": {
         "description": "Мероприятие случая",
         "type": "object",
         "properties": {
@@ -18,6 +22,10 @@ class MeasureListSchema(Schema):
             "measure_type_code": {
                 "description": "Код мероприятия, справочник Measure",
                 "type": "string"
+            },
+            "appointment_id":{
+                "type": "string",
+                "description": "id направления"
             },
             "begin_datetime": {
                 "description": "Дата-время начала интервала действия мероприятия",
@@ -42,5 +50,7 @@ class MeasureListSchema(Schema):
                 "type": "string"
             }
         },
-        "required": ["measure_type_code", "begin_datetime", "end_datetime", "status"]
-    }]
+        "required": ["measure_id", "measure_type_code", "begin_datetime", "end_datetime", "status"]
+    },
+    "minItems": 0
+}]
