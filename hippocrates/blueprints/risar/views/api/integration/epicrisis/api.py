@@ -23,6 +23,14 @@ def api_integr_epicrisis_schema(api_version):
     return EpicrisisXForm.get_schema(api_version)
 
 
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>/epicrisis/', methods=['GET'])
+@api_method(hook=hook)
+def api_integr_epicrisis_get(api_version, card_id):
+    xform = EpicrisisXForm(api_version)
+    xform.check_params(card_id)
+    return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/epicrisis/', methods=['POST'])
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/epicrisis/', methods=['PUT'])
 @api_method(hook=hook)

@@ -82,8 +82,9 @@ def api_0_pregnancy_checkup(event_id):
     else:
         checkup_method_name = 'risar.api_checkup_obs_second_ticket25_get'
     sirius.send_to_mis(
+        sirius.RisarEvents.SAVE_CHECKUP,
         checkup_method_name,
-        obj=('exam_obs_id', action.id),
+        obj=('external_id', action.id),
         params={'card_id': event_id},
         is_create=not checkup_id,
     )
@@ -98,8 +99,9 @@ def api_0_pregnancy_checkup(event_id):
         result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
 
     sirius.send_to_mis(
-        'api_measure_list_get',
-        obj=('exam_obs_id', action.id),
+        sirius.RisarEvents.SAVE_CHECKUP,
+        'risar.api_measure_list_get',
+        obj=('card_id', event_id),
         params={'card_id': event_id},
         is_create=not checkup_id,
     )

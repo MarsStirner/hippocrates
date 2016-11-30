@@ -444,6 +444,9 @@ class CheckupsTicket25XForm(XForm):
             self.set_checkup_xform()
         self.checkup_xform.reevaluate_data()
 
+    def update_target_obj(self, data):
+        raise NotImplementedError
+
     @wrap_simplify
     def as_json(self):
         if not self.target_obj:
