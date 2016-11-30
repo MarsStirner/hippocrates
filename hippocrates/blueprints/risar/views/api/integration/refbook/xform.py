@@ -76,7 +76,7 @@ class RefbookXForm(RefbookSchema, XForm):
     def init_and_check_params(self, refbook_code, item_code=None, data=None):
         self.item_code = item_code
         self.set_target_class(refbook_code)
-        super(RefbookXForm, self).check_params(1, data=data)
+        super(RefbookXForm, self).check_params(item_code and 1, data=data)
         if not self.new:
             self.target_obj = self.find_refbook()
 

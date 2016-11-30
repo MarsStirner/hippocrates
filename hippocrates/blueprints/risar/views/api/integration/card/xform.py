@@ -149,6 +149,15 @@ class CardXForm(CardSchema, XForm):
             "card_LPU": self.from_org_rb(event.organisation)
         }
 
-    def get_list(self):
+    def get_list(self, filters=None):
         q = self._find_list_query()
+        filters = filters or {}
+        if 'id' in filters:
+            q = q.filter(
+                self.target_obj_class.id == filters['id']
+            )
+        if 'pregnancyWeek' in filters:
+            q = q.filter(
+                self.target_obj_class.pregnancyWeek == filters['pregnancyWeek']
+            )
         return q.all()
