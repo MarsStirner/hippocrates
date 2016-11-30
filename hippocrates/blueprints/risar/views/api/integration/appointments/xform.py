@@ -66,6 +66,7 @@ class AppointmentXForm(AppointmentSchema, XForm):
     @wrap_simplify
     def as_json(self):
         action = self.target_obj
+        set_person = action.setPerson
         res = {
             'measure_code': action.em_appointment.measure.code,
             'diagnosis': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'DiagnosisDirection'))),
@@ -75,8 +76,8 @@ class AppointmentXForm(AppointmentSchema, XForm):
             'referral_lpu': self.or_undefined(self.from_org_rb(self._get_prop_val(action, 'LPUDirection'))),
             'referral_date': self.or_undefined(self._get_prop_val(action, 'DateDirection')),
             'comment': self.or_undefined(self._get_prop_val(action, 'Comment')),
-            'appointed_lpu': self.or_undefined(getattr(self._get_prop_val(action, 'Doctor'), 'org_id', None)),
-            'appointed_doctor': self.or_undefined(action.modifyPerson_id),
+            'appointed_lpu': self.or_undefined(self.from_org_rb(set_person and set_person.organisation)),
+            'appointed_doctor': self.or_undefined(self.from_person_rb(set_person)),
         }
         return res
 
