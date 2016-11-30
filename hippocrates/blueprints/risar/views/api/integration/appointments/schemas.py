@@ -52,6 +52,14 @@ class AppointmentSchema(Schema):
                 "description": "Параметры (список)",
                 "type": "string"
             },
+            "appointed_lpu":{
+                "type": "string",
+                "description": "Код ЛПУ в котором было назначено мероприятие"
+            },
+            "appointed_doctor":{
+                "type": "string",
+                "description": "Код врача, назначившего мероприятие"
+            },
             "referral_lpu": {
                 "description": "Направлен в (код ЛПУ)",
                 "type": "string"

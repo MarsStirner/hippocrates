@@ -98,10 +98,11 @@ class MeasureListXForm(MeasureListSchema, XForm):
 
     @wrap_simplify
     def as_json(self):
-        if self.new:
-            return self._represent_measure(self.measure)
+        measure = self.measure or self.measure_list
+        if isinstance(measure, list):
+            return map(self._represent_measure, measure)
         else:
-            return map(self._represent_measure, self.measure_list)
+            return self._represent_measure(measure)
 
     def _represent_measure(self, measure):
         dc = {
@@ -111,12 +112,13 @@ class MeasureListXForm(MeasureListSchema, XForm):
             'end_datetime': safe_date(measure.endDateTime),
             'status': unicode(MeasureStatus(measure.status)),
             'result_action_id': self.or_undefined(measure.resultAction_id),
-            'indications': ''
+            'indications': '',
+            'appointment_id': measure.appointmentAction_id,
         }
         try:
             dc['indications'] = measure.scheme_measure.schedule.additionalText
         except Exception as e:
-            #blank indications
+            # blank indications
             pass
 
         return dc
