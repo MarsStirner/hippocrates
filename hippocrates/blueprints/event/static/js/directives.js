@@ -378,7 +378,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     </tbody>\
     <tfoot>\
     <tr>\
-        <td colspan="6">\
+        <td colspan="[[ is_planned_end_date_needed() ? 7 : 6 ]]">\
             <hr class="novmargin">\
             <button type="button" class="btn btn-link btn-lg pull-right" ng-click="open_action_tree(actionTypeGroup)"\
                     ng-if="can_create_action()"><i class="ion ion-plus-round fa-fw"></i>Добавить</button>\
