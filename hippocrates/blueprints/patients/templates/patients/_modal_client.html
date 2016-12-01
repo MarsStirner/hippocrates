@@ -12,11 +12,12 @@
         </div>
     </div>
 </div>
-<div class="modal-body">
+<div class="modal-body modal-scrollable">
     <div ui-alert-list="alerts"></div>
     <tabset ng-if="client">
         <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
         <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+        <tab heading="Записи ЭМК" select="openPatientActions()">{% include "patients/_patient_actions.html" %}</tab>
     </tabset>
 </div>
 <div class="modal-footer">

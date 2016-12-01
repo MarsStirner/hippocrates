@@ -14,7 +14,7 @@ from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action, ActionServiceException, fit_planned_end_date
+    get_patient_location, delete_action, ActionServiceException, fit_planned_end_date, int_get_atl_actions_flat
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
@@ -25,6 +25,7 @@ from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import rlsNomen, rlsTradeName
+from nemesis.models.enums import ActionTypeClass
 from nemesis.systemwide import db
 
 
@@ -618,4 +619,34 @@ def api_search_actions():
             context.make_searched_action(action)
             for action in paginate.items
         ]
+    }
+
+
+@module.route('/api/patient_actions/', methods=["GET"])
+@module.route('/api/patient_actions/<int:client_id>', methods=["GET"])
+@api_method
+def api_patient_actions(client_id=None):
+    if not client_id:
+        raise ApiException(400, u'`client_id required`')
+
+    # get all patient actions
+    patient_actions = db.session.query(Action).join(ActionType, Event).filter(
+        Event.client_id == client_id,
+        Event.deleted == 0,
+        Action.deleted == 0
+    ).order_by(Action.begDate, Action.status)
+
+    at_ids = set()
+    action_list = []
+    viz = ActionVisualizer()
+    for action in patient_actions:
+        at_ids.add(action.actionType_id)
+        action_list.append(viz.make_small_action_info(action))
+
+    # get filtered ats for at trees
+    flat_trees = map(tuple, int_get_atl_actions_flat(at_ids).values())
+
+    return {
+        'flat_trees': flat_trees,
+        'patient_actions': action_list
     }

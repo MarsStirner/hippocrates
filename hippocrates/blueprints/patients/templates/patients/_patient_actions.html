@@ -1,0 +1,48 @@
+<div ng-controller="PatientActionsCtrl">
+<div class="row marginal tmargin20">
+<div class="col-md-12">
+    <input class="form-control" type="text" ng-model="cond.query" wm-slow-change="set_filter(true)" placeholder="Фильтр по названию, коду" />
+</div>
+</div>
+<div class="ui-treeview">
+    <ul ng-repeat="class_item_node in filtered_tree.children">
+        <li sf-treepeat="node in children of class_item_node">
+            <div ng-if="node.is_at_class_item">
+                <a class="node" ng-click="tree.toggle_expanded(node)">
+                    <div class="tree-label expanded" ng-if="!node.children.length">&nbsp;</div>
+                    <div ng-if="node.children.length" class="tree-label" ng-class="{'collapsed': !tree.is_expanded(node),
+                        'expanded': tree.is_expanded(node)}">&nbsp;</div>
+                    <span class="text-bold" style="font-size: larger">[[ node.name ]]</span>
+                </a>
+                <button type="button" class="btn btn-link lmargin20" ng-if="node.children.length"
+                        ng-click="tree.toggle_group_expanded(node)">
+                        <span ng-bind="tree.is_group_expanded(node) ? 'Скрыть все' : 'Показать все'"></span></button>
+            </div>
+
+            <a ng-if="node.is_at_item && node.children.length" ng-click="tree.toggle_expanded(node)"
+                class="node">
+                <div class="tree-label" ng-class="{'collapsed': !tree.is_expanded(node),
+                    'expanded': tree.is_expanded(node)}">&nbsp;</div>
+                [ [[node.code]] ] [[ node.name ]]
+            </a>
+
+            <div ng-if="node.is_action_item">
+                <a ng-click="openAction(node)">
+                    <div class="tree-label leaf">&nbsp;</div>
+                    <span ng-bind="node.formatData()"></span>
+                </a>
+                <ui-print-button ps="common_ps" resolve="node.get_ps_resolve()" ng-if="node.action_type.context_name"
+                    lazy-load-context="[[node.action_type.context_name]]" force-reload-context="true" class="lmargin20 btn-sm">
+                </ui-print-button>
+                <button type="button" class="btn btn-sm btn-info" ng-if="node.action_type.action_type_class.code === 'lab'"
+                    title="Динамика" ng-click="openLabDynamics(node)"><span class="glyphicon glyphicon-stats"></span>
+                </button>
+            </div>
+
+            <ul ng-if="node.children.length && tree.is_expanded(node)">
+                <li sf-treecurse></li>
+            </ul>
+        </li>
+    </ul>
+</div>
+</div>

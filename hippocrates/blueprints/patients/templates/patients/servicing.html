@@ -24,4 +24,6 @@
     <script type="text/ng-template" id="modal-client.html">{% include "patients/_modal_client.html" %}</script>
     <script type="text/ng-template" id="modal-client-cut.html">{% include "patients/_modal_client_cut.html" %}</script>
     <script type="text/javascript" src="{{ url_for('.static', filename='js/servicing.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/patient_actions.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('event.static', filename='js/directives.js', v=app_version) }}"></script>
 {% endblock %}

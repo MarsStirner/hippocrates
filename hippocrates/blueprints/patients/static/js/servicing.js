@@ -95,6 +95,9 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
     $scope.reload_client = function () {
         $scope.client.reload('for_servicing');
     };
+    $scope.openPatientActions = function () {
+        $scope.$broadcast('patientActionsOpened', {client_id: $scope.client_id});
+    };
 
     $scope.$on('printing_error', function (event, error) {
         $scope.alerts.push(error);
@@ -140,7 +143,8 @@ var ClientSearch = function ($scope, WMClient, $modal, CurrentUser) {
                 }
             },
             controller: ClientModalCtrl,
-            size: 'lg'
+            size: 'lg',
+            windowClass: 'modal-scrollable'
         });
     };
 };

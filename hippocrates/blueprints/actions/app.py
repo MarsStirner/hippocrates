@@ -36,7 +36,8 @@ def fc_urls():
                 'action_html': url_for('actions.html_action'),
                 'create_lab_direction': url_for('actions.api_create_lab_direction'),
                 'get_action_ped': url_for('actions.api_get_action_ped'),
-                'search_actions': url_for('actions.api_search_actions')
+                'search_actions': url_for('actions.api_search_actions'),
+                'patient_actions': url_for('actions.api_patient_actions')
             }
         }
     }
