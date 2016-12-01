@@ -600,6 +600,11 @@ WebMis20
                 curation_level: curation_level
             });
         },
+        get_radz_risk_info: function (curation_level) {
+            return wrapper('GET', Config.url.api_stats_radz_risks, {
+                curation_level: curation_level
+            });
+        },
         get_pregnancy_pathology_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code

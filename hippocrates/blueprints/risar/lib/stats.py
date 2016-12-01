@@ -4,6 +4,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, ch
     pregnancy_card_attrs, risar_epicrisis, request_type_gynecological
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
+from nemesis.models.risar import rbRadzinskyRiskRate
 from sqlalchemy import func, and_, or_
 from sqlalchemy.orm import aliased
 
@@ -123,6 +124,22 @@ class StatsSelecter(BaseSelecter):
         ).with_entities(
             RisarRiskGroup.riskGroup_code,
             func.count(func.distinct(RisarRiskGroup.event_id)),
+        )
+        self.query = query
+        return self.get_all()
+
+    def get_radz_risk_counts(self, person_id, curation_level=None):
+        from ..models.radzinsky_risks import RisarRadzinskyRisks
+
+        query = self.query_main(person_id, curation_level)
+        query = RisarRadzinskyRisks.query.join(
+            query.subquery(),
+            rbRadzinskyRiskRate
+        ).group_by(
+            RisarRadzinskyRisks.risk_rate_id,
+        ).with_entities(
+            rbRadzinskyRiskRate.code,
+            func.count(func.distinct(RisarRadzinskyRisks.event_id)),
         )
         self.query = query
         return self.get_all()
@@ -401,6 +418,16 @@ class StatsSelecter(BaseSelecter):
 
         self.query = query
         return self.get_one()
+
+
+class RadzStatsController(BaseModelController):
+
+    @classmethod
+    def get_selecter(cls):
+        return StatsSelecter()
+
+    def get_risk_by_code(self, person_id, curation_level):
+        return dict(self.get_selecter().get_radz_risk_counts(person_id, curation_level))
 
 
 mather_death_koef_diags = (

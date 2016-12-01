@@ -17,7 +17,7 @@ from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int, safe_timestamp
 from nemesis.lib.vesta import Vesta
-from nemesis.models.enums import PerinatalRiskRate
+from nemesis.models.enums import PerinatalRiskRate, RadzinskyRiskRate
 from nemesis.models.exists import Organisation, Person, rbRequestType
 from nemesis.models.organisation import OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
@@ -80,7 +80,6 @@ def search_events(paginated=True, **kwargs):
                 ors.append(area_code[:8])
             else:
                 ors.append(area_code[:2])
-
         query = query.filter(areas__in=ors)
     if 'org_ids' in kwargs:
         query = query.filter(org_id__in=list(kwargs['org_ids']))
@@ -94,6 +93,12 @@ def search_events(paginated=True, **kwargs):
         else:
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
+    if 'radz_risk' in kwargs:
+        if isinstance(kwargs['radz_risk'], basestring):
+            radz_risk = map(int, kwargs['radz_risk'].split(','))
+        else:
+            radz_risk = kwargs['radz_risk']
+        query = query.filter(radz_risk__in=radz_risk)
     if 'pathology' in kwargs:
         pathology = kwargs['pathology']
         if isinstance(kwargs['pathology'], basestring):
@@ -298,6 +303,7 @@ def api_0_event_search():
                 'client_workgroup': get_workgroupname_by_code(row.get('client_work_code', '')),
                 'literal_age': represent_age(row.get('client_age', 0)),
                 'risk': PerinatalRiskRate(row['risk']),
+                'radz_risk': RadzinskyRiskRate(row['radz_risk']),
                 'mdate': datetime.date.fromtimestamp(row['card_modify_date'])
                     if 'card_modify_date' in row and row['card_modify_date'] else None,
                 'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
@@ -347,6 +353,7 @@ def api_0_event_print():
             'external_id': row['external_id'],
             'exec_person_name': row['person_name'],
             'risk': PerinatalRiskRate(row['risk']).name,
+            'radz_risk': RadzinskyRiskRate(row['radz_risk']).name,
             'curators': get_org_curators(safe_int(row['org_id']), '2'),
             'week': ((
                 (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
