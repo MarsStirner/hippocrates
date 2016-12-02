@@ -74,7 +74,8 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     sirius.send_to_mis(
         sirius.RisarEvents.SAVE_CHECKUP,
         'risar.api_checkup_pc_ticket25_get',
-        obj=('external_id', action.id),
+        obj=('exam_obs_id', action.id),
+        # obj=('external_id', action.id),
         params={'card_id': event_id},
         is_create=not checkup_id,
     )
