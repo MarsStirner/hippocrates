@@ -8,6 +8,7 @@
 """
 import datetime
 
+from blueprints.risar.views.card_xform import CardXForm
 from flask import url_for, redirect
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
@@ -68,7 +69,6 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
 # from blueprints.risar.views.api.integration.card.api import \
 #     card_save_or_update # копипаста, т.к. ошибка объявления модулей
 def card_save_or_update(data, create, api_version, card_id=None):
-    from blueprints.risar.views.api.integration.card.xform import CardXForm
     xform = CardXForm(api_version, create)
     xform.validate(data)
     client_id = data.get('client_id')
