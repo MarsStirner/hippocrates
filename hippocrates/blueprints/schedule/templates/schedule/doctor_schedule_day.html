@@ -61,6 +61,7 @@
                     <tabset>
                         <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
                         <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+                        <tab heading="Записи ЭМК" select="openPatientActions()">{% include "patients/_patient_actions.html" %}</tab>
                     </tabset>
                 </div>
             </div>
@@ -71,4 +72,6 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/schedule_day.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('patients.static', filename='js/patient_actions.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('event.static', filename='js/directives.js', v=app_version) }}"></script>
 {% endblock %}

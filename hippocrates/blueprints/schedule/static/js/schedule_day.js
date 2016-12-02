@@ -10,7 +10,6 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
     $scope.proc_office = { selected: null };
     $scope.ticket = null;
     $scope.event_id = null;
-    $scope.client = null;
 
     $scope.modes = ['self_schedule', 'proc_office', 'full'];
     $scope.mode = $scope.modes[0];
@@ -145,6 +144,10 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
             return '{0}?person_id={1}'.format(WMConfig.url.schedule.html.index, id_);
         }
         return WMConfig.url.schedule.html.index;
+    };
+
+    $scope.openPatientActions = function () {
+        $scope.$broadcast('patientActionsOpened', {client_id: $scope.client.client_id});
     };
 
     var interval;
