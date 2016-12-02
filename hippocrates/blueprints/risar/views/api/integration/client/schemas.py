@@ -320,28 +320,6 @@ class newClientSchema(Schema):
                         "document_type_code": {
                             "type": "integer",
                             "description": "Код типа документа, идентифицирующего личность по федеральному приказу ФОМС №79 от 7.04.2011",
-                            "enum": [
-                                14,
-                                2,
-                                5,
-                                8,
-                                9,
-                                21,
-                                22,
-                                23,
-                                24,
-                                25,
-                                26,
-                                27,
-                                28,
-                                1,
-                                15,
-                                3,
-                                10,
-                                11,
-                                12,
-                                13
-                            ]
                         },
                         "document_series": {
                             "type": "string",
@@ -463,21 +441,6 @@ class newClientSchema(Schema):
                         "blood_type": {
                             "type": "string",
                             "description": "Код группы крови",
-                            "enum":
-                                [
-                                    "0(I)Rh-",
-                                    "0(I)Rh+",
-                                    "A(II)Rh-",
-                                    "A(II)Rh+",
-                                    "B(III)Rh-",
-                                    "B(III)Rh+",
-                                    "AB(IV)Rh-",
-                                    "AB(IV)Rh+",
-                                    "0(I)RhDu",
-                                    "A(II)RhDu",
-                                    "B(III)RhDu",
-                                    "AB(IV)RhDu"
-                                ]
                         }
                     },
                     "required": [
