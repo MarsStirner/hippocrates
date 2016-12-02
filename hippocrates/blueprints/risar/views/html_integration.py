@@ -13,9 +13,11 @@ from flask import url_for, redirect
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.lib.apiutils import RawApiResult
+from flask_login import current_user
 
 from blueprints.risar.lib import sirius
 from blueprints.risar.risar_config import request_type_pregnancy
+from nemesis.models.organisation import Organisation
 from ..app import module
 from hippocrates.blueprints.risar.views.api.integration.const import (
     card_attrs_save_error_code, err_card_attrs_save_msg
@@ -28,6 +30,11 @@ logger = logging.getLogger('simple')
 # /risar/integration/0/remote_entity/tambov/patient/6EHBT7UCLVXB5LSV/inspection.html
 @module.route('/integration/<int:api_version>/remote_entity/<region>/<entity>/<remote_id>/inspection.html')
 def api_card_by_remote_id(api_version, region, entity, remote_id):
+    main_user = current_user.get_main_user()
+    doctor_code = main_user.regionalCode
+    org_code = Organisation.query.filter(
+        Organisation.id == main_user.org_id
+    ).value(Organisation.TFOMSCode)
 
     # Добавляем/обновляем пациента по UID РМИС
     sirius.update_entity_from_mis(region, entity, remote_id)
@@ -53,8 +60,8 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
         data = {
             'client_id': client_id,
             'card_set_date': datetime.date.today().isoformat(),
-            'card_doctor': '995',  # todo: здесь данные пользователя МИС
-            'card_LPU': '1246'  # todo: здесь данные пользователя МИС
+            'card_doctor': doctor_code,  # todo: здесь данные пользователя МИС
+            'card_LPU': org_code  # todo: здесь данные пользователя МИС
         }
         xform = card_save_or_update(data, True, api_version)
         card_id = xform.target_obj.id
