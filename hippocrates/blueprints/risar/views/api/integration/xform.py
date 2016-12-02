@@ -326,7 +326,7 @@ class XForm(object):
     def _check_rb_value(self, rb_name, value_code):
         field_name = None
         if rb_name == 'rbBloodType':
-            field_name = 'name'
+            field_name = 'code'
         elif rb_name in ('rbDocumentType', 'rbPolicyType'):
             field_name = 'TFOMSCode'
         if not check_rb_value_exists(rb_name, value_code, field_name):
