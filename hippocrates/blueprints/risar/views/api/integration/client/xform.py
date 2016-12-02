@@ -169,7 +169,7 @@ class ClientXForm(ClientSchema, XForm):
 
     def _update_blood(self, data_list):
         blood_types = dict(
-            (bt.name, bt)
+            (bt.code, bt)
             for bt in rbBloodType.query
         )
         client = self.target_obj
