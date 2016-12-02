@@ -77,8 +77,8 @@ class MeasureListXForm(MeasureListSchema, XForm):
 
     def update_target_obj(self, data):
         event = None
-        measure_id = Measure.query.join(rbMeasureType).filter(
-            rbMeasureType.code == data['measure_type_code'],
+        measure_id = Measure.query.filter(
+            Measure.code == data['measure_type_code'],
             Measure.resultAt_id.isnot(None),
         ).first().id
         em_ctrl = EventMeasureController()
