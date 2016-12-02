@@ -630,11 +630,13 @@ def api_patient_actions(client_id=None):
         raise ApiException(400, u'`client_id required`')
 
     # get all patient actions
-    patient_actions = db.session.query(Action).join(ActionType, Event).filter(
+    patient_actions = db.session.query(Action).join(Event).filter(
         Event.client_id == client_id,
         Event.deleted == 0,
         Action.deleted == 0
-    ).order_by(Action.begDate, Action.status)
+    ).order_by(Action.begDate, Action.status).options(
+        joinedload(Action.actionType, innerjoin=True).joinedload('diagnosis_types')
+    )
 
     at_ids = set()
     action_list = []
