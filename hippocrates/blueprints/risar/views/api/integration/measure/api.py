@@ -6,7 +6,7 @@ from nemesis.lib.utils import public_endpoint
 from .....app import module
 
 from ..logformat import hook
-from .xform import MeasureListXForm
+from .xform import MeasureListXForm, MeasureXForm
 
 
 @module.route('/api/integration/<int:api_version>/measures/list/schema.json', methods=["GET"])
@@ -29,7 +29,7 @@ def api_measure_list_get(api_version, card_id):
 @module.route('/api/integration/<int:api_version>/card/<card_id>/measures/<int:measure_id>', methods=["GET"])
 @api_method(hook=hook)
 def api_measure_get(api_version, card_id, measure_id=None):
-    xform = MeasureListXForm(api_version, False)
+    xform = MeasureXForm(api_version, False)
     xform.check_params(measure_id, card_id)
     xform.load_data()
     return xform.as_json()
@@ -41,7 +41,7 @@ def api_measure_get(api_version, card_id, measure_id=None):
 def api_measure_save(api_version, card_id, measure_id=None):
     data = request.get_json()
     create = request.method == 'POST'
-    xform = MeasureListXForm(api_version, create)
+    xform = MeasureXForm(api_version, create)
     xform.validate(data)
     xform.check_params(measure_id, card_id, data)
     # todo: обновление не реализовано

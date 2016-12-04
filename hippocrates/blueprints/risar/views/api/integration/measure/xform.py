@@ -5,7 +5,7 @@ import logging
 from nemesis.models.expert_protocol import rbMeasureStatus, Measure, \
     rbMeasureType
 from ..xform import XForm, wrap_simplify, VALIDATION_ERROR
-from .schemas import MeasureListSchema
+from .schemas import MeasureListSchema, MeasureSchema
 
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.expert.utils import em_cancelled_all, em_status_all
@@ -89,7 +89,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
                 'end_datetime': data['end_datetime'],
                 'event_id': self.parent_obj_id,
                 'measure_id': measure_id,
-                'status': {'id': self.rb(rbMeasureStatus, data['status'], 'code')[0]},
+                'status': {'id': self.rb_validate(rbMeasureStatus, data['status'], 'code')[0]},
             }
         }]
         em_list = em_ctrl.save_list(event, em_data)
@@ -122,3 +122,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
             pass
 
         return dc
+
+
+class MeasureXForm(MeasureSchema, MeasureListXForm):
+    pass
