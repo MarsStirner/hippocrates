@@ -2,6 +2,7 @@
 
 import logging
 
+from blueprints.risar.lib.stats import StatsSelecter
 from sqlalchemy import or_
 from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
 from .schemas import CardSchema
@@ -157,7 +158,7 @@ class CardXForm(CardSchema, XForm):
                 self.target_obj_class.id == filters['id']
             )
         if 'pregnancyWeek' in filters:
-            q = q.filter(
-                self.target_obj_class.pregnancyWeek == filters['pregnancyWeek']
-            )
+            ss = StatsSelecter()
+            ss.get_events_exchange_card()
+            q = ss.query
         return q.all()
