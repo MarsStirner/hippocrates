@@ -40,7 +40,7 @@
                             </span>
                         </div>
                     {%- else -%}
-                        <div class="col-md-4 text-right">Рассчётная дата</div>
+                        <div class="col-md-4 text-right">Расчётная дата</div>
                         <div class="col-md-8">
                             <span class="bottom_dotted" tooltip="Рассчитана на основе срока беременности в последнем осмотре">
                                     {{ tm_data['predicted_delivery_date'] | as_date | ifempty('Нет данных для расчета') }}
