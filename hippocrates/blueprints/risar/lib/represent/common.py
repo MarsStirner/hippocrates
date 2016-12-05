@@ -308,6 +308,21 @@ def represent_fetus(fetus):
     }
 
 
+def represent_fetus_for_checkup_copy(fetus):
+    dc = {
+        'state': {
+            'id': None,
+            'position': fetus.position,
+            'position_2': fetus.position_2,
+            'type': fetus.type,
+            'presenting_part': fetus.presenting_part,
+            'heartbeat': fetus.heartbeat,
+            'heart_rate': fetus.heart_rate,
+        },
+    }
+    return dc
+
+
 def represent_age(age):
     age = safe_int(age)
     if age:

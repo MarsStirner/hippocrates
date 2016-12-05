@@ -95,6 +95,7 @@ WebMis20
         api_chart_header: '{{ url_for('.api_0_chart_header', event_id=-90).replace('-90', '{0}') }}',
         api_checkup_list: '{{ url_for('.api_0_pregnancy_checkup_list') }}',
         api_checkup_get: '{{ url_for('.api_0_pregnancy_checkup_get') }}{0}',
+        api_checkup_get_copy: '{{ url_for('.api_0_pregnancy_checkup_copy', event_id=-99, fill_from=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
         api_checkup_new: '{{ url_for('.api_0_pregnancy_checkup_new') }}{0}',
         api_checkup_save: '{{ url_for('.api_0_pregnancy_checkup') }}{0}',
         api_fetus_list: '{{ url_for('.api_0_fetus_list') }}',

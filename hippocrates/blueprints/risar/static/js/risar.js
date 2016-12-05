@@ -270,6 +270,9 @@ WebMis20
         get: function (checkup_id) {
             return wrapper('GET', Config.url.api_checkup_get.format(checkup_id));
         },
+        get_copy: function (event_id, checkup_id) {
+            return wrapper('GET', Config.url.api_checkup_get_copy.format(event_id, checkup_id));
+        },
         create: function (event_id, flat_code) {
             return wrapper('POST', Config.url.api_checkup_new.format(event_id), undefined, {
                 flat_code: flat_code

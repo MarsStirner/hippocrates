@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 
+
 from hippocrates.blueprints.risar.lib import sirius
 from flask import request
 
@@ -11,10 +12,11 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_wm, represent_fetuses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action, set_action_apt_values
+from hippocrates.blueprints.risar.lib.represent.common import represent_fetus_for_checkup_copy, represent_ticket_25
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
-from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, \
-    first_inspection_flat_code
+from hippocrates.blueprints.risar.lib.checkups import copy_checkup
+from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, first_inspection_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
@@ -118,6 +120,27 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
     if not action:
         raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
     return represent_pregnancy_checkup_wm(action)
+
+
+@module.route('/api/0/pregnancy/checkup/copy/<int:event_id>/<int:fill_from>', methods=['GET'])
+@api_method
+def api_0_pregnancy_checkup_copy(event_id, fill_from):
+    if fill_from:
+        from_action = get_action_by_id(fill_from)
+
+        if not from_action:
+            raise ApiException(400, u'укажите правильный action для копии')
+
+        event = Event.query.get(event_id)
+        with db.session.no_autoflush:
+            filled_action = copy_checkup(event, from_action)
+            ticket25_data = represent_ticket_25(from_action.propsByCode['ticket_25'].value)
+            ticket25_data['id'] = None
+            result = represent_pregnancy_checkup_wm(filled_action)
+            result['pregnancy_week'] = get_pregnancy_week(event)
+            result['fetuses'] = map(represent_fetus_for_checkup_copy, PregnancyCard.Fetus(from_action).states)
+            result['ticket_25'] = ticket25_data
+            return result
 
 
 @module.route('/api/0/pregnancy/checkup/new/', methods=['POST'])
