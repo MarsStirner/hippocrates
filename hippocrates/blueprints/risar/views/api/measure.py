@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from blueprints.risar.lib import sirius
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -90,6 +91,16 @@ def api_0_event_measure_save_list(event_id):
     em_ctrl = EventMeasureController()
     em_list = em_ctrl.save_list(event, data)
     em_ctrl.store(*em_list)
+
+    for em in em_list:
+        sirius.send_to_mis(
+            sirius.RisarEvents.CREATE_REFERRAL,
+            'risar.api_measure_list_get',
+            obj=('measure_id', em.id),
+            params={'card_id': event_id},
+            is_create=True,
+        )
+
     return EventMeasureRepr().represent_listed_event_measures(em_list)
 
 

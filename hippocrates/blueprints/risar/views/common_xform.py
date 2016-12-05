@@ -23,7 +23,7 @@ from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
+from .common_utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
 __author__ = 'viruzzz-kun'
@@ -751,18 +751,9 @@ class MeasuresResultsXForm(ExternalXForm):
         self.prepare_params(data)
 
         if self.new:
-            self.em = self.get_event_measure(
-                data.get('measure_id'),
-                data['measure_type_code'],
-                data.get('checkup_date'),
-                data.get('checkup_date'),
-            )
             self.create_action()
         else:
             self.find_target_obj(self.target_obj_id)
-            self.em = EventMeasure.query.filter(
-                EventMeasure.resultAction_id == self.target_obj_id
-            ).one()
 
         mr_data = self.get_data_for_diags(data)
 

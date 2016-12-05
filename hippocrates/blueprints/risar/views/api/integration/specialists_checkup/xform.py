@@ -69,12 +69,6 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
         self.target_obj.person = data['Doctor']
 
     def prepare_params(self, data):
-        self.em = self.get_event_measure(
-            data.get('measure_id'),
-            data['measure_type_code'],
-            data.get('checkup_date'),
-            data.get('checkup_date'),
-        )
         self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
     def get_properties_data(self, data):

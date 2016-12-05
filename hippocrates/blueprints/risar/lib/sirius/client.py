@@ -64,7 +64,7 @@ def update_entity_from_mis(region, entity, remote_id):
 def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
                               date, beg_time, end_time, schedule_id):
     # нет информации по методу мис
-    if 1 or not app.config.get('SIRIUS_ENABLED'):
+    if not app.config.get('SIRIUS_ENABLED'):
         return True
     event_code = RisarEvents.MAKE_APPOINTMENT
     data = {

@@ -33,12 +33,6 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
         return res
 
     def prepare_params(self, data):
-        self.em = self.get_event_measure(
-            data.get('measure_id'),
-            data['measure_type_code'],
-            data.get('realization_date'),
-            data.get('realization_date'),
-        )
         if data.get('doctor_code') and data.get('lpu_code'):
             self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
