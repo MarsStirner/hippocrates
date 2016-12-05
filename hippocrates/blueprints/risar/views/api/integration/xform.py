@@ -751,9 +751,18 @@ class MeasuresResultsXForm(ExternalXForm):
         self.prepare_params(data)
 
         if self.new:
+            self.em = self.get_event_measure(
+                data.get('measure_id'),
+                data['measure_type_code'],
+                data.get('checkup_date'),
+                data.get('checkup_date'),
+            )
             self.create_action()
         else:
             self.find_target_obj(self.target_obj_id)
+            self.em = EventMeasure.query.filter(
+                EventMeasure.resultAction_id == self.target_obj_id
+            ).one()
 
         mr_data = self.get_data_for_diags(data)
 
