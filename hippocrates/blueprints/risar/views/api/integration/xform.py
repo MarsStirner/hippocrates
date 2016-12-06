@@ -678,6 +678,14 @@ class PregnancyCheckupsXForm(CheckupsXForm):
         em_ctrl = EventMeasureController()
         em_ctrl.regenerate(self.target_obj)
 
+    @staticmethod
+    def get_mkb_list(diagnosis_list):
+        return map(lambda x: x['MKB'], diagnosis_list)
+
+    @staticmethod
+    def get_diagnosis_additional_info(diagnosis_list):
+        return {d.pop('MKB'): d for d in diagnosis_list}
+
 
 class GynecologyCheckupsXForm(CheckupsXForm):
 
