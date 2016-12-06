@@ -439,6 +439,7 @@ class DiagnosesSystemManager(object):
                                 diag['diagn'].character_id != safe_traverse(additional_info, 'character', 'id') or \
                                 diag['diagn'].MKBEx != safe_traverse(additional_info, 'mkb2', 'code') or \
                                 diag['diagn'].rbAcheResult_id != safe_traverse(additional_info, 'ache_result', 'id')
+                            # diagnosis_description
                         if 'left' not in insp_w_mkb:
                             # diag was created exactly in current action
                             ds_beg_date = action_date
@@ -891,6 +892,8 @@ class DiagnosesSystemManager(object):
                 data['diagnostic']['mkb2'] = additional_info['mkb2']
             if 'ache_result' in additional_info:
                 data['diagnostic']['ache_result'] = additional_info['ache_result']
+            if 'descr' in additional_info:
+                data['diagnostic']['diagnosis_description'] = additional_info['descr']
 
         if other_action is None:
             self.to_create.append(data)
