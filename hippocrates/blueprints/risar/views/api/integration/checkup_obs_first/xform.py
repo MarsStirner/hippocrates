@@ -195,6 +195,14 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         ve = data.get('vaginal_examination', {})
         self.mapping_part(self.VAGINAL_MAP, ve, res)
 
+    @staticmethod
+    def get_mkb_list(diagnosis_list):
+        return map(lambda x: x['MKB'], diagnosis_list)
+
+    @staticmethod
+    def get_diagnosis_additional_info(diagnosis_list):
+        return {d.pop('MKB'): d for d in diagnosis_list}
+
     def mapping_medical_report(self, data, res):
         mr = data.get('medical_report', {})
         self.mapping_part(self.REPORT_MAP, mr, res)
@@ -203,17 +211,20 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         if 'diagnosis_osn' in mr:
             diag_data.append({
                 'kind': 'main',
-                'mkbs': [mr['diagnosis_osn']]
+                'mkbs': self.get_mkb_list([mr['diagnosis_osn']]),
+                'additional_info': self.get_diagnosis_additional_info([mr['diagnosis_osn']]),
             })
         if 'diagnosis_osl' in mr:
             diag_data.append({
                 'kind': 'complication',
-                'mkbs': mr['diagnosis_osl']
+                'mkbs': self.get_mkb_list(mr['diagnosis_osl']),
+                'additional_info': self.get_diagnosis_additional_info(mr['diagnosis_osl']),
             })
         if 'diagnosis_sop' in mr:
             diag_data.append({
                 'kind': 'associated',
-                'mkbs': mr['diagnosis_sop']
+                'mkbs': self.get_mkb_list(mr['diagnosis_sop']),
+                'additional_info': self.get_diagnosis_additional_info(mr['diagnosis_sop']),
             })
         old_action_data = {
             'begDate': self.target_obj.begDate,
