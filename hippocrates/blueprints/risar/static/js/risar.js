@@ -5,8 +5,8 @@
 
 WebMis20
 .service('RisarApi', [
-        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService',
-        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService) {
+        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService', 'WMConfig',
+        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService, WMConfig) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
     this.file_get = function (verb, url, data, target) {
@@ -472,7 +472,9 @@ WebMis20
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
         },
         new_appointment: function (client_id, person_id, start_date) {
+            var external_url = WMConfig.local_config.risar.system_prefs.integration.external_schedule_url;
             this.child_window = $window.open(
+                external_url ||
                 Config.url.url_schedule_appointment_html +
                     '?client_id=' + client_id +
                     '&person_id=' + person_id +
