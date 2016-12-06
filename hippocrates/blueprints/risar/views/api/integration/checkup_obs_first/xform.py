@@ -195,14 +195,6 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         ve = data.get('vaginal_examination', {})
         self.mapping_part(self.VAGINAL_MAP, ve, res)
 
-    @staticmethod
-    def get_mkb_list(diagnosis_list):
-        return map(lambda x: x['MKB'], diagnosis_list)
-
-    @staticmethod
-    def get_diagnosis_additional_info(diagnosis_list):
-        return {d.pop('MKB'): d for d in diagnosis_list}
-
     def mapping_medical_report(self, data, res):
         mr = data.get('medical_report', {})
         self.mapping_part(self.REPORT_MAP, mr, res)
@@ -339,14 +331,15 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
 
         diags_data = data.get('diagnoses')
         for dd in diags_data:
-            if dd['end_date']:
-                continue
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
+            diagnosis = {
+                'MKB': dd['diagnostic']['mkb'].DiagID,
+                'descr': dd['diagnostic']['diagnosis_description'],
+            }
             if kind['is_vector']:
-                res.setdefault(kind['attr'], []).append(mkb_code)
+                res.setdefault(kind['attr'], []).append(diagnosis)
             else:
-                res[kind['attr']] = mkb_code
+                res[kind['attr']] = diagnosis
         return res
 
 
