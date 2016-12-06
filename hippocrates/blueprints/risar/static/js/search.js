@@ -94,7 +94,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         closed_diags: null,
         overdue: null,
         measure_type: $scope.rbMeasureType.objects[0],
-        controlled_events: null
+        controlled_events: null,
+        missed_last_checkup: null
     };
 
     $scope.get_search_data = function () {
@@ -148,7 +149,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             mkbs: mkbs.length ? mkbs : undefined,
             closed_diags: $scope.query.closed_diags || undefined,
             overdue: $scope.query.overdue && $scope.query.measure_type.code,
-            controlled_events: $scope.query.controlled_events || undefined
+            controlled_events: $scope.query.controlled_events || undefined,
+            missed_last_checkup: $scope.query.missed_last_checkup || undefined
         };
     };
 
@@ -243,7 +245,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             closed_diags: null,
             overdue: null,
             measure_type: $scope.rbMeasureType.objects[0],
-            controlled_events: null
+            controlled_events: null,
+            missed_last_checkup: null
         };
         return $scope.refresh_areas();
     };
@@ -381,6 +384,13 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.query.controlled_events = args.controlled_events === 'false' ?
                 false :
                 args.controlled_events === 'true' ?
+                    true :
+                    undefined;
+        }
+        if (args.hasOwnProperty('missed_last_checkup')) {
+            $scope.query.missed_last_checkup = args.missed_last_checkup === 'false' ?
+                false :
+                args.missed_last_checkup === 'true' ?
                     true :
                     undefined;
         }

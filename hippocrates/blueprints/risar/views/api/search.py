@@ -175,6 +175,12 @@ def search_events(paginated=True, **kwargs):
         else:
             query = query.filter(exec_date__eq=0)
 
+    if 'missed_last_checkup' in kwargs:
+        if kwargs['missed_last_checkup']:
+            query = query.filter(has_missed_checkups__neq=0)
+        else:
+            query = query.filter(has_missed_checkups__eq=0)
+
     card_fill = kwargs.get('card_fill')
     if card_fill:
         card_section = kwargs.get('card_section')
