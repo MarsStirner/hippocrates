@@ -110,7 +110,7 @@ class ConciliumXForm(ConciliumSchema, XForm):
 
         members = []
         for member in data.get('doctors', []):
-            doc = self.find_doctor(member['doctor'], org_code)
+            doc = self.find_doctor(member['doctor'], member['doctor_hospital'])
             members.append({
                 'person_id': doc.id,
                 'person': doc,
@@ -181,7 +181,8 @@ class ConciliumXForm(ConciliumSchema, XForm):
         return [
             {
                 'doctor': self.from_person_rb(member.person),
-                'opinion': self.or_undefined(member.opinion)
+                'opinion': self.or_undefined(member.opinion),
+                'doctor_hospital': self.or_undefined(self.from_org_rb(member.person.organisation)),
             }
             for member in members
         ]
