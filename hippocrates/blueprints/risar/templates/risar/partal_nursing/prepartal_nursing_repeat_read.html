@@ -1,125 +1,56 @@
-{% extends 'risar/base/base.html' %}
-{% import 'risar/_macros.html' as rimacros with context %}
-{%- block modules_css %}
-    {{ super() }}
-    <style type="text/css">
-       .box.box-primary {
-            line-height: 1.5em;
-            font-size: 110%;
-        }
-
-    </style>
-{% endblock -%}
-{% block title %}> {{ module_name }}{% endblock %}
-
-{% set flat_code = template_data.flatcode %}
-{% block main %}
-<div ng-controller="PartalNursingEditCtrl" ng-cloak>
-    <section class="content-header" ng-controller="RisarHeaderCtrl">
-        {{ rimacros.page_title_n('') }}
-        {{ rimacros.navigation('[[ event_id ]]') }}
-    </section>
-    <section class="content">
-        <div>
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="tab-content">
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header with-border">
-
-                             {% set right_word =  dict((('postpartal_nursing', 'послеродовому'),
-                                            ('prepartal_nursing', 'дородовому'),
-                                            ('prepartal_nursing_repeat', 'дородовому'))).get(flat_code) %}
-                               <h3 class="box-title">&nbsp;Сведения по {{ right_word }} патронажу</h3>
-                                <span class="col-sm-offset-3" ><a  class="print_link"  ng-if="!pp_nursing.end_date"
-                                   href="{{ url_for('.html_partal_nursing_edit', flatcode=flat_code) }}?event_id=[[ header.event.id ]]&pp_nursing_id=[[ pp_nursing.id ]]">
-                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a></span>
-                            </div>
-                            <div class="box-body">
-                                <table class="table table-condensed">
-                                    <tbody>
-                                        <td class="text-right col-md-4">Дата проведения</td>
-                                        <td class="col-md-8">[[pp_nursing.date | asDate]]</td>
-                                         <tr>
-                                            <td class="text-right">Срок беременности </td>
-                                            <td>[[pp_nursing.gestational_age]]</td>
-                                        </tr>
-                                         <tr>
-                                            <td class="text-right">Выполнение рекомендованных мероприятий </td>
-                                            <td>[[pp_nursing.arragements_completion]]</td>
-                                        </tr>
-                                         <tr>
-                                            <td class="text-right">Изменение условий труда </td>
-                                            <td>[[pp_nursing.conditions_of_work]]</td>
-                                        </tr>
-                                         <tr>
-                                            <td class="text-right">Изменение условий быта </td>
-                                            <td>[[pp_nursing.conditions_of_living]]</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right">Режим</td>
-                                            <td ng-bind-html="pp_nursing.regimen"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right">Питание</td>
-                                            <td ng-bind-html="pp_nursing.nutrition"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right">Мероприятия по оздоровлению</td>
-                                            <td ng-bind-html="pp_nursing.corrective_measures"></td>
-                                        </tr>
-                                         <tr>
-                                            <td class="text-right">Санация очагов инфекции </td>
-                                            <td>[[pp_nursing.sanitation]]</td>
-                                        </tr>
-                                         <tr>
-                                            <td class="text-right">Санитарно-гигиеническое состояние помещений </td>
-                                            <td>[[pp_nursing.sanitary_condition]]</td>
-                                        </tr>
-                                         <tr>
-                                            <td class="text-right">Подготовка к принятию новорождённого </td>
-                                            <td>[[pp_nursing.newborn_acceptance_readiness]]</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right">Прогноз гипогалактии</td>
-                                            <td ng-bind-html="pp_nursing.hypogalactia"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right">Прогноз группы риска ребёнка</td>
-                                            <td ng-bind-html="pp_nursing.child_risk"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-right">Рекомендации</td>
-                                            <td ng-bind-html="pp_nursing.recommendations"></td>
-                                        </tr>
-                                        </tbody>
-                                </table>
-                            </div>
-                            </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 col-sm-12">
-                    <div class="box-footer">
-                        <div class="col-md-offset-5 col-sm-offset-5">
-                         {% set right_word =  dict((('postpartal_nursing', 'послеродовых'),
-                                                ('prepartal_nursing', 'дородовых'),
-                                                ('prepartal_nursing_repeat', 'дородовых'))).get(flat_code) %}
-                        <a class="pseudo-btn" ng-href="{{ url_for('.html_partal_nursing', flatcode=flat_code) }}?event_id=[[ header.event.id ]]">Перейти на форму {{ right_word }} патронажей</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</div>
-{% endblock %}
-
-{% block modules_js %}
-    {{ super() }}
-    <script>
-        WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
-    </script>
-    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
-{% endblock %}
+<tbody>
+<td class="text-right col-md-4">Дата проведения</td>
+<td class="col-md-8">[[pp_nursing.date | asDate]]</td>
+ <tr>
+    <td class="text-right">Срок беременности </td>
+    <td>[[pp_nursing.gestational_age]]</td>
+</tr>
+ <tr>
+    <td class="text-right">Выполнение рекомендованных мероприятий </td>
+    <td>[[pp_nursing.arragements_completion]]</td>
+</tr>
+ <tr>
+    <td class="text-right">Изменение условий труда </td>
+    <td>[[pp_nursing.conditions_of_work]]</td>
+</tr>
+ <tr>
+    <td class="text-right">Изменение условий быта </td>
+    <td>[[pp_nursing.conditions_of_living]]</td>
+</tr>
+<tr>
+    <td class="text-right">Режим</td>
+    <td ng-bind-html="pp_nursing.regimen"></td>
+</tr>
+<tr>
+    <td class="text-right">Питание</td>
+    <td ng-bind-html="pp_nursing.nutrition"></td>
+</tr>
+<tr>
+    <td class="text-right">Мероприятия по оздоровлению</td>
+    <td ng-bind-html="pp_nursing.corrective_measures"></td>
+</tr>
+ <tr>
+    <td class="text-right">Санация очагов инфекции </td>
+    <td>[[pp_nursing.sanitation]]</td>
+</tr>
+ <tr>
+    <td class="text-right">Санитарно-гигиеническое состояние помещений </td>
+    <td>[[pp_nursing.sanitary_condition]]</td>
+</tr>
+ <tr>
+    <td class="text-right">Подготовка к принятию новорождённого </td>
+    <td>[[pp_nursing.newborn_acceptance_readiness]]</td>
+</tr>
+<tr>
+    <td class="text-right">Прогноз гипогалактии</td>
+    <td ng-bind-html="pp_nursing.hypogalactia"></td>
+</tr>
+<tr>
+    <td class="text-right">Прогноз группы риска ребёнка</td>
+    <td ng-bind-html="pp_nursing.child_risk"></td>
+</tr>
+<tr>
+    <td class="text-right">Рекомендации</td>
+    <td ng-bind-html="pp_nursing.recommendations"></td>
+</tr>
+</tbody>

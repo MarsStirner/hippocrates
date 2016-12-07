@@ -506,7 +506,7 @@ def html_partal_nursing_read(flatcode):
     event_id = safe_int(request.args.get('event_id'))
     card = PregnancyCard.get_by_id(event_id)
     at = get_action_type_by_flatcode(flatcode)
-    tpl_path = 'risar/partal_nursing/%s_read.html' % flatcode
+    tpl_path = 'risar/partal_nursing/read.html'
     return render_template(tpl_path,
                            card=card,
                            template_data=represent_action_type_for_nursing(at))
