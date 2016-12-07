@@ -91,6 +91,11 @@ WebMis20.controller('CheckupTicket25Ctrl', ['$scope', function ($scope) {
             $scope.checkup.ticket_25.beg_date = new Date($scope.checkup.beg_date);
         }
     });
+    $scope.$watch('checkup.end_date', function (n, o) {
+        if (n!==o && $scope.checkup.ticket_25) {
+            $scope.checkup.ticket_25.end_date = new Date($scope.checkup.beg_date);
+        }
+    });
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;
     };
