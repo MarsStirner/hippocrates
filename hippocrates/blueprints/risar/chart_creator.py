@@ -2,6 +2,7 @@
 # TODO: Refactor me
 from datetime import datetime
 
+from blueprints.risar.lib import sirius
 from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
@@ -102,6 +103,16 @@ class ChartCreator(object):
                 db.session.add(self.ticket)
 
             db.session.commit()
+
+            if self.automagic:
+                sirius.send_to_mis(
+                    sirius.RisarEvents.CREATE_CARD,
+                    'risar.api_card_get',
+                    obj=('card_id', self.event.id),
+                    params={'client_id': self.client_id},
+                    is_create=self.automagic,
+                )
+
             self._perform_post_create_event_checks()
         return self.event
 

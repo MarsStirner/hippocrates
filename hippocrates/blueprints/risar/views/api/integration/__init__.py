@@ -20,7 +20,8 @@ from . import (
     appointments,
     schedule,
     doctors,
-    orgs
+    orgs,
+    refbook,
 )
 from . import xform
 

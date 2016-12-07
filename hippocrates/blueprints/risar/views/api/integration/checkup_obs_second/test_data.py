@@ -101,24 +101,18 @@ obs_second_data = {
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
         "diagnosis_osn": {      # Основной диагноз
-            "MKB": "Z34.0",
-            "descr": "Описание основного диагноза",
-        },
-        "diagnosis_sop": [
-            {     # Диагноз сопутствующий
-                "MKB": "G01",
-                "descr": "Описание сопутствующего диагноза",
-            }
-        ],
-        "diagnosis_osl": [
-            {     # Диагноз осложнения
-                "MKB": "H01",
-                "descr": "Описание осложнения диагноза",
-            }, {
-                "MKB": "H02",
-                "descr": "Описание осложнения диагноза",
-            }
-        ],
+            "MKB": "A00",
+            "descr": "Osn descr"
+          }
+        ,
+        "diagnosis_sop": [{     # Диагноз сопутствующий
+          "MKB": "A00.0",
+          "descr": "Sop descr"
+        }],
+        "diagnosis_osl": [{     # Диагноз осложнения
+          "MKB": "A00.1",
+          "descr": "Osl descr"
+        }],
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания
         # "vitaminization": "",  # Витаминизация

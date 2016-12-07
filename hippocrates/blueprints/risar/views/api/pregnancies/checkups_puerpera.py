@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-
+from blueprints.risar.lib import sirius
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -70,6 +70,15 @@ def api_0_pregnancy_checkup_puerpera(event_id):
         create_or_update_diagnoses(action, diagnoses)
 
     db.session.commit()
+
+    sirius.send_to_mis(
+        sirius.RisarEvents.SAVE_CHECKUP,
+        'risar.api_checkup_pc_ticket25_get',
+        obj=('exam_obs_id', action.id),
+        # obj=('external_id', action.id),
+        params={'card_id': event_id},
+        is_create=not checkup_id,
+    )
 
     return represent_pregnancy_checkup_puerpera(action)
 

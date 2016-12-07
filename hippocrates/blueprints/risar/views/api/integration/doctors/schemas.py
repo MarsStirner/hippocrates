@@ -72,5 +72,5 @@ class DoctorSchema(Schema):
                 "description": "Региональный код врача"
             }
         },
-        "required": ["last_name", "first_name", "sex", "SNILS", "INN", "organization", "speciality", "post", "regional_code"]
+        "required": ["last_name", "first_name", "sex", "organization", "speciality", "post", "regional_code"]
     }]

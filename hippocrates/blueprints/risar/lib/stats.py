@@ -4,6 +4,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, ch
     pregnancy_card_attrs, risar_epicrisis, request_type_gynecological
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
+from nemesis.models.risar import rbRadzinskyRiskRate
 from sqlalchemy import func, and_, or_
 from sqlalchemy.orm import aliased
 
@@ -18,13 +19,16 @@ class StatsController(BaseModelController):
         """Различные метрики по текущим открытым картам"""
         sel = self.get_selecter()
         data = sel.get_current_cards_overview(person_id, curation_level)
+        data2 = sel.get_current_cards_overview_checkup_skipped(person_id, curation_level)
         events_all = float(data.count_all or 0) if data else 0
         events_not_closed_42 = float(data.count_event_not_closed_42 or 0) if data else 0
         events_2_months = float(data.count_event_2m_no_inspection or 0) if data else 0
+        events_missed_last_checkup = float(data2.count_event_skipped_checkup or 0) if data2 else 0
         return {
             'events_all': events_all,
             'events_not_closed_42': events_not_closed_42,
-            'events_2_months': events_2_months
+            'events_2_months': events_2_months,
+            'events_missed_last_checkup': events_missed_last_checkup,
         }
 
     def get_cards_pregnancy_week_distribution(self, person_id, curation_level):
@@ -123,6 +127,22 @@ class StatsSelecter(BaseSelecter):
         ).with_entities(
             RisarRiskGroup.riskGroup_code,
             func.count(func.distinct(RisarRiskGroup.event_id)),
+        )
+        self.query = query
+        return self.get_all()
+
+    def get_radz_risk_counts(self, person_id, curation_level=None):
+        from ..models.radzinsky_risks import RisarRadzinskyRisks
+
+        query = self.query_main(person_id, curation_level)
+        query = RisarRadzinskyRisks.query.join(
+            query.subquery(),
+            rbRadzinskyRiskRate
+        ).group_by(
+            RisarRadzinskyRisks.risk_rate_id,
+        ).with_entities(
+            rbRadzinskyRiskRate.code,
+            func.count(func.distinct(RisarRadzinskyRisks.event_id)),
         )
         self.query = query
         return self.get_all()
@@ -232,6 +252,88 @@ class StatsSelecter(BaseSelecter):
                               func.coalesce(q_latest_inspections.c.beg_date, Event.setDate)) >= 60,
                 1, 0)
             ).label('count_event_2m_no_inspection')
+        )
+
+        self.query = query
+        return self.get_one()
+
+    def get_current_cards_overview_checkup_skipped(self, person_id, curation_level=None):
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty= self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+
+        # 2) event latest inspection
+        # * самые поздние даты осмотров по обращениям
+        q_action_begdates = self.model_provider.get_query('Action').join(
+            Event, EventType, rbRequestType, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date,
+        ).filter(
+            Event.deleted == 0, Action.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            ActionType.flatCode.in_(checkup_flat_codes), ActionPropertyType.code == 'next_date',
+            ActionProperty_Date.value <= func.curdate()
+        ).with_entities(
+            func.max(Action.begDate).label('max_beg_date'), Event.id.label('event_id')
+        ).group_by(
+            Event.id
+        ).subquery('MaxActionBegDates')
+
+        # * id самых поздних осмотров (включая уже и дату и id, если даты совпадают) для каждого случая
+        q_latest_checkups_id = self.model_provider.get_query('Action').join(
+            q_action_begdates, and_(q_action_begdates.c.max_beg_date == Action.begDate,
+                                    q_action_begdates.c.event_id == Action.event_id)
+        ).filter(
+            Action.deleted == 0, ActionType.flatCode.in_(checkup_flat_codes)
+        ).with_entities(
+            func.max(Action.id).label('action_id'), Action.event_id.label('event_id')
+        ).group_by(
+            Action.event_id
+        ).subquery('EventLatestCheckups')
+
+        # * итого: самый поздний осмотр для каждого случая
+        q_latest_inspections = self.model_provider.get_query('Action').join(
+            q_latest_checkups_id, q_latest_checkups_id.c.action_id == Action.id
+        ).join(
+            ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            ActionPropertyType.code == 'next_date'
+        ).with_entities(
+            Action.id.label('action_id'), Action.event_id.label('event_id'),
+            Action.begDate.label('beg_date'), Action.endDate.label('end_date'),
+            ActionProperty_Date.value.label('next_date')
+        ).subquery('EventLatestInspections')
+
+        inspections = self.model_provider.get_query('Action').join(
+            Event, ActionType
+        ).filter(
+            Event.deleted ==0, Event.execDate.is_(None),
+            Action.deleted == 0, ActionType.flatCode.in_(checkup_flat_codes)
+        ).with_entities(
+            Action.id.label('action_id'),
+            Action.event_id.label('event_id'),
+            Action.begDate.label('beg_date')
+        ).subquery('AllInspections')
+        # main query
+        query = self.query_main(person_id, curation_level)
+
+
+        query = query.outerjoin(
+            q_latest_inspections, q_latest_inspections.c.event_id == Event.id
+        ).outerjoin(
+            inspections, and_(inspections.c.event_id == Event.id,
+                              q_latest_inspections.c.beg_date < inspections.c.beg_date,
+                              inspections.c.beg_date <= q_latest_inspections.c.next_date
+                              )
+        )
+
+        query = query.with_entities(
+            func.sum(
+                func.IF(inspections.c.action_id.is_(None), 1, 0)
+            ).label('count_event_skipped_checkup')
         )
 
         self.query = query
@@ -401,6 +503,90 @@ class StatsSelecter(BaseSelecter):
 
         self.query = query
         return self.get_one()
+
+    def get_events_exchange_card(self):
+        # todo: 28 weeks if two fetuses
+        Client = self.model_provider.get('Client')
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        # main query
+        query = self.model_provider.get_query('Event')
+        query = query.join(
+            EventType, rbRequestType, Client, Action, ActionType
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
+            Action.deleted == 0, ActionType.flatCode == pregnancy_card_attrs
+        )
+
+        # event prr query
+        q_event_prr = self.model_provider.get_query('Event')
+        q_event_prr = q_event_prr.join(
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'prenatal_risk_572'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Integer.value_.label('prr')
+        ).subquery('EventPerinatalRiskRate')
+
+        # event pregnancy start date
+        q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
+
+        # event predicted delivery date
+        q_event_pdd = self.model_provider.get_query('Event')
+        q_event_pdd = q_event_pdd.join(
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'predicted_delivery_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
+        ).subquery('EventPredictedDeliveryDate')
+
+        query = query.join(
+            q_event_prr,
+            and_(Event.id == q_event_prr.c.event_id,
+                 q_event_prr.c.prr.in_([PerinatalRiskRate.medium[0], PerinatalRiskRate.high[0]]))
+        ).join(
+            q_event_pdd, Event.id == q_event_pdd.c.event_id
+        ).join(
+            q_event_psd, Event.id == q_event_psd.c.event_id
+        ).filter(
+            # неделя беременности
+            func.floor(
+                func.datediff(
+                    func.IF(func.coalesce(q_event_pdd.c.pdd, func.curdate()) < func.curdate(),
+                            q_event_pdd.c.pdd,
+                            func.curdate()),
+                    q_event_psd.c.psd
+                ) / 7
+            ) + 1 == 32
+        ).order_by(
+            q_event_pdd.c.pdd
+        )
+
+        self.query = query
+        return self.get_all()
+
+
+class RadzStatsController(BaseModelController):
+
+    @classmethod
+    def get_selecter(cls):
+        return StatsSelecter()
+
+    def get_risk_by_code(self, person_id, curation_level):
+        return dict(self.get_selecter().get_radz_risk_counts(person_id, curation_level))
 
 
 mather_death_koef_diags = (

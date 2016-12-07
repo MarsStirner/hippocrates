@@ -28,14 +28,28 @@ def api_card_schema(api_version):
 @api_method(hook=hook)
 def api_card_list(api_version):
     xform = CardXForm(api_version, False)
-    obj_list = xform.get_list()
+    filters = None
+    data = request.get_json()
+    if data:
+        # карты пациентов на 32 (28 для двойняшек) неделе для создания обменных карт
+        # todo: фильтр для двойняшек
+        filters = data.get('filters')
+    obj_list = xform.get_list(filters)
     res = []
     for obj in obj_list:
         xform.check_params(obj.id, obj.client_id)
         xform.target_obj = xform._find_target_obj_query().first()
-        if obj.id == 139:  # todo: при тестировании работаем пока с одной картой
-            res.append(xform.as_json())
+        res.append(xform.as_json())
     return res
+
+
+@module.route('/api/integration/<int:api_version>/card/<int:card_id>', methods=['GET'])
+@api_method(hook=hook)
+def api_card_get(api_version, card_id=None):
+    xform = CardXForm(api_version, False)
+    xform.check_params(card_id)
+    xform.find_target()
+    return xform.as_json()
 
 
 @module.route('/api/integration/<int:api_version>/card/', methods=['POST'])

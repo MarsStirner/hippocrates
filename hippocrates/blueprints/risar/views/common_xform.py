@@ -23,7 +23,7 @@ from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
+from .common_utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
 
 
 __author__ = 'viruzzz-kun'
@@ -678,14 +678,6 @@ class PregnancyCheckupsXForm(CheckupsXForm):
         em_ctrl = EventMeasureController()
         em_ctrl.regenerate(self.target_obj)
 
-    @staticmethod
-    def get_mkb_list(diagnosis_list):
-        return map(lambda x: x['MKB'], diagnosis_list)
-
-    @staticmethod
-    def get_diagnosis_additional_info(diagnosis_list):
-        return {d.pop('MKB'): d for d in diagnosis_list}
-
 
 class GynecologyCheckupsXForm(CheckupsXForm):
 
@@ -759,18 +751,9 @@ class MeasuresResultsXForm(ExternalXForm):
         self.prepare_params(data)
 
         if self.new:
-            self.em = self.get_event_measure(
-                data.get('measure_id'),
-                data['measure_type_code'],
-                data.get('checkup_date'),
-                data.get('checkup_date'),
-            )
             self.create_action()
         else:
             self.find_target_obj(self.target_obj_id)
-            self.em = EventMeasure.query.filter(
-                EventMeasure.resultAction_id == self.target_obj_id
-            ).one()
 
         mr_data = self.get_data_for_diags(data)
 

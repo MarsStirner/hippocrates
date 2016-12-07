@@ -54,6 +54,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     });
 
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
+    $scope.radz_risks_rb = RefBookService.get('rbRadzinskyRiskRate');
     $scope.pathology_rb = RefBookService.get('PregnancyPathology');
     $scope.rbRisarRiskGroup = RefBookService.get('rbRisarRiskGroup');
     $scope.rbMeasureType = RefBookService.get('rbMeasureType');
@@ -75,6 +76,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         bdate_from: null,
         bdate_to: null,
         risk: [],
+        radz_risk: [],
         closed: $scope.closed_items[0],
         client_work_group: {},
         age_min: null,
@@ -92,7 +94,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         closed_diags: null,
         overdue: null,
         measure_type: $scope.rbMeasureType.objects[0],
-        controlled_events: null
+        controlled_events: null,
+        missed_last_checkup: null
     };
 
     $scope.get_search_data = function () {
@@ -103,6 +106,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         var areas = $scope.query.areas,
             curators = $scope.query.curators,
             risks = _.pluck($scope.query.risk, 'id'),
+            radz_risks = _.pluck($scope.query.radz_risk, 'id'),
             request_types = _.pluck($scope.query.request_types, 'id'),
             pathologies = _.pluck($scope.query.pathology, 'id'),
             risk_groups = _.pluck($scope.query.risk_groups, 'code'),
@@ -120,6 +124,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_from: $scope.query.bdate_from || undefined,
             bdate_to: $scope.query.bdate_to || undefined,
             risk: risks.length ? risks : undefined,
+            radz_risk: radz_risks.length ? radz_risks : undefined,
             closed: $scope.query.closed.value,
             client_workgroup: $scope.query.client_workgroup || undefined,
             age_max: $scope.query.age_max || undefined,
@@ -144,7 +149,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             mkbs: mkbs.length ? mkbs : undefined,
             closed_diags: $scope.query.closed_diags || undefined,
             overdue: $scope.query.overdue && $scope.query.measure_type.code,
-            controlled_events: $scope.query.controlled_events || undefined
+            controlled_events: $scope.query.controlled_events || undefined,
+            missed_last_checkup: $scope.query.missed_last_checkup || undefined
         };
     };
 
@@ -219,6 +225,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_from: null,
             bdate_to: null,
             risk: [],
+            radz_risk: [],
             closed: $scope.closed_items[0],
             client_work_group: {},
             age_min: null,
@@ -238,7 +245,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             closed_diags: null,
             overdue: null,
             measure_type: $scope.rbMeasureType.objects[0],
-            controlled_events: null
+            controlled_events: null,
+            missed_last_checkup: null
         };
         return $scope.refresh_areas();
     };
@@ -341,6 +349,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                 return rr.code === args.risk_rate;
             });
         }
+        if (args.hasOwnProperty('radz_risk_rate')) {
+            $scope.query.radz_risk = $scope.radz_risks_rb.objects.filter(function (rr) {
+                return rr.code === args.radz_risk_rate;
+            });
+        }
         if (args.hasOwnProperty('pathology_id')) {
             var new_pathology = $scope.pathology_rb.get(args.pathology_id);
             if (new_pathology) $scope.query.pathology = [new_pathology];
@@ -374,10 +387,17 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
                     true :
                     undefined;
         }
+        if (args.hasOwnProperty('missed_last_checkup')) {
+            $scope.query.missed_last_checkup = args.missed_last_checkup === 'false' ?
+                false :
+                args.missed_last_checkup === 'true' ?
+                    true :
+                    undefined;
+        }
     };
 
     // start
-    $q.all([areas_promise, $scope.risks_rb.loading, $scope.pathology_rb.loading,
+    $q.all([areas_promise, $scope.risks_rb.loading, $scope.radz_risks_rb.loading, $scope.pathology_rb.loading,
             $scope.rbRisarRiskGroup.loading, $scope.rbMeasureType.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
@@ -387,6 +407,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             tc.start()
         });
         $scope.$watchCollection('query.risk', function () {
+            tc.start()
+        });
+        $scope.$watchCollection('query.radz_risk', function () {
             tc.start()
         });
         $scope.$watchCollection('query.request_types', function () {

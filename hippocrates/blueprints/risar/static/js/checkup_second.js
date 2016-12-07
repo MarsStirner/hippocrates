@@ -56,6 +56,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     };
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
+    var fill_from_id = params.fill_from;
     var event_id = $scope.event_id = params.event_id;
 
     var reload_checkup = function () {
@@ -65,14 +66,23 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 $scope.minDate = $scope.header.event.set_date;
             });
         if (!checkup_id) {
-            RisarApi.checkup.create(event_id, 'risarSecondInspection').
-            then(function (checkup) {
-                $scope.checkup = checkup;
-                if(!$scope.checkup.fetuses.length) {
-                    $scope.add_child();
-                }
-                $scope.$broadcast('checkupLoaded');
-            });
+            fill_from_id !== undefined ?
+                RisarApi.checkup.get_copy(event_id, fill_from_id)
+                    .then(function (checkup) {
+                        $scope.checkup = checkup;
+                        if(!$scope.checkup.fetuses.length) {
+                            $scope.add_child();
+                        }
+                        $scope.$broadcast('checkupLoaded');
+                    }) :
+                RisarApi.checkup.create(event_id, 'risarSecondInspection').
+                    then(function (checkup) {
+                        $scope.checkup = checkup;
+                        if(!$scope.checkup.fetuses.length) {
+                            $scope.add_child();
+                        }
+                        $scope.$broadcast('checkupLoaded');
+                    });
         } else {
             RisarApi.checkup.get(checkup_id)
                 .then(function (checkup) {

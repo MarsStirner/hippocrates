@@ -33,6 +33,15 @@
                     </a>
                 </td>
             </tr>
+            <tr>
+                <td>Не пришедшие на приём</td>
+                <td>
+                    <a href="[[getExtendedSearchUrl('missed_last_checkup')]]">
+                        <span class="badge pull-right" ng-class="{'label-info': stats_data.events_missed_last_checkup === 0,
+                            'label-danger': stats_data.events_missed_last_checkup !== 0}">[[stats_data.events_missed_last_checkup]]</span>
+                    </a>
+                </td>
+            </tr>
         </table>
     </div>
 </div>

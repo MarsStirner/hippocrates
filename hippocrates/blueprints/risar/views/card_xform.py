@@ -2,10 +2,9 @@
 
 import logging
 
-from blueprints.risar.lib.stats import StatsSelecter
 from sqlalchemy import or_
-from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
-from .schemas import CardSchema
+from .common_xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
+from .card_schemas import CardSchema
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_ET_Heuristic, default_AT_Heuristic
@@ -158,7 +157,7 @@ class CardXForm(CardSchema, XForm):
                 self.target_obj_class.id == filters['id']
             )
         if 'pregnancyWeek' in filters:
-            ss = StatsSelecter()
-            ss.get_events_exchange_card()
-            q = ss.query
+            q = q.filter(
+                self.target_obj_class.pregnancyWeek == filters['pregnancyWeek']
+            )
         return q.all()

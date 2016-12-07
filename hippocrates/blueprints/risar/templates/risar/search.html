@@ -98,10 +98,17 @@
                 </div>
                 {% endif %}
                 <div class="form-group">
-                    <label>Степень риска</label>
+                    <label>Степень риска по приказу 572</label>
 {#                    ng-disabled="!filterForPregCardsAvailable()"#}
                     <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk" class="nopadding">
                         [[ item.name ]]
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Степень риска по шкале Радзинского</label>
+{#                    ng-disabled="!filterForPregCardsAvailable()"#}
+                    <div fs-checkbox="" items="radz_risks_rb.objects" ng-model="query.radz_risk" class="nopadding">
+                        [[ item.name_masc ]]
                     </div>
                 </div>
                 <div class="form-group">
@@ -165,6 +172,11 @@
                                 ng-disabled="!filterForPregCardsAvailable()">
                         </div>
                     </div>
+                </div>
+                 <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-model="query.missed_last_checkup">Пропущен последний осмотр
+                    </label>
                 </div>
                 <div class="form-group">
                     <label>Код МКБ</label>

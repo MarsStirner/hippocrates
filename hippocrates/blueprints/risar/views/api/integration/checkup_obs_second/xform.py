@@ -211,17 +211,20 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         if 'diagnosis_osn' in mr:
             diag_data.append({
                 'kind': 'main',
-                'mkbs': [mr['diagnosis_osn']]
+                'mkbs': self.get_mkb_list([mr['diagnosis_osn']]),
+                'additional_info': self.get_diagnosis_additional_info([mr['diagnosis_osn']]),
             })
         if 'diagnosis_osl' in mr:
             diag_data.append({
                 'kind': 'complication',
-                'mkbs': mr['diagnosis_osl']
+                'mkbs': self.get_mkb_list(mr['diagnosis_osl']),
+                'additional_info': self.get_diagnosis_additional_info(mr['diagnosis_osl']),
             })
         if 'diagnosis_sop' in mr:
             diag_data.append({
                 'kind': 'associated',
-                'mkbs': mr['diagnosis_sop']
+                'mkbs': self.get_mkb_list(mr['diagnosis_sop']),
+                'additional_info': self.get_diagnosis_additional_info(mr['diagnosis_sop']),
             })
         old_action_data = {
             'begDate': self.target_obj.begDate,
@@ -340,8 +343,6 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
 
         diags_data = data.get('diagnoses')
         for dd in diags_data:
-            if dd['end_date']:
-                continue
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
             diagnosis = {
                 'MKB': dd['diagnostic']['mkb'].DiagID,

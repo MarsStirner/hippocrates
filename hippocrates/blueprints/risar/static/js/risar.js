@@ -5,8 +5,8 @@
 
 WebMis20
 .service('RisarApi', [
-        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService',
-        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService) {
+        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService', 'WMConfig',
+        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService, WMConfig) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
     this.file_get = function (verb, url, data, target) {
@@ -270,6 +270,9 @@ WebMis20
         get: function (checkup_id) {
             return wrapper('GET', Config.url.api_checkup_get.format(checkup_id));
         },
+        get_copy: function (event_id, checkup_id) {
+            return wrapper('GET', Config.url.api_checkup_get_copy.format(event_id, checkup_id));
+        },
         create: function (event_id, flat_code) {
             return wrapper('POST', Config.url.api_checkup_new.format(event_id), undefined, {
                 flat_code: flat_code
@@ -469,7 +472,9 @@ WebMis20
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
         },
         new_appointment: function (client_id, person_id, start_date) {
+            var external_url = WMConfig.local_config.risar.system_prefs.integration.external_schedule_url;
             this.child_window = $window.open(
+                external_url ||
                 Config.url.url_schedule_appointment_html +
                     '?client_id=' + client_id +
                     '&person_id=' + person_id +
@@ -597,6 +602,11 @@ WebMis20
         },
         get_perinatal_risk_info: function (curation_level) {
             return wrapper('GET', Config.url.api_stats_perinatal_risk_rate, {
+                curation_level: curation_level
+            });
+        },
+        get_radz_risk_info: function (curation_level) {
+            return wrapper('GET', Config.url.api_stats_radz_risks, {
                 curation_level: curation_level
             });
         },
