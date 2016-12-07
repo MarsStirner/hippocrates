@@ -8,6 +8,7 @@
 """
 import datetime
 from contextlib import contextmanager
+from time import sleep
 
 import os
 import requests
@@ -40,8 +41,13 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
         Organisation.id == main_user.org_id
     ).value(Organisation.TFOMSCode)
 
+    if not doctor_code or not org_code:
+        raise Exception(u'Не найден Пользователь или Организация'.encode('utf-8'))
+
     # Добавляем/обновляем пациента по UID РМИС
     sirius.update_entity_from_mis(region, entity, remote_id)
+    # безысходность по времени
+    sleep(3)
     # Запрашиваем ID МР по UID РМИС
     client_id = sirius.get_risar_id_by_mis_id(region, entity, remote_id)
 
@@ -59,7 +65,7 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
                 card_id = card.id
                 break
     # если нет открытой карты для пациента
-    if not card_id:
+    if not card_id and client_id and doctor_code and org_code:
         # создаем в рисар новую карту
         data = {
             'client_id': client_id,
