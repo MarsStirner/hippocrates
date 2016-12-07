@@ -70,9 +70,9 @@
             <section class="content">
                 <div class="row">
                     <div class="col-md-12">
-                        <wm-action-layout ng-if="appointment" action="appointment_action"></wm-action-layout>
-                        <span ng-if="!appointment">
-                            <b>По данному мероприятию направлений нет</b>
+                        <wm-action-layout ng-if="!isDisabledAppointment()" action="appointment_action"></wm-action-layout>
+                        <span ng-if="isDisabledAppointment()">
+                            <b>Для данного мероприятия не были внесены данные направления</b>
                         </span>
                     </div>
                 </div>
@@ -117,12 +117,12 @@
 </div>
 <div class="modal-footer">
     <ui-print-button ng-if="tabNum == 2" ps="ps" resolve="ps_resolve()" fast-print="true" class="pull-left"
-                     ext-disabled="!canPrintAppointment()" lazy-load-context="[[getAppointmentContextName()]]"
+                     ext-disabled="!canPrintAppointment() || isDisabledAppointment()" lazy-load-context="[[getAppointmentContextName()]]"
                      before-print="createAppointmentIfNeed()"></ui-print-button>
     <ui-print-button ng-if="tabNum == 3" ps="ps" resolve="ps_resolve()" fast-print="true" class="pull-left"
                      ext-disabled="!canPrintEmResult" lazy-load-context="[[getEmResultContextName()]]"
                      before-print="createEmResultIfNeed()"></ui-print-button>
-    <button type="button" class="btn btn-default" ng-disabled="!canEditEmAppointment()"
+    <button type="button" class="btn btn-default" ng-disabled="!canEditEmAppointment() || isDisabledAppointment()"
             ng-click="editAppointment()"
             ng-if="tabNum == 2">Редактировать направление</button>
     <button type="button" class="btn btn-default" ng-disabled="!canEditEmResult()"

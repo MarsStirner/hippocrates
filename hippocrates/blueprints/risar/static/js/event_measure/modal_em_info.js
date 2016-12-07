@@ -22,6 +22,11 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         $scope.tabNum = num;
     };
 
+    $scope.isDisabledAppointment = function () {
+        var em_result_exists = $scope.em_result && $scope.em_result.id;
+        var appointment_exists = $scope.appointment && $scope.appointment.id;
+        return em_result_exists && !appointment_exists
+    };
     $scope.canEditEmAppointment = function () {
         return $scope.access.can_edit_appointment;
     };
