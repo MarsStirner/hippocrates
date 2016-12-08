@@ -22,11 +22,19 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         $scope.tabNum = num;
     };
 
+    $scope.isDisabledAppointment = function () {
+        var em_result_exists = $scope.em_result && $scope.em_result.id;
+        var appointment_exists = $scope.appointment && $scope.appointment.id;
+        return em_result_exists && !appointment_exists
+    };
+    $scope.isEmRevoked = function () {
+        return Boolean($scope.event_measure.status.code == 'cancelled');
+    };
     $scope.canEditEmAppointment = function () {
-        return $scope.access.can_edit_appointment;
+        return $scope.access.can_edit_appointment && !$scope.isEmRevoked() && !$scope.isDisabledAppointment();
     };
     $scope.canEditEmResult = function () {
-        return $scope.access.can_edit_result;
+        return $scope.access.can_edit_result && !$scope.isEmRevoked();
     };
     $scope.canReadEmAppointment = function () {
         return $scope.access.can_read_appointment;
@@ -50,10 +58,12 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         return $scope.access.can_restore;
     };
     $scope.canPrintAppointment = function () {
-        return $scope.appointment.id ? $scope.canReadEmAppointment() : $scope.canEditEmAppointment();
+        return ($scope.appointment.id ? $scope.canReadEmAppointment() : $scope.canEditEmAppointment()) &&
+            !$scope.isEmRevoked() &&
+            !$scope.isDisabledAppointment();
     };
     $scope.canPrintEmResult = function () {
-        return $scope.em_result.id ? $scope.canReadEmResult() : $scope.canEditEmResult();
+        return ($scope.em_result.id ? $scope.canReadEmResult() : $scope.canEditEmResult()) && !$scope.isEmRevoked();
     };
     $scope.displayNewAppointment = function () {
         return options && options.display_new_appointment;

@@ -1,0 +1,70 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+{%- block modules_css %}
+    {{ super() }}
+    <style type="text/css">
+       .box.box-primary {
+            line-height: 1.5em;
+            font-size: 110%;
+        }
+    </style>
+{% endblock -%}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% set flat_code = template_data.flatcode %}
+{% block main %}
+<div ng-controller="PartalNursingEditCtrl" ng-cloak>
+     {% set right_word =  dict((('postpartal_nursing', 'послеродовому'),
+                                                ('prepartal_nursing', 'дородовому'),
+                                                ('prepartal_nursing_repeat', 'дородовому'))).get(flat_code) %}
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
+        {% set title = "Сведения по %s патронажу"|format(right_word) %}
+        {{ rimacros.page_title_n(title) }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="tab-content">
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header with-border">
+
+                                <span class="col-sm-offset-5" ><a  class="print_link"  ng-if="!pp_nursing.end_date"
+                                   href="{{ url_for('.html_partal_nursing_edit', flatcode=flat_code) }}?event_id=[[ header.event.id ]]&pp_nursing_id=[[ pp_nursing.id ]]">
+                                    <span class="glyphicon glyphicon-pencil"></span> Изменить</a></span>
+                            </div>
+                            <div class="box-body">
+                                <table class="table table-condensed">
+                                    {% set fields_template = "risar/partal_nursing/"+flat_code+'_read.html' %}
+                                   {% include fields_template %}
+                                </table>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="box-footer">
+                        <div class="col-md-offset-5 col-sm-offset-5">
+                         {% set right_word =  dict((('postpartal_nursing', 'послеродовых'),
+                                                ('prepartal_nursing', 'дородовых'),
+                                                ('prepartal_nursing_repeat', 'дородовых'))).get(flat_code) %}
+                        <a class="pseudo-btn" ng-href="{{ url_for('.html_partal_nursing', flatcode=flat_code) }}?event_id=[[ header.event.id ]]">Перейти на форму {{ right_word }} патронажей</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script>
+        WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
+    </script>
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
+{% endblock %}

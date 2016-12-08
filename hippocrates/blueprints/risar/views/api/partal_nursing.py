@@ -19,7 +19,7 @@ from nemesis.systemwide import db
 from hippocrates.blueprints.risar.lib.partal_nursing import PartalNursingController
 
 
-@module.route('/api/0/nursing/<flatcode>/', methods=['POST'])
+@module.route('/api/0/nursing/<flatcode>/', methods=['GET', 'POST'])
 @module.route('/api/0/nursing/<flatcode>/<int:action_id>', methods=['POST', 'GET'])
 @api_method
 def api_0_partal_nursing(flatcode, action_id=None):
@@ -51,7 +51,6 @@ def api_0_partal_nursing(flatcode, action_id=None):
         pp.fill_own_fields(action, flatcode, json_data=pp_nursing)
         if flatcode == "prepartal_nursing":
             pp.fill_anamnesis_fields(card, json_data=jsn)
-
         db.session.add(action)
         db.session.commit()
     return represent_partal_nursing_with_anamnesis(action, flatcode, card)

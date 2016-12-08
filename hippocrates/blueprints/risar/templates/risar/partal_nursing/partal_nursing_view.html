@@ -1,14 +1,20 @@
 {% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros with context %}
 {% import 'risar/_inspection_macros.html' as imacros with context %}
-
-{% block title %}> Сведения по послеродовому патронажу{% endblock %}
+{% set flat_code = template_data.flatcode %}
+ {% set right_word =  dict((('postpartal_nursing', 'послеродовому'),
+                                                    ('prepartal_nursing', 'дородовому'),
+                                                    ('prepartal_nursing_repeat', 'дородовому'))).get(flat_code) %}
+{% set title = "Сведения по %s патронажу"|format(right_word) %}
+{% block title %}> {{title}}{% endblock %}
 {% set flat_code = template_data.flatcode %}
 
 {% block main %}
 <div ng-controller="PartalNursingListCtrl" ng-cloak>
+
     <section class="content-header" ng-controller="RisarHeaderCtrl">
-        {{ rimacros.page_title_ext_n('Сведения по послеродовому патронажу') }}
+
+        {{ rimacros.page_title_ext_n(title) }}
         {{ rimacros.navigation('[[ header.event.id ]]') }}
     </section>
     <section class="content">

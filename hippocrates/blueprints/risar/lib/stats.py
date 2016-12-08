@@ -263,19 +263,17 @@ class StatsSelecter(BaseSelecter):
         rbRequestType = self.model_provider.get('rbRequestType')
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
-        ActionProperty= self.model_provider.get('ActionProperty')
+        ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
         ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
-
 
         # 2) event latest inspection
         # * самые поздние даты осмотров по обращениям
         q_action_begdates = self.model_provider.get_query('Action').join(
-            Event, EventType, rbRequestType, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date,
+            Event, EventType, rbRequestType, ActionType
         ).filter(
             Event.deleted == 0, Action.deleted == 0, rbRequestType.code == request_type_pregnancy,
-            ActionType.flatCode.in_(checkup_flat_codes), ActionPropertyType.code == 'next_date',
-            ActionProperty_Date.value <= func.curdate()
+            ActionType.flatCode.in_(checkup_flat_codes)
         ).with_entities(
             func.max(Action.begDate).label('max_beg_date'), Event.id.label('event_id')
         ).group_by(
@@ -307,32 +305,16 @@ class StatsSelecter(BaseSelecter):
             ActionProperty_Date.value.label('next_date')
         ).subquery('EventLatestInspections')
 
-        inspections = self.model_provider.get_query('Action').join(
-            Event, ActionType
-        ).filter(
-            Event.deleted ==0, Event.execDate.is_(None),
-            Action.deleted == 0, ActionType.flatCode.in_(checkup_flat_codes)
-        ).with_entities(
-            Action.id.label('action_id'),
-            Action.event_id.label('event_id'),
-            Action.begDate.label('beg_date')
-        ).subquery('AllInspections')
         # main query
         query = self.query_main(person_id, curation_level)
-
-
         query = query.outerjoin(
             q_latest_inspections, q_latest_inspections.c.event_id == Event.id
-        ).outerjoin(
-            inspections, and_(inspections.c.event_id == Event.id,
-                              q_latest_inspections.c.beg_date < inspections.c.beg_date,
-                              inspections.c.beg_date <= q_latest_inspections.c.next_date
-                              )
         )
-
         query = query.with_entities(
             func.sum(
-                func.IF(inspections.c.action_id.is_(None), 1, 0)
+                func.IF(q_latest_inspections.c.next_date <= func.curdate(),
+                        1,
+                        0)
             ).label('count_event_skipped_checkup')
         )
 
