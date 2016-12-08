@@ -623,10 +623,31 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'has-error': ticketForm.next_date.$invalid}">
-                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
-                                                min-date="checkup.beg_date || currentDate" max-date="inFiveDate"></wm-date>
-                                        </div></td>
+                                        <td>
+                                            <div ng-class="{'has-error': ticketForm.next_date.$invalid || begDateIsAfterNextDate}">
+                                                <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
+                                                    min-date="checkup.beg_date || currentDate" max-date="inFiveDate"></wm-date>
+                                            </div>
+                                            <div class="row marginal" ng-if="begDateIsSameNextDate">
+                                                <br />
+                                                <div class="col-md-1" style="text-align: center; font-size:200%;">
+                                                    <i class="fa fa-exclamation-triangle text-yellow"></i>
+                                                </div>
+                                                <div class="col-md-11">
+                                                    <b>Вы указали текущию дату в качестве даты следующей явки.</b><br />
+                                                    Мероприятия не будут сформированы.
+                                                </div>
+                                            </div>
+                                            <div class="row marginal" ng-if="begDateIsAfterNextDate">
+                                                <br />
+                                                <div class="col-md-1" style="text-align: center; font-size:200%;">
+                                                    <i class="fa fa-exclamation-triangle text-yellow"></i>
+                                                </div>
+                                                <div class="col-md-11">
+                                                    <b>Дата следующего осмотра не может быть раньше даты текущего.</b><br />
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Примечания <span>&nbsp;</span></th>
