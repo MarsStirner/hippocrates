@@ -98,12 +98,12 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
+                                        <th class="text-right">Вес при осмотре <span class="text-danger">*</span></th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input name="weight" ng-model="checkup.weight" class="form-control" valid-number
-                                                       maxlength="3" ng-required="true" autofocus>
+                                                <input name="weight" ng-model="checkup.weight" valid-number valid-number-float
+                                                       class="form-control" ng-required="true" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/" autofocus>
                                             </div>
                                             </div>
                                         </td>
