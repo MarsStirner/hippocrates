@@ -36,20 +36,20 @@
         </div>
         <div class="row marginal">
             <div class="col-md-12 col-lg-12">
-                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = null"
-                        ng-class="{'btn-info': filter.status != null, 'btn-primary': filter.status == null}">
-                    Все <span title="" class="badge bg-white">[[ count_all_records() ]]</span>
-                </button>
+{#                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = null"#}
+{#                        ng-class="{'btn-info': filter.status != null, 'btn-primary': filter.status == null}">#}
+{#                    Все <span title="" class="badge bg-white">[[ count_all_records() ]]</span>#}
+{#                </button>#}
                 <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 0"
                         ng-class="{'btn-info': filter.status != 0, 'btn-primary': filter.status == 0}">
                     Ожидается <span title="" class="badge bg-white">[[ result.waiting.records.length ]]</span>
                 </button>
-                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 1"
-                        ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">
-                    Выполняется <span title="" class="badge bg-white">[[ result.in_progress.records.length ]]</span>
-                </button>
+{#                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 1"#}
+{#                        ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">#}
+{#                    Выполняется <span title="" class="badge bg-white">[[ result.in_progress.records.length ]]</span>#}
+{#                </button>#}
                 <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 2"
-                        ng-class="{'btn-info': filter.status <= 2, 'btn-primary': filter.status >= 2}">
+                        ng-class="{'btn-info': filter.status < 2, 'btn-primary': filter.status >= 2}">
                     Закончено <span title="" class="badge bg-white">[[ count_finished_records() ]]</span>
                 </button>
             </div>

@@ -16,7 +16,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
         $scope.filter = {
             execDate: new Date(),
-            status: null,
+            status: 0,
             org_struct: CurrentUser.info.org_structure
         };
         $scope.current_result = [];
@@ -36,9 +36,9 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
         $scope.set_current_records = function () {
             var display_map = {
-                null: ['waiting', 'in_progress', 'finished', 'sent_to_lab', 'fail_to_lab'],
+                null: ['waiting', 'finished', 'sent_to_lab', 'fail_to_lab'],
                 waiting: ['waiting'],
-                in_progress: ['in_progress'],
+                // in_progress: ['in_progress'],
                 finished: ['finished', 'sent_to_lab', 'fail_to_lab']
             };
             var result = {
