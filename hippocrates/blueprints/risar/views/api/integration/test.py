@@ -259,3 +259,7 @@ if __name__ == '__main__':
         # from hippocrates.blueprints.risar.views.api.integration.orgs.test import \
         #     test_create_update_organization
         # test_create_update_organization()
+
+        # from hippocrates.blueprints.risar.views.api.integration.schedule_tickets.test import \
+        #     test_create_update_delete_schedule_tickets
+        # test_create_update_delete_schedule_tickets()
