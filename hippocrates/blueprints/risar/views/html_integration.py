@@ -41,12 +41,22 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
         Organisation.id == main_user.org_id
     ).value(Organisation.TFOMSCode)
 
+    # если глюк оказался вдруг
+    # doctor_code = '58211165'  # Коняев /Тамбов
+    # org_code = '1434663'  # Контрольная МО /Тамбов
+
     if not doctor_code or not org_code:
-        raise Exception(u'Не найден Пользователь или Организация'.encode('utf-8'))
+        err_txt = (
+            u'Не найден Пользователь или Организация (id="%s" doctor_code="%s" org_code="%s")'
+            % (main_user.id, doctor_code, org_code)
+        )
+        logger.error(err_txt)
+        raise Exception(err_txt.encode('utf-8'))
 
     # Добавляем/обновляем пациента по UID РМИС
     sirius.update_entity_from_mis(region, entity, remote_id)
-    # безысходность по времени
+    # todo: был плавающий глюк падения создания карты. лог потерян.
+    # безысходность по времени.
     sleep(3)
     # Запрашиваем ID МР по UID РМИС
     client_id = sirius.get_risar_id_by_mis_id(region, entity, remote_id)
@@ -65,7 +75,7 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
                 card_id = card.id
                 break
     # если нет открытой карты для пациента
-    if not card_id and client_id and doctor_code and org_code:
+    if not card_id and client_id:
         # создаем в рисар новую карту
         data = {
             'client_id': client_id,
@@ -73,16 +83,16 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
             'card_doctor': doctor_code,
             'card_LPU': org_code,
         }
-        card_id = card_save_or_update(data, True, api_version, card_id)
+        card_id = create_or_update_card(data, True, api_version, card_id)
 
         # запись ID карты в шину
         sirius.save_card_ids_match(card_id, region, entity, remote_id)
 
-    # переход на страницу карты пациента по ID карты
+    # переход на страницу осмотра пациента по ID карты
     return redirect(url_for('.html_inspection', event_id=card_id))
 
 
-def card_save_or_update(data, create, api_version, card_id=None):
+def create_or_update_card(data, create, api_version, card_id=None):
     if create:
         url = '/risar/api/integration/%s/card/' % api_version
     else:

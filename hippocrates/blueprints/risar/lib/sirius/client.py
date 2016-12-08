@@ -50,6 +50,8 @@ def send_to_mis(event_code, service_method, obj, params, is_create):
 
 def update_entity_from_mis(region, entity, remote_id):
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
+    if not binded_event(event_code):
+        return
     request = {
         'event': event_code,
         "remote_system_code": region,
@@ -64,9 +66,11 @@ def update_entity_from_mis(region, entity, remote_id):
 def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
                               date, beg_time, end_time, schedule_id):
     # нет информации по методу мис
+    event_code = RisarEvents.MAKE_APPOINTMENT
     if not app.config.get('SIRIUS_ENABLED'):
         return True
-    event_code = RisarEvents.MAKE_APPOINTMENT
+    if not binded_event(event_code):
+        return
     data = {
         'event': event_code,
         'method': 'delete' if is_delete else 'post',
@@ -90,6 +94,8 @@ def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
 
 def get_risar_id_by_mis_id(region, entity, remote_id):
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
+    if not binded_event(event_code):
+        return
     request = {
         'event': event_code,
         "remote_system_code": region,
@@ -104,6 +110,8 @@ def get_risar_id_by_mis_id(region, entity, remote_id):
 
 def save_card_ids_match(local_id, region, entity, remote_id):
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
+    if not binded_event(event_code):
+        return
     request = {
         'event': event_code,
         "local_main_id": local_id,
