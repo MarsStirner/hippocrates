@@ -47,15 +47,16 @@ def api_0_invoice_save(invoice_id=None):
             invoice = invoice_ctrl.get_new_invoice()
             invoice = invoice_ctrl.update_invoice(invoice, json_data)
             invoice_ctrl.store(*invoice.get_all_entities())
+            invoice_ctrl.notify_invoice_changed(invoice, 'create')
         elif invoice_id:
             invoice = invoice_ctrl.get_invoice(invoice_id)
             if not invoice:
                 raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
             invoice = invoice_ctrl.update_invoice(invoice, json_data)
             invoice_ctrl.store(invoice)
+            invoice_ctrl.notify_invoice_changed(invoice, 'update')
         else:
             raise ApiException(404, u'`invoice_id` required')
-        invoice_ctrl.notify_invoice_changed(invoice)
         return InvoiceRepr().represent_invoice_full(invoice)
 
 
@@ -69,7 +70,7 @@ def api_0_invoice_delete(invoice_id=None):
     invoice = invoice_ctrl.get_invoice(invoice_id)
     invoice_ctrl.delete_invoice(invoice)
     invoice_ctrl.store(invoice)
-    invoice_ctrl.notify_invoice_changed(invoice)
+    invoice_ctrl.notify_invoice_changed(invoice, 'delete')
     return True
 
 
@@ -82,7 +83,7 @@ def on_event_deleted(sender, event_id, deleted_data=None):
         invoice_list = []
 
     for invoice in invoice_list:
-        invoice_ctrl.notify_invoice_changed(invoice)
+        invoice_ctrl.notify_invoice_changed(invoice, 'delete')
 
 
 blinker.signal('Event-deleted').connect(on_event_deleted)
