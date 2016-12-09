@@ -114,7 +114,7 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
         return res;
     };
 
-    $scope.loadOwnMedicos = function(){
+    $scope.loadOwnMedicos = function() {
         var orgId = safe_traverse($scope, ['epicrisis', 'LPU', 'id']);
         var medicoOrgId = safe_traverse($scope, ['epicrisis', 'maternity_hosp_medico', 'organisation', 'id']);
         var isSameOrganisation = medicoOrgId === orgId;
@@ -124,7 +124,7 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
         }
         $scope.filteredMedicos = safe_traverse($scope, ['groupedMedicos', orgId]);
     };
-    $scope.chooseNativeLpu = function(){
+    $scope.chooseNativeLpu = function() {
         $scope.loadOwnMedicos();
     };
 

@@ -326,7 +326,7 @@ class XForm(object):
     def _check_rb_value(self, rb_name, value_code):
         field_name = None
         if rb_name == 'rbBloodType':
-            field_name = 'name'
+            field_name = 'code'
         elif rb_name in ('rbDocumentType', 'rbPolicyType'):
             field_name = 'TFOMSCode'
         if not check_rb_value_exists(rb_name, value_code, field_name):
@@ -397,8 +397,8 @@ class XForm(object):
         return enum if enum.is_valid() else None
 
     def rb(self, code, rb_model, rb_code_field='code'):
-        id_ = self.rb_validate(rb_model, code, rb_code_field)
-        return code and {'code': code, 'id': id_} or None
+        id_, name = self.rb_validate(rb_model, code, rb_code_field)
+        return code and {'code': code, 'id': id_, 'name': name} or None
 
     @staticmethod
     def arr(rb_func, codes, rb_name, rb_code_field='code'):
@@ -406,7 +406,7 @@ class XForm(object):
 
     @staticmethod
     def rb_validate(rb_model, code, rb_code_field):
-        row_id = None
+        row_id = name = None
         if code is not None:
             if isinstance(rb_model, basestring):
                 try:
@@ -417,20 +417,23 @@ class XForm(object):
                     row_id = rb and rb.get('_id')
                     if row_id == 'None':
                         row_id = None
+                    name = rb.get('name')
             else:
                 field = getattr(rb_model, rb_code_field)
-                row_id = rb_model.query.filter(
+                rb = rb_model.query.filter(
                     field == code
-                ).value(rb_model.id)
+                ).first()
+                row_id = rb.id if rb else None
+                name = getattr(rb, 'name', None) if rb else None
             if not row_id:
                 raise ApiException(
                     NOT_FOUND_ERROR,
                     u'В справочнике "%s" запись с кодом "%s" не найдена' % (
-                        rb_model,
+                        rb_model if isinstance(rb_model, basestring) else rb_model.__name__,
                         code,
                     )
                 )
-        return row_id
+        return row_id, name
 
     def mapping_part(self, part_map, data, res):
         if not data:
@@ -578,7 +581,8 @@ class CheckupsXForm(ExternalXForm):
             if flt_mkbs:
                 flt_mis_diags.append({
                     'kind': diag_data['kind'],
-                    'mkbs': flt_mkbs
+                    'mkbs': flt_mkbs,
+                    'additional_info': diag_data.get('additional_info')
                 })
         return flt_mis_diags
 
@@ -674,6 +678,14 @@ class PregnancyCheckupsXForm(CheckupsXForm):
         em_ctrl = EventMeasureController()
         em_ctrl.regenerate(self.target_obj)
 
+    @staticmethod
+    def get_mkb_list(diagnosis_list):
+        return map(lambda x: x['MKB'], diagnosis_list)
+
+    @staticmethod
+    def get_diagnosis_additional_info(diagnosis_list):
+        return {d.pop('MKB'): d for d in diagnosis_list}
+
 
 class GynecologyCheckupsXForm(CheckupsXForm):
 
@@ -729,7 +741,7 @@ class MeasuresResultsXForm(ExternalXForm):
     def update_measure_data(self, data):
         status = data.get('status')
         if status:
-            self.em.status = self.rb_validate(rbMeasureStatus, status, 'code')
+            self.em.status = self.rb(rbMeasureStatus, status, 'code')['id']
 
     def changes_diagnoses_system(self):
         return bool(self.diagnosis_codes)
@@ -747,9 +759,18 @@ class MeasuresResultsXForm(ExternalXForm):
         self.prepare_params(data)
 
         if self.new:
+            self.em = self.get_event_measure(
+                data.get('measure_id'),
+                data['measure_type_code'],
+                data.get('checkup_date'),
+                data.get('checkup_date'),
+            )
             self.create_action()
         else:
             self.find_target_obj(self.target_obj_id)
+            self.em = EventMeasure.query.filter(
+                EventMeasure.resultAction_id == self.target_obj_id
+            ).one()
 
         mr_data = self.get_data_for_diags(data)
 

@@ -7,18 +7,23 @@ concilium_data_1 = {
     "doctor": "-1",
     "doctors": [
         {
-            "doctor": "-1"
+            "doctor": "-1",
+            "doctor_hospital": "-1",
         },
         {
-            "doctor": "-3"
+            "doctor": "-3",
+            "opinion": u'Всё не так',
+            "doctor_hospital": "-1",
         },
         {
             "doctor": "-4",
-            "opinion": u'Всё не так'
+            "opinion": u'И всё не то',
+            "doctor_hospital": "-1",
         },
         {
-            "doctor": "-5",
-            "opinion": u'Долой этот консилиум'
+            "doctor": "999",
+            "opinion": u'Когда твоя девушка больна',
+            "doctor_hospital": "-2",
         },
     ],
     "patient_presence": True,
@@ -35,14 +40,17 @@ concilium_data_2 = {
     "doctor": "-1",
     "doctors": [
         {
-            "doctor": "-1"
+            "doctor": "-1",
+            "doctor_hospital": "-1",
         },
         {
             "doctor": "-3",
+            "doctor_hospital": "-1",
         },
         {
             "doctor": "-4",
-            "opinion": u'Всё не так'
+            "opinion": u'Всё не так',
+            "doctor_hospital": "-1",
         }
     ],
     # "patient_presence": True,

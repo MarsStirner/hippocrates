@@ -203,14 +203,40 @@ def get_action_by_id(action_id, event=None, flat_code=None, create=False):
     return action
 
 
+def fill_these_attrs_from_action(from_action, to_action, attr_list):
+    for code in attr_list:
+        if code in from_action.propsByCode:
+            to_action.propsByCode[code].value = from_action.propsByCode[code].value
+
+
 def copy_attrs_from_last_action(event, flat_code, action, attr_list):
     last_action = get_action_list(event, flat_code).order_by(
         Action.id.desc()
     ).first()
     if last_action:
-        for code in attr_list:
-            if code in last_action.propsByCode:
-                action.propsByCode[code].value = last_action.propsByCode[code].value
+        fill_these_attrs_from_action(last_action, action, attr_list)
+
+
+def fill_action_from_another_action(from_action, to_action, exclude_attr_list=None):
+    if not exclude_attr_list:
+        exclude_attr_list = []
+    elif not isinstance(exclude_attr_list, (list, set, tuple)):
+        exclude_attr_list = [exclude_attr_list]
+
+    for code in to_action.propsByCode.keys():
+        if code in from_action.propsByCode:
+            if code in exclude_attr_list:
+                continue
+            to_action.propsByCode[code].value = from_action.propsByCode[code].value
+
+
+def copy_attrs_from_last_action_entirely(event, flat_code, action, exclude_attr_list):
+    last_action = get_action_list(event, flat_code).order_by(
+        Action.id.desc()
+    ).first()
+    if last_action:
+        fill_action_from_another_action(from_action=last_action, to_action=action,
+                                        exclude_attr_list=exclude_attr_list)
 
 
 def action_apt_values(action, codes):
@@ -488,3 +514,18 @@ def close_open_partal_nursing(event_id, flatcode):
     if flatcode == 'prepartal_nursing_repeat':
         flatcode = ['prepartal_nursing', 'prepartal_nursing_repeat']
     close_open_actions(event_id, flatcode)
+
+
+def get_apt_from_at(at, codes=None):
+    qr = at.property_types.filter(
+        ActionPropertyType.deleted == 0
+    )
+    if codes:
+        if not isinstance(codes, (list, tuple, set)):
+            codes = [codes]
+        qr = qr.filter(
+            ActionPropertyType.code.in_(codes),
+        )
+    return qr.order_by(
+        ActionPropertyType.idx
+    )

@@ -404,6 +404,7 @@ class DiagnosesSystemManager(object):
         for diag_data in mkb_data_list:
             new_kind = diag_data['kind']
             for mkb in diag_data['mkbs']:
+                additional_info = safe_traverse(diag_data, 'additional_info', mkb)
                 if mkb in by_mkb:
                     # mkb is in at least one of the inspections (previous, current, next)
                     insp_w_mkb = by_mkb[mkb]
@@ -432,6 +433,13 @@ class DiagnosesSystemManager(object):
                         dgn_cd = cur_diagn.createDatetime if cur_diagn else None
                         diagnostic_changed = self.create_mode or dgn_bd != action_date or \
                             dgn_cd != action_date or dg_person_id != new_person.id
+                        if additional_info:
+                            diagnostic_changed = diagnostic_changed or \
+                                diag['diagn'].traumaType_id != safe_traverse(additional_info, 'trauma', 'id') or \
+                                diag['diagn'].character_id != safe_traverse(additional_info, 'character', 'id') or \
+                                diag['diagn'].MKBEx != safe_traverse(additional_info, 'mkb2', 'code') or \
+                                diag['diagn'].rbAcheResult_id != safe_traverse(additional_info, 'ache_result', 'id') or\
+                                diag['diagn'].diagnosis_description != safe_traverse(additional_info, mkb, 'descr')
                         if 'left' not in insp_w_mkb:
                             # diag was created exactly in current action
                             ds_beg_date = action_date
@@ -471,13 +479,15 @@ class DiagnosesSystemManager(object):
 
                     dgn_beg_date = dgn_create_date = action_date
                     self._add_diag_data(diagnosis_id, mkb, new_kind, ds_beg_date, ds_end_date,
-                                        dgn_beg_date, dgn_create_date, new_person, diagnostic_changed, kind_changed)
+                                        dgn_beg_date, dgn_create_date, new_person, diagnostic_changed, kind_changed,
+                                        additional_info=additional_info)
                 else:
                     # is new mkb, not presented in any of 3 inspections
                     ds_beg_date = dgn_beg_date = dgn_create_date = action_date
                     ds_end_date = self.get_date_before(adj_inspections['right'], self.source.get_date())
                     self._add_diag_data(None, mkb, new_kind, ds_beg_date, ds_end_date,
-                                        dgn_beg_date, dgn_create_date, new_person, True, True)
+                                        dgn_beg_date, dgn_create_date, new_person, True, True,
+                                        additional_info=additional_info)
 
         # process existing diags, that were not sent from external source
         ext_mkbs = {mkb for diag_data in mkb_data_list for mkb in diag_data['mkbs']}
@@ -848,7 +858,8 @@ class DiagnosesSystemManager(object):
 
     def _add_diag_data(self, ds_id, mkb_code, diag_kind, ds_beg_date, ds_end_date,
                       dgn_beg_date, dgn_create_date, person,
-                      diagnostic_changed=False, kind_changed=False, other_action=None):
+                      diagnostic_changed=False, kind_changed=False, other_action=None,
+                      additional_info=None):
         diagnosis_types = {
             self.diag_type: {'code': diag_kind}
         }
@@ -872,6 +883,18 @@ class DiagnosesSystemManager(object):
             'set_date': safe_date(ds_beg_date),
             'end_date': ds_end_date,
         }
+        if additional_info:
+            if 'trauma' in additional_info:
+                data['diagnostic']['trauma'] = additional_info['trauma']
+            if 'character' in additional_info:
+                data['diagnostic']['character'] = additional_info['character']
+            if 'mkb2' in additional_info:
+                data['diagnostic']['mkb2'] = additional_info['mkb2']
+            if 'ache_result' in additional_info:
+                data['diagnostic']['ache_result'] = additional_info['ache_result']
+            if 'descr' in additional_info:
+                data['diagnostic']['diagnosis_description'] = additional_info['descr']
+
         if other_action is None:
             self.to_create.append(data)
         else:

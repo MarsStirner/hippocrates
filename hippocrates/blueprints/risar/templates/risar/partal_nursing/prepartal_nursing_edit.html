@@ -1,0 +1,270 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+{%- block modules_css %}
+    {{ super() }}
+    <style type="text/css">
+       .box.box-primary {
+            line-height: 1.5em;
+            font-size: 110%;
+        }
+
+    </style>
+{% endblock -%}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+{% set flat_code = template_data.flatcode %}
+<div ng-controller="PartalNursingEditCtrl" ng-cloak  >
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
+         {%- set right_word =  dict((('postpartal_nursing', 'послеродового'),
+                                                    ('prepartal_nursing', 'дородового'),
+                                                    ('prepartal_nursing_repeat', 'дородового'))).get(flat_code) -%}
+        {{ rimacros.page_title_n('Ввод данных '+right_word+' патронажа') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="tab-content">
+                        <form class="tab-pane active" id="common" name="commonForm" novalidate>
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header">
+                                <h3 class="box-title">&nbsp;</h3>
+                            </div>
+                            <div class="box-body">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-right col-md-4">Дата патронажа</td>
+                                            <td class="col-md-8">
+                                                <wm-date name="date"
+                                                         ng-model="pp_nursing.date" style="width: 250px" min-date="minDate" ></wm-date>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Срок беременности</td>
+                                            <td><div class="row">
+                                                <div class="col-md-2">
+                                                    <input name="gestational_age" ng-model="pp_nursing.gestational_age" class="form-control" valid-number
+                                                           maxlength="3" >
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right col-md-4">Предполагаемый срок декретного отпуска</td>
+                                            <td class="col-md-8">
+                                                <wm-date name="vacation_date"
+                                                         ng-model="pp_nursing.vacation_date" style="width: 250px" min-date="minDate" ></wm-date>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Семейное положение </td>
+                                            <td>
+                                                <div class="row"><div class="col-md-8">
+                                                    <rb-select ng-model="mother_anamnesis.marital_status"
+                                                               ref-book="rbRisarMarital_Status">
+                                                    </rb-select>
+                                                </div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Профессия </td>
+                                            <td>
+                                                <div class="row">
+                                                    <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.profession"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Профессиональная вредность</td>
+                                            <td>
+                                                <div class="row"><div class="col-md-8">
+                                                    <rb-select ng-model="mother_anamnesis.professional_properties"
+                                                               ref-book="rbRisarProfessional_Properties">
+                                                    </rb-select>
+                                                </div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">ФИО отца ребенка</td>
+                                            <td>
+                                                <div class="row">
+                                                    <div class="col-md-8"><input type="text"  class="form-control" ng-model="father_anamnesis.name"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Возраст отца ребенка</td>
+                                            <td>
+                                                <div class="row">
+                                                    <div class="col-md-8"><input type="text"  class="form-control" ng-model="father_anamnesis.age"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Профессия отца ребёнка</td>
+                                            <td><div class="row">
+                                                    <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.profession_husband"></div></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Профессиональная вредность отца ребёнка</td>
+                                            <td>
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <rb-select ng-model="father_anamnesis.professional_properties"
+                                                                   ref-book="rbRisarProfessional_Properties">
+                                                        </rb-select>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr><td class="text-right">Дети</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.children"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Ближайшие родственники беременной <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.other_family_members" /></div></div></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Бытовые условия семьи <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.living_conditions" /></div></div></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Психологический микроклимат семьи <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.psychological_environment" /></div></div></td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Состояние здоровья беременной женщины</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.mother_health"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Состояние здоровья отца ребенка</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.father_health"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Состояние здоровья детей</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.children_health"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Состояние здоровья ближайших родственников</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.other_family_members_health"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Биологический анамнез <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.biological_anamnesis" /></div></div></td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Перенесённые острые заболевания в период беременности</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.acute_disease"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Обострение хронических заболеваний</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.flareup_chronic_condition"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Травмы, операции</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.operations"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Внутриутробные инфекции</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.fetal_infection"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Какие лекарства получала <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.medicines" /></div></div></td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Посещение ж/к</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.womens_consultation_clinic_visiting"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr><td class="text-right">Посещение школы матерей</td>
+                                        <td><div class="row">
+                                                <div class="col-md-8"><input type="text"  class="form-control" ng-model="pp_nursing.maternity_school"></div></div>
+                                        </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Режим дня <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.day_regimen" /></div></div></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="text-right">Питание <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.nutrition" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Прогноз гипогалактии <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.hypogalactia" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Группы риска ребенка <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.child_risk" /></div></div></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-right">Рекомендации <span>&nbsp;</span></td>
+                                            <td><div class="row"><div class="col-md-8"><wysiwyg ng-model="pp_nursing.recommendations" /></div></div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="box-footer">
+                        <div class="col-md-offset-5 col-sm-offset-5">
+                            {% set right_word =  dict((('postpartal_nursing', 'послеродовых'),
+                                                    ('prepartal_nursing', 'дородовых'),
+                                                    ('prepartal_nursing_repeat', 'дородовых'))).get(flat_code) %}
+                            <a class="pseudo-btn" ng-href="{{ url_for('.html_partal_nursing', flatcode=template_data.flatcode) }}?event_id=[[ header.event.id ]]">Перейти на форму {{ right_word }} патронажей</a>
+                        <a class="btn btn-success" ng-click="save()"
+                           tooltip="[[$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script>
+        WebMis20.value('jinjaVariables', angular.fromJson('{{template_data|tojson|safe}}'));
+    </script>
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/partal_nursing.js', v=app_version) }}"></script>
+{% endblock %}

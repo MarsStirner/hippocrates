@@ -17,16 +17,24 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
         return viewMode === 'listed';
     };
 
-    $scope.toggleSelection = function (group) {
-        var enabled = !$scope.checkSelectedAll(group);
+    $scope.toggleSelection = function () {
+        var enabled = !$scope.checkSelectedAll();
         _.map($scope.checkup.measures, function (em) {
             if ($scope.canSelectEMAppointment(em)) {
                 $scope.checkboxes[em.data.id] = enabled;
             }
         });
     };
-    $scope.toggleByStatus = function (group, status) {
-        var enabled = !$scope.checkSelectedByStatus(group, status);
+    $scope.toggleByGroup = function (group) {
+        var enabled = !$scope.checkSelectedAll(group);
+        angular.forEach($scope.grouped[group], function (obj, status) {
+            $scope.toggleByStatus(group, status, enabled);
+        });
+    };
+    $scope.toggleByStatus = function (group, status, enabled) {
+        var enabled = enabled !== undefined ?
+            enabled :
+            !$scope.checkSelectedByStatus(group, status);
         angular.forEach($scope.grouped[group][status], function (list, mcode) {
             $scope.toggleByMeasure(group, status, mcode, enabled);
         });

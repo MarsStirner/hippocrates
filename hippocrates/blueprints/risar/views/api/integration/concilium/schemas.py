@@ -43,12 +43,16 @@ class ConciliumSchema(Schema):
                             "description": "Участник консилиума (код врача)",
                             "type": "string"
                         },
+                        "doctor_hospital": {
+                            "description": "ЛПУ участника консилиума (код)",
+                            "type": "string"
+                        },
                         "opinion":{
                             "description": "Особое мнение участника консилиума (если есть)",
                             "type": "string"
                         }
                     },
-                    "required": ["doctor"]
+                    "required": ["doctor", "doctor_hospital"]
                 },
                 "minItems": 3
             },

@@ -13,7 +13,7 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.errand import represent_errand
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_chart_short
 from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
-from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
+from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags, RadzStatsController
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method, ApiException
@@ -240,6 +240,17 @@ def api_1_stats_pregnancy_week_diagram(person_id=None):
 
     stats_ctrl = StatsController()
     data = stats_ctrl.get_cards_pregnancy_week_distribution(person_id, curation_level)
+    return data
+
+
+@module.route('/api/0/stats/radz_risk_rate/')
+@module.route('/api/0/stats/radz_risk_rate/<int:person_id>')
+@api_method
+def api_0_stats_radz_risks(person_id=None):
+    person_id = person_id or safe_current_user_id()
+    curation_level = request.args.get('curation_level_code')
+    stats_ctrl = RadzStatsController()
+    data = stats_ctrl.get_risk_by_code(person_id, curation_level)
     return data
 
 

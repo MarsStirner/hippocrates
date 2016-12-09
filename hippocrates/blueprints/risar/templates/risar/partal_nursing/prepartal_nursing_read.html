@@ -1,0 +1,122 @@
+<tbody>
+    <td class="text-right col-md-4">Дата патронажа</td>
+    <td class="col-md-8">[[pp_nursing.date | asDate]]</td>
+     <tr>
+        <td class="text-right">Срок беременности </td>
+        <td>[[pp_nursing.gestational_age]]</td>
+    </tr>
+    <td class="text-right col-md-4">Предполагаемый срок декретного отпуска</td>
+    <td class="col-md-8">[[pp_nursing.vacation_date | asDate]]</td>
+    <tr>
+        <td class="text-right">Семейное положение</td>
+        <td>[[mother_anamnesis.marital_status.name]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Профессия</td>
+        <td>[[pp_nursing.profession]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Профессиональная вредность</td>
+        <td>[[mother_anamnesis.professional_properties.name]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">ФИО отца ребенка </td>
+        <td>[[father_anamnesis.name]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Возраст отца ребенка </td>
+        <td>[[father_anamnesis.age]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Профессия отца ребёнка </td>
+        <td>[[pp_nursing.profession_husband]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Профессиональная вредность отца ребёнка</td>
+        <td>[[father_anamnesis.professional_properties.name]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Дети </td>
+        <td>[[pp_nursing.children]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Ближайшие родственники беременной</td>
+        <td ng-bind-html="pp_nursing.other_family_members"></td>
+    </tr>
+    <tr>
+        <td class="text-right">Бытовые условия семьи</td>
+        <td ng-bind-html="pp_nursing.living_conditions"></td>
+    </tr>
+    <tr>
+        <td class="text-right">Психологический микроклимат семьи</td>
+        <td ng-bind-html="pp_nursing.psychological_environment"></td>
+    </tr>
+     <tr>
+        <td class="text-right">Состояние здоровья беременной женщины </td>
+        <td>[[pp_nursing.mother_health]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Состояние здоровья отца ребенка </td>
+        <td>[[pp_nursing.father_health]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Состояние здоровья детей </td>
+        <td>[[pp_nursing.children_health]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Состояние здоровья ближайших родственников </td>
+        <td>[[pp_nursing.other_family_members_health]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Биологический анамнез</td>
+        <td ng-bind-html="pp_nursing.biological_anamnesis"></td>
+    </tr>
+     <tr>
+        <td class="text-right">Перенесённые острые заболевания в период беременности </td>
+        <td>[[pp_nursing.acute_disease]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Обострение хронических заболеваний </td>
+        <td>[[pp_nursing.flareup_chronic_condition]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Травмы, операции </td>
+        <td>[[pp_nursing.operations]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Внутриутробные инфекции </td>
+        <td>[[pp_nursing.fetal_infection]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Какие лекарства получала</td>
+        <td ng-bind-html="pp_nursing.medicines"></td>
+    </tr>
+     <tr>
+        <td class="text-right">Посещение ж/к </td>
+        <td>[[pp_nursing.womens_consultation_clinic_visiting]]</td>
+    </tr>
+     <tr>
+        <td class="text-right">Посещение школы матерей </td>
+        <td>[[pp_nursing.maternity_school]]</td>
+    </tr>
+    <tr>
+        <td class="text-right">Режим дня</td>
+        <td ng-bind-html="pp_nursing.day_regimen"></td>
+    </tr>
+    <tr>
+        <td class="text-right">Питание</td>
+        <td ng-bind-html="pp_nursing.nutrition"></td>
+    </tr>
+    <tr>
+        <td class="text-right">Прогноз гипогалактии</td>
+        <td ng-bind-html="pp_nursing.hypogalactia"></td>
+    </tr>
+    <tr>
+        <td class="text-right">Группы риска ребенка</td>
+        <td ng-bind-html="pp_nursing.child_risk"></td>
+    </tr>
+    <tr>
+        <td class="text-right">Рекомендации</td>
+        <td ng-bind-html="pp_nursing.recommendations"></td>
+    </tr>
+</tbody>

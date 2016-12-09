@@ -109,12 +109,12 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
+                                        <th class="text-right">Вес при осмотре <span class="text-danger">*</span></th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input name="weight" ng-model="checkup.weight" valid-number
-                                                       maxlength="3" class="form-control" ng-required="true">
+                                                <input name="weight" ng-model="checkup.weight" valid-number valid-number-float
+                                                       class="form-control" ng-required="true" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/">
                                             </div>
                                             </div>
                                         </td>
@@ -689,10 +689,31 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'has-error': conclusionForm.next_date.$invalid && conclusionForm.submit_attempt}">
-                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
-                                                min-date="checkup.beg_date || currentDate" max-date="inFiveDate"></wm-date>
-                                        </div></td>
+                                        <td>
+                                            <div ng-class="{'has-error': (conclusionForm.next_date.$invalid && conclusionForm.submit_attempt) || begDateIsAfterNextDate}">
+                                                <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
+                                                    min-date="checkup.beg_date || currentDate" max-date="inFiveDate"></wm-date>
+                                            </div>
+                                            <div class="row marginal" ng-if="begDateIsSameNextDate">
+                                                <br />
+                                                <div class="col-md-1" style="text-align: center; font-size:200%;">
+                                                    <i class="fa fa-exclamation-triangle text-yellow"></i>
+                                                </div>
+                                                <div class="col-md-11">
+                                                    <b>Вы указали текущию дату в качестве даты следующей явки.</b><br />
+                                                    Мероприятия не будут сформированы.
+                                                </div>
+                                            </div>
+                                            <div class="row marginal" ng-if="begDateIsAfterNextDate">
+                                                <br />
+                                                <div class="col-md-1" style="text-align: center; font-size:200%;">
+                                                    <i class="fa fa-exclamation-triangle text-yellow"></i>
+                                                </div>
+                                                <div class="col-md-11">
+                                                    <b>Дата следующего осмотра не может быть раньше даты текущего.</b><br />
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Примечания <span>&nbsp;</span></th>

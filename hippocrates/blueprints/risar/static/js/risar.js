@@ -5,8 +5,8 @@
 
 WebMis20
 .service('RisarApi', [
-        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService',
-        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService) {
+        '$q', 'Config', 'NotificationService', '$window', 'ApiCalls', 'RisarEventControlService', 'WMConfig',
+        function ($q, Config, NotificationService, $window, ApiCalls, RisarEventControlService, WMConfig) {
     var self = this;
     var wrapper = ApiCalls.wrapper;
     this.file_get = function (verb, url, data, target) {
@@ -147,6 +147,12 @@ WebMis20
         this.remove_control = function(event_id) {
            return wrapper('POST', Config.url.api_chart_control.format('remove_control', event_id, ''));
         };
+        this.transfer = function(event_id, to_person_id, data) {
+           return wrapper('POST', Config.url.api_chart_transfer.format(event_id, to_person_id), {}, data);
+        };
+        this.update_set_date = function(event_id, data) {
+           return wrapper('PUT', Config.url.api_update_set_date.format(event_id), {}, data);
+        };
         this.get_header = function (event_id) {
             return wrapper('GET', urls.header.format(event_id));
         };
@@ -265,6 +271,9 @@ WebMis20
         },
         get: function (checkup_id) {
             return wrapper('GET', Config.url.api_checkup_get.format(checkup_id));
+        },
+        get_copy: function (event_id, checkup_id) {
+            return wrapper('GET', Config.url.api_checkup_get_copy.format(event_id, checkup_id));
         },
         create: function (event_id, flat_code) {
             return wrapper('POST', Config.url.api_checkup_new.format(event_id), undefined, {
@@ -465,7 +474,9 @@ WebMis20
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
         },
         new_appointment: function (client_id, person_id, start_date) {
+            var external_url = WMConfig.local_config.risar.system_prefs.integration.external_schedule_url;
             this.child_window = $window.open(
+                external_url ||
                 Config.url.url_schedule_appointment_html +
                     '?client_id=' + client_id +
                     '&person_id=' + person_id +
@@ -596,6 +607,11 @@ WebMis20
                 curation_level: curation_level
             });
         },
+        get_radz_risk_info: function (curation_level) {
+            return wrapper('GET', Config.url.api_stats_radz_risks, {
+                curation_level: curation_level
+            });
+        },
         get_pregnancy_pathology_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code
@@ -667,8 +683,8 @@ WebMis20
         }
     };
     this.partal_nursing = {
-        save: function(flatcode, event_id, data) {
-            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, data.id||''), {event_id: event_id}, data);
+        save: function(pp_id, flatcode, event_id, data) {
+            return wrapper('POST', Config.url.api_partal_nursing.format(flatcode, pp_id||''), {event_id: event_id}, data);
         },
         get: function(flatcode, nursing_id, event_id) {
             return wrapper('GET', Config.url.api_partal_nursing.format(flatcode, nursing_id), {event_id: event_id});
@@ -727,8 +743,20 @@ WebMis20
     };
 }]);
 WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService', 'ErrandModalService',
-function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
-
+    'ChartTransferModalService', 'DateRegistrationModalService',
+function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, ChartTransferModalService, DateRegistrationModalService) {
+    $scope.openTransferModal = function () {
+        ChartTransferModalService.openTransfer($scope.header.event.id).then(function(rslt){
+            $scope.header = rslt;
+        });
+    };
+    $scope.openDateRegistrationModal = function () {
+        DateRegistrationModalService.openDateRegistration($scope.header.event).then(function(header){
+            if (header) {
+                $scope.header = header;
+            }
+        });
+    };
     $scope.create_errand = function () {
         var errand = {
             event_id: $scope.header.event.id,
@@ -1072,6 +1100,173 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService) {
                     _.extend(event, ret_event)
                 })
             })
+        }
+    }
+}])
+.service('ChartTransferModalService', ['$modal', '$q', 'RisarApi', 'RefBookService', function ($modal, $q, RisarApi, RefBookService) {
+    return {
+        openTransfer: function (event_id) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/RISAR/modal/chart_transfer.html',
+                template: '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+        <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+        <h4 class="modal-title">Перевод пациентки к другому врачу</h4>\
+    </div>\
+    <div class="modal-body">\
+        <div class="das-form">\
+        <ng-form name="MCForm">\
+              <table class="table table-condensed">\
+                   <thead>\
+                       <tr>\
+                           <th class="col-md-3"></th>\
+                           <th class="col-md-9"></th>\
+                       </tr>\
+                   </thead>\
+                    <tbody>\
+                        <tr>\
+                            <td class="text-right"><strong>ЛПУ</strong></td>\
+                            <td>\
+                                <div class="col-lg-8 col-md-8 col-xs-6">\
+                                    <ui-select ng-required="true" ng-model="model.org" ng-change="onOrgChanged()" theme="select2" class="form-control" name="LPU" ref-book="Organisation" autocomplete="off">\
+                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>\
+                                        <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">\
+                                            <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
+                                        </ui-select-choices>\
+                                    </ui-select>\
+                                </div>\
+                            </td>\
+                        </tr>\
+                        <tr>\
+                            <td class="text-right"><strong>Врач</strong></td>\
+                            <td>\
+                                 <div class="col-lg-8 col-md-8 col-xs-6">\
+                                  <ui-select ng-required="true" ng-model="model.person" theme="select2" class="form-control" name="maternity_hosp_medico" ref-book="Person" autocomplete="off">\
+                                    <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>\
+                                    <ui-select-choices repeat="item in filteredMedicos | filter: $select.search | limitTo: 50">\
+                                        <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
+                                    </ui-select-choices>\
+                                    </ui-select>\
+                                 </div>\
+                            </td>\
+                        </tr>\
+                        <tr>\
+                            <td class="text-right"><strong>Дата</strong></td>\
+                            <td>\
+                                <div class="col-lg-8 col-md-8 col-xs-6"><wm-date max-date="currentDate" ng-model="model.ep_date" ng-required="true" autofocus></wm-date></div>\
+                            </td>\
+                        </tr>\
+                    </tbody>\
+                </table>\
+        </ng-form>\
+        </div>\
+    </div>\
+   <div class="modal-footer">\
+       <button type="button" class="btn btn-primary" ng-disabled="MCForm.$invalid" ng-click="saveAndClose()">Сохранить</button>\
+       <button type="button" class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
+    </div>',
+                backdrop: 'static',
+                controller: function ($scope, $modal, RisarApi, event_id) {
+                    $scope.currentDate = new Date();
+                    $scope.model = {};
+                    $scope.filteredMedicos = [];
+
+                    $scope.loadOwnMedicos = function() {
+                        var orgId = $scope.model.org.id;
+                        $scope.filteredMedicos = safe_traverse($scope, ['groupedMedicos', orgId]);
+                    };
+                    $scope.onOrgChanged = function() {
+                        $scope.loadOwnMedicos();
+                        $scope.model.person = null;
+                    };
+                    $scope.saveAndClose = function() {
+                        RisarApi.chart.transfer(event_id, $scope.model.person.id, {beg_date: $scope.model.ep_date}).then(function(resp) {
+                            $scope.$close(resp);
+                        });
+                    };
+                    var reload = function () {
+                        $scope.allMedicos = RefBookService.get('Person');
+                        var head_promise = RisarApi.chart.get_header(event_id);
+                        $q.all([$scope.allMedicos.loading, head_promise]).then(function (result) {
+                            var header_data = result[1];
+                            $scope.groupedMedicos = _.groupBy($scope.allMedicos.objects, function(obj) {
+                                return obj.organisation != undefined ? obj.organisation.id: null
+                            });
+                            $scope.model = {
+                                person: header_data.header.event.person,
+                                org: header_data.header.event.person.organisation,
+                                ep_date: new Date()
+                            };
+                            $scope.loadOwnMedicos();
+                        });
+
+                    };
+                    reload();
+                },
+                size: 'lg',
+                resolve: {
+                    event_id: function () {
+                        return event_id
+                    }
+                }
+            });
+            return instance.result
+        }
+    }
+}])
+.service('DateRegistrationModalService', ['$modal', 'RisarApi', function ($modal, RisarApi) {
+    return {
+        openDateRegistration: function (event) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/RISAR/modal/date_registration.html',
+                template: '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+        <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+        <h4 class="modal-title">Изменить дату постановки на учет по беременности</h4>\
+        </div>\
+        <div class="modal-body">\
+            <div class="das-form">\
+            <ng-form name="MCForm">\
+                  <table class="table table-condensed">\
+                        <tbody>\
+                            <tr>\
+                                <td class="text-right"><strong>Дата</strong></td>\
+                                <td>\
+                                    <div class="col-lg-8 col-md-8 col-xs-6"><wm-date max-date="currentDate" ng-model="model.set_date" ng-required="true" autofocus></wm-date></div>\
+                                </td>\
+                            </tr>\
+                        </tbody>\
+                    </table>\
+            </ng-form>\
+            </div>\
+        </div>\
+       <div class="modal-footer">\
+           <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
+           <button type="button" class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
+        </div>',
+                backdrop: 'static',
+                controller: function ($scope, $modal, RisarApi, event) {
+                    $scope.model = {
+                        set_date: event.set_date
+                    };
+                    $scope.currentDate = new Date();
+                    $scope.saveAndClose = function() {
+                        var old_date = moment(event.set_date).startOf('day');
+                        var new_date = moment($scope.model.set_date).startOf('day');
+                        if (new_date.isSame(old_date)) {
+                            $scope.$close();
+                        }
+                        RisarApi.chart.update_set_date(event.id, {set_date: new_date.toDate()}).then(function(resp) {
+                            $scope.$close(resp);
+                        });
+                    };
+                },
+                size: 'lg',
+                resolve: {
+                    event: function () {
+                        return event
+                    }
+                }
+            });
+            return instance.result
         }
     }
 }])

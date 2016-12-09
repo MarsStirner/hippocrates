@@ -6,9 +6,14 @@ from abc import abstractmethod
 from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
 from hippocrates.blueprints.risar.views.api.integration.schemas import Schema
 from hippocrates.blueprints.risar.lib.represent.common import represent_action_diagnoses
+from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 
-from nemesis.lib.utils import safe_date, safe_traverse
+from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, safe_dict, safe_int, safe_bool_none
+from nemesis.lib.apiutils import json_dumps
 from nemesis.models.person import Person
+from nemesis.models.exists import rbDiseaseCharacter, rbTraumaType, MKB, rbAcheResult, rbFinance, rbResult
+from nemesis.models.risar import rbConditionMedHelp, rbProfMedHelp
+from nemesis.systemwide import db
 
 
 logger = logging.getLogger('simple')
@@ -25,6 +30,10 @@ class CheckupsTicket25XFormSchema(Schema):
             "description": "Талон",
             "type": "object",
             "properties": {
+                "external_id": {
+                    "description": "Внешний ID",
+                    "type": "string"
+                },
                 "hospital": {
                     "description": "Место обращения (код ЛПУ)",
                     "type": "string"
@@ -43,6 +52,26 @@ class CheckupsTicket25XFormSchema(Schema):
                     "description": "Оказываемая медицинская помощь, справочник rbRisarMedicalCare",
                     "type": "string"
                 },
+                "medical_care_emergency": {
+                    "description": "Форма оказания медицинской помощи (неотложная - да/нет)",
+                    "type": "boolean"
+                },
+                "medical_care_profile": {
+                    "description": "Профиль медицинской помощи, справочник rbProfMedHelp",
+                    "type": "string"
+                },
+                "medical_care_place": {
+                    "description": "Условия(место) оказания медицинской помощи, справочник rbConditionMedHelp",
+                    "type": "string"
+                },
+                "children": {
+                    "description": "Детское обращение (пациентка до 14 лет - да/нет)",
+                    "type": "boolean"
+                },
+                "visit_type": {
+                    "description": "Посещение (тип), справочник rbRisarVisit_Type",
+                    "type": "string"
+                },
                 "finished_treatment": {
                     "description": "Обращение (законченный случай лечения), справочник rbRisarFinishedTreatment",
                     "type": "string"
@@ -53,6 +82,10 @@ class CheckupsTicket25XFormSchema(Schema):
                 },
                 "treatment_result": {
                     "description": "Результат обращения, справочник rbResult",
+                    "type": "string"
+                },
+                "disease_outcome": {
+                    "description": "Исход заболевания, справочник rbAcheResult",
                     "type": "string"
                 },
                 "payment": {
@@ -86,6 +119,10 @@ class CheckupsTicket25XFormSchema(Schema):
                         "properties": {
                             "medical_service": {
                                 "description": "Медицинская услуга (код)",
+                                "type": "string"
+                            },
+                            "medical_service_quantity": {
+                                "description": "Медицинская услуга, количество",
                                 "type": "string"
                             },
                             "medical_service_doctor": {
@@ -205,7 +242,8 @@ class CheckupsTicket25XFormSchema(Schema):
                     "description": "Врач (код врача)",
                     "type": "string"
                 }
-            }
+            },
+            "required": ["doctor", "hospital", "diagnosis", "date_open"]
         }
     ]
 
@@ -215,7 +253,6 @@ class CheckupsTicket25XForm(XForm):
     def __init__(self, *args, **kwargs):
         super(CheckupsTicket25XForm, self).__init__(*args, **kwargs)
         self.checkup_xform = None
-        self.ticket25 = None
 
     @abstractmethod
     def set_checkup_xform(self):
@@ -239,34 +276,212 @@ class CheckupsTicket25XForm(XForm):
 
         if not self.checkup_xform.target_obj:
             self.checkup_xform.find_target_obj(self.checkup_xform.target_obj_id)
-        self.ticket25 = self.checkup_xform.target_obj.propsByCode['ticket_25'].value
+        self.target_obj = self.checkup_xform.target_obj.propsByCode['ticket_25'].value
+
+    def log_current_state(self):
+        message = u'Данные талона посещения в осмотре с id={0} до сохранения:\n{1}'.format(
+            self.checkup_xform.target_obj.id,
+            json_dumps(self.as_json())
+        )
+        logger.info(message, extra=dict(tags=['RISAR_INTGR', 'TICKET25_CS']))
+
+    def format_data(self, data):
+        hosp_code = data.get('hospital')
+        res = {
+            'hospital': self.find_org(data.get('hospital')),
+            'person': self.find_doctor(data.get('doctor'), data.get('hospital')),
+            'beg_date': safe_datetime(safe_date(data.get('date_open'))),
+            'end_date': safe_datetime(safe_date(data.get('date_close'))),
+            'urgent': safe_bool_none(data.get('medical_care_emergency')),
+            'medical_care': self.to_rb(data.get('medical_care')),
+            'prof_med_help': self.rb(data.get('medical_care_profile'), rbProfMedHelp),
+            'condit_med_help': self.rb(data.get('medical_care_place'), rbConditionMedHelp),
+            'finished_treatment': self.to_rb(data.get('finished_treatment')),
+            'initial_treatment': self.to_rb(data.get('initial_treatment')),
+            'treatment_result': self.rb(data.get('treatment_result'), rbResult),
+            'visit_type': self.to_rb(data.get('visit_type')),
+            'payment': self.rb(data.get('payment'), rbFinance),
+            # 'visit_dates': [],  # ignore this
+            # 'children': None,  # ignore this
+            'services': map(lambda s_data: self._format_service_data(s_data, hosp_code),
+                            data.get('medical_services', [])),
+            'operations': map(lambda s_data: self._format_operation_data(s_data, hosp_code),
+                              data.get('operations', [])),
+            'manipulations': map(lambda s_data: self._format_manipulation_data(s_data, hosp_code),
+                                 data.get('manipulations', [])),
+            'temp_disability': map(lambda s_data: self._format_sick_leave(s_data),
+                                   data.get('sick_leaves', [])),
+
+            '_data_for_diags': self._format_diags_data(data)
+        }
+        return res
+
+    def _format_service_data(self, data, hospital):
+        med_service = self._get_rb_service_format(data.get('medical_service'))
+        person = self.find_doctor(data.get('medical_service_doctor'), hospital)
+        amount = safe_int(data.get('medical_service_quantity'))
+        return {
+            'service': safe_dict(med_service),
+            'person': safe_dict(person),
+            'amount': amount
+        }
+
+    def _format_operation_data(self, data, hospital):
+        service = self._get_rb_service_format(data.get('operation_code'))
+        person = self.find_doctor(data.get('operation_doctor'), hospital)
+        anes = self.rb(data.get('operation_anesthesia'), 'rbRisarOperationAnesthetization')
+        equip = self.rb(data.get('operation_equipment'), 'rbRisarOperationEquipment')
+        return {
+            'service': safe_dict(service),
+            'person': safe_dict(person),
+            'anesthetization': safe_dict(anes),
+            'equipment': safe_dict(equip)
+        }
+
+    def _format_manipulation_data(self, data, hospital):
+        service = self._get_rb_service_format(data.get('manipulation'))
+        person = self.find_doctor(data.get('manipulation_doctor'), hospital)
+        amount = safe_int(data.get('manipulation_quantity'))
+        return {
+            'service': safe_dict(service),
+            'person': safe_dict(person),
+            'amount': amount
+        }
+
+    def _format_sick_leave(self, data):
+        leave_type = self.rb(data.get('sick_leave_type'), 'rbRisarSickLeaveType')
+        leave_reason = self.rb(data.get('sick_leave_reason'), 'rbRisarSickLeaveReason')
+        beg_date = safe_date(data.get('sick_leave_date_open'))
+        end_date = safe_date(data.get('sick_leave_date_close'))
+        return {
+            'type': safe_dict(leave_type),
+            'reason': safe_dict(leave_reason),
+            'beg_date': beg_date,
+            'end_date': end_date
+        }
+
+    def _format_diags_data(self, data):
+        diag_data = []
+        if 'diagnosis' in data:
+            mkb2 = self.rb(data.get('reason'), MKB, 'DiagID')
+            character = self.rb(data.get('disease_character'), rbDiseaseCharacter)
+            trauma = self.rb(data.get('trauma'), rbTraumaType)
+            ache_result = self.rb(data.get('disease_outcome'), rbAcheResult)
+            diag_data.append({
+                'kind': 'main',
+                'mkbs': [data['diagnosis']],
+                'additional_info': {
+                    data['diagnosis']: {
+                        'mkb2': mkb2,
+                        'character': character,
+                        'trauma': trauma,
+                        'ache_result': ache_result
+                    }
+                }
+            })
+        if 'diagnosis_sop' in data:
+            diag_data.append({
+                'kind': 'associated',
+                'mkbs': data['diagnosis_sop']
+            })
+        old_action_data = {
+            'begDate': self.checkup_xform.target_obj.begDate,
+            'endDate': self.checkup_xform.target_obj.endDate,
+            'person': self.checkup_xform.target_obj.person
+        }
+        return {
+            'diags_list': [
+                {
+                    'diag_data': diag_data,
+                    'diag_type': 'final'
+                }
+            ],
+            'old_action_data': old_action_data
+        }
+
+    def _get_rb_service_format(self, code):
+        refbook = 'rbService_regional' if SpecificsManager.uses_regional_services() else 'SST365'
+        return self.rb(code, refbook)
+
+    def update_target_obj(self, data):
+        if not self.target_obj:
+            self.find_ticket25()
+
+        self.log_current_state()
+
+        data = self.format_data(data)
+        data_for_diags = data.pop('_data_for_diags')
+
+        ticket25 = self.target_obj
+
+        ticket25.begDate = data['beg_date']
+        ticket25.setPerson = self.target_obj.person = data['person']
+
+        for code, value in data.iteritems():
+            if code in ticket25.propsByCode:
+                try:
+                    prop = ticket25.propsByCode[code]
+                    self.check_prop_value(prop, value)
+                    prop.value = value
+                except Exception, e:
+                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
+                        prop.type.name, prop.type.id), exc_info=True)
+                    raise e
+
+        # update data in parent checkup
+        self.checkup_xform.target_obj.begDate = data['beg_date']
+
+        self.checkup_xform.update_diagnoses_system(
+            data_for_diags['diags_list'], data_for_diags['old_action_data']
+        )
+
+    def store(self):
+        db.session.add(self.target_obj)
+        super(CheckupsTicket25XForm, self).store()
+
+    def reevaluate_data(self):
+        if not self.checkup_xform:
+            self.set_checkup_xform()
+        self.checkup_xform.reevaluate_data()
+
+    def update_target_obj(self, data):
+        raise NotImplementedError
 
     @wrap_simplify
     def as_json(self):
-        if not self.ticket25:
+        if not self.target_obj:
             return
 
         inspection = self.checkup_xform.target_obj
-        action = self.ticket25
+        action = self.target_obj
         person = action.person
         res = {
             'hospital': self.or_undefined(self.from_org_rb(person and person.organisation)),
             'doctor': self.or_undefined(self.from_person_rb(person)),
             'date_open': self.or_undefined(safe_date(action.begDate)),
             'date_close': self.or_undefined(safe_date(action.endDate)),
+            'medical_care_emergency': self.or_undefined(safe_bool_none(action['urgent'].value)),
             'medical_care': self.or_undefined(self.from_rb(action['medical_care'].value)),
+            'medical_care_profile': self.or_undefined(self.from_rb(action['prof_med_help'].value)),
+            'medical_care_place': self.or_undefined(self.from_rb(action['condit_med_help'].value)),
             'finished_treatment': self.or_undefined(self.from_rb(action['finished_treatment'].value)),
             'initial_treatment': self.or_undefined(self.from_rb(action['initial_treatment'].value)),
             'treatment_result': self.or_undefined(self.from_rb(action['treatment_result'].value)),
+            'visit_type': self.or_undefined(self.from_rb(action['visit_type'].value)),
             'payment': self.or_undefined(self.from_rb(action['payment'].value)),
-            'visit_dates': self.or_undefined(safe_date(inspection.begDate)),
+            'visit_dates': self.or_undefined(safe_date(inspection.begDate) and [safe_date(inspection.begDate)]),
+            # 'children': self._repr_is_child(),  # todo: TypeError("unsupported operand type(s) for -: 'datetime.datetime' and 'datetime.date'",)
             'medical_services': self.or_undefined(self._repr_med_services(action)),
             'operations': self.or_undefined(self._repr_operations(action)),
             'manipulations': self.or_undefined(self._repr_manipulations(action)),
-            'sick_leaves': self.or_undefined(self._repr_sick_leaves(action)),
+            'sick_leaves': self.or_undefined(self._repr_sick_leaves(action))
         }
         res.update(self._repr_diagnoses_info(inspection))
         return res
+
+    def _repr_is_child(self):
+        inspection = self.checkup_xform.target_obj
+        return inspection.event.client.age_tuple(inspection.begDate)[3] < 14
 
     def _repr_med_services(self, action):
         def make_med_service_data(ms):
@@ -274,7 +489,8 @@ class CheckupsTicket25XForm(XForm):
             doctor = Person.query.get(doctor_id) if doctor_id else None
             return {
                 'medical_service': safe_traverse(ms, 'service', 'code'),
-                'medical_service_doctor': self.from_person_rb(doctor)
+                'medical_service_doctor': self.from_person_rb(doctor),
+                'medical_service_quantity': ms.get('amount')
             }
 
         return [
@@ -350,5 +566,6 @@ class CheckupsTicket25XForm(XForm):
                 'reason': self.or_undefined(self.from_mkb_rb(main_diag['diagnostic']['mkb2'])),
                 'disease_character': self.or_undefined(self.from_rb(main_diag['diagnostic']['character'])),
                 'trauma': self.or_undefined(self.from_rb(main_diag['diagnostic']['trauma'])),
+                'disease_outcome': self.or_undefined(self.from_rb(main_diag['diagnostic']['ache_result'])),
             })
         return res

@@ -1,9 +1,10 @@
 'use strict';
 
-var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUser) {
+var RiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUser) {
     $scope.curation_level_code = $scope.curation_level.code; // from parent ctrl
 
     $scope.slices = [];
+    $scope.slices_radz = [];
     $scope.slices_x = function (d) {
         return d.key;
     };
@@ -58,23 +59,61 @@ var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, 
             .then(function (data) {
                 $scope.preg_pathg_stats = data.preg_pathg_stats;
             });
+        RisarApi.stats.get_radz_risk_info($scope.curation_level_code).then(function (result) {
+                $scope.slices_radz = [];
+                // if (result['undefined']) {
+                //     $scope.slices.push({
+                //         key: 'Не определена',
+                //         value: result['1'],
+                //         color: '#707070',
+                //         risk_rate: $scope.PerinatalRiskRate.get(1)
+                //     })
+                // }
+                if (result['low']) {
+                    $scope.slices_radz.push({
+                        key: 'Низкая',
+                        value: result['low'],
+                        color: '#30D040',
+                        radz_risk_rate: $scope.RadzinskyRiskRate.get(1)
+                    })
+                }
+                if (result['medium']) {
+                    $scope.slices_radz.push({
+                        key: 'Средняя',
+                        value: result['medium'],
+                        color: '#f39c12',
+                        radz_risk_rate: $scope.RadzinskyRiskRate.get(2)
+                    })
+                }
+                if (result['high']) {
+                    $scope.slices_radz.push({
+                        key: 'Высокая',
+                        value: result['high'],
+                        color: '#dd4b39',
+                        radz_risk_rate: $scope.RadzinskyRiskRate.get(3)
+                    })
+                }
+            });
     };
 
     $scope.$on('elementClick.directive', function (angularEvent, event) {
         $scope.openExtendedSearchFromDiagram(event);
     });
     $scope.openExtendedSearchFromDiagram = function (event) {
-        var rr = event.point.risk_rate,
-            mouse_button = event.pos.button;  // 0-left, 1-middle
-        var args = {
-            request_type: 'pregnancy',
-            closed: false,
-            risk_rate: rr.code
-        };
-        if (!$scope.curation_level_code) {
-            args.person_id = CurrentUser.get_main_user().id;
+        var risk_rate =  event.point.hasOwnProperty('risk_rate') ? 'risk_rate' : 'radz_risk_rate';
+        var rr = event.point[risk_rate]
+        if (rr !== undefined) {
+            var mouse_button = event.pos.button;  // 0-left, 1-middle
+            var args = {
+                request_type: 'pregnancy',
+                closed: false
+            };
+            args[risk_rate] = rr.code;
+            if (!$scope.curation_level_code) {
+                args.person_id = CurrentUser.get_main_user().id;
+            }
+            RisarApi.search_event.openExtendedSearch(args, mouse_button === 1)
         }
-        RisarApi.search_event.openExtendedSearch(args, mouse_button === 1)
     };
 
     $scope.flt_pp = function (pp) {
@@ -101,6 +140,7 @@ var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, 
     $scope.init = function () {
         $scope.PregnancyPathology = RefBookService.get('PregnancyPathology');
         $scope.PerinatalRiskRate = RefBookService.get('PerinatalRiskRate');
+        $scope.RadzinskyRiskRate = RefBookService.get('RadzinskyRiskRate');
 
         $q.all($scope.PregnancyPathology.loading, $scope.PerinatalRiskRate.loading).then($scope.refresh_data);
     };
@@ -109,5 +149,4 @@ var PerinatalRiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, 
 };
 
 
-WebMis20.controller('PerinatalRiskRateViewCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'CurrentUser',
-    PerinatalRiskRateViewCtrl]);
+WebMis20.controller('RiskRateViewCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'CurrentUser', RiskRateViewCtrl]);

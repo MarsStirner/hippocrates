@@ -50,12 +50,3 @@ def reevaluate_pregnancy_start_date_by_ultrasonography(card):
         if value:
             card.attrs['pregnancy_start_date_by_ultrasonography'].value = value
             break
-
-
-def get_delivery_date_by_last_menstruation(card):
-    weeks = 40
-    mother_action = card.anamnesis.mother
-    if mother_action:
-        start_date = mother_action['menstruation_last_date'].value
-        if start_date:
-            return start_date + datetime.timedelta(weeks=weeks)

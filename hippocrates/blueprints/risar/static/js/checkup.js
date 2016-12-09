@@ -80,17 +80,31 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
         var ticket_id = $scope.checkup.ticket_25.id;
         RisarApi.print_ticket_25(ticket_id, 'pdf');
     };
-
+    $scope.begDateIsSameNextDate = false;
+    $scope.begDateIsAfterNextDate = false;
+    $scope.$watch('checkup.next_date', function (n, o) {
+        if (n!==o && $scope.checkup) {
+            var beg_date = moment($scope.checkup.beg_date).startOf('day');
+            var next_date = moment(n).startOf('day');
+            $scope.begDateIsAfterNextDate = beg_date.isAfter(next_date);
+            $scope.begDateIsSameNextDate = beg_date.isSame(next_date);
+        }
+    });
+    $scope.$watch('checkup.beg_date', function (n, o) {
+        if (n!==o && $scope.checkup.ticket_25) {
+            var beg_date = moment(n).startOf('day');
+            var next_date = moment($scope.checkup.next_date).startOf('day');
+            $scope.checkup.ticket_25.beg_date = beg_date.toDate();
+            $scope.checkup.ticket_25.end_date = beg_date.toDate();
+            $scope.begDateIsAfterNextDate = beg_date.isAfter(next_date);
+            $scope.begDateIsSameNextDate = next_date.isSame(beg_date);
+        }
+    });
 }])
 ;
 
 
 WebMis20.controller('CheckupTicket25Ctrl', ['$scope', function ($scope) {
-    $scope.$watch('checkup.beg_date', function (n, o) {
-        if (n!==o && $scope.checkup.ticket_25) {
-            $scope.checkup.ticket_25.beg_date = new Date($scope.checkup.beg_date);
-        }
-    });
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;
     };

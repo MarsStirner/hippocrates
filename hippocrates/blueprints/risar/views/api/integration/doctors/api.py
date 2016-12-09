@@ -42,3 +42,12 @@ def api_doctor_save(api_version, organization_code=None, doctor_code=None):
     xform.update_target_obj(data)
     xform.store()
     return xform.as_json()
+
+
+@module.route('/api/integration/<int:api_version>/doctor/<organization_code>/<doctor_code>', methods=['DELETE'])
+@api_method(hook=hook)
+def api_doctor_delete(api_version, organization_code=None, doctor_code=None):
+    xform = DoctorXForm(api_version, False)
+    xform.init_and_check_params(organization_code, doctor_code)
+    xform.delete_target_obj()
+    xform.store()

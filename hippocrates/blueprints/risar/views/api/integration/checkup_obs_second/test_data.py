@@ -75,19 +75,102 @@ obs_second_data = {
             }
         },
     ],
+    "vaginal_examination": {  # Влагалищное исследование
+        "vagina": "svobodnoe",  # * Влагалище ["svobodnoe", "uzkoe"]
+        "cervix": "koniceskaacistaa",
+    # * Шейка матки ["koniceskaacistaa", "koniceskaaerozirovannaa", "zilindriceskaacistaa", "zilindriceskaaerozirovanaa"]
+        # "cervix_length": None,  # Длина шейки матки ["bolee2sm", "menee1sm", "menee2smnobolee1sm"]
+        # "cervical_canal": None,  # Цервикальный канал ["narujnyjzevprohodimdla1poperecnogopal_za", "narujnyjzevzakryt", "vnutrennijzevpriotkryt"]
+        # "cervix_consistency": None,  # Консистенция шейки матки ["magkaa", "plotnaa", "razmagcennaa"]
+        # "cervix_position": None,  # Позиция шейки матки ["kperediotprovodnoj", "kzadiotprovodnojosi", "poprovodnojositaza"]
+        # "cervix_maturity": None,  # Зрелость шейки матки ["nezrelaa", "sozrevausaa", "zrelaa"]
+        # "body_of_uterus": [],  # Тело матки ["bezboleznennopripal_pazii", "boleznennopripal_pazii", "magkovatojkonsistenzii", "nepodvijno", "podvijno"]
+        # "adnexa": None,  # Придатки ["bezosobennostej", "uveliceny"]
+        # "specialities": "",  # Особенности
+        # "vulva": "",  # Наружные половые органы
+        "parametrium": 'plotnoe',  # Околоматочное пространство
+        # "vaginal_smear": False,  # Отделяемое из влагалища взято на анализ
+        # "cervical_canal_smear": False,  # Отделяемое из цервикального канала взято на анализ
+        # "onco_smear": False,  # Мазок на онкоцитологию взято на анализ
+        # "urethra_smear": False,  # Отделяемое и при наличии данных з уретры взято на анализ
+    },
     "medical_report": {  # Заключение
         "pregnancy_week": 07,  # * Беременность (недель)
         "next_visit_date": "2016-04-15",  # * Плановая дата следующей явки
         "pregnancy_continuation": False,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "Z34.0",  # Основной диагноз
-        "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
-        "diagnosis_osl": ["H01", "H02"],  # Диагноз осложнения
+        "diagnosis_osn": {      # Основной диагноз
+            "MKB": "A00",
+            "descr": "Osn descr"
+          }
+        ,
+        "diagnosis_sop": [{     # Диагноз сопутствующий
+          "MKB": "A00.0",
+          "descr": "Sop descr"
+        }],
+        "diagnosis_osl": [{     # Диагноз осложнения
+          "MKB": "A00.1",
+          "descr": "Osl descr"
+        }],
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания
         # "vitaminization": "",  # Витаминизация
         # "nutrition": "",  # Коррекция питания
         # "treatment": "",  # Лечение
     }
+}
+
+
+ticket25_data = {
+    "date_open": "2016-11-26",
+    "doctor": "999",
+    "hospital": "-2",
+    "visit_dates": [
+        "2016-11-23"
+    ],
+    "diagnosis": "O15.0",
+    "reason": "B00",
+    "trauma": "01",
+    "visit_type": "1",
+    "disease_character": "2",
+    "disease_outcome": "improvement",
+    "medical_care": "3",
+    "medical_care_profile": "2",
+    "medical_care_place": "ambulatorno",
+    "medical_care_emergency": True,
+    "finished_treatment": "1",
+    "treatment_result": "01",
+    "initial_treatment": "2",
+    "payment": "4",
+    "medical_services": [
+        {
+            "medical_service": "00000023",
+            "medical_service_doctor": "999",
+            "medical_service_quantity": "5"
+        }
+    ],
+    "operations": [
+        {
+            "operation_code": "00000023",
+            "operation_doctor": "999",
+            "operation_anesthesia": "1",
+            "operation_equipment": "1"
+        }
+    ],
+    "manipulations": [
+        {
+            "manipulation_doctor": "999",
+            "manipulation_quantity": 3,
+            "manipulation": "A16.06.016.005"
+        }
+    ],
+    "sick_leaves": [
+        {
+            "sick_leave_reason": "1",
+            "sick_leave_date_open": "2016-11-26",
+            "sick_leave_type": "2",
+            "sick_leave_date_close": "2016-11-26"
+        }
+    ],
 }

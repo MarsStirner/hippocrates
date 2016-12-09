@@ -1,4 +1,5 @@
-<div class="box box-danger" ng-controller="PerinatalRiskRateViewCtrl">
+<div ng-controller="RiskRateViewCtrl">
+<div class="box box-danger">
     <div class="box-header with-border">
         <h3 class="box-title">Пациентки по степени риска</h3>
         <div class="box-tools pull-right">
@@ -6,6 +7,7 @@
         </div>
     </div>
     <div class="box-body">
+        <h4 class="text-center">по приказу МЗ РФ № 572н</h4>
         <nvd3-pie-chart
             id="noid"
             data="slices"
@@ -23,9 +25,34 @@
             donut-ratio="0.33"
             ><svg></svg>
         </nvd3-pie-chart>
+        <h4 class="text-center">по шкале Радзинского</h4>
+        <nvd3-pie-chart
+            id="noid2"
+            data="slices_radz"
+            width="350"
+            height="370"
+            margin="{left:0,top:0,bottom:0,right:10}"
+            x="slices_x"
+            y="slices_y"
+            color="slices_c"
+            nodata="Нет данных"
+            showlegend="true"
+            showlabels="true"
+            labeltype="value"
+            donut="true"
+            donut-ratio="0.33"
+            ><svg></svg>
+        </nvd3-pie-chart>
     </div>
-    <div class="box-footer">
-        <h4>По патологиям</h4>
+</div>
+<div class="box box-danger">
+    <div class="box-header with-border">
+        <h3 class="box-title">Пациентки по патологиям</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
         <table class="table table-condensed no-border">
             <tr ng-repeat="pp in PregnancyPathology.objects | filter:flt_pp">
                 <td>[[ pp.name ]]</td>
@@ -40,4 +67,5 @@
             </tr>
         </table>
     </div>
+</div>
 </div>

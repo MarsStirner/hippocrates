@@ -2,6 +2,7 @@
 
 import logging
 
+from blueprints.risar.lib.stats import StatsSelecter
 from sqlalchemy import or_
 from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
 from .schemas import CardSchema
@@ -64,6 +65,9 @@ class CardXForm(CardSchema, XForm):
                         existing_event_id, self.parent_obj_id
                     )
                 )
+
+    def find_target(self):
+        self.target_obj = self._find_target_obj_query().first()
 
     def get_target_nf_msg(self):
         return u'Не найдена карта с id = {0}'.format(self.target_obj_id)
@@ -146,6 +150,15 @@ class CardXForm(CardSchema, XForm):
             "card_LPU": self.from_org_rb(event.organisation)
         }
 
-    def get_list(self):
+    def get_list(self, filters=None):
         q = self._find_list_query()
+        filters = filters or {}
+        if 'id' in filters:
+            q = q.filter(
+                self.target_obj_class.id == filters['id']
+            )
+        if 'pregnancyWeek' in filters:
+            ss = StatsSelecter()
+            ss.get_events_exchange_card()
+            q = ss.query
         return q.all()

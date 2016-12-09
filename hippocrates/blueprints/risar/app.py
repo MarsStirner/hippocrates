@@ -41,7 +41,8 @@ def fc_risar_settings():
     return {
         'local_config': {
             'risar': {
-                'risar_regions': nemesis_app.config['RISAR_REGIONS']
+                'risar_regions': nemesis_app.config['RISAR_REGIONS'],
+                'system_prefs': nemesis_app.config['system_prefs'],
             }
         }
     }

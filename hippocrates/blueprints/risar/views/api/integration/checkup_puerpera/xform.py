@@ -173,8 +173,6 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, PregnancyCheckupsXForm):
 
         diags_data = data.get('diagnoses')
         for dd in diags_data:
-            if dd['end_date']:
-                continue
             kind_code = dd['diagnosis_types']['final'].code
             if kind_code in self.DIAG_KINDS_MAP:
                 kind = self.DIAG_KINDS_MAP[kind_code]

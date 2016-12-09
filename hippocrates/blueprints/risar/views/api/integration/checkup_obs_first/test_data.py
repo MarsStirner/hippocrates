@@ -101,9 +101,19 @@ obs_first_data = {
         "pregnancy_continuation": True,  # * Возможность сохранения беременности
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
-        "diagnosis_osn": "D01",  # Основной диагноз
-        "diagnosis_sop": ["G01"],  # Диагноз сопутствующий
-        # "diagnosis_osl": ["D01"],  # Диагноз осложнения
+        "diagnosis_osn": {      # Основной диагноз
+            "MKB": "A00",
+            "descr": "Osn descr"
+          }
+        ,
+        "diagnosis_sop": [{     # Диагноз сопутствующий
+          "MKB": "A00.0",
+          "descr": "Sop descr"
+        }],
+        "diagnosis_osl": [{     # Диагноз осложнения
+          "MKB": "A00.1",
+          "descr": "Osl descr"
+        }],
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания
     }

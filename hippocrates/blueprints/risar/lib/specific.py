@@ -36,6 +36,10 @@ class SpecificsManager(object):
             return get_sarbarsmis_card_url(event)
 
     @classmethod
+    def get_ext_schedule_url(cls):
+        return safe_traverse(app.config, 'system_prefs', 'integration', 'external_schedule_url', default='')
+
+    @classmethod
     def get_ext_card_menu_text(cls):
         if cls._system_mode == SystemMode.sar_barsmis[0]:
             return u'История заболевания'

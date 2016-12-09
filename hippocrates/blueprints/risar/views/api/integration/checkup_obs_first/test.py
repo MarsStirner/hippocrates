@@ -17,8 +17,8 @@ def create_checkup(session, card_id, data):
     return result
 
 
-def edit_checkup(session, card_id, concilium_id, data):
-    url = u'/risar/api/integration/0/card/%s/checkup/obs/first/%s/' % (card_id, concilium_id)
+def edit_checkup(session, card_id, checkup_id, data):
+    url = u'/risar/api/integration/0/card/%s/checkup/obs/first/%s/' % (card_id, checkup_id)
     result = make_api_request('put', url, session, data)
     return result
 

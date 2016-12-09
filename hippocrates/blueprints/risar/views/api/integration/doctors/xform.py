@@ -112,3 +112,7 @@ class DoctorXForm(DoctorSchema, XForm):
             'login': self.target_obj.login,
             'regional_code': self.target_obj.regionalCode,
         }
+
+    def delete_target_obj(self):
+        self.target_obj.deleted = 1
+        self._changed.append(self.target_obj)

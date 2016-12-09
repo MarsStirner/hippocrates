@@ -5,9 +5,9 @@
                     <th class="text-right col-md-4">Даты открытия и закрытия талона</th>
                     <td class="col-md-8">
                         <div class="row">
-                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date" autofocus
+                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.beg_date" ng-disabled="true"
                                 min-date="checkup.beg_date"></wm-date></div>
-                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date"
+                            <div class="col-md-6"><wm-date ng-model="checkup.ticket_25.end_date" ng-disabled="true"
                                 min-date="checkup.beg_date"></wm-date></div>
                         </div>
                     </td>
@@ -15,13 +15,15 @@
                 <tr>
                     <th class="text-right col-md-4">Оказываемая медицинская помощь</th>
                     <td class="col-md-8">
-                        <rb-select ref-book="rbRisarMedicalCare" ng-model="checkup.ticket_25.medical_care"></rb-select>
+                        <rb-select ref-book="rbRisarMedicalCare"
+                                   ng-model="checkup.ticket_25.medical_care" limit-to="50"/></rb-select>
                     </td>
                 </tr>
                 <tr>
                     <th class="text-right col-md-4">Место обращения (посещения)</th>
                     <td class="col-md-8">
-                        <rb-select ref-book="rbRisarVisitPlace" ng-model="checkup.ticket_25.visit_place"></rb-select>
+                        <rb-select ref-book="rbRisarVisitPlace"
+                                   ng-model="checkup.ticket_25.visit_place" limit-to="50"/></rb-select>
                     </td>
                 </tr>
                 <tr>
@@ -33,7 +35,7 @@
                 <tr>
                     <th class="text-right col-md-4">Посещение</th>
                     <td class="col-md-8">
-                        <ui-select ng-model="checkup.ticket_25.visit_type">
+                        <ui-select ng-model="checkup.ticket_25.visit_type" theme="select2">
                             <ui-select-choices repeat="item in checkup.ticket_25.visit_reason.types | filter: $select.search track by item._id">
                                 <div style="text-align: justify" ng-bind-html="item.name | highlight: $select.search"></div>
                             </ui-select-choices>
@@ -56,13 +58,13 @@
                 <tr>
                     <th class="text-right col-md-4">Результат обращения</th>
                     <td class="col-md-8">
-                        <rb-select ref-book="rbResult" ng-model="checkup.ticket_25.treatment_result"></rb-select>
+                        <rb-select ref-book="rbResult" ng-model="checkup.ticket_25.treatment_result" limit-to="50"></rb-select>
                     </td>
                 </tr>
                 <tr>
                     <th class="text-right col-md-4">Оплата за счет</th>
                     <td class="col-md-8">
-                        <rb-select ref-book="rbFinance" ng-model="checkup.ticket_25.payment"></rb-select>
+                        <rb-select ref-book="rbFinance" ng-model="checkup.ticket_25.payment" limit-to="50"></rb-select>
                     </td>
                 </tr>
                 <tr>
@@ -74,13 +76,13 @@
                 <tr>
                     <th class="text-right col-md-4">Профиль медицинской помощи</th>
                     <td class="col-md-8">
-                        <rb-select ref-book="rbProfMedHelp" ng-model="checkup.ticket_25.prof_med_help"></rb-select>
+                        <rb-select ref-book="rbProfMedHelp" ng-model="checkup.ticket_25.prof_med_help" limit-to="50"></rb-select>
                     </td>
                 </tr>
                 <tr>
                     <th class="text-right col-md-4">Условия оказания медицинской помощи </th>
                     <td class="col-md-8">
-                        <rb-select ref-book="rbConditionMedHelp" ng-model="checkup.ticket_25.condit_med_help"></rb-select>
+                        <rb-select ref-book="rbConditionMedHelp" ng-model="checkup.ticket_25.condit_med_help" limit-to="50"></rb-select>
                     </td>
                 </tr>
                 <tr>
@@ -94,14 +96,15 @@
                                style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th width="50%">Название</th>
-                                <th width="40%">Врач</th>
+                                <th width="45%">Название</th>
+                                <th width="10%">Количество</th>
+                                <th width="35%">Врач</th>
                                 <th width="10%">&nbsp;</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr ng-repeat="$row in $table.$model">
-                                <td class="col-md-5">
+                                <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)">[[ $row.service.code ]] - [[ $row.service.name ]]</span>
                                     <span ng-if="$table.$edited($index)">
                                         {% if specifics_mng.uses_regional_services() %}
@@ -114,7 +117,13 @@
                                     </span>
                                 </td>
 
-                                <td class="col-md-5">
+                                <td class="col-md-2">
+                                    <span ng-if="!$table.$edited($index)" ng-bind="$row.amount"></span>
+                                    <span ng-if="$table.$edited($index)">
+                                        <input valid-number maxlength="3" class="form-control" ng-model="$table.$tmp.amount" /></span>
+                                </td>
+
+                                <td class="col-md-4">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.person.full_name"></span>
                                     <span ng-if="$table.$edited($index)"><wm-person-select ng-model="$table.$tmp.person" /></span>
                                 </td>
@@ -169,12 +178,18 @@
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.anesthetization.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.anesthetization" ref-book="rbRisarOperationAnesthetization" with-title="true" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.anesthetization"
+                                                                                    ref-book="rbRisarOperationAnesthetization"
+                                                                                    with-title="true"
+                                                                                    limit-to="50"/></span>
                                 </td>
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.equipment.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.equipment" ref-book="rbRisarOperationEquipment" with-title="true" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.equipment"
+                                                                                    ref-book="rbRisarOperationEquipment"
+                                                                                    with-title="true"
+                                                                                    limit-to="50"/></span>
                                 </td>
 
                                 <td class="col-md-2">
@@ -279,12 +294,18 @@
                             <tr ng-repeat="$row in $table.$model">
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.type.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.type" ref-book="rbRisarSickLeaveType" with-title="true" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.type"
+                                                                                    ref-book="rbRisarSickLeaveType"
+                                                                                    with-title="true"
+                                                                                    limit-to="50"/></span>
                                 </td>
 
                                 <td class="col-md-2">
                                     <span ng-if="!$table.$edited($index)" ng-bind="$row.reason.name"></span>
-                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.reason" ref-book="rbRisarSickLeaveReason" with-title="true" /></span>
+                                    <span ng-if="$table.$edited($index)"><rb-select ng-model="$table.$tmp.reason"
+                                                                                    ref-book="rbRisarSickLeaveReason"
+                                                                                    with-title="true"
+                                                                                    limit-to="50"/></span>
                                 </td>
 
                                 <td class="col-md-3">
