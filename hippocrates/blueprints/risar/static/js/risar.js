@@ -1254,7 +1254,6 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                         if (new_date.isSame(old_date)) {
                             $scope.$close();
                         }
-                        console.log($scope.model.set_date);
                         RisarApi.chart.update_set_date(event.id, {set_date: new_date.toDate()}).then(function(resp) {
                             $scope.$close(resp);
                         });

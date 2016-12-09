@@ -80,17 +80,19 @@ def api_0_chart_transfer(event_id, person_id=None):
     return represent_header(event)
 
 
-@module.route('/api/0/update_event_set_date/<int:event_id>', methods=['PUT'])
+@module.route('/api/0/card/update_event_set_date/<int:event_id>', methods=['PUT'])
 @api_method
 def api_0_update_set_date(event_id):
-    event = Event.query.get(event_id)
     set_date = safe_datetime(request.get_json().get('set_date'))
+    if not set_date:
+        raise ApiException(400, u'Дата не определена')
 
+    event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение c id=%s не найдено' % event_id)
 
     event.setDate = set_date
-    AbstractCard(event).reevaluate_card_attrs()
-    db.session.add(event)
+    db.session.commit()
+    AbstractCard.get_for_event(event).reevaluate_card_attrs()
     db.session.commit()
     return represent_header(event)
