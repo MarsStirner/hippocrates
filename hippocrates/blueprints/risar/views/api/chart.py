@@ -3,6 +3,7 @@
 from flask import request, abort
 
 from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib.card import AbstractCard
 from hippocrates.blueprints.risar.lib.represent.common import represent_header
 from hippocrates.blueprints.risar.lib.chart import can_control_events, take_event_control,\
     remove_event_control, can_transfer_events, transfer_to_person
@@ -75,5 +76,23 @@ def api_0_chart_transfer(event_id, person_id=None):
     #     raise ApiException(403, u'Пользователь не может переводить пациенток')
 
     transfer_to_person(event, person, beg_date)
+    db.session.commit()
+    return represent_header(event)
+
+
+@module.route('/api/0/card/update_event_set_date/<int:event_id>', methods=['PUT'])
+@api_method
+def api_0_update_set_date(event_id):
+    set_date = safe_datetime(request.get_json().get('set_date'))
+    if not set_date:
+        raise ApiException(400, u'Дата не определена')
+
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение c id=%s не найдено' % event_id)
+
+    event.setDate = set_date
+    db.session.commit()
+    AbstractCard.get_for_event(event).reevaluate_card_attrs()
     db.session.commit()
     return represent_header(event)

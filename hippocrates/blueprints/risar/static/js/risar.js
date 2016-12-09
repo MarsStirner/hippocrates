@@ -149,7 +149,9 @@ WebMis20
         };
         this.transfer = function(event_id, to_person_id, data) {
            return wrapper('POST', Config.url.api_chart_transfer.format(event_id, to_person_id), {}, data);
-            
+        };
+        this.update_set_date = function(event_id, data) {
+           return wrapper('PUT', Config.url.api_update_set_date.format(event_id), {}, data);
         };
         this.get_header = function (event_id) {
             return wrapper('GET', urls.header.format(event_id));
@@ -740,11 +742,19 @@ WebMis20
         }
     };
 }]);
-WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService', 'ErrandModalService', 'ChartTransferModalService',
-function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, ChartTransferModalService) {
+WebMis20.controller('RisarHeaderCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService', 'ErrandModalService',
+    'ChartTransferModalService', 'DateRegistrationModalService',
+function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, ChartTransferModalService, DateRegistrationModalService) {
     $scope.openTransferModal = function () {
         ChartTransferModalService.openTransfer($scope.header.event.id).then(function(rslt){
             $scope.header = rslt;
+        });
+    };
+    $scope.openDateRegistrationModal = function () {
+        DateRegistrationModalService.openDateRegistration($scope.header.event).then(function(header){
+            if (header) {
+                $scope.header = header;
+            }
         });
     };
     $scope.create_errand = function () {
@@ -1196,6 +1206,63 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                 resolve: {
                     event_id: function () {
                         return event_id
+                    }
+                }
+            });
+            return instance.result
+        }
+    }
+}])
+.service('DateRegistrationModalService', ['$modal', 'RisarApi', function ($modal, RisarApi) {
+    return {
+        openDateRegistration: function (event) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/RISAR/modal/date_registration.html',
+                template: '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+        <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+        <h4 class="modal-title">Изменить дату постановки на учет по беременности</h4>\
+        </div>\
+        <div class="modal-body">\
+            <div class="das-form">\
+            <ng-form name="MCForm">\
+                  <table class="table table-condensed">\
+                        <tbody>\
+                            <tr>\
+                                <td class="text-right"><strong>Дата</strong></td>\
+                                <td>\
+                                    <div class="col-lg-8 col-md-8 col-xs-6"><wm-date max-date="currentDate" ng-model="model.set_date" ng-required="true" autofocus></wm-date></div>\
+                                </td>\
+                            </tr>\
+                        </tbody>\
+                    </table>\
+            </ng-form>\
+            </div>\
+        </div>\
+       <div class="modal-footer">\
+           <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
+           <button type="button" class="btn btn-default" ng-click="$dismiss()">Отменить</button>\
+        </div>',
+                backdrop: 'static',
+                controller: function ($scope, $modal, RisarApi, event) {
+                    $scope.model = {
+                        set_date: event.set_date
+                    };
+                    $scope.currentDate = new Date();
+                    $scope.saveAndClose = function() {
+                        var old_date = moment(event.set_date).startOf('day');
+                        var new_date = moment($scope.model.set_date).startOf('day');
+                        if (new_date.isSame(old_date)) {
+                            $scope.$close();
+                        }
+                        RisarApi.chart.update_set_date(event.id, {set_date: new_date.toDate()}).then(function(resp) {
+                            $scope.$close(resp);
+                        });
+                    };
+                },
+                size: 'lg',
+                resolve: {
+                    event: function () {
+                        return event
                     }
                 }
             });
