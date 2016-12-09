@@ -19,11 +19,15 @@
             <div class="col-sm-6 col-md-6">[[checkup.ticket_25.end_date|asDate]]</div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Оказываемая медицинская помощь:</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Оказываемая медицинская помощь:</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Вид медицинской помощи:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.medical_care.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Место обращения (посещения):</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Место обращения (посещения):</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Место оказания мед.помощи:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_place.name"></span></div>
     </div>
     <div class="row">
@@ -31,23 +35,33 @@
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_type.name"></span></div>
     </div>
      <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Обращение (цель):</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Обращение (цель):</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Вид обращения:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_reason.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Случай закончен:</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Случай закончен:</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Законченный случай лечения:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.finished_treatment.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Обращение:</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Обращение:</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Случай обслуживания:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.initial_treatment.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Результат обращения:</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Результат обращения:</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Результат заболевания:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.treatment_result.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Оплата за счет:</div>
+            <!--Временное решение! RIMIS-1791-->
+            <!--<div class="col-sm-6 col-md-6 text-right">Оплата за счет:</div>-->
+            <div class="col-sm-6 col-md-6 text-right">Вид оплаты:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.payment.name"></span></div>
     </div>
     <div class="row">
@@ -147,7 +161,9 @@
          <table class="table table-condensed">
             <thead>
               <tr>
-                <th>Тип</th>
+                  <!--Временное решение! RIMIS-1791-->
+                <!--<th>Тип</th>-->
+                <th>Вид</th>
                 <th>Повод выдачи</th>
                 <th>Кому</th>
                 <th>Дата выдачи</th>
