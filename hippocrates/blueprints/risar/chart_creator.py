@@ -107,6 +107,8 @@ class ChartCreator(object):
             if self.automagic:
                 sirius.send_to_mis(
                     sirius.RisarEvents.CREATE_CARD,
+                    sirius.RisarEntityCode.CARD,
+                    sirius.OperationCode.READ_ONE,
                     'risar.api_card_get',
                     obj=('card_id', self.event.id),
                     params={'client_id': self.client_id},

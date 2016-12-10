@@ -81,10 +81,14 @@ def api_0_pregnancy_checkup(event_id):
     db.session.commit()
     if flat_code == first_inspection_flat_code:
         checkup_method_name = 'risar.api_checkup_obs_first_ticket25_get'
+        entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
     else:
         checkup_method_name = 'risar.api_checkup_obs_second_ticket25_get'
+        entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
     sirius.send_to_mis(
         sirius.RisarEvents.SAVE_CHECKUP,
+        entity_code,
+        sirius.OperationCode.READ_ONE,
         checkup_method_name,
         obj=('exam_obs_id', action.id),
         # obj=('external_id', action.id),
@@ -103,6 +107,8 @@ def api_0_pregnancy_checkup(event_id):
 
     sirius.send_to_mis(
         sirius.RisarEvents.SAVE_CHECKUP,
+        sirius.RisarEntityCode.MEASURE,
+        sirius.OperationCode.READ_MANY,
         'risar.api_measure_list_get',
         obj=('card_id', event_id),
         params={'card_id': event_id},

@@ -210,6 +210,8 @@ def api_0_chart_close(event_id=None):
 
         sirius.send_to_mis(
             sirius.RisarEvents.CLOSE_CARD,
+            sirius.RisarEntityCode.EPICRISIS,
+            sirius.OperationCode.READ_ONE,
             'risar.api_integr_epicrisis_get',
             obj=('card_id', event_id),
             params={'card_id': event_id},

@@ -9,3 +9,5 @@
 
 from .client import *
 from .events import *
+from .entities import *
+from .operations import *
