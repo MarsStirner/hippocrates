@@ -42,10 +42,18 @@ class OrganizationSchema(Schema):
                 "id": "organization/phone",
                 "description": "Телефон организации"
             },
+            "LPU_id":{
+                "type": "string",
+                "description": "Уникальный идентификатор ЛПУ"
+            },
             "TFOMSCode":{
                 "type": "string",
                 "id": "organization/TFOMSCode",
                 "description": "ТФОМС код организации"
+            },
+            "Department_TFOMSCode":{
+                "type": "string",
+                "description": "ТФОМС код подразделения"
             },
             "INN":{
                 "type": "string",
