@@ -91,5 +91,5 @@ class OrganizationSchema(Schema):
                 "description": "Организация является СМО. Если организация СМО - передать 1. Если нет - 0"
             }
         },
-        "required": ["full_name", "short_name", "address", "area", "TFOMSCode", "is_LPU"]
+        "required": ["full_name", "short_name", "address", "area", "LPU_id", "is_LPU"]
     }]
