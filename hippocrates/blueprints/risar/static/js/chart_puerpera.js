@@ -53,7 +53,6 @@ var InspectionPuerperaViewCtrl = function ($scope, $modal, RisarApi, PrintingSer
             });
     };
 
-    $scope.init();
     reload();
 };
 

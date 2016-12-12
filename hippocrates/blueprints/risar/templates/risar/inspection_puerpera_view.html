@@ -38,6 +38,11 @@
             </thead>
             <tbody>
                 <tr>
+                    <th>Врач</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.person.short_name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Общее состояние</th>
                     <td ng-repeat="checkup in checkups"> [[ checkup.state.name ]]</td>
                     <td></td>

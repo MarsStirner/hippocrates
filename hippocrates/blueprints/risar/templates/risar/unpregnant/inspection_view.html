@@ -39,6 +39,11 @@
             </thead>
             <tbody>
                 <tr>
+                    <th>Врач</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.person.short_name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Диагнозы</th>
                     <td colspan="[[ checkups.length + 1 ]]"></td>
                 </tr>

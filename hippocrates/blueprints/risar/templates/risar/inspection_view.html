@@ -48,6 +48,11 @@
             </thead>
             <tbody>
                 <tr>
+                    <th>Врач</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.person.short_name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Срок беременности (расчётный)</th>
                     <td ng-repeat="checkup in checkups">[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
                     <td></td>
