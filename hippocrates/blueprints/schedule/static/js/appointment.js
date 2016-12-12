@@ -8,8 +8,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
     $scope.user_schedules = [];
     $scope.total_schedules = [];
 
-    $scope.current_user = CurrentUser.info;
-    $scope.user_selected = [$scope.current_user.id];
+    $scope.user_selected = [CurrentUser.info.id];
     $scope.data_selected = [];
     $scope.foldedArray = [];
 
