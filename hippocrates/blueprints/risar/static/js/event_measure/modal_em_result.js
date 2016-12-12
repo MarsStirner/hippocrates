@@ -17,9 +17,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <wm-action-layout action="action"></wm-action-layout>\
                 <hr>\
                 <h4>Файл <button type="button" class="btn btn-link lmargin20" ngf-select="addNewFiles($files)" \
-                ngf-multiple="true" ngf-max-size="10MB" ngf-pattern="\'.pdf,.bmp,.jpg,.jpeg,.png,.tiff,.gif,.psd\'"\
+                ngf-multiple="true" ngf-max-size="max_file_size" ngf-pattern="files_pattern"\
                             ng-show="canAddFile()">Добавить</button>\
-                </h4> <p class="text-info">Разрешена загрузка файлов размером не более 10Мб с расширением .pdf, .bmp, .jpg, .jpeg, .png, .tiff, .gif, .psd</p>\
+                </h4> <p class="text-info">Разрешена загрузка файлов размером не более [[max_file_size]] с расширением [[files_pattern]]</p>\
                 <table class="table table-condensed" ng-show="filesTableVisible()">\
                     <thead>\
                         <tr>\
@@ -75,6 +75,8 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
     $scope.action_attach_type_id = null;
     $scope.new_files = [];
     $scope.ro = false;
+    $scope.max_file_size = WMConfig.local_config.files_upload.max_file_size || '10MB';
+    $scope.files_pattern = WMConfig.local_config.files_upload.pattern || '.pdf, .bmp, .jpg, .jpeg, .png, .tiff, .gif, .psd';
     var _saved = false;
     $scope.ps = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
