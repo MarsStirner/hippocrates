@@ -73,15 +73,20 @@ def api_0_gyn_chart_mini(event_id=None):
 @module.route('/api/0/gyn/chart-by-ticket/<int:ticket_id>', methods=['DELETE'])
 @api_method
 def api_0_gyn_chart_delete(ticket_id):
-    ticket = ScheduleClientTicket.query.get(ticket_id)
-    if not ticket:
-        raise ApiException(404, u'Тикет не найден')
-    if not ticket.event:
-        raise ApiException(404, u'Event не найден')
-    if ticket.event.deleted:
-        raise ApiException(400, u'Event уже был удален')
-    ticket.event.deleted = 1
-    ticket.event = None
+    event_id = request.args.get("event_id")
+    if not event_id:
+        ticket = ScheduleClientTicket.query.get(ticket_id)
+        if not ticket:
+            raise ApiException(404, u'Тикет не найден')
+        if not ticket.event:
+            raise ApiException(404, u'Event не найден')
+        if ticket.event.deleted:
+            raise ApiException(400, u'Event уже был удален')
+        ticket.event.deleted = 1
+        ticket.event = None
+    else:
+        event = Event.query.get_or_404(event_id)
+        event.deleted = 1
     db.session.commit()
 
 

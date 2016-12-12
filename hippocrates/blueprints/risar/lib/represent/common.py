@@ -22,6 +22,7 @@ __author__ = 'viruzzz-kun'
 
 
 def represent_header(event):
+    card = AbstractCard.get_for_event(event)
     client = event.client
     return {
         'client': {
@@ -37,7 +38,10 @@ def represent_header(event):
             'manager': event.manager,
             'external_id': event.externalId,
             'is_controlled': check_event_controlled(event)
-        }
+        },
+        'latest_gyn_event_id': card.latest_gyn_event.id if card.latest_gyn_event else None,
+        'latest_pregnancy_event_id': card.latest_pregnancy_event.id if card.latest_pregnancy_event else None
+
     }
 
 
