@@ -17,7 +17,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <td width="10%" nowrap><b>Данные осмотра <b></td>
+                    <td width="10%" nowrap><b>Данные осмотра </b></td>
                     <th width="10%" nowrap ng-repeat="checkup in checkups">
                         <a ng-href="{{ url_for('.html_inspection_read') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
@@ -25,9 +25,11 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                {#<li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
-                                #}
-                                <li ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
+                                <li ng-class="{disabled: !canEditCheckup($index)}">
+                                    <a href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]"
+                                        ng-if="canEditCheckup($index)">Изменить</a>
+                                    <a href="javascript:void(0)" ng-if="!canEditCheckup($index)">Изменить</a>
+                                </li>
                                 <li>{{ imacros.checkup_ticket_25_print_link() }}</li>
                             </ul>
                         </div>
@@ -40,7 +42,6 @@
                     <th>Диагнозы</th>
                     <td colspan="[[ checkups.length + 1 ]]"></td>
                 </tr>
-                <!-- TODO: Отображение диагнозов -->
                 <tr>
                     <td>основной</td>
                     <td ng-repeat="checkup in checkups">

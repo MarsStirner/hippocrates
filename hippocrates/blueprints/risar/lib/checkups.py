@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from flask_login import current_user
 
 from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code, second_inspection_flat_code
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, fill_these_attrs_from_action, \
@@ -27,3 +28,14 @@ def copy_checkup(event, from_action):
             fill_action_from_another_action(from_action=from_action,
                                             to_action=empty_action)
         return empty_action
+
+
+def can_read_checkup(action):
+    return True
+
+
+def can_edit_checkup(action):
+    return current_user.has_right('adm') or (
+        action.setPerson_id == current_user.id and
+        action.endDate is None
+    )

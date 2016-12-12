@@ -221,11 +221,14 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
     $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
-
     $scope.ps_fi = new PrintingService("risar_inspection");
     $scope.ps_fi.set_context("risar_osm1_talon");
     $scope.ps_si = new PrintingService("risar_inspection");
     $scope.ps_si.set_context("risar_osm2_talon");
+
+    $scope.checkups = [];
+    $scope.checkupsAccess = [];
+
     $scope.ps_resolve = function (checkup_id) {
         return {
             event_id: $scope.header.event.id,
@@ -237,20 +240,27 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
         var ticket_id = checkup.ticket_25.id;
         RisarApi.print_ticket_25(ticket_id, fmt);
     };
-
     $scope.declOfNum = function (number, titles) {
         var cases = [2, 0, 1, 1, 1, 2];
         return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
     };
+    $scope.canEditCheckup = function (idx) {
+        return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
+    };
 
     var reload = function () {
+        $scope.checkups = [];
+        $scope.checkupsAccess = [];
         RisarApi.chart.get_header(event_id).
             then(function (data) {
                 $scope.header = data.header;
             });
         RisarApi.checkup.get_list(event_id)
             .then(function (data) {
-                $scope.checkups = data.checkups;
+                angular.forEach(data.checkups, function (d) {
+                    $scope.checkups.push(d.checkup);
+                    $scope.checkupsAccess.push(d.access);
+                });
 
                 // calculate mass gain
                 $scope.first_checkup = $scope.checkups.length ? $scope.checkups[0] : null;
@@ -281,47 +291,51 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
 }])
 .controller('InspectionGynViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
     function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
-        // Поскольку времени на то, чтобы с этим разбираться нет от слова "совсем", делаем тупую копипасту.
-        // В будущем наши потомки, проклиная нас, буду разбирать этот код...
-        // Но нам плевать. У нас проект горит.
-        // Синем пламенем.
-        // Пусть горит.
         var params = aux.getQueryParams(window.location.search);
         var event_id = params.event_id;
         $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
         $scope.ps = new PrintingService("risar");
         $scope.ps.set_context("risar");
-
         $scope.ps_fi = new PrintingService("risar_inspection");
         $scope.ps_fi.set_context("risar_osm1_talon");
         $scope.ps_si = new PrintingService("risar_inspection");
         $scope.ps_si.set_context("risar_osm2_talon");
+
+        $scope.checkups = [];
+        $scope.checkupsAccess = [];
+
         $scope.ps_resolve = function (checkup_id) {
             return {
                 event_id: $scope.header.event.id,
                 action_id: checkup_id
             }
         };
-
         $scope.print_checkup_ticket = function (checkup, fmt) {
             // Вы потом не разберётесь, откуда у этого говна ноги растут. Простите. Я не хотел
             var ticket_id = checkup.ticket_25.id;
             RisarApi.print_ticket_25(ticket_id, fmt);
         };
-
         $scope.declOfNum = function (number, titles) {
             var cases = [2, 0, 1, 1, 1, 2];
             return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
         };
+        $scope.canEditCheckup = function (idx) {
+            return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
+        };
 
         var reload = function () {
+            $scope.checkups = [];
+            $scope.checkupsAccess = [];
             RisarApi.gynecologic_chart.get_header(event_id).then(
                 function (data) {
                     $scope.header = data.header;
                 });
             RisarApi.checkup_gyn.get_list(event_id)
                 .then(function (data) {
-                    $scope.checkups = data.checkups;
+                    angular.forEach(data.checkups, function (d) {
+                        $scope.checkups.push(d.checkup);
+                        $scope.checkupsAccess.push(d.access);
+                    });
                 });
         };
 

@@ -8,6 +8,7 @@ from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.chart import check_event_controlled
+from hippocrates.blueprints.risar.lib.checkups import can_read_checkup, can_edit_checkup
 from hippocrates.blueprints.risar.lib.utils import action_as_dict
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes, \
     risar_gyn_checkup_flat_codes
@@ -428,6 +429,13 @@ def represent_checkup_shortly(action):
         'diag': represent_diag_shortly(diagnostic) if diagnostic else None
     }
     return result
+
+
+def represent_checkup_access(action):
+    return {
+        'can_read': can_read_checkup(action),
+        'can_edit': can_edit_checkup(action),
+    }
 
 
 def represent_measures(action):
