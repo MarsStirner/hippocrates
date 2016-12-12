@@ -104,7 +104,10 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
 ;
 
 
-WebMis20.controller('CheckupTicket25Ctrl', ['$scope', function ($scope) {
+WebMis20.controller('CheckupTicket25Ctrl', ['$scope', 'CurrentUser', function ($scope, CurrentUser) {
+    $scope.get_current_user = function () {
+        return { person: CurrentUser.info };
+    };
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;
     };
