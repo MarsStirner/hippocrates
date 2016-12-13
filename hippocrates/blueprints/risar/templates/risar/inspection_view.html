@@ -24,11 +24,22 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
-                                <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}"><a href="#" ng-click="open_print_window(ps_si, checkup.id)" >Печать</a></li>
-                                <li ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
-                                <li ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
-                                <li ng-if="!checkup.end_date && checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: checkup.end_date}" ><a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&fill_from=[[checkup.id]]">Копировать</a></li>
+                                <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}">
+                                    <a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
+                                <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}">
+                                    <a href="#" ng-click="open_print_window(ps_si, checkup.id)" >Печать</a></li>
+                                <li ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: !canEditCheckup($index)}">
+                                    <a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]"
+                                        ng-if="canEditCheckup($index)">Изменить</a>
+                                    <a href="javascript:void(0)" ng-if="!canEditCheckup($index)">Изменить</a>
+                                </li>
+                                <li ng-if="checkup.flat_code == 'risarPCCheckUp'" ng-class="{disabled: !canEditCheckup($index)}">
+                                    <a href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]"
+                                        ng-if="canEditCheckup($index)">Изменить</a>
+                                    <a href="javascript:void(0)" ng-if="!canEditCheckup($index)">Изменить</a>
+                                </li>
+                                <li ng-if="canEditCheckup($index) && checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: !canEditCheckup($index)}" >
+                                    <a href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&fill_from=[[checkup.id]]">Копировать</a></li>
                             </ul>
                         </div>
                     </th>
@@ -36,6 +47,11 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <th>Врач</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.person.short_name ]]</td>
+                    <td></td>
+                </tr>
                 <tr>
                     <th>Срок беременности (расчётный)</th>
                     <td ng-repeat="checkup in checkups">[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
@@ -85,7 +101,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <th>Масса тела</th>
+                    <th>Вес при осмотре</th>
                     <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>

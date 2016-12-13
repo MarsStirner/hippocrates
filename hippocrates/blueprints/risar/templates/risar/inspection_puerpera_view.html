@@ -25,10 +25,11 @@
                             </button>
                             <ul class="dropdown-menu" role="menu">
                                 <li ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
-                                <li ng-class="{disabled: checkup.end_date}"><a href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">Изменить</a></li>
-                                <li><a href="#">Копировать</a></li>
-                                <li><a href="#">Удалить</a></li>
-{#                                <li>{{ imacros.checkup_ticket_25_print_link() }}</li>#}
+                                <li ng-class="{disabled: !canEditCheckup($index)}">
+                                    <a href="{{ url_for('.html_inspection_puerpera_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]"
+                                        ng-if="canEditCheckup($index)">Изменить</a>
+                                    <a href="javascript:void(0)" ng-if="!canEditCheckup($index)">Изменить</a>
+                                </li>
                             </ul>
                         </div>
                     </th>
@@ -36,6 +37,11 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <th>Врач</th>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.person.short_name ]]</td>
+                    <td></td>
+                </tr>
                 <tr>
                     <th>Общее состояние</th>
                     <td ng-repeat="checkup in checkups"> [[ checkup.state.name ]]</td>

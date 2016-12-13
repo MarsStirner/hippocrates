@@ -22,6 +22,13 @@ def api_doctor_schema(api_version):
     return DoctorXForm.get_schema(api_version)
 
 
+@module.route('/api/integration/<int:api_version>/doctor/<organization_code>/list')
+@api_method(hook=hook)
+def api_doctor_list_get(api_version, organization_code):
+    xform = DoctorXForm(api_version)
+    return xform.as_json(organization_code)
+
+
 @module.route('/api/integration/<int:api_version>/doctor/<organization_code>/<doctor_code>')
 @api_method(hook=hook)
 def api_doctor_get(api_version, organization_code, doctor_code):

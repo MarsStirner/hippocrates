@@ -9,7 +9,7 @@ from sqlalchemy import and_, func
 
 from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
-from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event
+from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event, get_latest_gyn_event
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.fetus import get_fetuses
 from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
@@ -214,6 +214,14 @@ class AbstractCard(object):
         query = query.with_entities(sqlalchemy.func.max(Diagnostic.id).label('zid')).subquery()
         query = db.session.query(Diagnostic).join(query, query.c.zid == Diagnostic.id)
         return query.all()
+
+    @lazy
+    def latest_gyn_event(self):
+        return get_latest_gyn_event(self.event.client_id) if self.event else None
+
+    @lazy
+    def latest_pregnancy_event(self):
+        return get_latest_pregnancy_event(self.event.client_id) if self.event else None
 
 
 class PrimaryInspection(object):
@@ -434,6 +442,7 @@ class PregnancyCard(AbstractCard):
     def get_action_list(self, flatcode):
         return get_action_list(self.event, flatcode).all()
 
+
 class GynecologicCard(AbstractCard):
     cache = LocalCache()
     action_type_attrs = gynecological_card_attrs
@@ -448,10 +457,6 @@ class GynecologicCard(AbstractCard):
     @lazy
     def checkups(self):
         return get_action_list(self.event, risar_gyn_checkup_flat_codes).all()
-
-    @lazy
-    def latest_pregnancy_event(self):
-        return get_latest_pregnancy_event(self.event.client_id) if self.event else None
 
 
 classes = {
@@ -470,3 +475,10 @@ def _clear_caches():
     GynecologicCard.cache = LocalCache()
 
     lazy.cache = WeakKeyDictionary()
+
+
+def determine_card_class_by_event(event):
+    if event:
+        card_class = classes.get(event.eventType.requestType.code)
+        if card_class:
+            return card_class

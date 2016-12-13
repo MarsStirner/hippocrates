@@ -24,6 +24,7 @@ class DoctorXForm(DoctorSchema, XForm):
     target_obj_class = Person
     target_id_required = False
     parent_id_required = False
+    org_code = None
 
     def check_duplicate(self, data):
         person_code = data['regional_code']
@@ -42,7 +43,12 @@ class DoctorXForm(DoctorSchema, XForm):
             )
 
     def _find_target_obj_query(self):
-        pass
+        query = Person.query.join(Organisation).filter(
+            Person.deleted == 0,
+            Organisation.TFOMSCode == self.org_code,
+            Organisation.deleted == 0
+        )
+        return query
 
     def init_and_check_params(self, lpu_code=None, doctor_code=None, data=None):
         if not self.new:
@@ -97,20 +103,30 @@ class DoctorXForm(DoctorSchema, XForm):
         self.target_obj.birthPlace = ''
         self.target_obj.typeTimeLinePerson = 0
 
-    def as_json(self):
+    def as_json(self, org_code=None):
+        if self.target_obj:
+            return self.doctor_represent(self.target_obj)
+        else:
+            res = []
+            self.org_code = org_code
+            for doctor in self._find_target_obj_query():
+                res.append(self.doctor_represent(doctor))
+            return res
+
+    def doctor_represent(self, target_obj):
         return {
-            'last_name': self.target_obj.lastName,
-            'first_name': self.target_obj.firstName,
-            'patr_name': self.target_obj.patrName,
-            'sex': self.target_obj.sex,
-            'birth_date': self.target_obj.birthDate,
-            'SNILS': self.target_obj.SNILS,
-            'INN': self.target_obj.INN,
-            'organization': self.from_org_rb(self.target_obj.organisation),
-            'speciality': self.from_rb(self.target_obj.speciality),
-            'post': self.from_rb(self.target_obj.post),
-            'login': self.target_obj.login,
-            'regional_code': self.target_obj.regionalCode,
+            'last_name': target_obj.lastName,
+            'first_name': target_obj.firstName,
+            'patr_name': target_obj.patrName,
+            'sex': target_obj.sex,
+            'birth_date': target_obj.birthDate,
+            'SNILS': target_obj.SNILS,
+            'INN': target_obj.INN,
+            'organization': self.from_org_rb(target_obj.organisation),
+            'speciality': self.from_rb(target_obj.speciality),
+            'post': self.from_rb(target_obj.post),
+            'login': target_obj.login,
+            'regional_code': target_obj.regionalCode,
         }
 
     def delete_target_obj(self):

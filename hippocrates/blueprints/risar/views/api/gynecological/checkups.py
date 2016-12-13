@@ -5,7 +5,7 @@ from flask import request
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup, represent_gyn_checkup_wm
-from hippocrates.blueprints.risar.lib.represent.common import represent_measures
+from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_access
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
@@ -75,11 +75,13 @@ def api_0_gyn_checkup(event_id):
     em_ctrl = EventMeasureController()
     em_ctrl.regenerate_gyn(action)
 
-    result = represent_gyn_checkup(action)
-    result['measures'] = represent_measures(action)
+    result = represent_gyn_checkup_wm(action)  # todo: check
     if em_ctrl.exception:
         result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
-    return result
+    return {
+        'checkup': result,
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route(_base + '<int:checkup_id>', methods=['GET'])
@@ -88,7 +90,10 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
     action = get_action_by_id(checkup_id) or bail_out(ApiException(404, u'Action с id {0} не найден'.format(checkup_id)))
     if action.event_id != event_id:
         raise ApiException(404, u'Action c id {0} не принадлежит Event с id {1}'.format(checkup_id, event_id))
-    return represent_gyn_checkup(action)
+    return {
+        'checkup': represent_gyn_checkup(action),
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route(_base + 'new/<flat_code>', methods=['GET'])
@@ -98,7 +103,10 @@ def api_0_gyn_checkup_get_new(event_id, flat_code):
         event = Event.query.get(event_id) or bail_out(ApiException(404, u'Event c id {0} не найден'.format(event_id)))
         action = get_action_by_id(None, event, flat_code, True)
         result = represent_gyn_checkup(action)
-        return result
+        return {
+            'checkup': result,
+            'access': represent_checkup_access(action)
+        }
 
 
 @module.route(_base, methods=['GET'])
@@ -106,6 +114,12 @@ def api_0_gyn_checkup_get_new(event_id, flat_code):
 def api_0_gyn_checkup_list(event_id):
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)
+
+    def repr(checkup):
+        return {
+            'checkup': represent_gyn_checkup_wm(checkup),
+            'access': represent_checkup_access(checkup)
+        }
     return {
-        'checkups': map(represent_gyn_checkup_wm, card.checkups)
+        'checkups': map(repr, card.checkups)
     }

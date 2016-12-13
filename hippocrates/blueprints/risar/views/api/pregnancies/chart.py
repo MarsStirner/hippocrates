@@ -34,15 +34,20 @@ __author__ = 'mmalkov'
 @api_method
 def api_0_chart_delete(ticket_id):
     # TODO: Security
-    ticket = ScheduleClientTicket.query.get(ticket_id)
-    if not ticket:
-        raise ApiException(404, u'Ticket не найден')
-    if not ticket.event:
-        raise ApiException(404, u'Event не найден')
-    if ticket.event.deleted:
-        raise ApiException(400, u'Event уже был удален')
-    ticket.event.deleted = 1
-    ticket.event = None
+    event_id = request.args.get("event_id")
+    if not event_id:
+        ticket = ScheduleClientTicket.query.get(ticket_id)
+        if not ticket:
+            raise ApiException(404, u'Ticket не найден')
+        if not ticket.event:
+            raise ApiException(404, u'Event не найден')
+        if ticket.event.deleted:
+            raise ApiException(400, u'Event уже был удален')
+        ticket.event.deleted = 1
+        ticket.event = None
+    else:
+        event = Event.query.get_or_404(event_id)
+        event.deleted = 1
     db.session.commit()
 
 

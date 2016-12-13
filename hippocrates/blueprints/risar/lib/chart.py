@@ -3,7 +3,7 @@ import datetime
 
 from sqlalchemy import func
 
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
 from nemesis.models.event import Event, EventType, EventPersonsControl, Event_Persons
 from nemesis.models.exists import rbRequestType
 from nemesis.lib.user import UserProfileManager
@@ -17,13 +17,21 @@ def get_event(event_id):
     return Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
 
 
-def get_latest_pregnancy_event(client_id):
+def get_latest_event_by_request_type(client_id, request_type_code):
     return Event.query.join(EventType, rbRequestType).filter(
         Event.client_id == client_id,
         Event.deleted == 0,
-        rbRequestType.code == request_type_pregnancy,
+        rbRequestType.code == request_type_code,
         Event.execDate.is_(None)
     ).order_by(Event.setDate.desc()).first()
+
+
+def get_latest_pregnancy_event(client_id):
+    return get_latest_event_by_request_type(client_id, request_type_pregnancy)
+
+
+def get_latest_gyn_event(client_id):
+    return get_latest_event_by_request_type(client_id, request_type_gynecological)
 
 
 def can_control_events():

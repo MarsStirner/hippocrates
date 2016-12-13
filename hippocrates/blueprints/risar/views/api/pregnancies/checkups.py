@@ -10,6 +10,7 @@ from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasure
 from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses, calc_fisher_ktg_info
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_wm, represent_fetuses
+from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_access
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action, set_action_apt_values
 from hippocrates.blueprints.risar.lib.represent.common import represent_fetus_for_checkup_copy, represent_ticket_25
@@ -115,7 +116,10 @@ def api_0_pregnancy_checkup(event_id):
         is_create=not checkup_id,
     )
 
-    return result
+    return {
+        'checkup': result,
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route('/api/0/pregnancy/checkup/')
@@ -126,7 +130,10 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
     action.update_action_integrity()
     if not action:
         raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
-    return represent_pregnancy_checkup_wm(action)
+    return {
+        'checkup': represent_pregnancy_checkup_wm(action),
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route('/api/0/pregnancy/checkup/copy/<int:event_id>/<int:fill_from>', methods=['GET'])
@@ -147,7 +154,10 @@ def api_0_pregnancy_checkup_copy(event_id, fill_from):
             result['pregnancy_week'] = get_pregnancy_week(event)
             result['fetuses'] = map(represent_fetus_for_checkup_copy, PregnancyCard.Fetus(from_action).states)
             result['ticket_25'] = ticket25_data
-            return result
+            return {
+                'checkup': result,
+                'access': represent_checkup_access(filled_action)
+            }
 
 
 @module.route('/api/0/pregnancy/checkup/new/', methods=['POST'])
@@ -167,7 +177,10 @@ def api_0_pregnancy_checkup_new(event_id):
         ))
         result = represent_pregnancy_checkup_wm(action)
         result['pregnancy_week'] = get_pregnancy_week(event)
-    return result
+    return {
+        'checkup': result,
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route('/api/0/pregnancy/checkup_list/')
@@ -178,8 +191,14 @@ def api_0_pregnancy_checkup_list(event_id):
     card = PregnancyCard.get_for_event(event)
     for action in card.checkups:
         action.update_action_integrity()
+
+    def repr(checkup):
+        return {
+            'checkup': represent_pregnancy_checkup_wm(checkup),
+            'access': represent_checkup_access(checkup)
+        }
     return {
-        'checkups': map(represent_pregnancy_checkup_wm, card.checkups)
+        'checkups': map(repr, card.checkups)
     }
 
 

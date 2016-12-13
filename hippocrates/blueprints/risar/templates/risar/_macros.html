@@ -228,6 +228,11 @@
                 {% if specifics_mng.ext_card_url_menu_enabled() %}
                 {% if card %}<li><a href="{{ specifics_mng.get_ext_card_url(card.event) }}">{{ specifics_mng.get_ext_card_menu_text() }}</a></li>{% endif %}
                 {% endif %}
+            {% if user_profiles_mng.has_ui_obstetrician() %}
+                <li role="separator" class="divider"></li>
+                <li><a ng-if="!header.latest_gyn_event_id" ng-href="{{ url_for('.html_gynecological_chart') }}?client_id=[[ header.client.id ]]">Создать медицинскую карту амбулаторного пациента</a></li>
+                <li><a ng-if="header.latest_gyn_event_id" ng-href="{{ url_for('.html_gynecological_chart') }}?event_id=[[ header.latest_gyn_event_id ]]">Открыть медицинскую карту амбулаторного пациента</a></li>
+            {% endif %}
             </ul>
         </div>
     </div>

@@ -1,14 +1,14 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog, PersonTreeUpdater) {
+var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog, PersonTreeUpdater, CurrentUser) {
     $scope.modal = {};
     $scope.max_tickets = [];
     $scope.person_schedules = [];
     $scope.user_schedules = [];
     $scope.total_schedules = [];
 
-    $scope.user_selected = [];
+    $scope.user_selected = [CurrentUser.info.id];
     $scope.data_selected = [];
     $scope.foldedArray = [];
 
@@ -194,4 +194,4 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
 
     $scope.monthChanged();
 };
-WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', 'PersonTreeUpdater', PersonAppointmentCtrl]);
+WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', 'PersonTreeUpdater', 'CurrentUser', PersonAppointmentCtrl]);
