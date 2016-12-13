@@ -267,9 +267,15 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
                 function get_mass_gain(prev, curr, i){
                     if (i === 0) {
                         curr.weight_gain = [0, 0];
+                        return curr;
                     }
                     var num_days = moment(curr.beg_date).diff(moment(prev.beg_date), 'days');
-                    curr.weight_gain = prev.weight ? [curr.weight - prev.weight, num_days ] : [0, num_days];
+                    var weight_gain = 0;
+                    if (prev.weight) {
+                        weight_gain = curr.weight - prev.weight;
+                        weight_gain = Math.round(weight_gain * 1000) / 1000;
+                    }
+                    curr.weight_gain = [weight_gain, num_days];
                     return curr
                 }
                 $scope.checkups.reduce(get_mass_gain, [{}]);
