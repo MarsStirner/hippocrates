@@ -10,8 +10,8 @@ var IndexCtrl = function ($scope, $modal, JasperPrintingService) {
     var ps = $scope.ps = new JasperPrintingService('free');
     ps.set_context(reports_path);
 
-    var outer_print = function (data, callback) {
-        ps.print_template(data, false).then(angular.noop, callback);
+    var outer_print = function (data, callback, response_type) {
+        ps.print_template(data, false, response_type).then(angular.noop, callback);
     };
 
     $scope.print_template = function (template) {
@@ -65,6 +65,9 @@ var IndexCtrl = function ($scope, $modal, JasperPrintingService) {
 
                         $scope.print = function () {
                             outer_print([prepare_data()], angular.bind($scope, $scope.close))
+                        };
+                        $scope.preview = function () {
+                            outer_print([prepare_data()], angular.bind($scope, $scope.close), 'preview')
                         };
                         $scope.cancel = function () {
                             $modalInstance.dismiss('cancel');

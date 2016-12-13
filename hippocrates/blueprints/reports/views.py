@@ -70,6 +70,8 @@ def print_jr_templates_post():
     report_data = report_data_list[0]
     template_uri, template_code, params = report_data
     table_name, file_format = template_code.rsplit('.', 1)
+    if data.get('response_type') == 'preview':
+        file_format = 'html'
     params.update({
         'mongo_host': app.config.get('MONGO_HOST', '10.1.2.11'),
         'mongo_port': app.config.get('MONGO_PORT', '27017'),

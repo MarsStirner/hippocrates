@@ -56,6 +56,7 @@
             </form>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-primary" ng-click="preview()" ng-disabled="printing_meta.$invalid">Предпросмотр</button>
             <button type="button" class="btn btn-primary" ng-click="print()" ng-disabled="printing_meta.$invalid">Печать</button>
             <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
         </div>
