@@ -9,13 +9,13 @@ from nemesis.lib.apiutils import api_method
 from .....app import module
 
 from ..logformat import hook
-from .xform import ScheduleXForm, Schedule2XForm
+from .xform import ScheduleXForm, Schedule2XForm, ScheduleFullXForm
 
 
 logger = logging.getLogger('simple')
 
 
-@module.route('/api/integration/<int:api_version>/schedule.json', methods=["GET"])
+@module.route('/api/integration/<int:api_version>/schedule/schema.json', methods=["GET"])
 @api_method(hook=hook)
 @public_endpoint
 def api_schedule_schema(api_version):
@@ -44,9 +44,40 @@ def api_schedule_save(api_version, lpu_code, doctor_code):
     return xform.as_json()
 
 
+@module.route('/api/integration/<int:api_version>/schedule/full/schema.json', methods=["GET"])
+@api_method(hook=hook)
+@public_endpoint
+def api_schedule_full_schema(api_version):
+    return ScheduleFullXForm.get_schema(api_version)
+
+
+@module.route('/api/integration/<int:api_version>/schedule/full/', methods=['POST'])
+@module.route('/api/integration/<int:api_version>/schedule/full/<schedule_id>', methods=['PUT'])
+@api_method(hook=hook)
+def api_schedule_full_save(api_version, schedule_id=None):
+    data = request.get_json()
+    create = request.method == 'POST'
+
+    xform = ScheduleFullXForm(api_version, create)
+    xform.validate(data)
+    xform.check_params(schedule_id, None, data)
+    xform.update_target_obj(data)
+    xform.store()
+    return xform.as_json()
+
+
+@module.route('/api/integration/<int:api_version>/schedule/full/<schedule_id>', methods=['DELETE'])
+@api_method(hook=hook)
+def api_schedule_full_delete(api_version, schedule_id):
+    xform = ScheduleFullXForm(api_version)
+    xform.check_params(schedule_id)
+    xform.delete_target_obj()
+    xform.store()
+
+
 # additional methods
 
-@module.route('/api/integration/<int:api_version>/schedule2.json', methods=["GET"])
+@module.route('/api/integration/<int:api_version>/schedule2/schema.json', methods=["GET"])
 @api_method(hook=hook)
 @public_endpoint
 def api_schedule2_schema(api_version):

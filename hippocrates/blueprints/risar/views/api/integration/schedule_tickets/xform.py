@@ -142,10 +142,10 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
             begTime=data['time_begin'], endTime=data['time_end'],
             numTickets=1, receptionType=rec_type
         )
-        attendace = rbAttendanceType.cache().by_code()[u'planned']
+        attendance = rbAttendanceType.cache().by_code()[u'planned']
         st = ScheduleTicket(
             begTime=data['time_begin'], endTime=data['time_end'],
-            attendanceType=attendace
+            attendanceType=attendance
         )
         s.tickets.append(st)
         sct = ScheduleClientTicket(
