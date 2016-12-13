@@ -20,7 +20,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                         ng-class="{\'has-error\': invoiceForm.number.$invalid}">\
                         <label class="control-label" for="number">Номер счета</label>\
                         <input type="text" class="form-control" ng-model="invoice.number" id="number" name="number"\
-                            ng-required="true" autocomplete="off">\
+                            ng-required="true" ng-disabled="true" autocomplete="off">\
                     </div>\
                     <div class="form-group">\
                         <label for="set_date">Дата формирования</label>\
