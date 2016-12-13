@@ -32,7 +32,11 @@ class CardSchema(Schema):
                 "type": "string",
                 "id": "card_change_schema/card_LPU",
                 "description": "Код ЛПУ постановки на учёт в соответствии с классификатором f003"
+            },
+            "pregnant": {
+                "type": "boolean",
+                "description": "Признак карты беременной"
             }
         },
-        "required": ["client_id", "card_set_date", "card_doctor", "card_LPU"]
+        "requisred": ["client_id", "card_set_date", "card_doctor", "card_LPU", "pregnant"]
     }]
