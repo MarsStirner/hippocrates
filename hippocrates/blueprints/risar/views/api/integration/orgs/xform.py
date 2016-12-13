@@ -24,7 +24,7 @@ class OrganizationXForm(OrganizationSchema, XForm):
     parent_id_required = False
 
     def check_duplicate(self, data):
-        org_code = data['TFOMSCode']
+        org_code = data['LPU_id']
         q = Organisation.query.filter(
             Organisation.TFOMSCode == org_code,
             Organisation.deleted == 0
@@ -58,7 +58,9 @@ class OrganizationXForm(OrganizationSchema, XForm):
         self.target_obj.Address = data.get('address') or ''
         self.target_obj.area = data.get('area') or ''
         self.target_obj.phone = data.get('phone') or ''
-        self.target_obj.TFOMSCode = data.get('TFOMSCode')
+        self.target_obj.TFOMSCode = data.get('LPU_id')
+        self.target_obj.LPUcode = data.get('TFOMSCode')
+        self.target_obj.Departmentcode = data.get('Department_TFOMSCode')
         self.target_obj.INN = data.get('INN') or ''
         self.target_obj.KPP = data.get('KPP') or ''
         self.target_obj.OGRN = data.get('OGRN') or ''
@@ -102,7 +104,9 @@ class OrganizationXForm(OrganizationSchema, XForm):
             'address': target_obj.Address,
             'area': target_obj.area,
             'phone': target_obj.phone,
-            'TFOMSCode': target_obj.TFOMSCode,
+            'LPU_id': target_obj.TFOMSCode,
+            'TFOMSCode': target_obj.LPUcode,
+            'Department_TFOMSCode': target_obj.Departmentcode,
             'INN': target_obj.INN,
             'KPP': target_obj.KPP,
             'OGRN': target_obj.OGRN,

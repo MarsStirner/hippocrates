@@ -42,10 +42,18 @@ class OrganizationSchema(Schema):
                 "id": "organization/phone",
                 "description": "Телефон организации"
             },
+            "LPU_id":{
+                "type": "string",
+                "description": "Уникальный идентификатор ЛПУ"
+            },
             "TFOMSCode":{
                 "type": "string",
                 "id": "organization/TFOMSCode",
                 "description": "ТФОМС код организации"
+            },
+            "Department_TFOMSCode":{
+                "type": "string",
+                "description": "ТФОМС код подразделения"
             },
             "INN":{
                 "type": "string",
@@ -83,5 +91,5 @@ class OrganizationSchema(Schema):
                 "description": "Организация является СМО. Если организация СМО - передать 1. Если нет - 0"
             }
         },
-        "required": ["full_name", "short_name", "address", "area", "TFOMSCode", "is_LPU"]
+        "required": ["full_name", "short_name", "address", "area", "LPU_id", "is_LPU"]
     }]
