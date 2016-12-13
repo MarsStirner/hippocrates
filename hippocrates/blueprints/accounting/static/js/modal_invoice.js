@@ -76,10 +76,10 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <td>[[ item.price | moneyCut ]]</td>\
                     <td ng-if="isInvoiceWithDiscounts()">\
                         <ui-select ng-model="item.discount" ext-select-service-discount\
-                            ng-change="onDiscountChanged(item)" ng-if="!isInvoiceClosed() && isDiscountAvailable(item)" allow-clear="true"\
+                            ng-change="onDiscountChanged(item)" ng-if="canEditDiscounts() && isDiscountAvailable(item)" allow-clear="true"\
                             theme="select2" append-to-body="true" placeholder="...">\
                         </ui-select>\
-                        <span ng-if="isInvoiceClosed() && isDiscountAvailable(item)">[[ item.discount.description.short ]]</span>\
+                        <span ng-if="!canEditDiscounts() && isDiscountAvailable(item)">[[ item.discount.description.short ]]</span>\
                     </td>\
                     <td>[[ item.service.amount ]]</td>\
                     <td>[[ item.sum | moneyCut ]]</td>\
@@ -107,7 +107,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 </tbody>\
                 </table>\
                 \
-                <div class="row tmargin20" ng-if="!isInvoiceClosed()">\
+                <div class="row tmargin20" ng-if="canEditDiscounts()">\
                     <div class="form-group col-md-9">\
                         <label for="new_discount">Выбрать скидку</label>\
                         <div class="row">\
@@ -257,6 +257,9 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
                 root_item = $scope.invoice.item_list[root_idx];
             return root_item.service.is_accumulative_price ? !item.service.is_accumulative_price : false;
         }
+    };
+    $scope.canEditDiscounts = function () {
+        return !$scope.invoice.id && !$scope.isInvoiceClosed();
     };
     $scope.hasRefunds = function () {
         return $scope.invoice.refund_list.length;
