@@ -83,7 +83,8 @@ class ScheduleTicketsXForm(ScheduleTicketsSchema, XForm):
             Schedule.date,
             ScheduleTicket.begTime,
             ScheduleTicket.endTime,
-            Person
+            Person,
+            Schedule.id
         ).options(joinedload(Person.organisation, innerjoin=True))
         self.tickets = query.all()
 
@@ -97,6 +98,7 @@ class ScheduleTicketsXForm(ScheduleTicketsSchema, XForm):
                 'date': ticket[1],
                 'time_begin': ticket[2],
                 'time_end': ticket[3],
+                'schedule_id': ticket[5]
             }
             for ticket in self.tickets
         ]
