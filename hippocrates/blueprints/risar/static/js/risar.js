@@ -510,7 +510,7 @@ WebMis20
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
         },
         new_appointment: function (client_id, person_id, start_date) {
-            var external_url = WMConfig.local_config.risar.system_prefs.integration.external_schedule_url;
+            var external_url = WMConfig.local_config.risar.schedule.external_schedule_url;
             this.child_window = $window.open(
                 external_url ||
                 Config.url.url_schedule_appointment_html +

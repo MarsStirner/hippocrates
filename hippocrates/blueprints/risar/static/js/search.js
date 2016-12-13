@@ -4,7 +4,7 @@
 
 'use strict';
 
-var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookService, CurrentUser) {
+var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookService, CurrentUser, WMConfig) {
     var default_docs = [{
         full_name: 'Все',
         name: 'Все'
@@ -260,10 +260,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         perform(true);
     };
     $scope.canChangeDoctor = function () {
-        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
+        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3') ||
+            WMConfig.local_config.risar.extended_search.common_access_doctor;
     };
     $scope.canChangeCurator = function () {
-        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3');
+        return CurrentUser.current_role_in('admin', 'overseer1', 'overseer2', 'overseer3') ||
+            WMConfig.local_config.risar.extended_search.common_access_curator;
     };
     $scope.isCurator = function () {
         return CurrentUser.current_role_in('overseer1', 'overseer2', 'overseer3');
@@ -429,4 +431,5 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
 };
 
 WebMis20.controller('EventSearchCtrl', ['$scope', '$q', 'RisarApi', 'TimeoutCallback', 'RefBookService', 'CurrentUser',
+    'WMConfig',
     EventSearchCtrl]);
