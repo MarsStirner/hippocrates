@@ -13,27 +13,35 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Оказываемая медицинская помощь</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Оказываемая медицинская помощь</th>-->
+                    <th class="text-right col-md-4">Вид медицинской помощи</th>
                     <td class="col-md-8">
                         <rb-select ref-book="rbRisarMedicalCare"
                                    ng-model="checkup.ticket_25.medical_care" limit-to="50"/></rb-select>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Место обращения (посещения)</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Место обращения (посещения)</th>-->
+                    <th class="text-right col-md-4">Место оказания мед.помощи</th>
                     <td class="col-md-8">
                         <rb-select ref-book="rbRisarVisitPlace"
                                    ng-model="checkup.ticket_25.visit_place" limit-to="50"/></rb-select>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Обращение (цель)</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Обращение (цель)</th>-->
+                    <th class="text-right col-md-4">Вид обращения</th>
                     <td class="col-md-8">
                         <div refbook-radio ref-book="rbRisarTreatmentReason" ng-model="checkup.ticket_25.visit_reason">[[ item.name ]]</div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Посещение</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Посещение</th>-->
+                    <th class="text-right col-md-4"></th>
                     <td class="col-md-8">
                         <ui-select ng-model="checkup.ticket_25.visit_type" theme="select2">
                             <ui-select-choices repeat="item in checkup.ticket_25.visit_reason.types | filter: $select.search track by item._id">
@@ -44,25 +52,33 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Случай закончен</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Случай закончен</th>-->
+                    <th class="text-right col-md-4">Законченный случай лечения</th>
                     <td class="col-md-8">
                         <div refbook-radio ref-book="rbRisarFinishedTreatment" ng-model="checkup.ticket_25.finished_treatment">[[ item.name ]]</div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Обращение</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Обращение</th>-->
+                    <th class="text-right col-md-4">Случай обслуживания</th>
                     <td class="col-md-8">
                         <div refbook-radio ref-book="rbRisarInitialTreatment" ng-model="checkup.ticket_25.initial_treatment">[[ item.name ]]</div>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Результат обращения</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Результат обращения</th>-->
+                    <th class="text-right col-md-4">Результат заболевания</th>
                     <td class="col-md-8">
                         <rb-select ref-book="rbResult" ng-model="checkup.ticket_25.treatment_result" limit-to="50"></rb-select>
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4">Оплата за счет</th>
+                    <!--Временное решение! RIMIS-1791-->
+                    <!--<th class="text-right col-md-4">Оплата за счет</th>-->
+                    <th class="text-right col-md-4">Вид оплаты</th>
                     <td class="col-md-8">
                         <rb-select ref-book="rbFinance" ng-model="checkup.ticket_25.payment" limit-to="50"></rb-select>
                     </td>
@@ -281,9 +297,10 @@
                                style="table-layout: fixed;">
                             <thead>
                             <tr>
-                                <th width="10%">Тип</th>
-                                <th width="10%">Повод</th>
-                                <th width="25%">Кому</th>
+                                <!--Временное решение! RIMIS-1791-->
+                                <!--<th width="10%">Тип</th>-->
+                                <th width="10%">Вид</th>
+                                <th width="10%">Повод</th> <th width="25%">Кому</th>
                                 <th width="15%">Дата выдачи</th>
                                 <th width="15%">Даты продления</th>
                                 <th width="15%">Дата закрытия</th>
