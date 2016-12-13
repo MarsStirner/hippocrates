@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template
 from flask_login import current_user
-from safe import safe_traverse
 
 from .config import MODULE_NAME, RUS_NAME
 from nemesis.app import app as nemesis_app
 from nemesis.lib.frontend import frontend_config
+from nemesis.lib.utils import safe_traverse
 from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 
 module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_folder='static')
