@@ -78,6 +78,7 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             'Doctor': self.person,
             'LPUCheckup': self.person.organisation,
             'MainDiagnosis': self.to_mkb_rb(data.get('diagnosis')),
+            'Results': data.get('results')
         }
 
     def as_json(self):
@@ -92,5 +93,6 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             'lpu_code': self.person.organisation and self.person.organisation.TFOMSCode or '',
             'doctor_code': self.person.regionalCode,
             'diagnosis': an_props['MainDiagnosis'].value,
+            'results': an_props['Results'].value if 'Results' in an_props else ''
         }
         return res
