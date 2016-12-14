@@ -22,7 +22,7 @@ def api_schedule_schema(api_version):
     return ScheduleXForm.get_schema(api_version)
 
 
-@module.route('/api/integration/<int:api_version>/schedule/<lpu_code>/<doctor_code>')
+@module.route('/api/integration/<int:api_version>/schedule/<lpu_code>/<doctor_code>/')
 @api_method(hook=hook)
 def api_schedule_get(api_version, lpu_code, doctor_code):
     args = request.args.to_dict()
@@ -32,7 +32,7 @@ def api_schedule_get(api_version, lpu_code, doctor_code):
     return xform.as_json()
 
 
-@module.route('/api/integration/<int:api_version>/schedule/<lpu_code>/<doctor_code>', methods=['POST'])
+@module.route('/api/integration/<int:api_version>/schedule/<lpu_code>/<doctor_code>/', methods=['POST'])
 @api_method(hook=hook)
 def api_schedule_save(api_version, lpu_code, doctor_code):
     data = request.get_json()

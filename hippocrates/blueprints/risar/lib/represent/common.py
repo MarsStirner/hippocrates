@@ -357,6 +357,14 @@ def represent_transfusion(action):
     )
 
 
+def get_external_id(event_id):
+    from nemesis.models.event import Event
+    if event_id:
+        event = Event.query.get(event_id)
+        if event:
+            return event.externalId
+
+
 def represent_pregnancy(pregnancy):
     return dict(
         action_as_dict(pregnancy.action, pregnancy_apt_codes),
@@ -364,7 +372,9 @@ def represent_pregnancy(pregnancy):
             represent_anamnesis_newborn_inspection,
             get_previous_children(pregnancy.action)
         ),
-        id=pregnancy.action.id
+        id=pregnancy.action.id,
+        event_id=pregnancy.action['card_number'].value,
+        external_id=get_external_id(pregnancy.action['card_number'].value)
     )
 
 
@@ -373,6 +383,7 @@ def represent_anamnesis_newborn_inspection(child):
         'id': child.id,
         'weight': child.weight,
         'alive': safe_bool(child.alive),
+        'sex': Gender(child.sex) if child.sex is not None else None,
         'death_reason': child.death_reason,
         'died_at': child.died_at,
         'abnormal_development': safe_bool(child.abnormal_development),

@@ -182,6 +182,7 @@
                         <th>Срок</th>
                         <th>Сведения о детях</th>
                         <th>Особенности</th>
+                        <th>Ссылка на карту</th>
                         <th>&nbsp;</th>
                     </tr>
                     </thead>
@@ -196,16 +197,18 @@
                             <div ng-repeat="child_info in p.newborn_inspections">
                                 <b>ребенок [[$index+1]]</b>:
                                 <span ng-bind="format_newborn_inspection(child_info)"></span>
+                                <span ng></span>
                             </div>
                         </td>
                         <td ng-if="!p.deleted" ng-bind-html="format_characteristics(p) | trustHtml"></td>
-                        <td ng-if="!p.deleted" class="col-md-1 nowrap">
+                        <td ng-if="!p.deleted" ><a nf-if="p.external_id" ng-href="{{ url_for('.html_auto_chart') }}?event_id=[[ p.event_id ]]">[[p.external_id]]</a></td>
+                        <td ng-if="!p.deleted && !p.external_id" class="col-md-1 nowrap">
                             <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
                             <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4">&nbsp;</td>
+                        <td colspan="5">&nbsp;</td>
                         <td>
                             <a class="pseudo-btn" ng-click="add()">Добавить</a>
                         </td>

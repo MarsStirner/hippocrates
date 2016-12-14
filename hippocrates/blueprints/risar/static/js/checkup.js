@@ -77,7 +77,7 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
         return $scope.checkupAccess && $scope.checkupAccess.can_edit;
     };
     $scope.isDisabledVisitType = function () {
-        return _.isEmpty($scope.checkup.ticket_25.visit_reason);
+        return $scope.checkup && $scope.checkup.ticket_25 && _.isEmpty($scope.checkup.ticket_25.visit_reason);
     };
 
     $scope.begDateIsSameNextDate = false;

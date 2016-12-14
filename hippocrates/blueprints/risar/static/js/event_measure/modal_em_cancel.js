@@ -9,18 +9,18 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     <h4 class="modal-title">Отмена мероприятия</h4>\
 </div>\
 <div class="modal-body">\
-    <form class="form-horizontal">\
+    <form name="cancelForm" class="form-horizontal">\
         <div class="form-group">\
             <label for="cancel_reason" class="col-sm-3 control-label">Причина отмены</label>\
             <div class="col-sm-9 form-control-static">\
-                <rb-select ref-book="rbMeasureCancelReason" ng-model="model.cancel_reason" id="cancel_reason"></rb-select>\
+                <rb-select ref-book="rbMeasureCancelReason" ng-model="model.cancel_reason" id="cancel_reason" ng-required="true"></rb-select>\
             </div>\
         </div>\
     </form>\
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
-    <button type="button" class="btn btn-warning" ng-click="cancelAndClose()">Подтвердить</button>\
+    <button type="button" class="btn btn-warning" ng-click="cancelAndClose()" ng-disabled="cancelForm.$invalid">Подтвердить</button>\
 </div>');
 }]);
 
