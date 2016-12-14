@@ -10,6 +10,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     RisarApi, RefBookService, WMAction, PrintingService, EMModalService,
     event_measure, options) {
     $scope.event_measure = event_measure.data;
+    $scope.checkup_id = options && options.checkup_id;
     $scope.access = event_measure.access;
     $scope.ro = true;
     $scope.ps = new PrintingService("event_measure");
@@ -150,7 +151,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     };
 
     $scope.refresh = function () {
-        return RisarApi.measure.get_info($scope.event_measure.id, $scope.event_measure.appointment_action_id).then(function(data){
+        return RisarApi.measure.get_info($scope.event_measure.id, {checkup_id: $scope.checkup_id}).then(function(data){
             $scope.event_measure = data.event_measure;
             $scope.appointment = data.appointment;
             $scope.em_result = data.em_result;

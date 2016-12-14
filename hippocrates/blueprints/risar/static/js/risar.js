@@ -488,8 +488,8 @@ WebMis20
             }
             return wrapper('GET', url, args);
         },
-        get_info: function (event_measure_id) {
-            return wrapper('GET', Config.url.api_event_measure_get_info.format(event_measure_id))
+        get_info: function (event_measure_id, args) {
+            return wrapper('GET', Config.url.api_event_measure_get_info.format(event_measure_id), args)
         },
         save_list: function (event_id, data) {
             return wrapper('POST', Config.url.api_event_measure_save_list.format(event_id), {}, data);
