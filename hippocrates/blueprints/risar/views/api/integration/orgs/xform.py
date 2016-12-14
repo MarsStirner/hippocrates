@@ -59,6 +59,7 @@ class OrganizationXForm(OrganizationSchema, XForm):
         self.target_obj.area = data.get('area') or ''
         self.target_obj.phone = data.get('phone') or ''
         self.target_obj.TFOMSCode = data.get('LPU_id')
+        self.target_obj.FFOMSCode = data.get('FFOMSCode')
         self.target_obj.LPUcode = data.get('TFOMSCode')
         self.target_obj.Departmentcode = data.get('Department_TFOMSCode')
         self.target_obj.INN = data.get('INN') or ''
@@ -105,6 +106,7 @@ class OrganizationXForm(OrganizationSchema, XForm):
             'area': target_obj.area,
             'phone': target_obj.phone,
             'LPU_id': target_obj.TFOMSCode,
+            'FFOMSCode': target_obj.FFOMSCode,
             'TFOMSCode': target_obj.LPUcode,
             'Department_TFOMSCode': target_obj.Departmentcode,
             'INN': target_obj.INN,

@@ -46,6 +46,11 @@ class OrganizationSchema(Schema):
                 "type": "string",
                 "description": "Уникальный идентификатор ЛПУ"
             },
+            "FFOMSCode":{
+                "type": "string",
+                "id": "organization/TFOMSCode",
+                "description": "Федеральный код организации"
+            },
             "TFOMSCode":{
                 "type": "string",
                 "id": "organization/TFOMSCode",
