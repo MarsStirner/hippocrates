@@ -467,7 +467,7 @@ class CheckupsTicket25XForm(XForm):
             'visit_type': self.or_undefined(self.from_rb(action['visit_type'].value)),
             'payment': self.or_undefined(self.from_rb(action['payment'].value)),
             'visit_dates': self.or_undefined(safe_date(inspection.begDate) and [safe_date(inspection.begDate)]),
-            # 'children': self._repr_is_child(),  # todo: TypeError("unsupported operand type(s) for -: 'datetime.datetime' and 'datetime.date'",)
+            'children': self._repr_is_child(),
             'medical_services': self.or_undefined(self._repr_med_services(action)),
             'operations': self.or_undefined(self._repr_operations(action)),
             'manipulations': self.or_undefined(self._repr_manipulations(action)),
