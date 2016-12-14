@@ -10,6 +10,11 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-body">\
 <section class="content">\
+    <div class="row marginal" ng-if="appointment.number">\
+        <div class="col-md-12">\
+        <p class="text-right"><b>Номер направления:</b> [[appointment.number]]</p>\
+        </div>\
+    </div>\
     <div class="row">\
     <div class="col-md-12">\
         <div class="box box-info">\
@@ -102,6 +107,7 @@ var EMAppointmentModalCtrl = function ($scope, $q, RisarApi, RefBookService, WMA
     };
 
     $scope.init = function () {
+        $scope.appointment = appointment;
         $scope.action = new WMAction();
         $scope.ActionStatus = RefBookService.get('ActionStatus');
         $scope.ActionStatus.loading.then(function () {

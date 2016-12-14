@@ -59,7 +59,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
         return $scope.access.can_restore;
     };
     $scope.canPrintAppointment = function () {
-        return ($scope.appointment.id ? $scope.canReadEmAppointment() : $scope.canEditEmAppointment()) &&
+        return ($scope.appointment && $scope.appointment.id ? $scope.canReadEmAppointment() : $scope.canEditEmAppointment()) &&
             !$scope.isEmRevoked() &&
             !$scope.isDisabledAppointment();
     };

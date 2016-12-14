@@ -68,6 +68,11 @@
         <tab heading="Направление по мероприятию" select="setTab(2)" ng-attr-disabled="[[!canReadEmAppointment()]]">
             <div class="modal-body">
             <section class="content">
+                <div class="row marginal" ng-if="appointment.number">
+                    <div class="col-md-12">
+                    <p class="text-right"><b>Номер направления:</b> [[appointment.number]]</p>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-12">
                         <wm-action-layout ng-if="!isDisabledAppointment()" action="appointment_action"></wm-action-layout>
