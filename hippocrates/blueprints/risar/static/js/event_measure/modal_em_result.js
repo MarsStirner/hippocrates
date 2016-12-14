@@ -19,7 +19,11 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <h4>Файл <button type="button" class="btn btn-link lmargin20" ngf-select="addNewFiles($files)" \
                 ngf-multiple="true" ngf-max-size="max_file_size" ngf-pattern="files_pattern"\
                             ng-show="canAddFile()">Добавить</button>\
-                </h4> <p class="text-info">Разрешена загрузка файлов размером не более [[max_file_size]] с расширением [[files_pattern]]</p>\
+                </h4> \
+                <p class="text-info">\
+                    Разрешена загрузка файлов размером не более [[max_file_size]]\
+                    <span ng-if="files_pattern"> с расширением [[files_pattern]]</span>\
+                </p>\
                 <table class="table table-condensed" ng-show="filesTableVisible()">\
                     <thead>\
                         <tr>\
@@ -75,8 +79,8 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
     $scope.action_attach_type_id = null;
     $scope.new_files = [];
     $scope.ro = false;
-    $scope.max_file_size = WMConfig.local_config.files_upload.max_file_size || '10MB';
-    $scope.files_pattern = WMConfig.local_config.files_upload.pattern || '.pdf, .bmp, .jpg, .jpeg, .png, .tiff, .gif, .psd';
+    $scope.max_file_size = WMConfig.local_config.files_upload.max_file_size;
+    $scope.files_pattern = WMConfig.local_config.files_upload.pattern;
     var _saved = false;
     $scope.ps = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
