@@ -3,6 +3,7 @@
 from flask import request, abort
 
 from hippocrates.blueprints.risar.app import module
+from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.card import AbstractCard
 from hippocrates.blueprints.risar.lib.represent.common import represent_header
 from hippocrates.blueprints.risar.lib.chart import can_control_events, take_event_control,\
@@ -93,6 +94,17 @@ def api_0_update_set_date(event_id):
 
     event.setDate = set_date
     db.session.commit()
+
+    sirius.send_to_mis(
+        sirius.RisarEvents.CREATE_CARD,
+        sirius.RisarEntityCode.CARD,
+        sirius.OperationCode.READ_ONE,
+        'risar.api_card_get',
+        obj=('card_id', event_id),
+        params={'client_id': event.client_id},
+        is_create=False,
+    )
+
     AbstractCard.get_for_event(event).reevaluate_card_attrs()
     db.session.commit()
     return represent_header(event)
