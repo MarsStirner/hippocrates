@@ -23,6 +23,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
     """
     parent_obj_class = Event
     target_obj_class = Action
+    flat_code = 'general_hospitalization'
 
     diagnosis_codes = ('FinalDiagnosis', )
 
@@ -30,7 +31,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
-            ActionType.context == general_hospitalizations,
+            ActionType.flatCode == self.flat_code,
         )
         if self.target_obj_id:
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
