@@ -68,6 +68,10 @@ class CheckupsTicket25XFormSchema(Schema):
                     "description": "Детское обращение (пациентка до 14 лет - да/нет)",
                     "type": "boolean"
                 },
+                "visit_place": {
+                    "description": "Место посещения (оказания медицинской помощи), справочник rbRisarVisitPlace",
+                    "type": "string"
+                },
                 "visit_type": {
                     "description": "Посещение (тип), справочник rbRisarVisit_Type",
                     "type": "string"
@@ -277,6 +281,7 @@ class CheckupsTicket25XForm(XForm):
         if not self.checkup_xform.target_obj:
             self.checkup_xform.find_target_obj(self.checkup_xform.target_obj_id)
         self.target_obj = self.checkup_xform.target_obj.propsByCode['ticket_25'].value
+        self.target_obj.update_action_integrity()
 
     def log_current_state(self):
         message = u'Данные талона посещения в осмотре с id={0} до сохранения:\n{1}'.format(
@@ -296,6 +301,7 @@ class CheckupsTicket25XForm(XForm):
             'medical_care': self.to_rb(data.get('medical_care')),
             'prof_med_help': self.rb(data.get('medical_care_profile'), rbProfMedHelp),
             'condit_med_help': self.rb(data.get('medical_care_place'), rbConditionMedHelp),
+            'visit_place': self.to_rb(data.get('visit_place')),
             'finished_treatment': self.to_rb(data.get('finished_treatment')),
             'initial_treatment': self.to_rb(data.get('initial_treatment')),
             'treatment_result': self.rb(data.get('treatment_result'), rbResult),
@@ -461,13 +467,14 @@ class CheckupsTicket25XForm(XForm):
             'medical_care': self.or_undefined(self.from_rb(action['medical_care'].value)),
             'medical_care_profile': self.or_undefined(self.from_rb(action['prof_med_help'].value)),
             'medical_care_place': self.or_undefined(self.from_rb(action['condit_med_help'].value)),
+            'visit_place': self.or_undefined(self.from_rb(action['visit_place'].value)),
             'finished_treatment': self.or_undefined(self.from_rb(action['finished_treatment'].value)),
             'initial_treatment': self.or_undefined(self.from_rb(action['initial_treatment'].value)),
             'treatment_result': self.or_undefined(self.from_rb(action['treatment_result'].value)),
             'visit_type': self.or_undefined(self.from_rb(action['visit_type'].value)),
             'payment': self.or_undefined(self.from_rb(action['payment'].value)),
             'visit_dates': self.or_undefined(safe_date(inspection.begDate) and [safe_date(inspection.begDate)]),
-            # 'children': self._repr_is_child(),  # todo: TypeError("unsupported operand type(s) for -: 'datetime.datetime' and 'datetime.date'",)
+            'children': self._repr_is_child(),
             'medical_services': self.or_undefined(self._repr_med_services(action)),
             'operations': self.or_undefined(self._repr_operations(action)),
             'manipulations': self.or_undefined(self._repr_manipulations(action)),

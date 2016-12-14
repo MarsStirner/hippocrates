@@ -2,7 +2,7 @@
 
 test_client_data_1 = {
     "FIO": {
-        "middlename": u'Интова2',
+        "middlename": u'Интова3',
         "name": u'Тестовая интеграция',
         "surname": u'Интегра'
     },

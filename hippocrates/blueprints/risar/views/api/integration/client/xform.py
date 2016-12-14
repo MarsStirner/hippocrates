@@ -37,18 +37,12 @@ class ClientXForm(ClientSchema, XForm):
         ln = data['FIO']['surname']
         pn = data['FIO'].get('middlename') or ''
         bd = safe_date(data['birthday_date'])
-        doc_type_code = data['document']['document_type_code']
-        self._check_rb_value('rbDocumentType', doc_type_code)
-        doc_number = data['document']['document_number']
 
-        q = db.session.query(Client).join(ClientDocument).join(rbDocumentType).filter(
+        q = db.session.query(Client).filter(
             Client.firstName == fn,
             Client.lastName == ln,
             Client.birthDate == bd,
             Client.deleted == 0,
-            rbDocumentType.TFOMSCode == doc_type_code,
-            ClientDocument.number == doc_number,
-            ClientDocument.deleted == 0
         )
         if pn:
             q = q.filter(Client.patrName == pn)
@@ -56,10 +50,10 @@ class ClientXForm(ClientSchema, XForm):
         if target_obj_exist_id:
             raise ApiException(
                 ALREADY_PRESENT_ERROR,
-                (u'Уже существует пациент со следующими данными: '
-                 u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
-                 u'номер документа - {4}').format(
-                    fn, ln, pn, bd, doc_number
+                u'Уже существует пациент со следующими данными: '
+                u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+                .format(
+                    fn, ln, pn, bd
                 ),
                 client_id=str(target_obj_exist_id)
             )
