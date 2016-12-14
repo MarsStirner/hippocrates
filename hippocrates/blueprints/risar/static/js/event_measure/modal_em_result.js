@@ -67,8 +67,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 <div class="modal-footer">\
     <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_em_result(true)" fast-print="true"\
         class="pull-left"></ui-print-button>\
-    <button type="button" class="btn btn-default" ng-click="close()">Закрыть</button>\
-    <button type="button" class="btn btn-primary" ng-click="save_em_result()">Сохранить</button>\
+    <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить и закрыть</button>\
 </div>');
 }]);
 
