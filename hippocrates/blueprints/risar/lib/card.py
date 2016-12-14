@@ -9,7 +9,8 @@ from sqlalchemy import and_, func
 
 from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
-from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event, get_latest_gyn_event
+from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event, get_latest_gyn_event, \
+    get_any_prev_event
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.fetus import get_fetuses
 from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
@@ -216,11 +217,23 @@ class AbstractCard(object):
         return query.all()
 
     @lazy
+    def any_prev_event(self):
+        return get_any_prev_event(self.event) if self.event else None
+
+    @lazy
     def latest_gyn_event(self):
         return get_latest_gyn_event(self.event.client_id) if self.event else None
 
     @lazy
     def latest_pregnancy_event(self):
+        return get_latest_pregnancy_event(self.event.client_id) if self.event else None
+
+    @lazy
+    def prev_gyn_events(self):
+        return get_latest_gyn_event(self.event.client_id) if self.event else None
+
+    @lazy
+    def prev_pregnancy_events(self):
         return get_latest_pregnancy_event(self.event.client_id) if self.event else None
 
 
@@ -475,10 +488,3 @@ def _clear_caches():
     GynecologicCard.cache = LocalCache()
 
     lazy.cache = WeakKeyDictionary()
-
-
-def determine_card_class_by_event(event):
-    if event:
-        card_class = classes.get(event.eventType.requestType.code)
-        if card_class:
-            return card_class

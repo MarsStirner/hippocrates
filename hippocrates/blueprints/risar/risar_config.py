@@ -25,7 +25,7 @@ gynecological_ticket_25 = 'gynecological_ticket_25'
 
 pregnancy_apt_codes = [
     'year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'pregnancy_pathology',
-    'delivery_pathology', 'maternity_aid', 'after_birth_complications'
+    'delivery_pathology', 'maternity_aid', 'after_birth_complications', 'operation_testimonials',
 ]
 transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
 
