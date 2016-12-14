@@ -59,6 +59,10 @@ class SpecialistsCheckupSchema(Schema):
                     "id": "specialists_checkup/diagnosis",
                     "description": "Диагноз в формате кода МКБ"
                 },
+                "results": {
+                    "type": "string",
+                    "description": "Результаты осмотра"
+                },
                 "status": {
                     "description": "Статус мероприятия, справочник rbMeasureStatus",
                     "type": "string"
