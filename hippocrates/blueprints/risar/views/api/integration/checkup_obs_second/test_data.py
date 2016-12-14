@@ -133,6 +133,7 @@ ticket25_data = {
     "reason": "B00",
     "trauma": "01",
     "visit_type": "1",
+    "visit_place": "1",
     "disease_character": "2",
     "disease_outcome": "improvement",
     "medical_care": "3",
