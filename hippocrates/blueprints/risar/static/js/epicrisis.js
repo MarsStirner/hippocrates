@@ -169,7 +169,6 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
             $scope.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days') / 7) + 1;
         }
     });
-
     $scope.$watch('mother_death', function (n) {
         if ($scope.epicrisis && !n) {
             $scope.epicrisis.reason_of_death = null;
@@ -177,6 +176,15 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
             $scope.epicrisis.death_time = null;
             $scope.epicrisis.pat_diagnosis = null;
             $scope.epicrisis.control_expert_conclusion = '';
+        }
+    });
+    $scope.$watch('epicrisis.pregnancy_final', function (n, o) {
+        if (n) {
+            $scope.min_pregnancy_duration = n.code == 'abortom' ? 0 : 22;
+            $scope.max_pregnancy_duration = n.code == 'abortom' ? 21 : 45;
+            if (o && n.code !== o.code){
+                $scope.epicrisis.pregnancy_duration = undefined;
+            }
         }
     });
 
