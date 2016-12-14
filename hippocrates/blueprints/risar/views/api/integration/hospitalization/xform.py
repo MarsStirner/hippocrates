@@ -23,7 +23,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
     """
     parent_obj_class = Event
     target_obj_class = Action
-    flat_code = 'general_hospitalization'
+    flat_code = 'tula_hosp'
 
     diagnosis_codes = ('FinalDiagnosis', )
 
