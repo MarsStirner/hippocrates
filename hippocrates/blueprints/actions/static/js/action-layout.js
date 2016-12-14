@@ -64,6 +64,7 @@ angular.module('WebMis20')
                                 case 'OperationType':
                                 case 'HospitalBedProfile':
                                 case 'ReferenceRb':
+                                case 'ExtReferenceRb':
                                     inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
                                 case 'Person':
                                     inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
@@ -186,6 +187,7 @@ angular.module('WebMis20')
                                         </wm-custom-dropdown>';
                                     break;
                                 case 'ReferenceRb':
+                                case 'ExtReferenceRb':
                                     var domain = property.type.domain.split(';'),
                                         rbTable = domain[0],
                                         rb_codes = domain[1] ? (domain[1].split(',').map(function (code) {
