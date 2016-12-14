@@ -43,7 +43,7 @@
                     <!--<th class="text-right col-md-4">Посещение</th>-->
                     <th class="text-right col-md-4"></th>
                     <td class="col-md-8">
-                        <ui-select ng-model="checkup.ticket_25.visit_type" theme="select2">
+                        <ui-select ng-model="checkup.ticket_25.visit_type" theme="select2" ng-disabled="isDisabledVisitType()">
                             <ui-select-choices repeat="item in checkup.ticket_25.visit_reason.types | filter: $select.search track by item._id">
                                 <div style="text-align: justify" ng-bind-html="item.name | highlight: $select.search"></div>
                             </ui-select-choices>
