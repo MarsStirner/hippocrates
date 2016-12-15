@@ -88,7 +88,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
         an_props = self.target_obj.propsByCode
         res = {
             'external_id': self.external_id,
-            'hospitalization_id': self.target_obj.id,
+            'result_action_id': self.target_obj.id,
             'measure_id': self.em.id,
             'measure_status': self.em.literal_status,
             'date_in': an_props['ReceiptDate'].value,

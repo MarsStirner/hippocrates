@@ -78,7 +78,7 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             'Doctor': self.person,
             'LPUCheckup': self.person.organisation,
             'MainDiagnosis': self.to_mkb_rb(data.get('diagnosis')),
-            'Results': data.get('results')
+            'Results': data.get('results', '').replace('\r\n', '<br>'),
         }
 
     def as_json(self):

@@ -39,7 +39,7 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
 
     def get_properties_data(self, data):
         return {
-            'Results': data.get('results'),
+            'Results': data.get('results', '').replace('\r\n', '<br>'),
             'RealizationDate': safe_date(data.get('realization_date')),
             'AnalysisNumber': data.get('analysis_number'),
             'LPURealization': self.person.organisation if self.person else None,
