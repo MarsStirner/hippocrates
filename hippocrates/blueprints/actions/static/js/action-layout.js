@@ -71,7 +71,7 @@ angular.module('WebMis20')
                                 case 'Organisation':
                                     inner_template = '<span ng-bind="{0}.value.full_name"></span>'; break;
                                 case 'MKB':
-                                    inner_template = '<span>[[ {0}.value.code ]], [[ {0}.value.name ]]</span>'; break;
+                                    inner_template = '<span ng-bind="{0}.value ? [{0}.value.code, {0}.value.name].join(\', \') : \'\'"></span>'; break;
                                 case 'OrgStructure':
                                     inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
                                 case 'Diagnosis':

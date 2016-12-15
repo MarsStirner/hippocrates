@@ -100,12 +100,6 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
             $scope.begDateIsSameNextDate = next_date.isSame(beg_date);
         }
     });
-    $scope.$on('mayBeUziSrokChanged', function() {
-        RisarApi.checkup.get($scope.checkup_id)
-            .then(function (data) {
-                $scope.checkup.calculated_pregnancy_week_by_ultrason = data.checkup.calculated_pregnancy_week_by_ultrason;
-            });
-    });
 
     // initialization
     $scope.init = function () {
