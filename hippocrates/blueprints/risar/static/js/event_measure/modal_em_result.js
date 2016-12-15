@@ -16,9 +16,14 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <div class="box-body">\
                 <wm-action-layout action="action"></wm-action-layout>\
                 <hr>\
-                <h4>Файл <button type="button" class="btn btn-link lmargin20" ngf-select="addNewFile($file)"\
+                <h4>Файл <button type="button" class="btn btn-link lmargin20" ngf-select="addNewFiles($files)" \
+                ngf-multiple="true" ngf-max-size="max_file_size" ngf-pattern="files_pattern"\
                             ng-show="canAddFile()">Добавить</button>\
-                </h4>\
+                </h4> \
+                <p class="text-info">\
+                    Разрешена загрузка файлов размером не более [[max_file_size]]\
+                    <span ng-if="files_pattern"> с расширением [[files_pattern]]</span>\
+                </p>\
                 <table class="table table-condensed" ng-show="filesTableVisible()">\
                     <thead>\
                         <tr>\
@@ -62,8 +67,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 <div class="modal-footer">\
     <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_em_result(true)" fast-print="true"\
         class="pull-left"></ui-print-button>\
-    <button type="button" class="btn btn-default" ng-click="close()">Закрыть</button>\
-    <button type="button" class="btn btn-primary" ng-click="save_em_result()">Сохранить</button>\
+    <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить и закрыть</button>\
 </div>');
 }]);
 
@@ -74,6 +78,8 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
     $scope.action_attach_type_id = null;
     $scope.new_files = [];
     $scope.ro = false;
+    $scope.max_file_size = WMConfig.local_config.files_upload.max_file_size;
+    $scope.files_pattern = WMConfig.local_config.files_upload.pattern;
     var _saved = false;
     $scope.ps = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
@@ -146,7 +152,8 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
     };
     $scope.processNewFiles = function (action) {
         var attach_data = make_attach_data(action);
-        return $scope.uploadFiles($scope.new_files, attach_data)
+        var upload_promises = _.map($scope.new_files, function (f) { return $scope.uploadFiles([f], attach_data) });
+        return $q.all(upload_promises)
             .then(function () {
                 $scope.new_files = [];
             });
@@ -156,10 +163,10 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
             return Upload.upload({
                 url: WMConfig.url.devourer.upload,
                 data: {
-                    files: _.pluck($scope.new_files, 'file'),
+                    files: _.pluck(files, 'file'),
                     info: Upload.json({
                         attach_data: attach_data,
-                        files_info: _.map($scope.new_files, function (f) { return _.pick(f, 'name') })
+                        files_info: _.map(files, function (f) { return _.pick(f, 'name') })
                     })
                 },
                 arrayKey: '',
@@ -202,12 +209,12 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
         };
     };
 
-    $scope.addNewFile = function (file) {
-        if (file) {
+    $scope.addNewFiles = function (files) {
+        _.map(files, function (file) {
             var nf = make_file(file);
             $scope.setFileName(nf);
             $scope.new_files.push(nf);
-        }
+        });
     };
     $scope.removeNewFile = function (idx) {
         $scope.new_files.splice(idx, 1);
@@ -227,8 +234,7 @@ var EMResultModalCtrl = function ($scope, $q, $rootScope, RisarApi, RefBookServi
     };
 
     $scope.canAddFile = function () {
-        return $scope.action.attached_files && $scope.action.attached_files.length === 0 &&
-            $scope.new_files.length === 0 && !$scope.ro;
+        return $scope.action.attached_files && !$scope.ro;
     };
     $scope.filesTableVisible = function () {
         return $scope.action.attached_files && $scope.action.attached_files.length > 0 ||

@@ -97,50 +97,22 @@ WebMis20
     };
     function Chart (urls) {
         var self = this;
+        self.urls = urls;
 
-        function on_event_created (ticket_id, event) {
-            NotificationService.notify(
-                200,
-                [
-                    'Пациентка поставлена на учёт: ',
-                    {bold: true, text: event.person.name},
-                    '. ',
-                    {
-                        click: function () {
-                            RisarEventControlService.open_edit_modal(event, urls)
-                                .then(function () {
-                                    $window.location.replace(urls.html + '?event_id=' + event.id);
-                                })
-                        },
-                        text: 'Изменить'
-                    },
-                    ' ',
-                    {
-                        click: function () {
-                            self.delete(ticket_id).then(function success() {
-                                $window.location.replace(urls.back);
-                            })
-                        },
-                        text: 'Отменить'
-                    }
-                ],
-                'success'
-            );
-        }
-        function create (ticket_id, client_id, gyn_event_id) {
+        self.create = function (ticket_id, client_id, gyn_event_id) {
             return wrapper(
                 'POST',
-                urls.get.format(''),
+                 self.urls.get.format(''),
                 {ticket_id: ticket_id, client_id: client_id, gyn_event_id: gyn_event_id}
             ).then(function (event) {
                 if (event.automagic) {
-                    on_event_created(ticket_id, event);
+                    self.on_event_created(ticket_id, event);
                 } else {
-                    $window.location.replace(urls.html + '?event_id=' + event.id);
+                    $window.location.replace( self.urls.html + '?event_id=' + event.id);
                 }
                 return event;
             })
-        }
+        };
         this.take_control = function(event_id) {
           return wrapper('POST', Config.url.api_chart_control.format('take_control', event_id, ''));
         };
@@ -154,15 +126,51 @@ WebMis20
            return wrapper('PUT', Config.url.api_update_set_date.format(event_id), {}, data);
         };
         this.get_header = function (event_id) {
-            return wrapper('GET', urls.header.format(event_id));
+            return wrapper('GET',  self.urls.header.format(event_id));
         };
-        this.delete = function (ticket_id) {
-            return wrapper('DELETE', urls.delete.format(ticket_id));
+        this.delete = function (ticket_id, event_id) {
+            var formatted_ticket_id = ticket_id || '0',
+                targetUrl = self.urls.delete.format(formatted_ticket_id);
+            if (!ticket_id) {
+                if ( event_id!== undefined ) {
+                    targetUrl += '?event_id='+event_id
+                }
+            }
+            return wrapper('DELETE', targetUrl);
+        };
+        self.on_event_created = function (ticket_id, event, data) {
+            NotificationService.notify(
+                200,
+                [
+                    'Пациентка поставлена на учёт: ',
+                    {bold: true, text: event.person.name},
+                    '. ',
+                    {
+                        click: function () {
+                            RisarEventControlService.open_edit_modal(event,  self.urls)
+                                .then(function () {
+                                    $window.location.replace( self.urls.html + '?event_id=' + event.id);
+                                })
+                        },
+                        text: 'Изменить'
+                    },
+                    ' ',
+                    {
+                        click: function () {
+                            self.delete(ticket_id, event.id).then(function success() {
+                                $window.location.replace( self.urls.back);
+                            })
+                        },
+                        text: 'Отменить'
+                    }
+                ],
+                'success'
+            );
         };
         this.close_event = function (event_id, data, edit_callback, cancel_callback) {
             var show_notify = !data.cancel;
             return wrapper(
-                'POST', urls.close.format(event_id), {}, data
+                'POST',  self.urls.close.format(event_id), {}, data
             ).then(function (data) {
                 var close_notify = function() {
                     NotificationService.dismiss(notify_id);
@@ -192,13 +200,13 @@ WebMis20
         };
         this.get = function (event_id, ticket_id, client_id, gyn_event_id) {
             if (event_id) {
-                return wrapper('GET', urls.get.format(event_id))
+                return wrapper('GET',  self.urls.get.format(event_id))
             } else {
                 var deferred = $q.defer();
-                wrapper('GET', urls.get.format(''), {ticket_id: ticket_id, client_id: client_id}).then(
+                wrapper('GET',  self.urls.get.format(''), {ticket_id: ticket_id, client_id: client_id}).then(
                     function (data) {
                         if (!data) {
-                            create(ticket_id, client_id, gyn_event_id).then(
+                            self.create(ticket_id, client_id, gyn_event_id).then(
                                 deferred.resolve,
                                 deferred.reject
                             )
@@ -211,7 +219,7 @@ WebMis20
                 return deferred.promise;
             }
         };
-        this._create = create;
+        this._create = self.create;
     }
     this.chart = new Chart({
         get: Config.url.api_chart,
@@ -229,6 +237,34 @@ WebMis20
         html: Config.url.chart_gynecological_html,
         back: Config.url.index_html
     });
+    this.gynecologic_chart.on_event_created = function (ticket_id, event) {
+            var self = this;
+            NotificationService.notify(
+                200,
+                [
+                    'Карта создана. ',
+                    {
+                        click: function () {
+                            RisarEventControlService.open_edit_modal(event, self.urls)
+                                .then(function () {
+                                    $window.location.replace(self.urls.html + '?event_id=' + event.id);
+                                })
+                        },
+                        text: 'Изменить'
+                    },
+                    ' ',
+                    {
+                        click: function () {
+                            self.delete(ticket_id, event.id).then(function success() {
+                                $window.location.replace(self.urls.back);
+                            })
+                        },
+                        text: 'Отменить'
+                    }
+                ],
+                'success'
+            );
+    };
     this.maternal_cert = {
         get_by_event: function (event_id) {
             return wrapper('GET', Config.url.api_maternal_cert_for_event.format(event_id))
@@ -452,8 +488,8 @@ WebMis20
             }
             return wrapper('GET', url, args);
         },
-        get_info: function (event_measure_id) {
-            return wrapper('GET', Config.url.api_event_measure_get_info.format(event_measure_id))
+        get_info: function (event_measure_id, args) {
+            return wrapper('GET', Config.url.api_event_measure_get_info.format(event_measure_id), args)
         },
         save_list: function (event_id, data) {
             return wrapper('POST', Config.url.api_event_measure_save_list.format(event_id), {}, data);
@@ -474,7 +510,7 @@ WebMis20
             return wrapper('POST', Config.url.api_event_measure_checkups + event_measure_id);
         },
         new_appointment: function (client_id, person_id, start_date) {
-            var external_url = WMConfig.local_config.risar.system_prefs.integration.external_schedule_url;
+            var external_url = WMConfig.local_config.risar.schedule.external_schedule_url;
             this.child_window = $window.open(
                 external_url ||
                 Config.url.url_schedule_appointment_html +
@@ -607,9 +643,9 @@ WebMis20
                 curation_level: curation_level
             });
         },
-        get_radz_risk_info: function (curation_level) {
+        get_radz_risk_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_radz_risks, {
-                curation_level: curation_level
+                curation_level_code: curation_level_code
             });
         },
         get_pregnancy_pathology_info: function (curation_level_code) {

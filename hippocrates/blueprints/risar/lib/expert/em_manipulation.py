@@ -234,7 +234,9 @@ class EventMeasureController(BaseModelController):
         start_date = safe_datetime(action.begDate)
         next_date_property = action.propsByCode.get('next_date')
         end_date = safe_datetime(next_date_property.value) if next_date_property else None
-        if not end_date:
+        if end_date:
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        else:
             end_date = action.endDate
         args.update({
             'event_id': action.event_id,

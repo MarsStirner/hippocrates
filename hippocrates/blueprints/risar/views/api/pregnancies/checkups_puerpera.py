@@ -5,6 +5,7 @@ from flask import request
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_puerpera
+from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_access
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera, set_action_apt_values
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
@@ -73,6 +74,8 @@ def api_0_pregnancy_checkup_puerpera(event_id):
 
     sirius.send_to_mis(
         sirius.RisarEvents.SAVE_CHECKUP,
+        sirius.RisarEntityCode.CHECKUP_PC_TICKET,
+        sirius.OperationCode.READ_ONE,
         'risar.api_checkup_pc_ticket25_get',
         obj=('exam_obs_id', action.id),
         # obj=('external_id', action.id),
@@ -80,7 +83,10 @@ def api_0_pregnancy_checkup_puerpera(event_id):
         is_create=not checkup_id,
     )
 
-    return represent_pregnancy_checkup_puerpera(action)
+    return {
+        'checkup': represent_pregnancy_checkup_puerpera(action),
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route('/api/0/checkup_puerpera/')
@@ -91,7 +97,10 @@ def api_0_pregnancy_checkup_puerpera_get(checkup_id=None):
     action.update_action_integrity()
     if not action:
         raise ApiException(404, u'Action с id {0} не найден'.format(checkup_id))
-    return represent_pregnancy_checkup_puerpera(action)
+    return {
+        'checkup': represent_pregnancy_checkup_puerpera(action),
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route('/api/0/checkup_puerpera/new/', methods=['POST'])
@@ -104,8 +113,10 @@ def api_0_pregnancy_checkup_puerpera_new(event_id):
         raise ApiException(400, u'необходим flat_code')
     event = Event.query.get(event_id)
     action = get_action_by_id(None, event, flat_code, True)
-    result = represent_pregnancy_checkup_puerpera(action)
-    return result
+    return {
+        'checkup': represent_pregnancy_checkup_puerpera(action),
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route('/api/0/checkup_puerpera_list/')
@@ -116,6 +127,12 @@ def api_0_pregnancy_checkup_puerpera_list(event_id):
     card = PregnancyCard.get_for_event(event)
     for action in card.checkups_puerpera:
         action.update_action_integrity()
+
+    def repr(checkup):
+        return {
+            'checkup': represent_pregnancy_checkup_puerpera(checkup),
+            'access': represent_checkup_access(checkup)
+        }
     return {
-        'checkups': map(represent_pregnancy_checkup_puerpera, card.checkups_puerpera)
+        'checkups': map(repr, card.checkups_puerpera)
     }

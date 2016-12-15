@@ -29,8 +29,8 @@ from nemesis.systemwide import db
 from nemesis.app import app
 
 
-def get_mime_type(file_format, open_type='attachment'):
-    # open_type = 'application'
+def get_mime_type(file_format, open_type=None):
+    open_type = open_type or 'attachment'
     if file_format == 'pdf':
         return '%s/pdf' % open_type
     elif file_format == 'docx':
@@ -43,6 +43,8 @@ def get_mime_type(file_format, open_type='attachment'):
         return '%s/rtf' % open_type
     elif file_format == 'xls':
         return '%s/vnd.ms-excel' % open_type
+    elif file_format == 'html':
+        return 'text/html'
     else:
         return '%s/pdf' % open_type
 
@@ -234,13 +236,13 @@ class JasperReport(object):
         ), 'wb') as f:
             f.write(self.report)
 
-    def get_response_data(self):
+    def get_response_data(self, open_type=None):
         """
         Возврат отчета браузеру для доступа к отчету пользователем
         :return: Данные ответа браузеру
         """
         return self.report, 200, {
-            'Content-Type': get_mime_type(self.file_format),
+            'Content-Type': get_mime_type(self.file_format, open_type),
             'Content-Disposition': 'inline; filename="%s.%s"' % (
                 self.table_name, self.file_format
             ),

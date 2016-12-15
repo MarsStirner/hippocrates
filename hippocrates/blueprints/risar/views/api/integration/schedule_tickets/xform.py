@@ -83,7 +83,8 @@ class ScheduleTicketsXForm(ScheduleTicketsSchema, XForm):
             Schedule.date,
             ScheduleTicket.begTime,
             ScheduleTicket.endTime,
-            Person
+            Person,
+            Schedule.id
         ).options(joinedload(Person.organisation, innerjoin=True))
         self.tickets = query.all()
 
@@ -97,6 +98,7 @@ class ScheduleTicketsXForm(ScheduleTicketsSchema, XForm):
                 'date': ticket[1],
                 'time_begin': ticket[2],
                 'time_end': ticket[3],
+                'schedule_id': ticket[5]
             }
             for ticket in self.tickets
         ]
@@ -142,10 +144,10 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
             begTime=data['time_begin'], endTime=data['time_end'],
             numTickets=1, receptionType=rec_type
         )
-        attendace = rbAttendanceType.cache().by_code()[u'planned']
+        attendance = rbAttendanceType.cache().by_code()[u'planned']
         st = ScheduleTicket(
             begTime=data['time_begin'], endTime=data['time_end'],
-            attendanceType=attendace
+            attendanceType=attendance
         )
         s.tickets.append(st)
         sct = ScheduleClientTicket(

@@ -108,7 +108,7 @@ var EventMeasureActionViewCtrl = function ($scope, $q, RisarApi, EMModalService,
     };
     $scope.viewEventMeasure = function (idx) {
         var em = $scope.checkup.measures[idx];
-        EMModalService.openView(em, {'display_new_appointment': true}).then(function (action) {
+        EMModalService.openView(em, {'display_new_appointment': true, 'checkup_id': $scope.checkup.id}).then(function (action) {
             switch (action) {
                 case 'execute':
                     $scope.executeEm(idx);

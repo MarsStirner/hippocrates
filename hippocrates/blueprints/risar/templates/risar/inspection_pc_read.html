@@ -18,7 +18,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Общая информация</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_common">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -34,7 +34,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Масса при осмотре:</div>
+                                    <div class="col-sm-3 col-md-3  text-right">Вес при осмотре:</div>
                                     <div class="col-sm-9 col-md-9">[[checkup.weight]]</div>
                                 </div>
                                 <div class="row">
@@ -54,7 +54,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Соматический статус</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_somatic">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -155,7 +155,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Акушерский статус</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_obstetrician">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -235,7 +235,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Влагалищное исследование</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_vagina">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -317,7 +317,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Заключение</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_conclusion">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -411,7 +411,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Мероприятия</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_diagnostic">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -451,7 +451,7 @@
                             <div class="box box-primary">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">Плод [[$index+1]]</h3>
-                                    <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                    <a class="print_link pull-right" ng-if="canEditCheckup()"
                                        href="{{ url_for('.html_inspection_pc_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_fetus[[$index+1]]">
                                         <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                                 </div>

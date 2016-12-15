@@ -11,7 +11,8 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, re
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_nursing
 from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
-from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode
+from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode, get_action_by_id
+from hippocrates.blueprints.risar.lib.checkups import can_edit_checkup
 from hitsl_utils.api import ApiException
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
@@ -37,8 +38,10 @@ def index_html():
         return render_template('risar/desktop/index_overseer1.html')
     elif current_user.role_in('overseer2'):
         return render_template('risar/desktop/index_overseer2.html')
-    elif current_user.role_in('overseer3', 'ouz'):
+    elif current_user.role_in('overseer3'):
         return render_template('risar/desktop/index_overseer3.html')
+    elif current_user.role_in('ouz'):
+        return render_template('risar/desktop/index_ouz.html')
     else:
         return render_template('risar/desktop/index.html')
 
@@ -205,6 +208,15 @@ def html_gyn_inspection():
 def html_gyn_inspection_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
+    checkup_id = request.args.get('checkup_id')
+    if checkup_id:
+        checkup = get_action_by_id(checkup_id)
+        if not checkup:
+            abort(404)
+
+        if not can_edit_checkup(checkup):
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
+
     return render_template('risar/unpregnant/inspection_edit.html', card=card)
 
 
@@ -261,21 +273,14 @@ def html_inspection_edit():
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
-        checkup = Action.query.join(
-            ActionType
-        ).filter(
-            Action.id == checkup_id
-        ).with_entities(
-            ActionType.flatCode, Action.endDate
-        ).first()
-
+        checkup = get_action_by_id(checkup_id)
         if not checkup:
             abort(404)
 
-        if checkup[1]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, card=card))
+        if not can_edit_checkup(checkup):
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
 
-        flat_code = checkup[0]
+        flat_code = checkup.actionType.flatCode
     else:
         first_inspection_exists = Action.query.join(ActionType).filter(
             Action.event_id == event_id,
@@ -297,17 +302,12 @@ def html_inspection_pc_edit():
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
-        checkup = Action.query.filter(
-            Action.id == checkup_id
-        ).with_entities(
-            Action.endDate
-        ).first()
-
+        checkup = get_action_by_id(checkup_id)
         if not checkup:
             abort(404)
 
-        if checkup[0]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, card=card))
+        if not can_edit_checkup(checkup):
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
     return render_template('risar/inspection_pc_edit.html', card=card)
 
 
@@ -324,17 +324,12 @@ def html_inspection_puerpera_edit():
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
-        checkup = Action.query.filter(
-            Action.id == checkup_id
-        ).with_entities(
-            Action.endDate
-        ).first()
-
+        checkup = get_action_by_id(checkup_id)
         if not checkup:
             abort(404)
 
-        if checkup[0]:
-            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id, card=card))
+        if not can_edit_checkup(checkup):
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
     return render_template('risar/inspection_puerpera_edit.html', card=card)
 
 

@@ -92,3 +92,75 @@ class Schedule2Schema(Schema):
         },
         "minItems": 0
     }]
+
+
+class ScheduleFullSchema(Schema):
+    """
+    Схемы для проверки валидности данных расписания специалиста
+    """
+    schema = [{
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "title": "schedule_full",
+        "description": "Расписание полное (рабочий промежуток, слоты, записи на прием)",
+        "type": "object",
+        "properties": {
+            "schedule_id": {
+                "description": "id рабочего промежутка",
+                "type": "string"
+            },
+            "hospital": {
+                "description": "ЛПУ (код)",
+                "type": "string"
+            },
+            "doctor": {
+                "description": "Врач (код)",
+                "type": "string"
+            },
+            "date": {
+                "description": "Дата",
+                "type": "string",
+                "format": "date"
+            },
+            "time_begin": {
+                "description": "Время начала промежутка",
+                "type": "string",
+                "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
+            },
+            "time_end": {
+                "description": "Время завершения промежутка",
+                "type": "string",
+                "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
+            },
+            "quantity": {
+                "description": "Запланированное количество приемов в интервале",
+                "type": "integer"
+            },
+            "schedule_tickets": {
+                "description": "Список слотов расписания",
+                "type": "array",
+                "items": {
+                    "description": "Слот расписания",
+                    "type": "object",
+                    "properties": {
+                        "time_begin": {
+                            "description": "Время приема",
+                            "type": "string",
+                            "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
+                        },
+                        "time_end": {
+                            "description": "Время приема",
+                            "type": "string",
+                            "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
+                        },
+                        "patient": {
+                            "description": "Пациент (id пациента)",
+                            "type": "string"
+                        }
+                     },
+                    "required": ["time_begin","time_end"]
+                },
+                "minItems": 0
+            }
+        },
+        "required": ["hospital","doctor","date","time_begin","time_end"]
+    }]

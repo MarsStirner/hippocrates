@@ -5,7 +5,7 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
                              PrintingService, PrintingDialog, MessageBox, CurrentUser) {
     $scope.aux = aux;
     var params = aux.getQueryParams();
-    $scope.person_id = params.person_id;
+    $scope.person_id = params.person_id || CurrentUser.info.id;
     $scope.person_query = '';
     var curDate = new Date();
     var curYear = curDate.getUTCFullYear();

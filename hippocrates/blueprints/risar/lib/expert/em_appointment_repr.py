@@ -36,6 +36,7 @@ class EmAppointmentRepr(object):
             ],
             'ro': not can_edit_em_appointment(event_measure) if event_measure is not None else False,
             'layout': aviz.make_action_layout(action),
+            'number': self.represent_number(action)
         }
 
     def represent_action_type(self, action_type):
@@ -47,3 +48,7 @@ class EmAppointmentRepr(object):
             'class': action_type.class_,
             'context_name': action_type.context
         }
+
+    def represent_number(self, action):
+        if action.action_number:
+            return action.action_number.number

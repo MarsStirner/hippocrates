@@ -94,8 +94,9 @@ var MotherFatherCtrl = function ($scope) {
         risk_group_07: 'Внимание! Возможно развитие групповой несовместимости'
     };
 };
-var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
+var PregnanciesCtrl = function ($scope, $modal, $timeout, RefBookService, RisarApi) {
     var miscarriage_codes = ['therapeutic_abortion_before_12', 'therapeutic_abortion', 'misbirth_before_11', 'misbirth_before_12-21', 'unknown_miscarriage'];
+    $scope.rbGender = RefBookService.get('Gender');
     $scope.add = function () {
         var model = {
             newborn_inspections: []
@@ -153,6 +154,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         if (!child) { return '' }
         var result = [];
         result.push((child.alive)?('живой'):('мёртвый'));
+        if (child.sex){
+            result.push('пол: {0}'.formatNonEmpty(child.sex.name));
+        }
         result.push('масса: {0}'.formatNonEmpty(child.weight));
         if(child.abnormal_development){
             result.push('аномалии развития');
@@ -174,8 +178,12 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         if (p.note) {
             result.push(p.note)
         }
-        if (p.maternity_aid) {
+        if (p.maternity_aid && p.maternity_aid.length > 0) {
             result.push('Пособия, операции: ' + _.map(p.maternity_aid, function (ma) { return ma.name; }).join(', '));
+        }
+        var operation_testimonials = safe_traverse(p, ['operation_testimonials', 'name']);
+        if (p.operation_testimonials) {
+                result.push('Показания к операции: ' + operation_testimonials);
         }
         if (p.pregnancy_pathology && p.pregnancy_pathology.length) {
             result.push('Патологии беременности: ' + _.map(p.pregnancy_pathology, function (pat) {

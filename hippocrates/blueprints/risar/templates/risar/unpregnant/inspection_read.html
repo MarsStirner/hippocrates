@@ -25,7 +25,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Общая информация</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_common">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -189,7 +189,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Объективный осмотр</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_objective">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -276,7 +276,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Осмотр наружных половых органов</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_genitals">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -356,7 +356,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Осмотр в зеркалах</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_mirrors">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -446,7 +446,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Бимануальное исследование</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_bimanual">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -525,7 +525,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Ректовагинальное исследование</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_rectovaginal">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -616,7 +616,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Ректальное исследование</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_rectal">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -713,7 +713,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Заключение</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_conclusion">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
@@ -773,7 +773,7 @@
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Мероприятия</h3>
-                                <a class="print_link pull-right" ng-if="!checkup.end_date"
+                                <a class="print_link pull-right" ng-if="canEditCheckup()"
                                    href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_diagnostic">
                                     <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>

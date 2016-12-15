@@ -26,26 +26,19 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     $scope.$watch('checkup.height', update_auto);
     $scope.$watch('checkup.weight', update_auto);
 
-    // $scope.switchToTab = function(tabHref){
-    //     $("li a[href='#"+tabHref+"']").click();
-    // };
-    // $scope.goToConclusion = function(){
-    //     $scope.switchToTab('conclusion');
-    // };
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
         return $scope.checkup
     };
     $scope.save = function (form_controller){
         form_controller.submit_attempt = true;
-        // todo: как то надо переделать if ( !$scope.hasMainDiagnose ) { $scope.goToConclusion(); }
         if (form_controller.$valid){
             return RisarApi.checkup_gyn.save($scope.event_id,  $scope.prepareCheckup())
                 .then(function (data) {
                     if ($scope.checkup.id){
-                        $scope.checkup = data;
+                        $scope.setCheckupData(data);
                     } else {
-                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id, '_self');
+                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.checkup.id, '_self');
                     }
                 });
         }
@@ -56,13 +49,13 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
             RisarApi.checkup_gyn.save($scope.event_id,  $scope.prepareCheckup())
                 .then(function (data) {
                     if($scope.checkup.id){
-                        $scope.checkup = data;
+                        $scope.setCheckupData(data);
                         $scope.rc.sampleWizard.forward();
                         $location.url($scope.rc.sampleWizard.currentStep.attributes.id);
                     } else {
                         $scope.rc.sampleWizard.forward();
                         var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
-                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
+                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.checkup.id+'#/'+tab_name, '_self');
                     }
                 });
         }
@@ -72,23 +65,26 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     var event_id = $scope.event_id = params.event_id;
 
     var reload_checkup = function () {
-        RisarApi.chart.get_header(event_id).
-            then(function (data) {
+        RisarApi.gynecologic_chart.get_header(event_id)
+            .then(function (data) {
                 $scope.header = data.header;
                 $scope.minDate = $scope.header.event.set_date;
                 $scope.clientBd = $scope.header.client.birth_date;
             });
         if (!checkup_id) {
-            RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp')
-                .then(function (checkup) {
-                    $scope.checkup = checkup;
+            return RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp')
+                .then(function (data) {
+                    $scope.setCheckupData(data);
                     $scope.$broadcast('checkupLoaded');
+                    return data;
                 });
         } else {
-            RisarApi.checkup_gyn.get(event_id, checkup_id).then(function (checkup) {
-                $scope.checkup = checkup;
-                $scope.$broadcast('checkupLoaded');
-            });
+            return RisarApi.checkup_gyn.get(event_id, checkup_id)
+                .then(function (data) {
+                    $scope.setCheckupData(data);
+                    $scope.$broadcast('checkupLoaded');
+                    return data;
+                });
         }
     };
 

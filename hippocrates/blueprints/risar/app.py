@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template
 from flask_login import current_user
+
 from .config import MODULE_NAME, RUS_NAME
 from nemesis.app import app as nemesis_app
 from nemesis.lib.frontend import frontend_config
+from nemesis.lib.utils import safe_traverse
 from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 
 module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_folder='static')
@@ -38,12 +40,22 @@ def fc_risar_settings():
     """
     Настройки из конфигов, специфичные для РИСАР
     """
+    nemesis_config = nemesis_app.config
     return {
         'local_config': {
             'risar': {
-                'risar_regions': nemesis_app.config['RISAR_REGIONS'],
-                'system_prefs': nemesis_app.config['system_prefs'],
-            }
+                'risar_regions': nemesis_config['RISAR_REGIONS'],
+                'schedule': {
+                    'external_schedule_url': safe_traverse(nemesis_config,
+                                                           'system_prefs', 'integration', 'external_schedule_url'),
+                },
+                'extended_search': {
+                    'common_access_curator': safe_traverse(nemesis_config, 'system_prefs', 'ui', 'extended_search',
+                                                           'common_access_curator'),
+                    'common_access_doctor': safe_traverse(nemesis_config, 'system_prefs', 'ui', 'extended_search',
+                                                          'common_access_doctor'),
+                },
+            },
         }
     }
 

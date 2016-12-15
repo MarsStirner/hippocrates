@@ -8,7 +8,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
-from hippocrates.blueprints.risar.lib.chart import transfer_to_person
+from hippocrates.blueprints.risar.lib.chart import transfer_to_person, copy_prev_pregs
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import get_new_event_ext_id, bail_out
@@ -107,6 +107,8 @@ class ChartCreator(object):
             if self.automagic:
                 sirius.send_to_mis(
                     sirius.RisarEvents.CREATE_CARD,
+                    sirius.RisarEntityCode.CARD,
+                    sirius.OperationCode.READ_ONE,
                     'risar.api_card_get',
                     obj=('card_id', self.event.id),
                     params={'client_id': self.client_id},
@@ -156,6 +158,7 @@ class PregnancyChartCreator(ChartCreator):
         if self.action:
             card._card_attrs_action = self.action
         card.reevaluate_card_attrs()
+        copy_prev_pregs(self.event)
         db.session.commit()
 
 
@@ -186,4 +189,5 @@ class GynecologicCardCreator(ChartCreator):
         if self.action:
             card._card_attrs_action = self.action
         card.reevaluate_card_attrs()
+        copy_prev_pregs(self.event)
         db.session.commit()

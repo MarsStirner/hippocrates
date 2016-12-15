@@ -9,7 +9,8 @@ from .schemas import CardSchema
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_ET_Heuristic, default_AT_Heuristic
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, \
+    request_type_gynecological
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import get_new_event_ext_id, safe_datetime, safe_date
@@ -31,6 +32,8 @@ class CardXForm(CardSchema, XForm):
     target_obj_class = Event
     parent_obj_class = Client
     parent_id_required = False
+    ginek_event_type_code = '97'  # Гинекологический приём (ОМС)
+    pregn_event_type_code = '98'  # Случай беременности (ОМС)
 
     def _find_target_obj_query(self):
         return Event.query.join(EventType, rbRequestType).filter(
@@ -96,7 +99,12 @@ class CardXForm(CardSchema, XForm):
 
     def create_event(self, data):
         event = self.target_obj
+        # работа метода пока только по беременным картам
         et = default_ET_Heuristic(request_type_pregnancy)
+        # if data.get('pregnant'):
+        #     et = default_ET_Heuristic(request_type_pregnancy)
+        # else:
+        #     et = default_ET_Heuristic(request_type_gynecological)
         if et is None:
             raise ApiException(INTERNAL_ERROR, u'Не настроен тип события - Случай беременности ОМС')
         event.eventType = et
@@ -147,7 +155,10 @@ class CardXForm(CardSchema, XForm):
             'client_id': event.client_id,
             'card_set_date': safe_date(event.setDate),
             'card_doctor': self.from_person_rb(event.execPerson),
-            "card_LPU": self.from_org_rb(event.organisation)
+            "card_LPU": self.from_org_rb(event.organisation),
+            # "pregnant": event.eventType.code == self.pregn_event_type_code,
+            # работа метода пока только по беременным картам
+            "pregnant": True,
         }
 
     def get_list(self, filters=None):

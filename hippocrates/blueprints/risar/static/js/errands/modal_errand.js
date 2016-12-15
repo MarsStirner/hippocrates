@@ -180,7 +180,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-footer">\
     <button class="btn btn-success" ng-click="executeErrand()" ng-if="canExecute()" ng-disabled="createErrandForm.$invalid">Выполнить</button>\
-    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid">Отправить</button>\
+    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid">[[ saveButtonName ]]</button>\
     <button class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
 </div>');
 }]);
@@ -283,6 +283,7 @@ WebMis20.controller(
     $scope.isNewErrand = function () {
         return !$scope.model.id;
     };
+    $scope.saveButtonName = $scope.isNewErrand() ? 'Отправить' : 'Сохранить';
     $scope.isAuthor = function () {
         return $scope.is_author;
     };

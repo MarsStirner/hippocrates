@@ -6,7 +6,6 @@
 @date: 27.10.2016
 
 """
-from blueprints.risar.lib.sirius.events import RisarEvents
 from flask import url_for
 from nemesis.app import app
 from .request import request_local, request_remote, \
@@ -27,7 +26,8 @@ def binded_event(event_code):
     return event_code in events_list
 
 
-def send_to_mis(event_code, service_method, obj, params, is_create):
+def send_to_mis(event_code, entity_code, operation_code,
+                service_method, obj, params, is_create):
     if not app.config.get('SIRIUS_ENABLED'):
         return
     if not binded_event(event_code):
@@ -37,6 +37,8 @@ def send_to_mis(event_code, service_method, obj, params, is_create):
     url_params.update((obj,))
     data = {
         'event': event_code,
+        'entity_code': entity_code,
+        'operation_code': operation_code,
         'service_method': service_method,
         'request_url': url_for(service_method, api_version=0, **url_params),
         'request_method': 'get',
@@ -49,7 +51,10 @@ def send_to_mis(event_code, service_method, obj, params, is_create):
 
 
 def update_entity_from_mis(region, entity, remote_id):
+    from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
+    if not app.config.get('SIRIUS_ENABLED'):
+        return True
     if not binded_event(event_code):
         return
     request = {
@@ -65,6 +70,9 @@ def update_entity_from_mis(region, entity, remote_id):
 
 def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
                               date, beg_time, end_time, schedule_id):
+    from hippocrates.blueprints.risar.lib.sirius import OperationCode, \
+        RisarEntityCode
+    from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     # нет информации по методу мис
     event_code = RisarEvents.MAKE_APPOINTMENT
     if not app.config.get('SIRIUS_ENABLED'):
@@ -73,6 +81,8 @@ def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
         return
     data = {
         'event': event_code,
+        'entity_code': RisarEntityCode.SCHEDULE_TICKET,
+        'operation_code': OperationCode.READ_MANY,
         'method': 'delete' if is_delete else 'post',
         "service_method": 'api_schedule_tickets_get',
         "request_params": {'client_id': event_id},
@@ -93,6 +103,7 @@ def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
 
 
 def get_risar_id_by_mis_id(region, entity, remote_id):
+    from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
     if not binded_event(event_code):
         return
@@ -109,6 +120,7 @@ def get_risar_id_by_mis_id(region, entity, remote_id):
 
 
 def save_card_ids_match(local_id, region, entity, remote_id):
+    from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
     if not binded_event(event_code):
         return
