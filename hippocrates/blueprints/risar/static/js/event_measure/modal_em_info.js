@@ -46,8 +46,8 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     $scope.canExecuteEm = function () {
         return $scope.access.can_execute;
     };
-    $scope.canCancelEm = function (em) {
-        return $scope.access.can_cancel;
+    $scope.canCancelEm = function () {
+        return $scope.access.can_cancel && $scope.event_measure.status.code != 'performed';
     };
     $scope.canNewAppointment = function () {
         return options && options.display_new_appointment && $scope.event_measure.measure.measure_type.code === 'checkup';
