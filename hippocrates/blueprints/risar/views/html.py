@@ -38,8 +38,10 @@ def index_html():
         return render_template('risar/desktop/index_overseer1.html')
     elif current_user.role_in('overseer2'):
         return render_template('risar/desktop/index_overseer2.html')
-    elif current_user.role_in('overseer3', 'ouz'):
+    elif current_user.role_in('overseer3'):
         return render_template('risar/desktop/index_overseer3.html')
+    elif current_user.role_in('ouz'):
+        return render_template('risar/desktop/index_ouz.html')
     else:
         return render_template('risar/desktop/index.html')
 
