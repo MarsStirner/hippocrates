@@ -373,8 +373,8 @@ def represent_pregnancy(pregnancy):
             get_previous_children(pregnancy.action)
         ),
         id=pregnancy.action.id,
-        event_id=pregnancy.action['card_number'].value,
-        external_id=get_external_id(pregnancy.action['card_number'].value)
+        event_id=pregnancy.action['card_number'].value if 'card_number' in pregnancy.action.propsByCode else None,
+        external_id=get_external_id(pregnancy.action['card_number'].value) if 'card_number' in pregnancy.action.propsByCode else None
     )
 
 
