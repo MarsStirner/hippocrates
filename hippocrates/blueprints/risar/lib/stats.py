@@ -266,7 +266,7 @@ class StatsSelecter(BaseSelecter):
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
         ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
-        epicr_ids = self.query_epicrisis().with_entities(Action.event_id)
+        q_epicrisis = self.query_epicrisis().subquery('Epicrisis')
 
         # 2) event latest inspection
         # * самые поздние даты осмотров по обращениям
@@ -298,8 +298,10 @@ class StatsSelecter(BaseSelecter):
             q_latest_checkups_id, q_latest_checkups_id.c.action_id == Action.id
         ).join(
             ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).outerjoin(
+            q_epicrisis, q_epicrisis.c.event_id == Action.event_id
         ).filter(
-            ActionPropertyType.code == 'next_date'
+            ActionPropertyType.code == 'next_date', q_epicrisis.c.event_id.is_(None)
         ).with_entities(
             Action.id.label('action_id'), Action.event_id.label('event_id'),
             Action.begDate.label('beg_date'), Action.endDate.label('end_date'),
@@ -311,7 +313,7 @@ class StatsSelecter(BaseSelecter):
         query = query.outerjoin(
             q_latest_inspections, q_latest_inspections.c.event_id == Event.id
         )
-        query = query.filter(~Event.id.in_(epicr_ids)).with_entities(
+        query = query.with_entities(
             func.sum(
                 func.IF(q_latest_inspections.c.next_date <= func.curdate(),
                         1,
