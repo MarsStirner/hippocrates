@@ -23,7 +23,7 @@
 
 {% macro pregnancy_case(lpu) %}
     Случай беременности. На учёте по беременности
-    с <a class="btn-link" href="javascript:void(0)"  ng-click="openDateRegistrationModal()"><b>[[ header.event.set_date | asDate ]]</b></a>
+    с <a class="btn-link bottom_dotted" tooltip="Нажмите для изменения даты постановки на учёт" href="javascript:void(0)"  ng-click="openDateRegistrationModal()"><b>[[ header.event.set_date | asDate ]]</b></a>
     Наблюдается в <b>{{ lpu }}</b> у <b>[[ header.event.person.short_name ]]</b>
     <span>
     {#  как вариант цвет  #26FF22#}
