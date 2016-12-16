@@ -89,7 +89,7 @@ def make_api_request(method, url, json_data=None, url_args=None, resend=False):
         }
     )
     if result.status_code != 200:
-        if result.status_code == 403 and not resend:
+        if result.status_code == 403 and not resend:  # а не 401 ?
             # один раз пробуем взять другой токен
             session = None
             make_api_request(method, url, json_data=json_data,

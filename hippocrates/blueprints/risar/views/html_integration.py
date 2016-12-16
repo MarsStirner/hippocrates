@@ -8,25 +8,19 @@
 """
 import datetime
 from contextlib import contextmanager
-from time import sleep
 
 import os
 import requests
-from blueprints.risar.views.card_xform import CardXForm
 from flask import url_for, redirect
 from nemesis.app import app
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
-from nemesis.lib.apiutils import RawApiResult
 from flask_login import current_user
 
-from blueprints.risar.lib import sirius
-from blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.lib import sirius
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.models.organisation import Organisation
 from ..app import module
-from hippocrates.blueprints.risar.views.api.integration.const import (
-    card_attrs_save_error_code, err_card_attrs_save_msg
-)
 import logging
 
 logger = logging.getLogger('simple')
@@ -55,9 +49,6 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
 
     # Добавляем/обновляем пациента по UID РМИС
     sirius.update_entity_from_mis(region, entity, remote_id)
-    # todo: был плавающий глюк падения создания карты. лог потерян.
-    # безысходность по времени.
-    sleep(3)
     # Запрашиваем ID МР по UID РМИС
     client_id = sirius.get_risar_id_by_mis_id(region, entity, remote_id)
 
@@ -186,25 +177,3 @@ def make_api_request(method, url, session, json_data=None, url_args=None):
             message = u'Unknown ({0})'.format(unicode(result))
         raise Exception(unicode(u'Api Error: {0}'.format(message)).encode('utf-8'))
     return result.json()
-
-# from blueprints.risar.views.api.integration.card.api import \
-#     card_save_or_update # копипаста, т.к. ошибка объявления модулей
-def card_save_or_update_old(data, create, api_version, card_id=None):
-    xform = CardXForm(api_version, create)
-    xform.validate(data)
-    client_id = data.get('client_id')
-    xform.check_params(card_id, client_id, data)
-    xform.update_target_obj(data)
-    xform.store()
-
-    try:
-        xform.update_card_attrs()
-        xform.store()
-    except Exception, e:
-        logger.error(err_card_attrs_save_msg.format(card_id), exc_info=True)
-        return RawApiResult(
-            xform.as_json(),
-            card_attrs_save_error_code,
-            u'Карта сохранена, но произошла ошибка при пересчёте атрибутов карты'
-        )
-    return xform
