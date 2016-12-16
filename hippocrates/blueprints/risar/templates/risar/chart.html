@@ -360,19 +360,19 @@
                 </div>
                 <div class="box box-primary">
                     <div class="box-header">
-                        <h3 class="box-title">Закрытие случая
-                            <span ng-if="header.event.exec_date">(Случай закрыт)</span>
+                        <h3 class="box-title">Закрытие карты
+                            <span ng-if="header.event.exec_date">(Карта закрыта)</span>
                         </h3>
                         <div class="box-tools">
                             <div class="btn-group" role="group" ng-if="!header.event.exec_date">
-                                <button type="button" class="btn btn-primary" ng-click="close_event()">Закрыть случай</button>
+                                <button type="button" class="btn btn-primary" ng-click="close_event()">Закрыть карту</button>
                             </div>
                         </div>
                     </div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td class="col-md-6 text-right">Дата закрытия случая:</td>
+                            <td class="col-md-6 text-right">Дата закрытия карты:</td>
                             <td class="col-md-6">
                                 [[ header.event.exec_date | asDate ]]
                             </td>

@@ -179,7 +179,7 @@ WebMis20
                     var notify_id = NotificationService.notify(
                         200,
                         [
-                            'Случай беременности закрыт. ',
+                            'Карта закрыта. ',
                             {
                                 click: function () {
                                     edit_callback(data).then(close_notify);
