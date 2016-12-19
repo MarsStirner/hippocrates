@@ -48,13 +48,13 @@ class RoutingXForm(RoutingSchema, XForm):
         group_orgs = self.get_group_orgs(hospital_list, client)
         region_orgs_ids = [y['id'] for x in group_orgs['region_orgs'].values() for y in x['orgs']]
         district_orgs_ids = [y['id'] for x in group_orgs['district_orgs'].values() for y in x['orgs']]
-        hospital_emergency_list = [x[0] for x in Organisation.query.filter(Organisation.id.in_(region_orgs_ids)).values(Organisation.TFOMSCode)]
-        hospital_emergency_list_district = [x[0] for x in Organisation.query.filter(Organisation.id.in_(district_orgs_ids)).values(Organisation.TFOMSCode)]
+        hospital_emergency_list = [x[0] for x in Organisation.query.filter(Organisation.id.in_(region_orgs_ids)).values(Organisation.regionalCode)]
+        hospital_emergency_list_district = [x[0] for x in Organisation.query.filter(Organisation.id.in_(district_orgs_ids)).values(Organisation.regionalCode)]
 
         res = {
-            'hospital_planned': lpu_attached['plan_lpu'] and lpu_attached['plan_lpu'].org.TFOMSCode,
-            'hospital_emergency': lpu_attached['extra_lpu'] and lpu_attached['extra_lpu'].org.TFOMSCode,
-            'hospital_planned_list': [x.TFOMSCode for x in hospital_list],
+            'hospital_planned': lpu_attached['plan_lpu'] and lpu_attached['plan_lpu'].org.regionalCode,
+            'hospital_emergency': lpu_attached['extra_lpu'] and lpu_attached['extra_lpu'].org.regionalCode,
+            'hospital_planned_list': [x.regionalCode for x in hospital_list],
             'hospital_emergency_list': hospital_emergency_list,
             'hospital_emergency_list_district': hospital_emergency_list_district,
         }

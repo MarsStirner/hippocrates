@@ -39,7 +39,7 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
     doctor_code = main_user.regionalCode
     org_code = Organisation.query.filter(
         Organisation.id == main_user.org_id
-    ).value(Organisation.TFOMSCode)
+    ).value(Organisation.regionalCode)
 
     # если глюк оказался вдруг
     # doctor_code = '58211165'  # Коняев /Тамбов

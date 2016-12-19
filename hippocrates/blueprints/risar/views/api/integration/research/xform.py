@@ -70,6 +70,6 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             res['doctor_code'] = self.person.regionalCode
             res['lpu_code'] = ''
             if self.person.organisation:
-                res['lpu_code'] = self.person.organisation.TFOMSCode or ''
+                res['lpu_code'] = self.person.organisation.regionalCode or ''
 
         return res

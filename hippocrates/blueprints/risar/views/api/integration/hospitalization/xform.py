@@ -93,7 +93,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             'measure_status': self.em.literal_status,
             'date_in': an_props['ReceiptDate'].value,
             'date_out': an_props['IssueDate'].value,
-            'hospital': self.person.organisation and self.person.organisation.TFOMSCode or '',
+            'hospital': self.person.organisation and self.person.organisation.regionalCode or '',
             'doctor': self.person.regionalCode,
             'pregnancy_week': an_props['PregnancyDuration'].value,
             'diagnosis_in': an_props['DirectionDiagnosis'].value,

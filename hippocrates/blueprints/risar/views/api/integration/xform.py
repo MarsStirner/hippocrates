@@ -23,7 +23,7 @@ from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from .utils import get_org_by_tfoms_code, get_person_by_codes, get_client_query, get_event_query
+from .utils import get_org_by_org_code, get_person_by_codes, get_client_query, get_event_query
 
 
 __author__ = 'viruzzz-kun'
@@ -262,12 +262,12 @@ class XForm(object):
 
     # -----
 
-    def find_org(self, tfoms_code):
-        org = get_org_by_tfoms_code(tfoms_code)
+    def find_org(self, org_code):
+        org = get_org_by_org_code(org_code)
         if not org:
             raise ApiException(
                 NOT_FOUND_ERROR,
-                u'Не найдена организация по коду {0}'.format(tfoms_code)
+                u'Не найдена организация по коду {0}'.format(org_code)
             )
         return org
 
@@ -275,7 +275,7 @@ class XForm(object):
     def from_org_rb(org):
         if org is None:
             return None
-        return org.TFOMSCode
+        return org.regionalCode
 
     @staticmethod
     def find_doctor(person_code, org_code):
