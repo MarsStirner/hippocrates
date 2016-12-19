@@ -20,7 +20,7 @@ def printing_checkup_ticket_25():
     file_format = data.get('extension', 'html')
     jasper_report = JasperReport(
         'form25_1u',
-        '/reports/Hippocrates/Analytics/form25_1u',
+        '/reports/Hippocrates/Risar/form25_1u',
         params={
             'action_id': str(data['action_id'])
         }
@@ -37,7 +37,7 @@ def printing_jsp_epicrisis():
     file_format = data.get('extension', 'html')
     jasper_report = JasperReport(
         'epicrisis',
-        '/reports/Hippocrates/Analytics/epicrisis',
+        '/reports/Hippocrates/Risar/epicrisis',
         params={
             'action_id': str(data['action_id'])
         }
