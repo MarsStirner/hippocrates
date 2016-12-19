@@ -3,11 +3,12 @@
 import itertools
 import logging
 
+from nemesis.app import app
 from ..xform import XForm, wrap_simplify, none_default, Undefined, ALREADY_PRESENT_ERROR
 from .schemas import ClientSchema
 
 from nemesis.lib.apiutils import ApiException
-from nemesis.lib.utils import safe_date
+from nemesis.lib.utils import safe_date, safe_traverse
 from nemesis.models.client import Client, ClientDocument, ClientPolicy, BloodHistory, \
     ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse
 from nemesis.models.enums import AddressType
@@ -44,19 +45,45 @@ class ClientXForm(ClientSchema, XForm):
             Client.birthDate == bd,
             Client.deleted == 0,
         )
+        is_document_required = safe_traverse(
+            app.config, 'system_prefs', 'integration',
+            'client', 'document_required',
+        )
+        if is_document_required is None:
+            is_document_required = True
+        if is_document_required:
+            doc_type_code = data['document']['document_type_code']
+            self._check_rb_value('rbDocumentType', doc_type_code)
+            doc_number = data['document']['document_number']
+            q = q.join(ClientDocument).join(rbDocumentType).filter(
+                rbDocumentType.TFOMSCode == doc_type_code,
+                ClientDocument.number == doc_number,
+                ClientDocument.deleted == 0
+            )
         if pn:
             q = q.filter(Client.patrName == pn)
         target_obj_exist_id = q.value(Client.id)
         if target_obj_exist_id:
-            raise ApiException(
-                ALREADY_PRESENT_ERROR,
-                u'Уже существует пациент со следующими данными: '
-                u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
-                .format(
-                    fn, ln, pn, bd
-                ),
-                client_id=str(target_obj_exist_id)
-            )
+            if is_document_required:
+                raise ApiException(
+                    ALREADY_PRESENT_ERROR,
+                    (u'Уже существует пациент со следующими данными: '
+                     u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+                     u'номер документа - {4}').format(
+                        fn, ln, pn, bd, doc_number
+                    ),
+                    client_id=str(target_obj_exist_id)
+                )
+            else:
+                raise ApiException(
+                    ALREADY_PRESENT_ERROR,
+                    u'Уже существует пациент со следующими данными: '
+                    u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+                        .format(
+                        fn, ln, pn, bd
+                    ),
+                    client_id=str(target_obj_exist_id)
+                )
 
     def load_data(self):
         if self.new:
