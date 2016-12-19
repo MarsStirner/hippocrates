@@ -157,8 +157,8 @@ class PregnancyChartCreator(ChartCreator):
         card = PregnancyCard.get_for_event(self.event)
         if self.action:
             card._card_attrs_action = self.action
-        card.reevaluate_card_attrs()
         copy_prev_pregs(self.event)
+        card.reevaluate_card_attrs()
         db.session.commit()
 
 
@@ -188,6 +188,6 @@ class GynecologicCardCreator(ChartCreator):
         card = GynecologicCard.get_for_event(self.event)
         if self.action:
             card._card_attrs_action = self.action
-        card.reevaluate_card_attrs()
         copy_prev_pregs(self.event)
+        card.reevaluate_card_attrs()
         db.session.commit()

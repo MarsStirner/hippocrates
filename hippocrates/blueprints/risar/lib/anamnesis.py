@@ -52,48 +52,69 @@ def calculate_preg_result(epicrisis):
                             'iskusstvennyj-pomed.pokazaniamjensiny',
                             'iskusstvennyj-pomed.pokazaniamploda',
                             ]:
-            code = "delivery"
+            code = "therapeutic_abortion"
     if code:
         return {"code": code}
 
 
 def create_prev_pregn_based_on_epicrisis(from_card, to_card):
-    epic_props = from_card.epicrisis.action
-    blank_action = get_action_by_id(None, to_card.event, risar_anamnesis_pregnancy, True)
-    blank_action['year'].value = epic_props['delivery_date'].value.year if epic_props[
-        'delivery_date'].value else None
-    blank_action['pregnancyResult'].value = calculate_preg_result(epic_props)
-    blank_action['pregnancy_week'].value = epic_props['pregnancy_duration'].value
-    blank_action['maternity_aid'].value = [{'code': '05'}] if epic_props['caesarean_section'].value else None
-    blank_action['operation_testimonials'].value = epic_props['indication'].value
-    if not blank_action['card_number'].value:
-        blank_action['card_number'].value = from_card.event.id
-    db.session.add(blank_action)
-    for nb in RisarEpicrisis_Children.query.filter(
-                    RisarEpicrisis_Children.action_id == epic_props.id
+    if hasattr(from_card, 'epicrisis'):
+        if from_card.epicrisis.exists:
+            epic_props = from_card.epicrisis.action
+            blank_action = get_action_by_id(None, to_card.event, risar_anamnesis_pregnancy, True)
+            blank_action['year'].value = epic_props['delivery_date'].value.year if epic_props[
+                'delivery_date'].value else None
+            blank_action['pregnancyResult'].value = calculate_preg_result(epic_props)
+            blank_action['pregnancy_week'].value = epic_props['pregnancy_duration'].value
+            blank_action['maternity_aid'].value = [{'code': '05'}] if epic_props['caesarean_section'].value else None
+            blank_action['operation_testimonials'].value = epic_props['indication'].value
+            if not blank_action['card_number'].value:
+                blank_action['card_number'].value = from_card.event.id
+            db.session.add(blank_action)
+            for nb in RisarEpicrisis_Children.query.filter(
+                            RisarEpicrisis_Children.action_id == epic_props.id
+            ).all():
+                child = RisarPreviousPregnancy_Children()
+                child.action_id = blank_action.id
+                child.weight = nb.weight
+                child.alive = nb.alive
+                child.sex = nb.sex
+                db.session.add(child)
+
+
+def copy_all_prev_pregs(from_card, to_card, own_only=False):
+    prev_pregs = [x for x in from_card.prev_pregs if not x.action['card_number'].value]\
+                                        if own_only is True else from_card.prev_pregs
+    for prev in prev_pregs:
+        copy_one_preg(prev.action, from_card, to_card)
+
+
+def send_prev_pregnancies_to_gyn_card(pregnancy_event):
+    from blueprints.risar.lib.card import PregnancyCard, GynecologicCard
+    preg_card = PregnancyCard.get_for_event(pregnancy_event)
+    gyn_event = preg_card.latest_gyn_event or preg_card.latest_closed_gyn_event
+    if gyn_event:
+        gyn_card = GynecologicCard.get_for_event(gyn_event)
+        if gyn_card:
+            create_prev_pregn_based_on_epicrisis(from_card=preg_card, to_card=gyn_card)
+            copy_all_prev_pregs(from_card=preg_card, to_card=gyn_card, own_only=True)
+            gyn_card.reevaluate_card_attrs()
+
+
+def copy_one_preg(action, from_card,  to_card):
+    empty_action = get_action_by_id(None, to_card.event, risar_anamnesis_pregnancy, True)
+    fill_action_from_another_action(action, empty_action)
+    if not empty_action['card_number'].value:
+        # теперь мы не хотим ссылку на карту для введенных вручную и мы уже завязались на это поле в интерфейсе
+        empty_action['card_number'].value = -1
+    db.session.add(empty_action)
+    db.session.add(empty_action)
+    for nb in RisarPreviousPregnancy_Children.query.filter(
+                    RisarPreviousPregnancy_Children.action_id == action.id
     ).all():
         child = RisarPreviousPregnancy_Children()
-        child.action_id = blank_action.id
+        child.action_id = empty_action.id
         child.weight = nb.weight
         child.alive = nb.alive
         child.sex = nb.sex
         db.session.add(child)
-
-
-def copy_all_prev_pregs(from_card, to_card):
-    prev_pregs = from_card.prev_pregs
-    for prev in prev_pregs:
-        empty_action = get_action_by_id(None, to_card.event, risar_anamnesis_pregnancy, True)
-        fill_action_from_another_action(prev.action, empty_action)
-        if not empty_action['card_number'].value:
-            empty_action['card_number'].value = from_card.event.id
-        db.session.add(empty_action)
-        for nb in RisarPreviousPregnancy_Children.query.filter(
-                        RisarPreviousPregnancy_Children.action_id == prev.action.id
-        ).all():
-            child = RisarPreviousPregnancy_Children()
-            child.action_id = empty_action.id
-            child.weight = nb.weight
-            child.alive = nb.alive
-            child.sex = nb.sex
-            db.session.add(child)

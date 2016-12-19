@@ -35,6 +35,10 @@ def get_prev_gyn_events(client_id):
     return get_prev_events_by_request_type(client_id, request_type_gynecological).all()
 
 
+def get_latest_closed_gyn_event(client_id):
+    return get_prev_events_by_request_type(client_id, request_type_gynecological).first()
+
+
 def get_latest_event_by_request_type(client_id, request_type_code):
     return Event.query.join(EventType, rbRequestType).filter(
         Event.client_id == client_id,
@@ -48,7 +52,7 @@ def get_any_prev_event(event):
     return Event.query.join(EventType).filter(
         Event.client_id == event.client_id,
         Event.deleted == 0,
-        Event.id != event.id
+        Event.id != event.id,
     ).order_by(Event.setDate.desc()).first()
 
 
@@ -148,12 +152,9 @@ def copy_prev_pregs(event):
     from hippocrates.blueprints.risar.lib.card import AbstractCard
     current_card = AbstractCard.get_for_event(event)
     if current_card:
-        prev_event = current_card.any_prev_event
+        prev_event = current_card.latest_gyn_event or current_card.latest_closed_gyn_event or current_card.any_prev_event
         if prev_event:
             any_prev_card = AbstractCard.get_for_event(prev_event)
             if any_prev_card:
                 copy_all_prev_pregs(any_prev_card, current_card)
-                if hasattr(any_prev_card, 'epicrisis'):
-                    if any_prev_card.epicrisis.exists:
-                        create_prev_pregn_based_on_epicrisis(from_card=any_prev_card,
-                                                             to_card=current_card)
+                create_prev_pregn_based_on_epicrisis(from_card=any_prev_card, to_card=current_card)
