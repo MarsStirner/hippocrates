@@ -50,5 +50,5 @@ class EmAppointmentRepr(object):
         }
 
     def represent_number(self, action):
-        if action.action_number:
+        if hasattr(action, 'action_number') and action.action_number:
             return action.action_number.number

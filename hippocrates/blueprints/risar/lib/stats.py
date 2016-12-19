@@ -5,7 +5,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, ch
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.risar import rbRadzinskyRiskRate
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
 
@@ -266,6 +266,7 @@ class StatsSelecter(BaseSelecter):
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
         ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+        q_epicrisis = self.query_epicrisis().subquery('Epicrisis')
 
         # 2) event latest inspection
         # * самые поздние даты осмотров по обращениям
@@ -297,8 +298,10 @@ class StatsSelecter(BaseSelecter):
             q_latest_checkups_id, q_latest_checkups_id.c.action_id == Action.id
         ).join(
             ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).outerjoin(
+            q_epicrisis, q_epicrisis.c.event_id == Action.event_id
         ).filter(
-            ActionPropertyType.code == 'next_date'
+            ActionPropertyType.code == 'next_date', q_epicrisis.c.event_id.is_(None)
         ).with_entities(
             Action.id.label('action_id'), Action.event_id.label('event_id'),
             Action.begDate.label('beg_date'), Action.endDate.label('end_date'),

@@ -314,17 +314,8 @@ def represent_fetus(fetus):
 
 
 def represent_fetus_for_checkup_copy(fetus):
-    dc = {
-        'state': {
-            'id': None,
-            'position': fetus.position,
-            'position_2': fetus.position_2,
-            'type': fetus.type,
-            'presenting_part': fetus.presenting_part,
-            'heartbeat': fetus.heartbeat,
-            'heart_rate': fetus.heart_rate,
-        },
-    }
+    dc = represent_fetus(fetus)
+    dc['state']['id'] = None
     return dc
 
 
@@ -373,8 +364,8 @@ def represent_pregnancy(pregnancy):
             get_previous_children(pregnancy.action)
         ),
         id=pregnancy.action.id,
-        event_id=pregnancy.action['card_number'].value,
-        external_id=get_external_id(pregnancy.action['card_number'].value)
+        event_id=pregnancy.action['card_number'].value if 'card_number' in pregnancy.action.propsByCode else None,
+        external_id=get_external_id(pregnancy.action['card_number'].value) if 'card_number' in pregnancy.action.propsByCode else None
     )
 
 

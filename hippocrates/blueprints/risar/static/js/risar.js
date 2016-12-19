@@ -179,7 +179,7 @@ WebMis20
                     var notify_id = NotificationService.notify(
                         200,
                         [
-                            'Случай беременности закрыт. ',
+                            'Карта закрыта. ',
                             {
                                 click: function () {
                                     edit_callback(data).then(close_notify);
@@ -643,9 +643,9 @@ WebMis20
                 curation_level: curation_level
             });
         },
-        get_radz_risk_info: function (curation_level) {
+        get_radz_risk_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_radz_risks, {
-                curation_level: curation_level
+                curation_level_code: curation_level_code
             });
         },
         get_pregnancy_pathology_info: function (curation_level_code) {
@@ -1163,7 +1163,7 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                             <td class="text-right"><strong>ЛПУ</strong></td>\
                             <td>\
                                 <div class="col-lg-8 col-md-8 col-xs-6">\
-                                    <ui-select ng-required="true" ng-model="model.org" ng-change="onOrgChanged()" theme="select2" class="form-control" name="LPU" ref-book="Organisation" autocomplete="off">\
+                                    <ui-select ng-required="true" ng-model="model.org" theme="select2" class="form-control" name="LPU" ref-book="Organisation" autocomplete="off">\
                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>\
                                         <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">\
                                             <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
@@ -1176,12 +1176,9 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                             <td class="text-right"><strong>Врач</strong></td>\
                             <td>\
                                  <div class="col-lg-8 col-md-8 col-xs-6">\
-                                  <ui-select ng-required="true" ng-model="model.person" theme="select2" class="form-control" name="maternity_hosp_medico" ref-book="Person" autocomplete="off">\
-                                    <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>\
-                                    <ui-select-choices repeat="item in filteredMedicos | filter: $select.search | limitTo: 50">\
-                                        <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
-                                    </ui-select-choices>\
-                                    </ui-select>\
+                                     <wm-person-select ng-model="model.person" person-kind="onlyOrgPersons"\
+                                        filter-by="hospMedicoFilter" name="maternity_hosp_medico"\
+                                        ng-required="true"></wm-person-select>\
                                  </div>\
                             </td>\
                         </tr>\
@@ -1206,33 +1203,31 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                     $scope.model = {};
                     $scope.filteredMedicos = [];
 
-                    $scope.loadOwnMedicos = function() {
-                        var orgId = $scope.model.org.id;
-                        $scope.filteredMedicos = safe_traverse($scope, ['groupedMedicos', orgId]);
+                    $scope.$watch('model.org', function (n, o) {
+                        if (o !== undefined && !angular.equals(n, o)) {
+                            $scope.model.person = null;
+                        }
+                    });
+                    $scope.hospMedicoFilter = function () {
+                        return {
+                            org_id: safe_traverse($scope.model, ['org', 'id'], undefined)
+                        }
                     };
-                    $scope.onOrgChanged = function() {
-                        $scope.loadOwnMedicos();
-                        $scope.model.person = null;
-                    };
+
                     $scope.saveAndClose = function() {
                         RisarApi.chart.transfer(event_id, $scope.model.person.id, {beg_date: $scope.model.ep_date}).then(function(resp) {
                             $scope.$close(resp);
                         });
                     };
                     var reload = function () {
-                        $scope.allMedicos = RefBookService.get('Person');
                         var head_promise = RisarApi.chart.get_header(event_id);
-                        $q.all([$scope.allMedicos.loading, head_promise]).then(function (result) {
-                            var header_data = result[1];
-                            $scope.groupedMedicos = _.groupBy($scope.allMedicos.objects, function(obj) {
-                                return obj.organisation != undefined ? obj.organisation.id: null
-                            });
+                        $q.all([head_promise]).then(function (result) {
+                            var header_data = result[0];
                             $scope.model = {
                                 person: header_data.header.event.person,
                                 org: header_data.header.event.person.organisation,
                                 ep_date: new Date()
                             };
-                            $scope.loadOwnMedicos();
                         });
 
                     };

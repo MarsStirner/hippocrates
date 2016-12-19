@@ -50,7 +50,12 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 }
             });
     };
-
+    $scope.$on('mayBeUziSrokChanged', function() {
+        RisarApi.checkup.get($scope.checkup_id)
+            .then(function (data) {
+                $scope.checkup.calculated_pregnancy_week_by_ultrason = data.checkup.calculated_pregnancy_week_by_ultrason;
+            });
+    });
 
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;

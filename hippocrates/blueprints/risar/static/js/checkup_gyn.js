@@ -60,6 +60,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                 });
         }
     };
+
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
     var event_id = $scope.event_id = params.event_id;
