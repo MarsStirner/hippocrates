@@ -10,7 +10,7 @@ from sqlalchemy import and_, func
 from hippocrates.blueprints.risar.lib.helpers import lazy, LocalCache
 from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list
 from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnancy_event, get_latest_gyn_event, \
-    get_any_prev_event, get_latest_closed_gyn_event
+    get_any_prev_event, get_latest_closed_gyn_event, get_latest_closed_pregnancy_event
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.fetus import get_fetuses
 from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
@@ -227,6 +227,10 @@ class AbstractCard(object):
     @lazy
     def latest_pregnancy_event(self):
         return get_latest_pregnancy_event(self.event.client_id) if self.event else None
+
+    @lazy
+    def latest_closed_pregnancy_event(self):
+        return get_latest_closed_pregnancy_event(self.event.client_id) if self.event else None
 
     @lazy
     def latest_closed_gyn_event(self):
