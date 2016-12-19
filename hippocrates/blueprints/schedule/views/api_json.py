@@ -227,10 +227,11 @@ def api_search_persons():
         query_string = request.args['q']
         pkind = safe_int(request.args.get('person_kind'))
         pkind = personKind.get(pkind)
+        org_id = safe_int(request.args.get('org_id'))
     except (KeyError, ValueError):
         return abort(404)
     try:
-        result = SearchPerson.search(query_string)
+        result = SearchPerson.search(query_string, org_id=org_id)
 
         def cat(item):
             return {
