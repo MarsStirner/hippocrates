@@ -186,12 +186,12 @@ class JasperReport(object):
         :param fields: Список наименований полей шаблона
         :param session: Сессия доступа к серверу JasperReports
         """
+        params = params or {}
         self.table_name = table_name
         if fields is None:
             self.dsource = None
         else:
             self.dsource = JasperDBMemoryDataSource(table_name, fields)
-            params = params or {}
             params.update(self.dsource.get_request_params())
         params.update(self.mongo_params)
         self.jclient = JasperRestV2Client(path, session, params)

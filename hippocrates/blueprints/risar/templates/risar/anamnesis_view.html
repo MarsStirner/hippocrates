@@ -202,7 +202,7 @@
                         </td>
                         <td ng-if="!p.deleted" ng-bind-html="format_characteristics(p) | trustHtml"></td>
                         <td ng-if="!p.deleted" ><a nf-if="p.external_id" ng-href="{{ url_for('.html_auto_chart') }}?event_id=[[ p.event_id ]]">[[p.external_id]]</a></td>
-                        <td ng-if="!p.deleted && !p.external_id" class="col-md-1 nowrap">
+                        <td ng-if="!p.deleted && !p.event_id" class="col-md-1 nowrap">
                             <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
                             <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
                         </td>

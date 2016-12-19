@@ -177,7 +177,7 @@ def search_events(paginated=True, **kwargs):
 
     if 'missed_last_checkup' in kwargs:
         if kwargs['missed_last_checkup']:
-            query = query.filter(has_missed_checkups__neq=0)
+            query = query.filter(has_missed_checkups__neq=0, epicrisis_id__eq=0)
         else:
             query = query.filter(has_missed_checkups__eq=0)
 

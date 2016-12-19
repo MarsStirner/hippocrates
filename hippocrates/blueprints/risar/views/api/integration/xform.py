@@ -741,7 +741,7 @@ class MeasuresResultsXForm(ExternalXForm):
     def update_measure_data(self, data):
         status = data.get('status')
         if status:
-            self.em.status = self.rb(rbMeasureStatus, status, 'code')['id']
+            self.em.status = self.rb(status, rbMeasureStatus, 'code')['id']
 
     def changes_diagnoses_system(self):
         return bool(self.diagnosis_codes)

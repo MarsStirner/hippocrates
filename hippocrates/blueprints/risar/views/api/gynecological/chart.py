@@ -4,6 +4,7 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.chart_creator import GynecologicCardCreator
+from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.represent.common import represent_header, represent_chart_for_close_event
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_event
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_chart_for_routing
@@ -90,8 +91,8 @@ def api_0_gyn_chart_delete(ticket_id):
     db.session.commit()
 
 
-@module.route('/api/0/chart_close/')
-@module.route('/api/0/chart_close/<int:event_id>', methods=['POST'])
+@module.route('/api/0/gyn_chart_close/')
+@module.route('/api/0/gyn_chart_close/<int:event_id>', methods=['POST'])
 @api_method
 def api_0_gyn_chart_close(event_id=None):
     if not event_id:
@@ -106,6 +107,17 @@ def api_0_gyn_chart_close(event_id=None):
             event.execDate = safe_datetime(data['exec_date'])
             event.manager_id = data['manager']['id']
         db.session.commit()
+
+        sirius.send_to_mis(
+            sirius.RisarEvents.CLOSE_CARD,
+            sirius.RisarEntityCode.EPICRISIS,
+            sirius.OperationCode.READ_ONE,
+            'risar.api_integr_epicrisis_get',
+            obj=('card_id', event_id),
+            params={'card_id': event_id},
+            is_create=False,
+        )
+
     return represent_chart_for_close_event(event)
 
 
