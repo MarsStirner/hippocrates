@@ -82,26 +82,7 @@ def create_prev_pregn_based_on_epicrisis(from_card, to_card):
                 db.session.add(child)
 
 
-def copy_all_prev_pregs(from_card, to_card, own_only=False):
-    prev_pregs = [x for x in from_card.prev_pregs if not x.action['card_number'].value]\
-                                        if own_only is True else from_card.prev_pregs
-    for prev in prev_pregs:
-        copy_one_preg(prev.action, from_card, to_card)
-
-
-def send_prev_pregnancies_to_gyn_card(pregnancy_event):
-    from blueprints.risar.lib.card import PregnancyCard, GynecologicCard
-    preg_card = PregnancyCard.get_for_event(pregnancy_event)
-    gyn_event = preg_card.latest_gyn_event or preg_card.latest_closed_gyn_event
-    if gyn_event:
-        gyn_card = GynecologicCard.get_for_event(gyn_event)
-        if gyn_card:
-            create_prev_pregn_based_on_epicrisis(from_card=preg_card, to_card=gyn_card)
-            copy_all_prev_pregs(from_card=preg_card, to_card=gyn_card, own_only=True)
-            gyn_card.reevaluate_card_attrs()
-
-
-def copy_one_preg(action, from_card,  to_card):
+def copy_one_preg(action, to_card):
     empty_action = get_action_by_id(None, to_card.event, risar_anamnesis_pregnancy, True)
     fill_action_from_another_action(action, empty_action)
     if not empty_action['card_number'].value:
@@ -118,3 +99,24 @@ def copy_one_preg(action, from_card,  to_card):
         child.alive = nb.alive
         child.sex = nb.sex
         db.session.add(child)
+
+
+def copy_all_prev_pregs(from_card, to_card, own_only=False):
+    """копирует предыдущие беременности
+    :own_only = True - только введенные руками в этой карте(унаследованные игнорирует)"""
+    prev_pregs = [x for x in from_card.prev_pregs if not x.action['card_number'].value]\
+                                        if own_only is True else from_card.prev_pregs
+    for prev in prev_pregs:
+        copy_one_preg(prev.action, to_card)
+
+
+def send_prev_pregnancies_to_gyn_card(pregnancy_event):
+    from blueprints.risar.lib.card import PregnancyCard, GynecologicCard
+    preg_card = PregnancyCard.get_for_event(pregnancy_event)
+    gyn_event = preg_card.latest_gyn_event
+    if gyn_event:
+        gyn_card = GynecologicCard.get_for_event(gyn_event)
+        if gyn_card:
+            create_prev_pregn_based_on_epicrisis(from_card=preg_card, to_card=gyn_card)
+            copy_all_prev_pregs(from_card=preg_card, to_card=gyn_card, own_only=True)
+            gyn_card.reevaluate_card_attrs()
