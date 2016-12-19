@@ -20,10 +20,11 @@ def copy_checkup(event, from_action):
                                         'parametrium', 'features', 'vagina_secretion', 'cervical_canal_secretion',
                                         'urethra_secretion', 'onco_smear', 'pregnancy_week', 'pregnancy_continuation',
                                         'pregnancy_continuation_refusal', 'next_date', 'notes',
-                                        'recommendations', 'fetus_first_movement_date']
+                                        'recommendations', 'fetus_first_movement_date', ]
             fill_these_attrs_from_action(from_action=from_action,
                                          to_action=empty_action,
                                          attr_list=fields_to_copy_from_prev)
+            empty_action["lymph_nodes"].value = from_action["lymph"].value
         elif flat_code == second_inspection_flat_code:
             fill_action_from_another_action(from_action=from_action,
                                             to_action=empty_action)

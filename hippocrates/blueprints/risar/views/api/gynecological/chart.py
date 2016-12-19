@@ -91,8 +91,8 @@ def api_0_gyn_chart_delete(ticket_id):
     db.session.commit()
 
 
-@module.route('/api/0/chart_close/')
-@module.route('/api/0/chart_close/<int:event_id>', methods=['POST'])
+@module.route('/api/0/gyn_chart_close/')
+@module.route('/api/0/gyn_chart_close/<int:event_id>', methods=['POST'])
 @api_method
 def api_0_gyn_chart_close(event_id=None):
     if not event_id:
