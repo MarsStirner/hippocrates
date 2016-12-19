@@ -23,8 +23,8 @@ from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_dict, safe_int
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from .utils import get_org_by_org_code, get_person_by_codes, get_client_query, get_event_query
-
+from .utils import get_org_by_org_code, get_person_by_codes, get_client_query, get_event_query, \
+    get_org_structure_by_code
 
 __author__ = 'viruzzz-kun'
 
@@ -270,6 +270,15 @@ class XForm(object):
                 u'Не найдена организация по коду {0}'.format(org_code)
             )
         return org
+
+    def find_org_structure(self, org_str_code):
+        org_str = get_org_structure_by_code(org_str_code)
+        if not org_str:
+            raise ApiException(
+                NOT_FOUND_ERROR,
+                u'Не найдено подразделение по коду {0}'.format(org_str_code)
+            )
+        return org_str
 
     @staticmethod
     def from_org_rb(org):

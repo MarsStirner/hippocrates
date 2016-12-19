@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from nemesis.models.exists import OrgStructure
 from nemesis.models.organisation import Organisation
 from nemesis.models.person import Person
 from nemesis.models.client import Client
@@ -11,6 +11,14 @@ def get_org_by_org_code(org_code):
     org = Organisation.query.filter(
         Organisation.regionalCode == org_code,
         Organisation.deleted == 0
+    ).first()
+    return org
+
+
+def get_org_structure_by_code(org_str_code):
+    org = OrgStructure.query.filter(
+        OrgStructure.regionalCode == org_str_code,
+        OrgStructure.deleted == 0
     ).first()
     return org
 
