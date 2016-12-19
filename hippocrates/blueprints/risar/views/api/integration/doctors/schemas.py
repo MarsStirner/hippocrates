@@ -51,6 +51,10 @@ class DoctorSchema(Schema):
                 "id": "doctor/organization",
                 "description": "ТФОМС код организации врача"
             },
+            "department": {
+                "type": "string",
+                "description": "Идентификатор подразделения ЛПУ врача"
+            },
             "speciality":{
                 "type": "string",
                 "id": "doctor/speciality",
