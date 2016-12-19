@@ -22,6 +22,7 @@ from . import (
     doctors,
     orgs,
     refbook,
+    org_department,
 )
 from . import xform
 
