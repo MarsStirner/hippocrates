@@ -1404,4 +1404,24 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         }
     }
 }])
+.factory('PropsDescriptor', [function () {
+    return function (props_descriptor) {
+        return {
+            getName: function (code) {
+                return props_descriptor[code].name;
+            },
+            getMandatory: function (code) {
+                return props_descriptor[code].mandatory;
+            },
+            getReadOnly: function (code) {
+                return props_descriptor[code].read_only;
+            },
+            getLabel: function (code) {
+                var mandatory_text = ' <span class="text-danger">*</span>';
+                var prop_name = _.escape(this.getName(code));
+                return this.getMandatory(code) ? prop_name + mandatory_text: prop_name;
+            }
+        };
+    }
+}])
 ;

@@ -155,7 +155,9 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
 ;
 
 
-WebMis20.controller('CheckupTicket25Ctrl', ['$scope', 'CurrentUser', function ($scope, CurrentUser) {
+WebMis20.controller('CheckupTicket25Ctrl', ['$scope', 'CurrentUser', 'PropsDescriptor', 'ticket_25_descriptor',
+function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
+    $scope.ticket25Descriptor = new PropsDescriptor(ticket_25_descriptor);
     $scope.get_current_user = function () {
         return { person: CurrentUser.info };
     };

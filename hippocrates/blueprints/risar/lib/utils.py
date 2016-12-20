@@ -529,3 +529,16 @@ def get_apt_from_at(at, codes=None):
     return qr.order_by(
         ActionPropertyType.idx
     )
+
+
+def get_props_descriptor(action, flatcode):
+    if action:
+        property_types = map(lambda x: x.type, action.properties)
+    else:
+        action_type = get_action_type_by_flatcode(flatcode)
+        property_types = action_type and action_type.property_types
+    return {
+        prop_type.code: prop_type.description
+        for prop_type in property_types
+        if prop_type.code
+    }
