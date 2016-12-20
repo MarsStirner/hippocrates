@@ -1,5 +1,5 @@
 'use strict';
-var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, PrintingService, PrintingDialog, PropsDescriptor) {
+var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, PrintingService, PrintingDialog, PropsDescriptor, epicrisis_descriptor) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
@@ -19,7 +19,7 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
     };
     $scope.currentDate = new Date();
     $scope.minDate = new Date();
-    $scope.PropsDescriptor = PropsDescriptor;
+    $scope.epicrisisDescriptor = new PropsDescriptor(epicrisis_descriptor);
 
     var open_tab = function (tab_name) {
         var prefix = "tab_";
