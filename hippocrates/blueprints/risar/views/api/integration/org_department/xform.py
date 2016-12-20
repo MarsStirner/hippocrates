@@ -2,6 +2,8 @@
 
 import logging
 
+from datetime import datetime
+
 from ..xform import XForm, ALREADY_PRESENT_ERROR
 from .schemas import OrgDepartmentSchema
 
@@ -66,11 +68,15 @@ class OrgDepartmentXForm(OrgDepartmentSchema, XForm):
         self._fill_required_fields()
 
     def _fill_required_fields(self):
+        today = datetime.today()
         self.target_obj.code = ''
         self.target_obj.infisCode = ''
         self.target_obj.infisInternalCode = ''
         self.target_obj.infisDepTypeCode = ''
         self.target_obj.infisTariffCode = ''
+        self.target_obj.modifyDatetime = today
+        if self.new:
+            self.target_obj.createDatetime = today
 
     def as_json(self):
         if self.target_obj:
