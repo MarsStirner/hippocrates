@@ -66,9 +66,10 @@
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 1. Общая информация</h3>
                                 <div class="row" ng-class="{'has-error': firstForm.pregnancy_final.$invalid}" >
-                                    <div class="col-md-3" for="pregnancy_final" class="control-label text-right">Беременность закончилась</div>
+                                    <div class="col-md-3" for="pregnancy_final" class="control-label text-right" ng-bind-html="PropsDescriptor.get_prop_label('pregnancy_final')"></div>
                                     <div class="col-md-9" name="pregnancy_final" ng-model="epicrisis.pregnancy_final"
-                                         refbook-radio ref-book="rbRisarPregnancy_Final" ng-required="true">
+                                         refbook-radio ref-book="rbRisarPregnancy_Final"
+                                         ng-disabled="PropsDescriptor.get_prop_read_only('pregnancy_final')" ng-required="PropsDescriptor.get_prop_mandatory('pregnancy_final')">
                                       [[ item.name ]]
                                     </div>
                                 </div>
@@ -77,56 +78,56 @@
                                 <table class="table table-condensed" ng-if="epicrisis.pregnancy_final.code">
                                     <tbody>
                                         <tr>
-                                            <th class="text-right col-md-4">Дата поступления в роддом <span>&nbsp;</span></th>
+                                            <th class="text-right col-md-4" ng-bind-html="PropsDescriptor.get_prop_label('arrival_date')"></th>
                                             <td class="col-md-8">
-                                                <div class="row">
+                                                <div class="row" ng-class="{'has-error': firstForm.arrival_date.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2">
-                                                    <wm-date ng-model="epicrisis.arrival_date" min-date="minDate"
-                                                             style="width: 250px" name="arrival_date"></wm-date>
+                                                    <wm-date ng-model="epicrisis.arrival_date" min-date="minDate" ng-disabled="PropsDescriptor.get_prop_read_only('arrival_date')"
+                                                             style="width: 250px" ng-required="PropsDescriptor.get_prop_mandatory('arrival_date')" name="arrival_date"></wm-date>
                                                 </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right col-md-4">[[epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
+                                            <th class="text-right col-md-4" ng-bind-html="PropsDescriptor.get_prop_label('delivery_date')"></th>
                                             <td class="col-md-8">
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2">
-                                                <wm-date ng-model="epicrisis.delivery_date" min-date="minDate"
-                                                         style="width: 250px" ng-required="true" name="delivery_date"></wm-date>
+                                                <wm-date ng-model="epicrisis.delivery_date" min-date="minDate" ng-disabled="PropsDescriptor.get_prop_read_only('delivery_date')"
+                                                         style="width: 250px" ng-required="PropsDescriptor.get_prop_mandatory('delivery_date')" name="delivery_date"></wm-date>
                                                 </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">[[ epicrisis.pregnancy_final.code =='abortom' ? 'Время аборта':'Время родов']]  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('delivery_time')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_time.$invalid && firstForm.submit_attempt}">
                                                     <div class="col-md-4">
-                                                        <div fs-time ng-model="epicrisis.delivery_time"
-                                                             name="delivery_time" ng-required="true"></div>
+                                                        <div fs-time ng-model="epicrisis.delivery_time" ng-disabled="PropsDescriptor.get_prop_read_only('delivery_time')"
+                                                             name="delivery_time" ng-required="PropsDescriptor.get_prop_mandatory('delivery_time')"></div>
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">[[ epicrisis.pregnancy_final.code =='abortom' ? 'Аборт при сроке (недель)': 'Роды при сроке (недель)']]  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('pregnancy_duration')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.pregnancy_duration.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2  col-lg-2">
                                                     <input ng-model="epicrisis.pregnancy_duration" class="form-control" name="pregnancy_duration"
-                                                           ng-required="true" valid-number type="number" min="[[min_pregnancy_duration]]" max="[[max_pregnancy_duration]]" maxlength="2">
+                                                           ng-disabled="PropsDescriptor.get_prop_read_only('pregnancy_duration')" ng-required="PropsDescriptor.get_prop_mandatory('pregnancy_duration')" valid-number type="number" min="[[min_pregnancy_duration]]" max="[[max_pregnancy_duration]]" maxlength="2">
                                                 </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
-                                            <th class="text-right">ЛПУ родоразрешения  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('LPU')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.LPU.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
                                                     <ui-select ng-model="epicrisis.LPU" ng-change="loadOwnMedicos()" theme="select2" class="form-control" name="LPU"
-                                                               ref-book="Organisation" autocomplete="off" ng-required="epicrisis.pregnancy_final.code =='rodami'">
+                                                               ng-disabled="PropsDescriptor.get_prop_read_only('LPU')" ref-book="Organisation" autocomplete="off" ng-required="epicrisis.pregnancy_final.code =='rodami' && PropsDescriptor.get_prop_mandatory('LPU')">
                                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
                                                         <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
                                                             <span ng-bind-html="item.full_name | highlight: $select.search"></span>
@@ -137,12 +138,12 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Лечащий врач роддома<span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('maternity_hosp_medico')"></th>
                                             <td>
-                                                <div class="row">
+                                                <div class="row" ng-class="{'has-error': firstForm.maternity_hosp_medico.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
                                                         <ui-select ng-model="epicrisis.maternity_hosp_medico"  theme="select2" class="form-control" name="maternity_hosp_medico"
-                                                                   ref-book="Person" autocomplete="off" ng-change="chooseNativeLpu()">
+                                                                   ng-disabled="PropsDescriptor.get_prop_read_only('maternity_hosp_medico')" ref-book="Person" autocomplete="off" ng-change="chooseNativeLpu()" ng-required="PropsDescriptor.get_prop_mandatory('maternity_hosp_medico')">
                                                             <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
                                                             <ui-select-choices repeat="item in filteredMedicos | filter: $select.search | limitTo: 50">
                                                                 <span ng-bind-html="item.full_name | highlight: $select.search"></span>
@@ -153,12 +154,12 @@
                                             </td>
                                         </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
-                                            <th class="text-right">ЛПУ курации новорожденного</th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('newborn_LPU')"></th>
                                             <td>
-                                                <div class="row">
+                                                <div class="row" ng-class="{'has-error': firstForm.newborn_LPU.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
                                                     <ui-select ng-model="epicrisis.newborn_LPU" theme="select2" class="form-control" name="newborn_LPU"
-                                                               ref-book="Organisation" autocomplete="off">
+                                                               ng-disabled="PropsDescriptor.get_prop_read_only('newborn_LPU')" ref-book="Organisation" autocomplete="off" ng-required="PropsDescriptor.get_prop_mandatory('newborn_LPU')">
                                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
                                                         <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
                                                             <span ng-bind-html="item.full_name | highlight: $select.search"></span>
@@ -169,12 +170,12 @@
                                             </td>
                                         </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='abortom'">
-                                            <th class="text-right">Вид аборта  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('abort')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.state.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-3">
-                                                        <rb-select name="state" ng-model="epicrisis.abort"
-                                                                   ref-book="rbRisarAbort" ng-required="epicrisis.pregnancy_final.code =='abortom'"></rb-select>
+                                                        <rb-select name="state" ng-model="epicrisis.abort" ng-disabled="PropsDescriptor.get_prop_read_only('abort')"
+                                                                   ref-book="rbRisarAbort" ng-required="epicrisis.pregnancy_final.code =='abortom' && PropsDescriptor.get_prop_mandatory('abort')"></rb-select>
                                                     </div>
                                                 </div>
                                             </td>
@@ -185,7 +186,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Особенности течения беременности <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('pregnancy_speciality')"></th>
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.pregnancy_speciality" />
@@ -193,7 +194,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Особенности течения послеродового периода <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('afterbirth_features')"></th>
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.afterbirth_features" />
@@ -201,7 +202,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Оказанная помощь <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('help')"></th>
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.help" />
@@ -222,37 +223,37 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <td class="text-right col-md-4">Смерть матери <span>&nbsp;</span></td>
+                                        <td class="text-right col-md-4">Смерть матери<span>&nbsp;</span></td>
                                         <td class="col-md-8">
                                             <input type="checkbox" ng-model="mother_death" ng-change="clear_death_info">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Причина смерти матери <span class="text-danger">*</span></td>
+                                        <td class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('reason_of_death')"></td>
                                         <td><div class="row"
                                                  ng-class="{'has-error': secondForm.reason_of_death.$invalid && secondForm.submit_attempt}">
                                             <div class="col-md-3">
-                                            <input ng-model="epicrisis.reason_of_death" class = "form-control"
-                                                   ng-required="mother_death" name="reason_of_death" ng-disabled="!mother_death">
+                                            <input ng-model="epicrisis.reason_of_death" class="form-control"
+                                                   ng-required="mother_death && PropsDescriptor.get_prop_mandatory('reason_of_death')" name="reason_of_death" ng-disabled="!mother_death || PropsDescriptor.get_prop_read_only('reason_of_death')">
                                             </div></div>
                                         </td>
 
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Дата смерти матери <span class="text-danger">*</span></td>
+                                        <td class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('death_date')"></td>
                                         <td>
-                                            <wm-date name="death_date" ng-disabled="!mother_death" min-date="epicrisis.delivery_date"
+                                            <wm-date name="death_date" ng-disabled="!mother_death || PropsDescriptor.get_prop_read_only('death_date')" min-date="epicrisis.delivery_date"
                                                      ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
-                                                     ng-required="mother_death" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
+                                                     ng-required="mother_death && PropsDescriptor.get_prop_mandatory('death_date')" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Время смерти матери <span class="text-danger">*</span></td>
+                                        <td class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('death_time')"></td>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4" ng-class="{'has-error': secondForm.death_time.$invalid}">
-                                            <div fs-time ng-model="epicrisis.death_time" ng-required="mother_death"
-                                                 name="death_time" ng-disabled="!mother_death"></div>
+                                            <div fs-time ng-model="epicrisis.death_time" ng-required="mother_death && PropsDescriptor.get_prop_mandatory('death_time')"
+                                                 name="death_time" ng-disabled="!mother_death || PropsDescriptor.get_prop_read_only('death_time')"></div>
                                             </div>
                                             </div>
                                         </td>
@@ -266,7 +267,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии">Заключение ЛКК <span>&nbsp;</span></span></td>
+                                        <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии" ng-bind-html="PropsDescriptor.get_prop_label('control_expert_conclusion')"></td>
                                         <td>
                                             <div class="row"><div class="col-md-12">
                                                 <wysiwyg ng-model="epicrisis.control_expert_conclusion" contenteditable="mother_death"/>
@@ -286,123 +287,138 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Биологическая незрелость родовых путей в 40 недель</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('immaturity')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.immaturity">
+                                            <input type="checkbox" ng-model="epicrisis.immaturity"
+                                                   ng-required="PropsDescriptor.get_prop_mandatory('immaturity')" ng-disabled="PropsDescriptor.get_prop_read_only('immaturity')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right col-md-4">Излитие околоплодных вод</th>
+                                        <th class="text-right col-md-4" ng-bind-html="PropsDescriptor.get_prop_label('delivery_waters')"></th>
                                         <td class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.delivery_waters" ref-book="rbRisarDelivery_Waters"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.delivery_waters" ref-book="rbRisarDelivery_Waters"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('delivery_waters')" ng-disabled="PropsDescriptor.get_prop_read_only('delivery_waters')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Дородовое излитие вод (при отсутствии родовой деятельности более 6 ч)</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('pre_birth_delivery_waters')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.pre_birth_delivery_waters">
+                                            <input type="checkbox" ng-model="epicrisis.pre_birth_delivery_waters"
+                                            ng-required="PropsDescriptor.get_prop_mandatory('pre_birth_delivery_waters')" ng-disabled="PropsDescriptor.get_prop_read_only('pre_birth_delivery_waters')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Слабость родовых сил</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('weakness')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.weakness" ref-book="rbRisarWeakness"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.weakness" ref-book="rbRisarWeakness"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('weakness')" ng-disabled="PropsDescriptor.get_prop_read_only('weakness')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Разрыв промежностей (степень)</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('perineal_tear')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.perineal_tear" ref-book="rbPerinealTear"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.perineal_tear" ref-book="rbPerinealTear"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('perineal_tear')" ng-disabled="PropsDescriptor.get_prop_read_only('perineal_tear')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Мекониальная окраска амниотических вод</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('meconium_colouring')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.meconium_colouring">
+                                            <input type="checkbox" ng-model="epicrisis.meconium_colouring"
+                                            ng-required="PropsDescriptor.get_prop_mandatory('meconium_colouring')" ng-disabled="PropsDescriptor.get_prop_read_only('meconium_colouring')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Патологический прелиминарный период</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('patologicsl_preliminal_period')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.patologicsl_preliminal_period">
+                                            <input type="checkbox" ng-model="epicrisis.patologicsl_preliminal_period"
+                                            ng-required="PropsDescriptor.get_prop_mandatory('patologicsl_preliminal_period')" ng-disabled="PropsDescriptor.get_prop_read_only('patologicsl_preliminal_period')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Аномалии родовой деятельности</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('labor_anomalies')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.labor_anomalies">
+                                            <input type="checkbox" ng-model="epicrisis.labor_anomalies"
+                                            ng-required="PropsDescriptor.get_prop_mandatory('labor_anomalies')" ng-disabled="PropsDescriptor.get_prop_read_only('labor_anomalies')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Хориоамнионит</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('chorioamnionit')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.chorioamnionit">
+                                            <input type="checkbox" ng-model="epicrisis.chorioamnionit"
+                                            ng-required="PropsDescriptor.get_prop_mandatory('chorioamnionit')" ng-disabled="PropsDescriptor.get_prop_read_only('chorioamnionit')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Анемия после родов (Hb<110 г/л)</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('poor_blood')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.poor_blood">
+                                            <input type="checkbox" ng-model="epicrisis.poor_blood"
+                                            ng-required="PropsDescriptor.get_prop_mandatory('poor_blood')" ng-disabled="PropsDescriptor.get_prop_read_only('poor_blood')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Нефропатия/эклампсия в родах</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('eclampsia')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.eclampsia" ref-book="rbRisarEclampsia"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.eclampsia" ref-book="rbRisarEclampsia"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('eclampsia')" ng-disabled="PropsDescriptor.get_prop_read_only('eclampsia')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Патология пуповины</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('funiculus')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.funiculus" ref-book="rbRisarFuniculus"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.funiculus" ref-book="rbRisarFuniculus"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('funiculus')" ng-disabled="PropsDescriptor.get_prop_read_only('funiculus')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Патология плаценты</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('afterbirth')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.afterbirth" ref-book="rbRisarAfterbirth"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.afterbirth" ref-book="rbRisarAfterbirth"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('afterbirth')" ng-disabled="PropsDescriptor.get_prop_read_only('afterbirth')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Инфекции в родах</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('infections_during_birth')"></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                                <input ng-model="epicrisis.infections_during_birth" class="form-control">
+                                                <input ng-model="epicrisis.infections_during_birth" class="form-control"
+                                                ng-required="PropsDescriptor.get_prop_mandatory('infections_during_birth')" ng-disabled="PropsDescriptor.get_prop_read_only('infections_during_birth')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Инфекции после родов</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('infections_after_birth')"></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                                <input ng-model="epicrisis.infections_after_birth" class="form-control">
+                                                <input ng-model="epicrisis.infections_after_birth" class="form-control"
+                                                ng-required="PropsDescriptor.get_prop_mandatory('infections_after_birth')" ng-disabled="PropsDescriptor.get_prop_read_only('infections_after_birth')">
                                             </div>
                                             </div>
                                         </td>
@@ -421,68 +437,76 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Вскрытие околоплодного пузыря</th>
+                                        <th class="text-right col-md-4" ng-bind-html="PropsDescriptor.get_prop_label('caul')"></th>
                                         <td class="col-md-8"><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.caul = true" ng-checked="epicrisis.caul">
+                                                <input type="radio" ng-click="epicrisis.caul = true" ng-checked="epicrisis.caul"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('caul')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.caul = false" ng-checked="!epicrisis.caul">
+                                                <input type="radio" ng-click="epicrisis.caul = false" ng-checked="!epicrisis.caul"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('caul')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Ручное обследование матки</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('calfbed')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.calfbed = true" ng-checked="epicrisis.calfbed">
+                                                <input type="radio" ng-click="epicrisis.calfbed = true" ng-checked="epicrisis.calfbed"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('calfbed')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.calfbed = false" ng-checked="!epicrisis.calfbed">
+                                                <input type="radio" ng-click="epicrisis.calfbed = false" ng-checked="!epicrisis.calfbed"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('calfbed')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Эпизио/перинеотомия</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('perineotomy')"></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                                <input ng-model="epicrisis.perineotomy" class="form-control">
+                                                <input ng-model="epicrisis.perineotomy" class="form-control"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('perineotomy')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('perineotomy')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Ручное выделение последа</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('secundines')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.secundines = true" ng-checked="epicrisis.secundines">
+                                                <input type="radio" ng-click="epicrisis.secundines = true" ng-checked="epicrisis.secundines"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('secundines')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.secundines = false" ng-checked="!epicrisis.secundines">
+                                                <input type="radio" ng-click="epicrisis.secundines = false" ng-checked="!epicrisis.secundines"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('secundines')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Другие пособия и манипуляции</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('secundines')"></th>
                                         <td>
                                             <div class="row"><div class="col-md-12">
                                                 <wysiwyg ng-model="epicrisis.other_manipulations" />
@@ -503,84 +527,98 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Кесарево сечение</th>
+                                        <th class="text-right col-md-4" ng-bind-html="PropsDescriptor.get_prop_label('caesarean_section')"></th>
                                         <td class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.caesarean_section" ref-book="rbRisarCaesarean_Section"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.caesarean_section" ref-book="rbRisarCaesarean_Section"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('caesarean_section')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('caesarean_section')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Акушерские щипцы</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('obstetrical_forceps')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.obstetrical_forceps" ref-book="rbRisarObstetrical_Forceps"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.obstetrical_forceps" ref-book="rbRisarObstetrical_Forceps"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('obstetrical_forceps')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('obstetrical_forceps')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Вакуум-экстракция</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('vacuum_extraction')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = true" ng-checked="epicrisis.vacuum_extraction">
+                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = true" ng-checked="epicrisis.vacuum_extraction"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('vacuum_extraction')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = false" ng-checked="!epicrisis.vacuum_extraction">
+                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = false" ng-checked="!epicrisis.vacuum_extraction"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('vacuum_extraction')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Показания к операции</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('indication')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.indication" ref-book="rbRisarIndication"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.indication" ref-book="rbRisarIndication"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('indication')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('indication')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Особенности операции</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('specialities')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('specialities')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('specialities')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Обезболивание</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('anesthetization')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.anesthetization" ref-book="rbRisarAnesthetization"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.anesthetization" ref-book="rbRisarAnesthetization"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('anesthetization')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('anesthetization')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Гистерэктомия</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('hysterectomy')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.hysterectomy" ref-book="rbRisarHysterectomy"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.hysterectomy" ref-book="rbRisarHysterectomy"
+                                                    ng-required="PropsDescriptor.get_prop_mandatory('hysterectomy')"
+                                                    ng-disabled="PropsDescriptor.get_prop_read_only('hysterectomy')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Осложнения операции</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('operation_complication')"></th>
                                         <td>
                                             <div class="row">
                                                 <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
@@ -588,17 +626,19 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Плодоразрушающие операции</th>
+                                        <th class="text-right" ng-bind-html="PropsDescriptor.get_prop_label('embryotomy')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.embryotomy = true" ng-checked="epicrisis.embryotomy">
+                                                <input type="radio" ng-click="epicrisis.embryotomy = true" ng-checked="epicrisis.embryotomy"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('embryotomy')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.embryotomy = false" ng-checked="!epicrisis.embryotomy">
+                                                <input type="radio" ng-click="epicrisis.embryotomy = false" ng-checked="!epicrisis.embryotomy"
+                                                ng-disabled="PropsDescriptor.get_prop_read_only('embryotomy')">
                                                 Нет
                                             </label>
                                         </div>
@@ -826,6 +866,9 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('props_descriptor', angular.fromJson('{{props_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/epicrisis.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>
 {% endblock %}

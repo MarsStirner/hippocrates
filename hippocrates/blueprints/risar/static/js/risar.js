@@ -1409,4 +1409,25 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         }
     }
 }])
+.service('PropsDescriptor', ['props_descriptor', function (props_descriptor) {
+    // Ожидается что props_descriptor будет определен в каждом шаблоне где используется этот сервис
+    // WebMis20.value('props_descriptor', angular.fromJson('{{props_descriptor|tojson|safe}}'));
+    return {
+        get_prop_name: function (code) {
+            return props_descriptor[code].name;
+        },
+        get_prop_mandatory: function (code) {
+            return props_descriptor[code].mandatory;
+        },
+        get_prop_read_only: function (code) {
+            return props_descriptor[code].read_only;
+        },
+        get_prop_label: function (code) {
+            var mandatory_text = ' <span class="text-danger">*</span>';
+            var prop_name = _.escape(this.get_prop_name(code));
+            return this.get_prop_mandatory(code) ? prop_name + mandatory_text: prop_name;
+        }
+    };
+    }
+])
 ;

@@ -384,5 +384,8 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('props_descriptor', angular.fromJson('{{props_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/epicrisis.js', v=app_version) }}"></script>
 {% endblock %}
