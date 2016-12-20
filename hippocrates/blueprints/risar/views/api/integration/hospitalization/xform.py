@@ -23,7 +23,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
     """
     parent_obj_class = Event
     target_obj_class = Action
-    flat_code = 'general_hospitalization'
+    flat_code = 'general_hospitalizations'
 
     diagnosis_codes = ('FinalDiagnosis', )
 
@@ -88,12 +88,12 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
         an_props = self.target_obj.propsByCode
         res = {
             'external_id': self.external_id,
-            'hospitalization_id': self.target_obj.id,
+            'result_action_id': self.target_obj.id,
             'measure_id': self.em.id,
             'measure_status': self.em.literal_status,
             'date_in': an_props['ReceiptDate'].value,
             'date_out': an_props['IssueDate'].value,
-            'hospital': self.person.organisation and self.person.organisation.TFOMSCode or '',
+            'hospital': self.person.organisation and self.person.organisation.regionalCode or '',
             'doctor': self.person.regionalCode,
             'pregnancy_week': an_props['PregnancyDuration'].value,
             'diagnosis_in': an_props['DirectionDiagnosis'].value,

@@ -346,8 +346,8 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         lpu = data.get('LPU')
         newborn_lpu = data.get('newborn_LPU')
         res.update({
-            'maternity_hospital': lpu and lpu.TFOMSCode,
-            'curation_hospital': newborn_lpu and newborn_lpu.TFOMSCode,
+            'maternity_hospital': lpu and lpu.regionalCode,
+            'curation_hospital': newborn_lpu and newborn_lpu.regionalCode,
             'delivery_time': self.safe_time_format(res.get('delivery_time'), '%H:%M'),
         })
 

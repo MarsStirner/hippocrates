@@ -33,7 +33,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('visit_reason')"></th>
+                    <th class="text-right col-md-4">Обращение (цель)</th>
                     <td class="col-md-8">
                         <div refbook-radio ref-book="rbRisarTreatmentReason" ng-model="checkup.ticket_25.visit_reason"
                         ng-required="ticket25Descriptor.getMandatory('visit_reason')"
@@ -42,7 +42,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('visit_type')"></th>
+                    <th class="text-right col-md-4">Посещение</th>
                     <td class="col-md-8">
                         <ui-select ng-model="checkup.ticket_25.visit_type" theme="select2" ng-disabled="isDisabledVisitType() || ticket25Descriptor.getReadOnly('visit_type')"
                             ng-required="ticket25Descriptor.getMandatory('visit_type')">
@@ -79,7 +79,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('payment')"></th>
+                    <th class="text-right col-md-4">Оплата за счет</th>
                     <td class="col-md-8">
                         <rb-select ref-book="rbFinance" ng-model="checkup.ticket_25.payment" limit-to="50"
                         ng-required="ticket25Descriptor.getMandatory('payment')"
