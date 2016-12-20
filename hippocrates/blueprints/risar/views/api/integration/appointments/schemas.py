@@ -59,6 +59,10 @@ class AppointmentSchema(Schema):
                 "description": "Направлен в (код ЛПУ)",
                 "type": "string"
             },
+            "referral_department": {
+                "description": "Код подразделения",
+                "type": "string"
+            },
             "referral_date": {
                 "description": "Дата направления",
                 "type": "string",

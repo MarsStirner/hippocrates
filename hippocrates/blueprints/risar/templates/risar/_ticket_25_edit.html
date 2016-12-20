@@ -111,6 +111,15 @@
                     </td>
                 </tr>
                 <tr>
+                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('department')"></th>
+                    <td class="col-md-8">
+                        <rb-select ref-book="OrgStructure" ng-model="checkup.ticket_25.department" limit-to="50"
+                            ng-required="ticket25Descriptor.getMandatory('department')"
+                            ng-disabled="ticket25Descriptor.getReadOnly('department')"
+                            custom-filter="orgStructFilter"></rb-select>
+                    </td>
+                </tr>
+                <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('services')"></th>
                     <td></td>
                 </tr>

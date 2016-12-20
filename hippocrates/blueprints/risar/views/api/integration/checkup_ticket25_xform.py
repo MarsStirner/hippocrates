@@ -38,6 +38,10 @@ class CheckupsTicket25XFormSchema(Schema):
                     "description": "Место обращения (код ЛПУ)",
                     "type": "string"
                 },
+                "department": {
+                    "description": "Код подразделения",
+                    "type": "string"
+                },
                 "date_open": {
                     "description": "Дата открытия талона",
                     "type": "string",
@@ -294,6 +298,7 @@ class CheckupsTicket25XForm(XForm):
         hosp_code = data.get('hospital')
         res = {
             'hospital': self.find_org(data.get('hospital')),
+            'department': self.find_org_structure(data.get('department')),
             'person': self.find_doctor(data.get('doctor'), data.get('hospital')),
             'beg_date': safe_datetime(safe_date(data.get('date_open'))),
             'end_date': safe_datetime(safe_date(data.get('date_close'))),
@@ -460,6 +465,9 @@ class CheckupsTicket25XForm(XForm):
         person = action.person
         res = {
             'hospital': self.or_undefined(self.from_org_rb(person and person.organisation)),
+            'department': self.or_undefined(
+                self.from_org_struct_rb(action['department'].value)
+            ),
             'doctor': self.or_undefined(self.from_person_rb(person)),
             'date_open': self.or_undefined(safe_date(action.begDate)),
             'date_close': self.or_undefined(safe_date(action.endDate)),

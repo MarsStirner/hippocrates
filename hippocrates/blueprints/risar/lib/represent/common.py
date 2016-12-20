@@ -468,6 +468,7 @@ def represent_ticket_25(action):
             'manipulations': [],
             'temp_disability': [],
         }
+    action.update_action_integrity()
     return dict(
         action_as_dict(action),
         id=action.id,

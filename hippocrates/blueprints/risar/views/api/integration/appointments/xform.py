@@ -73,6 +73,7 @@ class AppointmentXForm(AppointmentSchema, XForm):
             'execution_time': self.or_undefined(format_time(self._get_prop_val(action, 'time'))),
             'parameters': self.or_undefined(self._get_prop_val(action, 'additional')),
             'referral_lpu': self.or_undefined(self.from_org_rb(self._get_prop_val(action, 'LPUDirection'))),
+            'referral_department': self.or_undefined(self.from_org_struct_rb(self._get_prop_val(action, 'department'))),
             'referral_date': self.or_undefined(self._get_prop_val(action, 'DateDirection')),
             'comment': self.or_undefined(self._get_prop_val(action, 'Comment')),
             'appointed_lpu': self.or_undefined(self.from_org_rb(set_person and set_person.organisation)),

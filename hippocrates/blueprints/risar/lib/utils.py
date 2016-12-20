@@ -533,6 +533,7 @@ def get_apt_from_at(at, codes=None):
 
 def get_props_descriptor(action, flatcode):
     if action:
+        action.update_action_integrity()
         property_types = map(lambda x: x.type, action.properties)
     else:
         action_type = get_action_type_by_flatcode(flatcode)

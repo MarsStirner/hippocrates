@@ -62,6 +62,7 @@ def api_0_pregnancy_checkup(event_id):
     action.person = person
 
     ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
+    ticket.update_action_integrity()
     db.session.add(ticket)
     if not ticket.id:
         # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
@@ -127,9 +128,9 @@ def api_0_pregnancy_checkup(event_id):
 @api_method
 def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
-    action.update_action_integrity()
     if not action:
         raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
+    action.update_action_integrity()
     return {
         'checkup': represent_pregnancy_checkup_wm(action),
         'access': represent_checkup_access(action)
