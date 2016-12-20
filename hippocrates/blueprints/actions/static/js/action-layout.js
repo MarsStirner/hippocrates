@@ -13,6 +13,34 @@ angular.module('WebMis20')
         link: function (scope, element) {
             var current_element = element;
             var v_groups_count = 0; // Must be set to zero before complete rebuild
+            // зависимость дочерних полей от родительских
+            //  - доступность для редактирования только после выбора значения в родительском
+            //  - дополнительные фильтры на основе выбора в родительском поле
+            var curLayoutDependencies = {};
+            var setCurLayoutDependencies = function (ld) {
+                curLayoutDependencies = ld;
+                angular.forEach(ld, function (dep_info, child_code) {
+                    var parent_code = dep_info.parent;
+                    if (parent_code) {
+                        scope.$watch(function () {
+                            var prop = scope.action.get_property(parent_code);
+                            return prop && prop.value;
+                        }, function (n, o) {
+                            if (o !== undefined && !angular.equals(n, o)) {
+                                var child_prop = scope.action.get_property(child_code);
+                                if (child_prop) {
+                                    // fixme: значение в виджете не очищается, при обнулении модели
+                                    try {
+                                        child_prop.value.name = '';
+                                    } catch (e) {}
+                                    child_prop.value = null;
+                                }
+                            }
+                        })
+                    }
+                });
+            };
+
             scope.layout_tools = {
                 format_Diagnosis: function (diag) {
                     return '{0}: {1} - {2}{ (|3|)}, {4} - {5}'.formatNonEmpty(
@@ -23,12 +51,47 @@ angular.module('WebMis20')
                         $filter('asDate')(diag.set_date),
                         $filter('asDate')(diag.end_date)
                     );
+                },
+                depends: {
+                    getFilter: function (prop_code) {
+                        var type = safe_traverse(curLayoutDependencies, [prop_code, 'type'], null);
+                        if (!type) return undefined;
+
+                        if (type === 'OrgStructure') {
+                            var parent_code = safe_traverse(curLayoutDependencies, [prop_code, 'parent'], null);
+                            if (!parent_code) return this._blank;
+                            return this._orgStructureFilter(parent_code)
+                        }
+                    },
+                    isParentFilled: function (prop_code) {
+                        var parent_code = safe_traverse(curLayoutDependencies, [prop_code, 'parent'], null);
+                        if (!parent_code) return true;
+
+                        var parent_prop = scope.action.get_property(parent_code);
+                        return !parent_prop || Boolean(parent_prop.value);
+                    },
+
+                    // private filters
+                    _blank: function () { return true; },
+                    _orgStructureFilter: function (parent_code) {
+                        var parent_prop = scope.action.get_property(parent_code);
+                        if (!parent_prop) return this._blank;
+
+                        return function (item) {
+                            return item.org_id === safe_traverse(parent_prop, ['value', 'id']);
+                        }
+                    }
                 }
             };
             scope.unity_function = function (arg) { return arg };
 
             function build(tag) {
                 var context = arguments[1];
+
+                if (tag.tagName === 'root' && tag.hasOwnProperty('dependencies')) {
+                    setCurLayoutDependencies(tag.dependencies);
+                }
+
                 var inner_template;
                 switch (tag.tagName) {
 
@@ -175,16 +238,20 @@ angular.module('WebMis20')
                                             <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
                                                 <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
                                             </ui-select-choices>\
-                                        </ui-select>';
+                                         </ui-select>';
                                     break;
                                 case 'MKB':
                                     inner_template = '<ui-select ext-select-mkb ng-model="{0}.value"></ui-select>';
                                     break;
                                 case 'OrgStructure': // Без фильтров
                                     inner_template =
-                                        '<wm-custom-dropdown ng-model="{0}.value">\
-                                            <wm-org-structure-tree></wm-org-structure-tree>\
-                                        </wm-custom-dropdown>';
+                                        '<rb-select ref-book="{1}" ng-model="{0}.value" ng-disabled="{2}"\
+                                            custom-filter="{3}"></rb-select>'
+                                            .format(
+                                                '{0}', 'OrgStructure',
+                                                '!layout_tools.depends.isParentFilled(\'{0}\')'.format(property.type.code),
+                                                'layout_tools.depends.getFilter(\'{0}\')'.format(property.type.code)
+                                            );
                                     break;
                                 case 'ReferenceRb':
                                 case 'ExtReferenceRb':

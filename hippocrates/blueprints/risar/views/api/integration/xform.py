@@ -287,6 +287,12 @@ class XForm(object):
         return org.regionalCode
 
     @staticmethod
+    def from_org_struct_rb(os):
+        if os is None:
+            return None
+        return os.regionalCode
+
+    @staticmethod
     def find_doctor(person_code, org_code):
         person = get_person_by_codes(person_code, org_code)
         if not person:

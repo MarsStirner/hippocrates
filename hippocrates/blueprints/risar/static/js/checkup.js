@@ -161,6 +161,9 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
     $scope.get_current_user = function () {
         return { person: CurrentUser.info };
     };
+    $scope.orgStructFilter = function (item) {
+        return item.org_id === safe_traverse($scope.header, ['event', 'person', 'organisation', 'id']);
+    };
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;
     };
