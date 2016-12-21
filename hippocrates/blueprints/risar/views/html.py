@@ -257,22 +257,27 @@ def html_inspection_read():
     if not checkup:
         abort(404)
     flat_code = checkup.actionType.flatCode
-
+    ticket_25 = checkup.get_prop_value('ticket_25')
     if flat_code == first_inspection_flat_code:
         return render_template('risar/inspection_first_read.html', card=card,
-                               checkup_descriptor=get_props_descriptor(checkup, flat_code))
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == second_inspection_flat_code:
         return render_template('risar/inspection_second_read.html', card=card,
-                               checkup_descriptor=get_props_descriptor(checkup, flat_code))
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == risar_gyn_checkup_flat_code:
         return render_template('risar/unpregnant/inspection_read.html', card=card,
-                               checkup_descriptor=get_props_descriptor(checkup, flat_code))
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == pc_inspection_flat_code:
         return render_template('risar/inspection_pc_read.html', card=card,
-                               checkup_descriptor=get_props_descriptor(checkup, flat_code))
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == puerpera_inspection_flat_code:
         return render_template('risar/inspection_puerpera_read.html', card=card,
-                               checkup_descriptor=get_props_descriptor(checkup, flat_code))
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
 
 
 @module.route('/inspection_edit.html')

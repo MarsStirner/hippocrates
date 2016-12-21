@@ -24,7 +24,7 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Дата осмотра:</div>
+                                    < class="col-sm-6 col-md-6  text-right">Дата осмотра:</>
                                     <div class="col-sm-6 col-md-6">[[checkup.beg_date|asDateTime]]</div>
                                 </div>
                                 <div class="row">
@@ -437,6 +437,7 @@
     {{ super() }}
     <script>
         WebMis20.value('checkup_descriptor', angular.fromJson('{{checkup_descriptor|tojson|safe}}'));
+        WebMis20.value('ticket_25_descriptor', angular.fromJson('{{ticket_25_descriptor|tojson|safe}}'));
     </script>
     <script src="{{ url_for('.static', filename='js/checkup.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/checkup_first.js', v=app_version) }}"></script>

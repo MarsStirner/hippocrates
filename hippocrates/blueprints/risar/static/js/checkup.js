@@ -2,7 +2,11 @@
 'use strict';
 
 WebMis20.controller('CheckupCtrl', ['$scope', '$timeout', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
-function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingDialog) {
+    'PropsDescriptor', 'checkup_descriptor', 'ticket_25_descriptor',
+function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingDialog, PropsDescriptor, checkup_descriptor,
+          ticket_25_descriptor) {
+    $scope.checkupDescriptor = new PropsDescriptor(checkup_descriptor);
+    $scope.ticket25Descriptor = new PropsDescriptor(ticket_25_descriptor);
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
