@@ -19,26 +19,28 @@ angular.module('WebMis20')
             var curLayoutDependencies = {};
             var setCurLayoutDependencies = function (ld) {
                 curLayoutDependencies = ld;
-                angular.forEach(ld, function (dep_info, child_code) {
-                    var parent_code = dep_info.parent;
-                    if (parent_code) {
-                        scope.$watch(function () {
-                            var prop = scope.action.get_property(parent_code);
-                            return prop && prop.value;
-                        }, function (n, o) {
-                            if (o !== undefined && !angular.equals(n, o)) {
-                                var child_prop = scope.action.get_property(child_code);
-                                if (child_prop) {
-                                    // fixme: значение в виджете не очищается, при обнулении модели
-                                    try {
-                                        child_prop.value.name = '';
-                                    } catch (e) {}
-                                    child_prop.value = null;
+                if (!scope.action.readonly) {
+                    angular.forEach(ld, function (dep_info, child_code) {
+                        var parent_code = dep_info.parent;
+                        if (parent_code) {
+                            scope.$watch(function () {
+                                var prop = scope.action.get_property(parent_code);
+                                return prop && prop.value;
+                            }, function (n, o) {
+                                if (o !== undefined && !angular.equals(n, o)) {
+                                    var child_prop = scope.action.get_property(child_code);
+                                    if (child_prop) {
+                                        // fixme: значение в виджете не очищается, при обнулении модели
+                                        try {
+                                            child_prop.value.name = '';
+                                        } catch (e) {}
+                                        child_prop.value = null;
+                                    }
                                 }
-                            }
-                        })
-                    }
-                });
+                            })
+                        }
+                    });
+                }
             };
 
             scope.layout_tools = {

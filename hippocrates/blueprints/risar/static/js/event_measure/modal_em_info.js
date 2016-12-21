@@ -7,12 +7,13 @@ WebMis20.run(['$templateCache', '$http', function ($templateCache, $http) {
 }]);
 
 var EventMeasureModalCtrl = function ($scope, $filter, $q,
-    RisarApi, RefBookService, WMAction, PrintingService, EMModalService,
-    event_measure, options) {
+        RisarApi, RefBookService, WMAction, PrintingService, EMModalService, event_measure, options) {
     $scope.event_measure = event_measure.data;
     $scope.checkup_id = options && options.checkup_id;
     $scope.access = event_measure.access;
     $scope.ro = true;
+    $scope.appointment_action = new WMAction();
+    $scope.em_result_action = new WMAction();
     $scope.ps = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
         return {
@@ -167,8 +168,6 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     };
 
     $scope.init = function () {
-        $scope.appointment_action = new WMAction();
-        $scope.em_result_action = new WMAction();
         $scope.ActionStatus = RefBookService.get('ActionStatus');
         $scope.FileAttachType = RefBookService.get('FileAttachType');
         $q.all([$scope.ActionStatus.loading, $scope.FileAttachType.loading]).then(function () {
