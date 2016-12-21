@@ -4,7 +4,7 @@ from hippocrates.blueprints.risar.risar_config import risar_anamnesis_pregnancy
 from hippocrates.blueprints.risar.lib.utils import fill_action_from_another_action, get_action_by_id
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children, RisarPreviousPregnancy_Children
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_traverse
+from nemesis.lib.utils import safe_traverse, safe_traverse_attrs
 
 
 def copy_anamnesis_from_gyn_card(gyn_card, preg_card):
@@ -120,3 +120,13 @@ def send_prev_pregnancies_to_gyn_card(pregnancy_event):
             create_prev_pregn_based_on_epicrisis(from_card=preg_card, to_card=gyn_card)
             copy_all_prev_pregs(from_card=preg_card, to_card=gyn_card, own_only=True)
             gyn_card.reevaluate_card_attrs()
+
+
+def get_delivery_date_based_on_epicrisis(pregnancy):
+    from blueprints.risar.lib.card import PregnancyCard
+    if 'card_number' in pregnancy.action.propsByCode:
+        early_event_id = pregnancy.action['card_number'].value
+        card = PregnancyCard.get_by_id(early_event_id)
+        if card:
+            epic = safe_traverse_attrs(card, 'epicrisis', 'action')
+            return epic['delivery_date'].value

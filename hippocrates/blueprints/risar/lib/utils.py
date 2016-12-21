@@ -11,6 +11,7 @@ from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, saf
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
+from nemesis.models.event import Event
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
@@ -543,3 +544,10 @@ def get_props_descriptor(action, flatcode):
         for prop_type in property_types
         if prop_type.code
     }
+
+
+def get_external_id(event_id):
+    if event_id:
+        event = Event.query.get(event_id)
+        if event:
+            return event.externalId

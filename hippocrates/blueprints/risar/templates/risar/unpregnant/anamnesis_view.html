@@ -275,7 +275,9 @@
                     <tbody>
                     <tr ng-repeat="p in anamnesis.pregnancies">
                         <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
-                        <td ng-if="!p.deleted" ng-bind="p.year"></td>
+                        <td ng-if="!p.deleted">
+                            <span class="[[p.epic_delivery_date ? 'bottom_dotted' : '']]" tooltip="[[p.epic_delivery_date]]" tooltip-enable="p.epic_delivery_date">[[p.year]]</span>
+                        </td>
                         <td ng-if="!p.deleted" ng-bind="p.pregnancyResult.name"></td>
                         <td ng-if="!p.deleted" ng-bind="p.pregnancy_week"></td>
                         <td ng-if="!p.deleted">
