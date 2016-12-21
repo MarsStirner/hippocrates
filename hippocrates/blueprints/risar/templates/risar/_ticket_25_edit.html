@@ -110,7 +110,7 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('condit_med_help')"></rb-select>
                     </td>
                 </tr>
-                <tr>
+                <tr ng-if="ticket_25_descriptor.exists('department')">
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('department')"></th>
                     <td class="col-md-8">
                         <rb-select ref-book="OrgStructure" ng-model="checkup.ticket_25.department" limit-to="50"

@@ -1407,14 +1407,17 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
 .factory('PropsDescriptor', [function () {
     return function (props_descriptor) {
         return {
+            exists: function (code) {
+                return _.has(props_descriptor, code);
+            },
             getName: function (code) {
-                return props_descriptor[code].name;
+                return this.exists(code) ? props_descriptor[code].name : '';
             },
             getMandatory: function (code) {
-                return props_descriptor[code].mandatory;
+                return this.exists(code) ? props_descriptor[code].mandatory : 0;
             },
             getReadOnly: function (code) {
-                return props_descriptor[code].read_only;
+                return this.exists(code) ? props_descriptor[code].read_only : 0;
             },
             getLabel: function (code) {
                 var mandatory_text = ' <span class="text-danger">*</span>';
