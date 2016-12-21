@@ -81,7 +81,7 @@
                                     <div class="col-sm-6 col-md-6">[[epicrisis.weight_gain]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Особенности течения беременности:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('pregnancy_speciality')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.pregnancy_speciality"></div>
                                 </div>
                             </div>
@@ -96,15 +96,15 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Дата смерти:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('death_date')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[epicrisis.death_date|asDate]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Время смерти:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('death_time')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[epicrisis.death_time|asTime]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Причина смерти:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('reason_of_death')]]:</div>
                                     <div class="col-sm-7 col-md-7  long-words">[[epicrisis.reason_of_death]]</div>
                                 </div>
                                 <div class="row">
@@ -114,7 +114,8 @@
                                             <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                </div>
+                                <div class="row">
                                     <div class="col-sm-5 col-md-5  text-right">Диагнозы осложнения:</div>
                                     <div class="col-sm-7 col-md-7">
                                         <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'pathanatomical'">
@@ -130,9 +131,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Заключение ЛКК:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('control_expert_conclusion')]]:</div>
                                     <div class="col-sm-7 col-md-7 long-words" ng-bind-html="epicrisis.control_expert_conclusion"></div>
                                 </div>
                                 <div class="row">
@@ -162,63 +162,63 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Биологическая незрелость родовых путей в 40 недель:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('immaturity')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.immaturity ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Излитие околоплодных вод:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('delivery_waters')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.delivery_waters.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Дородовое излитие вод (при отсутствии родовой деятельности более 6 ч):</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('pre_birth_delivery_waters')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.pre_birth_delivery_waters ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Слабость родовых сил:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('weakness')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.weakness.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Разрыв промежностей (степень):</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('perineal_tear')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.perineal_tear.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Мекониальная окраска амниотических вод:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('meconium_colouring')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.meconium_colouring ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Патологический прелиминарный период:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('patologicsl_preliminal_period')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.patologicsl_preliminal_period ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Аномалии родовой деятельности:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('labor_anomalies')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.labor_anomalies ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Хориоамнионит:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('chorioamnionit')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.chorioamnionit ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Анемия после родов (Hb<110 г/л):</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('poor_blood')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.poor_blood ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Нефропатия/эклампсия в родах:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('eclampsia')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.eclampsia.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Патология пуповины:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('funiculus')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.funiculus.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Патология плаценты:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('afterbirth')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.afterbirth.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Инфекции в родах:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('infections_during_birth')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[epicrisis.infections_during_birth]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Инфекции после родов:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('infections_after_birth')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.infections_after_birth"></div>
                                 </div>
                             </div>
@@ -233,23 +233,23 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Вскрытие околоплодного пузыря:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('caul')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[epicrisis.caul  ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Ручное обследование матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('calfbed')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[epicrisis.calfbed  ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Эпизио/перинеотомия:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('perineotomy')]]:</div>
                                     <div class="col-sm-7 col-md-7 long-words">[[epicrisis.perineotomy]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Ручное выделение последа:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('secundines')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[epicrisis.secundines ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Другие пособия и манипуляции:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('other_manipulations')]]:</div>
                                     <div class="col-sm-7 col-md-7 long-words" ng-bind-html="epicrisis.other_manipulations"></div>
                                 </div>
                                 <div class="row">
@@ -276,40 +276,40 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Кесарево сечение:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('caesarean_section')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.caesarean_section.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Акушерские щипцы:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('obstetrical_forceps')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.obstetrical_forceps.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Вакуум-экстракция:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('vacuum_extraction')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.vacuum_extraction ? 'да': '']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Показания к операции:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('indication')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.indication.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Особенности операции:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('specialities')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.specialities.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Обезболивание:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('anesthetization')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.anesthetization.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Гистерэктомия:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('hysterectomy')]]:</div>
                                     <div class="col-md-6">[[epicrisis.hysterectomy.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Осложнения операции:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('operation_complication')]]:</div>
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="diag in epicrisis.operation_complication" tooltip="[[diag.name]]">[[diag.code]]
                                     <span ng-if="epicrisis.operation_complication.length>1"><br></span></span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Плодоразрушающие операции:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('embryotomy')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[epicrisis.embryotomy  ? 'да': '']]</div>
                                 </div>
                             </div>
@@ -378,7 +378,7 @@
                 </div>
             </tab>
             <div class="pull-right">
-                <a class="btn btn-lg dropdown-toggle" ng-show="epicrisis.printing_action_id" ng-click="print_self()">
+                <a class="btn btn-lg" style="padding-bottom: 0;" ng-show="epicrisis.printing_action_id" ng-click="print_self()">
                     <span class="glyphicon glyphicon-print"></span>
                 </a>
             </div>
