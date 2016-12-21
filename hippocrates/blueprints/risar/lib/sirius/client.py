@@ -68,7 +68,7 @@ def update_entity_from_mis(region, entity, remote_id):
     return code
 
 
-def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
+def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
                               date, beg_time, end_time, schedule_id):
     from hippocrates.blueprints.risar.lib.sirius import OperationCode, \
         RisarEntityCode
@@ -78,28 +78,35 @@ def check_mis_schedule_ticket(event_id, ticket_id, is_delete, org, person,
     if not app.config.get('SIRIUS_ENABLED'):
         return True
     if not binded_event(event_code):
-        return
+        return True
     data = {
         'event': event_code,
         'entity_code': RisarEntityCode.SCHEDULE_TICKET,
-        'operation_code': OperationCode.READ_MANY,
+        'operation_code': OperationCode.CHANGE,
         'method': 'delete' if is_delete else 'post',
-        "service_method": 'api_schedule_tickets_get',
-        "request_params": {'client_id': event_id},
+        # "service_method": 'api_schedule_tickets_get',
+        "request_params": {
+            # 'hospital': org.regionalCode,
+            'doctor': person.regionalCode,
+            'patient': client_id,
+        },
         "main_id": ticket_id,
         "main_param_name": 'schedule_ticket_id',
         "data": {
+            "schedule_ticket_id": ticket_id,
             "schedule_id": schedule_id,
-            "hospital": org.TFOMSCode,
-            "doctor": person.regionalCode,
+            # "hospital": org.regionalCode,
+            # "doctor": person.regionalCode,
+            # "patient": client_id,
             "date": date.isoformat(),
-            "beg_time": beg_time.isoformat()[:5],
-            "end_time": end_time.isoformat()[:5],
+            "time_begin": beg_time.isoformat()[:5],
+            "time_end": end_time.isoformat()[:5],
         }
     }
     result = send_event_remote(data)
     code = result['meta']['code']
-    return code == 200
+    reject = result['meta'].get('reject')
+    return code == 200 and reject != 1
 
 
 def get_risar_id_by_mis_id(region, entity, remote_id):

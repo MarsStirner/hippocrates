@@ -9,12 +9,13 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.chart import check_event_controlled
 from hippocrates.blueprints.risar.lib.checkups import can_read_checkup, can_edit_checkup
-from hippocrates.blueprints.risar.lib.utils import action_as_dict
+from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_external_id
+from hippocrates.blueprints.risar.lib.anamnesis import get_delivery_date_based_on_epicrisis
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes, \
     risar_gyn_checkup_flat_codes
 from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
-from nemesis.lib.utils import safe_int, safe_bool
+from nemesis.lib.utils import safe_int, safe_bool, safe_date, format_date
 from nemesis.models.diagnosis import Diagnostic
 from nemesis.models.enums import Gender, IntoleranceType, AllergyPower
 from nemesis.models.exists import rbAttachType
@@ -348,12 +349,10 @@ def represent_transfusion(action):
     )
 
 
-def get_external_id(event_id):
-    from nemesis.models.event import Event
-    if event_id:
-        event = Event.query.get(event_id)
-        if event:
-            return event.externalId
+
+
+
+
 
 
 def represent_pregnancy(pregnancy):
@@ -365,9 +364,13 @@ def represent_pregnancy(pregnancy):
         ),
         id=pregnancy.action.id,
         event_id=pregnancy.action['card_number'].value if 'card_number' in pregnancy.action.propsByCode else None,
-        external_id=get_external_id(pregnancy.action['card_number'].value) if 'card_number' in pregnancy.action.propsByCode else None
+        external_id=get_external_id(
+            pregnancy.action['card_number'].value
+        ) if 'card_number' in pregnancy.action.propsByCode else None,
+        epic_delivery_date=format_date(
+            safe_date(get_delivery_date_based_on_epicrisis(pregnancy))
+        ) if 'card_number' in pregnancy.action.propsByCode else None
     )
-
 
 def represent_anamnesis_newborn_inspection(child):
     return {
@@ -468,6 +471,7 @@ def represent_ticket_25(action):
             'manipulations': [],
             'temp_disability': [],
         }
+    action.update_action_integrity()
     return dict(
         action_as_dict(action),
         id=action.id,

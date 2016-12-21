@@ -35,7 +35,7 @@ class EmAppointmentRepr(object):
                 for prop in action.properties
             ],
             'ro': not can_edit_em_appointment(event_measure) if event_measure is not None else False,
-            'layout': aviz.make_action_layout(action),
+            'layout': self.represent_layout(action),
             'number': self.represent_number(action)
         }
 
@@ -52,3 +52,20 @@ class EmAppointmentRepr(object):
     def represent_number(self, action):
         if hasattr(action, 'action_number') and action.action_number:
             return action.action_number.number
+
+    def represent_layout(self, action):
+        aviz = ActionVisualizer()
+        res = aviz.make_action_layout(action)
+        res.update({
+            # зависимость дочерних полей от родительских
+            #  - доступность для редактирования только после выбора значения в родительском
+            #  - дополнительные фильтры на основе выбора в родительском поле
+            'dependencies': {
+                # 'child': {'parent': ..., type: 'typeName', }
+                'department': {
+                    'parent': 'LPUDirection',
+                    'type': 'OrgStructure'
+                }
+            }
+        })
+        return res

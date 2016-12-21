@@ -294,6 +294,10 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('checkup_descriptor', angular.fromJson('{{checkup_descriptor|tojson|safe}}'));
+        WebMis20.value('ticket_25_descriptor', angular.fromJson('{{ticket_25_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/checkup.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/checkup_puerpera.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>

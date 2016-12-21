@@ -44,6 +44,7 @@ def api_0_gyn_checkup(event_id):
         validate_diagnoses(diagnoses)
 
     action = get_action_by_id(checkup_id, event, risar_gyn_checkup_flat_code, True)
+    action.update_action_integrity()
 
     if not checkup_id:
         close_open_checkups(event_id)
@@ -52,6 +53,7 @@ def api_0_gyn_checkup(event_id):
     action.person = person
 
     ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
+    ticket.update_action_integrity()
     db.session.add(ticket)
     if not ticket.id:
         # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
@@ -90,6 +92,7 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
     action = get_action_by_id(checkup_id) or bail_out(ApiException(404, u'Action с id {0} не найден'.format(checkup_id)))
     if action.event_id != event_id:
         raise ApiException(404, u'Action c id {0} не принадлежит Event с id {1}'.format(checkup_id, event_id))
+    action.update_action_integrity()
     return {
         'checkup': represent_gyn_checkup(action),
         'access': represent_checkup_access(action)
@@ -114,6 +117,8 @@ def api_0_gyn_checkup_get_new(event_id, flat_code):
 def api_0_gyn_checkup_list(event_id):
     event = Event.query.get(event_id)
     card = GynecologicCard.get_for_event(event)
+    for action in card.checkups:
+        action.update_action_integrity()
 
     def repr(checkup):
         return {

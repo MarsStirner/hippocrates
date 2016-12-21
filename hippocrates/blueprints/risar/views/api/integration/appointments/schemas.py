@@ -38,15 +38,10 @@ class AppointmentSchema(Schema):
                 "type": "string",
                 "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
             },
-            "time": {
+            "execution_time": {
                 "description": "Время забора материала",
                 "type": "string",
                 "pattern": "^([0-9]|0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$"
-            },
-            "date": {
-                "description": "Дата забора материала",
-                "type": "string",
-                "format": "date"
             },
             "parameters": {
                 "description": "Параметры (список)",
@@ -64,6 +59,10 @@ class AppointmentSchema(Schema):
                 "description": "Направлен в (код ЛПУ)",
                 "type": "string"
             },
+            "referral_department": {
+                "description": "Код подразделения",
+                "type": "string"
+            },
             "referral_date": {
                 "description": "Дата направления",
                 "type": "string",
@@ -71,6 +70,27 @@ class AppointmentSchema(Schema):
             },
             "comment": {
                 "description": "Комментарий",
+                "type": "string"
+            },
+            "appointment_code": {
+                "description": "Код направления",
+                "type": "string"
+            },
+            "appointed_date": {
+                "description": "Дата назначения",
+                "type": "string",
+                "format": "date"
+            },
+            "hospitalization_form": {
+                "description": "Код формы госпитализации, справочник rbHosp_form_regional",
+                "type": "string"
+            },
+            "operation": {
+                "description": "Код справочника требуется ли операция, справочник rb_operationNeed_regional",
+                "type": "string"
+            },
+            "profile": {
+                "description": "Код профиля, справочник rbProfMedHelp",
                 "type": "string"
             }
         }

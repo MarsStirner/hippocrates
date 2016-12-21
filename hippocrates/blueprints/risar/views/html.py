@@ -7,11 +7,11 @@ from flask_login import current_user
 
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
     first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, \
-    puerpera_inspection_flat_code
+    puerpera_inspection_flat_code, risar_epicrisis, gynecological_ticket_25
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_nursing
 from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
-from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode, get_action_by_id
+from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode, get_action_by_id, get_props_descriptor
 from hippocrates.blueprints.risar.lib.checkups import can_edit_checkup
 from hitsl_utils.api import ApiException
 from nemesis.app import app
@@ -209,6 +209,7 @@ def html_gyn_inspection_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
+    checkup = None
     if checkup_id:
         checkup = get_action_by_id(checkup_id)
         if not checkup:
@@ -217,7 +218,10 @@ def html_gyn_inspection_edit():
         if not can_edit_checkup(checkup):
             return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
 
-    return render_template('risar/unpregnant/inspection_edit.html', card=card)
+    ticket_25 = checkup and checkup.get_prop_value('ticket_25')
+    return render_template('risar/unpregnant/inspection_edit.html', card=card,
+                           checkup_descriptor=get_props_descriptor(checkup, risar_gyn_checkup_flat_code),
+                           ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
 
 
 @module.route('/inspection.html')
@@ -236,6 +240,7 @@ def html_gravidograma():
 
 @module.route('/inspection_read.html')
 def html_inspection_read():
+
     checkup_id = request.args.get('checkup_id')
     if not checkup_id:
         raise abort(404)
@@ -247,24 +252,32 @@ def html_inspection_read():
         ActionType
     ).filter(
         Action.id == checkup_id
-    ).with_entities(
-        ActionType.flatCode
     ).first()
 
     if not checkup:
         abort(404)
-    flat_code = checkup[0]
-
+    flat_code = checkup.actionType.flatCode
+    ticket_25 = checkup.get_prop_value('ticket_25')
     if flat_code == first_inspection_flat_code:
-        return render_template('risar/inspection_first_read.html', card=card)
+        return render_template('risar/inspection_first_read.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == second_inspection_flat_code:
-        return render_template('risar/inspection_second_read.html', card=card)
+        return render_template('risar/inspection_second_read.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == risar_gyn_checkup_flat_code:
-        return render_template('risar/unpregnant/inspection_read.html', card=card)
+        return render_template('risar/unpregnant/inspection_read.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == pc_inspection_flat_code:
-        return render_template('risar/inspection_pc_read.html', card=card)
+        return render_template('risar/inspection_pc_read.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
     elif flat_code == puerpera_inspection_flat_code:
-        return render_template('risar/inspection_puerpera_read.html', card=card)
+        return render_template('risar/inspection_puerpera_read.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
 
 
 @module.route('/inspection_edit.html')
@@ -272,6 +285,7 @@ def html_inspection_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
+    checkup = None
     if checkup_id:
         checkup = get_action_by_id(checkup_id)
         if not checkup:
@@ -288,12 +302,20 @@ def html_inspection_edit():
             ActionType.flatCode == first_inspection_flat_code,
         ).count() > 0
         flat_code = second_inspection_flat_code if first_inspection_exists else first_inspection_flat_code
-    
+
+    ticket_25 = checkup and checkup.get_prop_value('ticket_25')
     if flat_code == first_inspection_flat_code:
-        return render_template('risar/inspection_first_edit.html', card=card)
+
+        return render_template('risar/inspection_first_edit.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25)
+                               )
     
     elif flat_code == second_inspection_flat_code:
-        return render_template('risar/inspection_second_edit.html', card=card)
+        return render_template('risar/inspection_second_edit.html', card=card,
+                               checkup_descriptor=get_props_descriptor(checkup, flat_code),
+                               ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25)
+                               )
     
 
 @module.route('/inspection_pc_edit.html')
@@ -301,6 +323,7 @@ def html_inspection_pc_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
+    checkup = None
     if checkup_id:
         checkup = get_action_by_id(checkup_id)
         if not checkup:
@@ -308,7 +331,10 @@ def html_inspection_pc_edit():
 
         if not can_edit_checkup(checkup):
             return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
-    return render_template('risar/inspection_pc_edit.html', card=card)
+    ticket_25 = checkup and checkup.get_prop_value('ticket_25')
+    return render_template('risar/inspection_pc_edit.html', card=card,
+                           checkup_descriptor=get_props_descriptor(checkup, pc_inspection_flat_code),
+                           ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
 
 
 @module.route('/inspection_puerpera.html')
@@ -323,6 +349,7 @@ def html_inspection_puerpera_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     checkup_id = request.args.get('checkup_id')
+    checkup = None
     if checkup_id:
         checkup = get_action_by_id(checkup_id)
         if not checkup:
@@ -330,7 +357,10 @@ def html_inspection_puerpera_edit():
 
         if not can_edit_checkup(checkup):
             return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
-    return render_template('risar/inspection_puerpera_edit.html', card=card)
+    ticket_25 = checkup and checkup.get_prop_value('ticket_25')
+    return render_template('risar/inspection_puerpera_edit.html', card=card,
+                           checkup_descriptor=get_props_descriptor(checkup, pc_inspection_flat_code),
+                           ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
 
 
 @module.route('/inspection_fetus.html')
@@ -344,14 +374,16 @@ def html_inspection_fetus():
 def html_epicrisis():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
-    return render_template('risar/epicrisis.html', card=card)
+    return render_template('risar/epicrisis.html', card=card,
+                           epicrisis_descriptor=get_props_descriptor(card.epicrisis.action, risar_epicrisis))
 
 
 @module.route('/epicrisis_edit.html')
 def html_epicrisis_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
-    return render_template('risar/epicrisis_edit.html', card=card)
+    return render_template('risar/epicrisis_edit.html', card=card,
+                           epicrisis_descriptor=get_props_descriptor(card.epicrisis.action, risar_epicrisis))
 
 
 @module.route('/event_diagnoses.html')

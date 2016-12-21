@@ -304,7 +304,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
 
         person = data.get('person')
         res.update({
-            'hospital': person.organisation and person.organisation.TFOMSCode or '',
+            'hospital': person.organisation and person.organisation.regionalCode or '',
             'doctor': person.regionalCode,
         })
         return res

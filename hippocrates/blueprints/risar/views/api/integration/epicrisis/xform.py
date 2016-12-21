@@ -48,7 +48,7 @@ class EpicrisisXForm(EpicrisisSchema, XForm):
     def as_json(self):
         self.find_target_obj(self.target_obj_id)
         res = {
-            'hospital': self.target_obj.execPerson.organisation and self.target_obj.execPerson.organisation.TFOMSCode or '',
+            'hospital': self.target_obj.execPerson.organisation and self.target_obj.execPerson.organisation.regionalCode or '',
             'hospital_doctor': self.target_obj.execPerson.regionalCode,
             'hospital_chief_doctor': self.target_obj.manager and self.target_obj.manager.regionalCode or '',
             'date_close': self.safe_represent_val(self.target_obj.execDate),

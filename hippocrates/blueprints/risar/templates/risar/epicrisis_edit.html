@@ -66,9 +66,10 @@
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 1. Общая информация</h3>
                                 <div class="row" ng-class="{'has-error': firstForm.pregnancy_final.$invalid}" >
-                                    <div class="col-md-3" for="pregnancy_final" class="control-label text-right">Беременность закончилась</div>
+                                    <div class="col-md-3" for="pregnancy_final" class="control-label text-right" ng-bind-html="epicrisisDescriptor.getLabel('pregnancy_final')"></div>
                                     <div class="col-md-9" name="pregnancy_final" ng-model="epicrisis.pregnancy_final"
-                                         refbook-radio ref-book="rbRisarPregnancy_Final" ng-required="true">
+                                         refbook-radio ref-book="rbRisarPregnancy_Final"
+                                         ng-disabled="epicrisisDescriptor.getReadOnly('pregnancy_final')" ng-required="epicrisisDescriptor.getMandatory('pregnancy_final')">
                                       [[ item.name ]]
                                     </div>
                                 </div>
@@ -77,56 +78,56 @@
                                 <table class="table table-condensed" ng-if="epicrisis.pregnancy_final.code">
                                     <tbody>
                                         <tr>
-                                            <th class="text-right col-md-4">Дата поступления в роддом <span>&nbsp;</span></th>
+                                            <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('arrival_date')"></th>
                                             <td class="col-md-8">
-                                                <div class="row">
+                                                <div class="row" ng-class="{'has-error': firstForm.arrival_date.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2">
-                                                    <wm-date ng-model="epicrisis.arrival_date" min-date="minDate"
-                                                             style="width: 250px" name="arrival_date"></wm-date>
+                                                    <wm-date ng-model="epicrisis.arrival_date" min-date="minDate" ng-disabled="epicrisisDescriptor.getReadOnly('arrival_date')"
+                                                             style="width: 250px" ng-required="epicrisisDescriptor.getMandatory('arrival_date')" name="arrival_date"></wm-date>
                                                 </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right col-md-4">[[epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
+                                            <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('delivery_date')"></th>
                                             <td class="col-md-8">
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2">
-                                                <wm-date ng-model="epicrisis.delivery_date" min-date="minDate"
-                                                         style="width: 250px" ng-required="true" name="delivery_date"></wm-date>
+                                                <wm-date ng-model="epicrisis.delivery_date" min-date="minDate" ng-disabled="epicrisisDescriptor.getReadOnly('delivery_date')"
+                                                         style="width: 250px" ng-required="epicrisisDescriptor.getMandatory('delivery_date')" name="delivery_date"></wm-date>
                                                 </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">[[ epicrisis.pregnancy_final.code =='abortom' ? 'Время аборта':'Время родов']]  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('delivery_time')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_time.$invalid && firstForm.submit_attempt}">
                                                     <div class="col-md-4">
-                                                        <div fs-time ng-model="epicrisis.delivery_time"
-                                                             name="delivery_time" ng-required="true"></div>
+                                                        <div fs-time ng-model="epicrisis.delivery_time" ng-disabled="epicrisisDescriptor.getReadOnly('delivery_time')"
+                                                             name="delivery_time" ng-required="epicrisisDescriptor.getMandatory('delivery_time')"></div>
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">[[ epicrisis.pregnancy_final.code =='abortom' ? 'Аборт при сроке (недель)': 'Роды при сроке (недель)']]  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('pregnancy_duration')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.pregnancy_duration.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2  col-lg-2">
                                                     <input ng-model="epicrisis.pregnancy_duration" class="form-control" name="pregnancy_duration"
-                                                           ng-required="true" valid-number type="number" min="[[min_pregnancy_duration]]" max="[[max_pregnancy_duration]]" maxlength="2">
+                                                           ng-disabled="epicrisisDescriptor.getReadOnly('pregnancy_duration')" ng-required="epicrisisDescriptor.getMandatory('pregnancy_duration')" valid-number type="number" min="[[min_pregnancy_duration]]" max="[[max_pregnancy_duration]]" maxlength="2">
                                                 </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
-                                            <th class="text-right">ЛПУ родоразрешения  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('LPU')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.LPU.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
                                                     <ui-select ng-model="epicrisis.LPU" theme="select2" class="form-control" name="LPU"
-                                                               ref-book="Organisation" autocomplete="off" ng-required="epicrisis.pregnancy_final.code =='rodami'">
+                                                               ng-disabled="epicrisisDescriptor.getReadOnly('LPU')" ref-book="Organisation" autocomplete="off" ng-required="epicrisis.pregnancy_final.code =='rodami' && epicrisisDescriptor.getMandatory('LPU')">
                                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
                                                         <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
                                                             <span ng-bind-html="item.full_name | highlight: $select.search"></span>
@@ -137,23 +138,23 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Лечащий врач роддома<span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('maternity_hosp_medico')"></th>
                                             <td>
-                                                <div class="row">
+                                                <div class="row" ng-class="{'has-error': firstForm.maternity_hosp_medico.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
                                                         <wm-person-select ng-model="epicrisis.maternity_hosp_medico" person-kind="onlyOrgPersons"
-                                                            filter-by="hospMedicoFilter" name="maternity_hosp_medico"></wm-person-select>
+                                                            ng-disabled="epicrisisDescriptor.getReadOnly('maternity_hosp_medico')" filter-by="hospMedicoFilter" name="maternity_hosp_medico" ng-required="epicrisisDescriptor.getMandatory('maternity_hosp_medico')"></wm-person-select>
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
-                                            <th class="text-right">ЛПУ курации новорожденного</th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('newborn_LPU')"></th>
                                             <td>
-                                                <div class="row">
+                                                <div class="row" ng-class="{'has-error': firstForm.newborn_LPU.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-7">
                                                     <ui-select ng-model="epicrisis.newborn_LPU" theme="select2" class="form-control" name="newborn_LPU"
-                                                               ref-book="Organisation" autocomplete="off">
+                                                               ng-disabled="epicrisisDescriptor.getReadOnly('newborn_LPU')" ref-book="Organisation" autocomplete="off" ng-required="epicrisisDescriptor.getMandatory('newborn_LPU')">
                                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
                                                         <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
                                                             <span ng-bind-html="item.full_name | highlight: $select.search"></span>
@@ -164,12 +165,12 @@
                                             </td>
                                         </tr>
                                         <tr ng-if="epicrisis.pregnancy_final.code =='abortom'">
-                                            <th class="text-right">Вид аборта  <span class="text-danger">*</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('abort')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.state.$invalid  && firstForm.submit_attempt}">
                                                     <div class="col-md-3">
-                                                        <rb-select name="state" ng-model="epicrisis.abort"
-                                                                   ref-book="rbRisarAbort" ng-required="epicrisis.pregnancy_final.code =='abortom'"></rb-select>
+                                                        <rb-select name="state" ng-model="epicrisis.abort" ng-disabled="epicrisisDescriptor.getReadOnly('abort')"
+                                                                   ref-book="rbRisarAbort" ng-required="epicrisis.pregnancy_final.code =='abortom' && epicrisisDescriptor.getMandatory('abort')"></rb-select>
                                                     </div>
                                                 </div>
                                             </td>
@@ -180,7 +181,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Особенности течения беременности <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('pregnancy_speciality')"></th>
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.pregnancy_speciality" />
@@ -188,7 +189,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Особенности течения послеродового периода <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('afterbirth_features')"></th>
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.afterbirth_features" />
@@ -196,7 +197,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Оказанная помощь <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('help')"></th>
                                             <td>
                                                 <div class="row"><div class="col-md-12">
                                                     <wysiwyg ng-model="epicrisis.help" />
@@ -217,37 +218,37 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <td class="text-right col-md-4">Смерть матери <span>&nbsp;</span></td>
+                                        <td class="text-right col-md-4">Смерть матери<span>&nbsp;</span></td>
                                         <td class="col-md-8">
                                             <input type="checkbox" ng-model="mother_death" ng-change="clear_death_info">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Причина смерти матери <span class="text-danger">*</span></td>
+                                        <td class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('reason_of_death')"></td>
                                         <td><div class="row"
                                                  ng-class="{'has-error': secondForm.reason_of_death.$invalid && secondForm.submit_attempt}">
                                             <div class="col-md-3">
-                                            <input ng-model="epicrisis.reason_of_death" class = "form-control"
-                                                   ng-required="mother_death" name="reason_of_death" ng-disabled="!mother_death">
+                                            <input ng-model="epicrisis.reason_of_death" class="form-control"
+                                                   ng-required="mother_death && epicrisisDescriptor.getMandatory('reason_of_death')" name="reason_of_death" ng-disabled="!mother_death || epicrisisDescriptor.getReadOnly('reason_of_death')">
                                             </div></div>
                                         </td>
 
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Дата смерти матери <span class="text-danger">*</span></td>
+                                        <td class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('death_date')"></td>
                                         <td>
-                                            <wm-date name="death_date" ng-disabled="!mother_death" min-date="epicrisis.delivery_date"
+                                            <wm-date name="death_date" ng-disabled="!mother_death || epicrisisDescriptor.getReadOnly('death_date')" min-date="epicrisis.delivery_date"
                                                      ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
-                                                     ng-required="mother_death" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
+                                                     ng-required="mother_death && epicrisisDescriptor.getMandatory('death_date')" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Время смерти матери <span class="text-danger">*</span></td>
+                                        <td class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('death_time')"></td>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4" ng-class="{'has-error': secondForm.death_time.$invalid}">
-                                            <div fs-time ng-model="epicrisis.death_time" ng-required="mother_death"
-                                                 name="death_time" ng-disabled="!mother_death"></div>
+                                            <div fs-time ng-model="epicrisis.death_time" ng-required="mother_death && epicrisisDescriptor.getMandatory('death_time')"
+                                                 name="death_time" ng-disabled="!mother_death || epicrisisDescriptor.getReadOnly('death_time')"></div>
                                             </div>
                                             </div>
                                         </td>
@@ -261,7 +262,8 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии">Заключение ЛКК <span>&nbsp;</span></span></td>
+                                        <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии"
+                                                                     ng-bind-html="epicrisisDescriptor.getLabel('control_expert_conclusion')"></span></td>
                                         <td>
                                             <div class="row"><div class="col-md-12">
                                                 <wysiwyg ng-model="epicrisis.control_expert_conclusion" contenteditable="mother_death"/>
@@ -281,123 +283,138 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Биологическая незрелость родовых путей в 40 недель</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('immaturity')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.immaturity">
+                                            <input type="checkbox" ng-model="epicrisis.immaturity"
+                                                   ng-required="epicrisisDescriptor.getMandatory('immaturity')" ng-disabled="epicrisisDescriptor.getReadOnly('immaturity')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right col-md-4">Излитие околоплодных вод</th>
+                                        <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('delivery_waters')"></th>
                                         <td class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.delivery_waters" ref-book="rbRisarDelivery_Waters"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.delivery_waters" ref-book="rbRisarDelivery_Waters"
+                                                    ng-required="epicrisisDescriptor.getMandatory('delivery_waters')" ng-disabled="epicrisisDescriptor.getReadOnly('delivery_waters')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Дородовое излитие вод (при отсутствии родовой деятельности более 6 ч)</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('pre_birth_delivery_waters')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.pre_birth_delivery_waters">
+                                            <input type="checkbox" ng-model="epicrisis.pre_birth_delivery_waters"
+                                            ng-required="epicrisisDescriptor.getMandatory('pre_birth_delivery_waters')" ng-disabled="epicrisisDescriptor.getReadOnly('pre_birth_delivery_waters')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Слабость родовых сил</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('weakness')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.weakness" ref-book="rbRisarWeakness"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.weakness" ref-book="rbRisarWeakness"
+                                                    ng-required="epicrisisDescriptor.getMandatory('weakness')" ng-disabled="epicrisisDescriptor.getReadOnly('weakness')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Разрыв промежностей (степень)</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('perineal_tear')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.perineal_tear" ref-book="rbPerinealTear"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.perineal_tear" ref-book="rbPerinealTear"
+                                                    ng-required="epicrisisDescriptor.getMandatory('perineal_tear')" ng-disabled="epicrisisDescriptor.getReadOnly('perineal_tear')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Мекониальная окраска амниотических вод</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('meconium_colouring')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.meconium_colouring">
+                                            <input type="checkbox" ng-model="epicrisis.meconium_colouring"
+                                            ng-required="epicrisisDescriptor.getMandatory('meconium_colouring')" ng-disabled="epicrisisDescriptor.getReadOnly('meconium_colouring')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Патологический прелиминарный период</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('patologicsl_preliminal_period')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.patologicsl_preliminal_period">
+                                            <input type="checkbox" ng-model="epicrisis.patologicsl_preliminal_period"
+                                            ng-required="epicrisisDescriptor.getMandatory('patologicsl_preliminal_period')" ng-disabled="epicrisisDescriptor.getReadOnly('patologicsl_preliminal_period')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Аномалии родовой деятельности</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('labor_anomalies')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.labor_anomalies">
+                                            <input type="checkbox" ng-model="epicrisis.labor_anomalies"
+                                            ng-required="epicrisisDescriptor.getMandatory('labor_anomalies')" ng-disabled="epicrisisDescriptor.getReadOnly('labor_anomalies')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Хориоамнионит</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('chorioamnionit')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.chorioamnionit">
+                                            <input type="checkbox" ng-model="epicrisis.chorioamnionit"
+                                            ng-required="epicrisisDescriptor.getMandatory('chorioamnionit')" ng-disabled="epicrisisDescriptor.getReadOnly('chorioamnionit')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Анемия после родов (Hb<110 г/л)</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('poor_blood')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.poor_blood">
+                                            <input type="checkbox" ng-model="epicrisis.poor_blood"
+                                            ng-required="epicrisisDescriptor.getMandatory('poor_blood')" ng-disabled="epicrisisDescriptor.getReadOnly('poor_blood')">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Нефропатия/эклампсия в родах</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('eclampsia')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.eclampsia" ref-book="rbRisarEclampsia"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.eclampsia" ref-book="rbRisarEclampsia"
+                                                    ng-required="epicrisisDescriptor.getMandatory('eclampsia')" ng-disabled="epicrisisDescriptor.getReadOnly('eclampsia')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Патология пуповины</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('funiculus')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.funiculus" ref-book="rbRisarFuniculus"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.funiculus" ref-book="rbRisarFuniculus"
+                                                    ng-required="epicrisisDescriptor.getMandatory('funiculus')" ng-disabled="epicrisisDescriptor.getReadOnly('funiculus')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Патология плаценты</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('afterbirth')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.afterbirth" ref-book="rbRisarAfterbirth"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.afterbirth" ref-book="rbRisarAfterbirth"
+                                                    ng-required="epicrisisDescriptor.getMandatory('afterbirth')" ng-disabled="epicrisisDescriptor.getReadOnly('afterbirth')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Инфекции в родах</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('infections_during_birth')"></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                                <input ng-model="epicrisis.infections_during_birth" class="form-control">
+                                                <input ng-model="epicrisis.infections_during_birth" class="form-control"
+                                                ng-required="epicrisisDescriptor.getMandatory('infections_during_birth')" ng-disabled="epicrisisDescriptor.getReadOnly('infections_during_birth')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Инфекции после родов</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('infections_after_birth')"></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                                <input ng-model="epicrisis.infections_after_birth" class="form-control">
+                                                <input ng-model="epicrisis.infections_after_birth" class="form-control"
+                                                ng-required="epicrisisDescriptor.getMandatory('infections_after_birth')" ng-disabled="epicrisisDescriptor.getReadOnly('infections_after_birth')">
                                             </div>
                                             </div>
                                         </td>
@@ -416,68 +433,76 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Вскрытие околоплодного пузыря</th>
+                                        <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('caul')"></th>
                                         <td class="col-md-8"><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.caul = true" ng-checked="epicrisis.caul">
+                                                <input type="radio" ng-click="epicrisis.caul = true" ng-checked="epicrisis.caul"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('caul')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.caul = false" ng-checked="!epicrisis.caul">
+                                                <input type="radio" ng-click="epicrisis.caul = false" ng-checked="!epicrisis.caul"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('caul')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Ручное обследование матки</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('calfbed')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.calfbed = true" ng-checked="epicrisis.calfbed">
+                                                <input type="radio" ng-click="epicrisis.calfbed = true" ng-checked="epicrisis.calfbed"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('calfbed')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.calfbed = false" ng-checked="!epicrisis.calfbed">
+                                                <input type="radio" ng-click="epicrisis.calfbed = false" ng-checked="!epicrisis.calfbed"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('calfbed')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Эпизио/перинеотомия</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('perineotomy')"></th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                                <input ng-model="epicrisis.perineotomy" class="form-control">
+                                                <input ng-model="epicrisis.perineotomy" class="form-control"
+                                                    ng-required="epicrisisDescriptor.getMandatory('perineotomy')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('perineotomy')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Ручное выделение последа</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('secundines')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.secundines = true" ng-checked="epicrisis.secundines">
+                                                <input type="radio" ng-click="epicrisis.secundines = true" ng-checked="epicrisis.secundines"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('secundines')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.secundines = false" ng-checked="!epicrisis.secundines">
+                                                <input type="radio" ng-click="epicrisis.secundines = false" ng-checked="!epicrisis.secundines"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('secundines')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Другие пособия и манипуляции</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('secundines')"></th>
                                         <td>
                                             <div class="row"><div class="col-md-12">
                                                 <wysiwyg ng-model="epicrisis.other_manipulations" />
@@ -498,84 +523,98 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Кесарево сечение</th>
+                                        <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('caesarean_section')"></th>
                                         <td class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.caesarean_section" ref-book="rbRisarCaesarean_Section"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.caesarean_section" ref-book="rbRisarCaesarean_Section"
+                                                    ng-required="epicrisisDescriptor.getMandatory('caesarean_section')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('caesarean_section')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Акушерские щипцы</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('obstetrical_forceps')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.obstetrical_forceps" ref-book="rbRisarObstetrical_Forceps"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.obstetrical_forceps" ref-book="rbRisarObstetrical_Forceps"
+                                                    ng-required="epicrisisDescriptor.getMandatory('obstetrical_forceps')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('obstetrical_forceps')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Вакуум-экстракция</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('vacuum_extraction')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = true" ng-checked="epicrisis.vacuum_extraction">
+                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = true" ng-checked="epicrisis.vacuum_extraction"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('vacuum_extraction')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = false" ng-checked="!epicrisis.vacuum_extraction">
+                                                <input type="radio" ng-click="epicrisis.vacuum_extraction = false" ng-checked="!epicrisis.vacuum_extraction"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('vacuum_extraction')">
                                                 Нет
                                             </label>
                                         </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Показания к операции</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('indication')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.indication" ref-book="rbRisarIndication"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.indication" ref-book="rbRisarIndication"
+                                                    ng-required="epicrisisDescriptor.getMandatory('indication')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('indication')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Особенности операции</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('specialities')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"
+                                                    ng-required="epicrisisDescriptor.getMandatory('specialities')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('specialities')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Обезболивание</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('anesthetization')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.anesthetization" ref-book="rbRisarAnesthetization"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.anesthetization" ref-book="rbRisarAnesthetization"
+                                                    ng-required="epicrisisDescriptor.getMandatory('anesthetization')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('anesthetization')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Гистерэктомия</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('hysterectomy')"></th>
                                         <td>
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.hysterectomy" ref-book="rbRisarHysterectomy"></rb-select>
+                                                    <rb-select name="state" ng-model="epicrisis.hysterectomy" ref-book="rbRisarHysterectomy"
+                                                    ng-required="epicrisisDescriptor.getMandatory('hysterectomy')"
+                                                    ng-disabled="epicrisisDescriptor.getReadOnly('hysterectomy')"></rb-select>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Осложнения операции</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('operation_complication')"></th>
                                         <td>
                                             <div class="row">
                                                 <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
@@ -583,17 +622,19 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Плодоразрушающие операции</th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('embryotomy')"></th>
                                         <td><div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.embryotomy = true" ng-checked="epicrisis.embryotomy">
+                                                <input type="radio" ng-click="epicrisis.embryotomy = true" ng-checked="epicrisis.embryotomy"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('embryotomy')">
                                                 Да
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
-                                                <input type="radio" ng-click="epicrisis.embryotomy = false" ng-checked="!epicrisis.embryotomy">
+                                                <input type="radio" ng-click="epicrisis.embryotomy = false" ng-checked="!epicrisis.embryotomy"
+                                                ng-disabled="epicrisisDescriptor.getReadOnly('embryotomy')">
                                                 Нет
                                             </label>
                                         </div>
@@ -821,6 +862,9 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('epicrisis_descriptor', angular.fromJson('{{epicrisis_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/epicrisis.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>
 {% endblock %}

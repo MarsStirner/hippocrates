@@ -19,47 +19,47 @@
             <div class="col-sm-6 col-md-6">[[checkup.ticket_25.end_date|asDate]]</div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Оказываемая медицинская помощь:</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('medical_care')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.medical_care.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Место обращения (посещения):</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('visit_place')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_place.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Посещение:</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('visit_type')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_type.name"></span></div>
     </div>
      <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Обращение (цель):</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('visit_reason')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_reason.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Случай закончен:</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('finished_treatment')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.finished_treatment.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Обращение:</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('initial_treatment')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.initial_treatment.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Результат обращения:</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('treatment_result')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.treatment_result.name"></span></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right">Оплата за счет:</div>
+            <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('payment')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.payment.name"></span></div>
     </div>
     <div class="row">
-        <div class="col-sm-6 col-md-6 text-right">Неотложная:</div>
+        <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('urgent')]]:</div>
         <div class="col-sm-6 col-md-6">[[checkup.ticket_25.urgent ? 'да': 'нет']]</div>
     </div>
     <div class="row">
-        <div class="col-sm-6 col-md-6 text-right">Профиль медицинской помощи:</div>
+        <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('prof_med_help')]]:</div>
         <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.prof_med_help.name"></span></div>
     </div>
     <div class="row">
-        <div class="col-sm-6 col-md-6 text-right">Условия оказания медицинской помощи:</div>
+        <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('condit_med_help')]]:</div>
         <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.condit_med_help.name"></span></div>
     </div>
     <div class="row">
@@ -67,7 +67,7 @@
         <div class="col-sm-6 col-md-6"></div>
     </div>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right"><b>Медицинская услуги</b></div>
+            <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('services')]]</b></div>
             <div class="col-sm-6 col-md-6"></div>
     </div>
     <div class="row">
@@ -90,7 +90,7 @@
     </div>
     <br/>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right"><b>Операции</b></div>
+            <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('operations')]]</b></div>
             <div class="col-sm-6 col-md-6"></div>
     </div>
     <div class="row">
@@ -117,7 +117,7 @@
     </div>
     <br/>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right"><b>Манипуляция и исследования</b></div>
+            <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('manipulations')]]</b></div>
             <div class="col-sm-6 col-md-6"></div>
     </div>
     <div class="row">
@@ -140,14 +140,16 @@
     </div>
     <br/>
     <div class="row">
-            <div class="col-sm-6 col-md-6 text-right"><b>Документ временной нетрудоспособности</b></div>
+            <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('temp_disability')]]</b></div>
             <div class="col-sm-6 col-md-6"></div>
     </div>
     <div class="row">
          <table class="table table-condensed">
             <thead>
               <tr>
-                <th>Тип</th>
+                  <!--Временное решение! RIMIS-1791-->
+                <!--<th>Тип</th>-->
+                <th>Вид</th>
                 <th>Повод выдачи</th>
                 <th>Кому</th>
                 <th>Дата выдачи</th>

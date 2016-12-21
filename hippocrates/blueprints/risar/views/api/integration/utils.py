@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from nemesis.models.exists import OrgStructure
 from nemesis.models.organisation import Organisation
 from nemesis.models.person import Person
 from nemesis.models.client import Client
@@ -7,10 +7,18 @@ from nemesis.models.event import Event
 from nemesis.models.actions import Action
 
 
-def get_org_by_tfoms_code(tfoms_code):
+def get_org_by_org_code(org_code):
     org = Organisation.query.filter(
-        Organisation.TFOMSCode == tfoms_code,
+        Organisation.regionalCode == org_code,
         Organisation.deleted == 0
+    ).first()
+    return org
+
+
+def get_org_structure_by_code(org_str_code):
+    org = OrgStructure.query.filter(
+        OrgStructure.regionalCode == org_str_code,
+        OrgStructure.deleted == 0
     ).first()
     return org
 
@@ -19,7 +27,7 @@ def get_person_by_codes(person_code, org_code):
     person = Person.query.join(Organisation).filter(
         Person.regionalCode == person_code,
         Person.deleted == 0,
-        Organisation.TFOMSCode == org_code,
+        Organisation.regionalCode == org_code,
         Organisation.deleted == 0
     ).first()
     return person

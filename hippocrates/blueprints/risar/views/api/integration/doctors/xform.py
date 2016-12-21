@@ -32,7 +32,7 @@ class DoctorXForm(DoctorSchema, XForm):
         q = Person.query.join(Organisation).filter(
             Person.regionalCode == person_code,
             Person.deleted == 0,
-            Organisation.TFOMSCode == org_code,
+            Organisation.regionalCode == org_code,
             Organisation.deleted == 0
         )
         person_exists = db.session.query(q.exists()).scalar()
@@ -45,7 +45,7 @@ class DoctorXForm(DoctorSchema, XForm):
     def _find_target_obj_query(self):
         query = Person.query.join(Organisation).filter(
             Person.deleted == 0,
-            Organisation.TFOMSCode == self.org_code,
+            Organisation.regionalCode == self.org_code,
             Organisation.deleted == 0
         )
         return query
@@ -82,7 +82,8 @@ class DoctorXForm(DoctorSchema, XForm):
             self.target_obj.post = None
         self.target_obj.login = data.get('login')
         self.target_obj.regionalCode = data.get('regional_code')
-        self._fill_required_fields()
+        if self.new:
+            self._fill_required_fields()
 
     def _fill_required_fields(self):
         self.target_obj.uuid = get_new_uuid()

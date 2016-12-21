@@ -9,7 +9,7 @@ from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
 from nemesis.models.actions import Action
 from nemesis.systemwide import db
-from nemesis.lib.utils import format_time
+from nemesis.lib.utils import format_time, safe_date
 
 
 logger = logging.getLogger('simple')
@@ -70,14 +70,19 @@ class AppointmentXForm(AppointmentSchema, XForm):
         res = {
             'measure_code': action.em_appointment.measure.code,
             'diagnosis': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'DiagnosisDirection'))),
-            'time': self.or_undefined(format_time(self._get_prop_val(action, 'time'))),
-            'date': self.or_undefined(self._get_prop_val(action, 'date')),
+            'execution_time': self.or_undefined(format_time(self._get_prop_val(action, 'time'))),
             'parameters': self.or_undefined(self._get_prop_val(action, 'additional')),
             'referral_lpu': self.or_undefined(self.from_org_rb(self._get_prop_val(action, 'LPUDirection'))),
+            'referral_department': self.or_undefined(self.from_org_struct_rb(self._get_prop_val(action, 'department'))),
             'referral_date': self.or_undefined(self._get_prop_val(action, 'DateDirection')),
             'comment': self.or_undefined(self._get_prop_val(action, 'Comment')),
             'appointed_lpu': self.or_undefined(self.from_org_rb(set_person and set_person.organisation)),
             'appointed_doctor': self.or_undefined(self.from_person_rb(set_person)),
+            'appointment_code': self.or_undefined(action.action_number and action.action_number.number),
+            'appointed_date': self.or_undefined(safe_date(action.begDate)),
+            'hospitalization_form': self.or_undefined(self.from_rb(self._get_prop_val(action, 'hospitalization_form'))),
+            'operation': self.or_undefined(self.from_rb(self._get_prop_val(action, 'operation'))),
+            'profile': self.or_undefined(self.from_rb(self._get_prop_val(action, 'profile')))
         }
         return res
 

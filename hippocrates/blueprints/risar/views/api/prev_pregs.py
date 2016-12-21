@@ -78,6 +78,7 @@ def api_0_pregnancies_post(event_id, action_id=None):
     newborn_inspections = json.pop('newborn_inspections', [])
 
     # prev pregnancy
+    action.update_action_integrity()
     prop_types = {p.code: p for p in action.actionType.property_types if p.code}
     for code in pregnancy_apt_codes:
         if code not in action.propsByCode:
