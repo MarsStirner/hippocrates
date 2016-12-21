@@ -5,7 +5,7 @@ import logging
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func, Time
 
-from ..xform import XForm, VALIDATION_ERROR
+from ..xform import XForm, VALIDATION_ERROR, ALREADY_PRESENT_ERROR
 from .schemas import ScheduleTicketsSchema, ScheduleTicketSchema
 
 from nemesis.models.schedule import ScheduleClientTicket, ScheduleTicket, Schedule, rbAttendanceType,\
@@ -138,7 +138,7 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
         })
         return res
 
-    def _get_new_sct(self, data):
+    def _get_new_sct(self, data, check_duplicate=False):
         rec_type = rbReceptionType.query.filter(rbReceptionType.code == 'amb').first()
         attendance = rbAttendanceType.cache().by_code()[u'planned']
 
@@ -148,24 +148,28 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
             Schedule.date == data['date'],
             Schedule.begTime <= func.cast(data['time_begin'], Time),
             func.cast(data['time_begin'], Time) <= Schedule.endTime
-        ).options(
-            lazyload('*')
-        ).first()
+        ).options(lazyload('*')).first()
         if s:
             st = ScheduleTicket.query.filter(
                 ScheduleTicket.schedule_id == s.id,
                 ScheduleTicket.deleted == 0,
                 ScheduleTicket.begTime == data['time_begin'],
                 ScheduleTicket.endTime == data['time_end']
-            ).options(
-                lazyload('*')
-            ).first()
+            ).options(lazyload('*')).first()
             if not st:
                 st = ScheduleTicket(
                     begTime=data['time_begin'], endTime=data['time_end'],
                     attendanceType=attendance
                 )
                 s.tickets.append(st)
+            elif check_duplicate:
+                ex_sct = ScheduleClientTicket.query.filter(
+                    ScheduleClientTicket.ticket_id == st.id,
+                    ScheduleClientTicket.deleted == 0,
+                ).options(lazyload('*')).first()
+                if ex_sct:
+                    raise ApiException(ALREADY_PRESENT_ERROR,
+                                       u'Уже существует запись на прием на выбранное время')
         else:
             s = Schedule(
                 person=data['person'], date=data['date'],
@@ -192,7 +196,7 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
     def update_target_obj(self, data):
         data = self.convert_and_format(data)
         if self.new:
-            sct = self._get_new_sct(data)
+            sct = self._get_new_sct(data, True)
         else:
             self.find_target_obj(self.target_obj_id)
             existing_sct = self.target_obj
