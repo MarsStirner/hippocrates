@@ -53,6 +53,13 @@ def calculate_preg_result(epicrisis):
                             'iskusstvennyj-pomed.pokazaniamploda',
                             ]:
             code = "therapeutic_abortion"
+        elif abort_kind == "drugievidypreryvaniaberemennosti(kriminal_nye)":
+            code = "criminal"
+        elif abort_kind == "neutocnennye":
+            code = "unknown_miscarriage"
+        elif abort_kind == "iskusstvennyj-posozial_nympokazaniam":
+            code = "social_reasons"
+
     if code:
         return {"code": code}
 
@@ -128,5 +135,6 @@ def get_delivery_date_based_on_epicrisis(pregnancy):
         early_event_id = pregnancy.action['card_number'].value
         card = PregnancyCard.get_by_id(early_event_id)
         if card:
-            epic = safe_traverse_attrs(card, 'epicrisis', 'action')
-            return epic['delivery_date'].value
+            if isinstance(card, PregnancyCard):
+                epic = safe_traverse_attrs(card, 'epicrisis', 'action')
+                return epic['delivery_date'].value
