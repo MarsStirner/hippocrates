@@ -82,7 +82,8 @@ class DoctorXForm(DoctorSchema, XForm):
             self.target_obj.post = None
         self.target_obj.login = data.get('login')
         self.target_obj.regionalCode = data.get('regional_code')
-        self._fill_required_fields()
+        if self.new:
+            self._fill_required_fields()
 
     def _fill_required_fields(self):
         self.target_obj.uuid = get_new_uuid()
