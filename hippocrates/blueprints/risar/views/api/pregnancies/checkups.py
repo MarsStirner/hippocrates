@@ -173,6 +173,8 @@ def api_0_pregnancy_checkup_new(event_id):
 
     with db.session.no_autoflush:
         action = get_action_by_id(None, event, flat_code, True)
+        ta = get_action_by_id(None, event, gynecological_ticket_25, True)
+        action['ticket_25'].value = ta
         copy_attrs_from_last_action(event, flat_code, action, (
             'fetus_first_movement_date',
         ))
