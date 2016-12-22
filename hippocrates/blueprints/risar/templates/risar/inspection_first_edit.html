@@ -98,41 +98,49 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Рост <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('height')"></th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.height.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
                                                 <input id="height" name="height" ng-model="checkup.height" valid-number
-                                                       maxlength="3" class="form-control" ng-required="true" autofocus>
+                                                       maxlength="3" class="form-control"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('height')"
+                                                       ng-required="checkupDescriptor.getMandatory('height')" autofocus>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Вес при осмотре <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('weight')"></th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
                                                 <input name="weight" ng-model="checkup.weight" valid-number valid-number-float
-                                                       class="form-control" ng-required="true" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/">
+                                                       class="form-control"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('weight')"
+                                                       ng-required="checkupDescriptor.getMandatory('weight')" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Массо-ростовой коэффициент (МРК) <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('hw_ratio')"></th>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input disabled ng-model="checkup.hw_ratio" class="form-control">
+                                                <input ng-model="checkup.hw_ratio" class="form-control"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('hw_ratio')"
+                                                       ng-required="checkupDescriptor.getMandatory('hw_ratio')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Индекс массы тела <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('BMI')"></th>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input disabled ng-model="checkup.BMI" class="form-control">
+                                                <input ng-model="checkup.BMI" class="form-control"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('BMI')"
+                                                       ng-required="checkupDescriptor.getMandatory('BMI')">
                                             </div></div>
                                         </td>
                                     </tr>
@@ -150,53 +158,61 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Общее состояние <span class="text-danger">*</span></th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('state')"></th>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': somaticForm.state.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState"
-                                                       ng-required="true"></rb-select>
+                                                       ng-disabled="checkupDescriptor.getReadOnly('state')"
+                                                       ng-required="checkupDescriptor.getMandatory('state')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('complaints')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.complaints.$invalid && somaticForm.submit_attempt}">
-                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
+                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('complaints')"
+                                                 ng-required="checkupDescriptor.getMandatory('complaints')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Язык <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('tongue')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.tongue.$invalid && somaticForm.submit_attempt}">
-                                            <div name="tongue" refbook-checkbox ref-book="rbRisarTongue" ng-model="checkup.tongue" ng-required="true">
+                                            <div name="tongue" refbook-checkbox ref-book="rbRisarTongue" ng-model="checkup.tongue"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('tongue')"
+                                                 ng-required="checkupDescriptor.getMandatory('tongue')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Подкожно-жировая клетчатка <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('subcutaneous_fat')"></th>
                                         <td><div class="row" ng-class="{'has-error': somaticForm.subcutaneous_fat.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="subcutaneous_fat" ng-model="checkup.subcutaneous_fat"
-                                                       ref-book="rbRisarSubcutaneous_Fat" ng-required="true"></rb-select>
+                                                       ref-book="rbRisarSubcutaneous_Fat"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('subcutaneous_fat')"
+                                                       ng-required="checkupDescriptor.getMandatory('subcutaneous_fat')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние вен <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vein')"></th>
                                         <td><div class="row" ng-class="{'has-error': somaticForm.vein.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="vein" ng-model="checkup.vein" ref-book="rbRisarVein"
-                                                       ng-required="true"></rb-select>
+                                                       ng-disabled="checkupDescriptor.getReadOnly('vein')"
+                                                       ng-required="checkupDescriptor.getMandatory('vein')"></rb-select>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Отеки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('edema')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
                                     <tr>
@@ -204,11 +220,15 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (somaticForm.ad_right_high.$invalid || somaticForm.ad_right_low.$invalid)  && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input name="ad_right_high" ng-model="checkup.ad_right_high" valid-number
-                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                                <input name="ad_right_high" ng-model="checkup.ad_right_high" valid-number maxlength="3"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_right_high')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_right_high')"
+                                                       class="form-control blood_presure">
                                                 <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.ad_right_low" valid-number
-                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                                <input name="ad_right_low" ng-model="checkup.ad_right_low" valid-number maxlength="3"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_right_low')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_right_low')"
+                                                       class="form-control blood_presure">
                                             </div>
                                             </div>
                                         </td>
@@ -219,45 +239,57 @@
                                                  ng-class="{'has-error': (somaticForm.ad_left_high.$invalid || somaticForm.ad_left_low.$invalid) && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high" valid-number
-                                                       class="form-control blood_presure" ng-required="true">
+                                                       class="form-control blood_presure"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_left_high')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_left_high')" >
                                                 <span>/</span>
                                                 <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low" valid-number
-                                                       class="form-control blood_presure" ng-required="true">
+                                                       class="form-control blood_presure"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_left_low')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_left_low')" >
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">ССС: пульс <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('heart_rate')"></th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': somaticForm.heart_rate.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-2">
-                                                <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control" valid-number
-                                                       maxlength="3" ng-required="true" />
+                                                <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control"
+                                                       valid-number maxlength="3"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('heart_rate')"
+                                                       ng-required="checkupDescriptor.getMandatory('heart_rate')" />
                                             </div></div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Пульс <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pulse')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.pulse.$invalid}">
-                                            <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse" ng-required="true">
+                                            <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('pulse')"
+                                                 ng-required="checkupDescriptor.getMandatory('pulse')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Кожа <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('skin')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.skin.$invalid && somaticForm.submit_attempt}">
-                                            <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin" ng-required="true">
+                                            <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('skin')"
+                                                 ng-required="checkupDescriptor.getMandatory('skin')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лимфоузлы <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.lymph.$invalid && somaticForm.submit_attempt}">
-                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" ng-required="true">
+                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('lymph')"
+                                                 ng-required="checkupDescriptor.getMandatory('lymph')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
