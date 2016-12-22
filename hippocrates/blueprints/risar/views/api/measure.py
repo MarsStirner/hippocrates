@@ -11,7 +11,7 @@ from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_shortly
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_bool, safe_int
+from nemesis.lib.utils import safe_bool, safe_int, db_non_flushable
 from nemesis.models.actions import Action
 from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
@@ -50,36 +50,31 @@ def api_0_event_measure_get(event_measure_id=None):
 
 
 @module.route('/api/0/event_measure_info/<int:event_measure_id>')
+@db_non_flushable
 @api_method
 def api_0_event_measure_get_info(event_measure_id):
     em_ctrl = EventMeasureController()
-    with db.session.no_autoflush:
-        em = EventMeasure.query.get(event_measure_id)
-        if not em:
-            raise ApiException(404, u'Не найдено EM с id = {}'.format(event_measure_id))
+    em = EventMeasure.query.get(event_measure_id)
+    if not em:
+        raise ApiException(404, u'Не найдено EM с id = {}'.format(event_measure_id))
 
-        appointment = em.appointment_action
-        if not appointment and em.measure.appointmentAt_id:
-            appointment = em_ctrl.get_new_appointment(em)
-            data = {
-                'em': em,
-                'checkup_id': safe_int(request.args.get('checkup_id'))
-            }
-            appointment = em_ctrl.fill_new_appointment(appointment, data)
-        em.appointment_action = appointment
+    appointment = em.appointment_action
+    if not appointment and em.measure.appointmentAt_id:
+        appointment = em_ctrl.get_new_appointment(em)
+        data = {
+            'em': em,
+            'checkup_id': safe_int(request.args.get('checkup_id'))
+        }
+        appointment = em_ctrl.fill_new_appointment(appointment, data)
+    em.appointment_action = appointment
 
-        em_result = em.result_action
-        if not em_result and em.measure.resultAt_id:
-            em_result = em_ctrl.get_new_em_result(em)
-        em.result_action = em_result
+    em_result = em.result_action
+    if not em_result and em.measure.resultAt_id:
+        em_result = em_ctrl.get_new_em_result(em)
+    em.result_action = em_result
 
-        # FIXME: иначе будут insert-ы с последующим rollback
-        # Проблема в create_action, где при установке дефолтного значения для свойства
-        # объект помещается в сессию, после чего сессия становится грязной в flush-тся позднее
-        data = EventMeasureRepr().represent_event_measure_info(em)
-        db.session.rollback()
-
-        return data
+    data = EventMeasureRepr().represent_event_measure_info(em)
+    return data
 
 
 @module.route('/api/0/event_measure/<int:event_id>/save-list/', methods=['POST'])
@@ -151,41 +146,37 @@ def api_0_event_measure_undelete(event_measure_id):
 
 @module.route('/api/0/event_measure/<int:event_measure_id>/appointment/')
 @module.route('/api/0/event_measure/<int:event_measure_id>/appointment/<int:appointment_id>')
+@db_non_flushable
 @api_method
 def api_0_event_measure_appointment_get(event_measure_id, appointment_id=None):
     get_new = safe_bool(request.args.get('new', False))
     em_ctrl = EventMeasureController()
-    with db.session.no_autoflush:
-        if get_new:
-            em = EventMeasure.query.get(event_measure_id)
-            if not em:
-                raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
-            action_type_id = em.measure.appointmentAt_id
-            measure_id = em.measure.id
-            if not action_type_id:
-                raise ApiException(
-                    422,
-                    u'Невозможно создать направление для мероприятия Measure с id = {0},'
-                    u'т.к. для него не настроен ActionType для данных направления'.format(measure_id)
-                )
-            appointment = em_ctrl.get_new_appointment(em)
+    if get_new:
+        em = EventMeasure.query.get(event_measure_id)
+        if not em:
+            raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+        action_type_id = em.measure.appointmentAt_id
+        measure_id = em.measure.id
+        if not action_type_id:
+            raise ApiException(
+                422,
+                u'Невозможно создать направление для мероприятия Measure с id = {0},'
+                u'т.к. для него не настроен ActionType для данных направления'.format(measure_id)
+            )
+        appointment = em_ctrl.get_new_appointment(em)
 
-            data = {
-                'em': em,
-                'checkup_id': safe_int(request.args.get('checkup_id'))
-            }
-            appointment = em_ctrl.fill_new_appointment(appointment, data)
-            # FIXME: иначе будут insert-ы с последующим rollback
-            # Проблема в create_action, где при установке дефолтного значения для свойства
-            # объект помещается в сессию, после чего сессия становится грязной в flush-тся позднее
-            db.session.rollback()
-        elif appointment_id:
-            appointment = get_action_by_id(appointment_id)
-            if not appointment:
-                raise ApiException(404, u'Не найден Action с id = '.format(appointment_id))
-        else:
-            raise ApiException(404, u'`appointment_id` required')
-        return EmAppointmentRepr().represent_appointment(appointment)
+        data = {
+            'em': em,
+            'checkup_id': safe_int(request.args.get('checkup_id'))
+        }
+        appointment = em_ctrl.fill_new_appointment(appointment, data)
+    elif appointment_id:
+        appointment = get_action_by_id(appointment_id)
+        if not appointment:
+            raise ApiException(404, u'Не найден Action с id = '.format(appointment_id))
+    else:
+        raise ApiException(404, u'`appointment_id` required')
+    return EmAppointmentRepr().represent_appointment(appointment)
 
 
 @module.route('/api/0/event_measure/<int:event_measure_id>/appointment/', methods=['PUT'])
@@ -214,35 +205,31 @@ def api_0_event_measure_appointment_save(event_measure_id, appointment_id=None):
 
 @module.route('/api/0/event_measure/<int:event_measure_id>/em_result/')
 @module.route('/api/0/event_measure/<int:event_measure_id>/em_result/<int:em_result_id>')
+@db_non_flushable
 @api_method
 def api_0_event_measure_result_get(event_measure_id, em_result_id=None):
     get_new = safe_bool(request.args.get('new', False))
     em_ctrl = EventMeasureController()
-    with db.session.no_autoflush:
-        if get_new:
-            em = EventMeasure.query.get(event_measure_id)
-            if not em:
-                raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
-            action_type_id = em.measure.resultAt_id
-            measure_id = em.measure_id
-            if not action_type_id:
-                raise ApiException(
-                    422,
-                    u'Невозможно создать результат для мероприятия Measure с id = {0},'
-                    u'т.к. для него не настроен ActionType для данных результата'.format(measure_id)
-                )
-            em_result = em_ctrl.get_new_em_result(em)
-            # FIXME: иначе будут insert-ы с последующим rollback
-            # Проблема в create_action, где при установке дефолтного значения для свойства
-            # объект помещается в сессию, после чего сессия становится грязной в flush-тся позднее
-            db.session.rollback()
-        elif em_result_id:
-            em_result = get_action_by_id(em_result_id)
-            if not em_result:
-                raise ApiException(404, u'Не найден Action с id = '.format(em_result_id))
-        else:
-            raise ApiException(404, u'необходим `em_result_id`')
-        return EmResultRepr().represent_em_result(em_result)
+    if get_new:
+        em = EventMeasure.query.get(event_measure_id)
+        if not em:
+            raise ApiException(404, u'Не найдено EM с id = '.format(event_measure_id))
+        action_type_id = em.measure.resultAt_id
+        measure_id = em.measure_id
+        if not action_type_id:
+            raise ApiException(
+                422,
+                u'Невозможно создать результат для мероприятия Measure с id = {0},'
+                u'т.к. для него не настроен ActionType для данных результата'.format(measure_id)
+            )
+        em_result = em_ctrl.get_new_em_result(em)
+    elif em_result_id:
+        em_result = get_action_by_id(em_result_id)
+        if not em_result:
+            raise ApiException(404, u'Не найден Action с id = '.format(em_result_id))
+    else:
+        raise ApiException(404, u'необходим `em_result_id`')
+    return EmResultRepr().represent_em_result(em_result)
 
 
 @module.route('/api/0/event_measure/<int:event_measure_id>/em_result/', methods=['PUT'])
