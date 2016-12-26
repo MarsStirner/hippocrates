@@ -6,7 +6,7 @@ from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_t
 from hippocrates.blueprints.risar.lib.utils import get_action_list
 from nemesis.models.actions import Action
 from nemesis.models.client import BloodHistory
-from nemesis.models.diagnosis import rbDiagnosisKind
+from nemesis.lib.utils import safe_traverse
 
 __author__ = 'viruzzz-kun'
 
@@ -419,15 +419,15 @@ def calc_risk_groups(card):
     if p1 or p2 or p3_a or p3_b or p4 or p5 or p6 or low_hemo:
         yield '14'
 
-    # 15 - Риск развития преэклампсии
+ # 15 - Риск развития преэклампсии
 
-    from hippocrates.blueprints.risar.lib.utils import multiple_birth, collagenoses, hypertensia, kidney_diseases, vascular_diseases, diabetes, antiphospholipid_syndrome
+    from hippocrates.blueprints.risar.lib.utils import hypertensia, kidney_diseases, diabetes,\
+                                                antiphospholipid_syndrome, thrombophilia, extra_mass, \
+                                                infection_during_pregnancy, red_wolfy
 
-    diseases = hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + antiphospholipid_syndrome
+    diseases = hypertensia + kidney_diseases + diabetes + antiphospholipid_syndrome
+    diseases += thrombophilia, extra_mass, infection_during_pregnancy, red_wolfy
     checkups = card.checkups
-    main_kind = rbDiagnosisKind.query.filter(rbDiagnosisKind.code == 'main').first()
-    kind_ids = (main_kind.id,)
-    event_main_diags = card.get_event_diagnostics(card.event.setDate, card.event.execDate, kind_ids)
 
     p1_a = any_thing(
         all_diagnostics,
@@ -439,26 +439,35 @@ def calc_risk_groups(card):
         diseases,
         lambda x: x.DiagID,
     )
-    p1_c = any_thing(
-        event_main_diags,
-        multiple_birth,
-        lambda x: x.MKB,
-    )
-    p1 = p1_a or p1_b or p1_c
 
-    p2 = not card.prev_pregs
-    p3 = card.event.client.age_tuple()[-1] > 35
+    p1 = p1_a or p1_b
+
+    last_checkup = card.checkups[-1] if card.checkups else None
+    last_checkup_hands = (130 <= (last_checkup['ad_right_high'].value or last_checkup['ad_left_left'].value)) or \
+                        (80 <= (last_checkup['ad_right_low'].value or last_checkup['ad_left_low'].value)) if last_checkup else False
+
+    more_than_3_prev_pregs = card.prev_pregs and len(card.prev_pregs) >= 3
+    client_age = card.event.client.age_tuple()[-1] > 40
     try:
-        p4 = (card.checkups and checkups[0]['BMI'].value >= 25)
+        p4 = (card.checkups and checkups[0]['BMI'].value >= 35)
     except KeyError as e:
         p4 = False
-    p5 = card.anamnesis.mother['preeclampsia'].value
 
-    p6 = any(
-        preg.action['pregnancyResult'].value_raw in ('delivery', 'premature_birth_22-27', 'premature_birth_28-37', 'postmature_birth') and
-        preg.action['preeclampsia'].value
+    anamnesis_mother_preeclampsia = card.anamnesis.mother['preeclampsia'].value
+    anamnesis_mother_drugs = card.anamnesis.mother['drugs'].value
+    # 01 ниже прожиточного минимума
+    anamnesis_family_income = safe_traverse(card.anamnesis.mother['family_income'].value, 'code') == '01'
+    # есть значение 17 - "Патологии сердечно-сосудистой системы"
+    anamnesis_hereditary = '17' in map(lambda x: safe_traverse(x, 'code'), card.anamnesis.mother['hereditary'].value)
+    #  выбрано любое значение, кроме 05 - "Естественный";
+    anamnesis_fertilization_type = safe_traverse(card.anamnesis.mother['fertilization_type'].value, 'code') != '05'\
+                                    if card.anamnesis.mother['fertilization_type'].value else False
+    premature_birth = any(
+        preg.action['pregnancyResult'].value_raw in ('premature_birth_22-27',) and
+        preg.action['preeclampsia'].value and preg.action['pregnancy_week'].value <= 34
         for preg in card.prev_pregs
     )
+    atleast_one_preclampsia = any([preg.action['preeclampsia'].value for preg in card.prev_pregs])
 
     now_year = datetime.date.today().year
 
@@ -467,6 +476,9 @@ def calc_risk_groups(card):
         now_year - preg.action['year'].value >= 10
         for preg in card.prev_pregs
     )
+    conditions = [p1, last_checkup_hands, more_than_3_prev_pregs, client_age, anamnesis_mother_preeclampsia,
+            anamnesis_mother_drugs, anamnesis_family_income, anamnesis_hereditary, anamnesis_fertilization_type,
+            premature_birth, atleast_one_preclampsia, p7]
 
-    if p1 or p2 or p3 or p4 or p5 or p6 or p7:
+    if any(conditions):
         yield '15'
