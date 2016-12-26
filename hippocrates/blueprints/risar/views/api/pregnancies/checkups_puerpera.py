@@ -74,7 +74,7 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     db.session.commit()
 
     sirius.send_to_mis(
-        sirius.RisarEvents.SAVE_CHECKUP,
+        sirius.RisarEvents.SAVE_CHECKUP_PUERPERA,
         sirius.RisarEntityCode.CHECKUP_PC_TICKET,
         sirius.OperationCode.READ_ONE,
         'risar.api_checkup_pc_ticket25_get',
