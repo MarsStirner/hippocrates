@@ -9,17 +9,12 @@ from nemesis.systemwide import db
 
 
 def get_latest_measures_in_event(event_id, upto_date=None, with_result=False):
-    """Самые последние мероприятия случая на дату upto_date или текущую дату.
+    """Самые последние мероприятия случая на дату upto_date
 
     По одному EventMeasure на каждый тип мероприятия Measure.
     При этом берутся как автоматически созданные мероприятия на основе схем
     (schemeMeasure_id is not null), так и создаваемые вручную (measure_id is not null).
     """
-    if not upto_date:
-        upto_date = datetime.date.today()
-    elif isinstance(upto_date, datetime.datetime):
-        upto_date = upto_date.date()
-
     UserMeasure = aliased(Measure, name='UserMeasure')
     base_query = db.session.query(EventMeasure).outerjoin(
         ExpertSchemeMeasureAssoc, Measure
@@ -28,8 +23,11 @@ def get_latest_measures_in_event(event_id, upto_date=None, with_result=False):
     ).filter(
         EventMeasure.event_id == event_id,
         EventMeasure.deleted == 0,
-        func.date(EventMeasure.begDateTime) <= upto_date
     )
+    if upto_date:
+        base_query = base_query.filter(
+            func.date(EventMeasure.begDateTime) <= upto_date
+        )
     if with_result:
         base_query = base_query.filter(EventMeasure.resultAction_id.isnot(None))
 
