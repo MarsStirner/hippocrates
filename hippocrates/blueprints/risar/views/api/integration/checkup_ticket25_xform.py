@@ -441,6 +441,8 @@ class CheckupsTicket25XForm(XForm):
 
         # update data in parent checkup
         self.checkup_xform.target_obj.begDate = data['beg_date']
+        if 'department' in self.checkup_xform.target_obj.propsByCode:
+            self.checkup_xform.target_obj['department'].value = data['department']
 
         self.checkup_xform.update_diagnoses_system(
             data_for_diags['diags_list'], data_for_diags['old_action_data']
@@ -466,7 +468,8 @@ class CheckupsTicket25XForm(XForm):
         res = {
             'hospital': self.or_undefined(self.from_org_rb(person and person.organisation)),
             'department': self.or_undefined(
-                self.from_org_struct_rb(action['department'].value)
+                self.from_org_struct_rb(inspection['department'].value)
+                if 'department' in inspection.propsByCode else None
             ),
             'doctor': self.or_undefined(self.from_person_rb(person)),
             'date_open': self.or_undefined(safe_date(action.begDate)),

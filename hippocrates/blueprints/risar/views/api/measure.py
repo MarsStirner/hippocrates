@@ -200,7 +200,8 @@ def api_0_event_measure_appointment_save(event_measure_id, appointment_id=None):
     create_mode = not appointment_id and request.method == 'PUT'
     if create_mode:
         appointment = em_ctrl.create_appointment(em, json_data)
-        em_ctrl.store(em, appointment)
+        em_ctrl.store_appointment(em, appointment)
+
     elif appointment_id:
         appointment = get_action_by_id(appointment_id)
         if not appointment:

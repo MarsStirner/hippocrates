@@ -83,6 +83,9 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
     $scope.isDisabledVisitType = function () {
         return $scope.checkup && $scope.checkup.ticket_25 && _.isEmpty($scope.checkup.ticket_25.visit_reason);
     };
+    $scope.departmentOrgStructFilter = function (item) {
+        return item.org_id === safe_traverse($scope.header, ['event', 'person', 'organisation', 'id']);
+    };
 
     $scope.begDateIsSameNextDate = false;
     $scope.begDateIsAfterNextDate = false;
@@ -164,9 +167,6 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
     $scope.ticket25Descriptor = new PropsDescriptor(ticket_25_descriptor);
     $scope.get_current_user = function () {
         return { person: CurrentUser.info };
-    };
-    $scope.orgStructFilter = function (item) {
-        return item.org_id === safe_traverse($scope.header, ['event', 'person', 'organisation', 'id']);
     };
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;
