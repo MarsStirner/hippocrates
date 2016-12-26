@@ -43,7 +43,7 @@ def calculate_preg_result(epicrisis):
     elif pregnancy_final == 'abortom':
         abort_kind = epicrisis['abort'].value.get('code')
         if abort_kind == "samoproizvol_nyj":
-            if pregnancy_duration < 11:
+            if pregnancy_duration <= 11:
                 code = "misbirth_before_11"
             elif 12 <= pregnancy_duration <= 21:
                 code = "misbirth_before_12-21"
@@ -59,6 +59,8 @@ def calculate_preg_result(epicrisis):
             code = "unknown_miscarriage"
         elif abort_kind == "iskusstvennyj-posozial_nympokazaniam":
             code = "social_reasons"
+        elif abort_kind == "iskusstvennyj-pomed.pokazaniamjensiny":
+            code = "abortion_by_woman_request"
 
     if code:
         return {"code": code}
