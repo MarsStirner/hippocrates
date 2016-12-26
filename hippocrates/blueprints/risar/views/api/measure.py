@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from blueprints.risar.lib import sirius
+from hippocrates.blueprints.risar.lib import sirius
 from flask import request
 
 from hippocrates.blueprints.risar.app import module
@@ -210,6 +210,17 @@ def api_0_event_measure_appointment_save(event_measure_id, appointment_id=None):
         em_ctrl.store(em, appointment)
     else:
         raise ApiException(404, u'`appointment_id` required')
+
+    sirius.send_to_mis(
+        sirius.RisarEvents.CREATE_REFERRAL,
+        sirius.RisarEntityCode.MEASURE,
+        sirius.OperationCode.READ_ONE,
+        'risar.api_measure_get',
+        obj=('measure_id', event_measure_id),
+        params={'card_id': em.event_id},
+        is_create=create_mode,
+    )
+
     return EmAppointmentRepr().represent_appointment(appointment)
 
 
@@ -334,4 +345,16 @@ def api_0_event_measure_appointment_list_save(action_id):
     em_ctrl = EventMeasureController()
     ev_measures = em_ctrl.save_appointment_list(data_list, action)
     em_ctrl.store(*ev_measures)
+
+    for em in ev_measures:
+        sirius.send_to_mis(
+            sirius.RisarEvents.CREATE_REFERRAL,
+            sirius.RisarEntityCode.MEASURE,
+            sirius.OperationCode.READ_ONE,
+            'risar.api_measure_get',
+            obj=('measure_id', em.id),
+            params={'card_id': em.event_id},
+            is_create=False,
+        )
+
     return EventMeasureRepr().represent_listed_event_measures_in_action(ev_measures)
