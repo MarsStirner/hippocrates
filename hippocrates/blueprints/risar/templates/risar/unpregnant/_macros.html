@@ -3,6 +3,16 @@
 
 
 {# ^ Ниже описываем то, что отличается от карты беременной, если будет отличаться всё - удалить! #}
+{% macro orange_strip() %}
+   Под наблюдением
+    с <a class="btn-link bottom_dotted" tooltip="Нажмите для изменения даты создания карты" href="javascript:void(0)"  ng-click="openDateRegistrationModal()"><b>[[ header.event.set_date | asDate ]]</b></a>
+    в <b>[[ header.event.person.organisation.short_name ]]</b>
+    у <b>[[ header.event.person.name ]]</b>
+     <span>
+        &nbsp;&nbsp;
+        <a class="btn-link bottom_dotted" tooltip="Нажмите для перевода пациентки к другому врачу" href="javascript:void(0)"  ng-click="openTransferModal()"> Перевести пациентку</a>
+    </span>
+{% endmacro %}
 
 {% macro navigation_unpreg(event_id_repl, endpoints, ext_header=None) %}
     <div class="novmargin">
@@ -26,24 +36,6 @@
             <a ng-if="header.latest_pregnancy_event_id" class="btn btn-default" ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ header.latest_pregnancy_event_id ]]">
                 Открыть текущую карту беременной
             </a>
-            {# <div class="btn-group">
-                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Взять на диспансерный учёт <span class="fa fa-caret-down"></span></button>
-                <ul role="menu" class="dropdown-menu">
-                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">-По беременности</a></li>
-                    <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id={{ event_id_repl }}">-По заболеванию</a></li>
-                </ul>
-            </div>
-            #}
-            {#
-            <div class="btn-group">
-                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-                <ul role="menu" class="dropdown-menu">
-                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">-Диагнозы пациентки</a></li>
-                    <li><a ng-href="{{ url_for('.html_gynecological_event_measure') }}?event_id={{ event_id_repl }}">Мероприятия пациентки</a></li>
-                    <li><a ng-href="{{ url_for('.html_card_fill_history') }}?event_id={{ event_id_repl }}">-Случаи беременности</a></li>
-                </ul>
-            </div>
-            #}
         </div>
     </div>
 {% endmacro %}
@@ -59,10 +51,7 @@
 </h1>
 <div class="row vmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
-        <div class="alert-warning">Под наблюдением в <b>[[ header.event.person.organisation.short_name ]]</b>
-            у <b>[[ header.event.person.name ]]</b>
-            с <b>[[ header.event.set_date | asDate ]]</b>
-        </div>
+        <div class="alert-warning">{{ orange_strip() }} </div>
     </div>
 </div>
 {% endmacro %}
@@ -86,17 +75,12 @@
     </h1>
     </div>
     <div class="col-md-4 col-lg-4 col-sm-12">
-    {#    <div class="col-md-{{ w2 }} col-sm-12 achievements">#}
 
     </div>
     </div>
     <div class="row vmargin10">
         <div class="col-md-12 col-lg-12 col-sm-12">
-            <div class="alert-warning">Под наблюдением в <b>[[ header.event.person.organisation.short_name ]]</b>
-                у <b>[[ header.event.person.name ]]</b>
-                {# {{ url_for('.html_anamnesis') } #}
-{#                <b><a href="#" ng-click="open_edit_modal()">изменить</a></b>#}
-            </div>
+            <div class="alert-warning">{{ orange_strip() }} </div>
         </div>
     </div>
 {% endmacro %}
