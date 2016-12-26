@@ -443,7 +443,7 @@ def calc_risk_groups(card):
     p1 = p1_a or p1_b
 
     last_checkup = card.checkups[-1] if card.checkups else None
-    last_checkup_hands = (130 <= (last_checkup['ad_right_high'].value or last_checkup['ad_left_left'].value)) or \
+    last_checkup_hands = (130 <= (last_checkup['ad_right_high'].value or last_checkup['ad_left_high'].value)) or \
                         (80 <= (last_checkup['ad_right_low'].value or last_checkup['ad_left_low'].value)) if last_checkup else False
 
     more_than_3_prev_pregs = card.prev_pregs and len(card.prev_pregs) >= 3
