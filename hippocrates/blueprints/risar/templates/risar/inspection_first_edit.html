@@ -97,6 +97,15 @@
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
                                         </td>
                                     </tr>
+                                    <tr ng-if="checkupDescriptor.exists('department')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
+                                        <td class="col-md-4">
+                                            <rb-select ref-book="OrgStructure" ng-model="checkup.department" limit-to="50"
+                                                ng-required="checkupDescriptor.getMandatory('department')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('department')"
+                                                custom-filter="departmentOrgStructFilter"></rb-select>
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('height')"></th>
                                         <td><div class="row"

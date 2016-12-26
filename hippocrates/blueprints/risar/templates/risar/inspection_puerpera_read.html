@@ -24,6 +24,10 @@
                             <div class="col-sm-3 col-md-3  text-right">Дата осмотра:</div>
                             <div class="col-sm-9 col-md-9">[[checkup.beg_date|asDateTime]]</div>
                         </div>
+                        <div class="row" ng-if="checkupDescriptor.exists('department')">
+                            <div class="col-sm-6 col-md-6  text-right">[[ checkupDescriptor.getName('department') ]]:</div>
+                            <div class="col-sm-6 col-md-6">[[checkup.department.name]]</div>
+                        </div>
                         <div class="row">
                             <div class="col-sm-3 col-md-3  text-right">Дата родов:</div>
                             <div class="col-sm-9 col-md-9">
