@@ -562,7 +562,7 @@ def get_checkup_service_data(action):
         ActionTypeServiceRisar,
     ).filter(
         ActionTypeServiceRisar.master_id == action.actionType_id,
-        between(func.curdate(),
+        between(action.begDate,
                 ActionTypeServiceRisar.begDate,
                 func.coalesce(ActionTypeServiceRisar.endDate, func.curdate()))
     ).first()

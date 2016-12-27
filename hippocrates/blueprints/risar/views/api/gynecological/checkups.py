@@ -105,6 +105,8 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
 def api_0_gyn_checkup_get_new(event_id, flat_code):
     event = Event.query.get(event_id) or bail_out(ApiException(404, u'Event c id {0} не найден'.format(event_id)))
     action = get_action_by_id(None, event, flat_code, True)
+    ta = get_action_by_id(None, event, gynecological_ticket_25, True)
+    action['ticket_25'].value = ta
     result = represent_gyn_checkup(action)
     return {
         'checkup': result,

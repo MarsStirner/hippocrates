@@ -115,6 +115,8 @@ def api_0_pregnancy_checkup_puerpera_new(event_id):
         raise ApiException(400, u'необходим flat_code')
     event = Event.query.get(event_id)
     action = get_action_by_id(None, event, flat_code, True)
+    ta = get_action_by_id(None, event, gynecological_ticket_25, True)
+    action['ticket_25'].value = ta
     return {
         'checkup': represent_pregnancy_checkup_puerpera(action),
         'access': represent_checkup_access(action)
