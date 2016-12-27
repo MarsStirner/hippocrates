@@ -87,8 +87,8 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
     data = {
         'event': event_code,
         'entity_code': RisarEntityCode.SCHEDULE_TICKET,
-        'operation_code': OperationCode.CHANGE,
-        'method': 'delete' if is_delete else 'post',
+        'operation_code': OperationCode.DELETE if is_delete else OperationCode.CHANGE,
+        'method': 'post',
         # "service_method": 'api_schedule_tickets_get',
         "request_params": {
             # 'hospital': org.regionalCode,
