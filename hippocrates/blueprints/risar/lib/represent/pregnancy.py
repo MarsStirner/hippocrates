@@ -428,7 +428,8 @@ def make_epicrisis_info(epicrisis):
             info += u' - <b>{0} {1}</b>.<br>'.format(delivery_date.strftime("%d.%m.%Y"), delivery_time.strftime("%H:%M"))
 
         if pregnancy_final == u'родами':
-            info += u"Место родоразрешения: <b>{0}</b>.<br>".format(epicrisis['LPU'].shortName)
+            if epicrisis['LPU']:
+                info += u"Место родоразрешения: <b>{0}</b>.<br>".format(epicrisis['LPU'].shortName)
 
         if is_manipulations and is_operations:
             info += u'Были осуществлены <b>пособия и манипуляции</b> и проведены <b>операции</b>.<br>'
