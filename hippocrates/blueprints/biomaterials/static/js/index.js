@@ -1,11 +1,12 @@
 WebMis20.controller('BiomaterialsIndexCtrl', [
-    '$scope', '$modal', '$window', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'MessageBox', 'CurrentUser',
-    function ($scope, $modal, $window, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, MessageBox, CurrentUser) {
+    '$scope', '$modal', '$window', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'MessageBox', 'CurrentUser', '$interval',
+    function ($scope, $modal, $window, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, MessageBox, CurrentUser, $interval) {
         $scope.selected_records = new SelectAll([]);
         $scope.TTJStatus = RefBookService.get('TTJStatus');
         $scope.rbLaboratory = RefBookService.get('rbLaboratory');
         $scope.ps_bm = new PrintingService("biomaterials");
         $scope.ps_bm.set_context("biomaterials");
+
         $scope.ps_resolve = function () {
             if (!$scope.selected_records.any()) {
                 return MessageBox.error('Печать невозможна', 'Выберите хотя бы один забор биоматериала');
@@ -14,12 +15,17 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 ttj_ids: $scope.selected_records.selected()
             }
         };
+
         $scope.filter = {
+            barCode: null,
             execDate: new Date(),
             status: 0,
             org_struct: CurrentUser.info.org_structure
         };
+
         $scope.current_result = [];
+        $scope.grouped_current_result = {};
+
         $scope.count_all_records = function () {
             return _.chain($scope.result).mapObject(
                 function (value) { return value.records.length }
@@ -27,6 +33,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 function (a, b) { return a + b }
             ).value();
         };
+
         $scope.count_finished_records = function () {
             return _.chain($scope.result).mapObject(
                 function (value, key) { return ['finished', 'sent_to_lab', 'fail_to_lab'].has(key)?value.records.length:0 }
@@ -34,6 +41,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 function (a, b) { return a + b }
             ).value();
         };
+
         $scope.set_current_records = function () {
             var display_map = {
                 null: ['waiting', 'finished', 'sent_to_lab', 'fail_to_lab'],
@@ -64,10 +72,21 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                         }
                     })
                 });
+
             $scope.current_result = result;
+
+            $scope.grouped_current_result = {};
+            _.each($scope.current_result.records, function (i) {
+                if($scope.grouped_current_result[i.client.full_name] === undefined) {
+                    $scope.grouped_current_result[i.client.full_name] = [];
+                }
+                $scope.grouped_current_result[i.client.full_name].push(i);
+            });
+            
             $scope.selected_records.setSource(_.pluck($scope.current_result.records, 'id'));
             $scope.selected_records.selectNone();
         };
+
         $scope.get_data = function () {
             return ApiCalls.wrapper(
                 'POST',
@@ -77,14 +96,23 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 $scope.set_current_records();
             }), _.passThrough($scope.set_current_records));
         };
+
         $scope.change_status = function (status) {
+            var remember_selected = {
+                ttj_ids: $scope.selected_records.selected()
+            };
+
             ApiCalls.wrapper(
                 'POST',
                 WMConfig.url.biomaterials.api_ttj_update_status, {},
                 {
                     ids: $scope.selected_records.selected(),
                     status: $scope.TTJStatus.get_by_code(status)
-                }).then($scope.get_data, $scope.get_data)
+                }).then($scope.get_data, $scope.get_data).then(function () {
+                    $scope.$broadcast('print_templates', function () {
+                        return remember_selected;
+                    });
+                })
         };
 
         $scope.open_info = function (record) {
@@ -97,6 +125,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 size: 'lg'
             })
         };
+
         $scope.open_action = function (action_id) {
             $window.open(WMConfig.url.actions.action_html + '?action_id=' + action_id)
         };
@@ -108,6 +137,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             }
             $scope.get_data().then(_.passThrough($scope.set_current_records));
         }
+
         function watch_without_reload(n, o) {
             if (angular.equals(n, o)) return;
             if ($scope.filter.lab && $scope.filter.status != 2) {
@@ -116,12 +146,19 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             $scope.set_current_records();
         }
 
+        $scope.$watch('filter.barCode', watch_with_reload);
         $scope.$watch('filter.execDate', watch_with_reload);
         $scope.$watch('filter.lab', watch_with_reload);
         $scope.$watch('filter.org_struct', watch_with_reload);
         $scope.$watch('filter.biomaterial', watch_with_reload);
+
         $scope.$watch('filter.status', watch_without_reload);
+        $scope.$watch('static_filter.full_name', watch_without_reload);
 
         $scope.get_data();
+
+        // $interval(function(){
+        //     $scope.get_data();
+        // }, 60000);
     }])
 ;
