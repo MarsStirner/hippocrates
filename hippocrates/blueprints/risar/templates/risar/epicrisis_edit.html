@@ -218,13 +218,13 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <td class="text-right col-md-4">Смерть матери<span>&nbsp;</span></td>
+                                        <td class="text-right bold col-md-4">Смерть матери<span>&nbsp;</span></td>
                                         <td class="col-md-8">
                                             <input type="checkbox" ng-model="mother_death" ng-change="clear_death_info">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('reason_of_death')"></td>
+                                        <td class="text-right bold" ng-bind-html="epicrisisDescriptor.getLabel('reason_of_death')"></td>
                                         <td><div class="row"
                                                  ng-class="{'has-error': secondForm.reason_of_death.$invalid && secondForm.submit_attempt}">
                                             <div class="col-md-3">
@@ -235,7 +235,7 @@
 
                                     </tr>
                                     <tr>
-                                        <td class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('death_date')"></td>
+                                        <td class="text-right bold" ng-bind-html="epicrisisDescriptor.getLabel('death_date')"></td>
                                         <td>
                                             <wm-date name="death_date" ng-disabled="!mother_death || epicrisisDescriptor.getReadOnly('death_date')" min-date="epicrisis.delivery_date"
                                                      ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
@@ -243,7 +243,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('death_time')"></td>
+                                        <td class="text-right bold" ng-bind-html="epicrisisDescriptor.getLabel('death_time')"></td>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4" ng-class="{'has-error': secondForm.death_time.$invalid}">
@@ -502,7 +502,7 @@
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('secundines')"></th>
+                                        <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('other_manipulations')"></th>
                                         <td>
                                             <div class="row"><div class="col-md-12">
                                                 <wysiwyg ng-model="epicrisis.other_manipulations" />

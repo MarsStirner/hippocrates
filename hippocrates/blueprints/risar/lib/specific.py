@@ -68,3 +68,7 @@ def get_sarbarsmis_card_url(event):
         return None
     ext_id = event.client_id
     return u'{0}/ws/cas_risar?page=DISEASECASE&form=1&risar_id={1}'.format(ext_url, ext_id)
+
+
+def get_service_table_name():
+    return 'rbService_regional' if SpecificsManager.uses_regional_services() else 'SST365'
