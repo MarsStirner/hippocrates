@@ -105,7 +105,7 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
-                                     <tr>
+                                    <tr>
                                         <td class="text-right col-md-4">Дата</td>
                                         <td class="col-md-2">
                                             <wm-date name="osmotr_date" ng-model="checkup.beg_date" style="width: 250px" autofocus
@@ -113,6 +113,15 @@
                                         </td>
                                         <td class="text-right">Время осмотра</td>
                                         <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="checkupDescriptor.exists('department')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
+                                        <td class="col-md-4">
+                                            <rb-select ref-book="OrgStructure" ng-model="checkup.department" limit-to="50"
+                                                ng-required="checkupDescriptor.getMandatory('department')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('department')"
+                                                custom-filter="departmentOrgStructFilter"></rb-select>
                                         </td>
                                     </tr>
                                 <tbody>

@@ -20,7 +20,7 @@ from hippocrates.blueprints.risar.lib.checkups import copy_checkup
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, first_inspection_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime
+from nemesis.lib.utils import safe_datetime, db_non_flushable
 from nemesis.models.event import Event
 from nemesis.models.person import Person
 from nemesis.systemwide import db
@@ -138,6 +138,7 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
 
 
 @module.route('/api/0/pregnancy/checkup/copy/<int:event_id>/<int:fill_from>', methods=['GET'])
+@db_non_flushable
 @api_method
 def api_0_pregnancy_checkup_copy(event_id, fill_from):
     if fill_from:
@@ -147,22 +148,22 @@ def api_0_pregnancy_checkup_copy(event_id, fill_from):
             raise ApiException(400, u'укажите правильный action для копии')
 
         event = Event.query.get(event_id)
-        with db.session.no_autoflush:
-            filled_action = copy_checkup(event, from_action)
-            ticket25_data = represent_ticket_25(from_action.propsByCode['ticket_25'].value)
-            ticket25_data['id'] = None
-            result = represent_pregnancy_checkup_wm(filled_action)
-            result['pregnancy_week'] = get_pregnancy_week(event)
-            result['fetuses'] = map(represent_fetus_for_checkup_copy, PregnancyCard.Fetus(from_action).states)
-            result['ticket_25'] = ticket25_data
-            return {
-                'checkup': result,
-                'access': represent_checkup_access(filled_action)
-            }
+        filled_action = copy_checkup(event, from_action)
+        ticket25_data = represent_ticket_25(from_action.propsByCode['ticket_25'].value)
+        ticket25_data['id'] = None
+        result = represent_pregnancy_checkup_wm(filled_action)
+        result['pregnancy_week'] = get_pregnancy_week(event)
+        result['fetuses'] = map(represent_fetus_for_checkup_copy, PregnancyCard.Fetus(from_action).states)
+        result['ticket_25'] = ticket25_data
+        return {
+            'checkup': result,
+            'access': represent_checkup_access(filled_action)
+        }
 
 
 @module.route('/api/0/pregnancy/checkup/new/', methods=['POST'])
 @module.route('/api/0/pregnancy/checkup/new/<int:event_id>', methods=['POST'])
+@db_non_flushable
 @api_method
 def api_0_pregnancy_checkup_new(event_id):
     data = request.get_json()
@@ -171,13 +172,14 @@ def api_0_pregnancy_checkup_new(event_id):
         raise ApiException(400, u'необходим flat_code')
     event = Event.query.get(event_id)
 
-    with db.session.no_autoflush:
-        action = get_action_by_id(None, event, flat_code, True)
-        copy_attrs_from_last_action(event, flat_code, action, (
-            'fetus_first_movement_date',
-        ))
-        result = represent_pregnancy_checkup_wm(action)
-        result['pregnancy_week'] = get_pregnancy_week(event)
+    action = get_action_by_id(None, event, flat_code, True)
+    ta = get_action_by_id(None, event, gynecological_ticket_25, True)
+    action['ticket_25'].value = ta
+    copy_attrs_from_last_action(event, flat_code, action, (
+        'fetus_first_movement_date',
+    ))
+    result = represent_pregnancy_checkup_wm(action)
+    result['pregnancy_week'] = get_pregnancy_week(event)
     return {
         'checkup': result,
         'access': represent_checkup_access(action)

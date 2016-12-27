@@ -13,7 +13,7 @@ from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime, bail_out
+from nemesis.lib.utils import safe_datetime, bail_out, db_non_flushable
 from nemesis.models.event import Event
 from nemesis.models.person import Person
 from nemesis.systemwide import db
@@ -100,16 +100,18 @@ def api_0_gyn_checkup_get(event_id, checkup_id):
 
 
 @module.route(_base + 'new/<flat_code>', methods=['GET'])
+@db_non_flushable
 @api_method
 def api_0_gyn_checkup_get_new(event_id, flat_code):
-    with db.session.no_autoflush:
-        event = Event.query.get(event_id) or bail_out(ApiException(404, u'Event c id {0} не найден'.format(event_id)))
-        action = get_action_by_id(None, event, flat_code, True)
-        result = represent_gyn_checkup(action)
-        return {
-            'checkup': result,
-            'access': represent_checkup_access(action)
-        }
+    event = Event.query.get(event_id) or bail_out(ApiException(404, u'Event c id {0} не найден'.format(event_id)))
+    action = get_action_by_id(None, event, flat_code, True)
+    ta = get_action_by_id(None, event, gynecological_ticket_25, True)
+    action['ticket_25'].value = ta
+    result = represent_gyn_checkup(action)
+    return {
+        'checkup': result,
+        'access': represent_checkup_access(action)
+    }
 
 
 @module.route(_base, methods=['GET'])

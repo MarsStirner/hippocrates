@@ -272,6 +272,8 @@ class XForm(object):
         return org
 
     def find_org_structure(self, org_str_code):
+        if org_str_code is None:
+            return None
         org_str = get_org_structure_by_code(org_str_code)
         if not org_str:
             raise ApiException(

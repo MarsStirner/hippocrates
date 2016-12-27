@@ -17,10 +17,10 @@ from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes
 
 from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureCancelReason
 from nemesis.models.enums import MeasureStatus
-from nemesis.lib.data import create_action, update_action, safe_datetime
+from nemesis.lib.data import create_action, update_action
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.lib.apiutils import ApiException
-from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int
+from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int, safe_traverse_attrs
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.systemwide import db
 
@@ -409,6 +409,19 @@ class EventMeasureController(BaseModelController):
         ).update({
             EventMeasure.status: MeasureStatus.cancelled[0]
         }, synchronize_session=False)
+
+    def store_appointment(self, *args):
+        try:
+            self.store(*args)
+        except Exception, e:
+            # possible exception from db trigger (RIMIS-1820 , RIMIS-1857)
+            # expected (pymysql.err.InternalError) (1644, '...')
+            exc_info = safe_traverse_attrs(e, 'orig', 'args')
+            if isinstance(exc_info, tuple) and exc_info[0] == 1644:
+                text = exc_info[1]
+                raise ApiException(422, text)
+            else:
+                raise e
 
 
 class EventMeasureSelecter(BaseSelecter):

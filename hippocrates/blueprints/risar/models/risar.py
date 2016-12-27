@@ -207,3 +207,14 @@ class RisarConcilium_Identification(db.Model):
 
     concilium = db.relationship('RisarConcilium')
     external_system = db.relationship(u'rbAccountingSystem')
+
+
+class ActionTypeServiceRisar(db.Model):
+    __tablename__ = u'ActionType_Service_Risar'
+
+    id = db.Column(db.Integer, primary_key=True)
+    master_id = db.Column(db.Integer, db.ForeignKey('ActionType.id'), nullable=False, index=True)
+    idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    service_code = db.Column(db.String(250), index=True, nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date)

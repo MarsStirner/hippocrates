@@ -16,3 +16,4 @@ class RisarEvents(Enum):
     ENTER_MIS_EMPLOYEE = 'enter_mis_employee'
     CLOSE_CARD = 'close_card'
     CREATE_REFERRAL = 'create_referral'
+    SAVE_CHECKUP_PUERPERA = 'save_checkup_puerpera'

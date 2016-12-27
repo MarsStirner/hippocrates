@@ -11,13 +11,12 @@ from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasure
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week, get_pregnancy_week_for_ultrasonography
 from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk_rate
 from hippocrates.blueprints.risar.lib.represent.common import represent_event, represent_action_diagnoses, represent_intolerance, represent_fetus, \
-    represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures, \
-    represent_ticket_25
+    represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_ticket_25
 from hippocrates.blueprints.risar.lib.represent.mat_cert import represent_mat_cert
 from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
 from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix, \
-    represent_prop_value, safe_action_property
+    represent_prop_value, safe_action_property, get_checkup_service_data
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_anamnesis_apt_mother_codes, risar_anamnesis_apt_father_codes, \
     risar_epicrisis, attach_codes, checkup_flat_codes
@@ -272,6 +271,7 @@ def represent_pregnancy_checkup(action):
     result['calculated_pregnancy_week_by_ultrason'] = week_by_ultrason
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
     result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+    result['_service'] = get_checkup_service_data(action)
     return result
 
 
@@ -428,7 +428,8 @@ def make_epicrisis_info(epicrisis):
             info += u' - <b>{0} {1}</b>.<br>'.format(delivery_date.strftime("%d.%m.%Y"), delivery_time.strftime("%H:%M"))
 
         if pregnancy_final == u'родами':
-            info += u"Место родоразрешения: <b>{0}</b>.<br>".format(epicrisis['LPU'].shortName)
+            if epicrisis['LPU']:
+                info += u"Место родоразрешения: <b>{0}</b>.<br>".format(epicrisis['LPU'].shortName)
 
         if is_manipulations and is_operations:
             info += u'Были осуществлены <b>пособия и манипуляции</b> и проведены <b>операции</b>.<br>'

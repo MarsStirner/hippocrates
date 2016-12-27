@@ -11,7 +11,7 @@ from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
-from nemesis.lib.utils import safe_datetime
+from nemesis.lib.utils import safe_datetime, db_non_flushable
 from nemesis.models.event import Event
 from nemesis.models.person import Person
 from nemesis.systemwide import db
@@ -74,7 +74,7 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     db.session.commit()
 
     sirius.send_to_mis(
-        sirius.RisarEvents.SAVE_CHECKUP,
+        sirius.RisarEvents.SAVE_CHECKUP_PUERPERA,
         sirius.RisarEntityCode.CHECKUP_PC_TICKET,
         sirius.OperationCode.READ_ONE,
         'risar.api_checkup_pc_ticket25_get',
@@ -106,6 +106,7 @@ def api_0_pregnancy_checkup_puerpera_get(checkup_id=None):
 
 @module.route('/api/0/checkup_puerpera/new/', methods=['POST'])
 @module.route('/api/0/checkup_puerpera/new/<int:event_id>', methods=['POST'])
+@db_non_flushable
 @api_method
 def api_0_pregnancy_checkup_puerpera_new(event_id):
     data = request.get_json()
@@ -114,6 +115,8 @@ def api_0_pregnancy_checkup_puerpera_new(event_id):
         raise ApiException(400, u'необходим flat_code')
     event = Event.query.get(event_id)
     action = get_action_by_id(None, event, flat_code, True)
+    ta = get_action_by_id(None, event, gynecological_ticket_25, True)
+    action['ticket_25'].value = ta
     return {
         'checkup': represent_pregnancy_checkup_puerpera(action),
         'access': represent_checkup_access(action)

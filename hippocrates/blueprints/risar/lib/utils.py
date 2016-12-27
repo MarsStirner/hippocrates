@@ -3,11 +3,15 @@
 import datetime
 
 import six
+from sqlalchemy import between
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
 
+from hippocrates.blueprints.risar.lib.specific import get_service_table_name
+from hippocrates.blueprints.risar.models.risar import ActionTypeServiceRisar
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
+from nemesis.lib.vesta import Vesta, VestaNotFoundException
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
@@ -72,14 +76,14 @@ hepatitis_diags = ['B15', 'B16', 'B17', 'B18', 'B19', 'K73', 'K70.1', 'K71.2', '
 tuberculosis_diags = ['A15', 'A16', 'A17', 'A18', 'A19', 'P37.0']
 scabies_diags = ['B86']
 pediculosis_diags = ['B85']
-multiple_birth = ['O30-O30.99']
 hypertensia = ['O10-O10.99']
-kidney_diseases = ['N00-N08.99', 'N10-N23.99', 'N25-N29.99', 'O23.0']
-collagenoses = ['Q79.6', 'Q87.4', 'Q78.0', 'M33.0', 'M33.1', 'M33.2', 'L94.0', 'M34.0', 'M35.0', 'D69.0', 'D89.1',
-                'Q81-Q81.99', 'M05-M05.99', 'M32-M32.99', 'L95-L95.99']
-vascular_diseases = ['I70-I79.99', 'O22-O22.99']
-diabetes = ['E10-E14.99', 'O24-O24.99']
 antiphospholipid_syndrome = ['I82.9', 'D68.8', 'D89.9']
+red_wolfy = ['M32.0', 'M32.1', 'M32.8', 'M32.9']
+kidney_diseases = ['N18.0', 'N18.8', 'N18.9', 'O23.0']
+diabetes = ['E10', 'E11', 'O24.0', 'O24.1']
+extra_mass = ['026.0']
+thrombophilia = ['O99.1', 'D68.8']
+infection_during_pregnancy = ['A00-A99', 'B00-B99', 'N00-N99']
 
 week_postfix = {1: u'я', 2: u'и', 3: u'и', 4: u'и', 5: u'ь',  6: u'ь', 7: u'ь', 8: u'ь', 9: u'ь', 0: u'ь'}
 
@@ -551,3 +555,24 @@ def get_external_id(event_id):
         event = Event.query.get(event_id)
         if event:
             return event.externalId
+
+
+def get_checkup_service_data(action):
+    service_risar = db.session.query(
+        ActionTypeServiceRisar,
+    ).filter(
+        ActionTypeServiceRisar.master_id == action.actionType_id,
+        between(action.begDate,
+                ActionTypeServiceRisar.begDate,
+                func.coalesce(ActionTypeServiceRisar.endDate, func.curdate()))
+    ).first()
+
+    if not service_risar:
+        return None
+
+    try:
+        service = Vesta.get_rb(get_service_table_name(), service_risar.service_code)
+    except VestaNotFoundException:
+        return None
+    else:
+        return service

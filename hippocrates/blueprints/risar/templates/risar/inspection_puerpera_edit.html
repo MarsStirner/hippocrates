@@ -77,6 +77,15 @@
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
                                         </td>
                                     </tr>
+                                    <tr ng-if="checkupDescriptor.exists('department')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
+                                        <td class="col-md-4">
+                                            <rb-select ref-book="OrgStructure" ng-model="checkup.department" limit-to="50"
+                                                ng-required="checkupDescriptor.getMandatory('department')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('department')"
+                                                custom-filter="departmentOrgStructFilter"></rb-select>
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <th class="text-right col-md-4">Дата родов </th>
                                         <td class="col-md-8">
@@ -139,9 +148,11 @@
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('complaints')"></th>
                                         <td><div ng-class="{'text-danger': checkupForm.complaints.$invalid && checkupForm.submit_attempt}">
-                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints_Puerpera" ng-model="checkup.complaints" ng-required="true">
+                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints_Puerpera" ng-model="checkup.complaints"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('complaints')"
+                                                 ng-required="checkupDescriptor.getMandatory('complaints')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>

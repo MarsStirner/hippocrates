@@ -110,15 +110,6 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('condit_med_help')"></rb-select>
                     </td>
                 </tr>
-                <tr ng-if="ticket_25_descriptor.exists('department')">
-                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('department')"></th>
-                    <td class="col-md-8">
-                        <rb-select ref-book="OrgStructure" ng-model="checkup.ticket_25.department" limit-to="50"
-                            ng-required="ticket25Descriptor.getMandatory('department')"
-                            ng-disabled="ticket25Descriptor.getReadOnly('department')"
-                            custom-filter="orgStructFilter"></rb-select>
-                    </td>
-                </tr>
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('services')"></th>
                     <td></td>
@@ -168,7 +159,7 @@
                             <tbody>
                             <tr>
                                 <td colspan="4" class="text-right">
-                                    <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add(get_current_user)">
+                                    <button class="btn btn-primary" ng-disabled="$table.$edited()" ng-click="$table.$add(get_default_values)">
                                         <i class="fa fa-plus"></i> Добавить
                                     </button>
                                 </td>

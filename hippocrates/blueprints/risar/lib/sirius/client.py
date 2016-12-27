@@ -11,6 +11,9 @@ from nemesis.app import app
 from .request import request_local, request_remote, \
     request_client_local_id_by_remote_id, request_register_card_idents, \
     send_event_remote, request_events_map
+import logging
+
+logger = logging.getLogger('simple')
 
 events_list = None
 
@@ -28,10 +31,12 @@ def binded_event(event_code):
 
 def send_to_mis(event_code, entity_code, operation_code,
                 service_method, obj, params, is_create):
+    logger.debug('send_to_mis %s' % event_code)
     if not app.config.get('SIRIUS_ENABLED'):
         return
     if not binded_event(event_code):
         return
+    logger.debug('send_to_mis passed %s' % event_code)
     obj_name, obj_id = obj
     url_params = params.copy()
     url_params.update((obj,))

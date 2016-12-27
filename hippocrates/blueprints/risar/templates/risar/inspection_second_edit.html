@@ -97,13 +97,24 @@
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
                                         </td>
                                     </tr>
+                                    <tr ng-if="checkupDescriptor.exists('department')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
+                                        <td class="col-md-4">
+                                            <rb-select ref-book="OrgStructure" ng-model="checkup.department" limit-to="50"
+                                                ng-required="checkupDescriptor.getMandatory('department')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('department')"
+                                                custom-filter="departmentOrgStructFilter"></rb-select>
+                                        </td>
+                                    </tr>
                                     <tr>
-                                        <th class="text-right">Вес при осмотре <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('weight')"></th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': commonForm.weight.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-2">
                                                 <input name="weight" ng-model="checkup.weight" valid-number valid-number-float
-                                                       class="form-control" ng-required="true" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/" autofocus>
+                                                       class="form-control"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('weight')"
+                                                       ng-required="checkupDescriptor.getMandatory('weight')" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/">
                                             </div>
                                             </div>
                                         </td>
@@ -113,11 +124,15 @@
                                         <td><div class="row"
                                                  ng-class="{'has-error': (commonForm.ad_right_high.$invalid || commonForm.ad_right_low.$invalid)  && commonForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <input name="ad_right_high" ng-model="checkup.ad_right_high" valid-number
-                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                                <input name="ad_right_high" ng-model="checkup.ad_right_high" valid-number maxlength="3"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_right_high')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_right_high')"
+                                                       class="form-control blood_presure">
                                                 <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.ad_right_low" valid-number
-                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                                <input name="ad_right_low" ng-model="checkup.ad_right_low" valid-number maxlength="3"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_right_low')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_right_low')"
+                                                       class="form-control blood_presure">
                                             </div>
                                             </div>
                                         </td>
@@ -128,10 +143,14 @@
                                                  ng-class="{'has-error': (commonForm.ad_left_high.$invalid || commonForm.ad_left_low.$invalid) && commonForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input name="ad_left_high" ng-model="checkup.ad_left_high" valid-number
-                                                       maxlength="3" class="form-control blood_presure" ng-required="true">
+                                                       maxlength="3" class="form-control blood_presure"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_left_high')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_left_high')">
                                                 <span>/</span>
                                                 <input name="ad_left_low" ng-model="checkup.ad_left_low" valid-number
-                                                       maxlength="3" class="form-control blood_presure" ng-required="true">
+                                                       maxlength="3" class="form-control blood_presure"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_left_low')"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_left_low')">
                                             </div>
                                         </div></td>
                                     </tr>
@@ -169,24 +188,28 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Общее состояние <span class="text-danger">*</span></th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('state')"></th>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': somaticForm.state.$invalid && somaticForm.submit_attempt}">
                                             <div class="col-md-4">
-                                                <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
+                                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('state')"
+                                                       ng-required="checkupDescriptor.getMandatory('state')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('complaints')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.complaints.$invalid && somaticForm.submit_attempt}">
-                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
+                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('complaints')"
+                                                 ng-required="checkupDescriptor.getMandatory('complaints')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Отеки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('edema')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
                                     <tr>

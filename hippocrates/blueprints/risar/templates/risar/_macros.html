@@ -14,23 +14,14 @@
 
 {% endmacro %}
 
-{% macro old_pregnancy_case(lpu) %}
-    # на случай, если понадобится вернуть
-    Случай беременности. На учёте в <b>{{ lpu }}</b>
-    у <b>[[ header.event.person.name ]]</b>
-    с <b>[[ header.event.set_date | asDate ]]</b>
-{% endmacro %}
-
 {% macro pregnancy_case(lpu) %}
     Случай беременности. На учёте по беременности
     с <a class="btn-link bottom_dotted" tooltip="Нажмите для изменения даты постановки на учёт" href="javascript:void(0)"  ng-click="openDateRegistrationModal()"><b>[[ header.event.set_date | asDate ]]</b></a>
     Наблюдается в <b>{{ lpu }}</b> у <b>[[ header.event.person.short_name ]]</b>
     <span>
-    {#  как вариант цвет  #26FF22#}
         &nbsp;&nbsp;
         <a class="btn-link bottom_dotted" tooltip="Нажмите для перевода пациентки к другому врачу" href="javascript:void(0)"  ng-click="openTransferModal()"> Перевести пациентку</a>
     </span>
-    <span></span>
 {% endmacro %}
 
 {% macro page_title_n(title) %}
