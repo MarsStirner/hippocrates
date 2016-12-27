@@ -41,26 +41,29 @@ def calculate_preg_result(epicrisis):
         elif 22 <= pregnancy_duration <= 27:
             code = 'premature_birth_22-27'
     elif pregnancy_final == 'abortom':
-        abort_kind = epicrisis['abort'].value.get('code')
-        if abort_kind == "samoproizvol_nyj":
-            if pregnancy_duration <= 11:
-                code = "misbirth_before_11"
-            elif 12 <= pregnancy_duration <= 21:
-                code = "misbirth_before_12-21"
-        elif abort_kind in ["'abortmedikamentoznymmetodom-posostoaniurebenka",
-                            'abortmedikamentoznymmetodom-posostoaniujensiny',
-                            'iskusstvennyj-pomed.pokazaniamjensiny',
-                            'iskusstvennyj-pomed.pokazaniamploda',
-                            ]:
-            code = "therapeutic_abortion"
-        elif abort_kind == "drugievidypreryvaniaberemennosti(kriminal_nye)":
-            code = "criminal"
-        elif abort_kind == "neutocnennye":
-            code = "unknown_miscarriage"
-        elif abort_kind == "iskusstvennyj-posozial_nympokazaniam":
-            code = "social_reasons"
-        elif abort_kind == "iskusstvennyj-pomed.pokazaniamjensiny":
-            code = "abortion_by_woman_request"
+        abort_kind = epicrisis['abort'].value
+        if abort_kind:
+            abort_kind = abort_kind.get('code')
+            if abort_kind:
+                if abort_kind == "samoproizvol_nyj":
+                    if pregnancy_duration <= 11:
+                        code = "misbirth_before_11"
+                    elif 12 <= pregnancy_duration <= 21:
+                        code = "misbirth_before_12-21"
+                elif abort_kind in ["'abortmedikamentoznymmetodom-posostoaniurebenka",
+                                    'abortmedikamentoznymmetodom-posostoaniujensiny',
+                                    'iskusstvennyj-pomed.pokazaniamjensiny',
+                                    'iskusstvennyj-pomed.pokazaniamploda',
+                                    ]:
+                    code = "therapeutic_abortion"
+                elif abort_kind == "drugievidypreryvaniaberemennosti(kriminal_nye)":
+                    code = "criminal"
+                elif abort_kind == "neutocnennye":
+                    code = "unknown_miscarriage"
+                elif abort_kind == "iskusstvennyj-posozial_nympokazaniam":
+                    code = "social_reasons"
+                elif abort_kind == "iskusstvennyj-pomed.pokazaniamjensiny":
+                    code = "abortion_by_woman_request"
 
     if code:
         return {"code": code}
