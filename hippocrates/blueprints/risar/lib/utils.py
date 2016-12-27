@@ -3,11 +3,15 @@
 import datetime
 
 import six
+from sqlalchemy import between
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
 
+from hippocrates.blueprints.risar.lib.specific import get_service_table_name
+from hippocrates.blueprints.risar.models.risar import ActionTypeServiceRisar
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
+from nemesis.lib.vesta import Vesta, VestaNotFoundException
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.enums import ActionStatus, PerinatalRiskRate
 from nemesis.models.person import Person
@@ -551,3 +555,24 @@ def get_external_id(event_id):
         event = Event.query.get(event_id)
         if event:
             return event.externalId
+
+
+def get_checkup_service_data(action):
+    service_risar = db.session.query(
+        ActionTypeServiceRisar,
+    ).filter(
+        ActionTypeServiceRisar.master_id == action.actionType_id,
+        between(action.begDate,
+                ActionTypeServiceRisar.begDate,
+                func.coalesce(ActionTypeServiceRisar.endDate, func.curdate()))
+    ).first()
+
+    if not service_risar:
+        return None
+
+    try:
+        service = Vesta.get_rb(get_service_table_name(), service_risar.service_code)
+    except VestaNotFoundException:
+        return None
+    else:
+        return service
