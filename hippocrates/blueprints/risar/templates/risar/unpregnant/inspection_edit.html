@@ -506,18 +506,22 @@
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Молочные железы </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breast')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.breast.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
+                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('breast')"
+                                                 ng-required="checkupDescriptor.getMandatory('breast')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние сосков </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.nipples.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
+                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('nipples')"
+                                                 ng-required="checkupDescriptor.getMandatory('nipples')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
@@ -1365,7 +1369,7 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Диагнозы <span>&nbsp;</span></th>
+                                        <th class="text-right col-md-4">Диагнозы</th>
                                         <td class="col-md-8">&nbsp;</td>
                                     </tr>
                                     <tr>

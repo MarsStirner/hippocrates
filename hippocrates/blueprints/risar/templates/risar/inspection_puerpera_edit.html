@@ -176,9 +176,11 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние сосков </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples')"></th>
                                         <td>
-                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples_Puerpera">
+                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('nipples')"
+                                                 ng-required="checkupDescriptor.getMandatory('nipples')">
                                                 [[ item.name ]]
                                             </div>
                                         </td>
