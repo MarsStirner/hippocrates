@@ -62,6 +62,9 @@ var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
             })
     };
     reload_anamnesis();
+    $scope.print_anam = function (event_id) {
+        RisarApi.print_jsp_anamnesis({event_id: event_id, extension: 'html'});
+    };
 };
 
 var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi) {

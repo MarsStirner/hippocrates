@@ -46,3 +46,19 @@ def printing_jsp_epicrisis():
     return jasper_report.get_response_data()
 
 
+@module.route('/printing/anamnesis', methods=['POST'])
+def printing_jsp_anamnesis():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'epicrisis',
+        '/reports/Hippocrates/Risar/anamnesis',
+        params={
+            'event_id': str(data['event_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()
+

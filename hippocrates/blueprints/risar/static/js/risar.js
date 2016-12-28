@@ -28,6 +28,9 @@ WebMis20
     this.print_jsp_epicrisis = function(data) {
         self.file_get('POST',  Config.url.print_jsp_epicrisis, data)
     };
+    this.print_jsp_anamnesis = function(data) {
+        self.file_get('POST',  Config.url.print_jsp_anamnesis, data)
+    };
     this.print_ticket_25 = function (action_id, fmt) {
         self.file_get('POST', Config.url.print_checkup_ticket_25, {action_id: action_id, extension: fmt})
     };
