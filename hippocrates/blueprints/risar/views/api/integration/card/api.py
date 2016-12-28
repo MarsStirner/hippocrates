@@ -32,7 +32,6 @@ def api_card_list(api_version):
     data = request.get_json()
     if data:
         # карты пациентов на 32 (28 для двойняшек) неделе для создания обменных карт
-        # todo: фильтр для двойняшек
         filters = data.get('filters')
     obj_list = xform.get_list(filters)
     res = []
