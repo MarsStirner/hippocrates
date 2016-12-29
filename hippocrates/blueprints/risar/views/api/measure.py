@@ -191,7 +191,7 @@ def api_0_event_measure_appointment_save(event_measure_id, appointment_id=None):
     create_mode = not appointment_id and request.method == 'PUT'
     if create_mode:
         appointment = em_ctrl.create_appointment(em, json_data)
-        em_ctrl.store_appointment(em, appointment)
+        em_ctrl.store_appointments([em])
 
     elif appointment_id:
         appointment = get_action_by_id(appointment_id)
@@ -331,7 +331,7 @@ def api_0_event_measure_appointment_list_save(action_id):
     action = get_action_by_id(action_id)
     em_ctrl = EventMeasureController()
     ev_measures = em_ctrl.save_appointment_list(data_list, action)
-    em_ctrl.store(*ev_measures)
+    em_ctrl.store_appointments(ev_measures, silent=True)
 
     for em in ev_measures:
         sirius.send_to_mis(

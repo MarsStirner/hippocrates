@@ -20,7 +20,7 @@ from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.lib.apiutils import ApiException
-from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int, safe_traverse_attrs
+from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int, safe_traverse_attrs, db_non_flushable
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.systemwide import db
 
@@ -366,6 +366,7 @@ class EventMeasureController(BaseModelController):
             em_result.person = new_person
         return em_result
 
+    @db_non_flushable
     def save_appointment_list(self, item_list, action):
         """Сохраняет списоок мероприятий, создаёт направляения, проставляет им LPUDirection"""
         result = []
@@ -410,18 +411,44 @@ class EventMeasureController(BaseModelController):
             EventMeasure.status: MeasureStatus.cancelled[0]
         }, synchronize_session=False)
 
-    def store_appointment(self, *args):
-        try:
-            self.store(*args)
-        except Exception, e:
-            # possible exception from db trigger (RIMIS-1820 , RIMIS-1857)
-            # expected (pymysql.err.InternalError) (1644, '...')
-            exc_info = safe_traverse_attrs(e, 'orig', 'args')
-            if isinstance(exc_info, tuple) and exc_info[0] == 1644:
-                text = exc_info[1]
-                raise ApiException(422, text)
+    def store_appointments(self, em_list, silent=False):
+        """Сохранить список направлений по мероприятиям (список Action).
+
+        Используются SQL Savepoint (или виртуальные транзакции sqlalchemy) для того,
+        чтобы можно было провести транзакцию даже, если при сохранении части
+        направлений будет формироваться контролируемое исключение (например, при
+        создании направлений на госпитализацию будет сформировано исключение на уровне
+        триггеров в бд, если не выполнятся проверки в триггерах таблицы Action,
+        см. RIMIS-1820 , RIMIS-1857).
+        """
+        # новые объекты не должны быть в сессии, чтобы можно было вызвать flush
+        # каждого insert Action по отдельности
+        self.session.expunge_all()
+
+        for em in em_list:
+            self.session.begin_nested()  # savepoint , неявно вызовет вызовет flush
+            try:
+                self.session.add(em)
+                self.session.flush()
+            except Exception, e:
+                # possible exception from db trigger (RIMIS-1820 , RIMIS-1857)
+                # expected (pymysql.err.InternalError) (1644, '...')
+                exc_info = safe_traverse_attrs(e, 'orig', 'args')
+                if isinstance(exc_info, tuple) and exc_info[0] == 1644:
+                    text = exc_info[1]
+                    if silent:
+                        self.session.rollback()  # rollback to savepoint
+                        logger.warning(u'При сохранении списка направлений направление '
+                                       u'по мероприятию с id={0} не было создано: {1}'.format(em.id, text))
+                        continue
+                    else:
+                        raise ApiException(422, text)
+                else:
+                    raise e
             else:
-                raise e
+                self.session.commit()  # release savepoint
+
+        self.session.commit()
 
 
 class EventMeasureSelecter(BaseSelecter):
