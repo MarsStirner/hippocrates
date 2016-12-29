@@ -62,7 +62,7 @@ def calculate_preg_result(epicrisis):
                     code = "unknown_miscarriage"
                 elif abort_kind == "iskusstvennyj-posozial_nympokazaniam":
                     code = "social_reasons"
-                elif abort_kind == "iskusstvennyj-pomed.pokazaniamjensiny":
+                elif abort_kind == "iskusstvennyj-pojelaniujensiny":
                     code = "abortion_by_woman_request"
 
     if code:
