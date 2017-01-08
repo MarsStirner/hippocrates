@@ -20,6 +20,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
 from nemesis.models.organisation import Organisation
+from nemesis.models.person import Person
 from ..app import module
 import logging
 
@@ -30,9 +31,14 @@ logger = logging.getLogger('simple')
 @module.route('/integration/<int:api_version>/remote_entity/<region>/<entity>/<remote_id>/inspection.html')
 def api_card_by_remote_id(api_version, region, entity, remote_id):
     main_user = current_user.get_main_user()
-    doctor_code = main_user.regionalCode
+    # doctor_code = main_user.regionalCode
+    # org_code = Organisation.query.filter(
+    #     Organisation.id == main_user.org_id
+    # ).value(Organisation.regionalCode)
+    person = Person.query.get(main_user.id)
+    doctor_code = person.regionalCode
     org_code = Organisation.query.filter(
-        Organisation.id == main_user.org_id
+        Organisation.id == person.org_id
     ).value(Organisation.regionalCode)
 
     # если глюк оказался вдруг
