@@ -780,7 +780,7 @@
                                     </tr>
                                       <tr>
                                         <th class="text-right">Срок по последнему УЗИ</th>
-                                        <td>[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason :'Нет данных УЗИ для расчета']]</td>
+                                        <td>[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
                                       </tr>
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_continuation')"></th>

@@ -481,13 +481,15 @@
                                 <table class="table table-condensed">
                                     <tbody>
                                         <tr>
-                                            <th class="text-right">Дата первого шевеления <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fetus_first_movement_date')"></th>
                                             <td><div class="row"><div class="col-md-4">
                                                 <wm-date ng-model="checkup.fetus_first_movement_date" style="width: 250px"
-                                                    min-date="minDate" max-date="currentDate"></wm-date></div></div></td>
+                                                    min-date="minDate" max-date="currentDate"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('fetus_first_movement_date')"
+                                                    ng-required="checkupDescriptor.getMandatory('fetus_first_movement_date')"></wm-date></div></div></td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Шевеление <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fetus_movement')"></th>
                                             <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fetus_movement" /></div></div></td>
                                         </tr>
                                     </tbody>
@@ -643,21 +645,23 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_week')"></th>
                                         <td>
                                             <div class="row"
                                                  ng-class="{'has-error': ticketForm.pregnancy_week.$invalid && ticketForm.submit_attempt}">
                                                 <div class="col-md-2">
                                                     <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
-                                                           class="form-control" type="number" min="1" max="45" valid-number ng-required="true">
+                                                           class="form-control" type="number" min="1" max="45" valid-number
+                                                           ng-disabled="checkupDescriptor.getReadOnly('pregnancy_week')"
+                                                           ng-required="checkupDescriptor.getMandatory('pregnancy_week')">
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
-                                     <tr>
+                                      <tr>
                                         <th class="text-right">Срок по последнему УЗИ</th>
-                                        <td>[[ checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
-                                     </tr>
+                                        <td>[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
+                                      </tr>
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_continuation')"></th>
                                         <td>
@@ -683,15 +687,15 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Витаминизация <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fortification')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fortification" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Коррекция питания <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nutrition')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.nutrition" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лечение <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('treatment')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.treatment" /></div></div></td>
                                     </tr>
                                     <tr>
