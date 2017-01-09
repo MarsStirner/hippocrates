@@ -56,8 +56,8 @@
                 </td>
                 <td colspan="6" class="text-bold">
                     <span class="cursor-pointer" ng-click="show_group[measure_type.code] = !show_group[measure_type.code]">[[ measure_type.name ]]
-                        <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
-                            [[ measure_type.max_date | asDateTime ]])</span></span></td>
+                        <span class="nowrap">([[ measure_type.min_date | asDate ]] -
+                            [[ measure_type.max_date | asDate ]])</span></span></td>
             </tr>
             <tr ng-repeat="em in grouped.measures[status.code][measure_type.code] track by em.data.id"
                 ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }"
@@ -75,8 +75,8 @@
                     <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
                     <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
                 </td>
-                <td>[[ em.data.beg_datetime | asDateTime ]]</td>
-                <td>[[ em.data.end_datetime | asDateTime ]]</td>
+                <td>[[ em.data.beg_datetime | asDate ]]</td>
+                <td>[[ em.data.end_datetime | asDate ]]</td>
                 <td>
                     <event-measure-status status="em.data.status"></event-measure-status>
                     <span ng-if="emIsNotActual(em)">(Неактуально)</span>
@@ -129,8 +129,8 @@
                 </td>
                 <td colspan="6" class="text-bold">
                     <span class="cursor-pointer" ng-click="show_group[measure_type.code] = !show_group[measure_type.code]">[[ measure_type.name ]]
-                        <span class="nowrap">([[ measure_type.min_date | asDateTime ]] -
-                            [[ measure_type.max_date | asDateTime ]])</span></span></td>
+                        <span class="nowrap">([[ measure_type.min_date | asDate ]] -
+                            [[ measure_type.max_date | asDate ]])</span></span></td>
             </tr>
             <tr ng-repeat="em in grouped.recommendations[status.code][measure_type.code] track by em.data.id"
                 ng-class="{ 'measure-manual':  isManualMeasure(em), 'bg-muted': isDeletedManualMeasure(em) }"
@@ -148,8 +148,8 @@
                     <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
                     <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
                 </td>
-                <td>[[ em.data.beg_datetime | asDateTime ]]</td>
-                <td>[[ em.data.end_datetime | asDateTime ]]</td>
+                <td>[[ em.data.beg_datetime | asDate ]]</td>
+                <td>[[ em.data.end_datetime | asDate ]]</td>
                 <td>
                     <event-measure-status status="em.data.status"></event-measure-status>
                     <span ng-if="emIsNotActual(em)">(Неактуально)</span>
@@ -193,8 +193,8 @@
                 <span ng-if="emHasResult(em)" class="small-left-margin fa fa-paperclip" title="Имеется результат"></span>
                 <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
             </td>
-            <td>[[ em.data.beg_datetime | asDateTime ]]</td>
-            <td>[[ em.data.end_datetime | asDateTime ]]</td>
+            <td>[[ em.data.beg_datetime | asDate ]]</td>
+            <td>[[ em.data.end_datetime | asDate ]]</td>
             <td>
                 <event-measure-status status="em.data.status"></event-measure-status>
                 <span ng-if="emIsNotActual(em)">(Неактуально)</span>
