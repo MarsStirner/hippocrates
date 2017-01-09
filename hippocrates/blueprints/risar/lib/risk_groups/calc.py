@@ -425,33 +425,33 @@ def calc_risk_groups(card):
                                                 antiphospholipid_syndrome, thrombophilia, extra_mass, \
                                                 infection_during_pregnancy, red_wolfy
 
-    diseases = hypertensia + kidney_diseases + diabetes + antiphospholipid_syndrome
-    diseases += thrombophilia, extra_mass, infection_during_pregnancy, red_wolfy
     checkups = card.checkups
 
-    p1_a = any_thing(
+    diseases_in_mother_anamnesis = hypertensia + antiphospholipid_syndrome
+    disease_in_pregnancy_case = hypertensia + antiphospholipid_syndrome + red_wolfy + diabetes + extra_mass +\
+                                thrombophilia + infection_during_pregnancy + kidney_diseases
+    has_disease_in_pregnancy_case = any_thing(
         all_diagnostics,
-        diseases,
+        disease_in_pregnancy_case,
         lambda x: x.MKB,
     )
-    p1_b = any_thing(
+    has_diseases_in_mother_anamnesis = any_thing(
         card.anamnesis.mother['current_diseases'].value,
-        diseases,
+        diseases_in_mother_anamnesis,
         lambda x: x.DiagID,
     )
 
-    p1 = p1_a or p1_b
-
     last_checkup = card.checkups[-1] if card.checkups else None
-    last_checkup_hands = (130 <= (last_checkup['ad_right_high'].value or last_checkup['ad_left_high'].value)) or \
-                        (80 <= (last_checkup['ad_right_low'].value or last_checkup['ad_left_low'].value)) if last_checkup else False
+    last_checkup_hands = 130 <= max(last_checkup['ad_right_high'].value, last_checkup['ad_left_high'].value) or \
+                        80 <= max(last_checkup['ad_right_low'].value, last_checkup['ad_left_low'].value)\
+                        if last_checkup else False
 
     more_than_3_prev_pregs = card.prev_pregs and len(card.prev_pregs) >= 3
     client_age = card.event.client.age_tuple()[-1] > 40
     try:
-        p4 = (card.checkups and checkups[0]['BMI'].value >= 35)
+        bmi_greater_than = (card.checkups and checkups[0]['BMI'].value >= 35)
     except KeyError as e:
-        p4 = False
+        bmi_greater_than = False
 
     anamnesis_mother_preeclampsia = card.anamnesis.mother['preeclampsia'].value
     anamnesis_mother_drugs = card.anamnesis.mother['drugs'].value
@@ -471,14 +471,16 @@ def calc_risk_groups(card):
 
     now_year = datetime.date.today().year
 
-    p7 = all(
-        preg.action['pregnancyResult'].value_raw in ('delivery', 'premature_birth_22-27', 'premature_birth_28-37', 'postmature_birth') and
-        now_year - preg.action['year'].value >= 10
+    interval_between_preg_more_than_10_years = any(
+        preg.action['pregnancyResult'].value_raw in ('delivery', 'premature_birth_22-27', 'premature_birth_28-37',
+                                                     'postmature_birth') and now_year - preg.action['year'].value >= 10
         for preg in card.prev_pregs
     )
-    conditions = [p1, last_checkup_hands, more_than_3_prev_pregs, client_age, anamnesis_mother_preeclampsia,
-            anamnesis_mother_drugs, anamnesis_family_income, anamnesis_hereditary, anamnesis_fertilization_type,
-            premature_birth, atleast_one_preclampsia, p7]
+    conditions = [has_disease_in_pregnancy_case, has_diseases_in_mother_anamnesis,
+                  bmi_greater_than, last_checkup_hands, more_than_3_prev_pregs, client_age,
+                  anamnesis_mother_preeclampsia, anamnesis_mother_drugs, anamnesis_family_income,
+                  anamnesis_hereditary, anamnesis_fertilization_type, premature_birth,
+                  atleast_one_preclampsia, interval_between_preg_more_than_10_years]
 
     if any(conditions):
         yield '15'
