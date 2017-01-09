@@ -326,19 +326,19 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Окружность живота</th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('abdominal')"></th>
                                         <td class="col-md-8"><div class="row"><div class="col-md-2">
                                             <input ng-model="checkup.abdominal" class="form-control" valid-number maxlength="3">
                                            </div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Высота стояния дна матки</th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fundal_height')"></th>
                                         <td><div class="row"><div class="col-md-2">
                                             <input ng-model="checkup.fundal_height" class="form-control" valid-number maxlength="3">
                                            </div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние матки</th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('metra_state')"></th>
                                         <td><div class="row" ng-class="{'has-error': obstetricianForm.metra_state.$invalid && obstetricianForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State"></rb-select>

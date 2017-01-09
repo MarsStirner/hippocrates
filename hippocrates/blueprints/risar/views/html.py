@@ -359,7 +359,7 @@ def html_inspection_puerpera_edit():
             return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
     ticket_25 = checkup and checkup.get_prop_value('ticket_25')
     return render_template('risar/inspection_puerpera_edit.html', card=card,
-                           checkup_descriptor=get_props_descriptor(checkup, pc_inspection_flat_code),
+                           checkup_descriptor=get_props_descriptor(checkup, puerpera_inspection_flat_code),
                            ticket_25_descriptor=get_props_descriptor(ticket_25, gynecological_ticket_25))
 
 
