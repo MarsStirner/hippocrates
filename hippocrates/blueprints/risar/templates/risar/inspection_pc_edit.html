@@ -294,9 +294,11 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лимфоузлы <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.lymph.$invalid && somaticForm.submit_attempt}">
-                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" ng-required="true">
+                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('lymph')"
+                                                 ng-required="checkupDescriptor.getMandatory('lymph')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
@@ -392,7 +394,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Физиологические отправления</th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bowel_and_bladder_habits')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
                                     </tr>
                                 </tbody>
