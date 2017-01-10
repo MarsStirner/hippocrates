@@ -32,6 +32,7 @@ def api_get_ttj_records():
     data = request.json
     flt = data.get('filter')
 
+    barcode = flt.get('barCode')
     exec_date = safe_date(flt.get('execDate'))
     biomaterial = flt.get('biomaterial')
     lab = flt.get('lab')
@@ -42,10 +43,16 @@ def api_get_ttj_records():
     ).filter(
         Action.deleted == 0,
         ActionProperty.isAssigned == 1,
-        func.date(TakenTissueJournal.datetimePlanned) == exec_date,
     )
-    if biomaterial:
-        query = query.filter(TakenTissueJournal.tissueType_id == biomaterial['id'])
+
+    if barcode:
+        query = query.filter(func.concat(TakenTissueJournal.period, TakenTissueJournal.barcode).like(u'{0}%'.format(barcode)))
+    else:
+        query = query.filter(func.date(TakenTissueJournal.datetimePlanned) == exec_date)
+
+        if biomaterial:
+            query = query.filter(TakenTissueJournal.tissueType_id == biomaterial['id'])
+
     query = query.options(
         joinedload(TakenTissueJournal.tissueType),
     ).with_entities(
@@ -59,16 +66,17 @@ def api_get_ttj_records():
 
     filtered = query.all()
 
-    if org_str:
-        filtered = [
-            record for record in filtered
-            if record.Event.current_org_structure and record.Event.current_org_structure.id == org_str['id']
-        ]
-    if lab:
-        filtered = [
-            record for record in filtered
-            if record.rbLaboratory.id == lab['id']
-        ]
+    if not barcode:
+        if org_str:
+            filtered = [
+                record for record in filtered
+                if record.Event.current_org_structure and record.Event.current_org_structure.id == org_str['id']
+            ]
+        if lab:
+            filtered = [
+                record for record in filtered
+                if record.rbLaboratory.id == lab['id']
+            ]
 
     def make_default_result_record(record):
         return {
