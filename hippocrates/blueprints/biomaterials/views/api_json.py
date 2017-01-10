@@ -46,7 +46,7 @@ def api_get_ttj_records():
     )
 
     if barcode:
-        query = query.filter(TakenTissueJournal.barcode.like(u'{0}%'.format(barcode)))
+        query = query.filter(func.concat(TakenTissueJournal.period, TakenTissueJournal.barcode).like(u'{0}%'.format(barcode)))
     else:
         query = query.filter(func.date(TakenTissueJournal.datetimePlanned) == exec_date)
 

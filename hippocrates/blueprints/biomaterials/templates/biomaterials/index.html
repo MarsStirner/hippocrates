@@ -14,7 +14,7 @@
         <div class="row marginal">
             <div class="col-md-3 col-lg-2">
                 <label for="filter-id">№ забора б/м</label>
-                <input class="form-control" autocomplete="on" id="barCode" type="text" ng-model="filter.barCode" placeholder="Штрихкод" autofocus>
+                <input class="form-control" autocomplete="off" wm-slow-change="barCodeSearch(filter.barCode)" id="barCode" type="text" ng-model="filter.barCode" placeholder="Штрихкод" autofocus>
             </div>
             <div class="col-md-3 col-lg-2">
                 <label for="exec_date" class="control-label">Дата выполнения</label>
@@ -58,28 +58,25 @@
                 </button>
             </div>
         </div>
-        <div class="box box-info" style="font-size: 1.5em;">
+        <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Забор материалов</h3>
 
                 <div class="box-tools pull-right">
                     <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm" ng-model="static_filter.full_name" placeholder="ФИО пациента">
-                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <input type="text" class="form-control input-sm" ng-model="static_filter.client__full_name" placeholder="ФИО пациента">
                     </div>
                     <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm" placeholder="ФИО врача">
-                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <input type="text" class="form-control input-sm" ng-model="static_filter.set_persons__name" placeholder="ФИО врача">
                     </div>
                     <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm" placeholder="Лабораторное исследование">
-                        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                        <input type="text" class="form-control input-sm" ng-model="static_filter.action_type__name" placeholder="Лабораторное исследование">
                     </div>
 
-                    <button type="button" class="btn btn-primary" ng-click="change_status('in_progress')"
-                            ng-disabled="!selected_records.any()" ng-if="filter.status == 0">
-                        Выполнить
-                    </button>
+{#                    <button type="button" class="btn btn-primary" ng-click="change_status('in_progress')"#}
+{#                            ng-disabled="!selected_records.any()" ng-if="filter.status == 0">#}
+{#                        Выполнить#}
+{#                    </button>#}
                     <button type="button" class="btn btn-primary" ng-click="change_status('finished')"
                             ng-disabled="!selected_records.any()" ng-if="filter.status <= 1">
                         Отправить в лабораторию
@@ -91,7 +88,7 @@
                 </div>
             </div>
             <div class="box-body">
-                <table class="table table-condensed">
+                <table class="table table-condensed table-grouped">
                     <thead>
                         <tr>
                             <th>
@@ -101,17 +98,17 @@
                                 </span>
                             </th>
                             <th>Дата и время</th>
-                            <th>ФИО</th>
+                            <th>Лабораторное исследование</th>
                             <th>Пол</th>
                             <th>Дата рожд.</th>
                             <th>Назначил врач</th>
                             <th>Биоматериал</th>
-                            <th>Лабораторное исследование</th>
+                            <th>Оплачено</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody ng-repeat="(name, records) in grouped_current_result">
-                        <tr>
+                        <tr class="group-header">
                             <td colspan="9" class="th">[[name]]</td>
                         </tr>
                         <tr ng-repeat="record in records">
@@ -125,14 +122,14 @@
                                     [[record.datetime_planned | asDateTime]]
                                 </div>
                             </td>
-                            <td ng-click="open_info(record)">[[record.client.full_name]]</td>
+                            <td><div ng-repeat="action in record.actions">
+                                <a href="#" ng-click="open_action(action.id)" ng-bind="action.action_type.title"></a>
+                            </div></td>
                             <td ng-click="open_info(record)">[[record.client.sex.name]]</td>
                             <td ng-click="open_info(record)">[[record.client.birth_date | asDate]]</td>
                             <td ng-click="open_info(record)"><div ng-repeat="person in record.set_persons">[[person.short_name]]</div></td>
                             <td ng-click="open_info(record)">[[record.tissueType.name]] ([[record.actions.length]])</td>
-                            <td><div ng-repeat="action in record.actions">
-                                <a href="#" ng-click="open_action(action.id)" ng-bind="action.action_type.title"></a>
-                            </div></td>
+                            <td ng-click="open_info(record)"><span class="glyphicon" ng-class="{'glyphicon-ok text-success': record.is_paid, 'glyphicon-remove text-danger': !record.is_paid}"></span></td>
                             <td>
                                 <span ng-if="record.isUrgent" class="label label-warning">CITO</span>
                                 <span ng-if="record.status.code == 'finished'" class="label label-warning" tooltip="Ожидает отправку в ЛИС">ЛИС</span>
