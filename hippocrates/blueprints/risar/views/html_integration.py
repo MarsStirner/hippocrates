@@ -12,6 +12,8 @@ from contextlib import contextmanager
 import os
 import requests
 from flask import url_for, redirect
+from hippocrates.blueprints.risar.views.api.integration.card.api import \
+    card_save_or_update
 from nemesis.app import app
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
@@ -35,6 +37,7 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
     # org_code = Organisation.query.filter(
     #     Organisation.id == main_user.org_id
     # ).value(Organisation.regionalCode)
+    # по разным причинам бывают в main_user не те коды, или их нет
     person = Person.query.get(main_user.id)
     doctor_code = person.regionalCode
     org_code = Organisation.query.filter(
@@ -80,7 +83,8 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
             'card_doctor': doctor_code,
             'card_LPU': org_code,
         }
-        card_id = create_or_update_card(data, True, api_version, card_id)
+        # card_id = create_or_update_card(data, True, api_version, card_id)
+        card_id = card_save_or_update_get_id(data, True, api_version)
 
         # запись ID карты в шину
         sirius.save_card_ids_match(card_id, region, entity, remote_id)
@@ -89,6 +93,12 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
     return redirect(url_for('.html_inspection', event_id=card_id))
 
 
+def card_save_or_update_get_id(data, create, api_version, card_id=None):
+    xform = card_save_or_update(data, create, api_version, card_id)
+    return xform.target_obj.id
+
+
+# todo удалить, если верхний вариант пройдет проверку
 def create_or_update_card(data, create, api_version, card_id=None):
     if create:
         url = '/risar/api/integration/%s/card/' % api_version

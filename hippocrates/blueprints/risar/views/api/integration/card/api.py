@@ -57,6 +57,11 @@ def api_card_get(api_version, card_id=None):
 def api_card_save(api_version, card_id=None):
     data = request.get_json()
     create = request.method == 'POST'
+    xform = card_save_or_update(data, create, api_version, card_id)
+    return xform.as_json()
+
+
+def card_save_or_update(data, create, api_version, card_id=None):
     xform = CardXForm(api_version, create)
     xform.validate(data)
     client_id = data.get('client_id')
@@ -74,7 +79,7 @@ def api_card_save(api_version, card_id=None):
             card_attrs_save_error_code,
             u'Карта сохранена, но произошла ошибка при пересчёте атрибутов карты'
         )
-    return xform.as_json()
+    return xform
 
 
 @module.route('/api/integration/<int:api_version>/card/<card_id>', methods=['DELETE'])
