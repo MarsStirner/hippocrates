@@ -7,7 +7,7 @@ from flask_login import current_user
 
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
     first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, \
-    puerpera_inspection_flat_code, risar_epicrisis, gynecological_ticket_25
+    puerpera_inspection_flat_code, risar_epicrisis, gynecological_ticket_25, risar_gyn_general_anamnesis_flat_code
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_nursing
 from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
@@ -173,7 +173,8 @@ def html_anamnesis():
 def html_gynecological_anamnesis():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
-    return render_template('risar/unpregnant/anamnesis_view.html', card=card)
+    return render_template('risar/unpregnant/anamnesis_view.html', card=card,
+                           anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
 
 
 @module.route('/anamnesis/mother_edit.html')
@@ -187,7 +188,8 @@ def html_anamnesis_mother_edit():
 def html_gynecological_anamnesis_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
-    return render_template('risar/unpregnant/anamnesis_edit.html', card=card)
+    return render_template('risar/unpregnant/anamnesis_edit.html', card=card,
+                           anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
 
 
 @module.route('/anamnesis/father_edit.html')

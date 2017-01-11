@@ -25,42 +25,58 @@
                         <td></td>
                     </tr>
                     <tr>
-                        <td class="text-right">С возраста <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.age" class="form-control"></div></div></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('age')"></td>
+                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.age" class="form-control"
+                                                                          ng-required="anamnesisDescriptor.getMandatory('age')"
+                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('age')"></div></div></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Длительность <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.duration" class="form-control"></div></div></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('duration')"></td>
+                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.duration" class="form-control"
+                                                                          ng-required="anamnesisDescriptor.getMandatory('duration')"
+                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('duration')"></div></div></td>
                     </tr>
                     <tr><!-- example of input Integer, String-->
-                        <td class="text-right">Продолжительность цикла <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.period_duration" class="form-control"></div></div></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('period_duration')"></td>
+                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.period_duration" class="form-control"
+                                                                          ng-required="anamnesisDescriptor.getMandatory('period_duration')"
+                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('period_duration')"></div></div></td>
                     </tr>
                     <tr>
                         <!-- example of checkbox boolean-->
-                        <td class="text-right">Нарушения<span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('disorder')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"
+                                                                          ng-required="anamnesisDescriptor.getMandatory('disorder')"
+                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('disorder')"></td>
                     </tr>
                     <tr>
                         <!-- example of select ExtReferenceRb-->
-                        <td class="text-right">Характер менструаций<span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.menstrual_character" ref-book="rbRisarMenstruationCharacter"></rb-select></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menstrual_character')"></td>
+                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.menstrual_character" ref-book="rbRisarMenstruationCharacter"
+                              ng-required="anamnesisDescriptor.getMandatory('menstrual_character')"
+                              ng-disabled="anamnesisDescriptor.getReadOnly('menstrual_character')"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Межменструальные выделения <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.intermenstrual_spotting" class="form-control"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('intermenstrual_spotting')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.intermenstrual_spotting" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('intermenstrual_spotting')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('intermenstrual_spotting')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Менструальные боли <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.menstrual_pain" class="form-control"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menstrual_pain')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.menstrual_pain" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('menstrual_pain')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('menstrual_pain')"></td>
                     </tr>
                 
                     <tr>
-                        <td class="text-right"><strong>Менопауза</strong> <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menopause')"></th>
+                        <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"
+                                   ng-required="anamnesisDescriptor.getMandatory('menopause')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('menopause')"></td>
                     </tr>
                     <tr>
-                    <td class="text-right">С возраста<span>&nbsp;</span></td>
+                    <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menopause_age')"></td>
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
@@ -74,90 +90,120 @@
                         <td></td>
                     </tr>
                     <tr>
-                     <td class="text-right">С возраста<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.sex_life_age" class="form-control"></div></div></td>
+                     <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('sex_life_age')"></td>
+                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3"
+                                                                          ng-model="anamnesis_unpregnant.sex_life_age" class="form-control"
+                                                                          ng-required="anamnesisDescriptor.getMandatory('sex_life_age')"
+                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('sex_life_age')"></div></div></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Количество половых партнеров<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.intercourse_partner_number" class="form-control"></div></div>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('intercourse_partner_number')"></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.intercourse_partner_number" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('intercourse_partner_number')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('intercourse_partner_number')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Семейное положение</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.marital_status" ref-book="rbRisarMarital_Status"></rb-select></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('marital_status')"></th>
+                        <td><rb-select ng-model="anamnesis_unpregnant.marital_status" ref-book="rbRisarMarital_Status"
+                                   ng-required="anamnesisDescriptor.getMandatory('marital_status')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('marital_status')"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Заболевания</strong><span>&nbsp;</span></td>
                         <td></td>
                     </tr>
                      <tr>
-                        <td class="text-right">ЗППП<span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('std')"></td>
                         <td>
-                            <rb-select multiple="true" ref-book="rbRisarSTD" ng-model="anamnesis_unpregnant.std"></rb-select>
+                            <rb-select multiple="true" ref-book="rbRisarSTD" ng-model="anamnesis_unpregnant.std"
+                                   ng-required="anamnesisDescriptor.getMandatory('std')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('std')"></rb-select>
                         </td>
 
                     </tr>
                     <tr>
-                        <td class="text-right">Гинекологические<span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarGynecopathy"></rb-select></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('gynecopathy')"></td>
+                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarGynecopathy"
+                                   ng-required="anamnesisDescriptor.getMandatory('gynecopathy')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('gynecopathy')"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Гепатит<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.hepatitis" class="form-control"></div></div>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('hepatitis')"></td>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.hepatitis" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('hepatitis')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('hepatitis')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right">Туберкулез<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.tuberculosis" class="form-control"></div></div>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('tuberculosis')"></td>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.tuberculosis" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('tuberculosis')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('tuberculosis')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right">Соматические<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.somatic_disease" class="form-control"></div></div>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('somatic_disease')"></td>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.somatic_disease" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('somatic_disease')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('somatic_disease')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Наследственность</strong><span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('hereditary')"></th>
+                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"
+                                   ng-required="anamnesisDescriptor.getMandatory('hereditary')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
                     </tr>
                     
                     <tr>
-                        <td class="text-right"><strong>Оперативные вмешательства на половых органах</strong> <span>&nbsp;</span></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('gyn_operation')"></th>
                         <td><wysiwyg ng-model="anamnesis_unpregnant.gyn_operation" /></td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Бесплодие</strong><span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility')"></th>
+                        <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"
+                                   ng-required="anamnesisDescriptor.getMandatory('infertility')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('infertility')"></td>
                     </tr>
                      <tr>
-                        <td class="text-right">Вид<span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_kind')"></td>
                         <td><rb-select ng-model="anamnesis_unpregnant.infertility_kind" ref-book="rbRisarInfertilityKind" ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_duration')"></td>
                         <td><input ng-model="anamnesis_unpregnant.infertility_duration" class="form-control" type="text" valid-number maxlength="3" ng-disabled="!anamnesis_unpregnant.infertility"></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Причины <span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_etiology')"></td>
                         <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_unpregnant.infertility_etiology"
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Лечение <span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_treatment')"></td>
                         <td><rb-select multiple="true" ref-book="rbRisarInfertilityTreatment" ng-model="anamnesis_unpregnant.infertility_treatment"
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                      <tr>
-                        <td class="text-right"><strong>Эпидемиологический анамнез</strong><span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.epidemic" class="form-control"></div></div>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('epidemic')"></th>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.epidemic" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('epidemic')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('epidemic')"></div></div>
                         </td>
                     </tr>
                      <tr>
-                        <td class="text-right"><strong>Травмы</strong><span>&nbsp;</span></td>
-                         <td><input ng-model="anamnesis_unpregnant.traumas" class="form-control"></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('traumas')"></th>
+                         <td><input ng-model="anamnesis_unpregnant.traumas" class="form-control"
+                                   ng-required="anamnesisDescriptor.getMandatory('traumas')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('traumas')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Операции (кроме гинекологических)</strong><span>&nbsp;</span></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('operations')"></th>
                         <td>
                             <wysiwyg ng-model="anamnesis_unpregnant.operations" />
                         </td>
@@ -178,31 +224,43 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td class="text-right">Алкоголь <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('alcohol')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"
+                                   ng-required="anamnesisDescriptor.getMandatory('alcohol')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('alcohol')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Курение <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('smoking')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"
+                                   ng-required="anamnesisDescriptor.getMandatory('smoking')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('smoking')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Токсичные вещества <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('toxic')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"
+                                   ng-required="anamnesisDescriptor.getMandatory('toxic')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('toxic')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right">Наркотики <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('drugs')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"
+                                   ng-required="anamnesisDescriptor.getMandatory('drugs')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('drugs')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Общественно-профилактическая группа</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.work_group" ref-book="rbRisarWork_Group" ></rb-select></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('work_group')"></th>
+                        <td><rb-select ng-model="anamnesis_unpregnant.work_group" ref-book="rbRisarWork_Group"
+                                   ng-required="anamnesisDescriptor.getMandatory('work_group')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('work_group')"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Профессиональные вредности</strong> <span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('professional_properties')"></th>
+                        <td><rb-select ng-model="anamnesis_unpregnant.professional_properties" ref-book="rbRisarProfessional_Properties"
+                                   ng-required="anamnesisDescriptor.getMandatory('professional_properties')"
+                                   ng-disabled="anamnesisDescriptor.getReadOnly('professional_properties')"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right"><strong>Дополнительная информация</strong> <span>&nbsp;</span></td>
+                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_treatment')"></th>
                         <td> <wysiwyg ng-model="anamnesis_unpregnant.additional_info" /></td>
                     </tr>
                 </tbody>
@@ -221,6 +279,9 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('anamnesis_descriptor', angular.fromJson('{{anamnesis_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>
 {% endblock %}

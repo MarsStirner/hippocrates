@@ -4,7 +4,8 @@
 
 'use strict';
 
-var AnamnesisBaseCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog) {
+var AnamnesisBaseCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog, PropsDescriptor, anamnesis_descriptor) {
+    $scope.anamnesisDescriptor = new PropsDescriptor(anamnesis_descriptor);
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
