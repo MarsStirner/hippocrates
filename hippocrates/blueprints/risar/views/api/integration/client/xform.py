@@ -101,8 +101,10 @@ class ClientXForm(ClientSchema, XForm):
                 self._update_id_document(data['document'])
             if 'insurance_documents' in data:
                 self._update_policies(data['insurance_documents'])
+            if 'registration_address' in data:
+                self._update_address(data['registration_address'], AddressType.reg[0])
             if 'residential_address' in data:
-                self._update_address(data['residential_address'])
+                self._update_address(data['residential_address'], AddressType.live[0])
             if 'blood_type_info' in data:
                 self._update_blood(data['blood_type_info'])
             if 'allergies_info' in data:
@@ -165,7 +167,7 @@ class ClientXForm(ClientSchema, XForm):
             policy.insurer = org
             self._changed.append(policy)
 
-    def _update_address(self, data):
+    def _update_address(self, data, type_):
         client = self.target_obj
         client_address = client.loc_address
         if not client_address:
@@ -185,7 +187,7 @@ class ClientXForm(ClientSchema, XForm):
         house.corpus = data.get('building', '')
         address.flat = data.get('flat')
         client_address.localityType = data.get('locality_type')
-        client_address.type = AddressType.live[0]
+        client_address.type = type_
         self._changed.extend([client_address, address, house])
 
     def _update_blood(self, data_list):
