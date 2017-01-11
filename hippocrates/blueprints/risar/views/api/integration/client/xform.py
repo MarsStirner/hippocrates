@@ -169,9 +169,15 @@ class ClientXForm(ClientSchema, XForm):
 
     def _update_address(self, data, type_):
         client = self.target_obj
-        client_address = client.loc_address
-        if not client_address:
-            client.loc_address = client_address = ClientAddress()
+        if type_ == 0:
+            client_address = client.reg_address
+            if not client_address:
+                client.reg_address = client_address = ClientAddress()
+        else:
+            assert type_ == 1
+            client_address = client.loc_address
+            if not client_address:
+                client.loc_address = client_address = ClientAddress()
 
         address = client_address.address
         if not address:
@@ -252,6 +258,7 @@ class ClientXForm(ClientSchema, XForm):
             'gender': client.sexCode,
             'document': self._represent_document(client.document),
             'insurance_documents': map(self._represent_policy, client.policies_all),
+            'registration_address': self._represent_residential_address(client.reg_address),
             'residential_address': self._represent_residential_address(client.loc_address),
             'blood_type_info': map(self._represent_blood_type, client.blood_history),
             'allergies_info': map(self._represent_allergy, client.allergies),
