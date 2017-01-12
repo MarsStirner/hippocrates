@@ -117,12 +117,14 @@
                         <td>Перенесенные заболевания</td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.mother.finished_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="anamnesis.mother.finished_diseases.length"><br></span>[[anamnesis.mother.finished_diseases_text]]
+                            <span ng-if="anamnesis.mother.finished_diseases.length"><br></span>
+                            <span ng-bind-html="anamnesis.mother.finished_diseases_text"></span>
                             <span ng-if="!anamnesis.mother.finished_diseases.length && !anamnesis.mother.finished_diseases_text">нет</span>
                         </td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.father.finished_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="anamnesis.father.finished_diseases.length"><br></span>[[anamnesis.father.finished_diseases_text]]
+                            <span ng-if="anamnesis.father.finished_diseases.length"><br></span>
+                            <span ng-bind-html="anamnesis.father.finished_diseases_text"></span>
                             <span ng-if="!anamnesis.father.finished_diseases.length && !anamnesis.father.finished_diseases_text">нет</span>
                         </td>
                     </tr>
@@ -130,13 +132,15 @@
                         <td>Текущие заболевания</td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.mother.current_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="anamnesis.mother.current_diseases.length"><br></span>[[anamnesis.mother.current_diseases_text]]
+                            <span ng-if="anamnesis.mother.current_diseases.length"><br></span>
+                            <span ng-bind-html="anamnesis.mother.current_diseases_text"></span>
                             <br ng-if="anamnesis.mother.current_diseases_text"><span ng-if="anamnesis.mother.heart_disease">Пороки сердца с нарушением кровообращения</span>
                             <span ng-if="!anamnesis.mother.current_diseases.length && !anamnesis.mother.current_diseases_text && !anamnesis.mother.heart_disease">нет</span>
                         </td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.father.current_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
-                            <span ng-if="anamnesis.father.current_diseases.length"><br></span>[[anamnesis.father.current_diseases_text]]
+                            <span ng-if="anamnesis.father.current_diseases.length"><br></span>
+                            <span ng-bind-html="anamnesis.father.current_diseases_text"></span>
                             <span ng-if="!anamnesis.father.current_diseases.length && !anamnesis.father.current_diseases_text">нет</span>
                         </td>
                     </tr>
