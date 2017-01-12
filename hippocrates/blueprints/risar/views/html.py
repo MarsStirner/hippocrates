@@ -168,7 +168,7 @@ def html_anamnesis():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/anamnesis_view.html', card=card,
-                           anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis))
+                           mother_anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis))
 
 
 @module.route('/gynecological-anamnesis.html')

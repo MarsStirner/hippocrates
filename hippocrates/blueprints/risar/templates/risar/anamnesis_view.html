@@ -61,42 +61,42 @@
                     </thead>
                     <tbody>
                     <tr>
-                        <td>Образование</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('education')"></td>
                         <td ng-bind="anamnesis.mother.education.name"></td>
                         <td ng-bind="anamnesis.father.education.name"></td>
                     </tr>
                     <tr>
-                        <td>Общественно-профессиональная группа</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('work_group')"></td>
                         <td ng-bind="anamnesis.mother.work_group.name"></td>
                         <td ng-bind="anamnesis.father.work_group.name"></td>
                     </tr>
                     <tr>
-                        <td>Профессиональные и экологические вредности</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('professional_properties')"></td>
                         <td ng-bind="anamnesis.mother.professional_properties.name"></td>
                         <td ng-bind="anamnesis.father.professional_properties.name"></td>
                     </tr>
                     <tr>
-                        <td>Бесплодие</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('infertility')"></td>
                         <td ng-bind="anamnesis.mother.infertility | danet"></td>
                         <td ng-bind="anamnesis.father.infertility | danet"></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Вид</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('infertility_type')"></span></td>
                         <td ng-bind="anamnesis.mother.infertility_type.name"></td>
                         <td ng-bind="anamnesis.father.infertility_type.name"></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Длительность</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('infertility_period')"></span></td>
                         <td ng-bind="anamnesis.mother.infertility_period"></td>
                         <td ng-bind="anamnesis.father.infertility_period"></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Причины</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('infertility_cause')"></span></td>
                         <td ng-bind="format_multiple(anamnesis.mother.infertility_cause, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.infertility_cause, 'name')"></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Лечение</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('infertility_treatment')"></span></td>
                         <td ng-bind="format_multiple(anamnesis.mother.infertility_treatment, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.infertility_treatment, 'name')"></td>
                     </tr>
@@ -114,7 +114,7 @@
                         <td ng-bind="anamnesis.father.blood_type.name"></td>
                     </tr>
                     <tr>
-                        <td>Перенесенные заболевания</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('finished_diseases')"></td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.mother.finished_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
                             <span ng-if="anamnesis.mother.finished_diseases.length"><br></span>[[anamnesis.mother.finished_diseases_text]]
@@ -127,7 +127,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Текущие заболевания</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('current_diseases')"></td>
                         <td>
                             <span ng-repeat="mkb in anamnesis.mother.current_diseases" tooltip="[[ mkb.name ]]" class="bottom_dotted margin-right" ng-bind="mkb.code"></span>
                             <span ng-if="anamnesis.mother.current_diseases.length"><br></span>[[anamnesis.mother.current_diseases_text]]
@@ -141,7 +141,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Наследственность</td>
+                        <td ng-bind-html="MotherAnamnesisDescriptor.getName('hereditary')"></td>
                         <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
                     </tr>
@@ -151,22 +151,22 @@
                         <td ng-bind="anamnesis.father.bad_habits"></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Алкоголь</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('alcohol')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.alcohol, 'fa-check text-danger': anamnesis.mother.alcohol}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.alcohol, 'fa-check text-danger': anamnesis.father.alcohol}"></i></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Курение</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('smoking')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.smoking, 'fa-check text-danger': anamnesis.mother.smoking}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.smoking, 'fa-check text-danger': anamnesis.father.smoking}"></i></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Токсичные вещества</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('toxic')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.toxic, 'fa-check text-danger': anamnesis.mother.toxic}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.toxic, 'fa-check text-danger': anamnesis.father.toxic}"></i></td>
                     </tr>
                     <tr>
-                        <td><span class="small-left-margin">Наркотики</span></td>
+                        <td><span class="small-left-margin" ng-bind-html="MotherAnamnesisDescriptor.getName('drugs')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.drugs, 'fa-check text-danger': anamnesis.mother.drugs}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.drugs, 'fa-check text-danger': anamnesis.father.drugs}"></i></td>
                     </tr>
@@ -292,7 +292,7 @@
 {% block modules_js %}
     {{ super() }}
     <script>
-        WebMis20.value('anamnesis_descriptor', angular.fromJson('{{anamnesis_descriptor|tojson|safe}}'));
+        WebMis20.value('mother_anamnesis_descriptor', angular.fromJson('{{mother_anamnesis_descriptor|tojson|safe}}'));
     </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>

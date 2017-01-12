@@ -51,8 +51,10 @@ var BaseAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     };
 };
 
-var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
+var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, mother_anamnesis_descriptor) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
+
+    $scope.MotherAnamnesisDescriptor = new PropsDescriptor(mother_anamnesis_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.anamnesis.get($scope.event_id)
