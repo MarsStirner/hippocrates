@@ -456,8 +456,10 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
     };
     reload_anamnesis();
 };
-var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
+var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
+
+    $scope.FatherAnamnesisDescriptor = new PropsDescriptor(father_anamnesis_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.anamnesis.father.get($scope.event_id)
