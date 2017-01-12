@@ -7,6 +7,7 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.accounting import Invoice, FinanceTransaction, rbFinanceTransactionType, rbFinanceOperationType, \
     rbPayType
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
+from nemesis.lib.mq_integration.invoice import MQOpsInvoice, notify_invoice_changed
 from nemesis.systemwide import db
 from ..app import module
 from ..lib.represent import InvoiceRepr
@@ -99,8 +100,7 @@ def api_0_invoice_refund_save(invoice_id):
             item = item_map[item_id]
             item.set_refund(refund)
     db.session.commit()
-    invoice_ctrl = InvoiceController()
-    invoice_ctrl.notify_invoice_changed(refund, 'refund')
+    notify_invoice_changed(MQOpsInvoice.refund, refund)
     return InvoiceRepr().represent_refund(refund)
 
 
@@ -119,8 +119,7 @@ def api_0_invoice_refund_delete(invoice_id):
     for item in refund.refund_items:
         item.set_refund(None)
     db.session.commit()
-    invoice_ctrl = InvoiceController()
-    invoice_ctrl.notify_invoice_changed(refund, 'delete')
+    notify_invoice_changed(MQOpsInvoice.delete, refund)
 
 
 @module.route('/api/0/invoice/<int:invoice_id>/refund/process', methods=['POST'])

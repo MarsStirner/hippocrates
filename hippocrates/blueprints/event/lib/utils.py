@@ -9,7 +9,7 @@ from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from nemesis.models.utils import safe_current_user_id
 from sqlalchemy import func
 
-from nemesis.lib.data import create_new_action, update_action, create_action
+from nemesis.lib.data import create_new_action, update_action, create_action, get_action
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
@@ -20,6 +20,7 @@ from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_e
 from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
 from nemesis.models.enums import ActionStatus
 from nemesis.models.schedule import ScheduleClientTicket
+from nemesis.lib.const import STATIONARY_RECEIVED_CODE
 from nemesis.systemwide import db
 
 logger = logging.getLogger('simple')
@@ -290,12 +291,8 @@ def received_save(event_id, received_data):
     db.session.commit()
 
 
-def received_close(event_id):
-    received = Action.query.join(ActionType).filter(
-        ActionType.flatCode == 'received',
-        Action.deleted == 0,
-        Action.event_id == event_id,
-    ).first()
+def received_close(event):
+    received = get_action(event, STATIONARY_RECEIVED_CODE)
     if received and received.status < 2:
         received.modifyPerson = safe_current_user_id()
         received.modifyDatetime = datetime.datetime.now()

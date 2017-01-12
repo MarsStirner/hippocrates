@@ -20,12 +20,13 @@ from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out, safe_int
+from nemesis.lib.mq_integration.med_prescription import notify_action_prescriptions_changed, MQOpsMedPrescription
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import rlsNomen, rlsTradeName
-from nemesis.models.enums import ActionTypeClass
+from nemesis.models.enums import ActionStatus
 from nemesis.systemwide import db
 
 
@@ -335,6 +336,11 @@ def api_action_post(action_id=None):
         reasons_dict[d['person_id']].append(d['reason'])
 
     notify_object(object_id, reasons_dict, data, 'altered')
+
+    if not action_id or (action_id and action.status != ActionStatus.finished[0]):
+        notify_action_prescriptions_changed(MQOpsMedPrescription.create, action)
+    if action.status == ActionStatus.finished[0]:
+        notify_action_prescriptions_changed(MQOpsMedPrescription.close, action)
 
     v = ActionVisualizer()
     return v.make_action(action)
