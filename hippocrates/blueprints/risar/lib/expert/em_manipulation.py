@@ -82,7 +82,7 @@ class EventMeasureController(BaseModelController):
         return em
 
     def make_assigned(self, em):
-        if em.status == MeasureStatus.created[0]:
+        if em.status in (MeasureStatus.created[0], MeasureStatus.upon_med_indications[0]):
             em.status = MeasureStatus.assigned[0]
         return em
 
