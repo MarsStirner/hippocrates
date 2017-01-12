@@ -25,58 +25,58 @@
                         <td></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('age')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('age')"></td>
                         <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.age" class="form-control"
-                                                                          ng-required="anamnesisDescriptor.getMandatory('age')"
-                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('age')"></div></div></td>
+                                                                          ng-required="GynAnamnesisDescriptor.getMandatory('age')"
+                                                                          ng-disabled="GynAnamnesisDescriptor.getReadOnly('age')"></div></div></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('duration')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('duration')"></td>
                         <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.duration" class="form-control"
-                                                                          ng-required="anamnesisDescriptor.getMandatory('duration')"
-                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('duration')"></div></div></td>
+                                                                          ng-required="GynAnamnesisDescriptor.getMandatory('duration')"
+                                                                          ng-disabled="GynAnamnesisDescriptor.getReadOnly('duration')"></div></div></td>
                     </tr>
                     <tr><!-- example of input Integer, String-->
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('period_duration')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('period_duration')"></td>
                         <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.period_duration" class="form-control"
-                                                                          ng-required="anamnesisDescriptor.getMandatory('period_duration')"
-                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('period_duration')"></div></div></td>
+                                                                          ng-required="GynAnamnesisDescriptor.getMandatory('period_duration')"
+                                                                          ng-disabled="GynAnamnesisDescriptor.getReadOnly('period_duration')"></div></div></td>
                     </tr>
                     <tr>
                         <!-- example of checkbox boolean-->
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('disorder')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('disorder')"></td>
                         <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"
-                                                                          ng-required="anamnesisDescriptor.getMandatory('disorder')"
-                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('disorder')"></td>
+                                                                          ng-required="GynAnamnesisDescriptor.getMandatory('disorder')"
+                                                                          ng-disabled="GynAnamnesisDescriptor.getReadOnly('disorder')"></td>
                     </tr>
                     <tr>
                         <!-- example of select ExtReferenceRb-->
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menstrual_character')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('menstrual_character')"></td>
                         <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.menstrual_character" ref-book="rbRisarMenstruationCharacter"
-                              ng-required="anamnesisDescriptor.getMandatory('menstrual_character')"
-                              ng-disabled="anamnesisDescriptor.getReadOnly('menstrual_character')"></rb-select></td>
+                              ng-required="GynAnamnesisDescriptor.getMandatory('menstrual_character')"
+                              ng-disabled="GynAnamnesisDescriptor.getReadOnly('menstrual_character')"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('intermenstrual_spotting')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('intermenstrual_spotting')"></td>
                         <td><input ng-model="anamnesis_unpregnant.intermenstrual_spotting" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('intermenstrual_spotting')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('intermenstrual_spotting')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('intermenstrual_spotting')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('intermenstrual_spotting')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menstrual_pain')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('menstrual_pain')"></td>
                         <td><input ng-model="anamnesis_unpregnant.menstrual_pain" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('menstrual_pain')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('menstrual_pain')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('menstrual_pain')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('menstrual_pain')"></td>
                     </tr>
                 
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menopause')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('menopause')"></th>
                         <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"
-                                   ng-required="anamnesisDescriptor.getMandatory('menopause')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('menopause')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('menopause')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('menopause')"></td>
                     </tr>
                     <tr>
-                    <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('menopause_age')"></td>
+                    <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('menopause_age')"></td>
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
@@ -90,120 +90,120 @@
                         <td></td>
                     </tr>
                     <tr>
-                     <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('sex_life_age')"></td>
+                     <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('sex_life_age')"></td>
                         <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3"
                                                                           ng-model="anamnesis_unpregnant.sex_life_age" class="form-control"
-                                                                          ng-required="anamnesisDescriptor.getMandatory('sex_life_age')"
-                                                                          ng-disabled="anamnesisDescriptor.getReadOnly('sex_life_age')"></div></div></td>
+                                                                          ng-required="GynAnamnesisDescriptor.getMandatory('sex_life_age')"
+                                                                          ng-disabled="GynAnamnesisDescriptor.getReadOnly('sex_life_age')"></div></div></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('intercourse_partner_number')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('intercourse_partner_number')"></td>
                         <td><div class="row"><div class="col-md-4">
                             <input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.intercourse_partner_number" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('intercourse_partner_number')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('intercourse_partner_number')"></div></div>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('intercourse_partner_number')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('intercourse_partner_number')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('marital_status')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('marital_status')"></th>
                         <td><rb-select ng-model="anamnesis_unpregnant.marital_status" ref-book="rbRisarMarital_Status"
-                                   ng-required="anamnesisDescriptor.getMandatory('marital_status')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('marital_status')"></rb-select></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('marital_status')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('marital_status')"></rb-select></td>
                     </tr>
                     <tr>
                         <td class="text-right"><strong>Заболевания</strong><span>&nbsp;</span></td>
                         <td></td>
                     </tr>
                      <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('std')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('std')"></td>
                         <td>
                             <rb-select multiple="true" ref-book="rbRisarSTD" ng-model="anamnesis_unpregnant.std"
-                                   ng-required="anamnesisDescriptor.getMandatory('std')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('std')"></rb-select>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('std')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('std')"></rb-select>
                         </td>
 
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('gynecopathy')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('gynecopathy')"></td>
                         <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarGynecopathy"
-                                   ng-required="anamnesisDescriptor.getMandatory('gynecopathy')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('gynecopathy')"></rb-select></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('gynecopathy')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('gynecopathy')"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('hepatitis')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('hepatitis')"></td>
                         <td><div class="row"><div class="col-md-12">
                             <input ng-model="anamnesis_unpregnant.hepatitis" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('hepatitis')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('hepatitis')"></div></div>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('hepatitis')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('hepatitis')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('tuberculosis')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('tuberculosis')"></td>
                         <td><div class="row"><div class="col-md-12">
                             <input ng-model="anamnesis_unpregnant.tuberculosis" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('tuberculosis')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('tuberculosis')"></div></div>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('tuberculosis')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('tuberculosis')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('somatic_disease')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('somatic_disease')"></td>
                         <td><div class="row"><div class="col-md-12">
                             <input ng-model="anamnesis_unpregnant.somatic_disease" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('somatic_disease')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('somatic_disease')"></div></div>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('somatic_disease')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('somatic_disease')"></div></div>
                         </td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('hereditary')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('hereditary')"></th>
                         <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"
-                                   ng-required="anamnesisDescriptor.getMandatory('hereditary')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('hereditary')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
                     </tr>
                     
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('gyn_operation')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('gyn_operation')"></th>
                         <td><wysiwyg ng-model="anamnesis_unpregnant.gyn_operation" /></td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('infertility')"></th>
                         <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"
-                                   ng-required="anamnesisDescriptor.getMandatory('infertility')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('infertility')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('infertility')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('infertility')"></td>
                     </tr>
                      <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_kind')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('infertility_kind')"></td>
                         <td><rb-select ng-model="anamnesis_unpregnant.infertility_kind" ref-book="rbRisarInfertilityKind" ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_duration')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('infertility_duration')"></td>
                         <td><input ng-model="anamnesis_unpregnant.infertility_duration" class="form-control" type="text" valid-number maxlength="3" ng-disabled="!anamnesis_unpregnant.infertility"></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_etiology')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('infertility_etiology')"></td>
                         <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_unpregnant.infertility_etiology"
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_treatment')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('infertility_treatment')"></td>
                         <td><rb-select multiple="true" ref-book="rbRisarInfertilityTreatment" ng-model="anamnesis_unpregnant.infertility_treatment"
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
                      <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('epidemic')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('epidemic')"></th>
                         <td><div class="row"><div class="col-md-12">
                             <input ng-model="anamnesis_unpregnant.epidemic" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('epidemic')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('epidemic')"></div></div>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('epidemic')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('epidemic')"></div></div>
                         </td>
                     </tr>
                      <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('traumas')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('traumas')"></th>
                          <td><input ng-model="anamnesis_unpregnant.traumas" class="form-control"
-                                   ng-required="anamnesisDescriptor.getMandatory('traumas')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('traumas')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('traumas')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('traumas')"></td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('operations')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('operations')"></th>
                         <td>
                             <wysiwyg ng-model="anamnesis_unpregnant.operations" />
                         </td>
@@ -224,43 +224,43 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('alcohol')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('alcohol')"></td>
                         <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"
-                                   ng-required="anamnesisDescriptor.getMandatory('alcohol')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('alcohol')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('alcohol')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('alcohol')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('smoking')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('smoking')"></td>
                         <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"
-                                   ng-required="anamnesisDescriptor.getMandatory('smoking')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('smoking')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('smoking')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('smoking')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('toxic')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('toxic')"></td>
                         <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"
-                                   ng-required="anamnesisDescriptor.getMandatory('toxic')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('toxic')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('toxic')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('toxic')"></td>
                     </tr>
                     <tr>
-                        <td class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('drugs')"></td>
+                        <td class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('drugs')"></td>
                         <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"
-                                   ng-required="anamnesisDescriptor.getMandatory('drugs')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('drugs')"></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('drugs')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('drugs')"></td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('work_group')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('work_group')"></th>
                         <td><rb-select ng-model="anamnesis_unpregnant.work_group" ref-book="rbRisarWork_Group"
-                                   ng-required="anamnesisDescriptor.getMandatory('work_group')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('work_group')"></rb-select></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('work_group')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('work_group')"></rb-select></td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('professional_properties')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('professional_properties')"></th>
                         <td><rb-select ng-model="anamnesis_unpregnant.professional_properties" ref-book="rbRisarProfessional_Properties"
-                                   ng-required="anamnesisDescriptor.getMandatory('professional_properties')"
-                                   ng-disabled="anamnesisDescriptor.getReadOnly('professional_properties')"></rb-select></td>
+                                   ng-required="GynAnamnesisDescriptor.getMandatory('professional_properties')"
+                                   ng-disabled="GynAnamnesisDescriptor.getReadOnly('professional_properties')"></rb-select></td>
                     </tr>
                     <tr>
-                        <th class="text-right" ng-bind-html="anamnesisDescriptor.getLabel('infertility_treatment')"></th>
+                        <th class="text-right" ng-bind-html="GynAnamnesisDescriptor.getLabel('infertility_treatment')"></th>
                         <td> <wysiwyg ng-model="anamnesis_unpregnant.additional_info" /></td>
                     </tr>
                 </tbody>
@@ -280,7 +280,7 @@
 {% block modules_js %}
     {{ super() }}
     <script>
-        WebMis20.value('anamnesis_descriptor', angular.fromJson('{{anamnesis_descriptor|tojson|safe}}'));
+        WebMis20.value('gyn_anamnesis_descriptor', angular.fromJson('{{gyn_anamnesis_descriptor|tojson|safe}}'));
     </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>

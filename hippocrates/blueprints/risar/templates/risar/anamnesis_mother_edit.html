@@ -21,25 +21,34 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <th class="text-right">Образование <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="anamnesis_mother.education" ref-book="rbRisarEducation" autofocus="autofocus"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('education')"></th>
+                    <td><rb-select ng-model="anamnesis_mother.education" ref-book="rbRisarEducation" autofocus="autofocus"
+                                   ng-required="MotherAnamnesisDescriptor.getMandatory('education')"
+                                   ng-disabled="MotherAnamnesisDescriptor.getReadOnly('education')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Общественно-профессиональная группа <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="anamnesis_mother.work_group" ref-book="rbRisarWork_Group"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('work_group')"></th>
+                    <td><rb-select ng-model="anamnesis_mother.work_group" ref-book="rbRisarWork_Group"
+                                   ng-required="MotherAnamnesisDescriptor.getMandatory('work_group')"
+                                   ng-disabled="MotherAnamnesisDescriptor.getReadOnly('work_group')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Профессиональные вредности <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="anamnesis_mother.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('professional_properties')"></th>
+                    <td><rb-select ng-model="anamnesis_mother.professional_properties" ref-book="rbRisarProfessional_Properties"
+                                   ng-required="MotherAnamnesisDescriptor.getMandatory('professional_properties')"
+                                   ng-disabled="MotherAnamnesisDescriptor.getReadOnly('professional_properties')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Семейное положение <span class="text-danger">*</span></th>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('marital_status')"></th>
                     <td><rb-select ng-model="anamnesis_mother.marital_status" ref-book="rbRisarMarital_Status"
-                                   ng-required="true"></rb-select></td>
+                                   ng-required="MotherAnamnesisDescriptor.getMandatory('marital_status')"
+                                   ng-disabled="MotherAnamnesisDescriptor.getReadOnly('marital_status')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Доход семьи <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="anamnesis_mother.family_income" ref-book="rbRisarFamily_Income"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('family_income')"></th>
+                    <td><rb-select ng-model="anamnesis_mother.family_income" ref-book="rbRisarFamily_Income"
+                                   ng-required="MotherAnamnesisDescriptor.getMandatory('family_income')"
+                                   ng-disabled="MotherAnamnesisDescriptor.getReadOnly('family_income')"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Группа крови и резус-фактор <span>&nbsp;</span></th>
@@ -55,111 +64,153 @@
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td class="text-right">С возраста <span>&nbsp;</span></td>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstruation_start_age" class="form-control"></div></div></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('menstruation_start_age')"></td>
+                    <td><div class="row"><div class="col-md-4">
+                        <input ng-model="anamnesis_mother.menstruation_start_age" class="form-control"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('menstruation_start_age')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('menstruation_start_age')"></div></div></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Длительность <span>&nbsp;</span></td>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstruation_duration" class="form-control"></div></div></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('menstruation_duration')"></td>
+                    <td><div class="row"><div class="col-md-4">
+                        <input ng-model="anamnesis_mother.menstruation_duration" class="form-control"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('menstruation_duration')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('menstruation_duration')"></div></div></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Продолжительность цикла <span>&nbsp;</span></td>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstruation_period" class="form-control"></div></div></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('menstruation_period')"></td>
+                    <td><div class="row"><div class="col-md-4">
+                        <input ng-model="anamnesis_mother.menstruation_period" class="form-control"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('menstruation_period')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('menstruation_period')"></div></div></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Нарушения <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.menstruation_disorders" class="checkbox" type="checkbox"></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('menstruation_disorders')"></td>
+                    <td><input ng-model="anamnesis_mother.menstruation_disorders" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('menstruation_disorders')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('menstruation_disorders')"></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Половая жизнь с <span>&nbsp;</span></th>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.sex_life_start_age" class="form-control" valid-number maxlength="3" type="text" valid-number></div></div></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('sex_life_start_age')"></th>
+                    <td><div class="row"><div class="col-md-4">
+                        <input ng-model="anamnesis_mother.sex_life_start_age" class="form-control" valid-number maxlength="3" type="text" valid-number
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('sex_life_start_age')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('sex_life_start_age')"></div></div></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Сведения по контрацепции <span>&nbsp;</span></th>
-                    <td><rb-select multiple="true" ref-book="rbContraception" ng-model="anamnesis_mother.contraception" class="form-control"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('contraception')"></th>
+                    <td><rb-select multiple="true" ref-book="rbContraception" ng-model="anamnesis_mother.contraception" class="form-control"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('contraception')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('contraception')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Способ оплодотворения <span>&nbsp;</span></th>
-                    <td><rb-select ref-book="rbRisarFertilizationMethod" ng-model="anamnesis_mother.fertilization_type" class="form-control"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('fertilization_type')"></th>
+                    <td><rb-select ref-book="rbRisarFertilizationMethod" ng-model="anamnesis_mother.fertilization_type" class="form-control"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('fertilization_type')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('fertilization_type')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Внутриматочные вмешательства <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.intrauterine" class="checkbox" type="checkbox"></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('intrauterine')"></th>
+                    <td><input ng-model="anamnesis_mother.intrauterine" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('intrauterine')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('intrauterine')"></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Предыдущие многоплодные беременности <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.multifetation" class="checkbox" type="checkbox"></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('multifetation')"></th>
+                    <td><input ng-model="anamnesis_mother.multifetation" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('multifetation')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('multifetation')"></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Бесплодие <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.infertility" class="checkbox" type="checkbox"></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('infertility')"></th>
+                    <td><input ng-model="anamnesis_mother.infertility" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('infertility')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('infertility')"></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Вид <span>&nbsp;</span></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('infertility_type')"></td>
                     <td><rb-select ref-book="rbRisarInfertility_Type" ng-model="anamnesis_mother.infertility_type"
                         ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('infertility_period')"></td>
                     <td><input ng-model="anamnesis_mother.infertility_period" class="form-control" valid-number maxlength="3" type="text" valid-number ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Лечение <span>&nbsp;</span></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('infertility_treatment')"></td>
                     <td><rb-select multiple="true" ref-book="rbRisarInfertilityTreatment" ng-model="anamnesis_mother.infertility_treatment"
                         ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Причины <span>&nbsp;</span></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('infertility_cause')"></td>
                     <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_mother.infertility_cause"
                         ng-disabled="!anamnesis_mother.infertility"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Перенесенные заболевания <span>&nbsp;</span></th>
-                    <td><wm-mkb-multiple ng-model="anamnesis_mother.finished_diseases"></wm-mkb-multiple></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('finished_diseases')"></th>
+                    <td><wm-mkb-multiple ng-model="anamnesis_mother.finished_diseases"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('finished_diseases')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('finished_diseases')"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Перенесенные заболевания (ввод вручную) <span>&nbsp;</span></th>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('finished_diseases_text')"></th>
                     <td><wysiwyg ng-model="anamnesis_mother.finished_diseases_text" /></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Наследственность <span>&nbsp;</span></th>
-                    <td><rb-select multiple="true" ref-book="rbRisarHereditary" ng-model="anamnesis_mother.hereditary"></rb-select></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('hereditary')"></th>
+                    <td><rb-select multiple="true" ref-book="rbRisarHereditary" ng-model="anamnesis_mother.hereditary"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('hereditary')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Текущие заболевания <span>&nbsp;</span></th>
-                    <td><wm-mkb-multiple ng-model="anamnesis_mother.current_diseases"></wm-mkb-multiple></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('current_diseases')"></th>
+                    <td><wm-mkb-multiple ng-model="anamnesis_mother.current_diseases"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('current_diseases')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('current_diseases')"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Текущие заболевания (ввод вручную)<span>&nbsp;</span></th>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('current_diseases_text')"></th>
                     <td><wysiwyg ng-model="anamnesis_mother.current_diseases_text" /></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Пороки сердца с нарушением кровообращения <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.heart_disease" class="checkbox" type="checkbox"></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('heart_disease')"></th>
+                    <td><input ng-model="anamnesis_mother.heart_disease" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('heart_disease')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('heart_disease')"></td>
                 </tr>
                 <tr>
-                    <th class="text-right">Преэклампсия была у матери или сестры <span>&nbsp;</span></th>
-                    <td><input ng-model="anamnesis_mother.preeclampsia" class="checkbox" type="checkbox"></td>
+                    <th class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('preeclampsia')"></th>
+                    <td><input ng-model="anamnesis_mother.preeclampsia" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('preeclampsia')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('preeclampsia')"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Вредные привычки <span>&nbsp;</span></th>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td class="text-right">Алкоголь <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.alcohol" class="checkbox" type="checkbox"></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('alcohol')"></td>
+                    <td><input ng-model="anamnesis_mother.alcohol" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('alcohol')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('alcohol')"></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Курение <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.smoking" class="checkbox" type="checkbox"></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('smoking')"></td>
+                    <td><input ng-model="anamnesis_mother.smoking" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('smoking')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('smoking')"></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Токсические вещества <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.toxic" class="checkbox" type="checkbox"></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('toxic')"></td>
+                    <td><input ng-model="anamnesis_mother.toxic" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('toxic')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('toxic')"></td>
                 </tr>
                 <tr>
-                    <td class="text-right">Наркотики <span>&nbsp;</span></td>
-                    <td><input ng-model="anamnesis_mother.drugs" class="checkbox" type="checkbox"></td>
+                    <td class="text-right" ng-bind-html="MotherAnamnesisDescriptor.getLabel('drugs')"></td>
+                    <td><input ng-model="anamnesis_mother.drugs" class="checkbox" type="checkbox"
+                               ng-required="MotherAnamnesisDescriptor.getMandatory('drugs')"
+                               ng-disabled="MotherAnamnesisDescriptor.getReadOnly('drugs')"></td>
                 </tr>
                 </tbody>
             </table>
@@ -178,7 +229,7 @@
 {% block modules_js %}
     {{ super() }}
     <script>
-        WebMis20.value('anamnesis_descriptor', angular.fromJson('{{anamnesis_descriptor|tojson|safe}}'));
+        WebMis20.value('mother_anamnesis_descriptor', angular.fromJson('{{mother_anamnesis_descriptor|tojson|safe}}'));
     </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>

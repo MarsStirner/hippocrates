@@ -176,7 +176,7 @@ def html_gynecological_anamnesis():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/unpregnant/anamnesis_view.html', card=card,
-                           anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
+                           gyn_anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
 
 
 @module.route('/anamnesis/mother_edit.html')
@@ -184,7 +184,7 @@ def html_anamnesis_mother_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/anamnesis_mother_edit.html', card=card,
-                           anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis))
+                           mother_anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis))
 
 
 @module.route('/gynecological-anamnesis/edit.html')
@@ -192,14 +192,15 @@ def html_gynecological_anamnesis_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/unpregnant/anamnesis_edit.html', card=card,
-                           anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
+                           gyn_anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
 
 
 @module.route('/anamnesis/father_edit.html')
 def html_anamnesis_father_edit():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
-    return render_template('risar/anamnesis_father_edit.html', card=card)
+    return render_template('risar/anamnesis_father_edit.html', card=card,
+                           anamnesis_descriptor=get_props_descriptor(card.anamnesis.father, risar_mother_anamnesis))
 
 
 @module.route('/gyn/inspection.html')
