@@ -13,7 +13,7 @@ from hippocrates.blueprints.risar.lib.diagnosis import get_inspection_primary_di
     AdjasentInspectionsState
 from hippocrates.blueprints.risar.lib.expert.em_diagnosis import get_measure_result_mkbs
 from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
-from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes
+from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes, risar_epicrisis
 
 from nemesis.models.expert_protocol import EventMeasure, Measure, rbMeasureCancelReason
 from nemesis.models.enums import MeasureStatus
@@ -460,6 +460,8 @@ class EventMeasureSelecter(BaseSelecter):
     def apply_filter(self, **flt):
         EventMeasure = self.model_provider.get('EventMeasure')
         ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
+        ExpertProtocol = self.model_provider.get('ExpertProtocol')
+        ExpertScheme = self.model_provider.get('ExpertScheme')
         Measure = self.model_provider.get('Measure')
 
         if 'id' in flt:
@@ -486,6 +488,33 @@ class EventMeasureSelecter(BaseSelecter):
                         Measure.id == EventMeasure.measure_id,
                     ))
             self.query = self.query.filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
+        if 'observation_phase_codes' in flt:
+            if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
+                self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc)
+
+            epicr_q = self.query_epicrisis().subquery()
+            self.query = self.query.outerjoin(
+                ExpertScheme,
+                ExpertScheme.id == ExpertSchemeMeasureAssoc.scheme_id
+            ).outerjoin(
+                ExpertProtocol,
+                ExpertProtocol.id == ExpertScheme.protocol_id
+            ).outerjoin(
+                epicr_q,
+                EventMeasure.event_id == epicr_q.c.event_id
+            ).filter(
+                or_(
+                    ExpertProtocol.code.in_(flt['observation_phase_codes']),
+                    func.IF(
+                        epicr_q.c.delivery_date,
+                        and_(
+                            func.DATE(EventMeasure.begDateTime) >= func.DATE(epicr_q.c.delivery_date),
+                            EventMeasure.schemeMeasure_id.is_(None)
+                        ),
+                        True
+                    )
+                )
+            )
         if 'beg_date_from' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:
@@ -522,7 +551,9 @@ class EventMeasureSelecter(BaseSelecter):
             joined_tables = {mapper.class_ for mapper in self.query._join_entities}
             if rbMeasureType not in joined_tables:
                 if Measure not in joined_tables:
-                    self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
+                    if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
+                        self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc)
+                    self.query = self.query.join(
                         Measure, or_(Measure.id == ExpertSchemeMeasureAssoc.measure_id,
                                      Measure.id == EventMeasure.measure_id)
                     )
@@ -607,3 +638,19 @@ class EventMeasureSelecter(BaseSelecter):
                                   EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_hosp_completed'),
         )
+
+    def query_epicrisis(self):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        return self.model_provider.get_query('Action').join(
+            ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == risar_epicrisis, ActionPropertyType.code == 'delivery_date'
+        ).with_entities(
+            Action.event_id.label('event_id'), Action.id.label('action_id'),
+            ActionProperty_Date.value.label('delivery_date'))

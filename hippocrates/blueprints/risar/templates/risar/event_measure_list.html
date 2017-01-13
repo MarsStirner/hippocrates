@@ -45,6 +45,13 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Этап наблюдения</label>
+                    <div fs-checkbox="" items="etaps" ng-model="query.observation_phase" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+
                 <div class="form-group" ng-show="!isCalendarMode()">
                     <label>Дата начала</label>
                     <div class="row">
