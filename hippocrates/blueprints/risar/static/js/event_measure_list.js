@@ -189,7 +189,8 @@ var EventMeasureListCtrl = function ($scope, $controller, $q, RisarApi, RefBookS
             beg_date_to: null,
             end_date_from: null,
             end_date_to: null,
-            status: []
+            status: [],
+            observation_phase: []
         };
     };
 
@@ -212,6 +213,8 @@ var EventMeasureListCtrl = function ($scope, $controller, $q, RisarApi, RefBookS
             PrintingDialog.open($scope.ps, $scope.ps_resolve());
         }
     };
+
+    $scope.etaps = [{code: 'protocol572', name: 'Беременность'}, {code: 'protocolPuerpera', name: 'После родов'}];
 
     $scope.init();
 };
@@ -312,6 +315,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
+            observation_phase_codes: $scope.query.observation_phase.length ? _.pluck($scope.query.observation_phase, 'code') : undefined,
             beg_date_from: $scope.query.beg_date_from ? moment($scope.query.beg_date_from).startOf('day').toDate() : undefined,
             beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
             end_date_from: $scope.query.end_date_from ? moment($scope.query.end_date_from).startOf('day').toDate() : undefined,
@@ -329,16 +333,18 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
 
     var registered_watchers = [];
     $scope.$on('viewModeChanged', function (event, data) {
-        var w_q, w_qmt, w_qs, w_qc;
+        var w_q, w_qmt, w_qs, w_qc, w_qph;
         if (data.mode === 'table') {
             w_q = $scope.$watchCollection('query', function () { tc.start(); });
             w_qc = $scope.$watchCollection('query.checkups', function () { tc.start(); });
             w_qmt = $scope.$watchCollection('query.measure_type', function () { tc.start(); });
+            w_qph = $scope.$watchCollection('query.observation_phase', function (n, o) { if (n !== o) tc.start(); });
             w_qs = $scope.$watchCollection('query.status', function () { tc.start(); });
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
             registered_watchers.push(w_qc);
+            registered_watchers.push(w_qph);
         } else {
             registered_watchers.forEach(function (unwatch) { unwatch(); });
             registered_watchers = [];
@@ -366,6 +372,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
+            observation_phase_codes: $scope.query.observation_phase.length ? _.pluck($scope.query.observation_phase, 'code') : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined,
             with_deleted_hand_measures: true
         };
@@ -414,7 +421,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
 
     var registered_watchers = [];
     $scope.$on('viewModeChanged', function (event, data) {
-        var w_q, w_qmt, w_qs, w_qc;
+        var w_q, w_qmt, w_qs, w_qc, w_qph;
         if (data.mode === 'calendar') {
             w_q = $scope.$watchCollection('query', function (n, o) {
                 if (n !== o) tc.start();
@@ -428,10 +435,12 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             w_qs = $scope.$watchCollection('query.status', function (n, o) {
                 if (n !== o) tc.start();
             });
+            w_qph = $scope.$watchCollection('query.observation_phase', function (n, o) { if (n !== o) tc.start(); });
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
             registered_watchers.push(w_qc);
+            registered_watchers.push(w_qph);
             if ($scope.chart.last_inspection_date) {
                 uiCalendarConfig.calendars.measureList.fullCalendar('gotoDate', $scope.chart.last_inspection_date);
             }
