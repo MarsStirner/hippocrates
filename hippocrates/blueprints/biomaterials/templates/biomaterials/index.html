@@ -87,7 +87,7 @@
                     </button>
                 </div>
             </div>
-            <div class="box-body">
+            <div class="box-body autoheight">
                 <table class="table table-condensed table-grouped">
                     <thead>
                         <tr>
@@ -99,11 +99,11 @@
                             </th>
                             <th>Дата и время</th>
                             <th>Лабораторное исследование</th>
+                            <th>Оплачено</th>
                             <th>Пол</th>
                             <th>Дата рожд.</th>
                             <th>Назначил врач</th>
                             <th>Биоматериал</th>
-                            <th>Оплачено</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -125,11 +125,15 @@
                             <td><div ng-repeat="action in record.actions">
                                 <a href="#" ng-click="open_action(action.id)" ng-bind="action.action_type.title"></a>
                             </div></td>
+                            <td ng-click="open_info(record)">
+                                <div ng-repeat="action in record.actions">
+                                    <span class="glyphicon" ng-class="action.payment.is_paid ? 'glyphicon-ok text-success' : 'glyphicon-remove text-danger'"></span>
+                                </div>
+                            </td>
                             <td ng-click="open_info(record)">[[record.client.sex.name]]</td>
                             <td ng-click="open_info(record)">[[record.client.birth_date | asDate]]</td>
                             <td ng-click="open_info(record)"><div ng-repeat="person in record.set_persons">[[person.short_name]]</div></td>
                             <td ng-click="open_info(record)">[[record.tissueType.name]] ([[record.actions.length]])</td>
-                            <td ng-click="open_info(record)"><span class="glyphicon" ng-class="{'glyphicon-ok text-success': record.is_paid, 'glyphicon-remove text-danger': !record.is_paid}"></span></td>
                             <td>
                                 <span ng-if="record.isUrgent" class="label label-warning">CITO</span>
                                 <span ng-if="record.status.code == 'finished'" class="label label-warning" tooltip="Ожидает отправку в ЛИС">ЛИС</span>

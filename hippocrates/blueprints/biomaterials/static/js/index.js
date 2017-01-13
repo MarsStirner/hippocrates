@@ -72,15 +72,6 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 .each(function (value) {
                     result.records = result.records.concat(value.records);
 
-                    // to get true - all actions must have payment == true
-                    result.records = _.map(result.records, function (record) {
-                        record.is_paid = true;
-                        _.each(record.actions, function (action) {
-                            record.is_paid *= action.payment.is_paid;
-                        });
-                        return record;
-                    });
-
                     _.each(value.tubes, function (tube_value, tube_key) {
                         if (_.has(result.tubes, tube_key)) {
                             result.tubes[tube_key].count += tube_value.count
@@ -100,17 +91,17 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
 
                 result.records = _.chain(result.records)
                     .filter(function(value){
-                        return value.client.full_name.toLowerCase().startsWith($scope.static_filter.client__full_name.toLowerCase());
+                        return value.client.full_name.toLowerCase().indexOf($scope.static_filter.client__full_name.toLowerCase()) !== -1;
                     })
                     .filter(function(value){
                         var sps =_.filter(value.set_persons, function(sp) {
-                            return sp.short_name.toLowerCase().startsWith($scope.static_filter.set_persons__name.toLowerCase());
+                            return sp.short_name.toLowerCase().indexOf($scope.static_filter.set_persons__name.toLowerCase()) !== -1;
                         });
                         return Object.keys(sps).length;
                     })
                     .filter(function(value){
                         var acts =_.filter(value.actions, function(act) {
-                            return act.action_type.name.toLowerCase().startsWith($scope.static_filter.action_type__name.toLowerCase());
+                            return act.action_type.name.toLowerCase().indexOf($scope.static_filter.action_type__name.toLowerCase()) !== -1;
                         });
                         return Object.keys(acts).length;
                     })
@@ -124,12 +115,20 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 return row.client.full_name;
             });
 
-            var prev_selected = _.intersection($scope.selected_records.selected(), _.pluck($scope.current_result.records, 'id'));
+            // var prev_selected = _.intersection($scope.selected_records.selected(), _.pluck($scope.current_result.records, 'id'));
             $scope.selected_records.setSource(_.pluck($scope.current_result.records, 'id'));
-            $scope.selected_records.selectNone();
-            _.each(prev_selected, function(sel){
-                $scope.selected_records.select(sel, true);
-            });
+            // $scope.selected_records.selectNone();
+            // _.each(prev_selected, function(sel){
+            //     $scope.selected_records.select(sel, true);
+            // });
+
+            // resize block
+            setTimeout(function(){
+                var victim = document.getElementsByClassName('autoheight')[0];
+                while (window.innerHeight < document.body.scrollHeight && victim.offsetHeight > 0) {
+                  victim.style['max-height'] = victim.offsetHeight - 1 + 'px';
+                }
+            }, 200);
         };
 
         $scope.get_data = function () {
@@ -144,18 +143,23 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
 
         $scope.change_status = function (status) {
-            var remember_selected = $scope.selected_records.selected();
+            var remember_selected = _.intersection($scope.selected_records.selected(), _.pluck($scope.current_result.records, 'id'));
 
             ApiCalls.wrapper(
                 'POST',
                 WMConfig.url.biomaterials.api_ttj_update_status, {},
                 {
-                    ids: $scope.selected_records.selected(),
+                    ids: remember_selected,
                     status: $scope.TTJStatus.get_by_code(status)
                 })
                 .then($scope.get_data, $scope.get_data)
                 .then(function () {
-                    PrintingDialog.open($scope.ps_bm, $scope.ps_resolve(remember_selected), {}, true);
+                    // reset checkboxes on sended
+                    _.each(remember_selected, function(sel){
+                        $scope.selected_records.select(sel, false);
+                    });
+
+                    PrintingDialog.open($scope.ps_bm, $scope.ps_resolve(remember_selected), {}, true, 'biomaterials');
                 });
         };
 
