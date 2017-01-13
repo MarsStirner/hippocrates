@@ -29,6 +29,26 @@ angular.module('WebMis20')
                     scope.$broadcast('actionLayoutItemFocused', {
                         apt_id: args
                     });
+                },
+                getValueNormStyle: function (prop) {
+                    var s = {};
+                    if (prop.value_in_norm === null) return s;
+
+                    if (prop.value_in_norm < 0) s['color'] = 'blue';
+                    else if (prop.value_in_norm > 0) s['color'] = 'red';
+                    return s;
+                },
+                calcValueNorm: function (prop) {
+                    var norm_min = prop.type.norm_min,
+                        norm_max = prop.type.norm_max;
+                    var v = Number(prop.value);
+                    if (_.isNumber(v)) {
+                        if (norm_min !== null && v < norm_min) prop.value_in_norm = -1;
+                        else if (norm_max !== null && v > norm_max) prop.value_in_norm = 1;
+                        else prop.value_in_norm = 0;
+                    } else {
+                        prop.value_in_norm = 0;
+                    }
                 }
             };
             scope.unity_function = function (arg) { return arg };
@@ -59,7 +79,9 @@ angular.module('WebMis20')
                                 case 'String/Free':
                                 case 'Integer':
                                 case 'Double':
-                                    inner_template = '<span id="[[{0}.type.id]]">[[ {0}.value ]] {1}</span>'.format('{0}', property_unit_code); break;
+                                    inner_template = '<span id="[[{0}.type.id]]"><span ng-style="{2}">[[ {0}.value ]]</span> {1}</span>'.format(
+                                        '{0}', property.value !== null ? property_unit_code : '',
+                                        'layout_tools.getValueNormStyle({0})'.format(property_code)); break;
                                 case 'Date':
                                     inner_template = '<span ng-bind="{0}.value | asDate" id="[[{0}.type.id]]"></span>'; break;
                                 case 'Time':
@@ -115,18 +137,22 @@ angular.module('WebMis20')
                                     break;
                                 case 'Integer':
                                     inner_template = '<input class="form-control" type="text" ng-model="{0}.value"\
-                                        id="[[{0}.type.id]]" al-item-focused valid-number valid-number-negative>';
+                                        id="[[{0}.type.id]]" al-item-focused valid-number valid-number-negative\
+                                        ng-style="{1}" {2}>'.format('{0}', 'layout_tools.getValueNormStyle({0})'.format(property_code));
                                     if (property.type.unit) {
                                         inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'
-                                            .format(inner_template, property_unit_code);
+                                            .format(inner_template, property_unit_code,
+                                                property.type.norm ? 'ng-change="layout_tools.calcValueNorm({0})"'.format(property_code) : '');
                                     }
                                     break;
                                 case 'Double':
                                     inner_template = '<input class="form-control" type="text" ng-model="{0}.value"\
-                                        id="[[{0}.type.id]]" al-item-focused valid-number valid-number-negative valid-number-float>';
+                                        id="[[{0}.type.id]]" al-item-focused valid-number valid-number-negative valid-number-float\
+                                        ng-style="{1}" {2}>'.format('{0}', 'layout_tools.getValueNormStyle({0})'.format(property_code));
                                     if (property.type.unit) {
                                         inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'
-                                            .format(inner_template, property_unit_code);
+                                            .format(inner_template, property_unit_code,
+                                                property.type.norm ? 'ng-change="layout_tools.calcValueNorm({0})"'.format(property_code) : '');
                                     }
                                     break;
                                 case 'Time':
@@ -134,7 +160,9 @@ angular.module('WebMis20')
                                     break;
                                 case 'String':
                                     inner_template = '<input class="form-control" type="text" ng-model="{0}.value"\
-                                        id="[[{0}.type.id]]" al-item-focused>';
+                                        id="[[{0}.type.id]]" al-item-focused ng-style="{1}" {2}>'
+                                        .format('{0}', 'layout_tools.getValueNormStyle({0})'.format(property_code),
+                                                property.type.norm ? 'ng-change="layout_tools.calcValueNorm({0})"'.format(property_code) : '');
                                     if (property.type.unit) {
                                         inner_template = '<div class="input-group">{0}<span class="input-group-addon">{1}</span></div>'
                                             .format(inner_template, property_unit_code);
@@ -227,6 +255,7 @@ angular.module('WebMis20')
                                     inner_template = '<span ng-bind="{0}.value" id="[[{0}.type.id]]"></span>';
                             }
                         }
+
                         var property_name = tag.title || property.type.name;
                         var template;
                         if (context === undefined) {
