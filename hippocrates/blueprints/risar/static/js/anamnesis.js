@@ -69,7 +69,7 @@ var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi, PropsDescr
 
 var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor, prev_preg_descriptor) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
-    $scope.GynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
+    $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
     $scope.prevPregDescriptor = new PropsDescriptor(prev_preg_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
@@ -427,7 +427,7 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
 var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
-    $scope.GynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
+    $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
     $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date= new Date();
 
