@@ -12,7 +12,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 return MessageBox.error('Печать невозможна', 'Выберите хотя бы один забор биоматериала');
             }
             return {
-                ttj_ids: manual_values ? manual_values : $scope.selected_records.selected()
+                ttj_ids: manual_values ? manual_values : _.intersection($scope.selected_records.selected(), _.pluck($scope.current_result.records, 'id'))
             }
         };
 
