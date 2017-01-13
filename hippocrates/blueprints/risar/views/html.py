@@ -8,7 +8,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
     first_inspection_flat_code, second_inspection_flat_code, risar_gyn_checkup_flat_code, pc_inspection_flat_code, \
     puerpera_inspection_flat_code, risar_epicrisis, gynecological_ticket_25, risar_gyn_general_anamnesis_flat_code, \
-    risar_mother_anamnesis, risar_father_anamnesis
+    risar_mother_anamnesis, risar_father_anamnesis, risar_anamnesis_pregnancy
 from hippocrates.blueprints.risar.lib.card import AbstractCard, PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_action_type_for_nursing
 from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
@@ -168,7 +168,8 @@ def html_anamnesis():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/anamnesis_view.html', card=card,
-                           mother_anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis))
+                           mother_anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis),
+                           prev_preg_descriptor=get_props_descriptor(None, risar_anamnesis_pregnancy))
 
 
 @module.route('/gynecological-anamnesis.html')
@@ -176,7 +177,8 @@ def html_gynecological_anamnesis():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/unpregnant/anamnesis_view.html', card=card,
-                           gyn_anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code))
+                           gyn_anamnesis_descriptor=get_props_descriptor(card.anamnesis, risar_gyn_general_anamnesis_flat_code),
+                           prev_preg_descriptor=get_props_descriptor(None, risar_anamnesis_pregnancy))
 
 
 @module.route('/anamnesis/mother_edit.html')

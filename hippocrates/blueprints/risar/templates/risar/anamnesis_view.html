@@ -177,12 +177,12 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Год</th>
-                        <th>Исход беременности</th>
-                        <th>Срок</th>
-                        <th>Сведения о детях</th>
-                        <th>Особенности</th>
-                        <th>Ссылка на карту</th>
+                        <th>[[prevPregDescriptor.getName('year')]]</th>
+                        <th>[[prevPregDescriptor.getName('pregnancyResult')]]</th>
+                        <th>[[prevPregDescriptor.getName('pregnancy_week')]]</th>
+                        <th>[[prevPregDescriptor.getName('newborn_inspections')]]</th>
+                        <th>[[prevPregDescriptor.getName('note')]]</th>
+                        <th>[[prevPregDescriptor.getName('card_number')]]</th>
                         <th>&nbsp;</th>
                     </tr>
                     </thead>
@@ -293,6 +293,7 @@
     {{ super() }}
     <script>
         WebMis20.value('mother_anamnesis_descriptor', angular.fromJson('{{mother_anamnesis_descriptor|tojson|safe}}'));
+        WebMis20.value('prev_preg_descriptor', angular.fromJson('{{prev_preg_descriptor|tojson|safe}}'));
     </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>
