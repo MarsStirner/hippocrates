@@ -51,8 +51,11 @@ var BaseAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     };
 };
 
-var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
+var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, mother_anamnesis_descriptor, prev_preg_descriptor) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
+
+    $scope.motherAnamnesisDescriptor = new PropsDescriptor(mother_anamnesis_descriptor);
+    $scope.prevPregDescriptor = new PropsDescriptor(prev_preg_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.anamnesis.get($scope.event_id)
@@ -67,8 +70,10 @@ var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     };
 };
 
-var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi) {
+var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor, prev_preg_descriptor) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
+    $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
+    $scope.prevPregDescriptor = new PropsDescriptor(prev_preg_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.gynecological_anamnesis.get($scope.event_id)
@@ -109,7 +114,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RefBookService, RisarA
                 restart = rslt[1];
             result.newborn_inspections = result.newborn_inspections.filter(function(inspection){
                 return !inspection.deleted || inspection.id
-            })
+            });
             RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
                 $scope.anamnesis.pregnancies.push(result);
             });
@@ -388,9 +393,10 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
-var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi) {
+var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi, PropsDescriptor, mother_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
+    $scope.motherAnamnesisDescriptor = new PropsDescriptor(mother_anamnesis_descriptor);
     $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date = new Date();
 
@@ -421,9 +427,10 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
     };
     reload_anamnesis();
 };
-var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi) {
+var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
+    $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
     $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date= new Date();
 
@@ -456,8 +463,10 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
     };
     reload_anamnesis();
 };
-var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
+var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
+
+    $scope.fatherAnamnesisDescriptor = new PropsDescriptor(father_anamnesis_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.anamnesis.father.get($scope.event_id)

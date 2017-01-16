@@ -87,16 +87,20 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right col-md-4">Дата родов </th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('deliveryDate')"></th>
                                         <td class="col-md-8">
-                                            <wm-date ng-model="checkup.deliveryDate" style="width: 250px"></wm-date>
+                                            <wm-date ng-model="checkup.deliveryDate" style="width: 250px"
+                                                ng-required="checkupDescriptor.getMandatory('deliveryDate')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('deliveryDate')"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Срок после родов, недель </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('timeAfterDelivery')"></th>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input ng-model="checkup.timeAfterDelivery" class="form-control">
+                                                <input ng-model="checkup.timeAfterDelivery" class="form-control"
+                                                    ng-required="checkupDescriptor.getMandatory('timeAfterDelivery')"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('timeAfterDelivery')">
                                             </div>
                                             </div>
                                         </td>
@@ -115,10 +119,12 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Общее состояние <span>&nbsp;</span></th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('state')"></th>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState"></rb-select>
+                                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState"
+                                                       ng-required="checkupDescriptor.getMandatory('state')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('state')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -127,10 +133,14 @@
                                         <td><div class="row">
                                             <div class="col-md-4">
                                                 <input name="ad_right_high" ng-model="checkup.ad_right_high"
-                                                       maxlength="3" class="form-control blood_presure">
+                                                       maxlength="3" class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_right_high')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_right_high')">
                                                 <span>/</span>
                                                 <input name="ad_right_low" ng-model="checkup.ad_right_low"
-                                                       maxlength="3" class="form-control blood_presure">
+                                                       maxlength="3" class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_right_low')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_right_low')">
                                             </div>
                                             </div>
                                         </td>
@@ -140,10 +150,14 @@
                                         <td><div class="row">
                                             <div class="col-md-4">
                                                 <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
-                                                       class="form-control blood_presure">
+                                                       class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_left_high')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_left_high')">
                                                 <span>/</span>
                                                 <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
-                                                       class="form-control blood_presure">
+                                                       class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('ad_left_low')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('ad_left_low')">
                                             </div>
                                         </div></td>
                                     </tr>
@@ -159,61 +173,75 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние вен </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vein')"></th>
                                         <td><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="vein" ng-model="checkup.vein" ref-book="rbRisarVein"></rb-select>
+                                            <rb-select name="vein" ng-model="checkup.vein" ref-book="rbRisarVein"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('vein')"
+                                                 ng-required="checkupDescriptor.getMandatory('vein')"></rb-select>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние молочных желез </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breast')"></th>
                                         <td>
-                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast_Puerpera">
+                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('breast')"
+                                                 ng-required="checkupDescriptor.getMandatory('breast')">
                                                 [[ item.name ]]
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние сосков </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples')"></th>
                                         <td>
-                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples_Puerpera">
+                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('nipples')"
+                                                 ng-required="checkupDescriptor.getMandatory('nipples')">
                                                 [[ item.name ]]
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лактация </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lactation')"></th>
                                         <td><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="lactation" ng-model="checkup.lactation" ref-book="rbRisarLactation_Puerpera"></rb-select>
+                                            <rb-select name="lactation" ng-model="checkup.lactation" ref-book="rbRisarLactation_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('lactation')"
+                                                 ng-required="checkupDescriptor.getMandatory('lactation')"></rb-select>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние матки </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('uterus')"></th>
                                         <td><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="uterus" ng-model="checkup.uterus" ref-book="rbRisarUterus_Puerpera"></rb-select>
+                                            <rb-select name="uterus" ng-model="checkup.uterus" ref-book="rbRisarUterus_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('uterus')"
+                                                 ng-required="checkupDescriptor.getMandatory('uterus')"></rb-select>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние послеоперационного рубца </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('scar')"></th>
                                         <td><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="scar" ng-model="checkup.scar" ref-book="rbRisarScar_Puerpera"></rb-select>
+                                            <rb-select name="scar" ng-model="checkup.scar" ref-book="rbRisarScar_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('scar')"
+                                                 ng-required="checkupDescriptor.getMandatory('scar')"></rb-select>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Выделения </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('secretion')"></th>
                                         <td>
-                                            <div name="secretion" refbook-checkbox ng-model="checkup.secretion" ref-book="rbRisarSecretion_Puerpera">
+                                            <div name="secretion" refbook-checkbox ng-model="checkup.secretion" ref-book="rbRisarSecretion_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('secretion')"
+                                                 ng-required="checkupDescriptor.getMandatory('secretion')">
                                                 [[ item.name ]]
                                             </div>
                                         </td>
@@ -232,10 +260,12 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Рекомендации по контрацепции </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('contraception')"></th>
                                         <td><div class="row">
                                             <div class="col-md-4">
-                                            <rb-select name="contraception" ng-model="checkup.contraception" ref-book="rbRisarContraception_Puerpera"></rb-select>
+                                            <rb-select name="contraception" ng-model="checkup.contraception" ref-book="rbRisarContraception_Puerpera"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('contraception')"
+                                                 ng-required="checkupDescriptor.getMandatory('contraception')"></rb-select>
                                             </div>
                                             </div>
                                         </td>
@@ -258,11 +288,11 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лечение <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('treatment')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.treatment" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Общие рекомендации <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('recomendations')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.recomendations" /></div></div></td>
                                     </tr>
                                 </tbody>

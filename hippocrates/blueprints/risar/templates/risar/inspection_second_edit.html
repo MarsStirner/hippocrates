@@ -155,23 +155,23 @@
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Комментарии к анализам <span>&nbsp;</span></th>
+                                        <th class="text-right">Комментарии к анализам</th>
                                         <td>&nbsp;</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Мочи <span>&nbsp;</span></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('urine')"></td>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.urine" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Крови <span>&nbsp;</span></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('blood')"></td>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.blood" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">УЗИ <span>&nbsp;</span></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('us')"></td>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.us" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Другое <span>&nbsp;</span></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('other_analysis')"></td>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_analysis" /></div></div></td>
                                     </tr>
                                 </tbody>
@@ -213,85 +213,103 @@
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Кожа <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('skin')"></th>
                                         <td><div>
-                                            <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin">
+                                            <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('skin')"
+                                                 ng-required="checkupDescriptor.getMandatory('skin')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лимфоузлы <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph_nodes')"></th>
                                         <td><div>
-                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph_nodes" ref-book="rbRisarLymph">
+                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph_nodes" ref-book="rbRisarLymph"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('lymph_nodes')"
+                                                 ng-required="checkupDescriptor.getMandatory('lymph_nodes')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Молочные железы <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breast')"></th>
                                         <td><div>
-                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
+                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('breast')"
+                                                 ng-required="checkupDescriptor.getMandatory('breast')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние сосков <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples')"></th>
                                         <td><div>
-                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
+                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('nipples')"
+                                                 ng-required="checkupDescriptor.getMandatory('nipples')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Тоны сердца <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('heart_tones')"></th>
                                         <td><div>
                                             <div name="heart_tones" refbook-checkbox ng-model="checkup.heart_tones"
-                                                 ref-book="rbRisarHeart_Tones">
+                                                 ref-book="rbRisarHeart_Tones"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('heart_tones')"
+                                                 ng-required="checkupDescriptor.getMandatory('heart_tones')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Органы дыхания <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breathe')"></th>
                                         <td><div>
-                                            <div name="breathe" refbook-checkbox ng-model="checkup.breathe" ref-book="rbRisarBreathe">
+                                            <div name="breathe" refbook-checkbox ng-model="checkup.breathe" ref-book="rbRisarBreathe"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('breathe')"
+                                                 ng-required="checkupDescriptor.getMandatory('breathe')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Органы брюшной полости <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach')"></th>
                                         <td><div>
-                                            <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomach">
+                                            <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomach"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('stomach')"
+                                                 ng-required="checkupDescriptor.getMandatory('stomach')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Печень <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('liver')"></th>
                                         <td><div>
-                                            <div name="liver" refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver">
+                                            <div name="liver" refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('liver')"
+                                                 ng-required="checkupDescriptor.getMandatory('liver')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Выделения <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('secretion')"></th>
                                         <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></div></div></td>
+                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('secretion')"
+                                                 ng-required="checkupDescriptor.getMandatory('secretion')"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Физиологические отправления <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bowel_and_bladder_habits')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
                                     </tr>
                                 </tbody>
@@ -308,19 +326,19 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Окружность живота</th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('abdominal')"></th>
                                         <td class="col-md-8"><div class="row"><div class="col-md-2">
                                             <input ng-model="checkup.abdominal" class="form-control" valid-number maxlength="3">
                                            </div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Высота стояния дна матки</th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fundal_height')"></th>
                                         <td><div class="row"><div class="col-md-2">
                                             <input ng-model="checkup.fundal_height" class="form-control" valid-number maxlength="3">
                                            </div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние матки</th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('metra_state')"></th>
                                         <td><div class="row" ng-class="{'has-error': obstetricianForm.metra_state.$invalid && obstetricianForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State"></rb-select>
@@ -340,86 +358,114 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Наружные половые органы <span>&nbsp;</span></th>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('externalia')"></th>
                                         <td class="col-md-8"><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Влагалище <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina')"></th>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.vagina.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="vagina" ng-model="checkup.vagina" ref-book="rbRisarVagina" ng-required="true"></rb-select></div>
+                                            <div class="col-md-4"><rb-select name="vagina" ng-model="checkup.vagina" ref-book="rbRisarVagina"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('vagina')"
+                                                 ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Шейка матки <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix')"></th>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.cervix.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix" ng-required="true"></rb-select></div>
+                                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervix')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervix')"></rb-select></div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Длина шейки матки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_length')"></th>
                                         <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select></div></div></td>
+                                            <rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervix_length')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervix_length')"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Позиция шейки матки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_position')"></th>
                                         <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select></div></div></td>
+                                            <rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervix_position')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervix_position')"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Зрелость шейки матки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_maturity')"></th>
                                         <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select></div></div></td>
+                                            <rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervix_maturity')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervix_maturity')"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Консистенция шейки матки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_consistency')"></th>
                                         <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
+                                            <rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervix_consistency')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervix_consistency')"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Цервикальный канал <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervical_canal')"></th>
+                                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervical_canal')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervical_canal')"></rb-select>
                                         </div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Тело матки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('body_of_womb')"></th>
                                         <td>
-                                            <div refbook-checkbox ng-model="checkup.body_of_womb" ref-book="rbRisarBody_Of_Womb">
+                                            <div refbook-checkbox ng-model="checkup.body_of_womb" ref-book="rbRisarBody_Of_Womb"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('body_of_womb')"
+                                                 ng-required="checkupDescriptor.getMandatory('body_of_womb')">
                                                 [[ item.name ]]
                                             </div>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Придатки <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages')"></th>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.appendages.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="appendages" ng-model="checkup.appendages" ref-book="rbRisarAppendages"></rb-select></div>
+                                            <div class="col-md-4"><rb-select name="appendages" ng-model="checkup.appendages" ref-book="rbRisarAppendages"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('appendages')"
+                                                 ng-required="checkupDescriptor.getMandatory('appendages')"></rb-select></div>
                                         </div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Околоматочное пространство <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.parametrium" ref-book="rbRisarParametrium"></rb-select></div></div></td>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('parametrium')"></th>
+                                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.parametrium" ref-book="rbRisarParametrium"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('parametrium')"
+                                                 ng-required="checkupDescriptor.getMandatory('parametrium')"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Особенности <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('features')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.features" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Взято на анализ <span>&nbsp;</span></th>
+                                        <th class="text-right">Взято на анализ</th>
                                         <td>&nbsp;</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Отделяемое из влагалища <span>&nbsp;</span></td>
-                                        <td><input ng-model="checkup.vagina_secretion" class="checkbox" type="checkbox"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_secretion')"></td>
+                                        <td><input ng-model="checkup.vagina_secretion" class="checkbox" type="checkbox"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('vagina_secretion')"
+                                                 ng-required="checkupDescriptor.getMandatory('vagina_secretion')"></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Отделяемое из цервикального канала <span>&nbsp;</span></td>
-                                        <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervical_canal_secretion')"></td>
+                                        <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('cervical_canal_secretion')"
+                                                 ng-required="checkupDescriptor.getMandatory('cervical_canal_secretion')"></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Отделяемое из уретры <span>&nbsp;</span></td>
-                                        <td><input ng-model="checkup.urethra_secretion" class="checkbox" type="checkbox"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('urethra_secretion')"></td>
+                                        <td><input ng-model="checkup.urethra_secretion" class="checkbox" type="checkbox"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('urethra_secretion')"
+                                                 ng-required="checkupDescriptor.getMandatory('urethra_secretion')"></td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Мазок на онкоцитологию <span>&nbsp;</span></td>
-                                        <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('onco_smear')"></td>
+                                        <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('onco_smear')"
+                                                 ng-required="checkupDescriptor.getMandatory('onco_smear')"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -435,13 +481,15 @@
                                 <table class="table table-condensed">
                                     <tbody>
                                         <tr>
-                                            <th class="text-right">Дата первого шевеления <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fetus_first_movement_date')"></th>
                                             <td><div class="row"><div class="col-md-4">
                                                 <wm-date ng-model="checkup.fetus_first_movement_date" style="width: 250px"
-                                                    min-date="minDate" max-date="currentDate"></wm-date></div></div></td>
+                                                    min-date="minDate" max-date="currentDate"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('fetus_first_movement_date')"
+                                                    ng-required="checkupDescriptor.getMandatory('fetus_first_movement_date')"></wm-date></div></div></td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Шевеление <span>&nbsp;</span></th>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fetus_movement')"></th>
                                             <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fetus_movement" /></div></div></td>
                                         </tr>
                                     </tbody>
@@ -582,7 +630,7 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Диагнозы <span>&nbsp;</span></th>
+                                        <th class="text-right col-md-4">Диагнозы</th>
                                         <td class="col-md-8">&nbsp;</td>
                                     </tr>
                                     <tr>
@@ -597,32 +645,38 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_week')"></th>
                                         <td>
                                             <div class="row"
                                                  ng-class="{'has-error': ticketForm.pregnancy_week.$invalid && ticketForm.submit_attempt}">
                                                 <div class="col-md-2">
                                                     <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
-                                                           class="form-control" type="number" min="1" max="45" valid-number ng-required="true">
+                                                           class="form-control" type="number" min="1" max="45" valid-number
+                                                           ng-disabled="checkupDescriptor.getReadOnly('pregnancy_week')"
+                                                           ng-required="checkupDescriptor.getMandatory('pregnancy_week')">
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
-                                     <tr>
+                                      <tr>
                                         <th class="text-right">Срок по последнему УЗИ</th>
-                                        <td>[[ checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
-                                     </tr>
+                                        <td>[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
+                                      </tr>
                                     <tr>
-                                        <th class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_continuation')"></th>
                                         <td>
-                                        <div>
-                                              <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="true" required>  Да <br/>
-                                              <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="false" required> Нет <br/>
-                                        </div>
+                                            <div ng-class="{'has-error': conclusionForm.save.$invalid && conclusionForm.submit_attempt}">
+                                                <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="true"
+                                                           ng-disabled="checkupDescriptor.getReadOnly('pregnancy_continuation')"
+                                                           ng-required="checkupDescriptor.getMandatory('pregnancy_continuation')">  Да <br/>
+                                                <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="false"
+                                                           ng-disabled="checkupDescriptor.getReadOnly('pregnancy_continuation')"
+                                                           ng-required="checkupDescriptor.getMandatory('pregnancy_continuation')"> Нет <br/>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr ng-class="{'text-muted': pregContRefusalDisabled()}">
-                                        <th class="text-right">Отказ от прерывания <span ng-class="{'text-muted': pregContRefusalDisabled(), 'text-danger': !pregContRefusalDisabled()}">*</span></th>
+                                        <th class="text-right">[[checkupDescriptor.getName('pregnancy_continuation_refusal')]] <span ng-class="{'text-muted': pregContRefusalDisabled(), 'text-danger': !pregContRefusalDisabled()}">*</span></th>
                                         <td>
                                         <div>
                                               <input type="radio" ng-model="checkup.pregnancy_continuation_refusal" ng-value="true"
@@ -633,22 +687,24 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Витаминизация <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fortification')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fortification" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Коррекция питания <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nutrition')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.nutrition" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лечение <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('treatment')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.treatment" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('next_date')"></th>
                                         <td>
                                             <div ng-class="{'has-error': ticketForm.next_date.$invalid || begDateIsAfterNextDate}">
                                                 <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('next_date')"
+                                                    ng-required="checkupDescriptor.getMandatory('next_date')"
                                                     min-date="checkup.beg_date || currentDate" max-date="inFiveDate"></wm-date>
                                             </div>
                                             <div class="row marginal" ng-if="begDateIsSameNextDate">
@@ -673,11 +729,11 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Примечания <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('notes')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.notes" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Рекомендации <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('recommendations')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.recommendations" /></div></div></td>
                                     </tr>
                                 </tbody>

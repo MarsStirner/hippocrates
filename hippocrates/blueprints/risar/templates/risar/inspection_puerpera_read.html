@@ -35,7 +35,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-3 col-md-3  text-right">Срок после родов, недель:</div>
+                            <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('timeAfterDelivery')]]:</div>
                             <div class="col-sm-9 col-md-9">[[checkup.timeAfterDelivery]]</div>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Общее состояние:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('state')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.state.name]]</div>
                         </div>
                         <div class="row">
@@ -63,35 +63,35 @@
                             <div class="col-sm-7 col-md-7">[[checkup.ad_left_high]]/[[checkup.ad_left_low]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Жалобы:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('complaints')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.complaints" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние вен:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vein')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.vein.name]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние молочных желез:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('breast')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.breast" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние сосков:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('nipples')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.nipples" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Лактация:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('lactation')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.lactation.name]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние матки:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('uterus')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.uterus.name]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние послеоперационного рубца:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('scar')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.scar.name]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Выделения:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('secretion')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.secretion" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
                         <div class="row">
@@ -110,7 +110,7 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Рекомендации по контрацепции:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('contraception')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.contraception.name]]</div>
                         </div>
                         <!-- TODO: Отображение диагнозов -->
@@ -124,11 +124,11 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5  text-right">Лечение:</div>
+                            <div class="col-sm-5 col-md-5  text-right">[[checkupDescriptor.getName('treatment')]]:</div>
                             <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.treatment"></div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-5 col-md-5  text-right">Общие рекомендации:</div>
+                            <div class="col-sm-5 col-md-5  text-right">[[checkupDescriptor.getName('recomendations')]]:</div>
                             <div class="col-md-7 long-words" ng-bind-html="checkup.recomendations"></div>
                         </div>
                         <div class="row">

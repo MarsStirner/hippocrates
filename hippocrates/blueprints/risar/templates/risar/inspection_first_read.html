@@ -32,21 +32,21 @@
                                     <div class="col-sm-9 col-md-9">[[checkup.department.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Рост:</div>
+                                    <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('height')]]:</div>
                                     <div class="col-sm-9 col-md-9">
                                         [[checkup.height]]
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Вес при осмотре:</div>
+                                    <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('weight')]]:</div>
                                     <div class="col-sm-9 col-md-9">[[checkup.weight]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Массо-ростовой коэффициент (МРК):</div>
+                                    <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('hw_ratio')]]:</div>
                                     <div class="col-sm-9 col-md-9">[[checkup.hw_ratio]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-3 col-md-3  text-right">Индекс массы тела:</div>
+                                    <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('BMI')]]:</div>
                                     <div class="col-sm-9 col-md-9 long-words">
                                         [[checkup.BMI]]
                                     </div>
@@ -64,83 +64,83 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Общее состояние:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('state')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.state.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Язык:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('tongue')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.tongue" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Подкожно-жировая клетчатка:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('subcutaneous_fat')]]:</div>
                                     <div class="col-sm-7 col-md-7 ">[[checkup.subcutaneous_fat.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Состояние вен:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vein')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.vein.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Отеки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('edema')]]:</div>
                                     <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.edema"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">АД правая рука</div>
+                                    <div class="col-sm-5 col-md-5 text-right">АД правая рука:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.ad_right_high]]/[[checkup.ad_right_low]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">АД левая рука</div>
+                                    <div class="col-sm-5 col-md-5 text-right">АД левая рука:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.ad_left_high]]/[[checkup.ad_left_low]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">ССС: пульс</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('heart_rate')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.heart_rate]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Пульс</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('pulse')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.pulse" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Жалобы</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('complaints')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.complaints" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Кожа</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('skin')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.skin" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Лимфоузлы</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('lymph')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.lymph" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Тоны сердца</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('heart_tones')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.heart_tones" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Молочные железы</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('breast')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.breast" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Состояние сосков </div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('nipples')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.nipples" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Органы дыхания</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('breathe')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.breathe" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Органы брюшной полости</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('stomach')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.stomach" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Печень</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('liver')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.liver" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Мочевыводящая система</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('urinoexcretory')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.urinoexcretory" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Физиологические отправления</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('bowel_and_bladder_habits')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.bowel_and_bladder_habits]]</div>
                                 </div>
                                 <div class="row">
@@ -169,11 +169,11 @@
                                     <div class="col-sm-6 col-md-6"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Горизонтальная диагональ:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('MikHHor')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.MikHHor]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Вертикальная диагональ:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('MikhVert')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.MikhVert]]</div>
                                 </div>
                                 <div class="row">
@@ -181,31 +181,31 @@
                                     <div class="col-sm-6 col-md-6"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Ds. Sp:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('DsSP')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.DsSP]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Ds. Cr:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('DsCr')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.DsCr]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Ds. Tr:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('DsTr')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.DsTr]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">C. Ext:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('CExt')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.CExt]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">C. Diag:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('CDiag')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.CDiag]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">C. Vera:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('CVera')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.CVera]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Индекс Соловьёва:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('soloviev_index')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.soloviev_index]]</div>
                                 </div>
                                 <div class="row">
@@ -213,23 +213,23 @@
                                     <div class="col-sm-6 col-md-6"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Степень сужения таза:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('pelvis_narrowness')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words">[[checkup.pelvis_narrowness.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Форма таза:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('pelvis_form')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pelvis_form.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Окружность живота:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('abdominal')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.abdominal]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Высота стояния дна матки:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('fundal_height')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.fundal_height]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">Состояние матки:</div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('metra_state')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.metra_state.name]]</div>
                                 </div>
                             </div>
@@ -245,53 +245,53 @@
                             </div>
                             <div class="box-body">
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Наружные половые органы:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('externalia')]]:</div>
                                     <div class="col-sm-7 col-md-7 long-words">[[checkup.externalia]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Влагалище:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vagina')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.vagina.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Шейка матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervix.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Длина шейки матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix_length')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervix_length.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Позиция шейки матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix_position')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervix_position.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Зрелость шейки матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix_maturity')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervix_maturity.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Консистенция шейки матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix_consistency')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervix_consistency.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Цервикальный канал:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervical_canal')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervical_canal.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Тело матки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('body_of_womb')]]:</div>
                                     <div class="col-sm-7 col-md-7">
                                         <span ng-repeat="elem in checkup.body_of_womb" >[[elem.name]][[$last ? '' : ', ']]</span>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Придатки:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('appendages')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.appendages.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Околоматочное пространство :</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('parametrium')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.parametrium.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Особенности:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('features')]]:</div>
                                     <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.features"></div>
                                 </div>
                                 <div class="row">
@@ -299,19 +299,19 @@
                                     <div class="col-sm-7 col-md-7"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Отделяемое из влагалища:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vagina_secretion')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.vagina_secretion ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Отделяемое из цервикального канала:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervical_canal_secretion')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervical_canal_secretion ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Отделяемое из уретры:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('urethra_secretion')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.urethra_secretion ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Мазок на онкоцитологию:</div>
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('onco_smear')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.onco_smear ? 'да': 'нет']]</div>
                                 </div>
                             </div>
@@ -352,7 +352,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Беременность (недель):</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_week')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_week]]</div>
                                 </div>
                                 <div class="row">
@@ -360,27 +360,27 @@
                                     <div class="col-sm-6 col-md-6">[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason :'Нет данных УЗИ для расчета']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Возможность сохранения беременности:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_continuation')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row" ng-show="!pregContRefusalDisabled()">
-                                    <div class="col-sm-6 col-md-6  text-right">Отказ от прерывания:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_continuation_refusal')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation_refusal ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Изменение условий труда:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('craft')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.craft.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Плановая дата следующей явки:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('next_date')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.next_date|asDate]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Примечания:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('notes')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.notes"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Рекомендации:</div>
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('recommendations')]]:</div>
                                     <div class="col-md-6 long-words" ng-bind-html="checkup.recommendations"></div>
                                 </div>
                                 <div class="row">
