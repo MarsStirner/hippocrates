@@ -240,7 +240,8 @@ class EventMeasureController(BaseModelController):
             end_date = action.endDate
         args.update({
             'event_id': action.event_id,
-            'end_date_from': start_date
+            'end_date_from': start_date,
+            'action_id': action.id
         })
         if end_date:
             args['beg_date_to'] = end_date
@@ -566,9 +567,38 @@ class EventMeasureSelecter(BaseSelecter):
         return self
 
     def get_measures_in_action(self, args):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
         EventMeasure = self.model_provider.get('EventMeasure')
+        ExpertProtocol = self.model_provider.get('ExpertProtocol')
+        ExpertScheme = self.model_provider.get('ExpertScheme')
+        ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
+        ExpertProtocol_ActionTypeAssoc = self.model_provider.get('ExpertProtocol_ActionTypeAssoc')
 
-        self.apply_filter(**args)
+
+        self.query = self.query.filter(
+            EventMeasure.event_id == args['event_id'],
+            or_(
+                EventMeasure.endDateTime >= safe_datetime(args['end_date_from']),
+                EventMeasure.endDateTime == None
+            )
+        )
+
+        if 'beg_date_to' in args:
+            self.query = self.query.filter(EventMeasure.begDateTime <= safe_datetime(args['beg_date_to']))
+
+        self.query = self.query.outerjoin(
+            ExpertSchemeMeasureAssoc, ExpertScheme, ExpertProtocol, ExpertProtocol_ActionTypeAssoc, ActionType
+        ).outerjoin(
+            Action, and_(Action.id == args['action_id'], Action.actionType_id == ActionType.id)
+        ).filter(
+            func.IF(
+                    EventMeasure.schemeMeasure_id.isnot(None),
+                    Action.id.isnot(None),
+                    True
+            )
+        )
+
         self.apply_sort_order(**args)
         self.query = self.query.options(
             (joinedload(EventMeasure._scheme_measure).
@@ -582,6 +612,7 @@ class EventMeasureSelecter(BaseSelecter):
              ),
             joinedload(EventMeasure._measure).joinedload('measure_type', innerjoin=True),
         )
+
         return self.get_all()
 
     def get_measure(self, measure_id):
@@ -637,6 +668,23 @@ class EventMeasureSelecter(BaseSelecter):
             func.sum(func.IF(and_(rbMeasureType.code == 'hospitalization',
                                   EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_hosp_completed'),
+        )
+
+
+    def query_action_attr(self, action_id, attr_name):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        return self.model_provider.get_query('Action').join(
+            ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Action.id == action_id, ActionProperty.deleted == 0, ActionPropertyType.code == attr_name
+        ).with_entities(
+            Action.event_id.label('event_id'), Action.id.label('action_id'),
+            ActionProperty_Date.value.label(attr_name)
         )
 
     def query_epicrisis(self):
