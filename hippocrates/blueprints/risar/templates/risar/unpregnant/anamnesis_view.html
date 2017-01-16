@@ -30,178 +30,233 @@
                             <div class="col-sm-7 col-md-7 ">
                             </div>
                         </div>
+                        {% if 'age' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('age')"></div>
                             <div class="col-sm-7 col-md-7">
                                 <span ng-bind="anamnesis.general.age"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'duration' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('duration')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.duration"></span>
                             </div>
-                        </div><div class="row">
+                        </div>
+                        {% endif %}
+                        {% if 'period_duration' in gyn_anamnesis_descriptor %}
+                        <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('period_duration')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.period_duration"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'disorder' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('disorder')"></div>
                             <div class="col-sm-7 col-md-7" >
                                 <span>[[ anamnesis.general.disorder | danet ]]</span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'menstrual_character' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('menstrual_character')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.menstrual_character| pluck:'name' | join:', '"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'intermenstrual_spotting' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('intermenstrual_spotting')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.intermenstrual_spotting"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'menstrual_pain' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('menstrual_pain')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.menstrual_pain"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'menopause' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('menopause')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span >[[ anamnesis.general.menopause | danet ]]</span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'menopause_age' in gyn_anamnesis_descriptor %}
                         <div class="row" ng-show="anamnesis.general.menopause">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('menopause_age')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.menopause_age"></span>
                             </div>
                         </div>
+                        {% endif %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Половая жизнь</strong></div>
                             <div class="col-sm-7 col-md-7 ">
                             </div>
                         </div>
+                        {% if 'sex_life_age' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('sex_life_age')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.sex_life_age"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'intercourse_partner_number' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('intercourse_partner_number')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.intercourse_partner_number"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'marital_status' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('marital_status')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.marital_status.name"></span>
                             </div>
                         </div>
+                        {% endif %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Заболевания</strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span></span>
                             </div>
                         </div>
+                        {% if 'std' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('std')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.std | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'gynecopathy' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('gynecopathy')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.gynecopathy | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'hepatitis' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('hepatitis')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.hepatitis"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'tuberculosis' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('tuberculosis')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.tuberculosis"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'somatic_disease' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('somatic_disease')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.somatic_disease"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'hereditary' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('hereditary')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.hereditary | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'gyn_operation' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('gyn_operation')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind-html="anamnesis.general.gyn_operation"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'infertility' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('infertility')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span>[[ anamnesis.general.infertility | danet ]]</span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'infertility_kind' in gyn_anamnesis_descriptor %}
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_kind')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.infertility_kind.name"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'infertility_duration' in gyn_anamnesis_descriptor %}
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_duration')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.infertility_duration"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'infertility_etiology' in gyn_anamnesis_descriptor %}
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_etiology')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.infertility_etiology | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'infertility_treatment' in gyn_anamnesis_descriptor %}
                         <div class="row" ng-show="anamnesis.general.infertility">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_treatment')"></div>
                             <div class="col-sm-7 col-md-7 ">
                                <span ng-bind="anamnesis.general.infertility_treatment | pluck:'name' | join:', '"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'epidemic' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('epidemic')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.epidemic"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'traumas' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('traumas')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind-html="anamnesis.general.traumas"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'operations' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('operations')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind-html="anamnesis.general.operations"></span>
                             </div>
                         </div>
+                        {% endif %}
                         <!--search ref-books by .name -->
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong>Группа крови</strong></div>
@@ -213,48 +268,62 @@
                             <div class="col-sm-5 col-md-5 text-right"><strong>Вредные привычки</strong></div>
                             <div class="col-sm-7 col-md-7 "></div>
                         </div>
+                        {% if 'alcohol' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('alcohol')"></div>
                             <div class="col-sm-7 col-md-7 ng-binding">
                                 <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.alcohol, 'fa-check text-danger': anamnesis.general.alcohol}"></i>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'smoking' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('smoking')"></div>
                            <div class="col-sm-7 col-md-7">
                                 <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.smoking, 'fa-check text-danger': anamnesis.general.smoking}"></i>
                            </div>
                         </div>
+                        {% endif %}
+                        {% if 'toxic' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('toxic')"></div>
                             <div class="col-sm-7 col-md-7">
                                 <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.toxic, 'fa-check text-danger': anamnesis.general.toxic}"></i>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'drugs' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('drugs')"></div>
                             <div class="col-sm-7 col-md-7">
                                 <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.drugs, 'fa-check text-danger': anamnesis.general.drugs}"></i>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'work_group' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('work_group')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.work_group.name"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'professional_properties' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('professional_properties')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind="anamnesis.general.professional_properties.name"></span>
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'additional_info' in gyn_anamnesis_descriptor %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('additional_info')"></strong></div>
                             <div class="col-sm-7 col-md-7 ">
                                 <span ng-bind-html="anamnesis.general.additional_info"></span>
                             </div>
                         </div>
+                        {% endif %}
 
                 </div><!--end extr_space-->
             </tab>
