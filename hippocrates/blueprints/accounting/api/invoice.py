@@ -6,6 +6,7 @@ from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date, parse_json
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
+from nemesis.lib.mq_integration.invoice import MQOpsInvoice, notify_invoice_changed
 from hippocrates.blueprints.accounting.lib.represent import InvoiceRepr
 
 
@@ -47,14 +48,14 @@ def api_0_invoice_save(invoice_id=None):
             invoice = invoice_ctrl.get_new_invoice()
             invoice = invoice_ctrl.update_invoice(invoice, json_data)
             invoice_ctrl.store(*invoice.get_all_entities())
-            invoice_ctrl.notify_invoice_changed(invoice, 'create')
+            notify_invoice_changed(MQOpsInvoice.create, invoice)
         elif invoice_id:
             invoice = invoice_ctrl.get_invoice(invoice_id)
             if not invoice:
                 raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
             invoice = invoice_ctrl.update_invoice(invoice, json_data)
             invoice_ctrl.store(invoice)
-            invoice_ctrl.notify_invoice_changed(invoice, 'update')
+            notify_invoice_changed(MQOpsInvoice.update, invoice)
         else:
             raise ApiException(404, u'`invoice_id` required')
         return InvoiceRepr().represent_invoice_full(invoice)
@@ -70,7 +71,7 @@ def api_0_invoice_delete(invoice_id=None):
     invoice = invoice_ctrl.get_invoice(invoice_id)
     invoice_ctrl.delete_invoice(invoice)
     invoice_ctrl.store(invoice)
-    invoice_ctrl.notify_invoice_changed(invoice, 'delete')
+    notify_invoice_changed(MQOpsInvoice.delete, invoice)
     return True
 
 
@@ -83,7 +84,7 @@ def on_event_deleted(sender, event_id, deleted_data=None):
         invoice_list = []
 
     for invoice in invoice_list:
-        invoice_ctrl.notify_invoice_changed(invoice, 'delete')
+        notify_invoice_changed(MQOpsInvoice.delete, invoice)
 
 
 blinker.signal('Event-deleted').connect(on_event_deleted)

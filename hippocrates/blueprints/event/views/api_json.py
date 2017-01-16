@@ -29,6 +29,7 @@ from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB, rbTest
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
+from nemesis.lib.mq_integration.event import MQOpsEvent, notify_event_changed, notify_moving_changed
 from sqlalchemy import desc, func, and_, or_
 from sqlalchemy.orm import joinedload
 
@@ -87,6 +88,7 @@ def api_event_save():
     request_type_kind = all_data.get('request_type_kind')
     event_data = all_data.get('event')
     event_id = event_data.get('id')
+    create_mode = not event_id
 
     event_ctrl = EventSaveController()
     if event_id:
@@ -108,6 +110,7 @@ def api_event_save():
             visit = Visit.make_default(event)
             db.session.add(visit)
             db.session.commit()
+
     result['id'] = int(event)
 
     update_executives(event)
@@ -118,6 +121,10 @@ def api_event_save():
         received_save(event_id, received_data)
         if quota_data:
             client_quota_save(event, quota_data)
+
+    if create_mode:
+        notify_event_changed(MQOpsEvent.create, event)
+
     return result
 
 
@@ -128,7 +135,11 @@ def api_moving_save():
     mov_ctrl = MovingController()
     data = request.json
     event_id = data.get('event_id')
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
     moving_id = data.get('id')
+    create_mode = not moving_id
     if moving_id:
         moving = Action.query.get(moving_id)
         if not moving:
@@ -137,8 +148,13 @@ def api_moving_save():
         result = vis.make_moving_info(moving)
     else:
         result = mov_ctrl.create_moving(event_id, data)
+        moving = result[1]
         result = map(vis.make_moving_info, result)
-    received_close(event_id)
+    received_close(event)
+
+    if not create_mode:
+        notify_moving_changed(MQOpsEvent.moving, moving)
+
     return result
 
 
@@ -158,35 +174,6 @@ def api_event_moving_close():
     return vis.make_moving_info(moving)
 
 
-# @module.route('api/event_lab-res-dynamics.json', methods=['GET'])
-# @api_method
-# def api_event_lab_res_dynamics():
-#     # общая динамика по тестам в обращении
-#     event_id = request.args.get('event_id')
-#     from_date = safe_date(request.args.get('from_date'))
-#     to_date = safe_date(request.args.get('to_date'))
-#     properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(ActionProperty.deleted == 0,
-#                                                                                           Action.deleted == 0,
-#                                                                                           Action.begDate >= from_date,
-#                                                                                           Action.begDate <= to_date,
-#                                                                                           Action.event_id == event_id,
-#                                                                                           ActionType.mnem == 'LAB',
-#                                                                                           ActionPropertyType.test_id.isnot(None)).\
-#         order_by(desc(Action.begDate))
-#
-#     dynamics = {}
-#     for property in properties:
-#         test_id = property.type.test_id
-#         if property.value:
-#             if test_id in dynamics:
-#                 dynamics[test_id]['values'][format_date(property.action.begDate)] = property.value
-#             else:
-#                 dynamics[test_id] = {'test_name': property.type.test.name,
-#                                      'values': {format_date(property.action.begDate): property.value}}
-#     return dynamics
-
-
-# noinspection PyPep8Naming
 @module.route('/api/event_lab-res-dynamics.json', methods=['GET'])
 @api_method
 def api_event_lab_res_dynamics():
@@ -321,6 +308,9 @@ def api_event_close():
         event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
     save_event(event_id, all_data)
     save_executives(event_id)
+
+    notify_event_changed(MQOpsEvent.close, event)
+
     return {'result_name': u'Обращение закрыто'}
 
 
