@@ -34,8 +34,14 @@ angular.module('WebMis20')
                     var s = {};
                     if (prop.value_in_norm === null) return s;
 
-                    if (prop.value_in_norm < 0) s['color'] = 'blue';
-                    else if (prop.value_in_norm > 0) s['color'] = 'red';
+                    if (prop.value_in_norm < 0) {
+                        s['color'] = 'blue';
+                        s['font-weight'] = 'bold';
+                    }
+                    else if (prop.value_in_norm > 0) {
+                        s['color'] = 'red';
+                        s['font-weight'] = 'bold';
+                    }
                     return s;
                 },
                 calcValueNorm: function (prop) {
