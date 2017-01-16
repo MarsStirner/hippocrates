@@ -2,21 +2,22 @@
 
 import logging
 
-from blueprints.risar.lib.stats import StatsSelecter
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, func
 from ..xform import XForm, wrap_simplify, ALREADY_PRESENT_ERROR, INTERNAL_ERROR, Undefined
 from .schemas import CardSchema
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_ET_Heuristic, default_AT_Heuristic
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, \
-    request_type_gynecological
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological, \
+    pregnancy_card_attrs
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import get_new_event_ext_id, safe_datetime, safe_date
 from nemesis.models.event import Event, EventType
-from nemesis.models.exists import rbRequestType
+from nemesis.models.exists import rbRequestType, MKB
 from nemesis.models.client import Client
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.lib.data import create_action
 from nemesis.systemwide import db
@@ -169,7 +170,101 @@ class CardXForm(CardSchema, XForm):
                 self.target_obj_class.id == filters['id']
             )
         if 'pregnancyWeek' in filters:
-            ss = StatsSelecter()
-            ss.get_events_exchange_card()
-            q = ss.query
+            q = self._get_filtered_by_preg_week_events_query()
         return q.all()
+
+    def _get_filtered_by_preg_week_events_query(self):
+        # main query
+        query = self._find_list_query()
+        query = query.join(Action, ActionType).filter(
+            Action.deleted == 0, ActionType.flatCode == pregnancy_card_attrs
+        )
+
+        # event pregnancy start date
+        q_event_psd = self._find_list_query().join(
+            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'pregnancy_start_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
+        ).subquery('EventPregnancyStartDate')
+
+        # event predicted delivery date
+        q_event_pdd = self._find_list_query().join(
+            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'predicted_delivery_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
+        ).subquery('EventPredictedDeliveryDate')
+
+        # diags queries
+        q_diags_main = db.session.query(Diagnostic).join(Diagnosis).join(
+            Event, Event.client_id == Diagnosis.client_id,
+        ).filter(
+            Diagnosis.deleted == 0, Diagnostic.deleted == 0,
+        ).group_by(Diagnostic.diagnosis_id)
+        max_diagn_dates_sq = q_diags_main.with_entities(
+            func.max(Diagnostic.setDate).label('set_date'),
+            Diagnostic.diagnosis_id.label('diagnosis_id')
+        ).subquery()
+        diagn_ids_sq = q_diags_main.join(
+            max_diagn_dates_sq, and_(Diagnostic.setDate == max_diagn_dates_sq.c.set_date,
+                                     Diagnostic.diagnosis_id == max_diagn_dates_sq.c.diagnosis_id)
+        ).with_entities(
+            func.max(Diagnostic.id).label('diagnostic_id'),
+        ).subquery()
+
+        q_diags = db.session.query(Diagnostic).join(
+            diagn_ids_sq, diagn_ids_sq.c.diagnostic_id == Diagnostic.id
+        ).join(Diagnosis).join(
+            MKB, Diagnostic.MKB == MKB.DiagID,
+        ).with_entities(
+            Diagnosis.id.label('diagnosis_id'), Diagnosis.client_id.label('client_id'),
+            Diagnosis.setDate.label('ds_set_date'), Diagnosis.endDate.label('ds_end_date'),
+            MKB.DiagID.label('mkb')
+        ).group_by(
+            Diagnosis.id
+        ).subquery('ClientDiags')
+
+        # final main query
+        fltrd_q = query.join(
+            q_event_pdd, Event.id == q_event_pdd.c.event_id
+        ).join(
+            q_event_psd, Event.id == q_event_psd.c.event_id
+        ).outerjoin(
+            q_diags, and_(q_diags.c.client_id == Event.client_id,
+                          q_diags.c.ds_set_date <= func.coalesce(Event.execDate, func.curdate()),
+                          func.coalesce(q_diags.c.ds_end_date, func.curdate()) >= Event.setDate)
+        ).filter(
+            or_(
+                # неделя беременности = 32
+                func.floor(
+                    func.datediff(
+                        func.IF(func.coalesce(q_event_pdd.c.pdd, func.curdate()) < func.curdate(),
+                                q_event_pdd.c.pdd,
+                                func.curdate()),
+                        q_event_psd.c.psd
+                    ) / 7
+                ) + 1 == 32,
+                # неделя беременности = 28 и есть действующий диагноз мкб O30.xx (двойня)
+                and_(
+                    func.floor(
+                        func.datediff(
+                            func.IF(func.coalesce(q_event_pdd.c.pdd, func.curdate()) < func.curdate(),
+                                    q_event_pdd.c.pdd,
+                                    func.curdate()),
+                            q_event_psd.c.psd
+                        ) / 7
+                    ) + 1 == 28,
+                    q_diags.c.diagnosis_id.isnot(None),
+                    q_diags.c.mkb.like(u'O30.%')
+                )
+            )
+        ).with_entities(Event.id.distinct().label('event_id')).subquery('FilteredEvents')
+        query = db.session.query(Event).join(
+            fltrd_q, Event.id == fltrd_q.c.event_id
+        )
+        return query

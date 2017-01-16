@@ -101,8 +101,10 @@ class ClientXForm(ClientSchema, XForm):
                 self._update_id_document(data['document'])
             if 'insurance_documents' in data:
                 self._update_policies(data['insurance_documents'])
+            if 'registration_address' in data:
+                self._update_address(data['registration_address'], AddressType.reg[0])
             if 'residential_address' in data:
-                self._update_address(data['residential_address'])
+                self._update_address(data['residential_address'], AddressType.live[0])
             if 'blood_type_info' in data:
                 self._update_blood(data['blood_type_info'])
             if 'allergies_info' in data:
@@ -165,11 +167,17 @@ class ClientXForm(ClientSchema, XForm):
             policy.insurer = org
             self._changed.append(policy)
 
-    def _update_address(self, data):
+    def _update_address(self, data, type_):
         client = self.target_obj
-        client_address = client.loc_address
-        if not client_address:
-            client.loc_address = client_address = ClientAddress()
+        if type_ == 0:
+            client_address = client.reg_address
+            if not client_address:
+                client.reg_address = client_address = ClientAddress()
+        else:
+            assert type_ == 1
+            client_address = client.loc_address
+            if not client_address:
+                client.loc_address = client_address = ClientAddress()
 
         address = client_address.address
         if not address:
@@ -185,7 +193,7 @@ class ClientXForm(ClientSchema, XForm):
         house.corpus = data.get('building', '')
         address.flat = data.get('flat')
         client_address.localityType = data.get('locality_type')
-        client_address.type = AddressType.live[0]
+        client_address.type = type_
         self._changed.extend([client_address, address, house])
 
     def _update_blood(self, data_list):
@@ -250,6 +258,7 @@ class ClientXForm(ClientSchema, XForm):
             'gender': client.sexCode,
             'document': self._represent_document(client.document),
             'insurance_documents': map(self._represent_policy, client.policies_all),
+            'registration_address': self._represent_residential_address(client.reg_address),
             'residential_address': self._represent_residential_address(client.loc_address),
             'blood_type_info': map(self._represent_blood_type, client.blood_history),
             'allergies_info': map(self._represent_allergy, client.allergies),

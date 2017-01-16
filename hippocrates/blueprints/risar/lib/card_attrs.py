@@ -214,33 +214,28 @@ def reevaluate_preeclampsia_rate(card):
         urinary_protein_24 = urinary_24_analysis['24protein'].value if urinary_24_analysis else None
         urinary24 = urinary_24_analysis['24urinary'].value if urinary_24_analysis else None
 
-        urinary_protein_analysis = get_action_list(event, 'urinaryProtein').\
-            order_by(Action.begDate.desc()).first()
-        urinary_protein = urinary_protein_analysis['protein'].value if urinary_protein_analysis else None
-
         biochemical_analysis = get_action_list(event, 'biochemical_analysis').\
             order_by(Action.begDate.desc()).first()
         ALaT = biochemical_analysis['ALaT'].value if biochemical_analysis else None
         ASaT = biochemical_analysis['ASaT'].value if biochemical_analysis else None
+        LDG = biochemical_analysis['LDG'].value if biochemical_analysis else None
+        creatinin = biochemical_analysis['creatinin'].value if biochemical_analysis else None
 
         albumin_creatinine_analysis = get_action_list(event, 'albuminCreatinineRelation').\
             order_by(Action.begDate.desc()).first()
         albumin_creatinine = albumin_creatinine_analysis['albuminCreatinineRelation'].value \
             if albumin_creatinine_analysis else None
 
-        thrombocytes_analysis = get_action_list(event, 'clinical_blood_analysis').\
-            order_by(Action.begDate.desc()).first()
+        thrombocytes_analysis = get_action_list(event, ['blood_general_expanded', 'blood_general_hematocrit',
+                                                        'blood_general_formulae', 'blood_general']
+                                                ).order_by(Action.begDate.desc()).first()
         thrombocytes = thrombocytes_analysis['thrombocytes'].value if thrombocytes_analysis else None
 
         has_CAH = mkb_match(card.unclosed_mkbs, needles=u'O10-O10.99')
 
         if has_CAH:  # хроническая артериальная гипертензия
             if (urinary_protein_24 is not None and urinary_protein_24 >= 0.3 or
-                    urinary_protein is not None and urinary_protein >= 0.3 or
-                    albumin_creatinine is not None and albumin_creatinine >= 0.15 or
-                    (ALaT is not None and ALaT > 31 and
-                     ASaT is not None and ASaT > 31) or
-                    thrombocytes is not None and thrombocytes < 100):
+                    albumin_creatinine is not None and albumin_creatinine >= 0.15):
                 preec_rate_id = PreeclampsiaRisk.ChAH[0]
         elif latest_inspection:
             ad_left_high = latest_inspection.action['ad_left_high'].value
@@ -270,9 +265,10 @@ def reevaluate_preeclampsia_rate(card):
                         urinary24 is not None and urinary24 <= 500 or
                         (ALaT is not None and ALaT > 31 and
                          ASaT is not None and ASaT > 31) or
+                        LDG > 250 or creatinin > 90 or
                         thrombocytes is not None and thrombocytes < 100 or
                         # has_heavy_diags
-                        mkb_match(card.unclosed_mkbs, needles=u'R34, J81, R23.0, O36.5') or
+                        mkb_match(card.unclosed_mkbs, needles=u'R34, J81, R23.0, O36.5, O14.2, H47.1, O41.1') or
                         # has_complaints
                         any(compl['code'] in ('epigastrii', 'zrenie', 'golovnaabol_')
                             for compl in latest_inspection.action['complaints'].value or [])):

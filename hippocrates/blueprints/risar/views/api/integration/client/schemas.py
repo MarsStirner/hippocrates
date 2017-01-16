@@ -135,6 +135,49 @@ class ClientSchema(Schema):
 
                 }
             },
+            "registration_address": {
+                "type": "object",
+                "description": "Адрес регистрации пациента",
+                "properties": {
+                    "KLADR_locality": {
+                        "type": "string",
+                        "description": "Код населённого пункта адреса проживания по справочнику КЛАДР"
+                    },
+                    "KLADR_street": {
+                        "type": "string",
+                        "description": "Код улицы адреса проживания по справочнику КЛАДР"
+                    },
+                    "house": {
+                        "type": "string",
+                        "description": "Данные дома адреса проживания",
+                        "maxLength": 8
+                    },
+                    "building": {
+                        "type": "string",
+                        "description": "Корпус дома адреса проживания",
+                        "maxLength": 8
+                    },
+                    "flat": {
+                        "type": "string",
+                        "description": "Данные квартиры адреса проживания",
+                        "maxLength": 6
+                    },
+                    "locality_type": {
+                        "type": "integer",
+                        "description": "Тип населенного пункта: 0-село, 1 - город",
+                        "enum": [
+                            0,
+                            1
+                        ]
+                    }
+                },
+                "required": [
+                    "KLADR_locality",
+                    "KLADR_street",
+                    "house",
+                    "locality_type"
+                ]
+            },
             "residential_address": {
                 "type": "object",
                 "description": "Адрес проживания пациента",

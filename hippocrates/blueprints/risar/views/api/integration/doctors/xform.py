@@ -80,7 +80,8 @@ class DoctorXForm(DoctorSchema, XForm):
             self.target_obj.post = rbPost.query.filter(rbPost.code == data['post']).first()
         else:
             self.target_obj.post = None
-        self.target_obj.login = data.get('login')
+        if data.get('login'):  # в схеме поле не обязательное, а логин может быть проставлен в БД
+            self.target_obj.login = data.get('login')
         self.target_obj.regionalCode = data.get('regional_code')
         if self.new:
             self._fill_required_fields()

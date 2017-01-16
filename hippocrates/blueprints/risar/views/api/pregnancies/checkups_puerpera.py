@@ -1,7 +1,7 @@
-# -*- encoding: utf-8 -*-
-from blueprints.risar.lib import sirius
+# -*- coding: utf-8 -*-
 from flask import request
 
+from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_puerpera
@@ -9,6 +9,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups_puerpera, set_action_apt_values
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime, db_non_flushable
@@ -73,6 +74,13 @@ def api_0_pregnancy_checkup_puerpera(event_id):
 
     db.session.commit()
 
+    em_ctrl = EventMeasureController()
+    em_ctrl.regenerate(action)
+
+    result = represent_pregnancy_checkup_puerpera(action)
+    if em_ctrl.exception:
+        result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
+
     sirius.send_to_mis(
         sirius.RisarEvents.SAVE_CHECKUP_PUERPERA,
         sirius.RisarEntityCode.CHECKUP_PC_TICKET,
@@ -85,7 +93,7 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     )
 
     return {
-        'checkup': represent_pregnancy_checkup_puerpera(action),
+        'checkup': result,
         'access': represent_checkup_access(action)
     }
 

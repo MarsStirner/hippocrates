@@ -23,6 +23,7 @@ WebMis20
         },
         print_checkup_ticket_25: '{{ url_for('.printing_checkup_ticket_25') }}', // МЕНЯ ЗАСТАВИЛИ!!!
         print_jsp_epicrisis: '{{ url_for('.printing_jsp_epicrisis') }}',
+        print_jsp_anamnesis: '{{ url_for('.printing_jsp_anamnesis') }}',
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',
         api_stats_pregnancy_week_diagram: '{{ url_for('.api_1_stats_pregnancy_week_diagram') }}',

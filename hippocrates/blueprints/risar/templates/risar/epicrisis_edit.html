@@ -168,7 +168,7 @@
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('abort')"></th>
                                             <td>
                                                 <div class="row" ng-class="{'has-error': firstForm.state.$invalid  && firstForm.submit_attempt}">
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-7">
                                                         <rb-select name="state" ng-model="epicrisis.abort" ng-disabled="epicrisisDescriptor.getReadOnly('abort')"
                                                                    ref-book="rbRisarAbort" ng-required="epicrisis.pregnancy_final.code =='abortom' && epicrisisDescriptor.getMandatory('abort')"></rb-select>
                                                     </div>

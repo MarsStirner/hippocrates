@@ -80,10 +80,10 @@ hypertensia = ['O10-O10.99']
 antiphospholipid_syndrome = ['I82.9', 'D68.8', 'D89.9']
 red_wolfy = ['M32.0', 'M32.1', 'M32.8', 'M32.9']
 kidney_diseases = ['N18.0', 'N18.8', 'N18.9', 'O23.0']
-diabetes = ['E10', 'E11', 'O24.0', 'O24.1']
-extra_mass = ['026.0']
+diabetes = ['E10-E11.99', 'O24.0', 'O24.1']
+extra_mass = ['O26.0']
 thrombophilia = ['O99.1', 'D68.8']
-infection_during_pregnancy = ['A00-A99', 'B00-B99', 'N00-N99']
+infection_during_pregnancy = ['A00-A99', 'B00-B99', 'N00-N99.99']
 
 week_postfix = {1: u'я', 2: u'и', 3: u'и', 4: u'и', 5: u'ь',  6: u'ь', 7: u'ь', 8: u'ь', 9: u'ь', 0: u'ь'}
 

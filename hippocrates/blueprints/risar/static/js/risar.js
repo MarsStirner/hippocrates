@@ -28,6 +28,9 @@ WebMis20
     this.print_jsp_epicrisis = function(data) {
         self.file_get('POST',  Config.url.print_jsp_epicrisis, data)
     };
+    this.print_jsp_anamnesis = function(data) {
+        self.file_get('POST',  Config.url.print_jsp_anamnesis, data)
+    };
     this.print_ticket_25 = function (action_id, fmt) {
         self.file_get('POST', Config.url.print_checkup_ticket_25, {action_id: action_id, extension: fmt})
     };
@@ -787,7 +790,7 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         });
     };
     $scope.openDateRegistrationModal = function () {
-        DateRegistrationModalService.openDateRegistration($scope.header.event).then(function(header){
+        DateRegistrationModalService.openDateRegistration($scope.header.event, $scope.header.request_type).then(function(header){
             if (header) {
                 $scope.header = header;
             }
@@ -1246,12 +1249,12 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
 }])
 .service('DateRegistrationModalService', ['$modal', 'RisarApi', function ($modal, RisarApi) {
     return {
-        openDateRegistration: function (event) {
+        openDateRegistration: function (event, request_type) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/RISAR/modal/date_registration.html',
                 template: '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
         <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
-        <h4 class="modal-title">Изменить дату постановки на учет по беременности</h4>\
+        <h4 class="modal-title">[[request_type === "pregnancy" ? "Изменить дату постановки на учет по беременности" : "Изменить дату создания карты"]]</h4>\
         </div>\
         <div class="modal-body">\
             <div class="das-form">\
@@ -1275,6 +1278,7 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         </div>',
                 backdrop: 'static',
                 controller: function ($scope, $modal, RisarApi, event) {
+                    $scope.request_type = request_type;
                     $scope.model = {
                         set_date: event.set_date
                     };
