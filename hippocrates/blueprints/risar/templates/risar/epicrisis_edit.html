@@ -77,6 +77,7 @@
                             <div class="box-body">
                                 <table class="table table-condensed" ng-if="epicrisis.pregnancy_final.code">
                                     <tbody>
+                                        {% if 'arrival_date' in epicrisis_descriptor %}
                                         <tr>
                                             <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('arrival_date')"></th>
                                             <td class="col-md-8">
@@ -88,6 +89,7 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {% endif %}
                                         <tr>
                                             <th class="text-right col-md-4">[[epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']] <span class="text-danger">*</span></th>
                                             <td class="col-md-8">
@@ -121,6 +123,7 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {% if 'LPU' in epicrisis_descriptor %}
                                         <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('LPU')"></th>
                                             <td>
@@ -137,6 +140,8 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {% endif %}
+                                        {% if 'maternity_hosp_medico' in epicrisis_descriptor %}
                                         <tr>
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('maternity_hosp_medico')"></th>
                                             <td>
@@ -148,6 +153,8 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {% endif %}
+                                        {% if 'newborn_LPU' in epicrisis_descriptor %}
                                         <tr ng-if="epicrisis.pregnancy_final.code =='rodami'">
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('newborn_LPU')"></th>
                                             <td>
@@ -164,6 +171,8 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {% endif %}
+                                        {% if 'abort' in epicrisis_descriptor %}
                                         <tr ng-if="epicrisis.pregnancy_final.code =='abortom'">
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('abort')"></th>
                                             <td>
@@ -175,11 +184,13 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {% endif %}
                                         <tr>
                                             <td colspan="2">
                                                 <wm-diagnosis-new ng-model="epicrisis.diagnoses" diag-types="epicrisis.diagnosis_final" can-add-new="true" can-edit="! epicrisis.endDate"></wm-diagnosis-new>
                                             </td>
                                         </tr>
+                                        {% if 'pregnancy_speciality' in epicrisis_descriptor %}
                                         <tr>
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('pregnancy_speciality')"></th>
                                             <td>
@@ -188,6 +199,8 @@
                                                 </div></div>
                                             </td>
                                         </tr>
+                                        {% endif %}
+                                        {% if 'afterbirth_features' in epicrisis_descriptor %}
                                         <tr>
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('afterbirth_features')"></th>
                                             <td>
@@ -196,6 +209,8 @@
                                                 </div></div>
                                             </td>
                                         </tr>
+                                        {% endif %}
+                                        {% if 'help' in epicrisis_descriptor %}
                                         <tr>
                                             <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('help')"></th>
                                             <td>
@@ -204,6 +219,7 @@
                                                 </div></div>
                                             </td>
                                         </tr>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             </div>
@@ -223,6 +239,7 @@
                                             <input type="checkbox" ng-model="mother_death" ng-change="clear_death_info">
                                         </td>
                                     </tr>
+                                    {% if 'reason_of_death' in epicrisis_descriptor %}
                                     <tr>
                                         <td class="text-right bold" ng-bind-html="epicrisisDescriptor.getLabel('reason_of_death')"></td>
                                         <td><div class="row"
@@ -232,8 +249,9 @@
                                                    ng-required="mother_death && epicrisisDescriptor.getMandatory('reason_of_death')" name="reason_of_death" ng-disabled="!mother_death || epicrisisDescriptor.getReadOnly('reason_of_death')">
                                             </div></div>
                                         </td>
-
                                     </tr>
+                                    {% endif %}
+                                    {% if 'death_date' in epicrisis_descriptor %}
                                     <tr>
                                         <td class="text-right bold" ng-bind-html="epicrisisDescriptor.getLabel('death_date')"></td>
                                         <td>
@@ -242,6 +260,8 @@
                                                      ng-required="mother_death && epicrisisDescriptor.getMandatory('death_date')" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'death_time' in epicrisis_descriptor %}
                                     <tr>
                                         <td class="text-right bold" ng-bind-html="epicrisisDescriptor.getLabel('death_time')"></td>
                                         <td>
@@ -253,6 +273,7 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <td colspan="2">
                                             <div class="row">
@@ -282,6 +303,7 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
+                                    {% if 'immaturity' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('immaturity')"></th>
                                         <td class="col-md-8">
@@ -289,6 +311,8 @@
                                                    ng-required="epicrisisDescriptor.getMandatory('immaturity')" ng-disabled="epicrisisDescriptor.getReadOnly('immaturity')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'delivery_waters' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('delivery_waters')"></th>
                                         <td class="col-md-8">
@@ -300,6 +324,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'pre_birth_delivery_waters' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('pre_birth_delivery_waters')"></th>
                                         <td class="col-md-8">
@@ -307,6 +333,8 @@
                                             ng-required="epicrisisDescriptor.getMandatory('pre_birth_delivery_waters')" ng-disabled="epicrisisDescriptor.getReadOnly('pre_birth_delivery_waters')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'weakness' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('weakness')"></th>
                                         <td>
@@ -318,6 +346,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'perineal_tear' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('perineal_tear')"></th>
                                         <td>
@@ -329,6 +359,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'meconium_colouring' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('meconium_colouring')"></th>
                                         <td class="col-md-8">
@@ -336,6 +368,8 @@
                                             ng-required="epicrisisDescriptor.getMandatory('meconium_colouring')" ng-disabled="epicrisisDescriptor.getReadOnly('meconium_colouring')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'patologicsl_preliminal_period' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('patologicsl_preliminal_period')"></th>
                                         <td class="col-md-8">
@@ -343,6 +377,8 @@
                                             ng-required="epicrisisDescriptor.getMandatory('patologicsl_preliminal_period')" ng-disabled="epicrisisDescriptor.getReadOnly('patologicsl_preliminal_period')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'labor_anomalies' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('labor_anomalies')"></th>
                                         <td class="col-md-8">
@@ -350,6 +386,8 @@
                                             ng-required="epicrisisDescriptor.getMandatory('labor_anomalies')" ng-disabled="epicrisisDescriptor.getReadOnly('labor_anomalies')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'chorioamnionit' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('chorioamnionit')"></th>
                                         <td class="col-md-8">
@@ -357,6 +395,8 @@
                                             ng-required="epicrisisDescriptor.getMandatory('chorioamnionit')" ng-disabled="epicrisisDescriptor.getReadOnly('chorioamnionit')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'poor_blood' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('poor_blood')"></th>
                                         <td class="col-md-8">
@@ -364,6 +404,8 @@
                                             ng-required="epicrisisDescriptor.getMandatory('poor_blood')" ng-disabled="epicrisisDescriptor.getReadOnly('poor_blood')">
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'eclampsia' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('eclampsia')"></th>
                                         <td>
@@ -375,6 +417,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'funiculus' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('funiculus')"></th>
                                         <td>
@@ -386,6 +430,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'afterbirth' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('afterbirth')"></th>
                                         <td>
@@ -397,6 +443,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'infections_during_birth' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('infections_during_birth')"></th>
                                         <td>
@@ -408,6 +456,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'infections_after_birth' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('infections_after_birth')"></th>
                                         <td>
@@ -419,6 +469,7 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
@@ -432,6 +483,7 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
+                                    {% if 'caul' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('caul')"></th>
                                         <td class="col-md-8"><div>
@@ -451,6 +503,8 @@
                                         </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'calfbed' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('calfbed')"></th>
                                         <td><div>
@@ -470,6 +524,8 @@
                                         </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'perineotomy' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('perineotomy')"></th>
                                         <td>
@@ -482,6 +538,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'secundines' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('secundines')"></th>
                                         <td><div>
@@ -501,6 +559,8 @@
                                         </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'other_manipulations' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('other_manipulations')"></th>
                                         <td>
@@ -509,6 +569,7 @@
                                             </div></div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
@@ -522,6 +583,7 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
+                                    {% if 'caesarean_section' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right col-md-4" ng-bind-html="epicrisisDescriptor.getLabel('caesarean_section')"></th>
                                         <td class="col-md-8">
@@ -534,6 +596,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'obstetrical_forceps' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('obstetrical_forceps')"></th>
                                         <td>
@@ -546,6 +610,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vacuum_extraction' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('vacuum_extraction')"></th>
                                         <td><div>
@@ -565,6 +631,8 @@
                                         </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'indication' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('indication')"></th>
                                         <td>
@@ -577,6 +645,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'specialities' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('specialities')"></th>
                                         <td>
@@ -589,6 +659,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'anesthetization' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('anesthetization')"></th>
                                         <td>
@@ -601,6 +673,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'hysterectomy' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('hysterectomy')"></th>
                                         <td>
@@ -613,6 +687,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'operation_complication' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('operation_complication')"></th>
                                         <td>
@@ -621,6 +697,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'embryotomy' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('embryotomy')"></th>
                                         <td><div>
@@ -640,6 +718,7 @@
                                         </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
