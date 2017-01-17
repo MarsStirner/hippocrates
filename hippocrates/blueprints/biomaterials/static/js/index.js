@@ -1,6 +1,8 @@
 WebMis20.controller('BiomaterialsIndexCtrl', [
-    '$scope', '$modal', '$window', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'PrintingDialog', 'MessageBox', 'CurrentUser', '$interval',
-    function ($scope, $modal, $window, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, PrintingDialog, MessageBox, CurrentUser, $interval) {
+    '$scope', '$modal', '$window', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'PrintingDialog',
+    'MessageBox', 'CurrentUser', '$interval',
+    function ($scope, $modal, $window, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, PrintingDialog,
+              MessageBox, CurrentUser, $interval) {
         $scope.selected_records = new SelectAll([]);
         $scope.TTJStatus = RefBookService.get('TTJStatus');
         $scope.rbLaboratory = RefBookService.get('rbLaboratory');
@@ -182,6 +184,16 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             return {
                 ttj_ids: manual_values ? manual_values : $scope.getVisibleSelectedRecords()
             }
+        };
+        $scope.visibleAllSelected = function () {
+            return $scope.current_result.records &&
+                $scope.getVisibleSelectedRecords().length === $scope.current_result.records.length;
+        };
+        $scope.toggleAllVisibleRecords = function () {
+            var enabled = !$scope.visibleAllSelected();
+            _.each($scope.current_result.records, function (record) {
+                $scope.selected_records.select(record.id, enabled);
+            });
         };
 
         $scope.open_info = function (record) {
