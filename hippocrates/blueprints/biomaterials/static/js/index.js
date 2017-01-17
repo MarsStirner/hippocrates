@@ -133,8 +133,8 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             // resize block
             setTimeout(function(){
                 var victim = document.getElementsByClassName('autoheight')[0];
-                while (window.innerHeight < document.body.scrollHeight && victim.offsetHeight > 0) {
-                  victim.style['max-height'] = victim.offsetHeight - 1 + 'px';
+                while (window.innerHeight < document.body.scrollHeight && victim.offsetHeight > 60) {
+                  victim.style['max-height'] = victim.offsetHeight - 3 + 'px';
                 }
             }, 200);
         };
