@@ -60,46 +60,62 @@
                     </tr>
                     </thead>
                     <tbody>
+                    {% if 'education' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('education')"></td>
                         <td ng-bind="anamnesis.mother.education.name"></td>
                         <td ng-bind="anamnesis.father.education.name"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'work_group' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('work_group')"></td>
                         <td ng-bind="anamnesis.mother.work_group.name"></td>
                         <td ng-bind="anamnesis.father.work_group.name"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'professional_properties' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('professional_properties')"></td>
                         <td ng-bind="anamnesis.mother.professional_properties.name"></td>
                         <td ng-bind="anamnesis.father.professional_properties.name"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('infertility')"></td>
                         <td ng-bind="anamnesis.mother.infertility | danet"></td>
                         <td ng-bind="anamnesis.father.infertility | danet"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility_type' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('infertility_type')"></span></td>
                         <td ng-bind="anamnesis.mother.infertility_type.name"></td>
                         <td ng-bind="anamnesis.father.infertility_type.name"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility_period' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('infertility_period')"></span></td>
                         <td ng-bind="anamnesis.mother.infertility_period"></td>
                         <td ng-bind="anamnesis.father.infertility_period"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility_cause' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('infertility_cause')"></span></td>
                         <td ng-bind="format_multiple(anamnesis.mother.infertility_cause, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.infertility_cause, 'name')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility_treatment' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('infertility_treatment')"></span></td>
                         <td ng-bind="format_multiple(anamnesis.mother.infertility_treatment, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.infertility_treatment, 'name')"></td>
                     </tr>
+                    {% endif %}
                     <tr ng-if="false">
                         <td>Группа крови и резус-фактор</td>
                         <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.blood_type ]]</td>
@@ -113,6 +129,7 @@
                         <td ng-bind="anamnesis.mother.blood_type.name"></td>
                         <td ng-bind="anamnesis.father.blood_type.name"></td>
                     </tr>
+                    {% if 'finished_diseases' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('finished_diseases')"></td>
                         <td>
@@ -128,6 +145,8 @@
                             <span ng-if="!anamnesis.father.finished_diseases.length && !anamnesis.father.finished_diseases_text">нет</span>
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if 'current_diseases' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('current_diseases')"></td>
                         <td>
@@ -144,36 +163,47 @@
                             <span ng-if="!anamnesis.father.current_diseases.length && !anamnesis.father.current_diseases_text">нет</span>
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if 'hereditary' in mother_anamnesis_descriptor %}
                     <tr>
                         <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary')"></td>
                         <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
                         <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
                     </tr>
+                    {% endif %}
                     <tr>
                         <td>Вредные привычки</td>
                         <td ng-bind="anamnesis.mother.bad_habits"></td>
                         <td ng-bind="anamnesis.father.bad_habits"></td>
                     </tr>
+                    {% if 'alcohol' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('alcohol')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.alcohol, 'fa-check text-danger': anamnesis.mother.alcohol}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.alcohol, 'fa-check text-danger': anamnesis.father.alcohol}"></i></td>
                     </tr>
+                    {% endif %}
+                    {% if 'smoking' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('smoking')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.smoking, 'fa-check text-danger': anamnesis.mother.smoking}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.smoking, 'fa-check text-danger': anamnesis.father.smoking}"></i></td>
                     </tr>
+                    {% endif %}
+                    {% if 'toxic' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('toxic')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.toxic, 'fa-check text-danger': anamnesis.mother.toxic}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.toxic, 'fa-check text-danger': anamnesis.father.toxic}"></i></td>
                     </tr>
+                    {% endif %}
+                    {% if 'drugs' in mother_anamnesis_descriptor %}
                     <tr>
                         <td><span class="small-left-margin" ng-bind-html="motherAnamnesisDescriptor.getName('drugs')"></span></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.mother.drugs, 'fa-check text-danger': anamnesis.mother.drugs}"></i></td>
                         <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.father.drugs, 'fa-check text-danger': anamnesis.father.drugs}"></i></td>
                     </tr>
+                    {% endif %}
                     </tbody>
                 </table>
             </tab>
