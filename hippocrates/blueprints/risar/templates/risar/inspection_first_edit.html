@@ -97,6 +97,7 @@
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
                                         </td>
                                     </tr>
+                                    {% if 'department' in checkup_descriptor %}
                                     <tr ng-if="checkupDescriptor.exists('department')">
                                         <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
                                         <td class="col-md-4">
@@ -106,6 +107,8 @@
                                                 custom-filter="departmentOrgStructFilter"></rb-select>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'height' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('height')"></th>
                                         <td><div class="row"
@@ -119,6 +122,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'weight' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('weight')"></th>
                                         <td><div class="row"
@@ -132,6 +137,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'hw_ratio' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('hw_ratio')"></th>
                                         <td><div class="row">
@@ -143,6 +150,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'BMI' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('BMI')"></th>
                                         <td><div class="row">
@@ -153,6 +162,7 @@
                                             </div></div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -166,6 +176,7 @@
                                 <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
+                                    {% if 'state' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('state')"></th>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': somaticForm.state.$invalid && somaticForm.submit_attempt}">
@@ -176,6 +187,8 @@
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'complaints' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('complaints')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.complaints.$invalid && somaticForm.submit_attempt}">
@@ -187,6 +200,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'tongue' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('tongue')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.tongue.$invalid && somaticForm.submit_attempt}">
@@ -198,6 +213,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'subcutaneous_fat' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('subcutaneous_fat')"></th>
                                         <td><div class="row" ng-class="{'has-error': somaticForm.subcutaneous_fat.$invalid && somaticForm.submit_attempt}">
@@ -209,6 +226,8 @@
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vein' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vein')"></th>
                                         <td><div class="row" ng-class="{'has-error': somaticForm.vein.$invalid && somaticForm.submit_attempt}">
@@ -220,10 +239,14 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'edema' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('edema')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'ad_right_high' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
@@ -242,6 +265,7 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
@@ -259,6 +283,7 @@
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% if 'heart_rate' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('heart_rate')"></th>
                                         <td><div class="row"
@@ -271,6 +296,8 @@
                                             </div></div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'pulse' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pulse')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.pulse.$invalid}">
@@ -282,6 +309,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'skin' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('skin')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.skin.$invalid && somaticForm.submit_attempt}">
@@ -293,6 +322,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'lymph' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.lymph.$invalid && somaticForm.submit_attempt}">
@@ -304,6 +335,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'heart_tones' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('heart_tones')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.heart_tones.$invalid && somaticForm.submit_attempt}">
@@ -316,6 +349,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'breast' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breast')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.breast.$invalid && somaticForm.submit_attempt}">
@@ -327,6 +362,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'nipples' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.nipples.$invalid && somaticForm.submit_attempt}">
@@ -338,6 +375,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'breathe' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breathe')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.breathe.$invalid && somaticForm.submit_attempt}">
@@ -349,6 +388,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'stomach' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.stomach.$invalid && somaticForm.submit_attempt}">
@@ -360,6 +401,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'liver' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('liver')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.liver.$invalid && somaticForm.submit_attempt}">
@@ -371,6 +414,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'urinoexcretory' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('urinoexcretory')"></th>
                                         <td><div ng-class="{'text-danger': somaticForm.urinoexcretory.$invalid && somaticForm.submit_attempt}">
@@ -382,6 +427,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'mouth' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('mouth')"></th>
                                         <td><div class="row" ng-class="{'has-error': somaticForm.mouth.$invalid && somaticForm.submit_attempt}">
@@ -393,10 +440,13 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bowel_and_bladder_habits')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
@@ -414,6 +464,7 @@
                                         <th class="text-right col-md-4">Ромб Михаэлиса</th>
                                         <td class="col-md-8">&nbsp;</td>
                                     </tr>
+                                    {% if 'MikHHor' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('MikHHor')"></td>
                                         <td><div class="row"><div class="col-md-2"><input ng-model="checkup.MikHHor" class="form-control"
@@ -422,6 +473,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'MikhVert' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('MikhVert')"></td>
                                         <td><div class="row"><div class="col-md-2"><input ng-model="checkup.MikhVert" class="form-control"
@@ -430,10 +483,12 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right">Размеры таза</th>
                                         <td>&nbsp;</td>
                                     </tr>
+                                    {% if 'DsSP' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('DsSP')"></td>
                                         <td><div class="row"
@@ -445,6 +500,8 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'DsCr' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('DsCr')"></td>
                                         <td><div class="row"
@@ -453,6 +510,8 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('DsCr')"
                                                  ng-required="checkupDescriptor.getMandatory('DsCr')"></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'DsTr' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('DsTr')"></td>
                                         <td><div class="row"
@@ -461,6 +520,8 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('DsTr')"
                                                  ng-required="checkupDescriptor.getMandatory('DsTr')"></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'CExt' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('CExt')"></td>
                                         <td><div class="row"
@@ -469,18 +530,24 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('CExt')"
                                                  ng-required="checkupDescriptor.getMandatory('CExt')"></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'CDiag' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('CDiag')"></td>
                                         <td><div class="row"><div class="col-md-2"><input ng-model="checkup.CDiag" class="form-control"
                                                  ng-disabled="checkupDescriptor.getReadOnly('CDiag')"
                                                  ng-required="checkupDescriptor.getMandatory('CDiag')"></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'CVera' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('CVera')"></td>
                                         <td><div class="row"><div class="col-md-2"><input ng-model="checkup.CVera" class="form-control"
                                                  ng-disabled="checkupDescriptor.getReadOnly('CVera')"
                                                  ng-required="checkupDescriptor.getMandatory('CVera')"></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'soloviev_index' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('soloviev_index')"></td>
                                         <td><div class="row"
@@ -489,10 +556,12 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('soloviev_index')"
                                                  ng-required="checkupDescriptor.getMandatory('soloviev_index')"></div></div></td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right">Форма таза</th>
                                         <td>&nbsp;</td>
                                     </tr>
+                                    {% if 'pelvis_narrowness' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pelvis_narrowness')"></td>
                                         <td><div class="row"><div class="col-md-4">
@@ -502,6 +571,8 @@
                                             </div></div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'pelvis_form' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pelvis_form')"></td>
                                         <td><div class="row"><div class="col-md-4">
@@ -510,6 +581,8 @@
                                                  ng-required="checkupDescriptor.getMandatory('pelvis_form')"></rb-select>
                                             </div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'abdominal' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('abdominal')"></th>
                                         <td><div class="row"><div class="col-md-2">
@@ -518,6 +591,8 @@
                                                  ng-required="checkupDescriptor.getMandatory('abdominal')">
                                         </div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'fundal_height' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('fundal_height')"></th>
                                         <td><div class="row"><div class="col-md-2">
@@ -526,6 +601,8 @@
                                                  ng-required="checkupDescriptor.getMandatory('fundal_height')">
                                         </div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'metra_state' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('metra_state')"></th>
                                         <td><div class="row" ng-class="{'has-error': obstetricianForm.metra_state.$invalid && obstetricianForm.submit_attempt}">
@@ -535,6 +612,7 @@
                                                  ng-required="checkupDescriptor.getMandatory('metra_state')"></rb-select>
                                         </div></div></td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
@@ -626,10 +704,13 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
+                                    {% if 'externalia' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('externalia')"></th>
                                         <td class="col-md-8"><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vagina' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina')"></th>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.vagina.$invalid && vaginaForm.submit_attempt}">
@@ -638,6 +719,8 @@
                                                  ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervix' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix')"></th>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.cervix.$invalid && vaginaForm.submit_attempt}">
@@ -646,6 +729,8 @@
                                                  ng-required="checkupDescriptor.getMandatory('cervix')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervix_length' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_length')"></th>
                                         <td><div class="row"><div class="col-md-4">
@@ -653,6 +738,8 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix_length')"
                                                  ng-required="checkupDescriptor.getMandatory('cervix_length')"></rb-select></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervix_position' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_position')"></th>
                                         <td><div class="row"><div class="col-md-4">
@@ -660,6 +747,8 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix_position')"
                                                  ng-required="checkupDescriptor.getMandatory('cervix_position')"></rb-select></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervix_maturity' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_maturity')"></th>
                                         <td><div class="row"><div class="col-md-4">
@@ -667,6 +756,8 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix_maturity')"
                                                  ng-required="checkupDescriptor.getMandatory('cervix_maturity')"></rb-select></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervix_consistency' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_consistency')"></th>
                                         <td><div class="row"><div class="col-md-4">
@@ -674,6 +765,8 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix_consistency')"
                                                  ng-required="checkupDescriptor.getMandatory('cervix_consistency')"></rb-select></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervical_canal' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervical_canal')"></th>
                                         <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"
@@ -681,6 +774,8 @@
                                                  ng-required="checkupDescriptor.getMandatory('cervical_canal')"></rb-select>
                                         </div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'body_of_womb' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('body_of_womb')"></th>
                                         <td>
@@ -690,6 +785,8 @@
                                                 [[ item.name ]]
                                             </div>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'appendages' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages')"></th>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.appendages.$invalid && vaginaForm.submit_attempt}">
@@ -698,44 +795,57 @@
                                                  ng-required="checkupDescriptor.getMandatory('appendages')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'parametrium' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('parametrium')"></th>
                                         <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.parametrium" ref-book="rbRisarParametrium"
                                                  ng-disabled="checkupDescriptor.getReadOnly('parametrium')"
                                                  ng-required="checkupDescriptor.getMandatory('parametrium')"></rb-select></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'features' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('features')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.features" /></div></div></td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right">Взято на анализ</th>
                                         <td>&nbsp;</td>
                                     </tr>
+                                    {% if 'vagina_secretion' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_secretion')"></td>
                                         <td><input ng-model="checkup.vagina_secretion" class="checkbox" type="checkbox"
                                                  ng-disabled="checkupDescriptor.getReadOnly('vagina_secretion')"
                                                  ng-required="checkupDescriptor.getMandatory('vagina_secretion')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervical_canal_secretion' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervical_canal_secretion')"></td>
                                         <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervical_canal_secretion')"
                                                  ng-required="checkupDescriptor.getMandatory('cervical_canal_secretion')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'urethra_secretion' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('urethra_secretion')"></td>
                                         <td><input ng-model="checkup.urethra_secretion" class="checkbox" type="checkbox"
                                                  ng-disabled="checkupDescriptor.getReadOnly('urethra_secretion')"
                                                  ng-required="checkupDescriptor.getMandatory('urethra_secretion')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'onco_smear' in checkup_descriptor %}
                                     <tr>
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('onco_smear')"></td>
                                         <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"
                                                  ng-disabled="checkupDescriptor.getReadOnly('onco_smear')"
                                                  ng-required="checkupDescriptor.getMandatory('onco_smear')"></td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
@@ -764,6 +874,7 @@
                                             </ng-form>
                                         </td>
                                     </tr>
+                                    {% if 'pregnancy_week' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_week')"></th>
                                         <td>
@@ -778,6 +889,7 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                       <tr>
                                         <th class="text-right">Срок по последнему УЗИ</th>
                                         <td>[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
@@ -795,6 +907,7 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% if 'pregnancy_continuation_refusal' in checkup_descriptor %}
                                     <tr ng-class="{'text-muted': pregContRefusalDisabled()}">
                                         <th class="text-right">[[checkupDescriptor.getName('pregnancy_continuation_refusal')]] <span ng-class="{'text-muted': pregContRefusalDisabled(), 'text-danger': !pregContRefusalDisabled()}">*</span></th>
                                         <td>
@@ -806,6 +919,8 @@
                                         </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'craft' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('craft')"></th>
                                         <td><div class="row"><div class="col-md-4">
@@ -813,6 +928,8 @@
                                                ng-disabled="checkupDescriptor.getReadOnly('craft')"
                                                ng-required="checkupDescriptor.getMandatory('craft')"></rb-select></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'next_date' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('next_date')"></th>
                                         <td>
@@ -843,14 +960,19 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'notes' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('notes')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.notes" /></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'recommendations' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('recommendations')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.recommendations" /></div></div></td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
