@@ -266,10 +266,15 @@ class ClientXForm(ClientSchema, XForm):
                     # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
                     db.session.commit()
 
-                work_object = ClientWork(work_data, '', client)
+                work_object = ClientWork(
+                    work_data['organisation'],
+                    work_data.get('post', ''),
+                    client
+                )
                 work_object.client = client
                 work_object.soc_status_id = client_soc_status.id
-            work_object.shortName = work_data
+            work_object.shortName = work_data['organisation']
+            work_object.post = work_data.get('post', '')
             self._changed.append(work_object)
 
     def _update_intolerances(self, data_list):
@@ -301,7 +306,7 @@ class ClientXForm(ClientSchema, XForm):
             'SNILS': client.SNILS or Undefined,
             'gender': client.sexCode,
             'nationality': client.nationality_code,
-            'job': works and works[0]['job'],
+            'job': works and works[-1],
             'document': self._represent_document(client.document),
             'insurance_documents': map(self._represent_policy, client.policies_all),
             'registration_address': self._represent_residential_address(client.reg_address),
@@ -388,7 +393,8 @@ class ClientXForm(ClientSchema, XForm):
         :return:
         """
         return {
-            "job": work.shortName,
+            "organisation": work.shortName,
+            "post": work.post,
         }
 
     @none_default
