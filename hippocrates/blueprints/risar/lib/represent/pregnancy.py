@@ -296,6 +296,10 @@ def represent_pregnancy_checkup_shortly(action):
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
     return result
 
+def represent_pregnancy_checkup_for_em(action):
+    result = represent_checkup_shortly(action)
+    return result
+
 
 def represent_checkup_puerpera_shortly(action):
     return represent_checkup_shortly(action)

@@ -226,7 +226,7 @@ class EventMeasureController(BaseModelController):
         else:
             return self.get_listed_data(args)
 
-    def get_measures_in_action(self, action, args=None):
+    def get_checkup_interval(action, args=None):
         if not action.id:
             return []
         if args is None:
@@ -245,6 +245,10 @@ class EventMeasureController(BaseModelController):
         })
         if end_date:
             args['beg_date_to'] = end_date
+        return args
+
+    def get_measures_in_action(self, action, args=None):
+        args = get_checkup_interval(action, args)
         return self.get_selecter().get_measures_in_action(args)
 
     def get_measure(self, measure_id):
@@ -459,6 +463,10 @@ class EventMeasureSelecter(BaseSelecter):
         super(EventMeasureSelecter, self).__init__(query)
 
     def apply_filter(self, **flt):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ExpertProtocol_ActionTypeAssoc = self.model_provider.get('ExpertProtocol_ActionTypeAssoc')
+
         EventMeasure = self.model_provider.get('EventMeasure')
         ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
         ExpertProtocol = self.model_provider.get('ExpertProtocol')
@@ -473,7 +481,53 @@ class EventMeasureSelecter(BaseSelecter):
         if 'action_id' in flt:
             self.query = self.query.filter(EventMeasure.sourceAction_id == flt['action_id'])
         if 'action_id_list' in flt:
-            self.query = self.query.filter(EventMeasure.sourceAction_id.in_(flt['action_id_list']))
+            pass
+        if 'checkups' in flt:
+
+            from hippocrates.blueprints.risar.helperz.sql import literalquery
+            from pprint import pprint
+            print 'here>>>>'
+            pprint(literalquery(self.query))
+            self.query = self.query
+
+            def fn(flt):
+                for x in flt['checkups']:
+                    yield {'action_id': x.get('id'),
+                           'beg_date_to': safe_datetime(x.get('end_date')),
+                           'end_date_from': safe_datetime(x.get('beg_date'))
+                           }
+                    # yield {'action_id': x.get('id'),
+                    #        'beg_date_to': '2017-01-21 23:59:59',
+                    #        "end_date_from": '2016-12-29 13:45:00'}
+
+            def make_conditions(lst):
+                for item in fn(lst):
+                    pprint(item)
+                    yield and_(
+                        or_(
+                            EventMeasure.endDateTime >= item['end_date_from'],
+                            EventMeasure.endDateTime == None
+                        ),
+                        EventMeasure.begDateTime <= item['beg_date_to'],
+                        or_(
+                            Action.id == item['action_id'],
+                            Action.id.is_(None)
+                        )
+                    )
+            self.query = self.query.filter(
+                EventMeasure.event_id == flt['event_id']
+            ).outerjoin(
+                ExpertSchemeMeasureAssoc, ExpertScheme, ExpertProtocol, ExpertProtocol_ActionTypeAssoc, ActionType, Action
+            ).filter(
+                or_(*make_conditions(flt))
+            )
+
+
+
+            print 'here2>>>>'
+            print(literalquery(self.query))
+
+
         if 'measure_id_list' in flt:
             self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
                 Measure, or_(

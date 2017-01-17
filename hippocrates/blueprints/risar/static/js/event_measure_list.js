@@ -313,6 +313,7 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
         var query = {
             page: $scope.pager.current_page,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
+            checkups: $scope.query.checkups,
             measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             observation_phase_codes: $scope.query.observation_phase.length ? _.pluck($scope.query.observation_phase, 'code') : undefined,
@@ -371,6 +372,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             end_date_from: start.local().startOf('day').toDate(),
             measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
+            checkups: $scope.query.checkups,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             observation_phase_codes: $scope.query.observation_phase.length ? _.pluck($scope.query.observation_phase, 'code') : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined,
