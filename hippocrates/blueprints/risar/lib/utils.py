@@ -542,7 +542,7 @@ def get_props_descriptor(action, flatcode):
         property_types = map(lambda x: x.type, action.properties)
     else:
         action_type = get_action_type_by_flatcode(flatcode)
-        property_types = action_type and action_type.property_types
+        property_types = action_type and action_type.property_types.filter(ActionPropertyType.deleted == 0)
     return {
         prop_type.code: prop_type.description
         for prop_type in property_types
