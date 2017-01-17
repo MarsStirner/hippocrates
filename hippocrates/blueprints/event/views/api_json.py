@@ -13,7 +13,8 @@ from flask import request, abort
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
-from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
+from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
+    get_properties_values)
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
@@ -182,6 +183,7 @@ def api_event_lab_res_dynamics():
     action_type_id = request.args.get('action_type_id') or bail_out(ApiException(400, u'action_type_id должен быть указан'))
     from_date = safe_date(request.args.get('from_date', datetime.date.today() - datetime.timedelta(5)))
     to_date = safe_date(request.args.get('to_date', datetime.date.today()))
+    client_id = Event.query.filter(Event.id == event_id).value(Event.client_id)
 
     rb_tests_subquery = rbTest.query.join(
         ActionPropertyType
@@ -189,16 +191,13 @@ def api_event_lab_res_dynamics():
         ActionPropertyType.actionType_id == action_type_id
     ).with_entities(rbTest.id).subquery()
 
-    EventSelf = db.aliased(Event)
-
     query = ActionProperty.query.join(
         ActionPropertyType,
         Action,
-        Event,
     ).join(
-        EventSelf, db.and_(
-            EventSelf.client_id == Event.client_id,
-            EventSelf.id == event_id,
+        Event, db.and_(
+            Action.event_id == Event.id,
+            Event.client_id == client_id,
         ),
     ).filter(
         Action.deleted == 0,
@@ -211,10 +210,9 @@ def api_event_lab_res_dynamics():
     tissue_query = Action.query.outerjoin(
         Action_TakenTissueJournalAssoc, Action_TakenTissueJournalAssoc.action_id == Action.id
     ).outerjoin(
-        TakenTissueJournal, TakenTissueJournal.id.in_([
+        TakenTissueJournal, TakenTissueJournal.id == func.coalesce(
             Action_TakenTissueJournalAssoc.takenTissueJournal_id,
-            Action.takenTissueJournal_id,
-        ])
+            Action.takenTissueJournal_id)
     ).filter(
         Action.id.in_(query.group_by(ActionProperty.action_id).with_entities(ActionProperty.action_id).subquery())
     ).group_by(
@@ -234,14 +232,17 @@ def api_event_lab_res_dynamics():
     ).order_by(Action.begDate).with_entities(
         ActionProperty,
         rbTest
-    )
+    ).all()
+
+    props = [prop for prop, _ in result]
+    vals = get_properties_values(props)
 
     for (prop, test) in result:
-        if prop.value and tissue_dict[prop.action_id]:
+        if prop.id in vals and tissue_dict[prop.action_id]:
             date = tissue_dict[prop.action_id].strftime('%d.%m.%Y %H:%M')
             dates.add(date)
             dynamics[test.id]['test_name'] = test.name
-            dynamics[test.id]['values'][date] = prop.value
+            dynamics[test.id]['values'][date] = vals[prop.id]
     return sorted(dates), dynamics
 
 
