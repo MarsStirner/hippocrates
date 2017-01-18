@@ -504,7 +504,6 @@ class EventMeasureSelecter(BaseSelecter):
             if len(flt['observation_phase_codes']) > 0:
                 if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
                     self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc)
-
                 epicr_q = self.query_epicrisis().subquery()
                 self.query = self.query.outerjoin(
                     ExpertScheme,
@@ -519,12 +518,11 @@ class EventMeasureSelecter(BaseSelecter):
                     or_(
                         ExpertProtocol.code.in_(flt['observation_phase_codes']),
                         func.IF(
-                            epicr_q.c.delivery_date,
-                            and_(
+                            EventMeasure.schemeMeasure_id.is_(None),
+                            and_(epicr_q.c.delivery_date.isnot(None),
                                 func.DATE(EventMeasure.begDateTime) >= func.DATE(epicr_q.c.delivery_date),
-                                EventMeasure.schemeMeasure_id.is_(None)
                             ),
-                            True
+                            False
                         )
                     )
                 )
