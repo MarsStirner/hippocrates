@@ -112,7 +112,7 @@ class ChildbirthSchema(Schema):
                             "type": "string"
                         }
                     },
-                    "required": ["admission_date", "pregnancy_duration", "delivery_date", "delivery_time", "maternity_hospital", "diagnosis_osn", "pregnancy_final"]
+                    "required": ["admission_date", "pregnancy_duration", "delivery_date", "delivery_time", "maternity_hospital", "pregnancy_final"]
                 },
                 "mother_death": {
                     "description": "Информация о смерти матери",
