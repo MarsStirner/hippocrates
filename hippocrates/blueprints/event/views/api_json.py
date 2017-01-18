@@ -20,7 +20,7 @@ from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
-                               parse_id, bail_out)
+                               parse_id, bail_out, format_datetime)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed, \
     Action_TakenTissueJournalAssoc, TakenTissueJournal
@@ -239,11 +239,12 @@ def api_event_lab_res_dynamics():
 
     for (prop, test) in result:
         if prop.id in vals and tissue_dict[prop.action_id]:
-            date = tissue_dict[prop.action_id].strftime('%d.%m.%Y %H:%M')
+            date = tissue_dict[prop.action_id]
             dates.add(date)
             dynamics[test.id]['test_name'] = test.name
-            dynamics[test.id]['values'][date] = vals[prop.id]
-    return sorted(dates), dynamics
+            dynamics[test.id]['values'][format_datetime(date)] = vals[prop.id]
+    dates = [format_datetime(d) for d in sorted(dates)]
+    return dates, dynamics
 
 
 @module.route('/api/event_hosp_beds_get.json', methods=['GET'])
