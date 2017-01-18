@@ -136,7 +136,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
             # нужно для обновления данных по эпикризу
             chb = q.one()
             chb.deleted = 1
-            db.session.add(chb)
+            self._changed.append(chb)
             # db.session.commit()
             # raise ApiException(ALREADY_PRESENT_ERROR, u'%s уже существует' %
             #                    self.target_obj_class.__name__)
