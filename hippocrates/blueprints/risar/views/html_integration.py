@@ -83,8 +83,11 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
             'card_doctor': doctor_code,
             'card_LPU': org_code,
         }
-        # card_id = create_or_update_card(data, True, api_version, card_id)
-        card_id = card_save_or_update_get_id(data, True, api_version)
+        card_id = create_or_update_card(data, True, api_version, card_id)
+        # todo возникает проблема привязки к пациенту из-за уровня изоляции
+        # протестить вариант
+        # db.session.commit()
+        # card_id = card_save_or_update_get_id(data, True, api_version)
 
         # запись ID карты в шину
         sirius.save_card_ids_match(card_id, region, entity, remote_id)
@@ -98,12 +101,13 @@ def card_save_or_update_get_id(data, create, api_version, card_id=None):
     return xform.target_obj.id
 
 
-# todo удалить, если верхний вариант пройдет проверку
 def create_or_update_card(data, create, api_version, card_id=None):
     if create:
         url = '/risar/api/integration/%s/card/' % api_version
     else:
         url = '/risar/api/integration/%s/card/%s' % (api_version, card_id)
+    # todo добавлять по конфигу при внешнем cas
+    url += '?dont_check_tgt=true'
     with make_login() as session:
         result = make_api_request('post' if create else 'put', url, session, data)
     return result['result']['card_id']

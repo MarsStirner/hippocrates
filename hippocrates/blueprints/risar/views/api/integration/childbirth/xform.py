@@ -133,8 +133,11 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         q = self._find_target_obj_query()
         target_obj_exist = db.session.query(q.exists()).scalar()
         if target_obj_exist:
-            raise ApiException(ALREADY_PRESENT_ERROR, u'%s уже существует' %
-                               self.target_obj_class.__name__)
+            # нужно для обновления данных по эпикризу
+            self.delete_target_obj()
+            # db.session.commit()
+            # raise ApiException(ALREADY_PRESENT_ERROR, u'%s уже существует' %
+            #                    self.target_obj_class.__name__)
 
     def update_target_obj(self, data):
         if not self.new:
@@ -169,10 +172,14 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         maternity_hospital = self.find_org(part.get('maternity_hospital'))
         curation_hospital = part.get('curation_hospital')
         curation_hospital = self.find_org(curation_hospital) if curation_hospital is not None else None
+        delivery_time = part.get('delivery_time') and safe_time(part.get('delivery_time')).isoformat()
+        if delivery_time == '00:00:00':
+            # todo: нулевое время не отображается в вебе. нужно там исправить и это убрать
+            delivery_time = '00:15'
         res.update({
             'LPU': maternity_hospital,
             'newborn_LPU': curation_hospital,
-            'delivery_time': res.get('delivery_time') and safe_time(res.get('delivery_time')).isoformat(),
+            'delivery_time': delivery_time,
             'maternity_hosp_medico': self.person
         })
 
@@ -181,7 +188,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         self.mapping_part(self.MOTHER_DEATH_MAP, part, res)
 
         res.update({
-            'death_time': res.get('death_time') and safe_time(res.get('death_time')).isoformat(),
+            'death_time': part.get('death_time') and safe_time(part.get('death_time')).isoformat(),
         })
 
     def mapping_complications(self, data, res):

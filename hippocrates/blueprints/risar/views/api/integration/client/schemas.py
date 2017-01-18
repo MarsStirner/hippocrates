@@ -62,6 +62,24 @@ class ClientSchema(Schema):
                     2
                 ]
             },
+            "nationality": {
+                "type": "string",
+                "description": "национальная принадлежность"
+            },
+            "job": {
+                "type": "object",
+                "description": "место работы",
+                "properties": {
+                    "organisation": {
+                        "type": "string",
+                        "description": "организация"
+                    },
+                    "post": {
+                        "type": "string",
+                        "description": "должность"
+                    }
+                }
+            },
             "document": {
                 "type": "object",
                 "description": "Документ, удостоверяющий личность пациента",

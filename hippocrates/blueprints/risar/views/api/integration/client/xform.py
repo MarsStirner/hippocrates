@@ -10,10 +10,12 @@ from .schemas import ClientSchema
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_date, safe_traverse
 from nemesis.models.client import Client, ClientDocument, ClientPolicy, BloodHistory, \
-    ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse
+    ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse, \
+    ClientWork, ClientSocStatus
 from nemesis.models.enums import AddressType
 
-from nemesis.models.exists import rbDocumentType, rbPolicyType, rbBloodType
+from nemesis.models.exists import rbDocumentType, rbPolicyType, rbBloodType, \
+    rbSocStatusClass, rbSocStatusType
 from nemesis.models.organisation import Organisation
 from nemesis.systemwide import db
 
@@ -97,6 +99,8 @@ class ClientXForm(ClientSchema, XForm):
         self.load_data()
         with db.session.no_autoflush:
             self._update_main_data(data)
+            if 'job' in data:
+                self._update_works([data['job']])
             if 'document' in data:
                 self._update_id_document(data['document'])
             if 'insurance_documents' in data:
@@ -119,6 +123,7 @@ class ClientXForm(ClientSchema, XForm):
         client.patrName = data['FIO'].get('middlename') or ''
         client.birthDate = safe_date(data['birthday_date'])
         client.sexCode = data['gender']
+        client.nationality_code = data.get('nationality')
         snils = data.get('SNILS')
         client.SNILS = snils.replace('-', '') if snils else ''
         self._changed.append(client)
@@ -229,6 +234,49 @@ class ClientXForm(ClientSchema, XForm):
             allergy_object.power = allergy_data['allergy_power']
             self._changed.append(allergy_object)
 
+    def _update_works(self, data_list):
+        client = self.target_obj
+        for work_data, work_object in itertools.izip_longest(data_list, client.works):
+            if not work_data:
+                work_object.deleted = 1
+                self._changed.append(work_object)
+                continue
+            if not work_object:
+                self._check_rb_value('rbSocStatusClass', '3')
+                self._check_rb_value('rbSocStatusType', '004')
+                socStatusClass_id = rbSocStatusClass.query.filter(
+                    rbSocStatusClass.code == '3'
+                ).value(rbSocStatusClass.id)
+                socStatusType_id = rbSocStatusType.query.filter(
+                    rbSocStatusType.code == '004'
+                ).value(rbSocStatusType.id)
+
+                client_soc_status = ClientSocStatus(
+                    soc_stat_class=socStatusClass_id,
+                    soc_stat_type=socStatusType_id,
+                    beg_date='0000-00-00',
+                    end_date=None,
+                    client=self.target_obj,
+                    document=None,
+                    note=''
+                )
+                client_soc_status.client_id = self.target_obj_id
+                db.session.add(client_soc_status)
+                if not client_soc_status.id:
+                    # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
+                    db.session.commit()
+
+                work_object = ClientWork(
+                    work_data['organisation'],
+                    work_data.get('post', ''),
+                    client
+                )
+                work_object.client = client
+                work_object.soc_status_id = client_soc_status.id
+            work_object.shortName = work_data['organisation']
+            work_object.post = work_data.get('post', '')
+            self._changed.append(work_object)
+
     def _update_intolerances(self, data_list):
         client = self.target_obj
         for intolerance_data, intolerance_object in itertools.izip_longest(data_list, client.intolerances):
@@ -246,6 +294,7 @@ class ClientXForm(ClientSchema, XForm):
     @wrap_simplify
     def as_json(self):
         client = self.target_obj
+        works = map(self._represent_work, client.works)
         return {
             'client_id': self.target_obj.id,
             'FIO': {
@@ -256,6 +305,8 @@ class ClientXForm(ClientSchema, XForm):
             'birthday_date': client.birthDate,
             'SNILS': client.SNILS or Undefined,
             'gender': client.sexCode,
+            'nationality': client.nationality_code,
+            'job': works and works[-1],
             'document': self._represent_document(client.document),
             'insurance_documents': map(self._represent_policy, client.policies_all),
             'registration_address': self._represent_residential_address(client.reg_address),
@@ -332,6 +383,18 @@ class ClientXForm(ClientSchema, XForm):
         return {
             "allergy_power": allergy.power,
             "allergy_substance": allergy.name,
+        }
+
+    @none_default
+    def _represent_work(self, work):
+        """
+        :type work: nemesis.models.client.ClientWork
+        :param work:
+        :return:
+        """
+        return {
+            "organisation": work.shortName,
+            "post": work.post,
         }
 
     @none_default
