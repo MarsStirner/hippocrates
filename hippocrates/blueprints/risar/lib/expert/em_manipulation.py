@@ -504,14 +504,12 @@ class EventMeasureSelecter(BaseSelecter):
             if len(flt['observation_phase_codes']) > 0:
                 if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
                     self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc)
+                if not self.is_joined(self.query, ExpertScheme):
+                    self.query = self.query.outerjoin(ExpertScheme)
+                if not self.is_joined(self.query, ExpertProtocol):
+                    self.query = self.query.outerjoin(ExpertProtocol)
                 epicr_q = self.query_epicrisis().subquery()
                 self.query = self.query.outerjoin(
-                    ExpertScheme,
-                    ExpertScheme.id == ExpertSchemeMeasureAssoc.scheme_id
-                ).outerjoin(
-                    ExpertProtocol,
-                    ExpertProtocol.id == ExpertScheme.protocol_id
-                ).outerjoin(
                     epicr_q,
                     EventMeasure.event_id == epicr_q.c.event_id
                 ).filter(
