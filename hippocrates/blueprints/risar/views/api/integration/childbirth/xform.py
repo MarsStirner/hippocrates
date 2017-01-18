@@ -134,9 +134,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         target_obj_exist = db.session.query(q.exists()).scalar()
         if target_obj_exist:
             # нужно для обновления данных по эпикризу
-            chb = q.one()
-            chb.deleted = 1
-            self._changed.append(chb)
+            self.delete_target_obj()
             # db.session.commit()
             # raise ApiException(ALREADY_PRESENT_ERROR, u'%s уже существует' %
             #                    self.target_obj_class.__name__)
