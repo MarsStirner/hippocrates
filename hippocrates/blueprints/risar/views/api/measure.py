@@ -8,7 +8,7 @@ from hippocrates.blueprints.risar.lib.expert.em_appointment_repr import EmAppoin
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.expert.em_result_repr import EmResultRepr
-from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_shortly
+from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup_interval
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, db_non_flushable
@@ -319,7 +319,7 @@ def api_0_event_measure_checkups(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
     return {
-        'checkups': map(represent_pregnancy_checkup_shortly, card.checkups)
+        'checkups': map(represent_pregnancy_checkup_interval, card.checkups)
     }
 
 

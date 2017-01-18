@@ -4,6 +4,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code, second_inspection_flat_code
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, fill_these_attrs_from_action, \
     fill_action_from_another_action
+from nemesis.lib.utils import safe_datetime
 
 
 def copy_checkup(event, from_action):
@@ -40,3 +41,25 @@ def can_edit_checkup(action):
         action.setPerson_id == current_user.id and
         action.endDate is None
     )
+
+
+def get_checkup_interval(action, args=None):
+    if not action.id:
+        return []
+    if args is None:
+        args = {}
+    start_date = safe_datetime(action.begDate)
+    next_date_property = action.propsByCode.get('next_date')
+    end_date = safe_datetime(next_date_property.value) if next_date_property else None
+    if end_date:
+        end_date = end_date.replace(hour=23, minute=59, second=59)
+    else:
+        end_date = action.endDate
+    args.update({
+        'event_id': action.event_id,
+        'end_date_from': start_date,
+        'action_id': action.id
+    })
+    if end_date:
+        args['beg_date_to'] = end_date
+    return args

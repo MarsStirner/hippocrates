@@ -7,6 +7,7 @@ from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy.sql.expression import func, and_, or_
 
 from hippocrates.blueprints.risar.lib.utils import format_action_data, get_action_by_id
+from hippocrates.blueprints.risar.lib.checkups import get_checkup_interval
 from hippocrates.blueprints.risar.lib.expert.utils import em_stats_status_list, em_final_status_list
 from hippocrates.blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 from hippocrates.blueprints.risar.lib.diagnosis import get_inspection_primary_diag_mkb, DiagnosesSystemManager, \
@@ -23,7 +24,6 @@ from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_datetime, safe_traverse, safe_int, safe_traverse_attrs, db_non_flushable
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.systemwide import db
-
 
 logger = logging.getLogger('simple')
 
@@ -227,23 +227,7 @@ class EventMeasureController(BaseModelController):
             return self.get_listed_data(args)
 
     def get_measures_in_action(self, action, args=None):
-        if not action.id:
-            return []
-        if args is None:
-            args = {}
-        start_date = safe_datetime(action.begDate)
-        next_date_property = action.propsByCode.get('next_date')
-        end_date = safe_datetime(next_date_property.value) if next_date_property else None
-        if end_date:
-            end_date = end_date.replace(hour=23, minute=59, second=59)
-        else:
-            end_date = action.endDate
-        args.update({
-            'event_id': action.event_id,
-            'end_date_from': start_date
-        })
-        if end_date:
-            args['beg_date_to'] = end_date
+        args = get_checkup_interval(action, args)
         return self.get_selecter().get_measures_in_action(args)
 
     def get_measure(self, measure_id):
@@ -261,7 +245,8 @@ class EventMeasureController(BaseModelController):
         func_pct = round(func_complete * 100 / func_total if (func_total != 0 and func_complete != 0) else 0)
         checkup_total = data.count_checkup or 0
         checkup_complete = data.count_checkup_completed or 0
-        checkup_pct = round(checkup_complete * 100 / checkup_total if (checkup_total != 0 and checkup_complete != 0) else 0)
+        checkup_pct = round(
+            checkup_complete * 100 / checkup_total if (checkup_total != 0 and checkup_complete != 0) else 0)
         hosp_total = data.count_hosp or 0
         hosp_complete = data.count_hosp_completed or 0
         hosp_pct = round(hosp_complete * 100 / hosp_total if (hosp_total != 0 and hosp_complete != 0) else 0)
@@ -452,12 +437,14 @@ class EventMeasureController(BaseModelController):
 
 
 class EventMeasureSelecter(BaseSelecter):
-
     def __init__(self):
         query = self.model_provider.get_query('EventMeasure')
         super(EventMeasureSelecter, self).__init__(query)
 
     def apply_filter(self, **flt):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ExpertProtocol_ActionTypeAssoc = self.model_provider.get('ExpertProtocol_ActionTypeAssoc')
         EventMeasure = self.model_provider.get('EventMeasure')
         ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
         ExpertProtocol = self.model_provider.get('ExpertProtocol')
@@ -471,8 +458,33 @@ class EventMeasureSelecter(BaseSelecter):
             self.query = self.query.filter(EventMeasure.event_id == flt['event_id'])
         if 'action_id' in flt:
             self.query = self.query.filter(EventMeasure.sourceAction_id == flt['action_id'])
-        if 'action_id_list' in flt:
-            self.query = self.query.filter(EventMeasure.sourceAction_id.in_(flt['action_id_list']))
+        if 'checkups' in flt:
+            if len(flt['checkups']) > 0:
+                def make_conditions(checkups_interval_list):
+                    for checkup in checkups_interval_list:
+                        beg_date_to = safe_datetime(checkup['beg_date_to'])
+                        first = or_(
+                            EventMeasure.endDateTime >= safe_datetime(checkup['end_date_from']),
+                            EventMeasure.endDateTime.is_(None)
+                        )
+                        second = EventMeasure.begDateTime <= beg_date_to
+                        third = func.IF(
+                            EventMeasure.schemeMeasure_id.isnot(None),
+                            Action.id == checkup['action_id'],
+                            True
+                        )
+                        if beg_date_to:
+                            yield and_(first, second, third)
+                        else:
+                            yield and_(first, third)
+
+                self.query = self.query.outerjoin(
+                    ExpertSchemeMeasureAssoc, ExpertScheme, ExpertProtocol, ExpertProtocol_ActionTypeAssoc, ActionType,
+                    Action
+                ).filter(
+                    or_(*make_conditions(flt['checkups']))
+                ).distinct()
+
         if 'measure_id_list' in flt:
             self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc).join(
                 Measure, or_(
@@ -489,32 +501,33 @@ class EventMeasureSelecter(BaseSelecter):
                     ))
             self.query = self.query.filter(Measure.measureType_id.in_(flt['measure_type_id_list']))
         if 'observation_phase_codes' in flt:
-            if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
-                self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc)
+            if len(flt['observation_phase_codes']) > 0:
+                if not self.is_joined(self.query, ExpertSchemeMeasureAssoc):
+                    self.query = self.query.outerjoin(ExpertSchemeMeasureAssoc)
 
-            epicr_q = self.query_epicrisis().subquery()
-            self.query = self.query.outerjoin(
-                ExpertScheme,
-                ExpertScheme.id == ExpertSchemeMeasureAssoc.scheme_id
-            ).outerjoin(
-                ExpertProtocol,
-                ExpertProtocol.id == ExpertScheme.protocol_id
-            ).outerjoin(
-                epicr_q,
-                EventMeasure.event_id == epicr_q.c.event_id
-            ).filter(
-                or_(
-                    ExpertProtocol.code.in_(flt['observation_phase_codes']),
-                    func.IF(
-                        epicr_q.c.delivery_date,
-                        and_(
-                            func.DATE(EventMeasure.begDateTime) >= func.DATE(epicr_q.c.delivery_date),
-                            EventMeasure.schemeMeasure_id.is_(None)
-                        ),
-                        True
+                epicr_q = self.query_epicrisis().subquery()
+                self.query = self.query.outerjoin(
+                    ExpertScheme,
+                    ExpertScheme.id == ExpertSchemeMeasureAssoc.scheme_id
+                ).outerjoin(
+                    ExpertProtocol,
+                    ExpertProtocol.id == ExpertScheme.protocol_id
+                ).outerjoin(
+                    epicr_q,
+                    EventMeasure.event_id == epicr_q.c.event_id
+                ).filter(
+                    or_(
+                        ExpertProtocol.code.in_(flt['observation_phase_codes']),
+                        func.IF(
+                            epicr_q.c.delivery_date,
+                            and_(
+                                func.DATE(EventMeasure.begDateTime) >= func.DATE(epicr_q.c.delivery_date),
+                                EventMeasure.schemeMeasure_id.is_(None)
+                            ),
+                            True
+                        )
                     )
                 )
-            )
         if 'beg_date_from' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:
@@ -566,9 +579,37 @@ class EventMeasureSelecter(BaseSelecter):
         return self
 
     def get_measures_in_action(self, args):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
         EventMeasure = self.model_provider.get('EventMeasure')
+        ExpertProtocol = self.model_provider.get('ExpertProtocol')
+        ExpertScheme = self.model_provider.get('ExpertScheme')
+        ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
+        ExpertProtocol_ActionTypeAssoc = self.model_provider.get('ExpertProtocol_ActionTypeAssoc')
 
-        self.apply_filter(**args)
+        self.query = self.query.filter(
+            EventMeasure.event_id == args['event_id'],
+            or_(
+                EventMeasure.endDateTime >= safe_datetime(args['end_date_from']),
+                EventMeasure.endDateTime == None
+            )
+        )
+
+        if 'beg_date_to' in args:
+            self.query = self.query.filter(EventMeasure.begDateTime <= safe_datetime(args['beg_date_to']))
+
+        self.query = self.query.outerjoin(
+            ExpertSchemeMeasureAssoc, ExpertScheme, ExpertProtocol, ExpertProtocol_ActionTypeAssoc, ActionType
+        ).outerjoin(
+            Action, and_(Action.id == args['action_id'], Action.actionType_id == ActionType.id)
+        ).filter(
+            func.IF(
+                EventMeasure.schemeMeasure_id.isnot(None),
+                Action.id.isnot(None),
+                True
+            )
+        )
+
         self.apply_sort_order(**args)
         self.query = self.query.options(
             (joinedload(EventMeasure._scheme_measure).
@@ -582,6 +623,7 @@ class EventMeasureSelecter(BaseSelecter):
              ),
             joinedload(EventMeasure._measure).joinedload('measure_type', innerjoin=True),
         )
+
         return self.get_all()
 
     def get_measure(self, measure_id):
@@ -637,6 +679,22 @@ class EventMeasureSelecter(BaseSelecter):
             func.sum(func.IF(and_(rbMeasureType.code == 'hospitalization',
                                   EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_hosp_completed'),
+        )
+
+    def query_action_attr(self, action_id, attr_name):
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        return self.model_provider.get_query('Action').join(
+            ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Action.id == action_id, ActionProperty.deleted == 0, ActionPropertyType.code == attr_name
+        ).with_entities(
+            Action.event_id.label('event_id'), Action.id.label('action_id'),
+            ActionProperty_Date.value.label(attr_name)
         )
 
     def query_epicrisis(self):

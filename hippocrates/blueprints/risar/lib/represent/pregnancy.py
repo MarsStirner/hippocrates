@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from sqlalchemy import func
 
+from hippocrates.blueprints.risar.lib.checkups import get_checkup_interval
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import check_disease
 from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
@@ -294,6 +295,11 @@ def represent_pregnancy_checkup_shortly(action):
     result = represent_checkup_shortly(action)
     result['pregnancy_week'] = pregnancy_week.value if pregnancy_week else None
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
+    return result
+
+def represent_pregnancy_checkup_interval(action):
+    result = get_checkup_interval(action)
+    result['beg_date'] = action.begDate
     return result
 
 
