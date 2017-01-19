@@ -44,8 +44,6 @@ def can_edit_checkup(action):
 
 
 def get_checkup_interval(action, args=None):
-    if not action.id:
-        return []
     if args is None:
         args = {}
     start_date = safe_datetime(action.begDate)

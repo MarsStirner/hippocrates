@@ -227,6 +227,8 @@ class EventMeasureController(BaseModelController):
             return self.get_listed_data(args)
 
     def get_measures_in_action(self, action, args=None):
+        if not action.id:
+            return []
         args = get_checkup_interval(action, args)
         return self.get_selecter().get_measures_in_action(args)
 
