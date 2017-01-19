@@ -426,7 +426,7 @@ def represent_checkup_shortly(action):
         Action_Diagnosis.action == action,
         Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
         rbDiagnosisKind.code == 'main',
-    ).first()
+    ).order_by(Diagnostic.setDate.desc(), Diagnostic.id.desc()).first()
     result = {
         'id': action.id,
         'beg_date': action.begDate,
