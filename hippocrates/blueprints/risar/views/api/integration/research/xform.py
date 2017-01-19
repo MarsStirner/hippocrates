@@ -37,6 +37,8 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
         self.external_id = data.get('external_id')
 
     def prepare_params(self, data):
+        if data.get('lpu_code'):
+            self.organisation = self.find_org(data.get('lpu_code'))
         if data.get('doctor_code') and data.get('lpu_code'):
             self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
@@ -45,7 +47,7 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'Results': data.get('results', '').replace('\r\n', '<br>'),
             'RealizationDate': safe_date(data.get('realization_date')),
             'AnalysisNumber': data.get('analysis_number'),
-            'LPURealization': self.person.organisation if self.person else None,
+            'LPURealization': self.organisation,
             'Doctor': self.person,
             'Comment': data.get('comment'),
         }

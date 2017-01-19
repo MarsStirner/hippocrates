@@ -731,6 +731,7 @@ class MeasuresResultsXForm(ExternalXForm):
         super(MeasuresResultsXForm, self).__init__(*args, **kwargs)
         self.em = None
         self.person = None
+        self.organisation = None
         self.ais = AdjasentInspectionsState(inspections_span_flatcodes, self.new)
 
     @abstractmethod
