@@ -246,7 +246,7 @@ def api_event_lab_res_dynamics():
             dates.add(date)
             dynamics[test.id]['test_name'] = test.name
             dynamics[test.id]['values'][format_datetime(date)] = vals[prop.id]
-    dates = [format_datetime(d) for d in sorted(dates)]
+    dates = [format_datetime(d) for d in sorted(dates, reverse=True)]
     return dates, dynamics
 
 

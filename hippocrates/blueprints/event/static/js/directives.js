@@ -415,7 +415,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         return {
         openLabDynamicsModal: function (event, action) {
             var LabResDynamicsCtrl = function ($scope) {
-                $scope.date_range = [moment().subtract(5, 'days').toDate(), new Date()];
+                $scope.date_range = [moment().subtract(3, 'years').toDate(), new Date()];
                 $scope.currentDate = new Date();
                 $scope.dynamics = [];
                 $scope.xAxisTickFormat = function(d){
