@@ -64,29 +64,31 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
     var event_id = $scope.event_id = params.event_id;
+    var fill_from_id = params.fill_from;
 
     var reload_checkup = function () {
+        var checkup_promise;
+        /* set header */
         RisarApi.gynecologic_chart.get_header(event_id)
             .then(function (data) {
                 $scope.header = data.header;
                 $scope.minDate = $scope.header.event.set_date;
                 $scope.clientBd = $scope.header.client.birth_date;
             });
-        if (!checkup_id) {
-            return RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp')
-                .then(function (data) {
-                    $scope.setCheckupData(data);
-                    $scope.$broadcast('checkupLoaded');
-                    return data;
-                });
+        /* copy checkup */
+        if (!checkup_id && fill_from_id !== undefined) {
+            checkup_promise = RisarApi.checkup_gyn.get_copy(event_id, fill_from_id);
+        /* create new checkup */
+        } else if (!checkup_id) {
+            checkup_promise = RisarApi.checkup_gyn.create(event_id, 'gynecological_visit_general_checkUp');
+        /* get checkup */
         } else {
-            return RisarApi.checkup_gyn.get(event_id, checkup_id)
-                .then(function (data) {
-                    $scope.setCheckupData(data);
-                    $scope.$broadcast('checkupLoaded');
-                    return data;
-                });
+            checkup_promise = RisarApi.checkup_gyn.get(event_id, checkup_id);
         }
+        checkup_promise.then(function (data) {
+                $scope.setCheckupData(data);
+                $scope.$broadcast('checkupLoaded');
+            });
     };
 
     $scope.init();

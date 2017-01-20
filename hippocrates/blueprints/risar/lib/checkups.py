@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from flask_login import current_user
 
-from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code, second_inspection_flat_code
+from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code, second_inspection_flat_code, \
+    risar_gyn_checkup_flat_code
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, fill_these_attrs_from_action, \
     fill_action_from_another_action
 from nemesis.lib.utils import safe_datetime
@@ -30,6 +31,17 @@ def copy_checkup(event, from_action):
             fill_action_from_another_action(from_action=from_action,
                                             to_action=empty_action, exclude_attr_list=["next_date"])
         return empty_action
+
+
+def copy_gyn_checkup(event, from_action):
+    flat_code = from_action.actionType.flatCode
+    if flat_code != risar_gyn_checkup_flat_code:
+        return
+
+    empty_action = get_action_by_id(None, event, flat_code, True)
+    fill_action_from_another_action(from_action=from_action,
+                                    to_action=empty_action)
+    return empty_action
 
 
 def can_read_checkup(action):

@@ -15,6 +15,7 @@ WebMis20
             anamnesis: '{{ url_for('.api_0_gyn_anamnesis', event_id=-99).replace('-99', '{0}') }}',
             anamnesis_general: '{{ url_for('.api_0_gyn_anamnesis_general', event_id=-99).replace('-99', '{0}') }}',
             checkup: '{{ url_for('.api_0_gyn_checkup_get', event_id=-99, checkup_id=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
+            checkup_copy: '{{ url_for('.api_0_gyn_checkup_copy', event_id=-99, fill_from=-98).replace('-99', '{0}').replace('-98', '{1}') }}',
             checkup_list: '{{ url_for('.api_0_gyn_checkup_list', event_id=-99).replace('-99', '{0}') }}',
             checkup_new: '{{ url_for('.api_0_gyn_checkup_get_new', event_id=-99, flat_code='-98').replace('-99', '{0}').replace('-98', '{1}') }}',
             checkup_post: '{{ url_for('.api_0_gyn_checkup', event_id=-99).replace('-99', '{0}') }}',

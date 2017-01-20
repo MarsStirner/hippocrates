@@ -4,8 +4,9 @@ from flask import request
 
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
+from hippocrates.blueprints.risar.lib.checkups import copy_gyn_checkup
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_checkup, represent_gyn_checkup_wm
-from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_access
+from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_access, represent_ticket_25
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
@@ -129,4 +130,27 @@ def api_0_gyn_checkup_list(event_id):
         }
     return {
         'checkups': map(repr, card.checkups)
+    }
+
+
+@module.route('/api/0/gyn/copy/<int:event_id>/<int:fill_from>', methods=['GET'])
+@db_non_flushable
+@api_method
+def api_0_gyn_checkup_copy(event_id, fill_from):
+    if not fill_from:
+        return
+
+    from_action = get_action_by_id(fill_from)
+    if not from_action:
+        raise ApiException(400, u'укажите правильный action для копии')
+
+    event = Event.query.get(event_id)
+    filled_action = copy_gyn_checkup(event, from_action)
+    ticket25_data = represent_ticket_25(from_action.propsByCode['ticket_25'].value)
+    ticket25_data['id'] = None
+    result = represent_gyn_checkup_wm(filled_action)
+    result['ticket_25'] = ticket25_data
+    return {
+        'checkup': result,
+        'access': represent_checkup_access(filled_action)
     }
