@@ -5,7 +5,7 @@ __author__ = 'plakrisenko'
 
 
 class TTJVisualizer(object):
-    def make_ttj_record(self, ttj, actions, events):
+    def make_ttj_record(self, ttj, actions, events, actions_pay_data):
         """
         @type ttj: nemesis.models.actions.TakenTissueJournal
         @type actions: list|set
@@ -32,7 +32,10 @@ class TTJVisualizer(object):
             'unit': ttj.unit,
             'status': ttj.status,
             'isUrgent': any(map(lambda a: a.isUrgent, actions)),
-            'actions': map(avis.make_small_action_info, actions),
+            'actions': [
+                avis.make_small_action_info(action, actions_pay_data.get(action.id))
+                for action in actions
+            ],
             'set_persons': sorted({action.setPerson for action in actions if action.setPerson}),
             'org_str': event.current_org_structure if event else None
         }

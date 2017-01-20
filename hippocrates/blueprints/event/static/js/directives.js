@@ -165,6 +165,15 @@ angular.module('WebMis20')
             scope.btnLabTestModalDisabled = function () {
                 return !scope.editMode || !scope.service.access.can_edit;
             };
+            scope.isPaid = function (service) {
+                return service.pay_status && service.pay_status.code === 'paid';
+            };
+            scope.isNotPaid = function (service) {
+                return service.pay_status && service.pay_status.code === 'not_paid';
+            };
+            scope.isRefunded = function (service) {
+                return service.pay_status && service.pay_status.code === 'refunded';
+            };
         },
         template:
 '<tr ng-show="isVisible()" ng-class="getRowClass()">\
@@ -188,12 +197,12 @@ angular.module('WebMis20')
     <td ng-show="formstate.is_paid()">[[ service.discount ? service.discount.description.short : ""]]</td>\
     <td>\
         <span ng-bind="service.amount"></span>\
-        <!-- <input type="text" class="form-control input-sm"\
-               ng-disabled="amountDisabled()" ng-model="service.amount" ng-change="onAmountChanged()"\
-               valid-number minval="1" wm-debounce/> -->\
     </td>\
     <td class="text-right" ng-show="formstate.is_paid()">\
-        <span ng-bind="service.sum | moneyCut"></span> <span class="glyphicon glyphicon-ok text-success" title="Оплачено" ng-show="service.is_paid"></span>\
+        <span ng-bind="service.sum | moneyCut"></span> <span ng-show="isPaid(service)" class="glyphicon glyphicon-ok text-success"\
+            title="[[service.pay_status.name]]"></span><span ng-show="isNotPaid(service)" class="glyphicon glyphicon-remove text-danger"\
+            title="[[service.pay_status.name]]"></span><span ng-show="isRefunded(service)" class="glyphicon glyphicon-ok text-danger"\
+            title="[[service.pay_status.name]]"></span>\
     </td>\
     <td nowrap class="text-right">\
         <button type="button" class="btn btn-sm btn-danger" title="Удалить услугу" ng-show="btnRemoveVisible()"\
@@ -204,9 +213,10 @@ angular.module('WebMis20')
     };
 }])
 .directive('wmActionList', [
-    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser',
-        'WMConfig', 'PrintingService',
-function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig, PrintingService) {
+    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync',
+    'CurrentUser', 'WMConfig', 'PrintingService',
+function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser,
+          WMConfig, PrintingService) {
     return {
         restrict: 'E',
         scope: {
@@ -333,6 +343,15 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.action_has_payment = function (action) {
                 return Boolean(action.payment);
             };
+            scope.isPaid = function (action) {
+                return scope.action_has_payment(action) && action.payment.pay_status.code === 'paid';
+            };
+            scope.isNotPaid = function (action) {
+                return scope.action_has_payment(action) && action.payment.pay_status.code === 'not_paid';
+            };
+            scope.isRefunded = function (action) {
+                return scope.action_has_payment(action) && action.payment.pay_status.code === 'refunded';
+            };
             scope.reset_sorting();
             scope.reload();
         },
@@ -356,8 +375,10 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             <span ng-if="action.urgent" class="label"\
                   ng-class="{\'label-danger\': action.status.id < 2, \'label-default\': action.status.id >= 2}">Срочно</span>\
             <span ng-show="action_has_payment(action)" class="text-muted lmargin20"><br>\
-            Стоимость: [[ action.payment.sum ]] руб. <span class="glyphicon glyphicon-ok text-success" title="Оплачено"\
-            ng-show="action.payment.is_paid"></span>\
+            <span>Стоимость: [[ action.payment.sum ]] руб. </span><span\
+                ng-show="isPaid(action)" class="glyphicon glyphicon-ok text-success" title="[[action.payment.pay_status.name]]"></span><span\
+                ng-show="isNotPaid(action)" class="glyphicon glyphicon-remove text-danger" title="[[action.payment.pay_status.name]]"></span><span\
+                ng-show="isRefunded(action)" class="glyphicon glyphicon-ok text-danger" title="[[action.payment.pay_status.name]]"></span>\
         </td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
         <td ng-if="is_planned_end_date_needed()" ng-click="open_action(action.id)"><b>[[ action.plannedEndDate | asDate ]]</b></td>\

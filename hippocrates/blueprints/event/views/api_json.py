@@ -5,6 +5,9 @@ import logging
 import blinker
 import collections
 
+from sqlalchemy import desc, func, and_, or_
+from sqlalchemy.orm import joinedload
+
 from hippocrates.blueprints.event.app import module
 from hippocrates.blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
                                         save_executives, EventSaveController, MovingController, received_close)
@@ -31,8 +34,8 @@ from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure,
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from nemesis.lib.mq_integration.event import MQOpsEvent, notify_event_changed, notify_moving_changed
-from sqlalchemy import desc, func, and_, or_
-from sqlalchemy.orm import joinedload
+from nemesis.lib.data_ctrl.accounting.service import ServiceController
+
 
 logger = logging.getLogger('simple')
 
@@ -730,10 +733,13 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
         )
 
     paginate = action_query.paginate(page, per_page, False)
+    action_id_list = [action.id for action in paginate.items]
+    s_ctrl = ServiceController()
+    pay_data = s_ctrl.get_actions_pay_info(action_id_list)
     return {
         'pages': paginate.pages,
         'total': paginate.total,
         'items': [
-            eviz.make_action(action) for action in paginate.items
+            eviz.make_action(action, pay_data.get(action.id)) for action in paginate.items
         ]
     }

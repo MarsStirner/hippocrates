@@ -14,7 +14,9 @@
         <div class="row marginal">
             <div class="col-md-3 col-lg-2">
                 <label for="filter-id">№ забора б/м</label>
-                <input class="form-control" autocomplete="off" wm-slow-change="barCodeSearch(filter.barCode)" id="barCode" type="text" ng-model="filter.barCode" placeholder="Штрихкод" autofocus>
+                <input class="form-control" autocomplete="off" wm-slow-change="barCodeSearch(filter.barCode)"
+                    wm-slow-change-timeout="900" id="barCode" type="text" ng-model="filter.barCode"
+                    placeholder="Штрихкод" autofocus>
             </div>
             <div class="col-md-3 col-lg-2">
                 <label for="exec_date" class="control-label">Дата выполнения</label>
@@ -128,7 +130,9 @@
                             </div></td>
                             <td ng-click="open_info(record)">
                                 <div ng-repeat="action in record.actions">
-                                    <span class="glyphicon" ng-class="action.payment.is_paid ? 'glyphicon-ok text-success' : 'glyphicon-remove text-danger'"></span>
+                                    <span ng-show="isPaidAction(action)" class="glyphicon glyphicon-ok text-success" title="[[action.payment.pay_status.name]]"></span>
+                                    <span ng-show="isNotPaidAction(action)" class="glyphicon glyphicon-remove text-danger" title="[[action.payment.pay_status.name]]"></span>
+                                    <span ng-show="isRefundedAction(action)" class="glyphicon glyphicon-ok text-danger" title="[[action.payment.pay_status.name]]"></span>
                                 </div>
                             </td>
                             <td ng-click="open_info(record)">[[record.client.sex.name]]</td>

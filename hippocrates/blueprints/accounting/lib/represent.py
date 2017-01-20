@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from nemesis.models.enums import Gender, ContragentType, ServiceKind
-from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money, safe_bool
+from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money, safe_bool, safe_traverse
 from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_invoice_closed,
     check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts, calc_invoice_refunds_sum)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
@@ -333,13 +333,11 @@ class ServiceRepr(object):
             'is_complex_service': safe_bool(service.price_list_item.service.isComplex)
         }
 
-    def represent_service_full(self, service):
+    def represent_service_full(self, service, payment=None):
         data = self.represent_service(service)
-        service_ctrl = ServiceController()
-        is_paid = service_ctrl.check_service_is_paid(service)
         data['sum'] = format_money(service.sum)
         data['in_invoice'] = service.in_invoice
-        data['is_paid'] = is_paid
+        data['pay_status'] = safe_traverse(payment, 'pay_status')
         data['access'] = {
             'can_edit': service.can_edit,
             'can_delete': service.can_delete
@@ -428,17 +426,24 @@ class ServiceRepr(object):
         }
 
     def represent_listed_event_services(self, service_list):
+        service_id_list = [service.id for service in service_list]
+        ctrl = ServiceController()
+        pay_data = ctrl.get_services_pay_info(service_id_list)
         return [
-            self.represent_service_full(service)
+            self.represent_service_full(service, pay_data.get(service.id))
             for service in service_list
         ]
 
     def represent_paginated_event_services(self, paginated_data):
+        service_id_list = [service.id for service in paginated_data.items]
+        ctrl = ServiceController()
+        pay_data = ctrl.get_services_pay_info(service_id_list)
         return {
             'count': paginated_data.total,
             'total_pages': paginated_data.pages,
             'service_list': [
-                self.represent_service_full(service) for service in paginated_data.items
+                self.represent_service_full(service, pay_data.get(service.id))
+                for service in paginated_data.items
             ]
         }
 

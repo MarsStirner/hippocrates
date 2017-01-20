@@ -1,8 +1,8 @@
 WebMis20.controller('BiomaterialsIndexCtrl', [
-    '$scope', '$modal', '$window', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService', 'PrintingService', 'PrintingDialog',
-    'MessageBox', 'CurrentUser', '$interval',
-    function ($scope, $modal, $window, ApiCalls, WMConfig, SelectAll, RefBookService, PrintingService, PrintingDialog,
-              MessageBox, CurrentUser, $interval) {
+    '$scope', '$modal', '$window', '$interval', '$q', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService',
+    'PrintingService', 'PrintingDialog', 'MessageBox', 'CurrentUser',
+    function ($scope, $modal, $window, $interval, $q,ApiCalls, WMConfig, SelectAll, RefBookService,
+              PrintingService, PrintingDialog, MessageBox, CurrentUser) {
         $scope.selected_records = new SelectAll([]);
         $scope.TTJStatus = RefBookService.get('TTJStatus');
         $scope.rbLaboratory = RefBookService.get('rbLaboratory');
@@ -22,6 +22,8 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
         $scope.current_result = [];
         $scope.grouped_current_result = {};
+        $scope.requestInProgress = false;
+        $scope.refreshCanceller = undefined;
 
         $scope.count_all_records = function () {
             return _.chain($scope.result).mapObject(
@@ -142,13 +144,18 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
 
         $scope.get_data = function (quick_filter, dont_refresh_selected) {
+            $scope.requestInProgress = true;
+            $scope.refreshCanceller = $q.defer();
             return ApiCalls.wrapper(
                 'POST', WMConfig.url.biomaterials.api_get_ttj_records,
-                {}, {filter: $scope.filter}
+                {}, {filter: $scope.filter}, { timeout: $scope.refreshCanceller.promise }
             )
                 .then(function (res) {
                     $scope.result = res;
                     $scope.set_current_records(quick_filter, dont_refresh_selected);
+                })
+                .finally(function () {
+                    $scope.requestInProgress = false;
                 });
         };
 
@@ -206,9 +213,17 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
                 size: 'lg'
             })
         };
-
         $scope.open_action = function (action_id) {
             $window.open(WMConfig.url.actions.action_html + '?action_id=' + action_id)
+        };
+        $scope.isPaidAction = function (action) {
+            return action.payment && action.payment.pay_status.code === 'paid';
+        };
+        $scope.isNotPaidAction = function (action) {
+            return action.payment && action.payment.pay_status.code === 'not_paid';
+        };
+        $scope.isRefundedAction = function (action) {
+            return action.payment && action.payment.pay_status.code === 'refunded';
         };
 
         function watch_with_reload(n, o) {
@@ -227,8 +242,11 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             $scope.set_current_records(true);
         }
 
-        $scope.barCodeSearch = function(model){
-            watch_with_reload(model);
+        $scope.barCodeSearch = function(model) {
+            if ($scope.refreshCanceller) {
+                $scope.refreshCanceller.resolve('cancel search');
+            }
+            $scope.get_data();
         };
 
         // $scope.$watch('filter.barCode', watch_with_reload);
@@ -243,7 +261,9 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         $scope.$watch('static_filter.action_type__name', watch_without_reload);
 
         var reload = $interval(function () {
-            $scope.get_data($scope.quickFilterActive(), true);
+            if (!$scope.requestInProgress) {
+                $scope.get_data($scope.quickFilterActive(), true);
+            }
         }, 60000);
         $scope.get_data();
     }])

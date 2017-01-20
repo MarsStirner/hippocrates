@@ -19,6 +19,7 @@ from ..app import module
 from ..lib.utils import TTJVisualizer
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_date, bail_out
+from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournalAssoc, Action, ActionPropertyType, \
     ActionProperty
 from nemesis.models.enums import TTJStatus
@@ -88,18 +89,23 @@ def api_get_ttj_records():
         }
 
     mapping = {}
+    all_action_ids = set()
     for record in filtered:
         if record[0] not in mapping:
             r = mapping[record[0]] = make_default_result_record(record)
         else:
             r = mapping[record[0]]
         r['actions'].add(record.Action)
+        all_action_ids.add(record.Action.id)
         r['events'].add(record.Event)
         r['labs'].add(record.rbLaboratory)
         r['ttt'].add(record.rbTestTubeType)
 
     all_records = mapping.values()
     all_records.sort(key=lambda x: x['ttj'].datetimePlanned)
+
+    s_ctrl = ServiceController()
+    pay_data = s_ctrl.get_actions_pay_info(all_action_ids)
 
     ttj_by_status = {
         ttj_status_code: [
@@ -116,11 +122,16 @@ def api_get_ttj_records():
             for ttt in record['ttt']:
                 tube_dict[ttt.code]['name'] = ttt.name
                 tube_dict[ttt.code]['count'] += len(record['actions'])
+
+        ttj_records = []
+        for record in records:
+            pays = dict((a.id, pay_data.get(a.id)) for a in record['actions'])
+            ttj_records.append(
+                vis.make_ttj_record(record['ttj'], record['actions'], record['events'], pays)
+            )
+
         result[ttj_status] = {
-            'records': [
-                vis.make_ttj_record(record['ttj'], record['actions'], record['events'])
-                for record in records
-            ],
+            'records': ttj_records,
             'tubes': tube_dict,
         }
     return result
