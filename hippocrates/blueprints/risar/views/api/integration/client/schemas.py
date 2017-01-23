@@ -80,39 +80,43 @@ class ClientSchema(Schema):
                     }
                 }
             },
-            "document": {
-                "type": "object",
-                "description": "Документ, удостоверяющий личность пациента",
-                "properties": {
-                    "document_type_code": {
-                        "type": "integer",
-                        "description": "Код типа документа, идентифицирующего личность по федеральному приказу ФОМС №79 от 7.04.2011",
+            "documents": {
+                "type": "array",
+                "description": "Документы, удостоверяющие личность пациента",
+                "items": {
+                    "type": "object",
+                    "description": "Документ, удостоверяющий личность пациента",
+                    "properties": {
+                        "document_type_code": {
+                            "type": "integer",
+                            "description": "Код типа документа, идентифицирующего личность по федеральному приказу ФОМС №79 от 7.04.2011",
+                        },
+                        "document_series": {
+                            "type": "string",
+                            "description": "Серия документа, удостоверяющего личность пациента",
+                            "maxLength": 8
+                        },
+                        "document_number": {
+                            "type": "string",
+                            "description": "Номер документа, удостоверяющего личность пациента",
+                            "maxLength": 16
+                        },
+                        "document_beg_date": {
+                            "type": "string",
+                            "description": "Дата выдачи документа, удостоверяющего личность пациента"
+                        },
+                        "document_issuing_authority": {
+                            "type": "string",
+                            "description": "Орган, выдавший документ, удостоверяющий личность пациента",
+                            "maxLength": 256
+                        }
                     },
-                    "document_series": {
-                        "type": "string",
-                        "description": "Серия документа, удостоверяющего личность пациента",
-                        "maxLength": 8
-                    },
-                    "document_number": {
-                        "type": "string",
-                        "description": "Номер документа, удостоверяющего личность пациента",
-                        "maxLength": 16
-                    },
-                    "document_beg_date": {
-                        "type": "string",
-                        "description": "Дата выдачи документа, удостоверяющего личность пациента"
-                    },
-                    "document_issuing_authority": {
-                        "type": "string",
-                        "description": "Орган, выдавший документ, удостоверяющий личность пациента",
-                        "maxLength": 256
-                    }
-                },
-                "required": [
-                    "document_type_code",
-                    "document_number",
-                    "document_beg_date"
-                ]
+                    "required": [
+                        "document_type_code",
+                        "document_number",
+                        "document_beg_date"
+                    ]
+                }
             },
             "insurance_documents": {
                 "type": "array",
