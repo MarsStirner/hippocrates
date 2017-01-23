@@ -80,7 +80,7 @@ class ClientXForm(ClientSchema, XForm):
                 doc_q = or_(doc_q, doc_sq)
             else:
                 doc_q = doc_sq
-        if doc_q:
+        if doc_q is not None:
             q = q.join(ClientDocument).join(rbDocumentType).filter(
                 doc_q,
                 ClientDocument.deleted == 0
