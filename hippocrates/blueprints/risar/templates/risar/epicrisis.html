@@ -29,24 +29,24 @@
                             <div class="box-body">
                                 <!-- TODO: Отображение диагнозов -->
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Основной диагноз:</div>
-                                    <div class="col-sm-7 col-md-7">
+                                    <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
+                                    <div class="col-sm-6 col-md-6">
                                         <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'main':'final'">
                                             <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Диагнозы осложнения:</div>
-                                    <div class="col-sm-7 col-md-7">
+                                    <div class="col-sm-6 col-md-6  text-right">Диагнозы осложнения:</div>
+                                    <div class="col-sm-6 col-md-6">
                                         <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'final'">
                                             <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Сопутствующие диагнозы:</div>
-                                    <div class="col-sm-7 col-md-7">
+                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                                    <div class="col-sm-6 col-md-6">
                                         <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated':'final'">
                                             <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
                                         </div>
@@ -54,116 +54,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="box box-primary">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Данные случая</h3>
-                                <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                            </div>
-                            <div class="box-body">
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Дата постановки на учёт:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.set_date|asDate]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Срок беременности при постановке на учёт:</div>
-                                    <div class="col-sm-6 col-md-6">
-                                        <span tooltip="Рассчитывается исходя из текущего срока беременности, даты родоразрешения и даты постановки на учёт">[[epicrisis.registration_pregnancy_week]]</span></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Число посещений акушера-гинеколога:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.num_of_inspections]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">Прибавка массы, кг:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.weight_gain]]</div>
-                                </div>
-                                {% if 'pregnancy_speciality' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('pregnancy_speciality')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.pregnancy_speciality"></div>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6" ng-if="epicrisis.death_date || epicrisis.reason_of_death">
-                        <div class="box box-primary">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Смерть матери</h3>
-                                <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_second"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                            </div>
-                            <div class="box-body">
-                                {% if 'death_date' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('death_date')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.death_date|asDate]]</div>
-                                </div>
-                                {% endif %}
-                                {% if 'death_time' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('death_time')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.death_time|asTime]]</div>
-                                </div>
-                                {% endif %}
-                                {% if 'reason_of_death' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('reason_of_death')]]:</div>
-                                    <div class="col-sm-7 col-md-7  long-words">[[epicrisis.reason_of_death]]</div>
-                                </div>
-                                {% endif %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">Основной патологоанатомический диагноз:</div>
-                                    <div class="col-sm-7 col-md-7">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses: 'main':'pathanatomical'">
-                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Диагнозы осложнения:</div>
-                                    <div class="col-sm-7 col-md-7">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'pathanatomical'">
-                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Сопутствующие диагнозы:</div>
-                                    <div class="col-sm-7 col-md-7">
-                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated':'pathanatomical'">
-                                            <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% if 'control_expert_conclusion' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('control_expert_conclusion')]]:</div>
-                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="epicrisis.control_expert_conclusion"></div>
-                                </div>
-                                {% endif %}
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Осложнения при родах</h3>
@@ -263,61 +153,6 @@
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="box box-primary">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Пособия и манипуляции при родах</h3>
-                                <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fourth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                            </div>
-                            <div class="box-body">
-                                {% if 'caul' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('caul')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.caul  ? 'да': '']]</div>
-                                </div>
-                                {% endif %}
-                                {% if 'calfbed' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('calfbed')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.calfbed  ? 'да': '']]</div>
-                                </div>
-                                {% endif %}
-                                {% if 'perineotomy' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('perineotomy')]]:</div>
-                                    <div class="col-sm-7 col-md-7 long-words">[[epicrisis.perineotomy]]</div>
-                                </div>
-                                {% endif %}
-                                {% if 'secundines' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('secundines')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.secundines ? 'да': '']]</div>
-                                </div>
-                                {% endif %}
-                                {% if 'other_manipulations' in epicrisis_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5 text-right">[[epicrisisDescriptor.getName('other_manipulations')]]:</div>
-                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="epicrisis.other_manipulations"></div>
-                                </div>
-                                {% endif %}
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Операции при родах</h3>
@@ -380,6 +215,158 @@
                                     <div class="col-sm-6 col-md-6">[[epicrisis.embryotomy  ? 'да': '']]</div>
                                 </div>
                                 {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Данные случая</h3>
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Дата постановки на учёт:</div>
+                                    <div class="col-sm-6 col-md-6">[[chart.set_date|asDate]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Срок беременности при постановке на учёт:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span tooltip="Рассчитывается исходя из текущего срока беременности, даты родоразрешения и даты постановки на учёт">[[epicrisis.registration_pregnancy_week]]</span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Число посещений акушера-гинеколога:</div>
+                                    <div class="col-sm-6 col-md-6">[[chart.num_of_inspections]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Прибавка массы, кг:</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.weight_gain]]</div>
+                                </div>
+                                {% if 'pregnancy_speciality' in epicrisis_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('pregnancy_speciality')]]:</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.pregnancy_speciality"></div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="box-body" ng-if="epicrisis.death_date || epicrisis.reason_of_death">
+                                    {% if 'death_date' in epicrisis_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('death_date')]]:</div>
+                                        <div class="col-sm-6 col-md-6">[[epicrisis.death_date|asDate]]</div>
+                                    </div>
+                                    {% endif %}
+                                    {% if 'death_time' in epicrisis_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('death_time')]]:</div>
+                                        <div class="col-sm-6 col-md-6">[[epicrisis.death_time|asTime]]</div>
+                                    </div>
+                                    {% endif %}
+                                    {% if 'reason_of_death' in epicrisis_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('reason_of_death')]]:</div>
+                                        <div class="col-sm-6 col-md-6  long-words">[[epicrisis.reason_of_death]]</div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">Основной патологоанатомический диагноз:</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses: 'main':'pathanatomical'">
+                                                <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">Диагнозы осложнения:</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication':'pathanatomical'">
+                                                <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated':'pathanatomical'">
+                                                <span tooltip="[[ diag.diagnostic.mkb.name ]]">[[diag.diagnostic.mkb.code]]</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if 'control_expert_conclusion' in epicrisis_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('control_expert_conclusion')]]:</div>
+                                        <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.control_expert_conclusion"></div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="row">
+                                        <div class="col-md-12">&nbsp;</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">&nbsp;</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">&nbsp;</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">&nbsp;</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">&nbsp;</div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Пособия и манипуляции при родах</h3>
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fourth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="box-body">
+                                {% if 'caul' in epicrisis_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('caul')]]:</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.caul  ? 'да': '']]</div>
+                                </div>
+                                {% endif %}
+                                {% if 'calfbed' in epicrisis_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('calfbed')]]:</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.calfbed  ? 'да': '']]</div>
+                                </div>
+                                {% endif %}
+                                {% if 'perineotomy' in epicrisis_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('perineotomy')]]:</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.perineotomy]]</div>
+                                </div>
+                                {% endif %}
+                                {% if 'secundines' in epicrisis_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('secundines')]]:</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.secundines ? 'да': '']]</div>
+                                </div>
+                                {% endif %}
+                                {% if 'other_manipulations' in epicrisis_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('other_manipulations')]]:</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.other_manipulations"></div>
+                                </div>
+                                {% endif %}
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
                             </div>
                         </div>
                     </div>
