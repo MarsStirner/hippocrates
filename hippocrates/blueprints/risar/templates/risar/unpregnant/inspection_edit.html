@@ -106,10 +106,10 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <td class="text-right col-md-4">Дата</td>
+                                        <td class="text-right col-md-4">Дата <span class="text-danger">*</span></td>
                                         <td class="col-md-2">
                                             <wm-date name="osmotr_date" ng-model="checkup.beg_date" style="width: 250px" autofocus
-                                                min-date="minDate"></wm-date>
+                                                min-date="minDate" ng-required="true"></wm-date>
                                         </td>
                                         <td class="text-right">Время осмотра</td>
                                         <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
