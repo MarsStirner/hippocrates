@@ -121,7 +121,7 @@ class ClientXForm(ClientSchema, XForm):
         self.load_data()
         with db.session.no_autoflush:
             self._update_main_data(data)
-            self._update_works([data.get('job')])
+            self._update_works(data.get('job') and [data.get('job')] or [])
             self._update_id_documents(data.get('documents') or ())
             if 'insurance_documents' in data:
                 self._update_policies(data['insurance_documents'])
