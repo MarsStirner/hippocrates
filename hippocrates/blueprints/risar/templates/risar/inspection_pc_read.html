@@ -186,7 +186,7 @@
                                 {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('bowel_and_bladder_habits')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.bowel_and_bladder_habits]]</div>
+                                    <div class="col-sm-7 col-md-7" ng-bind-html="checkup.bowel_and_bladder_habits"></div>
                                 </div>
                                 {% endif %}
                                 <div class="row">
@@ -321,7 +321,7 @@
                                 {% if 'externalia' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('externalia')]]:</div>
-                                    <div class="col-sm-7 col-md-7 long-words">[[checkup.externalia]]</div>
+                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.externalia"></div>
                                 </div>
                                 {% endif %}
                                 {% if 'vagina' in checkup_descriptor %}

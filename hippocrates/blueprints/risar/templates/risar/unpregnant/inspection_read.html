@@ -232,7 +232,7 @@
                                 {% if 'other_complaints' in checkup_descriptor %}
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('other_complaints')]]:</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.other_complaints]]</div>
+                                        <div class="col-sm-6 col-md-6" ng-bind-html="checkup.other_complaints"></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -342,13 +342,13 @@
                                 {% if 'pilosis' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('pilosis')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.pilosis"></span></div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.pilosis"></div>
                                 </div>
                                 {% endif %}
                                 {% if 'comments' in checkup_descriptor %}
                                  <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('comments')]]:</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.comments]]</div>
+                                        <div class="col-sm-6 col-md-6" ng-bind-html="checkup.comments"></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -454,7 +454,7 @@
                                 {% if 'vulva_comments' in checkup_descriptor %}
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_comments')]]:</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.vulva_comments]]</div>
+                                        <div class="col-sm-6 col-md-6" ng-bind-html="checkup.vulva_comments"></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -572,7 +572,7 @@
                                 {% if 'comments_mirrors' in checkup_descriptor %}
                                  <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('comments_mirrors')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.comments_mirrors]]</div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.comments_mirrors"></div>
                                 </div>
                                 {% endif %}
                                 <!-- END MIRRORS-->
@@ -679,7 +679,7 @@
                                 {% if 'bimanual_comments' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('bimanual_comments')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.bimanual_comments]]</div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.bimanual_comments"></div>
                                 </div>
                                 {% endif %}
 
@@ -799,7 +799,7 @@
                                 {% if 'rectovaginal_comments' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_comments')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_comments]]</div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.rectovaginal_comments"></div>
                                 </div>
                                 {% endif %}
 
@@ -932,7 +932,7 @@
                                 {% if 'rectal_comments' in checkup_descriptor %}
                                 <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_comments')]]:</div>
-                                            <div class="col-sm-6 col-md-6">[[checkup.rectal_comments]]</div>
+                                            <div class="col-sm-6 col-md-6" ng-bind-html="checkup.rectal_comments"></div>
                                 </div>
                                 {% endif %}
                                 <!-- END RECTAL -->

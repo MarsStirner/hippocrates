@@ -62,8 +62,8 @@
                                     <span ng-repeat="mkb in chart.anamnesis.mother.finished_diseases" tooltip="[[ mkb.name ]]">
                                         <span class="bottom_dotted">[[mkb.code]]</span>[[$last ? '' : ', ']]
                                     </span>
-                                    <span ng-if="chart.anamnesis.mother.finished_diseases.length"><br></span>[[chart.anamnesis.mother.finished_diseases_text]]
-                                    [[!chart.anamnesis.mother.finished_diseases.length && !chart.anamnesis.mother.finished_diseases_text ? 'нет' : '']]</br>
+                                    <span ng-if="chart.anamnesis.mother.finished_diseases.length"><br></span>
+                                    <span ng-bind-html="get_mother_finished_diseases_text()"></span>
                                 </td>
                             </tr>
                             <tr>
@@ -73,8 +73,8 @@
                                     <span ng-repeat="mkb in chart.anamnesis.mother.current_diseases" tooltip="[[ mkb.name ]]">
                                         <span class="bottom_dotted">[[mkb.code]]</span>[[$last ? '' : ', ']]
                                     </span>
-                                    <span ng-if="chart.anamnesis.mother.current_diseases.length"><br></span>[[chart.anamnesis.mother.current_diseases_text]]
-                                    [[!chart.anamnesis.mother.current_diseases.length  && !chart.anamnesis.mother.current_diseases_text ? 'нет' : '']]
+                                    <span ng-if="chart.anamnesis.mother.current_diseases.length"><br></span>
+                                    <span ng-bind-html="get_mother_current_diseases_text()"></span>
                                 </td>
                             </tr>
                             <tr>

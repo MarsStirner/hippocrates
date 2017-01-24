@@ -54,25 +54,25 @@
                                 {% if 'urine' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('urine')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[checkup.urine]]</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.urine"></div>
                                 </div>
                                 {% endif %}
                                 {% if 'blood' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('blood')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[checkup.blood]]</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.blood"></div>
                                 </div>
                                 {% endif %}
                                 {% if 'us' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('us')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[checkup.us]]</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.us"></div>
                                 </div>
                                 {% endif %}
                                 {% if 'other_analysis' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('other_analysis')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[checkup.other_analysis]]</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.other_analysis"></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -138,7 +138,7 @@
                                 {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('bowel_and_bladder_habits')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.bowel_and_bladder_habits]]</div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.bowel_and_bladder_habits"></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -186,7 +186,7 @@
                                 {% if 'externalia' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('externalia')]]:</div>
-                                    <div class="col-sm-7 col-md-7 long-words">[[checkup.externalia]]</div>
+                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.externalia"></div>
                                 </div>
                                 {% endif %}
                                 {% if 'vagina' in checkup_descriptor %}

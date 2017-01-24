@@ -114,7 +114,7 @@
                 </tr>
                 <tr>
                     <th>Рекомендации</th>
-                    <td ng-repeat="checkup in checkups" ng-bind="checkup.treatment_recommendations"></td>
+                    <td ng-repeat="checkup in checkups" ng-bind-html="checkup.treatment_recommendations"></td>
                     <td></td>
                 </tr>
             </tbody>
