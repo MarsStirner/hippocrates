@@ -337,15 +337,15 @@ class XForm(object):
                 self.check_prop_value(prop, val)
         elif prop.type.typeName in ('ReferenceRb', 'ExtReferenceRb'):
             rb_name = prop.type.valueDomain.split(';')[0]
-            if rb_name not in ('rbBloodType', 'rbDocumentType', 'rbPolicyType'):
-                self._check_rb_value(rb_name, value['code'])
+            # if rb_name not in ('rbBloodType', 'rbDocumentType', 'rbPolicyType'):
+            self._check_rb_value(rb_name, value['code'])
 
     def _check_rb_value(self, rb_name, value_code):
-        field_name = None
-        if rb_name == 'rbBloodType':
-            field_name = 'code'
-        elif rb_name in ('rbDocumentType', 'rbPolicyType'):
-            field_name = 'TFOMSCode'
+        field_name = 'regionalCode'
+        # if rb_name == 'rbBloodType':
+        #     field_name = 'code'
+        # elif rb_name in ('rbDocumentType', 'rbPolicyType'):
+        #     field_name = 'TFOMSCode'
         if not check_rb_value_exists(rb_name, value_code, field_name):
             raise ApiException(
                 VALIDATION_ERROR,
