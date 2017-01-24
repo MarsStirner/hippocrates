@@ -460,8 +460,8 @@
                                     </tr>
                                     {% endif %}
 
-                                
-      
+
+
                                 </tbody>
                             </table>
                         </div>
@@ -621,9 +621,26 @@
                                            ng-disabled="checkupDescriptor.getReadOnly('mucous')"></rb-select></td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'lymph' in checkup_descriptor %}
+                                     {% if 'lymph' in checkup_descriptor %}
+                                         <tr>
+                                            <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('lymph')">Выделения из половых путей</th>
+                                            <td class="col-md-8">
+                                            </td>
+                                        </tr>
+                                         {%- if 'lymph_which' in checkup_descriptor -%}
+                                            <tr>
+                                                <!-- example short_string -->
+                                                <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph_which')">
+                                                </td>
+                                                <td><input class="form-control"
+                                                     ng-required="checkupDescriptor.getMandatory('lymph_which')"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('lymph_which')"
+                                                     ng-model="checkup.lymph_which">
+                                                </td>
+                                            </tr>
+                                        {%- endif -%}
                                     <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
+                                        <td></td>
                                         <td><div ng-class="{'text-danger': objectiveForm.lymph.$invalid && objectiveForm.submit_attempt}">
                                             <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
                                                 ng-required="checkupDescriptor.getMandatory('lymph')"
@@ -683,6 +700,16 @@
                                                 [[ item.name ]]
                                             </div>
                                             </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'stomach_area' in checkup_descriptor %}
+                                    <tr ng-show="checkup.stomach | pluck:'code' | intersects:['painful', 'tense']">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach_area')"></td>
+                                        <td>
+                                            <input ng-disabled="checkup.getReadOnly('stomach_area')"
+                                                   ng-model="checkup.stomach_area" class="form-control">
                                         </td>
                                     </tr>
                                     {% endif %}
@@ -1045,11 +1072,27 @@
                                         <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
                                     </tr>
                                     {% endif %}
-                                    <tr>
-                                        <th class="text-right col-md-4">Выделения из половых путей</th>
-                                        <td class="col-md-8">
+                                    {% if 'mucous_mirrors' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_mirrors')"></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="mucous_mirrors" refbook-checkbox ng-model="checkup.mucous_mirrors" ref-book="rbRisarMucous"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('mucous_mirrors')"
+                                                       ng-required="checkupDescriptor.getMandatory('mucous_mirrors')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'mucous_adds_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_adds_mirrors')"></td>
+                                        <td><input ng-disabled="checkup.mucous_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.mucous_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'discharge_consistency_mirrors' in checkup_descriptor %}
                                     <tr>
                                     <!-- example multiple -->

@@ -311,7 +311,11 @@
                                 {% if 'lymph' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('lymph')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.lymph | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-bind-html="checkup.lymph_which"></span>
+                                        <span>[[checkup.lymph_which ? ':': '']]</span>
+                                        <span ng-bind="checkup.lymph | pluck:'name' | join:', '"></span>
+                                    </div>
                                 </div>
                                 {% endif %}
                                 {% if 'subcutaneous_fat' in checkup_descriptor %}
@@ -336,7 +340,11 @@
                                 {% if 'stomach' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.stomach | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-bind="checkup.stomach | pluck:'name' | join:', '"></span>
+                                        <span>[[ checkup.stomach_area ? ':': '' ]]<</span>
+                                        <span ng-bind-html="checkup.stomach_area"></span>
+                                    </div>
                                 </div>
                                 {% endif %}
                                 {% if 'pilosis' in checkup_descriptor %}
@@ -541,10 +549,18 @@
                                     <div class="col-sm-6 col-md-6">[[checkup.vaginal_fornix_adds_mirrors]]</div>
                                 </div>
                                 {% endif %}
-                                  <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right"><b>Выделения из половых путей</b></div>
-                                        <div class="col-sm-6 col-md-6"></div>
+                                {% if 'mucous_mirrors' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('mucous_mirrors')]]:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.mucous_mirrors | pluck:'name' | join:', '"></span></div>
                                 </div>
+                                {% endif %}
+                                {% if 'mucous_adds_mirrors' in checkup_descriptor %}
+                                <div class="row" ng-show="checkup.mucous_adds_mirrors">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('mucous_adds_mirrors') ? checkupDescriptor.getName('mucous_adds_mirrors')+':' : '']]</div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.mucous_adds_mirrors"></div>
+                                </div>
+                                {% endif %}
                                 {% if 'discharge_consistency_mirrors' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('discharge_consistency_mirrors')]]:</div>
