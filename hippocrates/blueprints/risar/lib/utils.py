@@ -228,11 +228,10 @@ def fill_action_from_another_action(from_action, to_action, exclude_attr_list=No
     elif not isinstance(exclude_attr_list, (list, set, tuple)):
         exclude_attr_list = [exclude_attr_list]
 
-    for code in to_action.propsByCode.keys():
-        if code in from_action.propsByCode:
-            if code in exclude_attr_list:
-                continue
-            to_action.propsByCode[code].value = from_action.propsByCode[code].value
+    to_action_propsByCode = to_action.propsByCode
+    from_action_propsByCode = from_action.propsByCode
+    for code in set(to_action_propsByCode.keys()) & set(from_action_propsByCode.keys()) - set(exclude_attr_list):
+        to_action_propsByCode[code].value = from_action_propsByCode[code].value
 
 
 def copy_attrs_from_last_action_entirely(event, flat_code, action, exclude_attr_list):
