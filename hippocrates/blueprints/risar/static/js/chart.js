@@ -87,19 +87,19 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
         $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
     };
     $scope.get_mother_finished_diseases_text = function () {
-        if (!$scope.chart.anamnesis.mother.finished_diseases.length &&
-            !$scope.chart.anamnesis.mother.finished_diseases_text) {
-            return 'нет';
+        var finished_diseases_text = safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'finished_diseases_text']);
+        if (safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'finished_diseases', 'length'])) {
+            return finished_diseases_text;
         } else {
-            return $scope.chart.anamnesis.mother.finished_diseases_text;
+            return finished_diseases_text || 'нет';
         }
     };
     $scope.get_mother_current_diseases_text = function () {
-        if (!$scope.chart.anamnesis.mother.current_diseases.length &&
-            !$scope.chart.anamnesis.mother.current_diseases_text) {
-            return 'нет';
+        var current_diseases_text = safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'current_diseases_text']);
+        if (safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'current_diseases', 'length'])) {
+            return current_diseases_text;
         } else {
-            return $scope.chart.anamnesis.mother.current_diseases_text;
+            return current_diseases_text || 'нет';
         }
     };
     var load_header = function (event_id) {

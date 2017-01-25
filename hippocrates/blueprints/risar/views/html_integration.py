@@ -7,18 +7,14 @@
 
 """
 import datetime
-from contextlib import contextmanager
-
-import os
 
 import flask
-import requests
 from flask import url_for, redirect
 from hippocrates.blueprints.risar.views.api.integration.card.api import \
     card_save_or_update
-from nemesis.app import app
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
+from nemesis.systemwide import db
 from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib import sirius
@@ -36,10 +32,6 @@ logger = logging.getLogger('simple')
 def api_card_by_remote_id(api_version, region, entity, remote_id):
     try:
         main_user = current_user.get_main_user()
-        # doctor_code = main_user.regionalCode
-        # org_code = Organisation.query.filter(
-        #     Organisation.id == main_user.org_id
-        # ).value(Organisation.regionalCode)
         # по разным причинам бывают в main_user не те коды, или их нет
         person = Person.query.get(main_user.id)
         doctor_code = person.regionalCode
@@ -86,11 +78,9 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
                 'card_doctor': doctor_code,
                 'card_LPU': org_code,
             }
-            card_id = create_or_update_card(data, True, api_version, card_id)
-            # todo возникает проблема привязки к пациенту из-за уровня изоляции
-            # протестить вариант
-            # db.session.commit()
-            # card_id = card_save_or_update_get_id(data, True, api_version)
+            # здесь для нас появляется новый пациент
+            db.session.commit()
+            card_id = card_save_or_update_get_id(data, True, api_version)
 
             # запись ID карты в шину
             sirius.save_card_ids_match(card_id, region, entity, remote_id)
@@ -105,101 +95,3 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
 def card_save_or_update_get_id(data, create, api_version, card_id=None):
     xform = card_save_or_update(data, create, api_version, card_id)
     return xform.target_obj.id
-
-
-def create_or_update_card(data, create, api_version, card_id=None):
-    if create:
-        url = '/risar/api/integration/%s/card/' % api_version
-    else:
-        url = '/risar/api/integration/%s/card/%s' % (api_version, card_id)
-    # todo добавлять по конфигу при внешнем cas
-    url += '?dont_check_tgt=true'
-    with make_login() as session:
-        result = make_api_request('post' if create else 'put', url, session, data)
-    return result['result']['card_id']
-
-
-coldstar_url = app.config['COLDSTAR_URL'].rstrip('/')
-mis_url = app.config['HIPPO_URL'].rstrip('/')
-auth_token_name = app.config['CASTIEL_AUTH_TOKEN']
-session_token_name = app.config['BEAKER_SESSION']['session.key']
-
-# todo:
-login = os.getenv('API_LOGIN', u'ВнешСис')
-password = os.getenv('API_PASSWORD', '0909')
-
-
-@contextmanager
-def make_login():
-    token = get_token(login, password)
-    session_token = get_role(token)
-    session = token, session_token
-
-    try:
-        yield session
-    finally:
-        release_token(token)
-
-
-def get_token(login, password):
-    url = u'%s/cas/api/acquire' % coldstar_url
-    result = requests.post(
-        url,
-        {
-            'login': login,
-            'password': password
-        }
-    )
-    j = result.json()
-    if not j['success']:
-        print j
-        raise Exception(j['exception'])
-    return j['token']
-
-
-def release_token(token):
-    url = u'%s/cas/api/release' % coldstar_url
-    result = requests.post(
-        url,
-        {
-            'token': token,
-        }
-    )
-    j = result.json()
-    if not j['success']:
-        print j
-        raise Exception(j['exception'])
-
-
-def get_role(token, role_code=''):
-    url = u'%s/chose_role/' % mis_url
-    if role_code:
-        url += role_code
-    result = requests.post(
-        url,
-        cookies={auth_token_name: token}
-    )
-    j = result.json()
-    if not result.status_code == 200:
-        raise Exception('Ошибка авторизации')
-    return result.cookies[session_token_name]
-
-
-def make_api_request(method, url, session, json_data=None, url_args=None):
-    token, session_token = session
-    result = getattr(requests, method)(
-        mis_url + url,
-        json=json_data,
-        params=url_args,
-        cookies={auth_token_name: token,
-                 session_token_name: session_token}
-    )
-    if result.status_code != 200:
-        try:
-            j = result.json()
-            message = u'{0}: {1}'.format(j['meta']['code'], j['meta']['name'])
-        except Exception, e:
-            # raise e
-            message = u'Unknown ({0})'.format(unicode(result))
-        raise Exception(unicode(u'Api Error: {0}'.format(message)).encode('utf-8'))
-    return result.json()

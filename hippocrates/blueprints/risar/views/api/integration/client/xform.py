@@ -54,60 +54,61 @@ class ClientXForm(ClientSchema, XForm):
         if pn:
             q = q.filter(Client.patrName == pn)
 
-        is_document_required = safe_traverse(
-            app.config, 'system_prefs', 'integration',
-            'client', 'document_required',
-        )
-        if is_document_required is None:
-            is_document_required = True
-        if is_document_required and 'documents' not in data:
-            raise ApiException(
-                VALIDATION_ERROR,
-                u'Нет обязательного элемента "documents"'
-            )
-        doc_q = None
-        doc_numbers = []
-        for document in data.get('documents') or ():
-            doc_type_code = document['document_type_code']
-            self._check_rb_value('rbDocumentType', doc_type_code)
-            doc_number = document['document_number']
-            doc_numbers.append(doc_number)
-            doc_sq = and_(
-                rbDocumentType.regionalCode == doc_type_code,
-                ClientDocument.number == doc_number,
-            )
-            if doc_q:
-                doc_q = or_(doc_q, doc_sq)
-            else:
-                doc_q = doc_sq
-        if doc_q is not None:
-            q = q.join(ClientDocument).join(rbDocumentType).filter(
-                doc_q,
-                ClientDocument.deleted == 0
-            )
+        # RIMIS-1831 - если отменять, то удалить из конфига эту настройку
+        # is_document_required = safe_traverse(
+        #     app.config, 'system_prefs', 'integration',
+        #     'client', 'document_required',
+        # )
+        # if is_document_required is None:
+        #     is_document_required = True
+        # if is_document_required and 'documents' not in data:
+        #     raise ApiException(
+        #         VALIDATION_ERROR,
+        #         u'Нет обязательного элемента "documents"'
+        #     )
+        # doc_q = None
+        # doc_numbers = []
+        # for document in data.get('documents') or ():
+        #     doc_type_code = document['document_type_code']
+        #     self._check_rb_value('rbDocumentType', doc_type_code)
+        #     doc_number = document['document_number']
+        #     doc_numbers.append(doc_number)
+        #     doc_sq = and_(
+        #         rbDocumentType.regionalCode == doc_type_code,
+        #         ClientDocument.number == doc_number,
+        #     )
+        #     if doc_q:
+        #         doc_q = or_(doc_q, doc_sq)
+        #     else:
+        #         doc_q = doc_sq
+        # if doc_q is not None:
+        #     q = q.join(ClientDocument).join(rbDocumentType).filter(
+        #         doc_q,
+        #         ClientDocument.deleted == 0
+        #     )
 
         target_obj_exist_id = q.value(Client.id)
         if target_obj_exist_id:
-            if doc_numbers:
-                raise ApiException(
-                    ALREADY_PRESENT_ERROR,
-                    (u'Уже существует пациент со следующими данными: '
-                     u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
-                     u'номер документа - хотя бы один из ({4})').format(
-                        fn, ln, pn, bd, ', '.join(doc_numbers)
-                    ),
-                    client_id=str(target_obj_exist_id)
-                )
-            else:
-                raise ApiException(
-                    ALREADY_PRESENT_ERROR,
-                    u'Уже существует пациент со следующими данными: '
-                    u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
-                        .format(
-                        fn, ln, pn, bd
-                    ),
-                    client_id=str(target_obj_exist_id)
-                )
+            # if doc_numbers:
+            #     raise ApiException(
+            #         ALREADY_PRESENT_ERROR,
+            #         (u'Уже существует пациент со следующими данными: '
+            #          u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+            #          u'номер документа - хотя бы один из ({4})').format(
+            #             fn, ln, pn, bd, ', '.join(doc_numbers)
+            #         ),
+            #         client_id=str(target_obj_exist_id)
+            #     )
+            # else:
+            raise ApiException(
+                ALREADY_PRESENT_ERROR,
+                u'Уже существует пациент со следующими данными: '
+                u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3}'
+                    .format(
+                    fn, ln, pn, bd
+                ),
+                client_id=str(target_obj_exist_id)
+            )
 
     def load_data(self):
         if self.new:
