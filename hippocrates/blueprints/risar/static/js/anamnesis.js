@@ -463,7 +463,7 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
     };
     reload_anamnesis();
 };
-var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
+var AnamnesisFatherEditCtrl = function ($scope, $controller, $document, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
     $scope.fatherAnamnesisDescriptor = new PropsDescriptor(father_anamnesis_descriptor);
@@ -476,6 +476,12 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi, PropsDesc
         })
     };
     $scope.save = function () {
+        var form = $scope.anamnesisFatherForm;
+        if (form.$invalid) {
+            var formelm = $('#anamnesisFatherForm').find('.ng-invalid:not(ng-form):first');
+            $document.scrollToElement(formelm, 100, 1500);
+            return false;
+        }
         var model = $scope.anamnesis_father;
         RisarApi.anamnesis.father.save($scope.event_id, model)
         .then(function (data) {

@@ -68,7 +68,9 @@
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('menstruation_last_date')"></th>
                     <td><wm-date ng-model="anamnesis_mother.menstruation_last_date"
-                            max-date="menstruation_max_date" min-date="menstruation_min_date" style="width: 250px"></wm-date></td>
+                            max-date="menstruation_max_date" min-date="menstruation_min_date" style="width: 250px"
+                            ng-required="motherAnamnesisDescriptor.getMandatory('menstruation_last_date')"
+                            ng-disabled="motherAnamnesisDescriptor.getReadOnly('menstruation_last_date')"></wm-date></td>
                 </tr>
                 {% endif %}
                 <tr>

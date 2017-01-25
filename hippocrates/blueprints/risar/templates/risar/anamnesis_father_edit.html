@@ -10,6 +10,7 @@
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
+        <ng-form name="anamnesisFatherForm" id="anamnesisFatherForm" role="form" novalidate>
             <div class="box-body">
             <table class="table table-condensed">
                 <thead>
@@ -208,11 +209,11 @@
                 </tbody>
             </table>
             </div>
-
-            <div class="box-footer text-right">
-                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
-                <button class="btn btn-success" ng-click="save()">Сохранить</button>
-            </div>
+        </ng-form>
+        <div class="box-footer text-right">
+            <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
+            <button class="btn btn-success" ng-click="save()">Сохранить</button>
+        </div>
     </section>
 </div>
 {% endblock %}
