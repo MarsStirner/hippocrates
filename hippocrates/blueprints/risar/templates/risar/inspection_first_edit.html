@@ -246,7 +246,6 @@
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'ad_right_high' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
@@ -265,7 +264,6 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    {% endif %}
                                     <tr>
                                         <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
@@ -890,10 +888,11 @@
                                         </td>
                                     </tr>
                                     {% endif %}
-                                      <tr>
+                                    <tr>
                                         <th class="text-right">Срок по последнему УЗИ</th>
                                         <td>[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason : 'Нет данных УЗИ для расчета']]</td>
-                                      </tr>
+                                    </tr>
+                                    {% if 'pregnancy_continuation' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_continuation')"></th>
                                         <td>
@@ -907,6 +906,7 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     {% if 'pregnancy_continuation_refusal' in checkup_descriptor %}
                                     <tr ng-class="{'text-muted': pregContRefusalDisabled()}">
                                         <th class="text-right">[[checkupDescriptor.getName('pregnancy_continuation_refusal')]] <span ng-class="{'text-muted': pregContRefusalDisabled(), 'text-danger': !pregContRefusalDisabled()}">*</span></th>
