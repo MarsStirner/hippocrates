@@ -411,6 +411,16 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
                 current_diseases: []};
         })
     };
+    $scope.$watch('anamnesis_mother.fertilization_type', function (n, o) {
+        if ( n!==o ) {
+            if ( safe_traverse(n, ['code']) !== '01' ) {
+                $scope.anamnesis_mother.attempt_number = null;
+                $scope.isAttemptVisible = false;
+            } else {
+                $scope.isAttemptVisible = true;
+            }
+        }
+    });
     $scope.save = function () {
         $scope.submit_attempt = true;
         var form = $scope.anamnesisMotherForm;
