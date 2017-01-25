@@ -269,6 +269,7 @@
                                                     </div>
                                                 </td>
                                             </tr>
+                                            {% if 'control_expert_conclusion' in epicrisis_descriptor %}
                                             <tr ng-show="mother_death">
                                                 <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии"
                                                                              ng-bind-html="epicrisisDescriptor.getLabel('control_expert_conclusion')"></span></td>
@@ -277,6 +278,7 @@
                                                         <wysiwyg ng-model="epicrisis.control_expert_conclusion" contenteditable="mother_death"/>
                                                     </div></div>
                                             </tr>
+                                            {% endif %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -285,7 +287,7 @@
                         <ng-form class="tab-pane" id="birth_complexety" name="birthComplexetyForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 3. Осложнения при родах</h3>
+                                <h3 class="box-title">Шаг 2. Осложнения при родах</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -465,7 +467,7 @@
                         <ng-form class="tab-pane" id="help_manipulation" name="help_manipulationForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 4. Пособия и манипуляции при родах</h3>
+                                <h3 class="box-title">Шаг 3. Пособия и манипуляции при родах</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -565,7 +567,7 @@
                         <ng-form class="tab-pane" id="birth_operation" name="birthOperationForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 5. Операции при родах</h3>
+                                <h3 class="box-title">Шаг 4. Операции при родах</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -714,7 +716,7 @@
                         <ng-form class="tab-pane" id="birth_children" name="birthChildrenForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 6. Сведения о родившихся детях</h3>
+                                <h3 class="box-title">Шаг 5. Сведения о родившихся детях</h3>
                             </div>
                             <div class="box-body">
                                 <div class="row">
