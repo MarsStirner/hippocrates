@@ -219,8 +219,15 @@
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary')"></th>
                     <td><rb-select multiple="true" ref-book="rbRisarHereditary" ng-model="anamnesis_mother.hereditary"
                                ng-required="motherAnamnesisDescriptor.getMandatory('hereditary')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
+                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('hereditary')"
+                               limit-to=50></rb-select></td>
                 </tr>
+                    {%- if 'hereditary_defect' in mother_anamnesis_descriptor -%}
+                        <tr ng-show="isHeredTextVisible">
+                            <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary_defect')"></td>
+                            <td><wysiwyg ng-model="anamnesis_mother.hereditary_defect" /></td>
+                        </tr>
+                    {%- endif -%}
                 {% endif %}
                 {% if 'current_diseases' in mother_anamnesis_descriptor %}
                 <tr>

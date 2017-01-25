@@ -393,7 +393,7 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
-var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi, PropsDescriptor, mother_anamnesis_descriptor) {
+var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, $filter, RisarApi, PropsDescriptor, mother_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
     $scope.motherAnamnesisDescriptor = new PropsDescriptor(mother_anamnesis_descriptor);
@@ -411,9 +411,23 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
                 current_diseases: []};
         })
     };
+    $scope.$watch('anamnesis_mother.hereditary', function (n, o) {
+        if ( n!==o ) {
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['26']) ) {
+                $scope.isHeredTextVisible = true;
+            } else {
+                $scope.anamnesis_mother.hereditary_defect = null;
+                $scope.isHeredTextVisible = false;
+            }
+        }
+    });
     $scope.$watch('anamnesis_mother.fertilization_type', function (n, o) {
         if ( n!==o ) {
-            if ( safe_traverse(n, ['code']) !== '01' ) {
+            var n = n ? n : [];
+            if (safe_traverse(n, ['code']) !== '01') {
                 $scope.anamnesis_mother.attempt_number = null;
                 $scope.isAttemptVisible = false;
             } else {
@@ -421,6 +435,7 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
             }
         }
     });
+
     $scope.save = function () {
         $scope.submit_attempt = true;
         var form = $scope.anamnesisMotherForm;
