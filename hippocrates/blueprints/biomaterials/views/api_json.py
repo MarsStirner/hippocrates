@@ -18,7 +18,7 @@ from sqlalchemy.orm import joinedload
 from ..app import module
 from ..lib.utils import TTJVisualizer
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_date, bail_out
+from nemesis.lib.utils import safe_date, bail_out, safe_traverse
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournalAssoc, Action, ActionPropertyType, \
     ActionProperty
@@ -34,19 +34,26 @@ def api_get_ttj_records():
     flt = data.get('filter')
 
     barcode = flt.get('barCode')
+    min_barcode_len = safe_traverse(app.config, 'system_prefs', 'ui', 'ttj_barcode_len')
+    search_by_barcode = min_barcode_len is not None and barcode
     exec_date = safe_date(flt.get('execDate'))
     biomaterial = flt.get('biomaterial')
     lab = flt.get('lab')
     org_str = flt.get('org_struct')
 
+    result = {}
+
     query = TakenTissueJournal.query.join(
-        rbTestTubeType, Action_TakenTissueJournalAssoc, Action, Event, ActionProperty, ActionPropertyType, rbTest, rbLaboratory_TestAssoc, rbLaboratory
+        rbTestTubeType, Action_TakenTissueJournalAssoc, Action, Event, ActionProperty, ActionPropertyType, rbTest,
+        rbLaboratory_TestAssoc, rbLaboratory
     ).filter(
         Action.deleted == 0,
         ActionProperty.isAssigned == 1,
     )
 
-    if barcode:
+    if search_by_barcode:
+        if len(barcode) < min_barcode_len:
+            return result
         query = query.filter(func.concat(TakenTissueJournal.period, TakenTissueJournal.barcode).like(u'{0}%'.format(barcode)))
     else:
         query = query.filter(func.date(TakenTissueJournal.datetimePlanned) == exec_date)
@@ -67,7 +74,7 @@ def api_get_ttj_records():
 
     filtered = query.all()
 
-    if not barcode:
+    if not search_by_barcode:
         if org_str:
             filtered = [
                 record for record in filtered
@@ -115,7 +122,7 @@ def api_get_ttj_records():
         ]
         for ttj_value, ttj_status_code in TTJStatus.codes.items()
     }
-    result = {}
+
     for ttj_status, records in ttj_by_status.iteritems():
         tube_dict = collections.defaultdict(lambda: {'name': None, 'count': 0})
         for record in records:

@@ -1,13 +1,14 @@
 WebMis20.controller('BiomaterialsIndexCtrl', [
-    '$scope', '$modal', '$window', '$interval', '$q', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService',
+    '$scope', '$modal', '$window', '$interval', 'ApiCalls', 'WMConfig', 'SelectAll', 'RefBookService',
     'PrintingService', 'PrintingDialog', 'MessageBox', 'CurrentUser',
-    function ($scope, $modal, $window, $interval, $q,ApiCalls, WMConfig, SelectAll, RefBookService,
+    function ($scope, $modal, $window, $interval, ApiCalls, WMConfig, SelectAll, RefBookService,
               PrintingService, PrintingDialog, MessageBox, CurrentUser) {
         $scope.selected_records = new SelectAll([]);
         $scope.TTJStatus = RefBookService.get('TTJStatus');
         $scope.rbLaboratory = RefBookService.get('rbLaboratory');
         $scope.ps_bm = new PrintingService("biomaterials");
         $scope.ps_bm.set_context("biomaterials");
+        $scope.min_barcode_len = WMConfig.local_config.ui.ttj_barcode_len;
 
         $scope.filter = {
             barCode: null,
@@ -22,8 +23,6 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         };
         $scope.current_result = [];
         $scope.grouped_current_result = {};
-        $scope.requestInProgress = false;
-        $scope.refreshCanceller = undefined;
 
         $scope.count_all_records = function () {
             return _.chain($scope.result).mapObject(
@@ -135,28 +134,23 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             }
 
             // resize block
-            setTimeout(function(){
-                var victim = document.getElementsByClassName('autoheight')[0];
-                while (window.innerHeight < document.body.scrollHeight && victim.offsetHeight > 60) {
-                  victim.style['max-height'] = victim.offsetHeight - 3 + 'px';
-                }
-            }, 200);
+            //setTimeout(function(){
+            //    var victim = document.getElementsByClassName('autoheight')[0];
+            //    while (window.innerHeight < document.body.scrollHeight && victim.offsetHeight > 60) {
+            //      victim.style['max-height'] = victim.offsetHeight - 3 + 'px';
+            //    }
+            //}, 200);
         };
 
         $scope.get_data = function (quick_filter, dont_refresh_selected) {
-            $scope.requestInProgress = true;
-            $scope.refreshCanceller = $q.defer();
             return ApiCalls.wrapper(
                 'POST', WMConfig.url.biomaterials.api_get_ttj_records,
-                {}, {filter: $scope.filter}, { timeout: $scope.refreshCanceller.promise }
+                {}, {filter: $scope.filter}
             )
                 .then(function (res) {
                     $scope.result = res;
                     $scope.set_current_records(quick_filter, dont_refresh_selected);
                 })
-                .finally(function () {
-                    $scope.requestInProgress = false;
-                });
         };
 
         $scope.change_status = function (status) {
@@ -242,10 +236,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
             $scope.set_current_records(true);
         }
 
-        $scope.barCodeSearch = function(model) {
-            if ($scope.refreshCanceller) {
-                $scope.refreshCanceller.resolve('cancel search');
-            }
+        $scope.barCodeSearch = function(barcode) {
             $scope.get_data();
         };
 
@@ -261,9 +252,7 @@ WebMis20.controller('BiomaterialsIndexCtrl', [
         $scope.$watch('static_filter.action_type__name', watch_without_reload);
 
         var reload = $interval(function () {
-            if (!$scope.requestInProgress) {
-                $scope.get_data($scope.quickFilterActive(), true);
-            }
+            $scope.get_data($scope.quickFilterActive(), true);
         }, 60000);
         $scope.get_data();
     }])
