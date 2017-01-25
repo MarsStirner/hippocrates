@@ -42,7 +42,7 @@ class StatsController(BaseModelController):
         for event_id, preg_week in events_data:
             if preg_week is None:
                 pass
-            elif preg_week <= 40:
+            elif 1 <= preg_week <= 40:
                 distr_data[preg_week - 1][1] += 1
             else:
                 distr_data[-1][1] += 1

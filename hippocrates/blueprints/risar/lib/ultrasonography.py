@@ -10,8 +10,8 @@ logger = logging.getLogger('simple')
 def emresult_realization_minus_gestation(em):
     if em:
         ra = em.result_action
-        rd = ra.propsByCode['RealizationDate'].value
-        ga = ra.propsByCode['gestational_age'].value
+        rd = ra.propsByCode['RealizationDate'].value if 'RealizationDate' in ra.propsByCode else None
+        ga = ra.propsByCode['gestational_age'].value if 'gestational_age' in ra.propsByCode else None
         if rd and ga:
             return rd - datetime.timedelta(weeks=ga)
 

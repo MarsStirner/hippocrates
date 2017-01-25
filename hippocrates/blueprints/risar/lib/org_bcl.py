@@ -2,7 +2,7 @@
 from collections import defaultdict
 
 from sqlalchemy import func, and_, or_
-from sqlalchemy.orm import immediateload
+from sqlalchemy.orm import immediateload, contains_eager
 
 from nemesis.systemwide import db
 from nemesis.models.organisation import (OrganisationBirthCareLevel, Organisation, Organisation_OrganisationBCLAssoc,
@@ -121,6 +121,8 @@ class OrganisationFetcher(BaseFetcher):
             Person
         ).filter(
             Organisation.isStationary == 1
+        ).options(
+            contains_eager(Organisation.org_curators).contains_eager('person')
         )
 
 
