@@ -17,33 +17,67 @@
                         <div class="row">
                             <div class="col-md-6" style="padding-left: 30px; padding-right: 30px">
                                 <p>
+                                    {% if 'menstruation_start_age' in mother_anamnesis_descriptor %}
                                     Менструации с <b ng-bind-html="anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
+                                    {% endif %}
+                                    {% if 'menstruation_duration' in mother_anamnesis_descriptor %}
                                     длительность <b ng-bind-html="anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
+                                    {% endif %}
+                                    {% if 'menstruation_period' in mother_anamnesis_descriptor %}
                                     продолжительность цикла <b ng-bind-html="anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
+                                    {% endif %}
+                                    {% if 'menstruation_disorders' in mother_anamnesis_descriptor %}
                                     нарушения: <b ng-bind-html="anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>
+                                    {% endif %}
                                 </p>
+                                {% if 'menstruation_last_date' in mother_anamnesis_descriptor %}
                                 <p>
                                     Дата последней менструации <b ng-bind-html="anamnesis.mother.menstruation_last_date | asDate | underlineNoVal"></b>
                                 </p>
+                                {% endif %}
+                                {% if 'sex_life_start_age' in mother_anamnesis_descriptor %}
                                 <p>
                                     Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>
                                     Вид контрацепции: <b ng-bind-html="format_multiple(anamnesis.mother.contraception, 'name') | underlineNoVal"></b>
                                 </p>
+                                {% endif %}
+                                {% if 'fertilization_type' in mother_anamnesis_descriptor %}
                                 <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'intrauterine' in mother_anamnesis_descriptor %}
                                 <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b></p>
+                                {% endif %}
+                                {% if 'multifetation' in mother_anamnesis_descriptor %}
                                 <p>Предыдущие многоплодные беременности: <b>[[ anamnesis.mother.multifetation ? 'Да' : 'Нет']]</b></p>
+                                {% endif %}
+                                {% if 'preeclampsia' in mother_anamnesis_descriptor %}
                                 <p>Преэклампсия была у матери или сестры: <b>[[ anamnesis.mother.preeclampsia ? 'Да' : 'Нет']]</b></p>
+                                {% endif %}
+                                {% if 'marital_status' in mother_anamnesis_descriptor %}
                                 <p>Семейное положение: <b ng-bind-html="anamnesis.mother.marital_status.name | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'family_income' in mother_anamnesis_descriptor %}
                                 <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income.name | underlineNoVal"></b></p>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
+                                {% if 'name' in father_anamnesis_descriptor %}
                                 <p>ФИО отца: <b ng-bind-html="anamnesis.father.name | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'age' in father_anamnesis_descriptor %}
                                 <p>Возраст: <b ng-bind-html="anamnesis.father.age | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'phone' in father_anamnesis_descriptor %}
                                 <p>Телефон отца: <b ng-bind-html="anamnesis.father.phone | underlineNoVal"></b></p>
+                                {% endif %}
                                 <p>Данные исследований отца:
                                 <ul class="list-unstyled" style="padding-left: 30px;">
+                                    {% if 'HIV' in father_anamnesis_descriptor %}
                                     <li>ВИЧ: <b ng-bind-html="anamnesis.father.HIV | danet | underlineNoVal"></b></li>
+                                    {% endif %}
+                                    {% if 'fluorography' in father_anamnesis_descriptor %}
                                     <li>Флюорография: <b ng-bind-html="anamnesis.father.fluorography | underlineNoVal"></b></li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </div>
