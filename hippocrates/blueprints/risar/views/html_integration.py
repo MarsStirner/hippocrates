@@ -93,5 +93,5 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
 
 
 def card_save_or_update_get_id(data, create, api_version, card_id=None):
-    xform = card_save_or_update(data, create, api_version, card_id)
+    xform, _ = card_save_or_update(data, create, api_version, card_id)
     return xform.target_obj.id
