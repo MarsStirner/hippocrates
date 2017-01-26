@@ -90,7 +90,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         'specialities': {'attr': 'specialities', 'default': None, 'rb': 'rbRisarSpecialities', 'is_vector': False},
         'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
         'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
-        'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'regionalCode'},
         'embryotomy': {'attr': 'embryotomy', 'default': None, 'rb': None, 'is_vector': False},
     }
 
@@ -103,7 +103,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         'apgar_score_5': {'attr': 'apgar_score_5', 'default': None, 'rb': None, 'is_vector': False},
         'apgar_score_10': {'attr': 'apgar_score_10', 'default': None, 'rb': None, 'is_vector': False},
         'death_reasons': {'attr': 'death_reason', 'default': None, 'rb': None, 'is_vector': False},
-        'diseases': {'attr': 'diseases', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'diseases': {'attr': 'diseases', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'regionalCode'},
     }
 
     DIAG_KINDS_MAP = {
@@ -361,7 +361,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         diags_data = data.get('diagnoses')
         for dd in diags_data:
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
+            mkb_code = dd['diagnostic']['mkb'].regionalCode
             if kind['is_vector']:
                 res.setdefault(kind['attr'], []).append(mkb_code)
             else:
@@ -379,7 +379,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         diags_data = data.get('diagnoses')
         for dd in diags_data:
             kind = self.PAT_DIAG_KINDS_MAP[dd['diagnosis_types']['pathanatomical'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
+            mkb_code = dd['diagnostic']['mkb'].regionalCode
             if kind['is_vector']:
                 res.setdefault(kind['attr'], []).append(mkb_code)
             else:

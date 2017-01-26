@@ -72,7 +72,7 @@ class ExpertDataXForm(ExpertDataSchema, XForm):
         for risk_diag in risk_diagnosis:
             data.append(
                 {
-                    'diagnosis_code': risk_diag.mkb.DiagID,
+                    'diagnosis_code': risk_diag.mkb.regionalCode,
                     'diagnosis_name': risk_diag.mkb.DiagName,
                 }
             )

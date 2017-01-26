@@ -68,7 +68,7 @@ class AppointmentXForm(AppointmentSchema, XForm):
         action = self.target_obj
         set_person = action.setPerson
         res = {
-            'measure_code': action.em_appointment.measure.code,
+            'measure_code': action.em_appointment.measure.regionalCode,
             'diagnosis': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'DiagnosisDirection'))),
             'execution_time': self.or_undefined(format_time(self._get_prop_val(action, 'time'))),
             'parameters': self.or_undefined(self._get_prop_val(action, 'additional')),

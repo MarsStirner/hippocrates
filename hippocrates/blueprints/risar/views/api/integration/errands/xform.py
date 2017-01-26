@@ -41,7 +41,7 @@ class ErrandXForm(ErrandSchema, XForm):
         self.target_obj.result = data.get('execution_comment')
         status_code = data.get('status')
         self._check_rb_value('rbErrandStatus', status_code)
-        new_status = rbErrandStatus.query.filter(rbErrandStatus.code == status_code).first()
+        new_status = rbErrandStatus.query.filter(rbErrandStatus.regionalCode == status_code).first()
         self.target_obj.status = new_status
 
     def delete_target_obj_data(self):

@@ -324,7 +324,7 @@ class XForm(object):
 
     @staticmethod
     def find_mkb(code):
-        mkb = db.session.query(MKB).filter(MKB.DiagID == code, MKB.deleted == 0).first()
+        mkb = db.session.query(MKB).filter(MKB.regionalCode == code, MKB.deleted == 0).first()
         if not mkb:
             raise ApiException(400, u'Не найден МКБ по коду "{0}"'.format(code))
         return mkb
@@ -340,8 +340,7 @@ class XForm(object):
             # if rb_name not in ('rbBloodType', 'rbDocumentType', 'rbPolicyType'):
             self._check_rb_value(rb_name, value['code'])
 
-    def _check_rb_value(self, rb_name, value_code):
-        field_name = 'regionalCode'
+    def _check_rb_value(self, rb_name, value_code, field_name='regionalCode'):
         # if rb_name == 'rbBloodType':
         #     field_name = 'code'
         # elif rb_name in ('rbDocumentType', 'rbPolicyType'):
@@ -353,7 +352,7 @@ class XForm(object):
             )
 
     @staticmethod
-    def to_rb(code):
+    def to_rb(code):  # vesta
         return {
             'code': code
         } if code is not None else None
@@ -362,7 +361,7 @@ class XForm(object):
     def from_rb(rb):
         if rb is None:
             return None
-        return rb.code if hasattr(rb, 'code') else rb['code']
+        return rb.regionalCode if hasattr(rb, 'regionalCode') else rb['code']  # vesta
 
     @staticmethod
     def to_mkb_rb(code):
@@ -378,13 +377,13 @@ class XForm(object):
     def from_mkb_rb(rb):
         if rb is None:
             return None
-        return rb.DiagID if hasattr(rb, 'DiagID') else rb['code']
+        return rb.regionalCode if hasattr(rb, 'regionalCode') else rb['code']  # vesta
 
     @staticmethod
     def to_blood_type_rb(code):
         if code is None:
             return None
-        bt = db.session.query(rbBloodType).filter(rbBloodType.name == code).first()
+        bt = db.session.query(rbBloodType).filter(rbBloodType.regionalCode == code).first()
         if not bt:
             raise ApiException(400, u'Не найдена группа крови по коду "{0}"'.format(code))
         return safe_dict(bt)
@@ -393,7 +392,7 @@ class XForm(object):
     def from_blood_type_rb(rb):
         if rb is None:
             return None
-        return rb.name if hasattr(rb, 'name') else rb['name']
+        return rb.regionalCode if hasattr(rb, 'regionalCode') else rb['code']  # vesta
 
     @staticmethod
     def to_enum(value, enum_model):
@@ -413,17 +412,17 @@ class XForm(object):
             )
         return enum if enum.is_valid() else None
 
-    def rb(self, code, rb_model, rb_code_field='code'):
-        id_, name = self.rb_validate(rb_model, code, rb_code_field)
+    def rb(self, regionalCode, rb_model, rb_code_field='regionalCode'):
+        id_, code, name = self.rb_validate(rb_model, regionalCode, rb_code_field)
         return code and {'code': code, 'id': id_, 'name': name} or None
 
     @staticmethod
-    def arr(rb_func, codes, rb_name, rb_code_field='code'):
+    def arr(rb_func, codes, rb_name, rb_code_field='regionalCode'):
         return map(lambda code: rb_func(code, rb_name, rb_code_field), codes)
 
     @staticmethod
     def rb_validate(rb_model, code, rb_code_field):
-        row_id = name = None
+        row_id = row_code = name = None
         if code is not None:
             if isinstance(rb_model, basestring):
                 try:
@@ -435,6 +434,7 @@ class XForm(object):
                     if row_id == 'None':
                         row_id = None
                     name = rb.get('name')
+                    row_code = rb.get('code')
             else:
                 field = getattr(rb_model, rb_code_field)
                 rb = rb_model.query.filter(
@@ -442,6 +442,7 @@ class XForm(object):
                 ).first()
                 row_id = rb.id if rb else None
                 name = getattr(rb, 'name', None) if rb else None
+                row_code = getattr(rb, 'code', None) if rb else None
             if not row_id:
                 raise ApiException(
                     NOT_FOUND_ERROR,
@@ -450,7 +451,7 @@ class XForm(object):
                         code,
                     )
                 )
-        return row_id, name
+        return row_id, row_code, name
 
     def mapping_part(self, part_map, data, res):
         if not data:
@@ -458,7 +459,7 @@ class XForm(object):
         for k, v in part_map.items():
             val = data.get(v['attr'], v.get('default'))
             if v['rb']:
-                rb_code_field = v.get('rb_code_field', 'code')
+                rb_code_field = v.get('rb_code_field', 'regionalCode')
                 if v['is_vector']:
                     res[k] = self.arr(self.rb, val, v['rb'], rb_code_field)
                 else:
@@ -470,15 +471,16 @@ class XForm(object):
         res = {}
         for k, v in part.items():
             if v['rb']:
-                rb_code_field = v.get('rb_code_field', 'code')
+                rb_code_field = v.get('rb_code_field', 'regionalCode')
+                vesta_rb_code_field = v.get('rb_code_field', 'code')  # vesta
                 if v['is_vector']:
                     if isinstance(v['rb'], basestring):
-                        val = map(lambda x: x[rb_code_field], data[k])
+                        val = map(lambda x: x[vesta_rb_code_field], data[k])
                     else:
                         val = map(lambda x: getattr(x, rb_code_field), data[k])
                 else:
                     if isinstance(v['rb'], basestring):
-                        val = data[k] and data[k][rb_code_field]
+                        val = data[k] and data[k][vesta_rb_code_field]
                     else:
                         val = data[k] and getattr(data[k], rb_code_field)
             else:
@@ -759,7 +761,7 @@ class MeasuresResultsXForm(ExternalXForm):
     def update_measure_data(self, data):
         status = data.get('status')
         if status:
-            self.em.status = self.rb_validate(rbMeasureStatus, status, 'code')[0]
+            self.em.status = self.rb_validate(rbMeasureStatus, status, 'regionalCode')[0]
 
     def changes_diagnoses_system(self):
         return bool(self.diagnosis_codes)
@@ -862,7 +864,7 @@ class MeasuresResultsXForm(ExternalXForm):
 
     def create_hand_event_measure(self, measure_code, beg_date, end_date):
         status = MeasureStatus.performed[0]
-        measure = Measure.query.filter(Measure.code == measure_code).first()
+        measure = Measure.query.filter(Measure.regionalCode == measure_code).first()
         today = datetime.today()
 
         em = EventMeasure()

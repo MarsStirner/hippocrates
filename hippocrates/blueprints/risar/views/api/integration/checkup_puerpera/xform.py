@@ -176,7 +176,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, PregnancyCheckupsXForm):
             kind_code = dd['diagnosis_types']['final'].code
             if kind_code in self.DIAG_KINDS_MAP:
                 kind = self.DIAG_KINDS_MAP[kind_code]
-                mkb_code = dd['diagnostic']['mkb'].DiagID
+                mkb_code = dd['diagnostic']['mkb'].regionalCode
                 if kind['is_vector']:
                     res.setdefault(kind['attr'], []).append(mkb_code)
                 else:

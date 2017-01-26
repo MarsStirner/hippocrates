@@ -238,7 +238,7 @@ class ClientXForm(ClientSchema, XForm):
 
     def _update_blood(self, data_list):
         blood_types = dict(
-            (bt.code, bt)
+            (bt.regionalCode, bt)
             for bt in rbBloodType.query
         )
         client = self.target_obj
@@ -277,8 +277,8 @@ class ClientXForm(ClientSchema, XForm):
                 self._changed.append(work_object)
                 continue
             if not work_object:
-                self._check_rb_value('rbSocStatusClass', '3')
-                self._check_rb_value('rbSocStatusType', '004')
+                self._check_rb_value('rbSocStatusClass', '3', 'code')
+                self._check_rb_value('rbSocStatusType', '004', 'code')
                 socStatusClass_id = rbSocStatusClass.query.filter(
                     rbSocStatusClass.code == '3'
                 ).value(rbSocStatusClass.id)
