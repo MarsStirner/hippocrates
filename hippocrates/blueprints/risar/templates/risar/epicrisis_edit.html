@@ -813,11 +813,11 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <th class="text-right">[[child.alive == false ? 'Время смерти' : 'Время рождения']] <span class="text-danger">*</span></th>
+                                                            <th class="text-right">[[child.alive == false ? 'Время смерти' : 'Время рождения']]</th>
                                                             <td>
                                                                 <div class="row" ng-class="{'has-error': birthChildrenForm.time_[[$index]].$invalid && birthChildrenForm.submit_attempt}">
                                                                     <div class="col-md-3">
-                                                                        <div fs-time ng-required="true"
+                                                                        <div fs-time ng-required="false"
                                                                              ng-model="child.time" name="time_[[$index]]"></div>
                                                                     </div>
                                                                 </div>
@@ -856,18 +856,6 @@
                                                                 <div class="row">
                                                                 <div class="col-md-2">
                                                                     <input name="fifth_minute" ng-model="child.apgar_score_5"
-                                                                           class="form-control" type="number"
-                                                                           min="0" max="10" valid-number/>
-                                                                </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr ng-if="child.alive">
-                                                            <td class="text-right">на 10 минуту жизни <span>&nbsp;</span></td>
-                                                            <td>
-                                                                <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <input name="tenth_minute" ng-model="child.apgar_score_10"
                                                                            class="form-control" type="number"
                                                                            min="0" max="10" valid-number/>
                                                                 </div>

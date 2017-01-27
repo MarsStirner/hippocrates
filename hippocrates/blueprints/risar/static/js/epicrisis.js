@@ -80,7 +80,8 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
     $scope.add_child = function () {
         $scope.epicrisis.newborn_inspections.push({
             id: null,
-            deleted: 0
+            deleted: 0,
+            alive: true
         });
         $timeout(function () {
             $('#childrenTabs').find('a:last').tab('show');
