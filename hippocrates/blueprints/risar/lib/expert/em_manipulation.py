@@ -464,7 +464,7 @@ class EventMeasureSelecter(BaseSelecter):
             if len(flt['checkups']) > 0:
                 def make_conditions(checkups_interval_list):
                     for checkup in checkups_interval_list:
-                        beg_date_to = safe_datetime(checkup['beg_date_to'])
+                        beg_date_to = safe_datetime(checkup.get('beg_date_to'))
                         first = or_(
                             EventMeasure.endDateTime >= safe_datetime(checkup['end_date_from']),
                             EventMeasure.endDateTime.is_(None)
