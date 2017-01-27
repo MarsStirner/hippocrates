@@ -142,8 +142,8 @@
                     <td>[[ event.person_short_name ]]</td>
                     <td>[[ event.result_text ]]</td>
                     <td>
-                        <span ng-repeat="mkb in event.diagnoses">
-                            <span class="bottom_dashed" tooltip="[[mkb.name]]" ng-bind="mkb.code"></span><span ng-if="!$last">, </span>
+                        <span ng-repeat="item in event.diagnoses">
+                            <span class="bottom_dashed" title="[[ item[1] ]]" ng-bind="item[0]"></span><span ng-if="!$last">, </span>
                         </span>
                     </td>
                 </tr>

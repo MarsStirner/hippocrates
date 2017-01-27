@@ -35,6 +35,7 @@ from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from nemesis.lib.mq_integration.event import MQOpsEvent, notify_event_changed, notify_moving_changed
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
+from nemesis.lib.diagnosis import get_events_diagnoses, format_diagnoses
 
 
 logger = logging.getLogger('simple')
@@ -601,35 +602,22 @@ def api_get_events():
                     )
         )
     if 'diag_mkb_list' in flt:
-        # latest diagnostics for *all* diagnoses
-        diag_sqq = db.session.query(Diagnostic).join(
-            Diagnosis
-        ).filter(
-            Diagnosis.deleted == 0,
-            Diagnostic.deleted == 0,
-        )
-        diag_sqq = diag_sqq.group_by(
-            Diagnostic.diagnosis_id
-        )
-        diag_sqq = diag_sqq.with_entities(func.max(Diagnostic.id).label('zid')).subquery()
-        diag_sq = db.session.query(
-            Diagnostic.id, Diagnostic.diagnosis_id,
-            Diagnosis.client_id, Diagnostic.MKB.label('mkb'),
-            Diagnosis.setDate.label('beg_date'),
-            func.coalesce(Diagnosis.endDate, func.curdate()).label('end_date')
+        events_w_diags_sq = db.session.query(Event.id.label('event_id')).join(
+            Diagnosis, and_(Diagnosis.client_id == Event.client_id,
+                            Diagnosis.setDate <= func.coalesce(Event.execDate, func.curdate()),
+                            func.coalesce(Diagnosis.endDate, func.curdate()) >= Event.setDate)
         ).join(
-            diag_sqq, diag_sqq.c.zid == Diagnostic.id
+            Diagnostic
         ).join(
-            Diagnosis, Diagnostic.diagnosis_id == Diagnosis.id
-        ).subquery('AllLatestDiagnostics')
-
-        base_query = base_query.join(
-            diag_sq, and_(diag_sq.c.client_id == Event.client_id,
-                          diag_sq.c.beg_date <= func.coalesce(Event.execDate, func.curdate()),
-                          diag_sq.c.end_date >= Event.setDate)
+            Action, and_(Diagnostic.action_id == Action.id,
+                         Action.event_id == Event.id)
         ).filter(
-            diag_sq.c.mkb.in_(flt['diag_mkb_list'])
-        )
+            Diagnostic.setDate <= func.coalesce(Event.execDate, func.curdate()),
+            Diagnostic.setDate >= Event.setDate,
+            Diagnostic.MKB.in_(flt['diag_mkb_list']),
+            Diagnostic.deleted == 0, Diagnosis.deleted == 0
+        ).group_by(Event.id).subquery()
+        base_query = base_query.join(events_w_diags_sq, Event.id == events_w_diags_sq.c.event_id)
 
     if 'draft_contract' in flt:
         base_query = base_query.join(Contract).filter(Contract.draft == (flt['draft_contract'] and 1 or 0))
@@ -666,11 +654,14 @@ def api_get_events():
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
     paginate = base_query.paginate(page, per_page, False)
+    event_id_list = [event.id for event in paginate.items]
+    diag_data = get_events_diagnoses(event_id_list)
+    diag_data = format_diagnoses(diag_data)
     return {
         'pages': paginate.pages,
         'total': paginate.total,
         'items': [
-            context.make_short_event(event)
+            context.make_short_event(event, diag_data.get(event.id))
             for event in paginate.items
         ]
     }
