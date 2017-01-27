@@ -44,6 +44,7 @@ def api_0_chart_mother(event_id):
         action = get_action(event, risar_mother_anamnesis)
     else:
         action = get_action(event, risar_mother_anamnesis, True)
+        action.update_action_integrity()
         for code, value in request.get_json().iteritems():
             if code not in ('id', 'blood_type') and code in action.propsByCode:
                 action.propsByCode[code].value = value

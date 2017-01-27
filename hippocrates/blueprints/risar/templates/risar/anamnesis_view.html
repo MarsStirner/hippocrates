@@ -44,6 +44,9 @@
                                 {% if 'fertilization_type' in mother_anamnesis_descriptor %}
                                 <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b></p>
                                 {% endif %}
+                                {% if 'attempt_number' in mother_anamnesis_descriptor %}
+                                <p ng-if="anamnesis.mother.attempt_number">Номер попытки: <b ng-bind="anamnesis.mother.attempt_number"></b></p>
+                                {% endif %}
                                 {% if 'intrauterine' in mother_anamnesis_descriptor %}
                                 <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b></p>
                                 {% endif %}
@@ -201,12 +204,26 @@
                             </tr>
                             {% endif %}
                             {% if 'hereditary' in mother_anamnesis_descriptor %}
-                            <tr>
-                                <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary')"></td>
-                                <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
-                                <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
-                            </tr>
+                                <tr>
+                                    <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary')"></td>
+                                    <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
+                                    <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
+                                </tr>
+                                {%- if 'hereditary_defect' in mother_anamnesis_descriptor -%}
+                                    <tr ng-if="anamnesis.mother.hereditary_defect || anamnesis.father.hereditary_defect">
+                                        <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary_defect')"></td>
+                                        <td><span ng-bind-html="anamnesis.mother.hereditary_defect"></span></td>
+                                        <td><span ng-bind-html="anamnesis.father.hereditary_defect"></span></td>
+                                    </tr>
+                                {%- endif -%}
                             {% endif %}
+                            {%- if 'hereditary_free_input' in mother_anamnesis_descriptor  -%}
+                                <tr ng-if="anamnesis.mother.hereditary_free_input||anamnesis.father.hereditary_free_input">
+                                    <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary_free_input')"></td>
+                                    <td><span ng-bind-html="anamnesis.mother.hereditary_free_input"></span></td>
+                                    <td><span ng-bind-html="anamnesis.father.hereditary_free_input"></span></td>
+                                </tr>
+                            {%- endif -%}
                             <tr>
                                 <td>Вредные привычки</td>
                                 <td ng-bind="anamnesis.mother.bad_habits"></td>

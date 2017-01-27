@@ -180,9 +180,7 @@
                             <td class="col-md-6">
                                 <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'allergy'}}"
                                      class="danger text-danger">
-                                    <b ng-if="['high', 'strict'].has(char.power.code)"
-                                       ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[
-                                        char.name ]]</b>
+                                    <b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
                                 </div>
                             </td>
                         </tr>
@@ -191,9 +189,7 @@
                             <td class="col-md-7">
                                 <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'medicine'}}"
                                      class="danger text-danger">
-                                    <b ng-if="['high', 'strict'].has(char.power.code)"
-                                       ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[
-                                        char.name ]]</b>
+                                    <b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
                                 </div>
                             </td>
                         </tr>

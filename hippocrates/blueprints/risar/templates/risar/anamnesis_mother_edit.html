@@ -136,6 +136,20 @@
                                ng-required="motherAnamnesisDescriptor.getMandatory('fertilization_type')"
                                ng-disabled="motherAnamnesisDescriptor.getReadOnly('fertilization_type')"></rb-select></td>
                 </tr>
+                    <tr ng-show="isAttemptVisible">
+                        <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('attempt_number')"></th>
+                        <td>
+                            <div class="row">
+                                <div class="col-md-4">
+                            <input ng-model="anamnesis_mother.attempt_number" class="form-control" valid-number maxlength="2" type="text"
+                                   ng-required="motherAnamnesisDescriptor.getMandatory('attempt_number')"
+                                   ng-disabled="motherAnamnesisDescriptor.getReadOnly('attempt_number')">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                     {%- if 'attempt_number' in mother_anamnesis_descriptor -%}
+                    {%- endif -%}
                 {% endif %}
                 {% if 'intrauterine' in mother_anamnesis_descriptor %}
                 <tr>
@@ -207,8 +221,21 @@
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary')"></th>
                     <td><rb-select multiple="true" ref-book="rbRisarHereditary" ng-model="anamnesis_mother.hereditary"
                                ng-required="motherAnamnesisDescriptor.getMandatory('hereditary')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
+                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('hereditary')"
+                               limit-to=50></rb-select></td>
                 </tr>
+                    {%- if 'hereditary_defect' in mother_anamnesis_descriptor -%}
+                        <tr ng-if="isHeredTextVisible">
+                            <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary_defect')"></th>
+                            <td><wysiwyg ng-model="anamnesis_mother.hereditary_defect" /></td>
+                        </tr>
+                    {%- endif -%}
+                {% endif %}
+                {% if 'hereditary_free_input' in mother_anamnesis_descriptor  %}
+                   <tr>
+                        <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary_free_input')"></th>
+                        <td><wysiwyg ng-model="anamnesis_mother.hereditary_free_input" /></td>
+                   </tr>
                 {% endif %}
                 {% if 'current_diseases' in mother_anamnesis_descriptor %}
                 <tr>

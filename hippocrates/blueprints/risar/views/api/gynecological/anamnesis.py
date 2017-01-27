@@ -33,7 +33,9 @@ def api_0_gyn_anamnesis_general(event_id):
     if not event:
         raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
-    return represent_general_anamnesis_action(card.anamnesis)
+    action = card.anamnesis
+    action.update_action_integrity()
+    return represent_general_anamnesis_action(action)
 
 
 @module.route(_base + '/general', methods=['POST'])
@@ -44,6 +46,7 @@ def api_0_gyn_anamnesis_general_post(event_id):
         raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     action = card.anamnesis
+    action.update_action_integrity()
     pbc = action.propsByCode
     for code, value in request.get_json().iteritems():
         if code not in ('id', 'blood_type') and code in pbc:
