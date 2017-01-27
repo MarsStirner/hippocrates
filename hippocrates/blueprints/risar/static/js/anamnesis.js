@@ -452,12 +452,13 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, $filter,
     };
     reload_anamnesis();
 };
-var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor) {
+var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, $filter, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
     $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
     $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date= new Date();
+    
 
     var reload_anamnesis = function () {
         $scope.reload_header()
@@ -487,8 +488,21 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
         })
     };
     reload_anamnesis();
+    $scope.$watch('anamnesis_unpregnant.hereditary', function (n, o) {
+        if ( n!==o ) {
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['26']) ) {
+                $scope.isHeredTextVisible = true;
+            } else {
+                $scope.anamnesis_unpregnant.hereditary_defect = null;
+                $scope.isHeredTextVisible = false;
+            }
+        }
+    });
 };
-var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
+var AnamnesisFatherEditCtrl = function ($scope, $controller, $filter, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
     $scope.fatherAnamnesisDescriptor = new PropsDescriptor(father_anamnesis_descriptor);
@@ -508,4 +522,17 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi, PropsDesc
         })
     };
     reload_anamnesis();
+    $scope.$watch('anamnesis_father.hereditary', function (n, o) {
+        if ( n!==o ) {
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['26']) ) {
+                $scope.isHeredTextVisible = true;
+            } else {
+                $scope.anamnesis_father.hereditary_defect = null;
+                $scope.isHeredTextVisible = false;
+            }
+        }
+    });
 };

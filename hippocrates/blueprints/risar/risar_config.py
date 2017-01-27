@@ -33,13 +33,13 @@ risar_anamnesis_apt_common_codes = [
     'education', 'work_group', 'professional_properties',
     'infertility', 'infertility_period', 'infertility_cause', 'infertility_type', 'infertility_treatment',
     'blood_type', 'finished_diseases', 'current_diseases', 'finished_diseases_text', 'current_diseases_text',
-    'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
+    'hereditary', 'hereditary_defect', 'hereditary_free_input', 'alcohol', 'smoking', 'toxic', 'drugs']
 
 risar_anamnesis_apt_mother_codes = [
     'menstruation_last_date', 'marital_status',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
     'intrauterine', 'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income',
-    'preeclampsia', 'multifetation', 'heart_disease', 'attempt_number', 'hereditary_defect'] + risar_anamnesis_apt_common_codes
+    'preeclampsia', 'multifetation', 'heart_disease', 'attempt_number'] + risar_anamnesis_apt_common_codes
 risar_anamnesis_apt_father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + risar_anamnesis_apt_common_codes
 
 first_inspection_flat_code = 'risarFirstInspection'

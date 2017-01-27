@@ -223,11 +223,17 @@
                                limit-to=50></rb-select></td>
                 </tr>
                     {%- if 'hereditary_defect' in mother_anamnesis_descriptor -%}
-                        <tr ng-show="isHeredTextVisible">
-                            <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary_defect')"></td>
+                        <tr ng-if="isHeredTextVisible">
+                            <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary_defect')"></th>
                             <td><wysiwyg ng-model="anamnesis_mother.hereditary_defect" /></td>
                         </tr>
                     {%- endif -%}
+                {% endif %}
+                {% if 'hereditary_free_input' in mother_anamnesis_descriptor  %}
+                   <tr>
+                        <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('hereditary_free_input')"></th>
+                        <td><wysiwyg ng-model="anamnesis_mother.hereditary_free_input" /></td>
+                   </tr>
                 {% endif %}
                 {% if 'current_diseases' in mother_anamnesis_descriptor %}
                 <tr>
