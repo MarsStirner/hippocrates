@@ -604,15 +604,15 @@ def api_get_events():
     if 'diag_mkb_list' in flt:
         events_w_diags_sq = db.session.query(Event.id.label('event_id')).join(
             Diagnosis, and_(Diagnosis.client_id == Event.client_id,
-                            Diagnosis.setDate <= func.coalesce(Event.execDate, func.curdate()),
-                            func.coalesce(Diagnosis.endDate, func.curdate()) >= Event.setDate)
+                            Diagnosis.setDate <= func.coalesce(Event.execDate, func.current_timestamp()),
+                            func.coalesce(Diagnosis.endDate, func.current_timestamp()) >= Event.setDate)
         ).join(
             Diagnostic
         ).join(
             Action, and_(Diagnostic.action_id == Action.id,
                          Action.event_id == Event.id)
         ).filter(
-            Diagnostic.setDate <= func.coalesce(Event.execDate, func.curdate()),
+            Diagnostic.setDate <= func.coalesce(Event.execDate, func.current_timestamp()),
             Diagnostic.setDate >= Event.setDate,
             Diagnostic.MKB.in_(flt['diag_mkb_list']),
             Diagnostic.deleted == 0, Diagnosis.deleted == 0
