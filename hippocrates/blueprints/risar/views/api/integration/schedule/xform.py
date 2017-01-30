@@ -13,7 +13,8 @@ from nemesis.models.schedule import ScheduleTicket, Schedule, rbReceptionType, r
     ScheduleClientTicket
 from nemesis.models.person import Person
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, format_time, safe_dict, safe_time
+from nemesis.lib.utils import safe_date, format_time, safe_dict, safe_time, safe_int, \
+    safe_bool
 from nemesis.lib.apiutils import ApiException
 
 
@@ -231,20 +232,25 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
     def convert_and_format(self, data):
         res = {}
         person = self.find_doctor(data['doctor'], data['hospital'])
+        reserve_type_rb = self.rb(data.get('quota_type'), 'rbReserveType') or {}
         res.update({
-            'schedule_ticket_id': data.get('schedule_ticket_id'),
+            'schedule_id': data.get('schedule_id'),
             'person': person,
             'date': safe_date(data['date']),
             'time_begin': safe_time(data['time_begin']),
             'time_end': safe_time(data['time_end']),
-            'quantity': data.get('quantity')
+            'quantity': data.get('quantity'),
+            'reserve_type_id': reserve_type_rb.get('id'),
+            'appointment_permited': int(safe_bool(data.get('appointment_permited'))),
         })
         sts = []
         for st_data in data.get('schedule_tickets', []):
             st = {
                 'time_begin': safe_time(st_data['time_begin']),
                 'time_end': safe_time(st_data['time_end']),
-                'patient': None
+                'patient': None,
+                'schedule_ticket_type': safe_int(st_data.get('schedule_ticket_type')) or 1,
+                'schedule_ticket_id': safe_int(st_data.get('schedule_ticket_id')),
             }
             if 'patient' in st_data:
                 st['patient'] = self.find_client(st_data['patient'])
@@ -258,12 +264,24 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
         s = Schedule(
             person=data['person'], date=data['date'],
             begTime=data['time_begin'], endTime=data['time_end'],
-            numTickets=data['quantity'], receptionType=rec_type
+            numTickets=data['quantity'], receptionType=rec_type,
+            reserve_type_id=data['reserve_type_id'],
+            appointment_permitted=data['appointment_permited'],
         )
 
-        attendance = rbAttendanceType.cache().by_code()[u'planned']
         # make interval slots
         for st_data in data['schedule_tickets']:
+            att_code = u'extra' if st_data['schedule_ticket_type'] else u'planned'
+            if att_code == u'planned':
+                if not (st_data['time_begin'] and st_data['time_end']):
+                    raise ApiException(
+                        VALIDATION_ERROR,
+                        u'Не указано время начала или окончания слота'
+                        u' time_begin=(%s) time_end=(%s) schedule_ticket_id=(%s)' %
+                        (st_data['time_begin'], st_data['time_end'],
+                         st_data['schedule_ticket_id'])
+                    )
+            attendance = rbAttendanceType.cache().by_code()[att_code]
             st = ScheduleTicket(
                 begTime=st_data['time_begin'], endTime=st_data['time_end'],
                 attendanceType=attendance
@@ -355,6 +373,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
     def _represent_intervals(self, schedule):
         return [
             {
+                'schedule_ticket_id': st.id,
                 'time_begin': format_time(st.begTime),
                 'time_end': format_time(st.begTime),
                 'patient': self.or_undefined(st.client_ticket and st.client_ticket.client_id),
