@@ -269,9 +269,12 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
             appointment_permitted=data['appointment_permited'],
         )
 
-        if not data['schedule_tickets']:
+        if not data['schedule_tickets'] and not data['appointment_permited']:
             attendance = rbAttendanceType.cache().by_code()[u'planned']
-            st = ScheduleTicket(attendanceType=attendance)
+            st = ScheduleTicket(
+                begTime=data['time_begin'], endTime=data['time_end'],
+                attendanceType=attendance,
+            )
             s.tickets.append(st)
 
         # make interval slots
