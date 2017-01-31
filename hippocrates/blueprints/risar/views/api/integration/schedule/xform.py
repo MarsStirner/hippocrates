@@ -269,6 +269,11 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
             appointment_permitted=data['appointment_permited'],
         )
 
+        if not data['schedule_tickets']:
+            attendance = rbAttendanceType.cache().by_code()[u'planned']
+            st = ScheduleTicket(attendanceType=attendance)
+            s.tickets.append(st)
+
         # make interval slots
         for st_data in data['schedule_tickets']:
             att_code = u'extra' if st_data['schedule_ticket_type'] else u'planned'
