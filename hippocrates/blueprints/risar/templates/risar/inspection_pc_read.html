@@ -138,7 +138,12 @@
                                 {% if 'lymph' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('lymph')]]:</div>
-                                    <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.lymph" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                    <div class="col-sm-7 col-md-7">
+                                       {%- if 'lymph_which' in checkup_descriptor -%}
+                                            <span ng-bind-html="checkup.lymph_which"></span>
+                                        {%- endif -%}
+                                        <span ng-repeat="elem in checkup.lymph" >[[$first && checkup.lymph_which ? ': ' : '']][[elem.name]][[$last ? '' : ', ']]</span>
+                                    </div>
                                 </div>
                                 {% endif %}
                                 {% if 'heart_tones' in checkup_descriptor %}
