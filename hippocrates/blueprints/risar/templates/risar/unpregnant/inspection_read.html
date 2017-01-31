@@ -266,13 +266,13 @@
                                 {% if 'mrk' in checkup_descriptor %}
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('mrk')]]:</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.mrk]]</div>
+                                        <div class="col-sm-6 col-md-6" ><span ng-bind-html="checkup.mrk"></span></div>
                                 </div>
                                 {% endif %}
                                 {% if 'imt' in checkup_descriptor %}
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('imt')]]:</div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.imt]]</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.mrk"></span></div>
                                 </div>
                                 {% endif %}
                                 {% if 'temperature' in checkup_descriptor %}
@@ -312,11 +312,10 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('lymph')]]:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        {%- if 'lymph' in checkup_descriptor -%}
-                                        <span ng-bind-html="checkup.lymph_which"></span>
-                                        <span>[[checkup.lymph_which ? ': ': '']]</span>
+                                        {%- if 'lymph_which' in checkup_descriptor -%}
+                                            <span ng-bind-html="checkup.lymph_which"></span>
                                         {%- endif -%}
-                                        <span ng-bind="checkup.lymph | pluck:'name' | join:', '"></span>
+                                        <span ng-repeat="elem in checkup.lymph" >[[$first && checkup.lymph_which ? ': ' : '']][[elem.name]][[$last ? '' : ', ']]</span>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -344,7 +343,7 @@
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach')]]:</div>
                                     <div class="col-sm-6 col-md-6">
                                         <span ng-bind="checkup.stomach | pluck:'name' | join:', '"></span>
-                                        <span>[[ checkup.stomach_area ? ':': '' ]]<</span>
+                                        <span>[[ checkup.stomach_area ? ':': '' ]]</span>
                                         <span ng-bind-html="checkup.stomach_area"></span>
                                     </div>
                                 </div>
