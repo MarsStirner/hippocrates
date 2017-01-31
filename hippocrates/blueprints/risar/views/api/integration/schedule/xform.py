@@ -2,6 +2,7 @@
 
 import logging
 
+from nemesis.models.refbooks import rbReserveType
 from sqlalchemy.orm import lazyload, contains_eager
 
 from ..xform import XForm, VALIDATION_ERROR, wrap_simplify, none_default
@@ -232,7 +233,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
     def convert_and_format(self, data):
         res = {}
         person = self.find_doctor(data['doctor'], data['hospital'])
-        reserve_type_rb = self.rb(data.get('quota_type'), 'rbReserveType') or {}
+        reserve_type_rb = self.rb(data.get('quota_type'), rbReserveType) or {}
         res.update({
             'schedule_id': data.get('schedule_id'),
             'person': person,
@@ -249,8 +250,8 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
                 'time_begin': safe_time(st_data['time_begin']),
                 'time_end': safe_time(st_data['time_end']),
                 'patient': None,
-                'schedule_ticket_type': safe_int(st_data.get('schedule_ticket_type')) or 1,
-                'schedule_ticket_id': safe_int(st_data.get('schedule_ticket_id')),
+                'schedule_ticket_type': safe_int(st_data.get('schedule_ticket_type') or '1'),
+                'schedule_ticket_id': safe_int(st_data.get('schedule_ticket_id') or None),
             }
             if 'patient' in st_data:
                 st['patient'] = self.find_client(st_data['patient'])
