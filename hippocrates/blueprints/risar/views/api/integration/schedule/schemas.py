@@ -178,5 +178,5 @@ class ScheduleFullSchema(Schema):
                 "minItems": 0
             }
         },
-        "required": ["hospital","doctor","date","time_begin","time_end","quota_type"]
+        "required": ["hospital","doctor","date","time_begin","time_end"]
     }]

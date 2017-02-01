@@ -373,7 +373,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
             'hospital': self.from_org_rb(schedule.person.organisation),
             'date': schedule.date,
             'time_begin': format_time(schedule.begTime),
-            'time_end': format_time(schedule.begTime),
+            'time_end': format_time(schedule.endTime),
             'quantity': schedule.numTickets,
             'schedule_tickets': self.or_undefined(self._represent_intervals(schedule))
         }
@@ -384,7 +384,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
             {
                 'schedule_ticket_id': st.id,
                 'time_begin': format_time(st.begTime),
-                'time_end': format_time(st.begTime),
+                'time_end': format_time(st.endTime),
                 'patient': self.or_undefined(st.client_ticket and st.client_ticket.client_id),
             }
             for st in schedule.tickets
