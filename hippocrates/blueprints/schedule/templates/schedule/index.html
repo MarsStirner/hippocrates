@@ -63,6 +63,7 @@
                                                         style="border:none; background-color:[[
                                                             !ticket_user_info_available(day.tickets[row]) &&
                                                             day.tickets[row].attendance_type.code != 'extra' &&
+                                                            day.tickets[row].reserve_type &&
                                                             day.tickets[row].reserve_type.color
                                                         ]];"
                                                     {% endif %}>
@@ -74,6 +75,7 @@
                                                     {% if config['ORGANISATION_INFIS_CODE'] == 500 %}
                                                         style="border:none; background-color:[[
                                                             day.tickets[row].attendance_type.code != 'extra' &&
+                                                            day.tickets[row].reserve_type &&
                                                             day.tickets[row].reserve_type.color
                                                         ]];"
                                                     {% endif %}>
