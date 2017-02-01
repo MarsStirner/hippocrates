@@ -129,6 +129,14 @@
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.complaints" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 {% endif %}
+                                {% if 'complaints_free_input' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.complaints_free_input">
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('complaints_free_input')]]
+                                        <span ng-if="checkupDescriptor.getName('complaints_free_input')">:</span>
+                                        </div>
+                                        <div class="col-sm-7 col-md-7"><span ng-bind-html="checkup.complaints_free_input"></span> </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'skin' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('skin')]]:</div>

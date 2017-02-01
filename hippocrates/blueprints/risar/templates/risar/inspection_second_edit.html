@@ -224,6 +224,18 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'complaints_free_input' in checkup_descriptor %}
+                                        <tr ng-if="isComplaintsFreeInputVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('complaints_free_input')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('complaints_free_input')"
+                                                       ng-model="checkup.complaints_free_input"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('complaints_free_input')"
+                                                       ng-required="checkupDescriptor.getMandatory('complaints_free_input')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'edema' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('edema')"></th>

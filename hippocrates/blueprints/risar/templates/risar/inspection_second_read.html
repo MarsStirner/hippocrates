@@ -99,6 +99,14 @@
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.complaints" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 {% endif %}
+                                {% if 'complaints_free_input' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.complaints_free_input">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('complaints_free_input')]]
+                                        <span ng-if="checkupDescriptor.getName('complaints_free_input')">:</span>
+                                        </div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.complaints_free_input"></span> </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'edema' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('edema')]]:</div>
@@ -134,7 +142,7 @@
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.nipples" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 {% endif %}
-                                 {% if 'breathe' in checkup_descriptor %}
+                                {% if 'breathe' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('breathe')]]:</div>
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.breathe" >[[elem.name]][[$last ? '' : ', ']]</span></div>

@@ -83,6 +83,20 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
             }
         }
     }, true);
+    
+    $scope.$watch('checkup.complaints', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['other'])) {
+                $scope.isComplaintsFreeInputVisible = true;
+            } else {
+                $scope.checkup.complaints_free_input = null;
+                $scope.isComplaintsFreeInputVisible = false;
+            }
+        }
+    }, true);
 
     $scope.init();
     reload_checkup();
