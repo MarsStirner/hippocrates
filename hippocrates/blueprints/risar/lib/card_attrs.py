@@ -238,10 +238,10 @@ def reevaluate_preeclampsia_rate(card):
                     albumin_creatinine is not None and albumin_creatinine >= 0.15):
                 preec_rate_id = PreeclampsiaRisk.ChAH[0]
         elif latest_inspection:
-            ad_left_high = latest_inspection.action['ad_left_high'].value
-            ad_left_low = latest_inspection.action['ad_left_low'].value
-            ad_right_high = latest_inspection.action['ad_right_high'].value
-            ad_right_low = latest_inspection.action['ad_right_low'].value
+            ad_left_high = latest_inspection.action.get_prop_value('ad_left_high')
+            ad_left_low = latest_inspection.action.get_prop_value('ad_left_low')
+            ad_right_high = latest_inspection.action.get_prop_value('ad_right_high')
+            ad_right_low = latest_inspection.action.get_prop_value('ad_right_low')
             high_blood_pressure = (
                 ad_left_high is not None and ad_left_high >= 140 or
                 ad_left_low is not None and ad_left_low >= 90 or
@@ -271,7 +271,7 @@ def reevaluate_preeclampsia_rate(card):
                         mkb_match(card.unclosed_mkbs, needles=u'R34, J81, R23.0, O36.5, O14.2, H47.1, O41.1') or
                         # has_complaints
                         any(compl['code'] in ('epigastrii', 'zrenie', 'golovnaabol_')
-                            for compl in latest_inspection.action['complaints'].value or [])):
+                            for compl in latest_inspection.action.get_prop_value('complaints') or [])):
                     preec_rate_id = PreeclampsiaRisk.heavy[0]
 
     # Показатель подозрения на преэкламсию
