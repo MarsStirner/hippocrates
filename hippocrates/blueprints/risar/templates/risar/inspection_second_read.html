@@ -115,7 +115,7 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('lymph_nodes')]]:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        {{%- if 'lymph_which' in checkup_descriptor -%}
+                                        {%- if 'lymph_which' in checkup_descriptor -%}
                                             <span ng-bind-html="checkup.lymph_which"></span>
                                         {%- endif -%}
                                         <span ng-repeat="elem in checkup.lymph_nodes" >[[$first && checkup.lymph_which ? ': ' : '']][[elem.name]][[$last ? '' : ', ']]</span>
@@ -133,6 +133,24 @@
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('nipples')]]:</div>
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.nipples" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
+                                {% endif %}
+                                 {% if 'breathe' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('breathe')]]:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.breathe" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
+                                {% if 'stomach' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach')]]:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.stomach" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
+                                {% if 'stomach_area' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.stomach_area">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach_area')]]:</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.stomach_area"></span> </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'secretion' in checkup_descriptor %}
                                 <div class="row">

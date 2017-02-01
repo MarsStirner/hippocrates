@@ -343,10 +343,14 @@
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach')]]:</div>
                                     <div class="col-sm-6 col-md-6">
                                         <span ng-bind="checkup.stomach | pluck:'name' | join:', '"></span>
-                                        <span>[[ checkup.stomach_area ? ':': '' ]]</span>
-                                        <span ng-bind-html="checkup.stomach_area"></span>
                                     </div>
                                 </div>
+                                {% endif %}
+                                {% if 'stomach_area' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.stomach_area">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach_area')]]:</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.stomach_area"></span> </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'pilosis' in checkup_descriptor %}
                                 <div class="row">

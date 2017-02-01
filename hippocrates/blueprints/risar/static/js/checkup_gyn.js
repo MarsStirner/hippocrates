@@ -4,8 +4,8 @@
 "use strict";
 WebMis20
 
-.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
-function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
+.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter', 'RisarApi', 'Config',
+function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
     var update_auto = function () {
@@ -25,7 +25,20 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
 
     $scope.$watch('checkup.height', update_auto);
     $scope.$watch('checkup.weight', update_auto);
-
+    $scope.$watch('checkup.stomach', function (n, o) {
+        if ( n!==o ) {
+            
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['painful', 'tense']) ) {
+                $scope.isStomachAreaVisible = true;
+            } else {
+                $scope.checkup.stomach_area = null;
+                $scope.isStomachAreaVisible = false;
+            }
+        }
+    }, true);
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
         return $scope.checkup

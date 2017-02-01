@@ -1,8 +1,8 @@
 /**
  * Created by mmalkov on 24.07.16.
  */
-WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
-function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
+WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter', 'RisarApi', 'Config',
+function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
     var updateHW_Ratio = function (){
@@ -69,6 +69,20 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         $scope.getHeader();
         $scope.getCheckup('risarFirstInspection');
     };
+
+   $scope.$watch('checkup.stomach', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['jivotnaprajennyj', 'jivotboleznennyi'])) {
+                $scope.isStomachAreaVisible = true;
+            } else {
+                $scope.checkup.stomach_area = null;
+                $scope.isStomachAreaVisible = false;
+            }
+        }
+    }, true);
 
     $scope.init();
     reload_checkup();

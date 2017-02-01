@@ -176,6 +176,12 @@
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.stomach" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 {% endif %}
+                                {% if 'stomach_area' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.stomach_area">
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('stomach_area')]]:</div>
+                                        <div class="col-sm-7 col-md-7"><span ng-bind-html="checkup.stomach_area"></span> </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'liver' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('liver')]]:</div>
