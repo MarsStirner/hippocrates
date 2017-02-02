@@ -3,11 +3,17 @@
 import datetime
 
 from celery.utils.log import get_task_logger
+from nemesis.models.actions import Action, ActionType
 
+from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_event_cfrs
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, \
+    inspections_span_flatcodes, first_inspection_flat_code, \
+    second_inspection_flat_code, pc_inspection_flat_code, \
+    puerpera_inspection_flat_code, risar_gyn_checkup_flat_codes, \
+    risar_gyn_checkup_flat_code
 from nemesis.lib.apiutils import json_dumps
 from nemesis.lib.utils import safe_dict
 from nemesis.models.celery_tasks import TaskInfo
@@ -84,3 +90,89 @@ def update_card_attrs_cfrs(self):
     db.session.add(new_task)
     db.session.commit()
     return safe_dict(diff)
+
+
+@celery.task(bind=True)
+def close_yesterday_checkups(self):
+    today = datetime.datetime.today()
+    cur_weekday = today.weekday()
+    if cur_weekday < 5:  # раньше субботы
+        for checkup in get_all_opened_checkups(today):
+            checkup.endDate = today
+            db.session.add(checkup)
+
+            send_data_to_mis = True
+            if checkup.actionType.flatCode == first_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_obs_first_get'
+                checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
+                ticket_method_name = 'risar.api_checkup_obs_first_ticket25_get'
+                ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
+            elif checkup.actionType.flatCode == second_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_obs_second_get'
+                checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND
+                ticket_method_name = 'risar.api_checkup_obs_second_ticket25_get'
+                ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
+            elif checkup.actionType.flatCode == pc_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_pc_get'
+                checkup_entity_code = sirius.RisarEntityCode.CHECKUP_PC
+                ticket_method_name = 'risar.api_checkup_pc_ticket25_get'
+                ticket_entity_code = sirius.RisarEntityCode.CHECKUP_PC_TICKET
+            elif checkup.actionType.flatCode == puerpera_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_puerpera_get'
+                # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
+                ticket_method_name = 'risar.api_checkup_puerpera_ticket25_get'
+                # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
+                send_data_to_mis = False
+            elif checkup.actionType.flatCode == risar_gyn_checkup_flat_code:
+                checkup_method_name = 'risar.api_checkup_gyn_get'
+                # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
+                ticket_method_name = 'risar.api_checkup_gyn_ticket25_get'
+                # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
+                send_data_to_mis = False
+            else:
+                raise Exception(
+                    'Unexpected checkup action type = (%s)' %
+                    checkup.actionType.flatCode
+                )
+
+            if send_data_to_mis:
+                sirius.send_to_mis(
+                    sirius.RisarEvents.CLOSE_CHECKUP,
+                    checkup_entity_code,
+                    sirius.OperationCode.READ_ONE,
+                    checkup_method_name,
+                    obj=('exam_obs_id', checkup.id),
+                    # obj=('external_id', action.id),
+                    params={'card_id': checkup.event_id},
+                    is_create=False,
+                )
+                sirius.send_to_mis(
+                    sirius.RisarEvents.CLOSE_CHECKUP,
+                    ticket_entity_code,
+                    sirius.OperationCode.READ_ONE,
+                    ticket_method_name,
+                    obj=('exam_obs_id', checkup.id),
+                    # obj=('external_id', action.id),
+                    params={'card_id': checkup.event_id},
+                    is_create=False,
+                )
+                sirius.send_to_mis(
+                    sirius.RisarEvents.CLOSE_CHECKUP,
+                    sirius.RisarEntityCode.MEASURE,
+                    sirius.OperationCode.READ_MANY,
+                    'risar.api_measure_list_get',
+                    obj=('card_id', checkup.event_id),
+                    params={'card_id': checkup.event_id},
+                    is_create=False,
+                )
+
+            db.session.commit()
+
+
+def get_all_opened_checkups(today):
+    return Action.query.join(ActionType).filter(
+        Action.deleted == 0,
+        Action.begDate < today.date(),
+        Action.endDate.is_(None),
+        ActionType.flatCode.in_(inspections_span_flatcodes + risar_gyn_checkup_flat_codes),
+    ).all()

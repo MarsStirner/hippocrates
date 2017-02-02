@@ -13,6 +13,7 @@ class RisarEvents(Enum):
     CREATE_CARD = 'create_card'
     MAKE_APPOINTMENT = 'make_appointment'
     SAVE_CHECKUP = 'save_checkup'
+    CLOSE_CHECKUP = 'close_checkup'
     ENTER_MIS_EMPLOYEE = 'enter_mis_employee'
     CLOSE_CARD = 'close_card'
     CREATE_REFERRAL = 'create_referral'
