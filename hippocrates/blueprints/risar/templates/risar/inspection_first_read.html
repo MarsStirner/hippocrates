@@ -205,7 +205,7 @@
                                 {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('bowel_and_bladder_habits')]]:</div>
-                                    <div class="col-sm-7 col-md-7" ng-bind-html="checkup.bowel_and_bladder_habits"></div>
+                                    <div class="col-sm-7 col-md-7" ng-bind-html="checkup.bowel_and_bladder_habits.name"></div>
                                 </div>
                                 {% endif %}
                                 <div class="row">

@@ -386,7 +386,10 @@
                                     {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bowel_and_bladder_habits')"></th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
+                                        <td><div class="row"><div class="col-md-4">
+                                            <rb-select ng-model="checkup.bowel_and_bladder_habits" ref-book="rbRisarBowelAndBladderFunctions"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('bowel_and_bladder_habits')"
+                                                 ng-required="checkupDescriptor.getMandatory('bowel_and_bladder_habits')"></rb-select></div></div></td>
                                     </tr>
                                     {% endif %}
                                 </tbody>
