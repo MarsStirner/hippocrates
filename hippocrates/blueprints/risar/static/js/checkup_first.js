@@ -97,6 +97,20 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
             }
         }
     }, true);
+    
+    $scope.$watch('checkup.cervix', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['other'])) {
+                $scope.isCervixFreeInputVisible = true;
+            } else {
+                $scope.checkup.cervix_free_input = null;
+                $scope.isCervixFreeInputVisible = false;
+            }
+        }
+    }, true);
 
     $scope.init();
     reload_checkup();

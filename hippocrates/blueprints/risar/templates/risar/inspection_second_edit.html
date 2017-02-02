@@ -474,6 +474,18 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'cervix_free_input' in checkup_descriptor %}
+                                        <tr ng-if="isCervixFreeInputVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_free_input')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('cervix_free_input')"
+                                                       ng-model="checkup.cervix_free_input"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('cervix_free_input')"
+                                                       ng-required="checkupDescriptor.getMandatory('cervix_free_input')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'cervix_length' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_length')"></th>
