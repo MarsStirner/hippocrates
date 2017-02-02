@@ -85,6 +85,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             'PregnancyDuration': safe_int(data.get('pregnancy_week')),
             'DirectionDiagnosis': self.to_mkb_rb(data.get('diagnosis_in')),
             'FinalDiagnosis': self.to_mkb_rb(data.get('diagnosis_out')),
+            'Results': data.get('results', '').replace('\r\n', '<br>'),
         }
 
     def as_json(self):
@@ -101,5 +102,6 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             'pregnancy_week': an_props['PregnancyDuration'].value,
             'diagnosis_in': an_props['DirectionDiagnosis'].value,
             'diagnosis_out': an_props['FinalDiagnosis'].value,
+            'results': an_props['Results'].value if 'Results' in an_props else ''
         }
         return res

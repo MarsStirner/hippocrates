@@ -64,6 +64,10 @@ class HospitalizationSchema(Schema):
                     "type": "string",
                     "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
                 },
+                "results": {
+                    "type": "string",
+                    "description": "Результаты осмотра"
+                },
                 "status": {
                     "description": "Статус мероприятия, справочник rbMeasureStatus",
                     "type": "string"
