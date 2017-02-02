@@ -66,7 +66,7 @@ class HospitalizationSchema(Schema):
                 },
                 "results": {
                     "type": "string",
-                    "description": "Результаты осмотра"
+                    "description": "Результаты госпитализации"
                 },
                 "status": {
                     "description": "Статус мероприятия, справочник rbMeasureStatus",
