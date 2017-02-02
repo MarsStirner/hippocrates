@@ -55,6 +55,12 @@ class SpecificsManager(object):
             app.config, 'system_prefs', 'regional', 'uses_regional_services', default=False
         )
 
+    @classmethod
+    def close_yesterday_checkups(cls):
+        return safe_traverse(
+            app.config, 'system_prefs', 'regional', 'close_yesterday_checkups', default=False
+        )
+
 
 def get_sarbarsmis_url():
     return safe_traverse(
