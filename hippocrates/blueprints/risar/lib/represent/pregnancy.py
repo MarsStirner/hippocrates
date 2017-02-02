@@ -178,6 +178,7 @@ def group_orgs_for_routing(orgs, client):
         c_kladr_code = None
     c_district_codes = {c_kladr_code[:8]} if c_kladr_code else set()
     c_region_codes = {code[:2] for code in risar_regions}
+
     # special cases
     # 1) Ленинградская Область 47 000 000 000 (00) и Санкт-Петербург Город 78 000 000 000 (00)
     # 2) Московская Область 50 000 000 000 (00) и Москва Город 77 000 000 000 (00)
@@ -188,14 +189,15 @@ def group_orgs_for_routing(orgs, client):
     for org in orgs:
         if org.kladr_locality:
             locality_code = org.kladr_locality.code
-            if any(locality_code.startswith(code) for code in c_district_codes):
-                if 'kladr_locality' not in district_orgs[locality_code]:
-                    district_orgs[locality_code]['kladr_locality'] = org.kladr_locality
-                district_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
-            elif any(locality_code.startswith(code) for code in c_region_codes):
-                if 'kladr_locality' not in region_orgs[locality_code]:
-                    region_orgs[locality_code]['kladr_locality'] = org.kladr_locality
-                region_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
+            if locality_code:
+                if any(locality_code.startswith(code) for code in c_district_codes):
+                    if 'kladr_locality' not in district_orgs[locality_code]:
+                        district_orgs[locality_code]['kladr_locality'] = org.kladr_locality
+                    district_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
+                elif any(locality_code.startswith(code) for code in c_region_codes):
+                    if 'kladr_locality' not in region_orgs[locality_code]:
+                        region_orgs[locality_code]['kladr_locality'] = org.kladr_locality
+                    region_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
     return {
         'district_orgs': district_orgs,
         'region_orgs': region_orgs
