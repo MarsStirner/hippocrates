@@ -763,11 +763,12 @@
                                      {% if 'cervix' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix')"></th>
-                                        <td>
-                                            <div refbook-checkbox ng-model="checkup.cervix" ref-book="rbRisarCervix"
+                                        <td><div ng-class="{'text-danger': vaginaForm.cervix.$invalid && vaginaForm.submit_attempt}">
+                                            <div name="cervix" refbook-checkbox ng-model="checkup.cervix" ref-book="rbRisarCervix"
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix')"
                                                  ng-required="checkupDescriptor.getMandatory('cervix')">
                                                 [[ item.name ]]
+                                            </div>
                                             </div>
                                         </td>
                                     </tr>
