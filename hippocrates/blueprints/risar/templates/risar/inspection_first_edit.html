@@ -759,14 +759,17 @@
                                         </div></td>
                                     </tr>
                                     {% endif %}
+
                                     {% if 'cervix' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix')"></th>
-                                        <td><div class="row" ng-class="{'has-error': vaginaForm.cervix.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix"
+                                        <td>
+                                            <div refbook-checkbox ng-model="checkup.cervix" ref-book="rbRisarCervix"
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix')"
-                                                 ng-required="checkupDescriptor.getMandatory('cervix')"></rb-select></div>
-                                        </div></td>
+                                                 ng-required="checkupDescriptor.getMandatory('cervix')">
+                                                [[ item.name ]]
+                                            </div>
+                                        </td>
                                     </tr>
                                     {% endif %}
                                     {% if 'cervix_length' in checkup_descriptor %}
