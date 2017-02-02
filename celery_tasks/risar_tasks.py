@@ -100,6 +100,7 @@ def close_yesterday_checkups(self):
         for checkup in get_all_opened_checkups(today):
             checkup.endDate = today
             db.session.add(checkup)
+            db.session.flush([checkup])
 
             send_data_to_mis = True
             if checkup.actionType.flatCode == first_inspection_flat_code:
