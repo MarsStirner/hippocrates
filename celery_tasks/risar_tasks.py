@@ -180,6 +180,7 @@ def get_all_opened_checkups(today):
     return Action.query.join(ActionType).filter(
         Action.deleted == 0,
         Action.begDate < today.date(),
+        Action.begDate > (today.date() - datetime.timedelta(days=60)),
         Action.endDate.is_(None),
         ActionType.flatCode.in_(inspections_span_flatcodes + risar_gyn_checkup_flat_codes),
     ).all()
