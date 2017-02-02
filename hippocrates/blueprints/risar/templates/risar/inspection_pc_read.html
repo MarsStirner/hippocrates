@@ -357,7 +357,7 @@
                                     </div>
                                 </div>
                                 {% endif %}
-                            {% if 'cervix_free_input' in checkup_descriptor %}
+                                {% if 'cervix_free_input' in checkup_descriptor %}
                                     <div class="row" ng-if="checkup.cervix_free_input" >
                                         <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix_free_input')]]
                                             <span ng-if="checkupDescriptor.getName('cervix_free_input')">:</span>
@@ -394,6 +394,14 @@
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervical_canal')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.cervical_canal.name]]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'cervical_canal_free_input' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.cervix_free_input" >
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervical_canal_free_input')]]
+                                            <span ng-if="checkupDescriptor.getName('cervical_canal_free_input')">:</span>
+                                        </div>
+                                        <div class="col-sm-7 col-md-7"><span ng-bind-html="checkup.cervical_canal_free_input"></span> </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'body_of_womb' in checkup_descriptor %}
                                 <div class="row">

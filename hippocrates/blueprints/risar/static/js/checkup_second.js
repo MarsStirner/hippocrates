@@ -124,6 +124,18 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
             }
         }
     }, true);
+    
+   $scope.$watch('checkup.cervical_canal', function (n, o) {
+        if (n !== o) {
+            var code = n ? safe_traverse(n, ['code']) : undefined;
+            if (code === 'other') {
+                $scope.isCervicalCanalFreeInputVisible = true;
+            } else {
+                $scope.checkup.cervical_canal_free_input = null;
+                $scope.isCervicalCanalFreeInputVisible = false;
+            }
+        }
+    }, true);
 
     $scope.init();
     reload_checkup();

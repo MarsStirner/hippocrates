@@ -531,6 +531,18 @@
                                         </div></div></td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'cervical_canal_free_input' in checkup_descriptor %}
+                                        <tr ng-if="isCervicalCanalFreeInputVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervical_canal_free_input')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('cervical_canal_free_input')"
+                                                       ng-model="checkup.cervical_canal_free_input"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('cervical_canal_free_input')"
+                                                       ng-required="checkupDescriptor.getMandatory('cervical_canal_free_input')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'body_of_womb' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('body_of_womb')"></th>
