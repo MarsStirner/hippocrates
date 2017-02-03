@@ -289,8 +289,42 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     }
 
+    $scope.$watch('event.info.set_date', function (n, o) {
+        if(n !== undefined && typeof n === 'string' && n !== o) {
+            var date = new Date(n);
+            if(typeof o === 'object') {
+                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
+            }
+
+            $scope.event.info.set_date = date
+        }
+    });
+
+    $scope.$watch('event.info.exec_date', function (n, o) {
+        if(n !== undefined && typeof n === 'string' && n !== o) {
+            var date = new Date(n);
+            if(typeof o === 'object') {
+                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
+            }
+
+            $scope.event.info.exec_date = date
+        }
+    });
+
     $scope.$on('event_loaded', function() {
-        $scope.event.info.set_date = new Date($scope.event.info.set_date);
+        if($scope.event.info.is_adm_permission) {
+            if(!$scope.event.info.set_date) {
+                $scope.event.info.set_date = new Date();
+                $scope.event.info.set_date.setHours(1, 0, 0);
+            }
+            if(!$scope.event.info.exec_date) {
+                $scope.event.info.exec_date = new Date();
+                $scope.event.info.exec_date.setHours(23, 59, 59);
+            }
+        } else {
+            $scope.event.info.set_date = new Date($scope.event.info.set_date);
+        }
+
         var et_loading = $scope.rbEventType.initialize($scope.event.info.client);
         $q.all([et_loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
             .then(function () {

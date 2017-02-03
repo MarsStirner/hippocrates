@@ -136,7 +136,7 @@
                     <div class="col-md-3">
                         <label for="exec_time">Время выполнения</label>
                         <wm-time id="exec_time" name="exec_time" ng-model="event.info.exec_date"
-                                 ng-disabled="widget_disabled('exec_date')">
+                                 ng-disabled="widget_disabled('exec_date')" ng-change="console.log(this);">
                         </wm-time>
                     </div>
                 </div>
