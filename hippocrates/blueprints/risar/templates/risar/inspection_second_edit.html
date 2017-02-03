@@ -582,15 +582,87 @@
                                             </td>
                                         </tr>
                                     {% endif %}
+                                    {% if 'appendages' in checkup_descriptor or 'appendages_right' in checkup_descriptor %}
+                                        <tr>
+                                            <th class="text-right">Придатки</th>
+                                            <td>&nbsp;</td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'appendages' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages')"></th>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages')"></td>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.appendages.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="appendages" ng-model="checkup.appendages" ref-book="rbRisarAppendages"
+                                            <div class="col-md-4">
+                                                <rb-select
+                                                 name="appendages"
+                                                 ng-model="checkup.appendages"
+                                                 ref-book="rbRisarAppendages"
+                                                 multiple="checkupDescriptor.getVector('appendages_right')"
                                                  ng-disabled="checkupDescriptor.getReadOnly('appendages')"
                                                  ng-required="checkupDescriptor.getMandatory('appendages')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'appendages_increased' in checkup_descriptor %}
+                                        <tr ng-if="isAppendasIncreasedVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages_increased')"></td>
+                                            <td>
+                                                <div class="row">
+                                                   <div class="col-md-4">
+                                                        <div class="input-group">
+                                                            <input class="form-control"
+                                                                   aria-describedby="addon-appendages_increased"
+                                                                   name="appendages_increased"
+                                                                   id="appendages_increased"
+                                                                   valid-number valid-number-float
+                                                                   ng-model="checkup.appendages_increased"
+                                                                   ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/"
+                                                                   ng-disabled="checkupDescriptor.getReadOnly('appendages_increased')"
+                                                                   ng-required="checkupDescriptor.getMandatory('appendages_increased')"
+                                                                   >
+{#                                                            <span class="input-group-addon" id="addon-appendages_increased">недель</span>#}
+                                                        </div>
+                                                   </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'appendages_right' in checkup_descriptor %}
+                                    <tr>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages_right')"></td>
+                                        <td><div class="row" ng-class="{'has-error': vaginaForm.appendages_right.$invalid && vaginaForm.submit_attempt}">
+                                            <div class="col-md-4">
+                                                <rb-select name="appendages_right" ng-model="checkup.appendages_right"
+                                                           ref-book="rbRisarAppendages"
+                                                           multiple="checkupDescriptor.getVector('appendages_right')"
+                                                           ng-disabled="checkupDescriptor.getReadOnly('appendages_right')"
+                                                           ng-required="checkupDescriptor.getMandatory('appendages_right')"></rb-select></div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'appendages_right_increased' in checkup_descriptor %}
+                                        <tr ng-if="isAppendasRightIncreasedVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages_right_increased')"></td>
+                                            <td>
+                                                <div class="row">
+                                                   <div class="col-md-4">
+                                                        <div class="input-group">
+                                                            <input class="form-control"
+                                                                   aria-describedby="addon-appendages_right_increased"
+                                                                   name="appendages_right_increased"
+                                                                   id="appendages_right_increased"
+                                                                   valid-number valid-number-float
+                                                                   ng-model="checkup.appendages_right_increased"
+                                                                   ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/"
+                                                                   ng-disabled="checkupDescriptor.getReadOnly('appendages_right_increased')"
+                                                                   ng-required="checkupDescriptor.getMandatory('appendages_right_increased')"
+                                                                   >
+{#                                                            <span class="input-group-addon" id="addon-appendages_increased">недель</span>#}
+                                                        </div>
+                                                   </div>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'parametrium' in checkup_descriptor %}
                                     <tr>

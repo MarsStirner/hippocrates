@@ -1426,6 +1426,9 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
             getReadOnly: function (code) {
                 return this.exists(code) ? props_descriptor[code].read_only : 0;
             },
+            getVector: function (code) {
+                return this.exists(code) ? (props_descriptor[code].is_vector ? true: false) : false;
+            },
             getLabel: function (code) {
                 var mandatory_text = ' <span class="text-danger">*</span>';
                 var prop_name = _.escape(this.getName(code));

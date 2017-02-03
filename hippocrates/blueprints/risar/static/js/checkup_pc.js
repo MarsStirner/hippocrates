@@ -136,6 +136,34 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
             }
         }
     }, true);
+    
+    $scope.$watch('checkup.appendages', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['uveliceny'])) {
+                $scope.isAppendasIncreasedVisible = true;
+            } else {
+                $scope.checkup.appendages_increased = null;
+                $scope.isAppendasIncreasedVisible = false;
+            }
+        }
+    }, true);
+    
+    $scope.$watch('checkup.appendages_right', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['uveliceny'])) {
+                $scope.isAppendasRightIncreasedVisible = true;
+            } else {
+                $scope.checkup.appendages_right_increased = null;
+                $scope.isAppendasRightIncreasedVisible = false;
+            }
+        }
+    }, true);
 
     $scope.init();
     reload_checkup();
