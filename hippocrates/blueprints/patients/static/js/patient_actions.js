@@ -1,7 +1,7 @@
 'use strict';
 
 var PatientActionsCtrl = function ($scope, $window, PatientATTreeService, RefBookService, WMConfig,
-        PrintingService, LabDynamicsModal) {
+        PrintingService, LabDynamicsModal, client_id) {
     $scope.client_id = undefined;
     $scope.tree = null;
     $scope.filtered_tree = null;
@@ -32,11 +32,9 @@ var PatientActionsCtrl = function ($scope, $window, PatientATTreeService, RefBoo
 
     $scope.$on('patientActionsOpened', function (event, args) {
         if (!$scope.client_id) {
-            $scope.reloadData(args.client_id);
-            $scope.common_ps = new PrintingService("action");
+            $scope.init(args.client_id);
         }
     });
-
 
     $scope.openAction = function(node) {
          $window.open(WMConfig.url.actions.html.action + '?action_id=' + node.action_id, '_blank');
@@ -44,6 +42,15 @@ var PatientActionsCtrl = function ($scope, $window, PatientATTreeService, RefBoo
     $scope.openLabDynamics = function (node) {
         LabDynamicsModal.openLabDynamicsModal({event_id: node.event_id}, {id: node.id, type: {id: node.action_type.id}});
     };
+
+    $scope.init = function (client_id) {
+        $scope.reloadData(client_id);
+        $scope.common_ps = new PrintingService("action");
+    };
+
+    if (client_id) {
+        $scope.init(client_id);
+    }
 };
 
 
@@ -350,6 +357,27 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
 
                 return tree;
             });
+    }
+}])
+;
+
+
+WebMis20.service('PatientActionsModalService', ['$modal', function ($modal) {
+    return {
+        open: function (client_id) {
+            return $modal.open({
+                templateUrl: '/patients/patient_actions_modal/' + client_id,
+                controller: PatientActionsCtrl,
+                size: 'lg',
+                windowClass: 'modal-scrollable',
+                backdrop : 'static',
+                resolve: {
+                    client_id: function () {
+                        return client_id
+                    }
+                }
+            }).result;
+        }
     }
 }])
 ;
