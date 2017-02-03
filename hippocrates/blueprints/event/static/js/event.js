@@ -617,7 +617,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService,
-        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig) {
+        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig, PatientActionsModalService) {
     $scope.aux = aux;
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -744,6 +744,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             window.opener.focus();
             window.close();
         }
+    };
+
+    $scope.openPatientActions = function () {
+        PatientActionsModalService.open($scope.event.info.client_id);
     };
 
     $scope.ps = new PrintingService("event");
@@ -957,7 +961,8 @@ WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', '
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
-    'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', 'WMConfig', EventInfoCtrl]);
+    'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', 'WMConfig',
+    'PatientActionsModalService', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$filter', '$controller', '$modal', '$http', '$q',
     'RisarApi', 'ApiCalls', 'WMStationaryEvent', 'WMConfig', StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);
