@@ -4,6 +4,7 @@
 <div ng-controller="PoliclinicEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
+            <button type="button" class="btn btn-sm btn-primary" ng-click="openPatientActions()">Записи ЭМК</button>
             <a type="button" class="btn btn-sm btn-primary"
                href="{{ url_for('patients.patient_events', client_id=client_id) }}">Все обращения пациента</a>
             <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
@@ -191,4 +192,5 @@
     <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
     <script src="{{ url_for('accounting.static', filename='js/accounting.js', v=app_version) }}"></script>
     <script src="{{ url_for('accounting.static', filename='js/modal_cashbook.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('patients.static', filename='js/patient_actions.js', v=app_version) }}"></script>
 {% endblock %}

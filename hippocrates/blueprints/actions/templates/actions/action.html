@@ -8,6 +8,7 @@
 <div alert-notify></div>
 <section class="content-header">
     <div class="wm-page-header-button-box">
+        <button type="button" class="btn btn-primary" ng-click="openPatientActions()">Записи ЭМК</button>
         <wm-subscription-btn oid="hitsl.action.[[ action.id ]]"></wm-subscription-btn>
         <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
         <button class="btn btn-success" title="Сохранить" ng-click="save_action()" ng-if="!action.readonly">
@@ -69,6 +70,8 @@
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/ezekiel.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('accounting.static', filename='js/accounting.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('event.static', filename='js/directives.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('patients.static', filename='js/patient_actions.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="_action_template_load_model.html">{% include "actions/_action_template_load_modal.html" %}</script>
     <script type="text/ng-template" id="_action_template_save_model.html">{% include "actions/_action_template_save_modal.html" %}</script>
 {% endblock %}
