@@ -1,10 +1,16 @@
 # coding: utf-8
+from time import sleep
 
+import logging
 import requests
 
 from contextlib import contextmanager
 
 from nemesis.app import app
+from requests import ConnectionError
+
+logger = logging.getLogger('simple')
+
 
 config = app.config
 hippo_url = config.get('HIPPOCRATE_URL', 'http://127.0.0.1:6600/').rstrip('/')
@@ -74,6 +80,45 @@ def make_login():
     return session
 
 
+def reconnect(func):
+    begin_sleep_timeout = 1  # sec
+    max_retry = 16
+
+    def wrap(*a, **kw):
+        res = None
+        retry = True
+        retry_count = 0
+        sleep_timeout = begin_sleep_timeout
+        while retry:
+            retry = False
+            retry_count += 1
+            try:
+                res = func(*a, **kw)
+            except ConnectionError as exc:
+                try:
+                    exc_txt = str(exc)
+                except (IndexError, UnicodeError):
+                    exc_txt = exc.__name__
+                logger.error(exc_txt)
+                if retry_count >= max_retry:
+                    logger.info('Retry count = %s. Stop retrying' % (retry_count,))
+                else:
+                    retry = True
+                    logger.info('Retry count = %s. Wait for %s seconds and then try again' % (retry_count, sleep_timeout))
+                    sleep(sleep_timeout)
+                    if sleep_timeout < 10 * 60:  # min
+                        sleep_timeout += 2
+            except Exception as exc:
+                try:
+                    exc_txt = str(exc)
+                except (IndexError, UnicodeError):
+                    exc_txt = exc.__name__
+                logger.error(exc_txt)
+        return res
+    return wrap
+
+
+@reconnect
 def make_api_request(method, url, json_data=None, url_args=None, resend=False):
     global session
     if not session:
@@ -89,11 +134,12 @@ def make_api_request(method, url, json_data=None, url_args=None, resend=False):
         }
     )
     if result.status_code != 200:
-        if result.status_code == 403 and not resend:  # а не 401 ?
+        if result.status_code == 401 and not resend:
             # один раз пробуем взять другой токен
             session = None
-            make_api_request(method, url, json_data=json_data,
-                             url_args=url_args, resend=True)
+            res_json = make_api_request(method, url, json_data=json_data,
+                                        url_args=url_args, resend=True)
+            return res_json
         try:
             j = result.json()
             message = u'{0}: {1}'.format(j['meta']['code'], j['meta']['name'])
