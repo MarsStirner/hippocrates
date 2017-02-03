@@ -2,7 +2,7 @@
  * Created by mmalkov on 14.07.14.
  */
 var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
-        RefBookService, MessageBox, NotificationService, WMConfig, AccountingService) {
+        RefBookService, MessageBox, NotificationService, WMConfig, AccountingService, PatientActionsModalService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -184,6 +184,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
         }
         return deferred.promise;
     };
+    $scope.openPatientActions = function () {
+        PatientActionsModalService.open($scope.action.client.id);
+    };
     $scope.is_med_doc = function () { return $scope.action.action_type && $scope.action.action_type.class === 0; };
     $scope.is_diag_lab = function () { return $scope.action.action_type && $scope.action.action_type.class === 1; };
     $scope.is_treatment = function () { return $scope.action.action_type && $scope.action.action_type.class === 2; };
@@ -342,7 +345,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'MessageBox', 'NotificationService',
-    'WMConfig', 'AccountingService', ActionEditorCtrl]);
+    'WMConfig', 'AccountingService', 'PatientActionsModalService', ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.

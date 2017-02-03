@@ -58,3 +58,9 @@ def patient_info_full():
         'patients/patient_info_full.html',
         client=client
     )
+
+
+@module.route('/patient_actions_modal/<int:client_id>')
+def patient_actions_modal(client_id):
+    client = Client.query.get_or_404(client_id)
+    return render_template('patients/_modal_patient_actions.html', client=client)

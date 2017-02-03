@@ -1,0 +1,10 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <h4 class="modal-title">Записи ЭМК – {{ client.nameText }} {{ client.birthDate.strftime('%d.%m.%Y') }} ({{ client.age }})</h4>
+</div>
+<div class="modal-body">
+    {% include 'patients/_patient_actions.html' %}
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="$dismiss('cancel')">Закрыть</button>
+</div>
