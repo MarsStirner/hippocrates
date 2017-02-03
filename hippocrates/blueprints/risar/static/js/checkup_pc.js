@@ -122,6 +122,20 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
             }
         }
     }, true);
+    
+    $scope.$watch('checkup.body_of_womb', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['enlarged'])) {
+                $scope.isBodyOfWombAdditionalVisible = true;
+            } else {
+                $scope.checkup.body_of_womb_additional = null;
+                $scope.isBodyOfWombAdditionalVisible = false;
+            }
+        }
+    }, true);
 
     $scope.init();
     reload_checkup();

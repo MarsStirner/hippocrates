@@ -411,6 +411,14 @@
                                     </div>
                                 </div>
                                 {% endif %}
+                                {% if 'body_of_womb_additional' in checkup_descriptor %}
+                                <div class="row" ng-if="checkup.body_of_womb_additional">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('body_of_womb_additional')]]:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                       <span ng-bind="checkup.body_of_womb_additional"></span>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 {% if 'appendages' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('appendages')]]:</div>
