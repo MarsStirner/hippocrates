@@ -464,21 +464,21 @@ class EventMeasureSelecter(BaseSelecter):
             if len(flt['checkups']) > 0:
                 def make_conditions(checkups_interval_list):
                     for checkup in checkups_interval_list:
-                        beg_date_to = safe_datetime(checkup.get('beg_date_to'))
                         first = or_(
                             EventMeasure.endDateTime >= safe_datetime(checkup['end_date_from']),
                             EventMeasure.endDateTime.is_(None)
                         )
-                        second = EventMeasure.begDateTime <= beg_date_to
-                        third = func.IF(
+                        second = func.IF(
                             EventMeasure.schemeMeasure_id.isnot(None),
                             Action.id == checkup['action_id'],
                             True
                         )
+                        beg_date_to = safe_datetime(checkup.get('beg_date_to'))
                         if beg_date_to:
+                            third = EventMeasure.begDateTime <= beg_date_to
                             yield and_(first, second, third)
                         else:
-                            yield and_(first, third)
+                            yield and_(first, second)
 
                 self.query = self.query.outerjoin(
                     ExpertSchemeMeasureAssoc, ExpertScheme, ExpertProtocol, ExpertProtocol_ActionTypeAssoc, ActionType,
