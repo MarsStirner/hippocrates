@@ -184,7 +184,7 @@ var EpicrisisCtrl = function ($timeout, $scope, $q, RefBookService, RisarApi, Pr
     var init = function () {
         var hash = document.location.hash;
         if (hash) {
-            hash.match('child') ? open_tab('#sixth') : open_tab(hash);
+            hash.match('child') ? open_tab('#birth_children') : open_tab(hash);
         }
         reload_epicrisis();
     };
