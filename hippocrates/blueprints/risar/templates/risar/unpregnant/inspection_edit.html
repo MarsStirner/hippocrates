@@ -459,9 +459,6 @@
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_complaints" /></div></div></td>
                                     </tr>
                                     {% endif %}
-
-
-
                                 </tbody>
                             </table>
                         </div>
@@ -704,8 +701,7 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'stomach_area' in checkup_descriptor %}
-                                    <tr ng-show="checkup.stomach | pluck:'code' | intersects:['painful', 'tense']">
-                                        <!-- example short_string -->
+                                        <tr ng-if="isStomachAreaVisible">
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach_area')"></td>
                                         <td>
                                             <input ng-disabled="checkup.getReadOnly('stomach_area')"

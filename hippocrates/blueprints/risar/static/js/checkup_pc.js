@@ -1,7 +1,7 @@
 
 'use strict';
 
-WebMis20.controller('CheckupPCEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config', 
+WebMis20.controller('CheckupPCEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
 function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
@@ -69,6 +69,7 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         $scope.getCheckup('risarPCCheckUp');
     };
 
+    $controller('BasePregCheckupWatchesCtrl', {$scope: $scope});
     $scope.init();
     reload_checkup();
 }])

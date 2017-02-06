@@ -99,6 +99,14 @@
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.complaints" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 {% endif %}
+                                {% if 'complaints_free_input' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.complaints_free_input">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('complaints_free_input')]]
+                                        <span ng-if="checkupDescriptor.getName('complaints_free_input')">:</span>
+                                        </div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.complaints_free_input"></span> </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'edema' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('edema')]]:</div>
@@ -114,7 +122,12 @@
                                 {% if 'lymph_nodes' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('lymph_nodes')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.lymph_nodes" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                    <div class="col-sm-6 col-md-6">
+                                        {%- if 'lymph_which' in checkup_descriptor -%}
+                                            <span ng-bind-html="checkup.lymph_which"></span>
+                                        {%- endif -%}
+                                        <span ng-repeat="elem in checkup.lymph_nodes" >[[$first && checkup.lymph_which ? ': ' : '']][[elem.name]][[$last ? '' : ', ']]</span>
+                                    </div>
                                 </div>
                                 {% endif %}
                                 {% if 'breast' in checkup_descriptor %}
@@ -129,6 +142,24 @@
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.nipples" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                                 </div>
                                 {% endif %}
+                                {% if 'breathe' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('breathe')]]:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.breathe" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
+                                {% if 'stomach' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach')]]:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.stomach" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
+                                {% if 'stomach_area' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.stomach_area">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('stomach_area')]]:</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind-html="checkup.stomach_area"></span> </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'secretion' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('secretion')]]:</div>
@@ -138,7 +169,7 @@
                                 {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('bowel_and_bladder_habits')]]:</div>
-                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.bowel_and_bladder_habits"></div>
+                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.bowel_and_bladder_habits.name"></div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -198,8 +229,18 @@
                                 {% if 'cervix' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.cervix.name]]</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <span ng-bind="checkup.cervix| pluck:'name' | join:', '"></span>
+                                    </div>
                                 </div>
+                                {% endif %}
+                                {% if 'cervix_free_input' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.cervix_free_input" >
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix_free_input')]]
+                                            <span ng-if="checkupDescriptor.getName('cervix_free_input')">:</span>
+                                        </div>
+                                        <div class="col-sm-7 col-md-7"><span ng-bind-html="checkup.cervix_free_input"></span> </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'cervix_length' in checkup_descriptor %}
                                 <div class="row">
@@ -231,6 +272,14 @@
                                     <div class="col-sm-7 col-md-7">[[checkup.cervical_canal.name]]</div>
                                 </div>
                                 {% endif %}
+                                {% if 'cervical_canal_free_input' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.cervix_free_input" >
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervical_canal_free_input')]]
+                                            <span ng-if="checkupDescriptor.getName('cervical_canal_free_input')">:</span>
+                                        </div>
+                                        <div class="col-sm-7 col-md-7"><span ng-bind-html="checkup.cervical_canal_free_input"></span> </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'body_of_womb' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('body_of_womb')]]:</div>
@@ -239,10 +288,51 @@
                                     </div>
                                 </div>
                                 {% endif %}
+                                {% if 'body_of_womb_additional' in checkup_descriptor %}
+                                <div class="row" ng-if="checkup.body_of_womb_additional">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('body_of_womb_additional')]]:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                       <span ng-bind="checkup.body_of_womb_additional"></span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if 'appendages' in checkup_descriptor or 'appendages_right' in checkup_descriptor %}
+                                    <div class="row" ng-if="checkup.appendages || checkup.appendages_right">
+                                        <div class="col-sm-5 col-md-5 text-right"><b>Придатки</b></div>
+                                        <div class="col-sm-7 col-md-7">
+                                        </div>
+                                    </div>
+                                {% endif %}
                                 {% if 'appendages' in checkup_descriptor %}
-                                <div class="row">
+                                <div class="row" ng-if="checkup.appendages">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('appendages')]]:</div>
-                                    <div class="col-sm-7 col-md-7">[[checkup.appendages.name]]</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <span ng-bind="checkup.appendages| pluck:'name' | join:', '"></span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if 'appendages_increased' in checkup_descriptor %}
+                                <div class="row" ng-if="checkup.appendages_increased">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('appendages_increased')]]:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                       <span ng-bind="checkup.appendages_increased"></span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if 'appendages_right' in checkup_descriptor %}
+                                <div class="row" ng-if="checkup.appendages_right">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('appendages_right')]]:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                        <span ng-bind="checkup.appendages_right| pluck:'name' | join:', '"></span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if 'appendages_right_increased' in checkup_descriptor %}
+                                <div class="row" ng-if="checkup.appendages_right_increased">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('appendages_right_increased')]]:</div>
+                                    <div class="col-sm-7 col-md-7">
+                                       <span ng-bind="checkup.appendages_right_increased"></span>
+                                    </div>
                                 </div>
                                 {% endif %}
                                 {% if 'parametrium' in checkup_descriptor %}
