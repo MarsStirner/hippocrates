@@ -247,10 +247,10 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
         sts = []
         for st_data in data.get('schedule_tickets', []):
             st = {
-                'time_begin': safe_time(st_data['time_begin']),
-                'time_end': safe_time(st_data['time_end']),
+                'time_begin': safe_time(st_data.get('time_begin')),
+                'time_end': safe_time(st_data.get('time_end')),
                 'patient': None,
-                'schedule_ticket_type': safe_int(st_data.get('schedule_ticket_type') or '1'),
+                'schedule_ticket_type': safe_int(st_data.get('schedule_ticket_type') or '0'),
                 'schedule_ticket_id': safe_int(st_data.get('schedule_ticket_id') or None),
             }
             if 'patient' in st_data:
@@ -281,6 +281,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
         # make interval slots
         for st_data in data['schedule_tickets']:
             att_code = u'extra' if st_data['schedule_ticket_type'] else u'planned'
+            attendance = rbAttendanceType.cache().by_code()[att_code]
             if att_code == u'planned':
                 if not (st_data['time_begin'] and st_data['time_end']):
                     raise ApiException(
@@ -290,11 +291,14 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
                         (st_data['time_begin'], st_data['time_end'],
                          st_data['schedule_ticket_id'])
                     )
-            attendance = rbAttendanceType.cache().by_code()[att_code]
-            st = ScheduleTicket(
-                begTime=st_data['time_begin'], endTime=st_data['time_end'],
-                attendanceType=attendance
-            )
+                st = ScheduleTicket(
+                    begTime=st_data['time_begin'], endTime=st_data['time_end'],
+                    attendanceType=attendance
+                )
+            else:
+                st = ScheduleTicket(
+                    attendanceType=attendance
+                )
             s.tickets.append(st)
 
             # if slot is not empty

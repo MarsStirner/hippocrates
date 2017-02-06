@@ -131,12 +131,12 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
         patient = self.find_client(data['patient'])
         res.update({
             'schedule_ticket_id': self.target_obj_id,
-            'schedule_ticket_type': safe_int(data.get('schedule_ticket_type')) or 1,
+            'schedule_ticket_type': safe_int(data.get('schedule_ticket_type') or '0'),
             'person': person,
             'patient': patient,
             'date': safe_date(data['date']),
-            'time_begin': safe_time(data['time_begin']),
-            'time_end': safe_time(data['time_end'])
+            'time_begin': safe_time(data.get('time_begin')),
+            'time_end': safe_time(data.get('time_end'))
         })
         return res
 
