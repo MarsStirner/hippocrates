@@ -317,9 +317,9 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Дата</th>
+                                <th>Год</th>
                                 <th>Вид</th>
-                                <th>Группа крови донора</th>
+                                <th></th>
                                 <th>Реакция</th>
                                 <th>&nbsp;</th>
                             </tr>
@@ -327,9 +327,9 @@
                             <tbody>
                             <tr ng-repeat="t in anamnesis.transfusions">
                                 <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
-                                <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.year"></td>
                                 <td ng-if="!t.deleted" ng-bind="t.type.name"></td>
-                                <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
+                                <td></td>
                                 <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
                                 <td ng-if="!t.deleted" class="col-md-1 nowrap">
                                     <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
