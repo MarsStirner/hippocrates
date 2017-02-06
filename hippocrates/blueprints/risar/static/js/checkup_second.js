@@ -183,13 +183,26 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
     reload_checkup();
 }])
 .controller('CheckupSecondChildCtrl', function ($scope) {
+    function cleanPhisher() {
+        $scope.child.state.basal = null;
+        $scope.child.state.variability_range = null;
+        $scope.child.state.frequency_per_minute = null;
+        $scope.child.state.acceleration = null;
+        $scope.child.state.deceleration = null;
+        $scope.child.state.fisher_ktg_rate = null;
+    }
+    function cleanStv() {
+        $scope.child.state.stv_evaluation = null;
+    }
     $scope.$watch('child.state.ktg_input', function (n, o) {
         if (n === 'fisher') {
             $scope.isPhisher = true;
             $scope.isStv = false;
+            cleanStv();
         } else if (n === 'stv') {
             $scope.isStv = true;
             $scope.isPhisher = false;
+            cleanPhisher();
         } else {
           $scope.isPhisher = false;
           $scope.isStv = false;

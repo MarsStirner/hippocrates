@@ -32,7 +32,9 @@ def create_or_update_fetuses(action, fetuses):
                 if sd_key == 'ktg_input':
                     if not sd_val:
                         continue
-                    sd_val = KtgInput.getId(sd_val)
+                    # с фронденда приходят строки вида fisher, stv
+                    if isinstance(sd_val, basestring):
+                        sd_val = KtgInput.getId(sd_val)
                 setattr(fetus_state, sd_key, sd_val)
             points, rate = calc_fisher_ktg_info(state_data)
             fetus_state.fisher_ktg_points = points
