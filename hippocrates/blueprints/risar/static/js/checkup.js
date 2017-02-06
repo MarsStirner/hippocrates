@@ -184,5 +184,104 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;
     };
-}])
-;
+}]);
+
+WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function ($scope, $filter) {
+    $scope.$watch('checkup.stomach', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['other', 'jivotboleznennyi'])) {
+                $scope.isStomachAreaVisible = true;
+            } else {
+                $scope.checkup.stomach_area = null;
+                $scope.isStomachAreaVisible = false;
+            }
+        }
+    }, true);
+
+    $scope.$watch('checkup.complaints', function (n, o) {
+        if (n !== o) {
+
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['other'])) {
+                $scope.isComplaintsFreeInputVisible = true;
+            } else {
+                $scope.checkup.complaints_free_input = null;
+                $scope.isComplaintsFreeInputVisible = false;
+            }
+        }
+    }, true);
+
+    $scope.$watch('checkup.cervix', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['other'])) {
+                $scope.isCervixFreeInputVisible = true;
+            } else {
+                $scope.checkup.cervix_free_input = null;
+                $scope.isCervixFreeInputVisible = false;
+            }
+        }
+    }, true);
+
+   $scope.$watch('checkup.cervical_canal', function (n, o) {
+        if (n !== o) {
+            var code = n ? safe_traverse(n, ['code']) : undefined;
+            if (code === 'other') {
+                $scope.isCervicalCanalFreeInputVisible = true;
+            } else {
+                $scope.checkup.cervical_canal_free_input = null;
+                $scope.isCervicalCanalFreeInputVisible = false;
+            }
+        }
+    }, true);
+
+    $scope.$watch('checkup.body_of_womb', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['enlarged'])) {
+                $scope.isBodyOfWombAdditionalVisible = true;
+            } else {
+                $scope.checkup.body_of_womb_additional = null;
+                $scope.isBodyOfWombAdditionalVisible = false;
+            }
+        }
+    }, true);
+
+     $scope.$watch('checkup.appendages', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['uveliceny'])) {
+                $scope.isAppendasIncreasedVisible = true;
+            } else {
+                $scope.checkup.appendages_increased = null;
+                $scope.isAppendasIncreasedVisible = false;
+            }
+        }
+    }, true);
+
+    $scope.$watch('checkup.appendages_right', function (n, o) {
+        if (n !== o) {
+            var selectedCodes = _.map(n, function (obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ($filter('intersects')(selectedCodes, ['uveliceny'])) {
+                $scope.isAppendasRightIncreasedVisible = true;
+            } else {
+                $scope.checkup.appendages_right_increased = null;
+                $scope.isAppendasRightIncreasedVisible = false;
+            }
+        }
+    }, true);
+
+}]);
