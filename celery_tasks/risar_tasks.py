@@ -21,6 +21,9 @@ from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import celery, db
 
+# для регистрации url, которые понадобятся клианту sirius
+import hippocrates.blueprints.risar.views.api.integration
+
 logger = get_task_logger(__name__)
 
 
