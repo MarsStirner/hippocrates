@@ -182,4 +182,24 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
     $scope.init();
     reload_checkup();
 }])
+.controller('CheckupSecondChildCtrl', function ($scope) {
+    $scope.$watch('child.state.ktg_input', function (n, o) {
+        if (n === 'fisher') {
+            $scope.isPhisher = true;
+            $scope.isStv = false;
+        } else if (n === 'stv') {
+            $scope.isStv = true;
+            $scope.isPhisher = false;
+        } else {
+          $scope.isPhisher = false;
+          $scope.isStv = false;
+        }
+    }, true);
+    $scope.$watch('child.state.stv_evaluation', function (n, o) {
+        if (n !== undefined) {
+            $scope.stvDescription = n < 4 ? 'патология' : 'норма';
+        }
+    }, true);
+    
+});
 ;
