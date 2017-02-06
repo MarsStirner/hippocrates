@@ -121,3 +121,14 @@ def api_0_invoice_calc_sum(invoice_id=None):
         else:
             raise ApiException(404, u'`invoice_id` required')
         return InvoiceRepr().represent_invoice_full(invoice)
+
+
+@module.route('/api/0/invoice/amqp/<int:invoice_id>')
+@api_method
+def api_0_invoice_requeue(invoice_id):
+    invoice_ctrl = InvoiceController()
+    invoice = invoice_ctrl.get_invoice(invoice_id)
+    if not invoice:
+        raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
+    notify_invoice_changed(MQOpsInvoice.update, invoice)
+    return 'ok'
