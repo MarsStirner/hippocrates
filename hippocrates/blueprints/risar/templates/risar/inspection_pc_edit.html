@@ -201,6 +201,18 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'complaints_free_input' in checkup_descriptor %}
+                                        <tr ng-if="isComplaintsFreeInputVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('complaints_free_input')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('complaints_free_input')"
+                                                       ng-model="checkup.complaints_free_input"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('complaints_free_input')"
+                                                       ng-required="checkupDescriptor.getMandatory('complaints_free_input')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'tongue' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('tongue')"></th>
@@ -322,17 +334,32 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'lymph' in checkup_descriptor %}
-                                    <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.lymph.$invalid && somaticForm.submit_attempt}">
-                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
-                                                 ng-disabled="checkupDescriptor.getReadOnly('lymph')"
-                                                 ng-required="checkupDescriptor.getMandatory('lymph')">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
+                                            <td class="col-md-8"></td>
+                                        </tr>
+                                        {% if 'lymph_which' in checkup_descriptor %}
+                                              <tr>
+                                                <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph_which')">
+                                                </td>
+                                                <td><input class="form-control"
+                                                     ng-required="checkupDescriptor.getMandatory('lymph_which')"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('lymph_which')"
+                                                     ng-model="checkup.lymph_which">
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <td></td>
+                                            <td><div ng-class="{'text-danger': somaticForm.lymph.$invalid && somaticForm.submit_attempt}">
+                                                <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('lymph')"
+                                                     ng-required="checkupDescriptor.getMandatory('lymph')">
+                                                    [[ item.name ]]
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'heart_tones' in checkup_descriptor %}
                                     <tr>
@@ -400,6 +427,18 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'stomach_area' in checkup_descriptor %}
+                                        <tr ng-if="isStomachAreaVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach_area')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('stomach_area')"
+                                                       ng-model="checkup.stomach_area"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('stomach_area')"
+                                                       ng-required="checkupDescriptor.getMandatory('stomach_area')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'liver' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('liver')"></th>
@@ -442,7 +481,10 @@
                                     {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bowel_and_bladder_habits')"></th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
+                                        <td><div class="row"><div class="col-md-4">
+                                            <rb-select ng-model="checkup.bowel_and_bladder_habits" ref-book="rbRisarBowelAndBladderFunctions"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('bowel_and_bladder_habits')"
+                                                 ng-required="checkupDescriptor.getMandatory('bowel_and_bladder_habits')"></rb-select></div></div></td>
                                     </tr>
                                     {% endif %}
                                 </tbody>
@@ -718,15 +760,30 @@
                                         </div></td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'cervix' in checkup_descriptor %}
+                                     {% if 'cervix' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix')"></th>
-                                        <td><div class="row" ng-class="{'has-error': vaginaForm.cervix.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix"
+                                        <td><div ng-class="{'text-danger': vaginaForm.cervix.$invalid && vaginaForm.submit_attempt}">
+                                            <div name="cervix" refbook-checkbox ng-model="checkup.cervix" ref-book="rbRisarCervix"
                                                  ng-disabled="checkupDescriptor.getReadOnly('cervix')"
-                                                 ng-required="checkupDescriptor.getMandatory('cervix')"></rb-select></div>
-                                        </div></td>
+                                                 ng-required="checkupDescriptor.getMandatory('cervix')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'cervix_free_input' in checkup_descriptor %}
+                                        <tr ng-if="isCervixFreeInputVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervix_free_input')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('cervix_free_input')"
+                                                       ng-model="checkup.cervix_free_input"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('cervix_free_input')"
+                                                       ng-required="checkupDescriptor.getMandatory('cervix_free_input')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'cervix_length' in checkup_descriptor %}
                                     <tr>
@@ -773,6 +830,18 @@
                                         </div></div></td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'cervical_canal_free_input' in checkup_descriptor %}
+                                        <tr ng-if="isCervicalCanalFreeInputVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('cervical_canal_free_input')"></td>
+                                            <td>
+                                                <input ng-disabled="checkup.getReadOnly('cervical_canal_free_input')"
+                                                       ng-model="checkup.cervical_canal_free_input"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('cervical_canal_free_input')"
+                                                       ng-required="checkupDescriptor.getMandatory('cervical_canal_free_input')"
+                                                       class="form-control">
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                     {% if 'body_of_womb' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('body_of_womb')"></th>
@@ -784,15 +853,111 @@
                                             </div>
                                     </tr>
                                     {% endif %}
+                                    {% if 'body_of_womb_additional' in checkup_descriptor %}
+                                        <tr ng-if="isBodyOfWombAdditionalVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('body_of_womb_additional')"></td>
+                                            <td>
+                                                <div class="row">
+                                                   <div class="col-md-4">
+                                                        <div class="input-group">
+                                                            <input class="form-control"
+                                                                   aria-describedby="addon-weeks"
+                                                                   name="body_of_womb_additional"
+                                                                   id="body_of_womb_additional"
+                                                                   valid-number valid-number-float
+                                                                   ng-model="checkup.body_of_womb_additional"
+                                                                   ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/"
+                                                                   ng-disabled="checkupDescriptor.getReadOnly('body_of_womb_additional')"
+                                                                   ng-required="checkupDescriptor.getMandatory('body_of_womb_additional')"
+                                                                   >
+                                                            <span class="input-group-addon" id="addon-weeks">недель</span>
+                                                        </div>
+                                                   </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'appendages' in checkup_descriptor or 'appendages_right' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right">Придатки</th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'appendages' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages')"></th>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages')"></td>
                                         <td><div class="row" ng-class="{'has-error': vaginaForm.appendages.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="appendages" ng-model="checkup.appendages" ref-book="rbRisarAppendages"
+                                            <div class="col-md-4">
+                                                <rb-select
+                                                 name="appendages"
+                                                 ng-model="checkup.appendages"
+                                                 ref-book="rbRisarAppendages"
+                                                 multiple="checkupDescriptor.getVector('appendages_right')"
                                                  ng-disabled="checkupDescriptor.getReadOnly('appendages')"
                                                  ng-required="checkupDescriptor.getMandatory('appendages')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'appendages_increased' in checkup_descriptor %}
+                                        <tr ng-if="isAppendasIncreasedVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages_increased')"></td>
+                                            <td>
+                                                <div class="row">
+                                                   <div class="col-md-4">
+                                                        <div class="input-group">
+                                                            <input class="form-control"
+                                                                   aria-describedby="addon-appendages_increased"
+                                                                   name="appendages_increased"
+                                                                   id="appendages_increased"
+                                                                   valid-number valid-number-float
+                                                                   ng-model="checkup.appendages_increased"
+                                                                   ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/"
+                                                                   ng-disabled="checkupDescriptor.getReadOnly('appendages_increased')"
+                                                                   ng-required="checkupDescriptor.getMandatory('appendages_increased')"
+                                                                   >
+{#                                                            <span class="input-group-addon" id="addon-appendages_increased">недель</span>#}
+                                                        </div>
+                                                   </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'appendages_right' in checkup_descriptor %}
+                                    <tr>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages_right')"></td>
+                                        <td><div class="row" ng-class="{'has-error': vaginaForm.appendages_right.$invalid && vaginaForm.submit_attempt}">
+                                            <div class="col-md-4">
+                                                <rb-select name="appendages_right" ng-model="checkup.appendages_right"
+                                                           ref-book="rbRisarAppendages"
+                                                           multiple="checkupDescriptor.getVector('appendages_right')"
+                                                           ng-disabled="checkupDescriptor.getReadOnly('appendages_right')"
+                                                           ng-required="checkupDescriptor.getMandatory('appendages_right')"></rb-select></div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'appendages_right_increased' in checkup_descriptor %}
+                                        <tr ng-if="isAppendasRightIncreasedVisible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('appendages_right_increased')"></td>
+                                            <td>
+                                                <div class="row">
+                                                   <div class="col-md-4">
+                                                        <div class="input-group">
+                                                            <input class="form-control"
+                                                                   aria-describedby="addon-appendages_right_increased"
+                                                                   name="appendages_right_increased"
+                                                                   id="appendages_right_increased"
+                                                                   valid-number valid-number-float
+                                                                   ng-model="checkup.appendages_right_increased"
+                                                                   ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/"
+                                                                   ng-disabled="checkupDescriptor.getReadOnly('appendages_right_increased')"
+                                                                   ng-required="checkupDescriptor.getMandatory('appendages_right_increased')"
+                                                                   >
+{#                                                            <span class="input-group-addon" id="addon-appendages_increased">недель</span>#}
+                                                        </div>
+                                                   </div>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'parametrium' in checkup_descriptor %}
                                     <tr>

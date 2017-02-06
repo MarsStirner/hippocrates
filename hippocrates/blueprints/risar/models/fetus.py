@@ -49,7 +49,8 @@ class RisarFetusState(db.Model):
     deceleration = VestaProperty('deceleration_code', 'rbRisarDeceleration')
 
     heart_rate = db.Column(db.Integer, nullable=True)
-    ktg_input = db.Column(db.Boolean, nullable=False, server_default=u"'0'", default=0)
+    ktg_input = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
+    stv_evaluation = db.Column(db.Float(asdecimal=True))
     fisher_ktg_points = db.Column(db.Integer)
     fisher_ktg_rate_id = db.Column(db.ForeignKey('rbFisherKTGRate.id'))
 

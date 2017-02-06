@@ -17,7 +17,7 @@ from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_int, safe_bool, safe_date, format_date
 from nemesis.models.diagnosis import Diagnostic
-from nemesis.models.enums import Gender, IntoleranceType, AllergyPower
+from nemesis.models.enums import Gender, IntoleranceType, AllergyPower, KtgInput
 from nemesis.models.exists import rbAttachType
 
 __author__ = 'viruzzz-kun'
@@ -292,7 +292,6 @@ def make_file_url(fmeta):
             u'api/0/download/{0}'.format(fmeta.uuid.hex)
         )
 
-
 def represent_fetus(fetus):
     return {
         'state': {
@@ -309,7 +308,8 @@ def represent_fetus(fetus):
             'acceleration': fetus.acceleration,
             'deceleration': fetus.deceleration,
             'heart_rate': fetus.heart_rate,
-            'ktg_input': fetus.ktg_input,
+            'ktg_input': KtgInput(fetus.ktg_input).code,
+            'stv_evaluation': fetus.stv_evaluation,
             'fisher_ktg_points': fetus.fisher_ktg_points,
             'fisher_ktg_rate': fetus.fisher_ktg_rate
         },
