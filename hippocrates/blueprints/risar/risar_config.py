@@ -27,7 +27,7 @@ pregnancy_apt_codes = [
     'year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'pregnancy_pathology',
     'delivery_pathology', 'maternity_aid', 'after_birth_complications', 'operation_testimonials',
 ]
-transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
+transfusion_apt_codes = ['year', 'type', 'reaction']
 
 risar_anamnesis_apt_common_codes = [
     'education', 'work_group', 'professional_properties',

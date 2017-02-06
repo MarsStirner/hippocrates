@@ -312,8 +312,9 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
     var open_edit = function (p) {
         var scope = $scope.$new();
         scope.model = p;
-        scope.minDate = $scope.header.client.birth_date;
-        scope.maxDate = new Date();
+
+        scope.minYear = moment($scope.header.client.birth_date).year();
+        scope.maxYear = new Date().getFullYear();
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/transfusions.html',
             scope: scope,
@@ -383,6 +384,12 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         scope.model = p;
         scope.minDate = $scope.header.client.birth_date;
         scope.maxDate = new Date();
+        scope.$watch('model.type', function(n, o) {
+            if (n !== undefined) {
+                scope.isAllergy = n.code === 'allergy' ? true : false;
+            }
+        }, true);
+
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/intolerances.html',
             scope: scope,
