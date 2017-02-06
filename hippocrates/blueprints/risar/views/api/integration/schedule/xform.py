@@ -387,6 +387,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
         return [
             {
                 'schedule_ticket_id': st.id,
+                'schedule_ticket_type': '0' if st.begTime else '1',
                 'time_begin': format_time(st.begTime),
                 'time_end': format_time(st.endTime),
                 'patient': self.or_undefined(st.client_ticket and st.client_ticket.client_id),
