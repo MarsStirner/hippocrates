@@ -155,9 +155,9 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                     this.children.sort(function (x, y) {
                         var a = self.lookup[x],
                             b = self.lookup[y];
-                        if (a.beg_date > b.beg_date) {
+                        if (a.beg_date < b.beg_date) {
                             return 1;
-                        } else if (a.beg_date < b.beg_date) {
+                        } else if (a.beg_date > b.beg_date) {
                             return -1;
                         } else {
                             return a.status - b.status;
