@@ -854,59 +854,6 @@
                                         </td>
                                     </tr>
                                     {% endif %}
-                                    <tr>
-                                        <th class="text-right col-md-4">Выделения</th>
-                                        <td class="col-md-8">
-                                        </td>
-                                    </tr>
-                                    {% if 'vulva_discharge_consistency' in checkup_descriptor %}
-                                    <tr>
-                                    <!-- example multiple -->
-                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_discharge_consistency')"></td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.vulva_discharge_consistency"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_discharge_consistency')"
-                                                       ng-required="checkupDescriptor.getMandatory('vulva_discharge_consistency')"></rb-select></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'vulva_discharge_colour' in checkup_descriptor %}
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_discharge_colour')"></td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="discharge_colour" ng-model="checkup.vulva_discharge_colour" ref-book="rbRisarDischargeColour"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_discharge_colour')"
-                                                       ng-required="checkupDescriptor.getMandatory('vulva_discharge_colour')"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'vulva_discharge_quantity' in checkup_descriptor %}
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_discharge_quantity')"></td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="discharge_quantity" ng-model="checkup.vulva_discharge_quantity" ref-book="rbRisarDischargeQuantity"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_discharge_quantity')"
-                                                       ng-required="checkupDescriptor.getMandatory('vulva_discharge_quantity')"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'vulva_discharge_smell' in checkup_descriptor %}
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_discharge_smell')"></td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="discharge_smell" ng-model="checkup.vulva_discharge_smell" ref-book="rbRisarDischargeSmell"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_discharge_smell')"
-                                                       ng-required="checkupDescriptor.getMandatory('vulva_discharge_smell')"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    {% endif %}
                                     {% if 'vulva_comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
