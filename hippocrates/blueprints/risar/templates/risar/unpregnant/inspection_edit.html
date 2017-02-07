@@ -1256,6 +1256,13 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'bimanual_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.bimanual_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'bimanual_comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
@@ -1450,6 +1457,13 @@
                                                 </div>
                                             </div>
                                         </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_formix_other" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'rectovaginal_comments' in checkup_descriptor %}
@@ -1671,6 +1685,14 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'rectal_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.rectal_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+
                                     {% if 'rectal_comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
