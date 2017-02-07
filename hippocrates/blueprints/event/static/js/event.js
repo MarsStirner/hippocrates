@@ -166,7 +166,22 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         )[0];
         $scope.update_form_state();
         $scope.on_event_type_changed();
+
+        if(['8', 'admperm1', 'admperm2'].indexOf($scope.event.info.event_type.finance.code) !== -1) {
+            $scope.set_default_dates();
+        }
     };
+
+    $scope.set_default_dates = function () {
+        if($scope.event.is_new()) {
+            $scope.event.info.set_date = new Date();
+            $scope.event.info.set_date.setHours(1, 0, 0);
+
+            $scope.event.info.exec_date = new Date();
+            $scope.event.info.exec_date.setHours(23, 59, 59);
+        }
+    };
+
     $scope.on_event_type_changed = function () {
         clearErrors();
         $scope.update_form_state();
@@ -312,7 +327,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     });
 
     $scope.$on('event_loaded', function() {
-        if($scope.event.info.is_adm_permission) {
+        if(['8', 'admperm1', 'admperm2'].indexOf($scope.event.info.event_type.finance.code) !== -1) {
             if(!$scope.event.info.set_date) {
                 $scope.event.info.set_date = new Date();
                 $scope.event.info.set_date.setHours(1, 0, 0);
