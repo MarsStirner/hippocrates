@@ -349,18 +349,6 @@
                                         </td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'stomach_area' in checkup_descriptor %}
-                                        <tr ng-if="isStomachAreaVisible">
-                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach_area')"></td>
-                                            <td>
-                                                <input ng-disabled="checkup.getReadOnly('stomach_area')"
-                                                       ng-model="checkup.stomach_area"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('stomach_area')"
-                                                       ng-required="checkupDescriptor.getMandatory('stomach_area')"
-                                                       class="form-control">
-                                            </td>
-                                        </tr>
-                                    {% endif %}
                                     {% if 'liver' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('liver')"></th>
@@ -878,7 +866,7 @@
                                                                 <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stv_evaluation')"></td>
                                                                 <td>
                                                                     <div class="row">
-                                                                       <div class="col-md-6">
+                                                                       <div class="col-md-4">
                                                                             <div class="input-group">
                                                                                 <input class="form-control"
                                                                                        aria-describedby="addon-stv"
@@ -887,7 +875,7 @@
                                                                                        valid-number valid-number-float
                                                                                        ng-model="child.state.stv_evaluation"
                                                                                        ng-required="isStv"
-                                                                                       ng-pattern="/^[0-9]{1,2}(\.[0-9]{0,1})?$/"/>
+                                                                                       ng-pattern="/^[1-9]{0,1}[0-9]{0,1}(\.[0-9]{0,1})?$/"/>
                                                                                     <span class="input-group-addon" id="addon-stv" ng-bind="stvDescription"></span>
                                                                             </div>
                                                                        </div>

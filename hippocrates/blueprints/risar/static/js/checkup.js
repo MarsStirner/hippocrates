@@ -187,20 +187,7 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
 }]);
 
 WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function ($scope, $filter) {
-    $scope.$watch('checkup.stomach', function (n, o) {
-        if (n !== o) {
-            var selectedCodes = _.map(n, function (obj, _idx) {
-                return safe_traverse(obj, ['code']);
-            });
-            if ($filter('intersects')(selectedCodes, ['other', 'jivotboleznennyi'])) {
-                $scope.isStomachAreaVisible = true;
-            } else {
-                $scope.checkup.stomach_area = null;
-                $scope.isStomachAreaVisible = false;
-            }
-        }
-    }, true);
-
+   
     $scope.$watch('checkup.complaints', function (n, o) {
         if (n !== o) {
 

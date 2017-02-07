@@ -112,8 +112,10 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         }
     }, true);
     $scope.$watch('child.state.stv_evaluation', function (n, o) {
-        if (n !== undefined) {
-            $scope.stvDescription = n < 4 ? 'патология' : 'норма';
+        if (n) {
+            $scope.stvDescription = n <= 4 ? 'патология' : 'норма';
+        } else {
+            $scope.stvDescription = null;
         }
     }, true);
     
