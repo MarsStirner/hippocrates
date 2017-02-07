@@ -181,7 +181,11 @@
                                         {% endif %}
                                         <tr>
                                             <td colspan="2">
-                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses" diag-types="epicrisis.diagnosis_final" can-add-new="true" can-edit="! epicrisis.endDate"></wm-diagnosis-new>
+                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses"
+                                                                  diag-types="epicrisis.diagnosis_final"
+                                                                  changed-diag-types="epicrisis.diagnosis_pathanatomical"
+                                                                  can-add-new="true" can-edit="! epicrisis.endDate">
+                                                </wm-diagnosis-new>
                                             </td>
                                         </tr>
                                         {% if 'pregnancy_speciality' in epicrisis_descriptor %}
@@ -265,7 +269,9 @@
                                                 <td colspan="2">
                                                     <div class="row">
                                                         <wm-diagnosis-new ng-model="epicrisis.diagnoses" can-add-new="true" can-edit="!! mother_death && ! epicrisis.endDate"
-                                                          diag-types="epicrisis.diagnosis_pathanatomical"></wm-diagnosis-new>
+                                                          diag-types="epicrisis.diagnosis_pathanatomical"
+                                                          changed-diag-types="epicrisis.diagnosis_final">
+                                                        </wm-diagnosis-new>
                                                     </div>
                                                 </td>
                                             </tr>
