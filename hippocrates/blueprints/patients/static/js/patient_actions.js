@@ -184,9 +184,11 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             return new ActionTreeItem(this)
         };
         ActionTreeItem.prototype.formatData = function () {
-            return '{0|, }{(плановая дата |1|), }{2}, {3}'.formatNonEmpty(
+            return '{0|, }{(дата выполнения |1|), }{(плановая дата |2|), }{3}, {4}'.formatNonEmpty(
                 $filter('asDateTime')(this.beg_date),
-                _.has(['diagnostics', 'lab'], this.action_type.action_type_class) ?
+                ['diagnostics', 'lab'].indexOf(this.action_type.action_type_class.code) !== -1 && this.end_date ?
+                    $filter('asDateTime')(this.end_date) : undefined,
+                ['diagnostics', 'lab'].indexOf(this.action_type.action_type_class.code) !== -1 && !this.end_date ?
                     $filter('asDateTime')(this.planned_end_date) : undefined,
                 this.action_type.name, this.status.name
             );
