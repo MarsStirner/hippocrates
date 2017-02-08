@@ -5,7 +5,7 @@
 {% block title %}> Повторный осмотр{% endblock %}
 
 {% block main %}
-<div ng-controller="CheckupFirstEditCtrl" ng-cloak>
+<div ng-controller="CheckupSecondEditCtrl" ng-cloak>
     <section class="content-header" ng-controller="RisarHeaderCtrl">
         {{ rimacros.page_title_n('Повторный осмотр') }}
         {{ rimacros.navigation('[[ event_id ]]') }}
@@ -536,7 +536,7 @@
                         </div>
                     </div>
                     <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                         ng-repeat="child in checkup.fetuses | flt_not_deleted">
+                         ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupSecondChildCtrl">
                         <div class="col-md-6">
                             <div class="box box-primary">
                                 <div class="box-header with-border">
@@ -574,29 +574,33 @@
                                         <div class="col-sm-6 col-md-6 text-right">ЧСС, уд/мин:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.heart_rate]]</div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right"><b>[[child.state.ktg_input ? 'Данные КТГ': 'Данные КТГ:']]</b></div>
-                                        <div class="col-sm-6 col-md-6">[[child.state.ktg_input ? '': 'нет данных']]</div>
+                                    <div class="row" ng-show="isPhisher || isStv">
+                                        <div class="col-sm-6 col-md-6 text-right"><b>Данные КТГ</b></div>
+                                        <div class="col-sm-6 col-md-6"></div>
                                     </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
+                                    <div class="row" ng-show="isPhisher">
                                         <div class="col-sm-6 col-md-6 text-right">Базальный ритм:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.basal.name]]</div>
                                     </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
+                                    <div class="row" ng-show="isPhisher">
                                         <div class="col-sm-6 col-md-6 text-right">Вариабельность (амплитуда):</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.variability_range.name]]</div>
                                     </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
+                                    <div class="row" ng-show="isPhisher">
                                         <div class="col-sm-6 col-md-6 text-right">Вариабельность (частота в минуту):</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.frequency_per_minute.name]]</div>
                                     </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
+                                    <div class="row" ng-show="isPhisher">
                                         <div class="col-sm-6 col-md-6 text-right">Акселерации за 30 минут:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.acceleration.name]]</div>
                                     </div>
-                                    <div class="row" ng-show="child.state.ktg_input">
+                                    <div class="row" ng-show="isPhisher">
                                         <div class="col-sm-6 col-md-6 text-right">Децелерации за 30 минут:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.deceleration.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isStv">
+                                        <div class="col-sm-6 col-md-6 text-right">Оценка по STV:</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind="child.state.stv_evaluation"></span></div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">&nbsp;</div>
@@ -619,7 +623,7 @@
         WebMis20.value('ticket_25_descriptor', angular.fromJson('{{ticket_25_descriptor|tojson|safe}}'));
     </script>
     <script src="{{ url_for('.static', filename='js/checkup.js', v=app_version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/checkup_first.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/checkup_second.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/event_measure/em_action_view.js', v=app_version) }}"></script>
 {% endblock %}
