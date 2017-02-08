@@ -39,6 +39,42 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
             }
         }
     }, true);
+    $scope.$watch('checkup.bimanual_body_of_womb_size', function (n, o) {
+        if ( n!==o ) {
+            var code = safe_traverse(n, ['code']);
+            $scope.is_bimanual_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
+            $scope.is_bimanual_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
+
+            if (!$scope.is_bimanual_body_of_womb_enlarged_Visible) { $scope.checkup.bimanual_body_of_womb_enlarged=null; }
+            if (!$scope.is_bimanual_body_of_womb_reduced_Visible) { $scope.checkup.bimanual_body_of_womb_reduced=null; }
+
+        }
+    }, true); 
+    
+    $scope.$watch('checkup.rectovaginal_body_of_womb_size', function (n, o) {
+        if ( n!==o ) {
+            var code = safe_traverse(n, ['code']);
+            $scope.is_rectovaginal_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
+            $scope.is_rectovaginal_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
+
+            if (!$scope.is_rectovaginal_body_of_womb_enlarged_Visible) { $scope.checkup.rectovaginal_body_of_womb_enlarged=null; }
+            if (!$scope.is_rectovaginal_body_of_womb_reduced_Visible) { $scope.checkup.rectovaginal_body_of_womb_reduced=null; }
+
+        }
+    }, true);
+    
+    $scope.$watch('checkup.rectal_body_of_womb_size', function (n, o) {
+        if ( n!==o ) {
+            var code = safe_traverse(n, ['code']);
+            $scope.is_rectal_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
+            $scope.is_rectal_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
+
+            if (!$scope.is_rectal_body_of_womb_enlarged_Visible) { $scope.checkup.rectal_body_of_womb_enlarged=null; }
+            if (!$scope.is_rectal_body_of_womb_reduced_Visible) { $scope.checkup.rectal_body_of_womb_reduced=null; }
+
+        }
+    }, true);
+    
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
         return $scope.checkup
