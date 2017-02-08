@@ -16,7 +16,8 @@ from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_
 from hippocrates.blueprints.risar.lib.represent.common import represent_fetus_for_checkup_copy, represent_ticket_25
 from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
-from hippocrates.blueprints.risar.lib.checkups import copy_checkup
+from hippocrates.blueprints.risar.lib.checkups import copy_checkup, \
+    validate_send_to_mis_checkup
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, first_inspection_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -81,22 +82,24 @@ def api_0_pregnancy_checkup(event_id):
         create_or_update_fetuses(action, fetuses)
 
     db.session.commit()
-    if flat_code == first_inspection_flat_code:
-        checkup_method_name = 'risar.api_checkup_obs_first_ticket25_get'
-        entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
-    else:
-        checkup_method_name = 'risar.api_checkup_obs_second_ticket25_get'
-        entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
-    sirius.send_to_mis(
-        sirius.RisarEvents.SAVE_CHECKUP,
-        entity_code,
-        sirius.OperationCode.READ_ONE,
-        checkup_method_name,
-        obj=('exam_obs_id', action.id),
-        # obj=('external_id', action.id),
-        params={'card_id': event_id},
-        is_create=not checkup_id,
-    )
+    is_ready_send_to_mis = validate_send_to_mis_checkup(action)
+    if is_ready_send_to_mis:
+        if flat_code == first_inspection_flat_code:
+            checkup_method_name = 'risar.api_checkup_obs_first_ticket25_get'
+            entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
+        else:
+            checkup_method_name = 'risar.api_checkup_obs_second_ticket25_get'
+            entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
+        sirius.send_to_mis(
+            sirius.RisarEvents.SAVE_CHECKUP,
+            entity_code,
+            sirius.OperationCode.READ_ONE,
+            checkup_method_name,
+            obj=('exam_obs_id', action.id),
+            # obj=('external_id', action.id),
+            params={'card_id': event_id},
+            is_create=not checkup_id,
+        )
     card.reevaluate_card_attrs()
     db.session.commit()
 
@@ -107,15 +110,16 @@ def api_0_pregnancy_checkup(event_id):
     if em_ctrl.exception:
         result['em_error'] = u'Произошла ошибка формирования списка мероприятий'
 
-    sirius.send_to_mis(
-        sirius.RisarEvents.SAVE_CHECKUP,
-        sirius.RisarEntityCode.MEASURE,
-        sirius.OperationCode.READ_MANY,
-        'risar.api_measure_list_get',
-        obj=('card_id', event_id),
-        params={'card_id': event_id},
-        is_create=not checkup_id,
-    )
+    if is_ready_send_to_mis:
+        sirius.send_to_mis(
+            sirius.RisarEvents.SAVE_CHECKUP,
+            sirius.RisarEntityCode.MEASURE,
+            sirius.OperationCode.READ_MANY,
+            'risar.api_measure_list_get',
+            obj=('card_id', event_id),
+            params={'card_id': event_id},
+            is_create=not checkup_id,
+        )
 
     return {
         'checkup': result,

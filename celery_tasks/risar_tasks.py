@@ -4,12 +4,12 @@ import datetime
 
 from celery.utils.log import get_task_logger
 from nemesis.models.actions import Action, ActionType
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
-    rbDiagnosisTypeN, Diagnostic
 
 from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import reevaluate_card_fill_rate_all
+from hippocrates.blueprints.risar.lib.checkups import \
+    validate_send_to_mis_checkup
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_event_cfrs
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, \
     inspections_span_flatcodes, first_inspection_flat_code, \
@@ -97,12 +97,21 @@ def update_card_attrs_cfrs(self):
 
 @celery.task(bind=True)
 def close_yesterday_checkups(self):
+    def get_all_opened_checkups(today):
+        return Action.query.join(ActionType).filter(
+            Action.deleted == 0,
+            Action.begDate < today.date(),
+            Action.begDate > (today.date() - datetime.timedelta(days=60)),
+            Action.endDate.is_(None),
+            ActionType.flatCode.in_(inspections_span_flatcodes + risar_gyn_checkup_flat_codes),
+        ).all()
+
     today = datetime.datetime.today()
     cur_weekday = today.weekday()
     if cur_weekday < 5:  # раньше субботы
         for checkup in get_all_opened_checkups(today):
 
-            send_data_to_mis = validate_checkup(checkup)
+            send_data_to_mis = validate_send_to_mis_checkup(checkup)
             if checkup.actionType.flatCode == first_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_obs_first_get'
                 checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
@@ -178,58 +187,3 @@ def close_yesterday_checkups(self):
                     db.session.add(checkup)
                     db.session.commit()
                     raise
-
-
-def get_all_opened_checkups(today):
-    return Action.query.join(ActionType).filter(
-        Action.deleted == 0,
-        Action.begDate < today.date(),
-        Action.begDate > (today.date() - datetime.timedelta(days=60)),
-        Action.endDate.is_(None),
-        ActionType.flatCode.in_(inspections_span_flatcodes + risar_gyn_checkup_flat_codes),
-    ).all()
-
-
-def validate_checkup(checkup):
-    res = True
-    talon25 = checkup.propsByCode['ticket_25'].value
-    dg_q = Action_Diagnosis.query.join(
-        rbDiagnosisKind
-    ).join(
-        rbDiagnosisTypeN
-    ).join(
-        Diagnostic, Diagnostic.action == checkup
-    ).filter(
-        Diagnostic.diagnosis_id == Action_Diagnosis.diagnosis_id,
-        Action_Diagnosis.deleted == 0,
-        Action_Diagnosis.action == checkup,
-        rbDiagnosisKind.code == 'main',
-        rbDiagnosisTypeN.code == 'final',
-        Diagnostic.rbAcheResult_id.isnot(None),
-    )
-
-    if not talon25.propsByCode['medical_care'].value:
-        res = False
-    elif not talon25.propsByCode['visit_place'].value:
-        res = False
-    elif not talon25.propsByCode['visit_reason'].value:
-        res = False
-    elif not talon25.propsByCode['visit_type'].value:
-        res = False
-    elif not talon25.propsByCode['finished_treatment'].value:
-        res = False
-    elif not talon25.propsByCode['initial_treatment'].value:
-        res = False
-    elif not talon25.propsByCode['treatment_result'].value:
-        res = False
-    elif not talon25.propsByCode['payment'].value:
-        res = False
-    elif not talon25.propsByCode['prof_med_help'].value:
-        res = False
-    elif not talon25.propsByCode['condit_med_help'].value:
-        res = False
-    elif not talon25.propsByCode['services'].value:
-        res = False
-    elif not db.session.query(dg_q.exists()).scalar():
-        res = False
-    return res
