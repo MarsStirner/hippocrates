@@ -511,6 +511,7 @@ class EventMeasureSelecter(BaseSelecter):
                 if not self.is_joined(self.query, ExpertProtocol):
                     self.query = self.query.outerjoin(ExpertProtocol)
                 epicr_q = self.query_epicrisis().subquery()
+
                 self.query = self.query.outerjoin(
                     epicr_q,
                     EventMeasure.event_id == epicr_q.c.event_id
@@ -519,8 +520,16 @@ class EventMeasureSelecter(BaseSelecter):
                         ExpertProtocol.code.in_(flt['observation_phase_codes']),
                         func.IF(
                             EventMeasure.schemeMeasure_id.is_(None),
-                            and_(epicr_q.c.delivery_date.isnot(None),
-                                func.DATE(EventMeasure.begDateTime) >= func.DATE(epicr_q.c.delivery_date),
+                            or_(
+                                and_(
+                                    'protocol572' in flt['observation_phase_codes'],
+                                    func.DATE(EventMeasure.begDateTime) <= func.coalesce(func.DATE(epicr_q.c.delivery_date), func.curdate())
+                                ),
+                                and_(
+                                    'protocolPuerpera' in flt['observation_phase_codes'],
+                                    epicr_q.c.delivery_date.isnot(None),
+                                    func.DATE(EventMeasure.begDateTime) >= func.DATE(epicr_q.c.delivery_date)
+                                )
                             ),
                             False
                         )
