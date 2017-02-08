@@ -14,6 +14,9 @@
         <button class="btn btn-success" title="Сохранить" ng-click="save_action()" ng-if="!action.readonly">
             <i class="glyphicon glyphicon-ok"></i>
         </button>
+        <button class="btn btn-success" title="Подписать" ng-click="sign_n_save_action()" ng-if="!action.readonly">
+            <i class="glyphicon glyphicon-user"></i>
+        </button>
     </div>
     <h1>[[ action.action_type.name ]] -
         <a href="{{ url_for('patients.patient') }}?client_id=[[action.client.id]]">[[ action.client.full_name ]] [[ action.client.birth_date |asDate ]] ([[ action.client.age]])</a>
@@ -56,6 +59,7 @@
         <div class="pull-right">
             <ui-print-button class="btn-lg" ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
             <button class="btn btn-lg btn-success" ng-click="save_action()" ng-if="!action.readonly">Сохранить</button>
+            <button class="btn btn-lg btn-success" ng-click="sign_n_save_action()" ng-if="!action.readonly">Подписать</button>
             <button class="btn btn-lg btn-danger" ng-click="cancel()">Закрыть</button>
         </div>
 </div>
