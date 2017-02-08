@@ -5,7 +5,7 @@ import datetime
 import logging
 from collections import defaultdict
 
-from blueprints.risar.lib import sirius
+from hippocrates.blueprints.risar.lib import sirius
 from flask import abort, request
 from flask_login import current_user
 

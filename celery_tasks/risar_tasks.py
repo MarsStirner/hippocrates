@@ -4,6 +4,8 @@ import datetime
 
 from celery.utils.log import get_task_logger
 from nemesis.models.actions import Action, ActionType
+from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
+    rbDiagnosisTypeN, Diagnostic
 
 from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
@@ -21,8 +23,6 @@ from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.systemwide import celery, db
 
-# для регистрации url, которые понадобятся клианту sirius
-import hippocrates.blueprints.risar.views.api.integration
 
 logger = get_task_logger(__name__)
 
@@ -101,47 +101,48 @@ def close_yesterday_checkups(self):
     cur_weekday = today.weekday()
     if cur_weekday < 5:  # раньше субботы
         for checkup in get_all_opened_checkups(today):
-            checkup.endDate = today
-            db.session.add(checkup)
-            # чтобы дата закрытия попала в данные при передаче в мис
-            db.session.commit()
 
-            try:
-                send_data_to_mis = True
-                if checkup.actionType.flatCode == first_inspection_flat_code:
-                    checkup_method_name = 'risar.api_checkup_obs_first_get'
-                    checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
-                    ticket_method_name = 'risar.api_checkup_obs_first_ticket25_get'
-                    ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
-                elif checkup.actionType.flatCode == second_inspection_flat_code:
-                    checkup_method_name = 'risar.api_checkup_obs_second_get'
-                    checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND
-                    ticket_method_name = 'risar.api_checkup_obs_second_ticket25_get'
-                    ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
-                elif checkup.actionType.flatCode == pc_inspection_flat_code:
-                    checkup_method_name = 'risar.api_checkup_pc_get'
-                    checkup_entity_code = sirius.RisarEntityCode.CHECKUP_PC
-                    ticket_method_name = 'risar.api_checkup_pc_ticket25_get'
-                    ticket_entity_code = sirius.RisarEntityCode.CHECKUP_PC_TICKET
-                elif checkup.actionType.flatCode == puerpera_inspection_flat_code:
-                    checkup_method_name = 'risar.api_checkup_puerpera_get'
-                    # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
-                    ticket_method_name = 'risar.api_checkup_puerpera_ticket25_get'
-                    # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
-                    send_data_to_mis = False
-                elif checkup.actionType.flatCode == risar_gyn_checkup_flat_code:
-                    checkup_method_name = 'risar.api_checkup_gyn_get'
-                    # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
-                    ticket_method_name = 'risar.api_checkup_gyn_ticket25_get'
-                    # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
-                    send_data_to_mis = False
-                else:
-                    raise Exception(
-                        'Unexpected checkup action type = (%s)' %
-                        checkup.actionType.flatCode
-                    )
+            send_data_to_mis = validate_checkup(checkup)
+            if checkup.actionType.flatCode == first_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_obs_first_get'
+                checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
+                ticket_method_name = 'risar.api_checkup_obs_first_ticket25_get'
+                ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
+            elif checkup.actionType.flatCode == second_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_obs_second_get'
+                checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND
+                ticket_method_name = 'risar.api_checkup_obs_second_ticket25_get'
+                ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
+            elif checkup.actionType.flatCode == pc_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_pc_get'
+                checkup_entity_code = sirius.RisarEntityCode.CHECKUP_PC
+                ticket_method_name = 'risar.api_checkup_pc_ticket25_get'
+                ticket_entity_code = sirius.RisarEntityCode.CHECKUP_PC_TICKET
+            elif checkup.actionType.flatCode == puerpera_inspection_flat_code:
+                checkup_method_name = 'risar.api_checkup_puerpera_get'
+                # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
+                ticket_method_name = 'risar.api_checkup_puerpera_ticket25_get'
+                # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
+                send_data_to_mis = False
+            elif checkup.actionType.flatCode == risar_gyn_checkup_flat_code:
+                checkup_method_name = 'risar.api_checkup_gyn_get'
+                # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
+                ticket_method_name = 'risar.api_checkup_gyn_ticket25_get'
+                # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
+                send_data_to_mis = False
+            else:
+                raise Exception(
+                    'Unexpected checkup action type = (%s)' %
+                    checkup.actionType.flatCode
+                )
 
-                if send_data_to_mis:
+            if send_data_to_mis:
+                try:
+                    checkup.endDate = today
+                    db.session.add(checkup)
+                    # чтобы дата закрытия попала в данные при передаче в мис
+                    db.session.commit()
+
                     sirius.send_to_mis(
                         sirius.RisarEvents.CLOSE_CHECKUP,
                         checkup_entity_code,
@@ -171,12 +172,12 @@ def close_yesterday_checkups(self):
                         params={'card_id': checkup.event_id},
                         is_create=False,
                     )
-            except:
-                # чтобы при устранении проблемы осмотр был найден и передан в мис
-                checkup.endDate = None
-                db.session.add(checkup)
-                db.session.commit()
-                raise
+                except:
+                    # чтобы при устранении проблемы осмотр был найден и передан в мис
+                    checkup.endDate = None
+                    db.session.add(checkup)
+                    db.session.commit()
+                    raise
 
 
 def get_all_opened_checkups(today):
@@ -187,3 +188,48 @@ def get_all_opened_checkups(today):
         Action.endDate.is_(None),
         ActionType.flatCode.in_(inspections_span_flatcodes + risar_gyn_checkup_flat_codes),
     ).all()
+
+
+def validate_checkup(checkup):
+    res = True
+    talon25 = checkup.propsByCode['ticket_25'].value
+    dg_q = Action_Diagnosis.query.join(
+        rbDiagnosisKind
+    ).join(
+        rbDiagnosisTypeN
+    ).join(
+        Diagnostic, Diagnostic.action == checkup
+    ).filter(
+        Diagnostic.diagnosis_id == Action_Diagnosis.diagnosis_id,
+        Action_Diagnosis.deleted == 0,
+        Action_Diagnosis.action == checkup,
+        rbDiagnosisKind.code == 'main',
+        rbDiagnosisTypeN.code == 'final',
+        Diagnostic.rbAcheResult_id.isnot(None),
+    )
+
+    if not talon25.propsByCode['medical_care'].value:
+        res = False
+    elif not talon25.propsByCode['visit_place'].value:
+        res = False
+    elif not talon25.propsByCode['visit_reason'].value:
+        res = False
+    elif not talon25.propsByCode['visit_type'].value:
+        res = False
+    elif not talon25.propsByCode['finished_treatment'].value:
+        res = False
+    elif not talon25.propsByCode['initial_treatment'].value:
+        res = False
+    elif not talon25.propsByCode['treatment_result'].value:
+        res = False
+    elif not talon25.propsByCode['payment'].value:
+        res = False
+    elif not talon25.propsByCode['prof_med_help'].value:
+        res = False
+    elif not talon25.propsByCode['condit_med_help'].value:
+        res = False
+    elif not talon25.propsByCode['services'].value:
+        res = False
+    elif not db.session.query(dg_q.exists()).scalar():
+        res = False
+    return res

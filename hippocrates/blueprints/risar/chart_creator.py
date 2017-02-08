@@ -2,7 +2,7 @@
 # TODO: Refactor me
 from datetime import datetime
 
-from blueprints.risar.lib import sirius
+from hippocrates.blueprints.risar.lib import sirius
 from flask_login import current_user
 
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
