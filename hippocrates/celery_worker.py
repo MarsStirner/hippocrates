@@ -17,8 +17,8 @@ usagi()
 
 # для генерации url, которые понадобятся клиенту sirius
 config = flask_app.config
-hippo_url = config.get('HIPPO_URL').rstrip('/').lstrip('http://')
-config['SERVER_NAME'] = hippo_url
+hippo_host = config.get('HIPPO_URL').rstrip('/').lstrip('http://')
+config['SERVER_NAME'] = hippo_host
 
 
 # https://github.com/Robpol86/Flask-Large-Application-Example
