@@ -1163,11 +1163,16 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'bimanual_body_of_womb_enlarged' in checkup_descriptor %}
-                                    <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_enlarged')"></td>
-                                    <td><input ng-disabled="['missing', 'not determined'].has(checkup.bimanual_uterus_body) || checkup.bimanual_body_of_womb_size.code != 'enlarged'" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
-                                    </tr>
+                                        <tr ng-if="is_bimanual_body_of_womb_enlarged_Visible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_enlarged')"></td>
+                                            <td><input ng-disabled="!is_bimanual_body_of_womb_enlarged_Visible" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'bimanual_body_of_womb_reduced' in checkup_descriptor %}
+                                        <tr ng-if="is_bimanual_body_of_womb_reduced_Visible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_reduced')"></td>
+                                            <td><input ng-disabled="!is_bimanual_body_of_womb_reduced_Visible" ng-model="checkup.bimanual_body_of_womb_reduced" class="form-control"></td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'bimanual_uteri_position' in checkup_descriptor %}
                                     <tr>
@@ -1340,10 +1345,17 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'rectovaginal_body_of_womb_enlarged' in checkup_descriptor %}
-                                    <tr>
+                                    <tr ng-if="checkup.rectovaginal_body_of_womb_size.code == 'enlarged'">
                                         <!-- example short_string -->
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_enlarged')"></td>
                                         <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_body_of_womb_reduced' in checkup_descriptor %}
+                                    <tr ng-if="checkup.rectovaginal_body_of_womb_size.code == 'reduced'">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_reduced')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'reduced'" ng-model="checkup.rectovaginal_body_of_womb_reduced" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'rectovaginal_uteri_position' in checkup_descriptor %}
@@ -1571,10 +1583,17 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'rectal_body_of_womb_enlarged' in checkup_descriptor %}
-                                    <tr>
+                                    <tr ng-if="is_rectal_body_of_womb_enlarged_Visible">
                                         <!-- example short_string -->
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_enlarged')"></td>
-                                        <td><input ng-disabled="checkup.rectal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                        <td><input ng-disabled="!is_rectal_body_of_womb_enlarged_Visible" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_body_of_womb_reduced' in checkup_descriptor %}
+                                    <tr ng-if="is_rectal_body_of_womb_reduced_Visible">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_reduced')"></td>
+                                        <td><input ng-disabled="!is_rectal_body_of_womb_reduced_Visible" ng-model="checkup.rectal_body_of_womb_reduced" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'rectal_uteri_position' in checkup_descriptor %}

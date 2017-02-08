@@ -436,34 +436,6 @@
                                         <div class="col-sm-6 col-md-6"><span ng-bind="checkup.perianal_zona | pluck:'name' | join:', '"></span></div>
                                 </div>
                                 {% endif %}
-                                <div class="row">
-                                            <div class="col-sm-6 col-md-6 text-right"><b>Выделения</b></div>
-                                            <div class="col-sm-6 col-md-6"></div>
-                                </div>
-                                {% if 'vulva_discharge_consistency' in checkup_descriptor %}
-                                 <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_discharge_consistency')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_consistency | pluck:'name' | join:', '"></span></div>
-                                </div>
-                                {% endif %}
-                                {% if 'vulva_discharge_colour' in checkup_descriptor %}
-                                <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_discharge_colour')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_colour.name"></span></div>
-                                </div>
-                                {% endif %}
-                                {% if 'vulva_discharge_quantity' in checkup_descriptor %}
-                                <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_discharge_quantity')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_quantity.name"></span></div>
-                                </div>
-                                {% endif %}
-                                {% if 'vulva_discharge_smell' in checkup_descriptor %}
-                                <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_discharge_smell')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_discharge_smell.name"></span></div>
-                                </div>
-                                {% endif %}
                                 {% if 'vulva_comments' in checkup_descriptor %}
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_comments')]]:</div>
