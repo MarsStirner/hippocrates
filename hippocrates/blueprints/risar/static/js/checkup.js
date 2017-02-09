@@ -188,7 +188,7 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
 
 WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function ($scope, $filter) {
    
-    $scope.$watch('checkup.complaints', function (n, o) {
+   $scope.$watch('checkup.complaints', function (n, o) {
         if (n !== o) {
 
             var selectedCodes = _.map(n, function (obj, _idx) {
@@ -201,9 +201,9 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
                 $scope.isComplaintsFreeInputVisible = false;
             }
         }
-    }, true);
+   }, true);
 
-    $scope.$watch('checkup.cervix', function (n, o) {
+   $scope.$watch('checkup.cervix', function (n, o) {
         if (n !== o) {
             var selectedCodes = _.map(n, function (obj, _idx) {
                 return safe_traverse(obj, ['code']);
@@ -215,7 +215,7 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
                 $scope.isCervixFreeInputVisible = false;
             }
         }
-    }, true);
+   }, true);
 
    $scope.$watch('checkup.cervical_canal', function (n, o) {
         if (n !== o) {
@@ -227,9 +227,9 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
                 $scope.isCervicalCanalFreeInputVisible = false;
             }
         }
-    }, true);
+   }, true);
 
-    $scope.$watch('checkup.body_of_womb', function (n, o) {
+   $scope.$watch('checkup.body_of_womb', function (n, o) {
         if (n !== o) {
             var selectedCodes = _.map(n, function (obj, _idx) {
                 return safe_traverse(obj, ['code']);
@@ -241,7 +241,7 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
                 $scope.isBodyOfWombAdditionalVisible = false;
             }
         }
-    }, true);
+   }, true);
 
      $scope.$watch('checkup.appendages', function (n, o) {
         if (n !== o) {
@@ -255,9 +255,9 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
                 $scope.isAppendasIncreasedVisible = false;
             }
         }
-    }, true);
+   }, true);
 
-    $scope.$watch('checkup.appendages_right', function (n, o) {
+   $scope.$watch('checkup.appendages_right', function (n, o) {
         if (n !== o) {
             var selectedCodes = _.map(n, function (obj, _idx) {
                 return safe_traverse(obj, ['code']);
@@ -269,6 +269,6 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
                 $scope.isAppendasRightIncreasedVisible = false;
             }
         }
-    }, true);
+   }, true);
 
 }]);

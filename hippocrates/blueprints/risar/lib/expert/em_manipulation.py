@@ -108,14 +108,14 @@ class EventMeasureController(BaseModelController):
         if 'checkup_id' in data:
             cur_inspection = get_action_by_id(data['checkup_id'])
 
-        if org and 'LPUDirection' in appointment.propsByCode:
-            appointment['LPUDirection'].value = org
-        if cur_inspection and 'DateDirection' in appointment.propsByCode:
-            appointment['DateDirection'].value = cur_inspection.begDate
-        if cur_inspection and 'DirectionDate' in appointment.propsByCode:
-            appointment['DirectionDate'].value = cur_inspection.begDate
-        if cur_inspection and 'DiagnosisDirection' in appointment.propsByCode:
-            appointment['DiagnosisDirection'].value = get_inspection_primary_diag_mkb(cur_inspection)
+        if org and appointment.has_property('LPUDirection'):
+            appointment.set_prop_value('LPUDirection', org)
+        if cur_inspection and appointment.has_property('DateDirection'):
+            appointment.set_prop_value('DateDirection', cur_inspection.begDate)
+        if cur_inspection and appointment.has_property('DirectionDate'):
+            appointment.set_prop_value('DirectionDate', cur_inspection.begDate)
+        if cur_inspection and appointment.has_property('DiagnosisDirection'):
+            appointment.set_prop_value('DiagnosisDirection', get_inspection_primary_diag_mkb(cur_inspection))
         return appointment
 
     def create_appointment(self, em, json_data):
@@ -202,14 +202,14 @@ class EventMeasureController(BaseModelController):
         return res
 
     def _set_emr_data(self, em_result):
-        if 'CheckupDate' in em_result.propsByCode:
-            new_date = safe_datetime(em_result.propsByCode['CheckupDate'].value)
-        elif 'IssueDate' in em_result.propsByCode:
-            new_date = safe_datetime(em_result.propsByCode['IssueDate'].value)
+        if em_result.has_property('CheckupDate'):
+            new_date = safe_datetime(em_result.get_prop_value('CheckupDate'))
+        elif em_result.has_property('IssueDate'):
+            new_date = safe_datetime(em_result.get_prop_value('IssueDate'))
         else:
             new_date = None
-        if 'Doctor' in em_result.propsByCode:
-            new_doctor = em_result.propsByCode['Doctor'].value
+        if em_result.has_property('Doctor'):
+            new_doctor = em_result.get_prop_value('Doctor')
         else:
             new_doctor = None
         self.modify_emr(em_result, new_date, new_doctor)
@@ -336,7 +336,7 @@ class EventMeasureController(BaseModelController):
         db.session.flush()
 
     def emr_changes_diagnoses_system(self, emr):
-        return any(prop_code in self.ds_emr_apt_codes for prop_code in emr.propsByCode)
+        return any(emr.has_property(prop_code) for prop_code in self.ds_emr_apt_codes)
 
     def get_emr_data_for_diags(self, em_result):
         mkbs = get_measure_result_mkbs(em_result, self.ds_emr_apt_codes)
@@ -370,14 +370,15 @@ class EventMeasureController(BaseModelController):
                     appointment = self.get_new_appointment(em)
                 except EventMeasureException:
                     continue
-                if 'LPUDirection' in appointment.propsByCode:
-                    appointment['LPUDirection'].value = org
-                if 'DateDirection' in appointment.propsByCode:
-                    appointment['DateDirection'].value = cur_beg_date
-                if 'DirectionDate' in appointment.propsByCode:
-                    appointment['DirectionDate'].value = cur_beg_date
-                if 'DiagnosisDirection' in appointment.propsByCode:
-                    appointment['DiagnosisDirection'].value = cur_main_diag
+
+                if appointment.has_property('LPUDirection'):
+                    appointment.set_prop_value('LPUDirection', org)
+                if appointment.has_property('DateDirection'):
+                    appointment.set_prop_value('DateDirection', cur_beg_date)
+                if appointment.has_property('DirectionDate'):
+                    appointment.set_prop_value('DirectionDate', cur_beg_date)
+                if appointment.has_property('DiagnosisDirection'):
+                    appointment.set_prop_value('DiagnosisDirection', cur_main_diag)
 
                 em.appointment_action = appointment
                 self.make_assigned(em)

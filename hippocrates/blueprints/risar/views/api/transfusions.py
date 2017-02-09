@@ -75,10 +75,9 @@ def api_0_transfusions_post(action_id=None):
         action = Action.query.get(action_id)
         if action is None:
             raise ApiException(404, u'Action не найден')
-    action.update_action_integrity()
     json = request.get_json()
     for key in transfusion_apt_codes:
-        action.propsByCode[key].value = json.get(key)
+        action.set_prop_value(key, json.get(key))
     db.session.add(action)
     db.session.commit()
     card = PregnancyCard.get_for_event(action.event)

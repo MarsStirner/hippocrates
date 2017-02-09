@@ -21,7 +21,7 @@ from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, ri
     request_type_gynecological, request_type_pregnancy, risar_epicrisis, first_inspection_flat_code,\
     second_inspection_flat_code, pc_inspection_flat_code, soc_prof_codes, pregnancy_card_apts
 from nemesis.lib.data import create_action
-from nemesis.models.actions import Action, ActionType, create_property
+from nemesis.models.actions import Action, ActionType
 from nemesis.lib.utils import safe_bool
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
 from nemesis.models.diagnosis import Diagnostic
@@ -329,8 +329,9 @@ class PregnancyCard(AbstractCard):
         """
 
         for apt_code in pregnancy_card_apts:
-            if apt_code not in action.propsByCode:
-                create_property(action, apt_code)
+            if not action.has_property(apt_code):
+                prop = action.create_property(apt_code)
+                action.add_property(prop)
 
     @property
     def anamnesis(self):

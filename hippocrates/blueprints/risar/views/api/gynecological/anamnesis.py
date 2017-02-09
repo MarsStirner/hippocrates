@@ -34,7 +34,6 @@ def api_0_gyn_anamnesis_general(event_id):
         raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     action = card.anamnesis
-    action.update_action_integrity()
     return represent_general_anamnesis_action(action)
 
 
@@ -46,11 +45,9 @@ def api_0_gyn_anamnesis_general_post(event_id):
         raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     action = card.anamnesis
-    action.update_action_integrity()
-    pbc = action.propsByCode
     for code, value in request.get_json().iteritems():
-        if code not in ('id', 'blood_type') and code in pbc:
-            pbc[code].value = value
+        if code not in ('id', 'blood_type') and action.has_property(code):
+            action.set_prop_value(code, value)
         elif code == 'blood_type' and value:
             mother_blood_type = BloodHistory.query \
                 .filter(BloodHistory.client_id == event.client_id) \

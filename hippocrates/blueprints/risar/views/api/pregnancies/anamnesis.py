@@ -46,10 +46,9 @@ def api_0_chart_mother(event_id):
         action = get_action(event, risar_mother_anamnesis, True)
     else:
         action = get_action(event, risar_mother_anamnesis, True)
-        action.update_action_integrity()
         for code, value in request.get_json().iteritems():
-            if code not in ('id', 'blood_type') and code in action.propsByCode:
-                action.propsByCode[code].value = value
+            if code not in ('id', 'blood_type') and action.has_property(code):
+                action.set_prop_value(code, value)
             elif code == 'blood_type' and value:
                 mother_blood_type = BloodHistory.query \
                     .filter(BloodHistory.client_id == event.client_id) \
@@ -78,11 +77,10 @@ def api_0_chart_father(event_id):
     else:
         action = get_action(event, risar_father_anamnesis, True)
         for code, value in request.get_json().iteritems():
-            if code not in ('id', 'finished_diseases', 'current_diseases') and code in action.propsByCode:
-                action.propsByCode[code].value = value
+            if code not in ('id', 'finished_diseases', 'current_diseases') and action.has_property(code):
+                action.set_prop_value(code, value)
             elif (code == 'finished_diseases' or code == 'current_diseases') and value:
-                prop = action.propsByCode[code]
-                prop.value = value
+                action.set_prop_value(code, value)
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()

@@ -10,9 +10,8 @@ from nemesis.lib.utils import bail_out
 from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy
 from hippocrates.blueprints.risar.views.api.pregnancies.anamnesis import logger
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.data import create_action, create_action_property
+from nemesis.lib.data import create_action
 from nemesis.models.actions import Action
-from nemesis.models.event import Event
 from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
@@ -78,17 +77,8 @@ def api_0_pregnancies_post(event_id, action_id=None):
     newborn_inspections = json.pop('newborn_inspections', [])
 
     # prev pregnancy
-    action.update_action_integrity()
-    prop_types = {p.code: p for p in action.actionType.property_types if p.code}
     for code in pregnancy_apt_codes:
-        if code not in action.propsByCode:
-            if code in prop_types:
-                action.propsByCode[code] = create_action_property(action, prop_types[code])
-            else:
-                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"',
-                            code, action_id, risar_anamnesis_pregnancy)
-                continue
-        action.propsByCode[code].value = json.get(code)
+        action.set_prop_value(code, json.get(code))
 
     # prev pregnancy children
     new_children, deleted_children = create_or_update_prev_children(action, newborn_inspections)

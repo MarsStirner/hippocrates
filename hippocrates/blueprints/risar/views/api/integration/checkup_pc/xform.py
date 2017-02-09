@@ -247,6 +247,8 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
         self.ais.refresh(self.target_obj)
         self.ais.set_cur_enddate()
 
+        self.set_properties(self.target_obj, data, False)
+
         self.update_diagnoses_system(data_for_diags['diags_list'], data_for_diags['old_action_data'])
         create_or_update_fetuses(action, fetuses)
 

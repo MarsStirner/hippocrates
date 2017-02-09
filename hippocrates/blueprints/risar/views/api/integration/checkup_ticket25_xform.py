@@ -3,13 +3,13 @@ import logging
 
 from abc import abstractmethod
 
-from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm, wrap_simplify, INTERNAL_ERROR
 from hippocrates.blueprints.risar.views.api.integration.schemas import Schema
 from hippocrates.blueprints.risar.lib.represent.common import represent_action_diagnoses
 from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, safe_dict, safe_int, safe_bool_none
-from nemesis.lib.apiutils import json_dumps
+from nemesis.lib.apiutils import json_dumps, ApiException
 from nemesis.models.person import Person
 from nemesis.models.exists import rbDiseaseCharacter, rbTraumaType, MKB, rbAcheResult, rbFinance, rbResult
 from nemesis.models.risar import rbConditionMedHelp, rbProfMedHelp
@@ -284,8 +284,10 @@ class CheckupsTicket25XForm(XForm):
 
         if not self.checkup_xform.target_obj:
             self.checkup_xform.find_target_obj(self.checkup_xform.target_obj_id)
-        self.target_obj = self.checkup_xform.target_obj.propsByCode['ticket_25'].value
-        self.target_obj.update_action_integrity()
+        self.target_obj = self.checkup_xform.target_obj.get_prop_value('ticket_25')
+        if self.target_obj is None:
+            raise ApiException(INTERNAL_ERROR, u'Отсутствует талон в осмотре с id = {0}'.format(
+                self.checkup_xform.target_obj_id))
 
     def log_current_state(self):
         message = u'Данные талона посещения в осмотре с id={0} до сохранения:\n{1}'.format(
@@ -428,21 +430,12 @@ class CheckupsTicket25XForm(XForm):
         ticket25.begDate = data['beg_date']
         ticket25.setPerson = self.target_obj.person = data['person']
 
-        for code, value in data.iteritems():
-            if code in ticket25.propsByCode:
-                try:
-                    prop = ticket25.propsByCode[code]
-                    self.check_prop_value(prop, value)
-                    prop.value = value
-                except Exception, e:
-                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
-                        prop.type.name, prop.type.id), exc_info=True)
-                    raise e
+        self.set_properties(self.target_obj, data)
 
         # update data in parent checkup
         self.checkup_xform.target_obj.begDate = data['beg_date']
-        if 'department' in self.checkup_xform.target_obj.propsByCode:
-            self.checkup_xform.target_obj['department'].value = data['department']
+        if self.checkup_xform.target_obj.has_property('department'):
+            self.checkup_xform.target_obj.set_prop_value('department', data['department'])
 
         self.checkup_xform.update_diagnoses_system(
             data_for_diags['diags_list'], data_for_diags['old_action_data']
@@ -468,8 +461,7 @@ class CheckupsTicket25XForm(XForm):
         res = {
             'hospital': self.or_undefined(self.from_org_rb(person and person.organisation)),
             'department': self.or_undefined(
-                self.from_org_struct_rb(inspection['department'].value)
-                if 'department' in inspection.propsByCode else None
+                self.from_org_struct_rb(inspection.get_prop_value('department'))
             ),
             'doctor': self.or_undefined(self.from_person_rb(person)),
             'date_open': self.or_undefined(safe_date(action.begDate)),

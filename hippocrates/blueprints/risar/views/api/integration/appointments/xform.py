@@ -69,23 +69,19 @@ class AppointmentXForm(AppointmentSchema, XForm):
         set_person = action.setPerson
         res = {
             'measure_code': action.em_appointment.measure.code,
-            'diagnosis': self.or_undefined(self.from_mkb_rb(self._get_prop_val(action, 'DiagnosisDirection'))),
-            'execution_time': self.or_undefined(format_time(self._get_prop_val(action, 'time'))),
-            'parameters': self.or_undefined(self._get_prop_val(action, 'additional')),
-            'referral_lpu': self.or_undefined(self.from_org_rb(self._get_prop_val(action, 'LPUDirection'))),
-            'referral_department': self.or_undefined(self.from_org_struct_rb(self._get_prop_val(action, 'department'))),
-            'referral_date': self.or_undefined(self._get_prop_val(action, 'DateDirection')),
-            'comment': self.or_undefined(self._get_prop_val(action, 'Comment')),
+            'diagnosis': self.or_undefined(self.from_mkb_rb(action.get_prop_value('DiagnosisDirection'))),
+            'execution_time': self.or_undefined(format_time(action.get_prop_value('time'))),
+            'parameters': self.or_undefined(action.get_prop_value('additional')),
+            'referral_lpu': self.or_undefined(self.from_org_rb(action.get_prop_value('LPUDirection'))),
+            'referral_department': self.or_undefined(self.from_org_struct_rb(action.get_prop_value('department'))),
+            'referral_date': self.or_undefined(action.get_prop_value('DateDirection')),
+            'comment': self.or_undefined(action.get_prop_value('Comment')),
             'appointed_lpu': self.or_undefined(self.from_org_rb(set_person and set_person.organisation)),
             'appointed_doctor': self.or_undefined(self.from_person_rb(set_person)),
             'appointment_code': self.or_undefined(action.action_number and action.action_number.number),
             'appointed_date': self.or_undefined(safe_date(action.begDate)),
-            'hospitalization_form': self.or_undefined(self.from_rb(self._get_prop_val(action, 'hospitalization_form'))),
-            'operation': self.or_undefined(self.from_rb(self._get_prop_val(action, 'operation'))),
-            'profile': self.or_undefined(self.from_rb(self._get_prop_val(action, 'profile')))
+            'hospitalization_form': self.or_undefined(self.from_rb(action.get_prop_value('hospitalization_form'))),
+            'operation': self.or_undefined(self.from_rb(action.get_prop_value('operation'))),
+            'profile': self.or_undefined(self.from_rb(action.get_prop_value('profile')))
         }
         return res
-
-    def _get_prop_val(self, action, code):
-        if code in action.propsByCode:
-            return action.propsByCode[code].value

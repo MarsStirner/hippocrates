@@ -11,6 +11,8 @@
 def get_measure_result_mkbs(action, codes):
     res = []
     for code in codes:
-        if code in action.propsByCode and action.propsByCode[code].value:
-            res.append(action.propsByCode[code].value.DiagID)
+        if action.has_property(code):
+            val = action.get_prop_value(code)
+            if val:
+                res.append(val.DiagID)
     return res

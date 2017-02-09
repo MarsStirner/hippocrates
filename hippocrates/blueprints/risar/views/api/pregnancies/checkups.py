@@ -52,7 +52,6 @@ def api_0_pregnancy_checkup(event_id):
         raise ApiException(400, u'необходим flat_code')
 
     action = get_action_by_id(checkup_id, event, flat_code, True)
-    action.update_action_integrity()
 
     notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
 
@@ -62,8 +61,7 @@ def api_0_pregnancy_checkup(event_id):
     action.begDate = beg_date
     action.person = person
 
-    ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
-    ticket.update_action_integrity()
+    ticket = action.get_prop_value('ticket_25') or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
     if not ticket.id:
         # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
@@ -134,7 +132,6 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     if not action:
         raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
-    action.update_action_integrity()
     return {
         'checkup': represent_pregnancy_checkup_wm(action),
         'access': represent_checkup_access(action)
@@ -153,7 +150,7 @@ def api_0_pregnancy_checkup_copy(event_id, fill_from):
 
         event = Event.query.get(event_id)
         filled_action = copy_checkup(event, from_action)
-        ticket25_data = represent_ticket_25(from_action.propsByCode['ticket_25'].value)
+        ticket25_data = represent_ticket_25(from_action.get_prop_value('ticket_25'))
         ticket25_data['id'] = None
         result = represent_pregnancy_checkup_wm(filled_action)
         result['pregnancy_week'] = get_pregnancy_week(event)
@@ -178,7 +175,7 @@ def api_0_pregnancy_checkup_new(event_id):
 
     action = get_action_by_id(None, event, flat_code, True)
     ta = get_action_by_id(None, event, gynecological_ticket_25, True)
-    action['ticket_25'].value = ta
+    action.set_prop_value('ticket_25', ta)
     copy_attrs_from_last_action(event, flat_code, action, (
         'fetus_first_movement_date',
     ))
@@ -196,8 +193,6 @@ def api_0_pregnancy_checkup_new(event_id):
 def api_0_pregnancy_checkup_list(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
-    for action in card.checkups:
-        action.update_action_integrity()
 
     def repr(checkup):
         return {

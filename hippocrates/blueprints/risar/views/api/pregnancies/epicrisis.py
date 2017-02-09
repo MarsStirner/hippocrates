@@ -38,8 +38,8 @@ def api_0_chart_epicrisis(event_id):
             close_open_checkups(event_id)  # закрыть все незакрытые осмотры
             EventMeasureController().close_all_unfinished_ems(action)
         for code, value in data.iteritems():
-            if code in action.propsByCode:
-                action.propsByCode[code].value = value
+            if action.has_property(code):
+                action.set_prop_value(code, value)
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_newborns(action, newborn_inspections)
 
