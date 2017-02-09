@@ -13,6 +13,7 @@ from hippocrates.blueprints.risar.lib.utils import get_action
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import risar_father_anamnesis, risar_mother_anamnesis
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.utils import db_non_flushable
 from nemesis.models.client import BloodHistory
 from nemesis.models.event import Event
 from nemesis.systemwide import db
@@ -34,6 +35,7 @@ def api_0_chart_anamnesis(event_id):
 
 
 @module.route('/api/0/pregnancy/chart/<int:event_id>/mother', methods=['GET', 'POST'])
+@db_non_flushable
 @api_method
 def api_0_chart_mother(event_id):
     event = Event.query.get(event_id)
@@ -41,7 +43,7 @@ def api_0_chart_mother(event_id):
     if not event:
         raise ApiException(404, u'Event не найден')
     if request.method == 'GET':
-        action = get_action(event, risar_mother_anamnesis)
+        action = get_action(event, risar_mother_anamnesis, True)
     else:
         action = get_action(event, risar_mother_anamnesis, True)
         action.update_action_integrity()
@@ -64,6 +66,7 @@ def api_0_chart_mother(event_id):
 
 
 @module.route('/api/0/pregnancy/chart/<int:event_id>/father', methods=['GET', 'POST'])
+@db_non_flushable
 @api_method
 def api_0_chart_father(event_id):
     event = Event.query.get(event_id)
@@ -71,7 +74,7 @@ def api_0_chart_father(event_id):
     if not event:
         raise ApiException(404, u'Event не найден')
     if request.method == 'GET':
-        action = get_action(event, risar_father_anamnesis)
+        action = get_action(event, risar_father_anamnesis, True)
     else:
         action = get_action(event, risar_father_anamnesis, True)
         for code, value in request.get_json().iteritems():
