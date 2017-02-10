@@ -29,7 +29,7 @@ def copy_checkup(event, from_action):
             fill_these_attrs_from_action(from_action=from_action,
                                          to_action=empty_action,
                                          attr_list=fields_to_copy_from_prev)
-            empty_action["lymph_nodes"].value = from_action["lymph"].value
+            empty_action.set_prop_value('lymph_nodes', from_action.get_prop_value('lymph'))
         elif flat_code == second_inspection_flat_code:
             fill_action_from_another_action(from_action=from_action,
                                             to_action=empty_action, exclude_attr_list=["next_date"])
@@ -62,7 +62,7 @@ def get_checkup_interval(action, args=None):
     if args is None:
         args = {}
     start_date = safe_datetime(action.begDate)
-    next_date_property = action.propsByCode.get('next_date')
+    next_date_property = action.get_property('next_date')
     end_date = safe_datetime(next_date_property.value) if next_date_property else None
     if end_date:
         end_date = end_date.replace(hour=23, minute=59, second=59)

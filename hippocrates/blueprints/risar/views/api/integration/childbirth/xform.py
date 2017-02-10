@@ -304,15 +304,8 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         action.setPerson = self.person
         action.person = self.person
 
-        for code, value in data.iteritems():
-            if code in action.propsByCode:
-                prop = action[code]
-                try:
-                    action.propsByCode[code].value = value
-                except Exception, e:
-                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
-                        prop.type.name, prop.type.id))
-                    raise e
+        self.set_properties(self.target_obj, data, False)
+
         self.update_diagnoses_system(data_for_diags['diags_list'], data_for_diags['old_action_data'])
         create_or_update_newborns(action, newborn_inspections)
 

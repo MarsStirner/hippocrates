@@ -159,7 +159,7 @@
                                 <td>Группа крови и резус-фактор</td>
                                 <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.blood_type ]]</td>
                             </tr>
-                            <tr ng-if="anamnesis.risk_groups.indexOf('07') >= 0">
+                            <tr ng-if="anamnesis.has_incompat_risk_group">
                                 <td>Группа риска</td>
                                 <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.risk_group_07 ]]</td>
                             </tr>

@@ -6,6 +6,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_anamnesis, represent_general_anamnesis_action
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.client import BloodHistory
 from nemesis.models.event import Event
@@ -34,7 +35,6 @@ def api_0_gyn_anamnesis_general(event_id):
         raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     action = card.anamnesis
-    action.update_action_integrity()
     return represent_general_anamnesis_action(action)
 
 
@@ -46,11 +46,9 @@ def api_0_gyn_anamnesis_general_post(event_id):
         raise ApiException(404, u'Event не найден')
     card = GynecologicCard.get_for_event(event)
     action = card.anamnesis
-    action.update_action_integrity()
-    pbc = action.propsByCode
     for code, value in request.get_json().iteritems():
-        if code not in ('id', 'blood_type') and code in pbc:
-            pbc[code].value = value
+        if code not in ('id', 'blood_type') and action.has_property(code):
+            action.set_prop_value(code, value)
         elif code == 'blood_type' and value:
             mother_blood_type = BloodHistory.query \
                 .filter(BloodHistory.client_id == event.client_id) \
@@ -63,6 +61,7 @@ def api_0_gyn_anamnesis_general_post(event_id):
     db.session.commit()
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return represent_general_anamnesis_action(action)
 
 

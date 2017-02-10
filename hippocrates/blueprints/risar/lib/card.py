@@ -14,6 +14,7 @@ from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnan
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.fetus import get_fetuses
 from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
@@ -21,7 +22,7 @@ from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, ri
     request_type_gynecological, request_type_pregnancy, risar_epicrisis, first_inspection_flat_code,\
     second_inspection_flat_code, pc_inspection_flat_code, soc_prof_codes, pregnancy_card_apts
 from nemesis.lib.data import create_action
-from nemesis.models.actions import Action, ActionType, create_property
+from nemesis.models.actions import Action, ActionType
 from nemesis.lib.utils import safe_bool
 from nemesis.models.diagnosis import Diagnosis, Action_Diagnosis
 from nemesis.models.diagnosis import Diagnostic
@@ -100,6 +101,7 @@ class AbstractCard(object):
                 self.reevaluate_card_attrs()
                 db.session.add(action)
                 db.session.commit()
+                NotificationQueue.process_events()
             self._card_attrs_action = action
         return self._card_attrs_action
 
@@ -329,8 +331,9 @@ class PregnancyCard(AbstractCard):
         """
 
         for apt_code in pregnancy_card_apts:
-            if apt_code not in action.propsByCode:
-                create_property(action, apt_code)
+            if not action.has_property(apt_code):
+                prop = action.create_property(apt_code)
+                action.add_property(prop)
 
     @property
     def anamnesis(self):
@@ -393,6 +396,7 @@ class PregnancyCard(AbstractCard):
             reevaluate_risk_groups, reevaluate_card_fill_rate_all
         from .radzinsky_risks.calc import reevaluate_radzinsky_risks
 
+        self.attrs.get_lock()
         with db.session.no_autoflush:
             reevaluate_risk_rate(self)
             reevaluate_pregnacy_pathology(self)

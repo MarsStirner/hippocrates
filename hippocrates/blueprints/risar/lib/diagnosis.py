@@ -343,18 +343,10 @@ class DiagnosesSystemManager(object):
             self.measure_type = measure_type
         def get_date(self):
             return self.action.begDate
-            # if self.measure_type == MeasureType.checkup[0]:
-            #     return self.action['CheckupDate'].value
-            # elif self.measure_type == MeasureType.hospitalization[0]:
-            #     return self.action['IssueDate'].value
         def get_enddate(self):
             return self.action.endDate
         def get_person(self):
             return self.action.person
-            # if self.measure_type == MeasureType.checkup[0]:
-            #     return self.action['Doctor'].value
-            # elif self.measure_type == MeasureType.hospitalization[0]:
-            #     return self.action['Doctor'].value
 
     @classmethod
     def get_for_inspection(cls, action, diag_type, adj_insp_state, refresh_in_series=False):

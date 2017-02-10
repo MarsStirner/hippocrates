@@ -105,6 +105,7 @@ if __name__ == '__main__':
     from nemesis.app import app
 
     with app.app_context():
+        import nemesis.models
         from hippocrates.blueprints.risar.views.api.integration.client.test import test_register_edit_client
 
         from hippocrates.blueprints.risar.views.api.integration.card.test import (
@@ -142,9 +143,9 @@ if __name__ == '__main__':
         # card_id = '278'
         # test_register_edit_delete_first_checkup(card_id)
 
-        # from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.test import \
-        #     test_register_edit_delete_second_checkup, test_edit_ticket25
-        # card_id = '278'
+        from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.test import \
+            test_register_edit_delete_second_checkup, test_edit_ticket25
+        # card_id = '72'
         # test_register_edit_delete_second_checkup(card_id)
         # test_edit_ticket25(377, 8303)
 

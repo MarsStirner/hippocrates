@@ -14,7 +14,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action, set_action_apt_values
 from hippocrates.blueprints.risar.lib.represent.common import represent_fetus_for_checkup_copy, represent_ticket_25
-from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.lib.checkups import copy_checkup, \
     validate_send_to_mis_checkup
@@ -52,9 +52,8 @@ def api_0_pregnancy_checkup(event_id):
         raise ApiException(400, u'необходим flat_code')
 
     action = get_action_by_id(checkup_id, event, flat_code, True)
-    action.update_action_integrity()
 
-    notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
+    NotificationQueue.notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
 
     if not checkup_id:
         close_open_checkups(event_id)
@@ -62,12 +61,10 @@ def api_0_pregnancy_checkup(event_id):
     action.begDate = beg_date
     action.person = person
 
-    ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
-    ticket.update_action_integrity()
+    ticket = action.get_prop_value('ticket_25') or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
     if not ticket.id:
-        # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-        db.session.commit()
+        db.session.flush()
 
     def set_ticket(prop, value):
         set_action_apt_values(ticket, value)
@@ -82,6 +79,8 @@ def api_0_pregnancy_checkup(event_id):
         create_or_update_fetuses(action, fetuses)
 
     db.session.commit()
+    NotificationQueue.process_events()
+
     is_ready_send_to_mis = validate_send_to_mis_checkup(action)
     if is_ready_send_to_mis:
         if flat_code == first_inspection_flat_code:
@@ -100,8 +99,10 @@ def api_0_pregnancy_checkup(event_id):
             params={'card_id': event_id},
             is_create=not checkup_id,
         )
+
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
 
     em_ctrl = EventMeasureController()
     em_ctrl.regenerate(action)
@@ -134,7 +135,6 @@ def api_0_pregnancy_checkup_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     if not action:
         raise ApiException(404, u'Action c id {0} не найден'.format(checkup_id))
-    action.update_action_integrity()
     return {
         'checkup': represent_pregnancy_checkup_wm(action),
         'access': represent_checkup_access(action)
@@ -153,7 +153,7 @@ def api_0_pregnancy_checkup_copy(event_id, fill_from):
 
         event = Event.query.get(event_id)
         filled_action = copy_checkup(event, from_action)
-        ticket25_data = represent_ticket_25(from_action.propsByCode['ticket_25'].value)
+        ticket25_data = represent_ticket_25(from_action.get_prop_value('ticket_25'))
         ticket25_data['id'] = None
         result = represent_pregnancy_checkup_wm(filled_action)
         result['pregnancy_week'] = get_pregnancy_week(event)
@@ -178,7 +178,7 @@ def api_0_pregnancy_checkup_new(event_id):
 
     action = get_action_by_id(None, event, flat_code, True)
     ta = get_action_by_id(None, event, gynecological_ticket_25, True)
-    action['ticket_25'].value = ta
+    action.set_prop_value('ticket_25', ta)
     copy_attrs_from_last_action(event, flat_code, action, (
         'fetus_first_movement_date',
     ))
@@ -196,8 +196,6 @@ def api_0_pregnancy_checkup_new(event_id):
 def api_0_pregnancy_checkup_list(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
-    for action in card.checkups:
-        action.update_action_integrity()
 
     def repr(checkup):
         return {

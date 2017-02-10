@@ -365,13 +365,13 @@ def represent_pregnancy(pregnancy):
             get_previous_children(pregnancy.action)
         ),
         id=pregnancy.action.id,
-        event_id=pregnancy.action['card_number'].value if 'card_number' in pregnancy.action.propsByCode else None,
+        event_id=pregnancy.action.get_prop_value('card_number'),
         external_id=get_external_id(
-            pregnancy.action['card_number'].value
-        ) if 'card_number' in pregnancy.action.propsByCode else None,
+            pregnancy.action.get_prop_value('card_number')
+        ) if pregnancy.action.has_property('card_number') else None,
         epic_delivery_date=format_date(
             safe_date(get_delivery_date_based_on_epicrisis(pregnancy))
-        ) if 'card_number' in pregnancy.action.propsByCode else None
+        ) if pregnancy.action.has_property('card_number') else None
     )
 
 def represent_anamnesis_newborn_inspection(child):
@@ -473,7 +473,6 @@ def represent_ticket_25(action):
             'manipulations': [],
             'temp_disability': [],
         }
-    action.update_action_integrity()
     return dict(
         action_as_dict(action),
         id=action.id,

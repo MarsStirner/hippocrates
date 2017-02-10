@@ -12,6 +12,7 @@ from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
 from hippocrates.blueprints.risar.models.risar import ActionIdentification
 from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes, risar_gyn_checkup_flat_code
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 
 from nemesis.lib.data import create_action
 from nemesis.views.rb import check_rb_value_exists
@@ -250,6 +251,7 @@ class XForm(object):
         for d in self._deleted:
             db.session.delete(d)
         db.session.commit()
+        NotificationQueue.process_events()
 
         self._changed = []
         self._deleted = []
@@ -259,6 +261,19 @@ class XForm(object):
 
     def get_parent_nf_msg(self):
         return u'Не найден {0} с id = {1}'.format(self.parent_obj_class.__name__, self.parent_obj_id)
+
+    def set_properties(self, action, data, check_val=True):
+        for code, value in data.iteritems():
+            if action.has_property(code, True):
+                prop = action.get_property(code, True)
+                try:
+                    if check_val:
+                        self.check_prop_value(prop, value)
+                    action.set_prop_value(code, value)
+                except Exception, e:
+                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
+                        prop.type.name, prop.type.id), exc_info=True)
+                    raise
 
     # -----
 
@@ -794,7 +809,7 @@ class MeasuresResultsXForm(ExternalXForm):
 
         properties_data = self.get_properties_data(data)
         self.set_result_action_data(properties_data)
-        self.set_properties(properties_data)
+        self.set_properties(self.target_obj, properties_data)
         self.update_measure_data(data)
         self.save_external_data()
         if self.changes_diagnoses_system():
@@ -889,18 +904,6 @@ class MeasuresResultsXForm(ExternalXForm):
 
     def set_result_action_data(self, data):
         pass
-
-    def set_properties(self, data):
-        for code, value in data.iteritems():
-            if code in self.target_obj.propsByCode:
-                try:
-                    prop = self.target_obj.propsByCode[code]
-                    self.check_prop_value(prop, value)
-                    prop.value = value
-                except Exception, e:
-                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
-                        prop.type.name, prop.type.id), exc_info=True)
-                    raise
 
     def delete_target_obj(self):
         self.find_target_obj(self.target_obj_id)

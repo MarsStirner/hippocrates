@@ -5,6 +5,7 @@ from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_action_type_id
 from hippocrates.blueprints.risar.risar_config import transfusion_apt_codes, risar_anamnesis_transfusion
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action
@@ -42,6 +43,7 @@ def api_0_transfusions_delete(action_id):
     card = PregnancyCard.get_for_event(action.event)
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return True
 
 
@@ -58,6 +60,7 @@ def api_0_transfusions_undelete(action_id):
     card = PregnancyCard.get_for_event(action.event)
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return True
 
 
@@ -75,15 +78,15 @@ def api_0_transfusions_post(action_id=None):
         action = Action.query.get(action_id)
         if action is None:
             raise ApiException(404, u'Action не найден')
-    action.update_action_integrity()
     json = request.get_json()
     for key in transfusion_apt_codes:
-        action.propsByCode[key].value = json.get(key)
+        action.set_prop_value(key, json.get(key))
     db.session.add(action)
     db.session.commit()
     card = PregnancyCard.get_for_event(action.event)
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return dict(
         action_as_dict(action, transfusion_apt_codes),
         id=action.id

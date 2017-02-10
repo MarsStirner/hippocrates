@@ -296,18 +296,13 @@ class ClientXForm(ClientSchema, XForm):
                     note=''
                 )
                 client_soc_status.client_id = self.target_obj_id
-                db.session.add(client_soc_status)
-                if not client_soc_status.id:
-                    # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-                    db.session.commit()
 
                 work_object = ClientWork(
                     work_data['organisation'],
                     work_data.get('post', ''),
                     client
                 )
-                work_object.client = client
-                work_object.soc_status_id = client_soc_status.id
+                work_object.soc_status = client_soc_status
             work_object.shortName = work_data['organisation']
             work_object.post = work_data.get('post', '')
             self._changed.append(work_object)
