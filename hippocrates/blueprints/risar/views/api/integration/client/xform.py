@@ -371,7 +371,7 @@ class ClientXForm(ClientSchema, XForm):
             "insurance_document_series": doc.serial or Undefined,
             "insurance_document_number": doc.number,
             "insurance_document_beg_date": doc.begDate,
-            "insurance_document_issuing_authority": doc.insurer.TFOMSCode if doc.insurer else None,
+            "insurance_document_issuing_authority": doc.insurer.regionalCode if doc.insurer else None,
         }
 
     @none_default
