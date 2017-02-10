@@ -161,7 +161,7 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
                 Schedule.deleted == 0,
                 Schedule.date == data['date'],
                 Schedule.begTime <= func.cast(data['time_begin'], Time),
-                func.cast(data['time_begin'], Time) <= Schedule.endTime
+                func.cast(data['time_begin'], Time) < Schedule.endTime
             ).options(lazyload('*')).first()
         if s:
             st = ScheduleTicket.query.filter(
