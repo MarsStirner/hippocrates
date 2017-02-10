@@ -34,6 +34,9 @@ WebMis20
     this.print_ticket_25 = function (action_id, fmt) {
         self.file_get('POST', Config.url.print_checkup_ticket_25, {action_id: action_id, extension: fmt})
     };
+    this.print_first_checkup = function (action_id, fmt) {
+        self.file_get('POST', Config.url.print_first_checkup, {action_id: action_id, extension: fmt})
+    };
     this.schedule = function () {
         var date = arguments[0];
         var all = arguments[1];

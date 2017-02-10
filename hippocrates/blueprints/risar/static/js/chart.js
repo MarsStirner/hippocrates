@@ -263,6 +263,15 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
     $scope.canEditCheckup = function (idx) {
         return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
     };
+    $scope.print_checkup = function (checkup) {
+        var action_id = checkup.id;
+        var flat_code = checkup.flat_code;
+        if (flat_code == 'risarFirstInspection') {
+            RisarApi.print_first_checkup(action_id, 'pdf');
+        } else {
+            $scope.open_print_window($scope.ps_si, checkup.id)
+        }
+    };
 
     var reload = function () {
         $scope.checkups = [];
