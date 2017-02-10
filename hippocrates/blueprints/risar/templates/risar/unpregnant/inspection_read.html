@@ -145,10 +145,17 @@
                                     <div class="col-sm-6 col-md-6"><span ng-bind="checkup.menstrual_disorders | pluck:'name' | join:', '"></span></div>
                                 </div>
                                 {% endif %}
+                                {% if
+                                    'discharge_consistency' in checkup_descriptor or
+                                    'discharge_colour' in checkup_descriptor or
+                                    'discharge_quantity' in checkup_descriptor or
+                                    'discharge_smell' in checkup_descriptor
+                                %}
                                  <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right"><b>Выделения из половых путей</b></div>
                                         <div class="col-sm-6 col-md-6"></div>
                                 </div>
+                                {% endif %}
                                 {% if 'discharge_consistency' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('discharge_consistency')]]:</div>
