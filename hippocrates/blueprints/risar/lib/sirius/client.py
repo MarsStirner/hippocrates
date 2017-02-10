@@ -6,6 +6,9 @@
 @date: 27.10.2016
 
 """
+from hashlib import md5
+from uuid import uuid1
+
 from flask import url_for
 from nemesis.app import app
 from .request import request_local, request_remote, \
@@ -29,14 +32,18 @@ def binded_event(event_code):
     return event_code in events_list
 
 
+def get_stream_id():
+    return 'stream_' + md5(uuid1().get_hex()).hexdigest()[:10]
+
+
 def send_to_mis(event_code, entity_code, operation_code,
                 service_method, obj, params, is_create):
-    logger.debug('send_to_mis %s' % event_code)
     if not app.config.get('SIRIUS_ENABLED'):
         return
     if not binded_event(event_code):
         return
-    logger.debug('send_to_mis passed %s' % event_code)
+    stream_id = get_stream_id()
+    logger.debug('%s send_to_mis %s' % (stream_id, event_code))
     obj_name, obj_id = obj
     url_params = params.copy()
     url_params.update((obj,))
@@ -51,6 +58,7 @@ def send_to_mis(event_code, entity_code, operation_code,
         'main_id': obj_id,
         'main_param_name': obj_name,
         'method': 'post' if is_create else 'put',
+        'stream_id': stream_id,
     }
     return request_local(data)
 
@@ -62,11 +70,13 @@ def update_entity_from_mis(region, entity, remote_id):
         return True
     if not binded_event(event_code):
         return
+    stream_id = get_stream_id()
     request = {
         'event': event_code,
         "remote_system_code": region,
         "remote_entity_code": entity,
         "remote_main_id": remote_id,
+        'stream_id': stream_id,
     }
     result = request_remote(request)
     code = result['meta']['code']
@@ -84,6 +94,7 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
         return True
     if not binded_event(event_code):
         return True
+    stream_id = get_stream_id()
     data = {
         'event': event_code,
         'entity_code': RisarEntityCode.SCHEDULE_TICKET,
@@ -106,7 +117,8 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
             "date": date.isoformat(),
             "time_begin": beg_time.isoformat()[:5],
             "time_end": end_time.isoformat()[:5],
-        }
+        },
+        'stream_id': stream_id,
     }
     result = send_event_remote(data)
     code = result['meta']['code']
@@ -119,11 +131,13 @@ def get_risar_id_by_mis_id(region, entity, remote_id):
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
     if not binded_event(event_code):
         return
+    stream_id = get_stream_id()
     request = {
         'event': event_code,
         "remote_system_code": region,
         "remote_entity_code": entity,
         "remote_main_id": remote_id,
+        'stream_id': stream_id,
     }
     result = request_client_local_id_by_remote_id(request)
     code = result['meta']['code']
@@ -136,12 +150,14 @@ def save_card_ids_match(local_id, region, entity, remote_id):
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
     if not binded_event(event_code):
         return
+    stream_id = get_stream_id()
     request = {
         'event': event_code,
         "local_main_id": local_id,
         "remote_system_code": region,
         "remote_entity_code": entity,
         "remote_main_id": remote_id,
+        'stream_id': stream_id,
     }
     result = request_register_card_idents(request)
     code = result['meta']['code']
