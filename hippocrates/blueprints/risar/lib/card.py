@@ -396,6 +396,7 @@ class PregnancyCard(AbstractCard):
             reevaluate_risk_groups, reevaluate_card_fill_rate_all
         from .radzinsky_risks.calc import reevaluate_radzinsky_risks
 
+        self.attrs.get_lock()
         with db.session.no_autoflush:
             reevaluate_risk_rate(self)
             reevaluate_pregnacy_pathology(self)
