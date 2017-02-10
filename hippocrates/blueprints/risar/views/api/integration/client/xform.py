@@ -166,8 +166,6 @@ class ClientXForm(ClientSchema, XForm):
             doc_type_code = str(doc_data['document_type_code'])
             self._check_rb_value('rbDocumentType', doc_type_code)
             doc_type = rbdt_map.get(doc_type_code)
-            doc_issuing_auth = doc_data.get('document_issuing_authority')
-            org = doc_issuing_auth and self.find_org(doc_issuing_auth)
             if not document:
                 document = ClientDocument()
                 document.client = client
@@ -175,7 +173,7 @@ class ClientXForm(ClientSchema, XForm):
             document.serial = doc_data.get('document_series') or ''
             document.number = doc_data['document_number']
             document.date = safe_date(doc_data['document_beg_date'])
-            document.origin = org or ''
+            document.origin = doc_data.get('document_issuing_authority') or ''
             self._changed.append(document)
 
     def _update_policies(self, policies):
