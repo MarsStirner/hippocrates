@@ -12,6 +12,7 @@ from hippocrates.blueprints.risar.lib.datetime_interval import DateTimeInterval
 from hippocrates.blueprints.risar.models.risar import ActionIdentification
 from hippocrates.blueprints.risar.risar_config import inspections_span_flatcodes, risar_gyn_checkup_flat_code
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 
 from nemesis.lib.data import create_action
 from nemesis.views.rb import check_rb_value_exists
@@ -250,6 +251,7 @@ class XForm(object):
         for d in self._deleted:
             db.session.delete(d)
         db.session.commit()
+        NotificationQueue.process_events()
 
         self._changed = []
         self._deleted = []

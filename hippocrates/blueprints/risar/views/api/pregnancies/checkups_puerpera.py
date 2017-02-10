@@ -54,8 +54,7 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     ticket = action.get_prop_value('ticket_25') or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
     if not ticket.id:
-        # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-        db.session.commit()
+        db.session.flush()
 
     def set_ticket(prop, value):
         if value is None:

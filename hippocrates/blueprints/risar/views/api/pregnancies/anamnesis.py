@@ -9,6 +9,7 @@ from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_anamnesis, represent_mother_action, \
     represent_father_action
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.utils import get_action
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import risar_father_anamnesis, risar_mother_anamnesis
@@ -61,6 +62,7 @@ def api_0_chart_mother(event_id):
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()
+        NotificationQueue.process_events()
     return represent_mother_action(action)
 
 
@@ -84,6 +86,7 @@ def api_0_chart_father(event_id):
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()
+        NotificationQueue.process_events()
     return represent_father_action(action)
 
 

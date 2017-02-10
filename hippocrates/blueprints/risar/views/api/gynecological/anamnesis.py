@@ -6,6 +6,7 @@ from flask_login import current_user
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib.card import GynecologicCard
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_gyn_anamnesis, represent_general_anamnesis_action
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.client import BloodHistory
 from nemesis.models.event import Event
@@ -60,6 +61,7 @@ def api_0_gyn_anamnesis_general_post(event_id):
     db.session.commit()
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return represent_general_anamnesis_action(action)
 
 

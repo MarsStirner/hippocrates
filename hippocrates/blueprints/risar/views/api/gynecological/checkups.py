@@ -11,6 +11,7 @@ from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasure
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     set_action_apt_values
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.risar_config import gynecological_ticket_25, risar_gyn_checkup_flat_code
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.diagnosis import create_or_update_diagnoses
@@ -55,8 +56,7 @@ def api_0_gyn_checkup(event_id):
     ticket = action.get_prop_value('ticket_25') or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
     if not ticket.id:
-        # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-        db.session.commit()
+        db.session.flush()
 
     def set_ticket(prop, value):
         set_action_apt_values(ticket, value)
@@ -72,6 +72,7 @@ def api_0_gyn_checkup(event_id):
     db.session.commit()
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
 
     em_ctrl = EventMeasureController()
     em_ctrl.regenerate_gyn(action)

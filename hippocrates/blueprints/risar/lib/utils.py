@@ -4,7 +4,7 @@ import datetime
 
 import six
 from sqlalchemy import between
-from sqlalchemy.orm import lazyload, joinedload
+from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
 from hippocrates.blueprints.risar.lib.specific import get_service_table_name
@@ -12,8 +12,8 @@ from hippocrates.blueprints.risar.models.risar import ActionTypeServiceRisar
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.lib.vesta import Vesta, VestaNotFoundException
-from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from nemesis.models.enums import ActionStatus, PerinatalRiskRate
+from nemesis.models.actions import Action, ActionType, ActionPropertyType
+from nemesis.models.enums import ActionStatus
 from nemesis.models.person import Person
 from nemesis.models.event import Event
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
@@ -21,7 +21,6 @@ from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
     inspection_preg_week_code, puerpera_inspection_flat_code, pc_inspection_flat_code,\
     risar_gyn_checkup_flat_codes
-from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
@@ -392,27 +391,6 @@ def format_action_data(json_data):
     if 'attached_files' in json_data:
         data['attached_files'] = json_data['attached_files']
     return data
-
-
-def notify_checkup_changes(card, action, new_preg_cont):
-    if new_preg_cont is None:
-        return
-    cur_preg_cont_possibility = action['pregnancy_continuation'].value
-    new_preg_cont_possibility = new_preg_cont
-
-    if new_preg_cont_possibility != cur_preg_cont_possibility and not bool(new_preg_cont_possibility):
-        event = PregContInabilityEvent(card, action)
-        NotificationQueue.add_events(event)
-
-
-def notify_risk_rate_changes(card, new_prr):
-    current_rate = card.attrs['prenatal_risk_572'].value
-    cur_prr = PerinatalRiskRate(current_rate.id) if current_rate is not None else None
-
-    if new_prr.value not in (PerinatalRiskRate.undefined[0], PerinatalRiskRate.low[0]) and (
-            cur_prr is None or cur_prr.order < new_prr.order):
-        event = RiskRateRiseEvent(card, new_prr)
-        NotificationQueue.add_events(event)
 
 
 def represent_prop_value(prop):

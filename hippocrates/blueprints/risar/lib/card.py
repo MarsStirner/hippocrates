@@ -14,6 +14,7 @@ from hippocrates.blueprints.risar.lib.chart import get_event, get_latest_pregnan
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.fetus import get_fetuses
 from hippocrates.blueprints.risar.lib.expert.em_get import get_latest_measures_in_event
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy, pregnancy_card_attrs, gynecological_card_attrs, risar_anamnesis_transfusion, \
@@ -100,6 +101,7 @@ class AbstractCard(object):
                 self.reevaluate_card_attrs()
                 db.session.add(action)
                 db.session.commit()
+                NotificationQueue.process_events()
             self._card_attrs_action = action
         return self._card_attrs_action
 

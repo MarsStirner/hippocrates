@@ -8,7 +8,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_pregnanc
 from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_action_type_id
 from nemesis.lib.utils import bail_out
 from hippocrates.blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy
-from hippocrates.blueprints.risar.views.api.pregnancies.anamnesis import logger
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action
@@ -43,6 +43,7 @@ def api_0_pregnancies_delete(event_id, action_id):
     card = AbstractCard.get_for_event(action.event)
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return True
 
 
@@ -57,6 +58,7 @@ def api_0_pregnancies_undelete(event_id, action_id):
     card = AbstractCard.get_for_event(action.event)
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return True
 
 
@@ -90,4 +92,5 @@ def api_0_pregnancies_post(event_id, action_id=None):
 
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return represent_pregnancy(PreviousPregnancy(action))

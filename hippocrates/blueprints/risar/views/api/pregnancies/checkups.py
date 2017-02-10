@@ -14,7 +14,7 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_checkup_
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, close_open_checkups, \
     copy_attrs_from_last_action, set_action_apt_values
 from hippocrates.blueprints.risar.lib.represent.common import represent_fetus_for_checkup_copy, represent_ticket_25
-from hippocrates.blueprints.risar.lib.utils import notify_checkup_changes
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.diagnosis import validate_diagnoses
 from hippocrates.blueprints.risar.lib.checkups import copy_checkup, \
     validate_send_to_mis_checkup
@@ -53,7 +53,7 @@ def api_0_pregnancy_checkup(event_id):
 
     action = get_action_by_id(checkup_id, event, flat_code, True)
 
-    notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
+    NotificationQueue.notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
 
     if not checkup_id:
         close_open_checkups(event_id)
@@ -64,8 +64,7 @@ def api_0_pregnancy_checkup(event_id):
     ticket = action.get_prop_value('ticket_25') or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
     if not ticket.id:
-        # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-        db.session.commit()
+        db.session.flush()
 
     def set_ticket(prop, value):
         set_action_apt_values(ticket, value)
@@ -80,6 +79,8 @@ def api_0_pregnancy_checkup(event_id):
         create_or_update_fetuses(action, fetuses)
 
     db.session.commit()
+    NotificationQueue.process_events()
+
     is_ready_send_to_mis = validate_send_to_mis_checkup(action)
     if is_ready_send_to_mis:
         if flat_code == first_inspection_flat_code:
@@ -98,8 +99,10 @@ def api_0_pregnancy_checkup(event_id):
             params={'card_id': event_id},
             is_create=not checkup_id,
         )
+
     card.reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
 
     em_ctrl = EventMeasureController()
     em_ctrl.regenerate(action)

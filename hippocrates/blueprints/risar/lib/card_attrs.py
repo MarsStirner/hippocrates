@@ -7,7 +7,8 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.time_converter import DateTimeUtil
 from hippocrates.blueprints.risar.lib.utils import get_action_list, HIV_diags, syphilis_diags, \
     hepatitis_diags, tuberculosis_diags, scabies_diags, pediculosis_diags, pregnancy_pathologies, risk_mkbs, \
-    belongs_to_mkbgroup, notify_risk_rate_changes, mkb_match
+    belongs_to_mkbgroup, mkb_match
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.ultrasonography import reevaluate_pregnancy_start_date_by_ultrasonography
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code, rtc_2_atc, pc_inspection_flat_code
@@ -85,7 +86,7 @@ def reevaluate_risk_rate(card):
     )
 
     new_prr = PerinatalRiskRate(max_rate)
-    notify_risk_rate_changes(card, new_prr)
+    NotificationQueue.notify_risk_rate_changes(card, new_prr)
 
     card.attrs['prenatal_risk_572'].value = safe_dict(new_prr)
 

@@ -8,7 +8,8 @@
 """
 from hippocrates.blueprints.risar.lib.fetus import create_or_update_fetuses
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_checkup
-from hippocrates.blueprints.risar.lib.utils import get_action_by_id, notify_checkup_changes
+from hippocrates.blueprints.risar.lib.utils import get_action_by_id
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import pc_inspection_flat_code
 from hippocrates.blueprints.risar.views.api.integration.checkup_pc.schemas import \
@@ -239,7 +240,7 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
         action = self.target_obj
 
         self.set_pcard()
-        notify_checkup_changes(self.pcard, action, data.get('pregnancy_continuation'))
+        NotificationQueue.notify_checkup_changes(self.pcard, action, data.get('pregnancy_continuation'))
 
         action.begDate = beg_date
         action.setPerson = self.person
