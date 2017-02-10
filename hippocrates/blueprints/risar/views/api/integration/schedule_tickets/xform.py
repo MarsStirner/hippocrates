@@ -5,14 +5,15 @@ import logging
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func, Time
 
-from ..xform import XForm, VALIDATION_ERROR, ALREADY_PRESENT_ERROR
+from ..xform import XForm, VALIDATION_ERROR, ALREADY_PRESENT_ERROR, \
+    NOT_FOUND_ERROR
 from .schemas import ScheduleTicketsSchema, ScheduleTicketSchema
 
 from nemesis.models.schedule import ScheduleClientTicket, ScheduleTicket, Schedule, rbAttendanceType,\
     rbReceptionType
 from nemesis.models.person import Person
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, safe_time
+from nemesis.lib.utils import safe_date, safe_time, safe_int
 from nemesis.lib.apiutils import ApiException
 
 
@@ -130,25 +131,38 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
         patient = self.find_client(data['patient'])
         res.update({
             'schedule_ticket_id': self.target_obj_id,
+            'schedule_ticket_type': safe_int(data.get('schedule_ticket_type') or '0'),
             'person': person,
             'patient': patient,
             'date': safe_date(data['date']),
-            'time_begin': safe_time(data['time_begin']),
-            'time_end': safe_time(data['time_end'])
+            'time_begin': safe_time(data.get('time_begin')),
+            'time_end': safe_time(data.get('time_end'))
         })
         return res
 
     def _get_new_sct(self, data, check_duplicate=False):
         rec_type = rbReceptionType.query.filter(rbReceptionType.code == 'amb').first()
-        attendance = rbAttendanceType.cache().by_code()[u'planned']
 
-        s = Schedule.query.filter(
-            Schedule.person_id == data['person'].id,
-            Schedule.deleted == 0,
-            Schedule.date == data['date'],
-            Schedule.begTime <= func.cast(data['time_begin'], Time),
-            func.cast(data['time_begin'], Time) <= Schedule.endTime
-        ).options(lazyload('*')).first()
+        attendance = self._get_attendance(data)
+        if attendance.code == u'extra':
+            s = Schedule.query.filter(
+                Schedule.date == data['date'],
+                Schedule.person == data['person'],
+            ).order_by(Schedule.endTime.desc()).first()
+            if not s:
+                raise ApiException(
+                    NOT_FOUND_ERROR,
+                    u'Не найден рабочий промежуток для врача (%s) на дату %s' %
+                    (data['person'], data['date'])
+                )
+        else:
+            s = Schedule.query.filter(
+                Schedule.person_id == data['person'].id,
+                Schedule.deleted == 0,
+                Schedule.date == data['date'],
+                Schedule.begTime <= func.cast(data['time_begin'], Time),
+                func.cast(data['time_begin'], Time) <= Schedule.endTime
+            ).options(lazyload('*')).first()
         if s:
             st = ScheduleTicket.query.filter(
                 ScheduleTicket.schedule_id == s.id,
@@ -188,6 +202,20 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
             event_id=data.get('event_id')
         )
         return sct
+
+    def _get_attendance(self, data):
+        att_code = u'extra' if data['schedule_ticket_type'] else u'planned'
+        if att_code == u'planned':
+            if not (data['time_begin'] and data['time_end']):
+                raise ApiException(
+                    VALIDATION_ERROR,
+                    u'Не указано время начала или окончания слота'
+                    u' time_begin=(%s) time_end=(%s) schedule_ticket_id=(%s)' %
+                    (data['time_begin'], data['time_end'],
+                     data['schedule_ticket_id'])
+                )
+        attendance = rbAttendanceType.cache().by_code()[att_code]
+        return attendance
 
     def _delete_existing_sct(self, sct):
         sct.deleted = 1

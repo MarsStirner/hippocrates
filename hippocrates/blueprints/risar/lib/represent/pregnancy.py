@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from sqlalchemy import func
 
+from hippocrates.blueprints.risar.lib.checkups import get_checkup_interval
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.card_attrs import check_disease
 from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
@@ -14,9 +15,8 @@ from hippocrates.blueprints.risar.lib.represent.common import represent_event, r
     represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_ticket_25
 from hippocrates.blueprints.risar.lib.represent.mat_cert import represent_mat_cert
-from hippocrates.blueprints.risar.lib.risk_groups.calc import calc_risk_groups
-from hippocrates.blueprints.risar.lib.utils import get_action_property_value, get_action, get_action_list, week_postfix, \
-    represent_prop_value, safe_action_property, get_checkup_service_data
+from hippocrates.blueprints.risar.lib.utils import get_action, get_action_list, week_postfix, \
+    represent_prop_value, get_checkup_service_data
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_anamnesis_apt_mother_codes, risar_anamnesis_apt_father_codes, \
     risar_epicrisis, attach_codes, checkup_flat_codes
@@ -50,11 +50,11 @@ def represent_pregnancy_event(event):
         'checkups': map(represent_pregnancy_checkup_shortly, card.checkups),
         'checkups_puerpera': map(represent_pregnancy_checkup_shortly, card.checkups_puerpera),
         'risk_rate': card_attrs_action['prenatal_risk_572'].value,
-        'preeclampsia_susp_rate': safe_action_property(card_attrs_action, 'preeclampsia_susp'),
-        'preeclampsia_confirmed_rate': safe_action_property(card_attrs_action, 'preeclampsia_comfirmed'),
+        'preeclampsia_susp_rate': card_attrs_action.get_prop_value('preeclampsia_susp'),
+        'preeclampsia_confirmed_rate': card_attrs_action.get_prop_value('preeclampsia_comfirmed'),
         'pregnancy_pathologies': [
             PregnancyPathology(pathg)
-            for pathg in safe_action_property(card_attrs_action, 'pregnancy_pathology_list')
+            for pathg in card_attrs_action.get_prop_value('pregnancy_pathology_list')
         ],
         'card_fill_rates': represent_event_cfrs(card_attrs_action),
         'radz_risk_rate': get_radz_risk_rate(card.radz_risk),
@@ -177,6 +177,7 @@ def group_orgs_for_routing(orgs, client):
         c_kladr_code = None
     c_district_codes = {c_kladr_code[:8]} if c_kladr_code else set()
     c_region_codes = {code[:2] for code in risar_regions}
+
     # special cases
     # 1) Ленинградская Область 47 000 000 000 (00) и Санкт-Петербург Город 78 000 000 000 (00)
     # 2) Московская Область 50 000 000 000 (00) и Москва Город 77 000 000 000 (00)
@@ -187,14 +188,15 @@ def group_orgs_for_routing(orgs, client):
     for org in orgs:
         if org.kladr_locality:
             locality_code = org.kladr_locality.code
-            if any(locality_code.startswith(code) for code in c_district_codes):
-                if 'kladr_locality' not in district_orgs[locality_code]:
-                    district_orgs[locality_code]['kladr_locality'] = org.kladr_locality
-                district_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
-            elif any(locality_code.startswith(code) for code in c_region_codes):
-                if 'kladr_locality' not in region_orgs[locality_code]:
-                    region_orgs[locality_code]['kladr_locality'] = org.kladr_locality
-                region_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
+            if locality_code:
+                if any(locality_code.startswith(code) for code in c_district_codes):
+                    if 'kladr_locality' not in district_orgs[locality_code]:
+                        district_orgs[locality_code]['kladr_locality'] = org.kladr_locality
+                    district_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
+                elif any(locality_code.startswith(code) for code in c_region_codes):
+                    if 'kladr_locality' not in region_orgs[locality_code]:
+                        region_orgs[locality_code]['kladr_locality'] = org.kladr_locality
+                    region_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
     return {
         'district_orgs': district_orgs,
         'region_orgs': region_orgs
@@ -208,20 +210,20 @@ def represent_pregnancy_card_attributes(action):
     @return:
     """
     return {
-        'pregnancy_start_date': safe_action_property(action, 'pregnancy_start_date'),
-        'predicted_delivery_date': safe_action_property(action, 'predicted_delivery_date'),
+        'pregnancy_start_date': action.get_prop_value('pregnancy_start_date'),
+        'predicted_delivery_date': action.get_prop_value('predicted_delivery_date'),
     }
 
 
 def represent_pregnancy_anamnesis(card):
-    found_groups = list(calc_risk_groups(card))
+    has_incompat_risk_group = any((rg for rg in card.event.risk_groups if rg.riskGroup_code == '07'))
     return {
         'mother': represent_mother_action(card.anamnesis.mother),
         'father': represent_father_action(card.anamnesis.father),
         'pregnancies': map(represent_pregnancy, card.prev_pregs),
         'transfusions': map(represent_transfusion, card.transfusions),
         'intolerances': map(represent_intolerance, card.intolerances),
-        'risk_groups': found_groups,
+        'has_incompat_risk_group': has_incompat_risk_group,
     }
 
 
@@ -265,12 +267,12 @@ def represent_father_action(action):
 def represent_pregnancy_checkup(action):
     result = represent_checkup(action, checkup_flat_codes)
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
-    card = PregnancyCard.get_for_event(action.event).attrs
-    ultrason_start_date = card['pregnancy_start_date_by_ultrasonography'].value if 'pregnancy_start_date_by_ultrasonography' in card.propsByCode else None
+    card_attrs = PregnancyCard.get_for_event(action.event).attrs
+    ultrason_start_date = card_attrs.get_prop_value('pregnancy_start_date_by_ultrasonography')
     week_by_ultrason = get_pregnancy_week_for_ultrasonography(start_date=ultrason_start_date, dt=action.begDate)
     result['calculated_pregnancy_week_by_ultrason'] = week_by_ultrason
     result['fetuses'] = map(represent_fetus, PregnancyCard.Fetus(action).states)
-    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+    result['ticket_25'] = represent_ticket_25(action.get_prop_value('ticket_25'))
     result['_service'] = get_checkup_service_data(action)
     return result
 
@@ -284,16 +286,21 @@ def represent_pregnancy_checkup_wm(action):
 
 def represent_pregnancy_checkup_puerpera(action):
     result = represent_checkup(action, checkup_flat_codes)
-    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+    result['ticket_25'] = represent_ticket_25(action.get_prop_value('ticket_25'))
     result['measures'] = represent_measures(action)
     return result
 
 
 def represent_pregnancy_checkup_shortly(action):
-    pregnancy_week = get_action_property_value(action.id, 'pregnancy_week')
     result = represent_checkup_shortly(action)
-    result['pregnancy_week'] = pregnancy_week.value if pregnancy_week else None
+    result['pregnancy_week'] = action.get_prop_value('pregnancy_week')
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
+    return result
+
+
+def represent_pregnancy_checkup_interval(action):
+    result = get_checkup_interval(action)
+    result['beg_date'] = action.begDate
     return result
 
 
@@ -315,8 +322,8 @@ def represent_pregnancy_epicrisis(event, action=None):
     second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
         filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
 
-    first_weight = first_inspection.propsByCode['weight'].value if first_inspection else None
-    second_weight = second_inspection.propsByCode['weight'].value if second_inspection else None
+    first_weight = first_inspection.get_prop_value('weight') if first_inspection else None
+    second_weight = second_inspection.get_prop_value('weight') if second_inspection else None
     if first_weight and second_weight:
         epicrisis['weight_gain'] = second_weight - first_weight
 

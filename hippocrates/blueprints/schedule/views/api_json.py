@@ -5,7 +5,7 @@ import datetime
 import logging
 from collections import defaultdict
 
-from blueprints.risar.lib import sirius
+from hippocrates.blueprints.risar.lib import sirius
 from flask import abort, request
 from flask_login import current_user
 
@@ -315,12 +315,27 @@ def api_appointment():
     """
     data = request.get_json()
     client_id = data['client_id']
-    ticket_id = data['ticket_id']
+    ticket_id = data.get('ticket_id')
+    schedule_id = data.get('schedule_id')
     create_person = data.get('create_person', current_user.get_id())
     appointment_type_id = data.get('appointment_type_id')
     event_id = data.get('event_id')
     delete = bool(data.get('delete', False))
-    ticket = ScheduleTicket.query.get(ticket_id)
+
+    if ticket_id:
+        ticket = ScheduleTicket.query.get(ticket_id)
+    else:
+        att_extra_id = rbAttendanceType.query.filter(
+            rbAttendanceType.code == 'extra'
+        ).value(rbAttendanceType.id)
+        new_ticket = ScheduleTicket(
+            schedule_id=schedule_id,
+            attendanceType_id=att_extra_id,
+        )
+        db.session.add(new_ticket)
+        db.session.flush([new_ticket])
+        ticket_id = new_ticket.id
+        ticket = new_ticket
     if not ticket:
         return abort(404)
 

@@ -51,8 +51,11 @@ var BaseAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     };
 };
 
-var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
+var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi, PropsDescriptor, mother_anamnesis_descriptor, prev_preg_descriptor) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
+
+    $scope.motherAnamnesisDescriptor = new PropsDescriptor(mother_anamnesis_descriptor);
+    $scope.prevPregDescriptor = new PropsDescriptor(prev_preg_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.anamnesis.get($scope.event_id)
@@ -67,8 +70,10 @@ var PregnancyAnamnesisCtrl = function ($scope, $controller, RisarApi) {
     };
 };
 
-var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi) {
+var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $timeout, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor, prev_preg_descriptor) {
     $controller('BaseAnamnesisCtrl', {$scope: $scope});
+    $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
+    $scope.prevPregDescriptor = new PropsDescriptor(prev_preg_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.gynecological_anamnesis.get($scope.event_id)
@@ -109,7 +114,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RefBookService, RisarA
                 restart = rslt[1];
             result.newborn_inspections = result.newborn_inspections.filter(function(inspection){
                 return !inspection.deleted || inspection.id
-            })
+            });
             RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
                 $scope.anamnesis.pregnancies.push(result);
             });
@@ -307,8 +312,9 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
     var open_edit = function (p) {
         var scope = $scope.$new();
         scope.model = p;
-        scope.minDate = $scope.header.client.birth_date;
-        scope.maxDate = new Date();
+
+        scope.minYear = moment($scope.header.client.birth_date).year();
+        scope.maxYear = new Date().getFullYear();
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/transfusions.html',
             scope: scope,
@@ -378,6 +384,12 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         scope.model = p;
         scope.minDate = $scope.header.client.birth_date;
         scope.maxDate = new Date();
+        scope.$watch('model.type', function(n, o) {
+            if (n !== undefined) {
+                scope.isAllergy = n.code === 'allergy' ? true : false;
+            }
+        }, true);
+
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/intolerances.html',
             scope: scope,
@@ -388,9 +400,10 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
-var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi) {
+var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, $filter, RisarApi, PropsDescriptor, mother_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
+    $scope.motherAnamnesisDescriptor = new PropsDescriptor(mother_anamnesis_descriptor);
     $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date = new Date();
 
@@ -405,6 +418,31 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
                 current_diseases: []};
         })
     };
+    $scope.$watch('anamnesis_mother.hereditary', function (n, o) {
+        if ( n!==o ) {
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['26']) ) {
+                $scope.isHeredTextVisible = true;
+            } else {
+                $scope.anamnesis_mother.hereditary_defect = null;
+                $scope.isHeredTextVisible = false;
+            }
+        }
+    });
+    $scope.$watch('anamnesis_mother.fertilization_type', function (n, o) {
+        if ( n!==o ) {
+            var n = n ? n : [];
+            if (safe_traverse(n, ['code']) !== '01') {
+                $scope.anamnesis_mother.attempt_number = null;
+                $scope.isAttemptVisible = false;
+            } else {
+                $scope.isAttemptVisible = true;
+            }
+        }
+    });
+
     $scope.save = function () {
         $scope.submit_attempt = true;
         var form = $scope.anamnesisMotherForm;
@@ -421,11 +459,13 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
     };
     reload_anamnesis();
 };
-var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, RisarApi) {
+var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, $filter, RisarApi, PropsDescriptor, gyn_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
 
+    $scope.gynAnamnesisDescriptor = new PropsDescriptor(gyn_anamnesis_descriptor);
     $scope.menstruation_min_date = new Date();
     $scope.menstruation_max_date= new Date();
+    
 
     var reload_anamnesis = function () {
         $scope.reload_header()
@@ -455,9 +495,24 @@ var AnamnesisUnpregnantEditCtrl = function ($scope, $controller, $document, Risa
         })
     };
     reload_anamnesis();
+    $scope.$watch('anamnesis_unpregnant.hereditary', function (n, o) {
+        if ( n!==o ) {
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['26']) ) {
+                $scope.isHeredTextVisible = true;
+            } else {
+                $scope.anamnesis_unpregnant.hereditary_defect = null;
+                $scope.isHeredTextVisible = false;
+            }
+        }
+    });
 };
-var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
+var AnamnesisFatherEditCtrl = function ($scope, $controller, $document, $filter, RisarApi, PropsDescriptor, father_anamnesis_descriptor) {
     $controller('AnamnesisBaseCtrl', {$scope: $scope});
+
+    $scope.fatherAnamnesisDescriptor = new PropsDescriptor(father_anamnesis_descriptor);
     var reload_anamnesis = function () {
         $scope.reload_header();
         RisarApi.anamnesis.father.get($scope.event_id)
@@ -467,6 +522,12 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
         })
     };
     $scope.save = function () {
+        var form = $scope.anamnesisFatherForm;
+        if (form.$invalid) {
+            var formelm = $('#anamnesisFatherForm').find('.ng-invalid:not(ng-form):first');
+            $document.scrollToElement(formelm, 100, 1500);
+            return false;
+        }
         var model = $scope.anamnesis_father;
         RisarApi.anamnesis.father.save($scope.event_id, model)
         .then(function (data) {
@@ -474,4 +535,17 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
         })
     };
     reload_anamnesis();
+    $scope.$watch('anamnesis_father.hereditary', function (n, o) {
+        if ( n!==o ) {
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['26']) ) {
+                $scope.isHeredTextVisible = true;
+            } else {
+                $scope.anamnesis_father.hereditary_defect = null;
+                $scope.isHeredTextVisible = false;
+            }
+        }
+    });
 };

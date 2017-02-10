@@ -18,54 +18,83 @@
             <div class="col-sm-6 col-md-6  text-right">Дата закрытия талона:</div>
             <div class="col-sm-6 col-md-6">[[checkup.ticket_25.end_date|asDate]]</div>
     </div>
+    {% if 'medical_care' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('medical_care')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.medical_care.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'visit_place' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('visit_place')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_place.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'visit_type' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('visit_type')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_type.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'visit_reason' in ticket_25_descriptor %}
      <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('visit_reason')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.visit_reason.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'finished_treatment' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('finished_treatment')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.finished_treatment.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'initial_treatment' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('initial_treatment')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.initial_treatment.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'treatment_result' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('treatment_result')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.treatment_result.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'payment' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('payment')]]:</div>
             <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.payment.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'urgent' in ticket_25_descriptor %}
     <div class="row">
         <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('urgent')]]:</div>
         <div class="col-sm-6 col-md-6">[[checkup.ticket_25.urgent ? 'да': 'нет']]</div>
     </div>
+    {% endif %}
+    {% if 'prof_med_help' in ticket_25_descriptor %}
     <div class="row">
         <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('prof_med_help')]]:</div>
         <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.prof_med_help.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'condit_med_help' in ticket_25_descriptor %}
     <div class="row">
         <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('condit_med_help')]]:</div>
         <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.condit_med_help.name"></span></div>
     </div>
+    {% endif %}
+    {% if 'ache_result' in ticket_25_descriptor %}
+    <div class="row">
+        <div class="col-sm-6 col-md-6 text-right">[[ticket25Descriptor.getName('ache_result')]]:</div>
+        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.ticket_25.ache_result.name"></span></div>
+    </div>
+    {% endif %}
     <div class="row">
         <div class="col-sm-6 col-md-6 text-right">&nbsp;<br></div>
         <div class="col-sm-6 col-md-6"></div>
     </div>
+    {% if 'services' in ticket_25_descriptor %}
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('services')]]</b></div>
             <div class="col-sm-6 col-md-6"></div>
@@ -88,6 +117,8 @@
             </tbody>
           </table>
     </div>
+    {% endif %}
+    {% if 'operations' in ticket_25_descriptor %}
     <br/>
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('operations')]]</b></div>
@@ -115,6 +146,8 @@
             </tbody>
           </table>
     </div>
+    {% endif %}
+    {% if 'manipulations' in ticket_25_descriptor %}
     <br/>
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('manipulations')]]</b></div>
@@ -138,6 +171,8 @@
             </tbody>
           </table>
     </div>
+    {% endif %}
+    {% if 'temp_disability' in ticket_25_descriptor %}
     <br/>
     <div class="row">
             <div class="col-sm-6 col-md-6 text-right"><b>[[ticket25Descriptor.getName('temp_disability')]]</b></div>
@@ -167,6 +202,7 @@
             </tbody>
           </table>
     </div>
+    {% endif %}
     <!-- END TICKET25 -->
     </div>
 </div>

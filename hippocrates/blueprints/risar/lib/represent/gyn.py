@@ -42,7 +42,7 @@ def represent_gyn_checkup_wm(action):
 
 def represent_gyn_checkup(action):
     result = represent_checkup(action, risar_gyn_checkup_flat_codes, gyn_checkup_simple_codes)
-    result['ticket_25'] = represent_ticket_25(action.propsByCode['ticket_25'].value)
+    result['ticket_25'] = represent_ticket_25(action.get_prop_value('ticket_25'))
     result['measures'] = represent_measures(action)
     return result
 

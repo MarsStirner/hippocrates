@@ -3,40 +3,40 @@
 </div>
 <div class="modal-body">
     <div class="das-form">
-        <table class="table table-condensed">
-            <thead>
-                <tr>
-                    <th class="col-md-3"></th>
-                    <th class="col-md-9"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th class="text-right">Дата</th>
-                    <td><div class="col-lg-3 col-md-3 col-xs-3">
-                        <wm-date name="date" ng-model="model.date" min-date="minDate"
-                            max-date="maxDate" style="width: 250px"></wm-date>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th class="text-right">Вид</th>
-                    <td><div class="col-md-10"><rb-select ref-book="rbRisarBloodTransfusionType" ng-model="model.type" autofocus="true"/></div></td>
-                </tr>
-                <tr>
-                    <th class="text-right">Группа крови донора</th>
-                    <td><div class="col-lg-3 col-md-3 col-xs-3"><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></div></td>
-                </tr>
-                <tr>
-                    <th class="text-right">Реакция</th>
-                    <td><div class="col-md-10"><input class="form-control" type="text" ng-model="model.reaction" /></div></td>
-                </tr>
-            </tbody>
-        </table>
+        <ng-form name="algForm">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th class="col-md-3"></th>
+                        <th class="col-md-9"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                     <tr>
+                        <th class="text-right">Год беременности <span class="text-danger">*</span></th>
+                        <td>
+                            <div class="col-lg-3 col-md-3 col-xs-3">
+                            <input name="year" class="form-control validatable" type="number" ng-model="model.year"
+                                   min="[[minYear]]" max="[[maxYear]]"
+                                   ng-maxlength="4" ng-required="true" ng-pattern="/^[12]\d{3}$/" auto-focus>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Вид</th>
+                        <td><div class="col-md-10"><rb-select ref-book="rbRisarBloodTransfusionType" ng-model="model.type"/></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Реакция</th>
+                        <td><div class="col-md-10"><input class="form-control" type="text" ng-model="model.reaction" /></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </ng-form>
     </div>
 </div>
 <div class="modal-footer">
     <input type="checkbox" ng-model="restart" id="another"><label for="another"> Создать ещё </label>
-    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+    <button class="btn btn-success" ng-click="$close([model, restart])"  ng-disabled="!algForm.$valid">Сохранить</button>
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
 </div>

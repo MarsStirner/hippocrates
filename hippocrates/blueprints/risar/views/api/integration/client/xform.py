@@ -4,16 +4,22 @@ import itertools
 import logging
 
 from nemesis.app import app
-from ..xform import XForm, wrap_simplify, none_default, Undefined, ALREADY_PRESENT_ERROR
+from sqlalchemy import and_
+from sqlalchemy import or_
+
+from ..xform import XForm, wrap_simplify, none_default, Undefined, ALREADY_PRESENT_ERROR, \
+    VALIDATION_ERROR
 from .schemas import ClientSchema
 
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_date, safe_traverse
 from nemesis.models.client import Client, ClientDocument, ClientPolicy, BloodHistory, \
-    ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse
+    ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse, \
+    ClientWork, ClientSocStatus
 from nemesis.models.enums import AddressType
 
-from nemesis.models.exists import rbDocumentType, rbPolicyType, rbBloodType
+from nemesis.models.exists import rbDocumentType, rbPolicyType, rbBloodType, \
+    rbSocStatusClass, rbSocStatusType
 from nemesis.models.organisation import Organisation
 from nemesis.systemwide import db
 
@@ -45,32 +51,50 @@ class ClientXForm(ClientSchema, XForm):
             Client.birthDate == bd,
             Client.deleted == 0,
         )
+        if pn:
+            q = q.filter(Client.patrName == pn)
+
         is_document_required = safe_traverse(
             app.config, 'system_prefs', 'integration',
             'client', 'document_required',
         )
         if is_document_required is None:
-            is_document_required = True
-        if is_document_required:
-            doc_type_code = data['document']['document_type_code']
+            is_document_required = False
+        if is_document_required and 'documents' not in data:
+            raise ApiException(
+                VALIDATION_ERROR,
+                u'Нет обязательного элемента "documents"'
+            )
+        doc_q = None
+        doc_numbers = []
+        for document in data.get('documents') or ():
+            doc_type_code = document['document_type_code']
             self._check_rb_value('rbDocumentType', doc_type_code)
-            doc_number = data['document']['document_number']
-            q = q.join(ClientDocument).join(rbDocumentType).filter(
+            doc_number = document['document_number']
+            doc_numbers.append(doc_number)
+            doc_sq = and_(
                 rbDocumentType.TFOMSCode == doc_type_code,
                 ClientDocument.number == doc_number,
+            )
+            if doc_q:
+                doc_q = or_(doc_q, doc_sq)
+            else:
+                doc_q = doc_sq
+        if doc_q is not None:
+            q = q.join(ClientDocument).join(rbDocumentType).filter(
+                doc_q,
                 ClientDocument.deleted == 0
             )
-        if pn:
-            q = q.filter(Client.patrName == pn)
+
         target_obj_exist_id = q.value(Client.id)
         if target_obj_exist_id:
-            if is_document_required:
+            if doc_numbers:
                 raise ApiException(
                     ALREADY_PRESENT_ERROR,
                     (u'Уже существует пациент со следующими данными: '
                      u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
-                     u'номер документа - {4}').format(
-                        fn, ln, pn, bd, doc_number
+                     u'номер документа - хотя бы один из ({4})').format(
+                        fn, ln, pn, bd, ', '.join(doc_numbers)
                     ),
                     client_id=str(target_obj_exist_id)
                 )
@@ -78,7 +102,7 @@ class ClientXForm(ClientSchema, XForm):
                 raise ApiException(
                     ALREADY_PRESENT_ERROR,
                     u'Уже существует пациент со следующими данными: '
-                    u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+                    u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3}'
                         .format(
                         fn, ln, pn, bd
                     ),
@@ -97,8 +121,8 @@ class ClientXForm(ClientSchema, XForm):
         self.load_data()
         with db.session.no_autoflush:
             self._update_main_data(data)
-            if 'document' in data:
-                self._update_id_document(data['document'])
+            self._update_works(data.get('job') and [data.get('job')] or [])
+            self._update_id_documents(data.get('documents') or ())
             if 'insurance_documents' in data:
                 self._update_policies(data['insurance_documents'])
             if 'registration_address' in data:
@@ -119,24 +143,38 @@ class ClientXForm(ClientSchema, XForm):
         client.patrName = data['FIO'].get('middlename') or ''
         client.birthDate = safe_date(data['birthday_date'])
         client.sexCode = data['gender']
+        client.nationality_code = data.get('nationality')
         snils = data.get('SNILS')
         client.SNILS = snils.replace('-', '') if snils else ''
         self._changed.append(client)
 
-    def _update_id_document(self, data):
+    def _update_id_documents(self, documents):
         client = self.target_obj
-        self._check_rb_value('rbDocumentType', data['document_type_code'])
-        doc_type = rbDocumentType.query.filter(rbDocumentType.TFOMSCode == data['document_type_code']).first()
-        document = client.document
-        if not document:
-            document = ClientDocument()
-            document.client = client
-        document.documentType = doc_type
-        document.serial = data.get('document_series') or ''
-        document.number = data['document_number']
-        document.date = safe_date(data['document_beg_date'])
-        document.origin = data.get('document_issuing_authority') or ''
-        self._changed.append(document)
+        rbdt_map = dict(
+            (str(item.TFOMSCode), item)
+            for item in rbDocumentType.query
+            if item.TFOMSCode
+        )
+
+        client_documents = client.documents.all()
+
+        for doc_data, document in itertools.izip_longest(documents, client_documents):
+            if not doc_data:
+                document.deleted = 1
+                self._changed.append(document)
+                continue
+            doc_type_code = str(doc_data['document_type_code'])
+            self._check_rb_value('rbDocumentType', doc_type_code)
+            doc_type = rbdt_map.get(doc_type_code)
+            if not document:
+                document = ClientDocument()
+                document.client = client
+            document.documentType = doc_type
+            document.serial = doc_data.get('document_series') or ''
+            document.number = doc_data['document_number']
+            document.date = safe_date(doc_data['document_beg_date'])
+            document.origin = doc_data.get('document_issuing_authority') or ''
+            self._changed.append(document)
 
     def _update_policies(self, policies):
         client = self.target_obj
@@ -229,6 +267,44 @@ class ClientXForm(ClientSchema, XForm):
             allergy_object.power = allergy_data['allergy_power']
             self._changed.append(allergy_object)
 
+    def _update_works(self, data_list):
+        client = self.target_obj
+        for work_data, work_object in itertools.izip_longest(data_list, client.works):
+            if not work_data:
+                work_object.deleted = 1
+                self._changed.append(work_object)
+                continue
+            if not work_object:
+                self._check_rb_value('rbSocStatusClass', '3')
+                self._check_rb_value('rbSocStatusType', '004')
+                socStatusClass_id = rbSocStatusClass.query.filter(
+                    rbSocStatusClass.code == '3'
+                ).value(rbSocStatusClass.id)
+                socStatusType_id = rbSocStatusType.query.filter(
+                    rbSocStatusType.code == '004'
+                ).value(rbSocStatusType.id)
+
+                client_soc_status = ClientSocStatus(
+                    soc_stat_class=socStatusClass_id,
+                    soc_stat_type=socStatusType_id,
+                    beg_date='0000-00-00',
+                    end_date=None,
+                    client=self.target_obj,
+                    document=None,
+                    note=''
+                )
+                client_soc_status.client_id = self.target_obj_id
+
+                work_object = ClientWork(
+                    work_data['organisation'],
+                    work_data.get('post', ''),
+                    client
+                )
+                work_object.soc_status = client_soc_status
+            work_object.shortName = work_data['organisation']
+            work_object.post = work_data.get('post', '')
+            self._changed.append(work_object)
+
     def _update_intolerances(self, data_list):
         client = self.target_obj
         for intolerance_data, intolerance_object in itertools.izip_longest(data_list, client.intolerances):
@@ -246,6 +322,7 @@ class ClientXForm(ClientSchema, XForm):
     @wrap_simplify
     def as_json(self):
         client = self.target_obj
+        works = map(self._represent_work, client.works)
         return {
             'client_id': self.target_obj.id,
             'FIO': {
@@ -256,7 +333,9 @@ class ClientXForm(ClientSchema, XForm):
             'birthday_date': client.birthDate,
             'SNILS': client.SNILS or Undefined,
             'gender': client.sexCode,
-            'document': self._represent_document(client.document),
+            'nationality': client.nationality_code,
+            'job': works and works[-1],
+            'documents': map(self._represent_documents, client.documents_all),
             'insurance_documents': map(self._represent_policy, client.policies_all),
             'registration_address': self._represent_residential_address(client.reg_address),
             'residential_address': self._represent_residential_address(client.loc_address),
@@ -266,7 +345,7 @@ class ClientXForm(ClientSchema, XForm):
         }
 
     @none_default
-    def _represent_document(self, doc):
+    def _represent_documents(self, doc):
         """
         :type doc: nemesis.models.client.ClientDocument
         :param doc:
@@ -332,6 +411,18 @@ class ClientXForm(ClientSchema, XForm):
         return {
             "allergy_power": allergy.power,
             "allergy_substance": allergy.name,
+        }
+
+    @none_default
+    def _represent_work(self, work):
+        """
+        :type work: nemesis.models.client.ClientWork
+        :param work:
+        :return:
+        """
+        return {
+            "organisation": work.shortName,
+            "post": work.post,
         }
 
     @none_default

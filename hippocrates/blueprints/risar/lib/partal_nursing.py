@@ -40,15 +40,14 @@ class PartalNursingController(object):
 
     @staticmethod
     def fill_own_fields(action, flatcode, json_data):
-        action.update_action_integrity()
         for field in nursing.get(flatcode):
-            action.propsByCode[field].value = json_data.get(field)
+            action.set_prop_value(field, json_data.get(field))
 
     @staticmethod
     def fill_anamnesis_fields(card, json_data):
         mother = json_data.get("mother_anamnesis", {})
         father = json_data.get('father_anamnesis', {})
         for field, value in mother.items():
-            card.anamnesis.mother.propsByCode[field].value = value
+            card.anamnesis.mother.set_prop_value(field, value)
         for field, value in father.items():
-            card.anamnesis.father.propsByCode[field].value = value
+            card.anamnesis.father.set_prop_value(field, value)

@@ -86,6 +86,22 @@ function ($scope, $controller, $window, RisarApi, Config, $modal, NotificationSe
     $scope.add_inspection = function() {
         $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id, '_self');
     };
+    $scope.get_mother_finished_diseases_text = function () {
+        var finished_diseases_text = safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'finished_diseases_text']);
+        if (safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'finished_diseases', 'length'])) {
+            return finished_diseases_text;
+        } else {
+            return finished_diseases_text || 'нет';
+        }
+    };
+    $scope.get_mother_current_diseases_text = function () {
+        var current_diseases_text = safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'current_diseases_text']);
+        if (safe_traverse($scope, ['chart', 'anamnesis', 'mother', 'current_diseases', 'length'])) {
+            return current_diseases_text;
+        } else {
+            return current_diseases_text || 'нет';
+        }
+    };
     var load_header = function (event_id) {
         RisarApi.chart.get_header(event_id).then(function (data) {
             $scope.header = data.header;
@@ -247,6 +263,15 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
     $scope.canEditCheckup = function (idx) {
         return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
     };
+    $scope.print_checkup = function (checkup) {
+        var action_id = checkup.id;
+        var flat_code = checkup.flat_code;
+        if (flat_code == 'risarFirstInspection') {
+            RisarApi.print_first_checkup(action_id, 'pdf');
+        } else {
+            $scope.open_print_window($scope.ps_si, checkup.id)
+        }
+    };
 
     var reload = function () {
         $scope.checkups = [];
@@ -289,8 +314,8 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
     };
 
     $scope.open_print_window = function (ps, checkup_id) {
-        if (ps.is_available()){
-            PrintingDialog.open(ps, $scope.ps_resolve(checkup_id));
+        if (ps.is_available()) {
+            PrintingDialog.open(ps, $scope.ps_resolve(checkup_id), undefined, true);
         }
     };
     reload();
@@ -347,7 +372,7 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
 
         $scope.open_print_window = function (ps, checkup_id) {
             if ($scope.ps.is_available()){
-                PrintingDialog.open(ps, $scope.ps_resolve(checkup_id));
+                PrintingDialog.open(ps, $scope.ps_resolve(checkup_id), undefined, true);
             }
         };
         reload();

@@ -19,355 +19,454 @@
         {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
     </section>
     <section class="content">
-        <tabset justified="true" class="nav-tabs-custom">
-            <tab  heading="Сведения о пациентке" active="tabs.motherfather">
-                <div class="row">
-                     <a style="margin-right: 10% !important;" class="pull-right pseudo-btn" ng-href="{{ url_for('.html_gynecological_anamnesis_edit') }}?event_id=[[ event_id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                </div>
-                <div class="extr_space">  
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Менструальная функция</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
+        <tabset>
+            <tab heading="Сведения о пациентке" active="tabs.motherfather">
+                    <div class="panel panel-default" style="border-top: none; border-radius: 0">
+                            <div class="panel-body">
+                                <div class="row">
+                                     <a style="margin-right: 10% !important;" class="pull-right pseudo-btn" ng-href="{{ url_for('.html_gynecological_anamnesis_edit') }}?event_id=[[ event_id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                </div>
+                                <div class="extr_space">
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong>Менструальная функция</strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                            </div>
+                                        </div>
+                                        {% if 'age' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('age')"></div>
+                                            <div class="col-sm-7 col-md-7">
+                                                <span ng-bind="anamnesis.general.age"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'duration' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('duration')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.duration"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'period_duration' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('period_duration')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.period_duration"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'disorder' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('disorder')"></div>
+                                            <div class="col-sm-7 col-md-7" >
+                                                <span>[[ anamnesis.general.disorder | danet ]]</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'menstrual_character' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('menstrual_character')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.menstrual_character| pluck:'name' | join:', '"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'intermenstrual_spotting' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('intermenstrual_spotting')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.intermenstrual_spotting"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'menstrual_pain' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('menstrual_pain')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.menstrual_pain"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'menopause' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('menopause')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span >[[ anamnesis.general.menopause | danet ]]</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'menopause_age' in gyn_anamnesis_descriptor %}
+                                        <div class="row" ng-show="anamnesis.general.menopause">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('menopause_age')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.menopause_age"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong>Половая жизнь</strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                            </div>
+                                        </div>
+                                        {% if 'sex_life_age' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('sex_life_age')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.sex_life_age"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'intercourse_partner_number' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('intercourse_partner_number')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.intercourse_partner_number"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'marital_status' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('marital_status')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.marital_status.name"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong>Заболевания</strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                        {% if 'std' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('std')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.std | pluck:'name' | join:', '"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'gynecopathy' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('gynecopathy')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.gynecopathy | pluck:'name' | join:', '"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'hepatitis' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('hepatitis')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.hepatitis"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'tuberculosis' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('tuberculosis')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.tuberculosis"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'somatic_disease' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('somatic_disease')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.somatic_disease"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'hereditary' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('hereditary')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.hereditary | pluck:'name' | join:', '"></span>
+                                            </div>
+                                        </div>
+                                            {%- if 'hereditary_defect' in gyn_anamnesis_descriptor -%}
+                                                <div class="row" ng-if="anamnesis.general.hereditary_defect">
+                                                    <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('hereditary_defect')"></strong></div>
+                                                    <div class="col-sm-7 col-md-7 ">
+                                                        <span ng-bind-html="anamnesis.general.hereditary_defect"></span>
+                                                    </div>
+                                                </div>
+                                            {%- endif -%}
+                                        {% endif %}
+                                        {% if 'hereditary_free_input' in gyn_anamnesis_descriptor %}
+                                            <div class="row" ng-if="anamnesis.general.hereditary_free_input">
+                                                <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('hereditary_free_input')"></strong></div>
+                                                <div class="col-sm-7 col-md-7 ">
+                                                    <span ng-bind-html="anamnesis.general.hereditary_free_input"></span>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if 'gyn_operation' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('gyn_operation')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind-html="anamnesis.general.gyn_operation"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'infertility' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('infertility')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span>[[ anamnesis.general.infertility | danet ]]</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'infertility_kind' in gyn_anamnesis_descriptor %}
+                                        <div class="row" ng-show="anamnesis.general.infertility">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_kind')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.infertility_kind.name"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'infertility_duration' in gyn_anamnesis_descriptor %}
+                                        <div class="row" ng-show="anamnesis.general.infertility">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_duration')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.infertility_duration"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'infertility_etiology' in gyn_anamnesis_descriptor %}
+                                        <div class="row" ng-show="anamnesis.general.infertility">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_etiology')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.infertility_etiology | pluck:'name' | join:', '"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'infertility_treatment' in gyn_anamnesis_descriptor %}
+                                        <div class="row" ng-show="anamnesis.general.infertility">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('infertility_treatment')"></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                               <span ng-bind="anamnesis.general.infertility_treatment | pluck:'name' | join:', '"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'epidemic' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('epidemic')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.epidemic"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'traumas' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('traumas')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind-html="anamnesis.general.traumas"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'operations' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('operations')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind-html="anamnesis.general.operations"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <!--search ref-books by .name -->
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong>Группа крови</strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                               <span ng-bind="anamnesis.general.blood_type.name"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong>Вредные привычки</strong></div>
+                                            <div class="col-sm-7 col-md-7 "></div>
+                                        </div>
+                                        {% if 'alcohol' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('alcohol')"></div>
+                                            <div class="col-sm-7 col-md-7 ng-binding">
+                                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.alcohol, 'fa-check text-danger': anamnesis.general.alcohol}"></i>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'smoking' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('smoking')"></div>
+                                           <div class="col-sm-7 col-md-7">
+                                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.smoking, 'fa-check text-danger': anamnesis.general.smoking}"></i>
+                                           </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'toxic' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('toxic')"></div>
+                                            <div class="col-sm-7 col-md-7">
+                                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.toxic, 'fa-check text-danger': anamnesis.general.toxic}"></i>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'drugs' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right" ng-bind-html="gynAnamnesisDescriptor.getName('drugs')"></div>
+                                            <div class="col-sm-7 col-md-7">
+                                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.drugs, 'fa-check text-danger': anamnesis.general.drugs}"></i>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'work_group' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('work_group')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.work_group.name"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'professional_properties' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('professional_properties')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind="anamnesis.general.professional_properties.name"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if 'additional_info' in gyn_anamnesis_descriptor %}
+                                        <div class="row">
+                                            <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('additional_info')"></strong></div>
+                                            <div class="col-sm-7 col-md-7 ">
+                                                <span ng-bind-html="anamnesis.general.additional_info"></span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">С возраста</div>
-                            <div class="col-sm-7 col-md-7">
-                                <span ng-bind="anamnesis.general.age"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Длительность</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.duration"></span>
-                            </div>
-                        </div><div class="row">
-                            <div class="col-sm-5 
-                            col-md-5 text-right">Продолжительность цикла</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.period_duration"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Нарушения</div>
-                            <div class="col-sm-7 col-md-7" >
-                                <span>[[ anamnesis.general.disorder | danet ]]</span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Характер менструаций</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.menstrual_character| pluck:'name' | join:', '"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Межменструальные выделения</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.intermenstrual_spotting"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Менструальные боли</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.menstrual_pain"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Менопауза</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span >[[ anamnesis.general.menopause | danet ]]</span>
-                            </div>
-                        </div>
-                        <div class="row" ng-show="anamnesis.general.menopause">
-                            <div class="col-sm-5 col-md-5 text-right">С возраста</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.menopause_age"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Половая жизнь</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">С возраста</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.sex_life_age"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Количество половых партнёров</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.intercourse_partner_number"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Семейное положение</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.marital_status.name"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Заболевания</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">ЗППП</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.std | pluck:'name' | join:', '"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Гинекологические</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.gynecopathy | pluck:'name' | join:', '"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Гепатит</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.hepatitis"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Туберкулез</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.tuberculosis"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Соматические</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.somatic_disease"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Наследственность</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.hereditary | pluck:'name' | join:', '"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Оперативные вмешательства на половых органах</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind-html="anamnesis.general.gyn_operation"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Бесплодие</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span>[[ anamnesis.general.infertility | danet ]]</span>
-                            </div>
-                        </div>
-                        <div class="row" ng-show="anamnesis.general.infertility">
-                            <div class="col-sm-5 col-md-5 text-right">Вид</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.infertility_kind.name"></span>
-                            </div>
-                        </div>
-                        <div class="row" ng-show="anamnesis.general.infertility">
-                            <div class="col-sm-5 col-md-5 text-right">Длительность, лет</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.infertility_duration"></span>
-                            </div>
-                        </div>
-                        <div class="row" ng-show="anamnesis.general.infertility">
-                            <div class="col-sm-5 col-md-5 text-right">Причины</div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.infertility_etiology | pluck:'name' | join:', '"></span>
-                            </div>
-                        </div>
-                        <div class="row" ng-show="anamnesis.general.infertility">
-                            <div class="col-sm-5 col-md-5 text-right">Лечение</div>
-                            <div class="col-sm-7 col-md-7 ">
-                               <span ng-bind="anamnesis.general.infertility_treatment | pluck:'name' | join:', '"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Эпидемиологический анамнез</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.epidemic"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Травмы</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind-html="anamnesis.general.traumas"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Операции (кроме гинекологических)</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind-html="anamnesis.general.operations"></span>
-                            </div>
-                        </div>
-                        <!--search ref-books by .name -->
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Группа крови</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                               <span ng-bind="anamnesis.general.blood_type.name"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Вредные привычки</strong></div>
-                            <div class="col-sm-7 col-md-7 "></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Алкоголь</div>
-                            <div class="col-sm-7 col-md-7 ng-binding">
-                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.alcohol, 'fa-check text-danger': anamnesis.general.alcohol}"></i>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Курение</div>
-                           <div class="col-sm-7 col-md-7">
-                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.smoking, 'fa-check text-danger': anamnesis.general.smoking}"></i>
-                           </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Токсичные вещества</div>
-                            <div class="col-sm-7 col-md-7">
-                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.toxic, 'fa-check text-danger': anamnesis.general.toxic}"></i>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Наркотики</div>
-                            <div class="col-sm-7 col-md-7">
-                                <i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !anamnesis.general.drugs, 'fa-check text-danger': anamnesis.general.drugs}"></i>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Общественно-профилактическая группа</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.work_group.name"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Профессиональные вредности</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind="anamnesis.general.professional_properties.name"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right"><strong>Дополнительная информация</strong></div>
-                            <div class="col-sm-7 col-md-7 ">
-                                <span ng-bind-html="anamnesis.general.additional_info"></span>
-                            </div>
-                        </div>
-
-                </div><!--end extr_space-->
-            </tab>
+                    </tab>
             <tab heading="Предыдущие беременности" active="tabs.pregnancies" ng-controller="PregnanciesCtrl">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Год</th>
-                        <th>Исход беременности</th>
-                        <th>Срок</th>
-                        <th>Сведения о детях</th>
-                        <th>Особенности</th>
-                        <th>Ссылка на карту</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="p in anamnesis.pregnancies">
-                        <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
-                        <td ng-if="!p.deleted">
-                            <span class="[[p.epic_delivery_date ? 'bottom_dotted' : '']]" tooltip="[[p.epic_delivery_date]]" tooltip-enable="p.epic_delivery_date">[[p.year]]</span>
-                        </td>
-                        <td ng-if="!p.deleted" ng-bind="p.pregnancyResult.name"></td>
-                        <td ng-if="!p.deleted" ng-bind="p.pregnancy_week"></td>
-                        <td ng-if="!p.deleted">
-                            Дети ([[p.newborn_inspections.length]]):
-                            <div ng-repeat="child_info in p.newborn_inspections">
-                                <b>ребенок [[$index+1]]</b>:
-                                <span ng-bind="format_newborn_inspection(child_info)"></span>
-                            </div>
-                        </td>
-                        <td ng-if="!p.deleted" ng-bind-html="format_characteristics(p) | trustHtml"></td>
-                        <td ng-if="!p.deleted" ><a ng-if="p.external_id" ng-href="{{ url_for('.html_auto_chart') }}?event_id=[[ p.event_id ]]">[[p.external_id]]</a></td>
-                        <td ng-if="!p.deleted && !p.event_id" class="col-md-1 nowrap">
-                            <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
-                            <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="5">&nbsp;</td>
-                        <td>
-                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="panel panel-default" style="border-top: none; border-radius: 0">
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>[[prevPregDescriptor.getName('year')]]</th>
+                                <th>[[prevPregDescriptor.getName('pregnancyResult')]]</th>
+                                <th>[[prevPregDescriptor.getName('pregnancy_week')]]</th>
+                                <th>[[prevPregDescriptor.getName('newborn_inspections')]]</th>
+                                <th>[[prevPregDescriptor.getName('note')]]</th>
+                                <th>[[prevPregDescriptor.getName('card_number')]]</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="p in anamnesis.pregnancies">
+                                <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!p.deleted">
+                                    <span class="[[p.epic_delivery_date ? 'bottom_dotted' : '']]" tooltip="[[p.epic_delivery_date]]" tooltip-enable="p.epic_delivery_date">[[p.year]]</span>
+                                </td>
+                                <td ng-if="!p.deleted" ng-bind="p.pregnancyResult.name"></td>
+                                <td ng-if="!p.deleted" ng-bind="p.pregnancy_week"></td>
+                                <td ng-if="!p.deleted">
+                                    Дети ([[p.newborn_inspections.length]]):
+                                    <div ng-repeat="child_info in p.newborn_inspections">
+                                        <b>ребенок [[$index+1]]</b>:
+                                        <span ng-bind="format_newborn_inspection(child_info)"></span>
+                                    </div>
+                                </td>
+                                <td ng-if="!p.deleted" ng-bind-html="format_characteristics(p) | trustHtml"></td>
+                                <td ng-if="!p.deleted" ><a ng-if="p.external_id" ng-href="{{ url_for('.html_auto_chart') }}?event_id=[[ p.event_id ]]">[[p.external_id]]</a></td>
+                                <td ng-if="!p.deleted && !p.event_id" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </tab>
             <tab heading="Переливания крови" active="tabs.transfusions" ng-controller="TransfusionsCtrl">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Дата</th>
-                        <th>Вид</th>
-                        <th>Группа крови донора</th>
-                        <th>Реакция</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="t in anamnesis.transfusions">
-                        <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
-                        <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.type.name"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
-                        <td ng-if="!t.deleted" class="col-md-1 nowrap">
-                            <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
-                            <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4">&nbsp;</td>
-                        <td>
-                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="panel panel-default" style="border-top: none; border-radius: 0">
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Год</th>
+                                <th>Вид</th>
+                                <th></th>
+                                <th>Реакция</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="t in anamnesis.transfusions">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.year"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.type.name"></td>
+                                <td></td>
+                                <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </tab>
             <tab heading="Аллергии и непереносимости" active="tabs.intolerances" ng-controller="IntolerancesCtrl">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Тип</th>
-                        <th>Дата установления</th>
-                        <th>Наименование</th>
-                        <th>Степень</th>
-                        <th>Примечания</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="t in anamnesis.intolerances">
-                        <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
-                        <td ng-if="!t.deleted" ng-bind="t.type.name" class="col-md-2"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.name"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.power.name"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.note"></td>
-                        <td ng-if="!t.deleted" class="col-md-1 nowrap">
-                            <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
-                            <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="5">&nbsp;</td>
-                        <td>
-                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="panel panel-default" style="border-top: none; border-radius: 0">
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Тип</th>
+                                <th>Дата установления</th>
+                                <th>Наименование</th>
+                                <th>Степень</th>
+                                <th>Примечания</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="t in anamnesis.intolerances">
+                                <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!t.deleted" ng-bind="t.type.name" class="col-md-2"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.power.name"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.note"></td>
+                                <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                                    <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
+                                    <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">&nbsp;</td>
+                                <td>
+                                    <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </tab>
         </tabset>
     </section>
@@ -376,6 +475,10 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('gyn_anamnesis_descriptor', angular.fromJson('{{gyn_anamnesis_descriptor|tojson|safe}}'));
+        WebMis20.value('prev_preg_descriptor', angular.fromJson('{{prev_preg_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/transfusions.html">{% include 'risar/modals/_modal_transfusions.html' %}</script>

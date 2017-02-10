@@ -27,19 +27,19 @@ pregnancy_apt_codes = [
     'year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'pregnancy_pathology',
     'delivery_pathology', 'maternity_aid', 'after_birth_complications', 'operation_testimonials',
 ]
-transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
+transfusion_apt_codes = ['year', 'type', 'reaction']
 
 risar_anamnesis_apt_common_codes = [
     'education', 'work_group', 'professional_properties',
     'infertility', 'infertility_period', 'infertility_cause', 'infertility_type', 'infertility_treatment',
     'blood_type', 'finished_diseases', 'current_diseases', 'finished_diseases_text', 'current_diseases_text',
-    'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
+    'hereditary', 'hereditary_defect', 'hereditary_free_input', 'alcohol', 'smoking', 'toxic', 'drugs']
 
 risar_anamnesis_apt_mother_codes = [
     'menstruation_last_date', 'marital_status',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
     'intrauterine', 'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income',
-    'preeclampsia', 'multifetation', 'heart_disease'] + risar_anamnesis_apt_common_codes
+    'preeclampsia', 'multifetation', 'heart_disease', 'attempt_number'] + risar_anamnesis_apt_common_codes
 risar_anamnesis_apt_father_codes = ['name', 'phone', 'HIV', 'fluorography', 'age'] + risar_anamnesis_apt_common_codes
 
 first_inspection_flat_code = 'risarFirstInspection'
@@ -110,11 +110,13 @@ gyn_checkup_simple_codes = [
     'AD_left_low',
     'skin',
     'mucous',
+    'lymph_which',
     'lymph',
     'subcutaneous_fat',
     'breast',
     'nipples',
     'stomach',
+    'stomach_area',
     'pilosis',
     'comments',
     'vulva_pilosis',
@@ -144,6 +146,8 @@ gyn_checkup_simple_codes = [
     'uterus_external_orifice_mirrors',
     'vaginal_fornix_mirrors',
     'vaginal_fornix_adds_mirrors',
+    'mucous_mirrors',
+    'mucous_adds_mirrors',
     'discharge_consistency_mirrors',
     'discharge_colour_mirrors',
     'discharge_quantity_mirrors',
@@ -154,6 +158,7 @@ gyn_checkup_simple_codes = [
     'bimanual_uterus_body',
     'bimanual_body_of_womb_size',
     'bimanual_body_of_womb_enlarged',
+    'bimanual_body_of_womb_reduced',
     'bimanual_uteri_position',
     'bimanual_ovary_right',
     'bimanual_ovary_right_oher',
@@ -162,12 +167,14 @@ gyn_checkup_simple_codes = [
     'bimanual_uterine_tubes_right',
     'bimanual_uterine_tubes_left',
     'bimanual_vaginal_fornix',
+    'bimanual_formix_other',
     'bimanual_comments',
     'rectovaginal_cervix_uteri',
     'rectovaginal_cervix_consistency',
     'rectovaginal_uterus_body',
     'rectovaginal_body_of_womb_size',
     'rectovaginal_body_of_womb_enlarged',
+    'rectovaginal_body_of_womb_reduced',
     'rectovaginal_uteri_position',
     'rectovaginal_parametrium',
     'rectovaginal_parametrium_other',
@@ -178,6 +185,7 @@ gyn_checkup_simple_codes = [
     'rectovaginal_uterine_tubes_right',
     'rectovaginal_uterine_tubes_left',
     'rectovaginal_vaginal_fornix',
+    'rectal_formix_other',
     'rectovaginal_comments',
     'rectal_perianal_zona',
     'rectal_rectum',
@@ -186,6 +194,7 @@ gyn_checkup_simple_codes = [
     'rectal_uterus_body',
     'rectal_body_of_womb_size',
     'rectal_body_of_womb_enlarged',
+    'rectal_body_of_womb_reduced',
     'rectal_uteri_position',
     'rectal_parametrium',
     'rectal_parametrium_other',
@@ -196,6 +205,7 @@ gyn_checkup_simple_codes = [
     'rectal_uterine_tubes_right',
     'rectal_uterine_tubes_left',
     'rectal_vaginal_fornix',
+    'rectovaginal_formix_other',
     'rectal_comments',
     'encompassing_comments',
     'encompassing_treatment',

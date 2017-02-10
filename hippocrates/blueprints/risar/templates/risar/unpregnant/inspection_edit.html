@@ -15,7 +15,7 @@
 {% block main %}
 <div ng-controller="CheckupGynEditCtrl" ng-cloak>
     <section class="content-header" ng-controller="RisarHeaderCtrl">
-        {{ rimacros.unpregnant_page_title_n('Ввод данных первичного осмотра') }}
+        {{ rimacros.unpregnant_page_title_n('Ввод данных осмотра') }}
         {{ rimacros.navigation_unpreg('[[ event_id ]]') }}
     </section>
     <section class="content">
@@ -106,15 +106,16 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <td class="text-right col-md-4">Дата</td>
+                                        <td class="text-right col-md-4">Дата <span class="text-danger">*</span></td>
                                         <td class="col-md-2">
                                             <wm-date name="osmotr_date" ng-model="checkup.beg_date" style="width: 250px" autofocus
-                                                min-date="minDate"></wm-date>
+                                                min-date="minDate" ng-required="true"></wm-date>
                                         </td>
                                         <td class="text-right">Время осмотра</td>
                                         <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
                                         </td>
                                     </tr>
+                                    {% if 'department' in checkup_descriptor %}
                                     <tr ng-if="checkupDescriptor.exists('department')">
                                         <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
                                         <td class="col-md-4">
@@ -124,6 +125,7 @@
                                                 custom-filter="departmentOrgStructFilter"></rb-select>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                 <tbody>
                             </table>
                             <table class="table table-condensed">
@@ -132,79 +134,104 @@
                                         <th class="text-right col-md-4">Последняя менструация</th>
                                         <td class="col-md-8"></td>
                                     </tr>
-                                    
-                                    
+                                    {% if 'last_menstruation_date' in checkup_descriptor %}
                                     <tr>
-                                        <td class="text-right col-md-4">Дата</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('last_menstruation_date')"></td>
                                         <td class="col-md-8">
                                             <wm-date ng-class="{'has-error': commonForm.last_menstruation_date.$invalid && commonForm.submit_attempt}" name="last_menstruation_date"
                                                      ng-model="checkup.last_menstruation_date" style="width: 250px"
-                                                     min-date="clientBd" max-date="currentDate"></wm-date>
+                                                     min-date="clientBd" max-date="currentDate"
+                                                     ng-required="checkupDescriptor.getMandatory('last_menstruation_date')"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('last_menstruation_date')"></wm-date>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'last_menstruation_features' in checkup_descriptor %}
                                     <tr>
-                                        <td class="text-right col-md-4">Особенности</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('last_menstruation_features')"></td>
                                         <td class="col-md-8"><div class="row" ng-class="{'has-error': commonForm.last_menstruation_features.$invalid && commonForm.submit_attempt}">
                                             <div class="col-md-6">
-                                            <rb-select name="last_menstruation_features" ng-model="checkup.last_menstruation_features" ref-book="rbRisarLastMenstruationFeatures"></rb-select>
+                                            <rb-select name="last_menstruation_features" ng-model="checkup.last_menstruation_features" ref-book="rbRisarLastMenstruationFeatures"
+                                                 ng-required="checkupDescriptor.getMandatory('last_menstruation_features')"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('last_menstruation_features')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'last_menstruation_character' in checkup_descriptor %}
                                     <tr>
-                                        <td class="text-right">Характер </td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarMenstruationCharacter" ng-model="checkup.last_menstruation_character"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('last_menstruation_character')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarMenstruationCharacter" ng-model="checkup.last_menstruation_character"
+                                            ng-required="checkupDescriptor.getMandatory('last_menstruation_character')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('last_menstruation_character')"></rb-select></td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Половая функция</th>
                                         <td class="col-md-8">
-    
                                         </td>
                                     </tr>
+                                    {% if 'libido' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Половое влечение</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('libido')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="libido" ng-model="checkup.libido" ref-book="rbRisarLibido"
-                                                       ></rb-select>
+                                                ng-required="checkupDescriptor.getMandatory('libido')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('libido')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'intercourse_partner' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Половой партнер</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('intercourse_partner')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="intercourse_partner" ng-model="checkup.intercourse_partner" ref-book="rbRisarIntercoursePartner"
-                                                       ></rb-select>
+                                                ng-required="checkupDescriptor.getMandatory('intercourse_partner')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('intercourse_partner')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'sexual_intercourse' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Половой акт</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('sexual_intercourse')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select multiple="true" name="sexual_intercourse" ng-model="checkup.sexual_intercourse" ref-book="rbRisarSexualIntercourse"
-                                                       ></rb-select>
+                                                ng-required="checkupDescriptor.getMandatory('sexual_intercourse')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('sexual_intercourse')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'contraception' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Контрацепция</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('contraception')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select multiple="true" name="contraception" ng-model="checkup.contraception" ref-book="rbContraception"
-                                                       ></rb-select>
+                                                ng-required="checkupDescriptor.getMandatory('contraception')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('contraception')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'medicament' in checkup_descriptor %}
                                     <tr>
                                         <!-- example one_row_text -->
-                                        <td class="text-right">Принимаемые медикаменты</td>
-                                        <td><input ng-model="checkup.medicament" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('medicament')"></td>
+                                        <td><input ng-model="checkup.medicament" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('medicament')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('medicament')"></td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Жалобы</th>
                                         <td class="col-md-8">
@@ -217,111 +244,168 @@
     
                                         </td>
                                     </tr>
+                                    {% if 'pain_location' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Локализация боли</td>
-                                        <td><input ng-model="checkup.pain_location" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pain_location')"></td>
+                                        <td><input ng-model="checkup.pain_location" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('pain_location')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('pain_location')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'pain_how_long' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Как давно</td>
-                                        <td><input ng-model="checkup.pain_how_long" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pain_how_long')"></td>
+                                        <td><input ng-model="checkup.pain_how_long" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('pain_how_long')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('pain_how_long')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'pain_character' in checkup_descriptor %}
                                      <tr>
                                     <!-- example multiple -->
-                                        <td class="text-right">Характер </td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarPainCharacter" ng-model="checkup.pain_character"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pain_character')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarPainCharacter" ng-model="checkup.pain_character"
+                                            ng-required="checkupDescriptor.getMandatory('pain_character')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('pain_character')"></rb-select></td>
                                     </tr>
-
+                                    {% endif %}
+                                    {% if 'temperature_rise' in checkup_descriptor %}
                                     <tr>
                                     <!-- example double -->
-                                        <td class="text-right">Повышение температуры до </td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('temperature_rise')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="text" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
-                                                       class="form-control" ui-mask="99.9">
+                                                       class="form-control" ui-mask="99.9"
+                                                       ng-required="checkupDescriptor.getMandatory('temperature_rise')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('temperature_rise')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'shivers' in checkup_descriptor %}
                                      <tr>
                                         <!-- example checkbox -->
-                                        <td class="text-right">Озноб</td>
-                                        <td><input ng-model="checkup.shivers" class="checkbox" type="checkbox"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('shivers')"></td>
+                                        <td><input ng-model="checkup.shivers" class="checkbox" type="checkbox"
+                                            ng-required="checkupDescriptor.getMandatory('shivers')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('shivers')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'menstrual_disorders' in checkup_descriptor %}
                                     <tr>
                                     <!-- example multiple -->
-                                        <td class="text-right">Нарушение характера менструаций </td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarMenstrualDisorders" ng-model="checkup.menstrual_disorders"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('menstrual_disorders')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarMenstrualDisorders" ng-model="checkup.menstrual_disorders"
+                                            ng-required="checkupDescriptor.getMandatory('menstrual_disorders')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('menstrual_disorders')"></rb-select></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if
+                                        'discharge_consistency' in checkup_descriptor or
+                                        'discharge_colour' in checkup_descriptor or
+                                        'discharge_quantity' in checkup_descriptor or
+                                        'discharge_smell' in checkup_descriptor
+                                    %}
                                     <tr>
                                         <th class="text-right col-md-4">Выделения из половых путей</th>
                                         <td class="col-md-8">
     
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'discharge_consistency' in checkup_descriptor %}
                                      <tr>
                                     <!-- example multiple -->
-                                        <td class="text-right">Консистенция</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.discharge_consistency"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('discharge_consistency')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.discharge_consistency"
+                                            ng-required="checkupDescriptor.getMandatory('discharge_consistency')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('discharge_consistency')"></rb-select></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'discharge_colour' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Цвет</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('discharge_colour')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select name="discharge_colour" ng-model="checkup.discharge_colour" ref-book="rbRisarDischargeColour"></rb-select>
+                                            <rb-select name="discharge_colour" ng-model="checkup.discharge_colour" ref-book="rbRisarDischargeColour"
+                                                ng-required="checkupDescriptor.getMandatory('discharge_colour')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_colour')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'discharge_quantity' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Количество</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('discharge_quantity')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity" ref-book="rbRisarDischargeQuantity"></rb-select>
+                                            <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity" ref-book="rbRisarDischargeQuantity"
+                                                ng-required="checkupDescriptor.getMandatory('discharge_quantity')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_quantity')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'discharge_smell' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Запах</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('discharge_smell')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select name="discharge_smell" ng-model="checkup.discharge_smell" ref-book="rbRisarDischargeSmell"></rb-select>
+                                            <rb-select name="discharge_smell" ng-model="checkup.discharge_smell" ref-book="rbRisarDischargeSmell"
+                                                ng-required="checkupDescriptor.getMandatory('discharge_smell')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_smell')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Зуд, жжение в области половых органов</th>
                                         <td class="col-md-8">
     
                                         </td>
                                     </tr>
+                                    {% if 'itch_character' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Характер</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('itch_character')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select multiple="true" name="itch_character" ng-model="checkup.itch_character" ref-book="rbRisarItchCharacter"></rb-select>
+                                            <rb-select multiple="true" name="itch_character" ng-model="checkup.itch_character" ref-book="rbRisarItchCharacter"
+                                                ng-required="checkupDescriptor.getMandatory('itch_character')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('itch_character')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'itch_period' in checkup_descriptor %}
                                      <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Как давно</td>
-                                        <td><input ng-model="checkup.itch_period" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('itch_period')"></td>
+                                        <td><input ng-model="checkup.itch_period" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('itch_period')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('itch_period')"></td>
                                     </tr>
-                                    <tr>
-
+                                    {% endif %}
+                                    {% if 'pregnancy_failure' in checkup_descriptor %}
                                     <tr>
                                         <!-- example checkbox -->
-                                        <th class="text-right">Отсутствие беременности при регулярной половой жизни без контрацептивов</th>
-                                        <td><input ng-model="checkup.pregnancy_failure" class="checkbox" type="checkbox"></td>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_failure')"></th>
+                                        <td><input ng-model="checkup.pregnancy_failure" class="checkbox" type="checkbox"
+                                            ng-required="checkupDescriptor.getMandatory('pregnancy_failure')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('pregnancy_failure')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'pregnancy_failure_period' in checkup_descriptor %}
                                     <tr>
                                     <!-- example double -->
-                                        <td class="text-right">В течение</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_failure_period')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input id="pregnancy_failure_period"
@@ -333,40 +417,55 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Молочные железы</th>
                                         <td class="col-md-8">
-    
                                         </td>
                                     </tr>
+                                    {% if 'engorged_breasts' in checkup_descriptor %}
                                     <tr>
                                         <!-- example checkbox -->
-                                        <td class="text-right">Нагрубание перед менструацией</td>
-                                        <td><input ng-model="checkup.engorged_breasts" class="checkbox" type="checkbox"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('engorged_breasts')"></td>
+                                        <td><input ng-model="checkup.engorged_breasts" class="checkbox" type="checkbox"
+                                            ng-required="checkupDescriptor.getMandatory('engorged_breasts')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('engorged_breasts')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'breasts_pain' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Боль</td>
-                                        <td><input ng-model="checkup.breasts_pain" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('breasts_pain')"></td>
+                                        <td><input ng-model="checkup.breasts_pain" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('breasts_pain')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('breasts_pain')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'breasts_induration' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Уплотнения</td>
-                                        <td><input ng-model="checkup.breasts_induration" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('breasts_induration')"></td>
+                                        <td><input ng-model="checkup.breasts_induration" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('breasts_induration')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('breasts_induration')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'nipples_discharge' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Выделения из сосков</td>
-                                        <td><input ng-model="checkup.nipples_discharge" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples_discharge')"></td>
+                                        <td><input ng-model="checkup.nipples_discharge" class="form-control"
+                                            ng-required="checkupDescriptor.getMandatory('nipples_discharge')"
+                                            ng-disabled="checkupDescriptor.getReadOnly('nipples_discharge')"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'other_complaints' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
-                                        <th class="text-right">Другие жалобы <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('other_complaints')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_complaints" /></div></div></td>
                                     </tr>
- 
-                                
-      
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -381,84 +480,112 @@
                             <table class="table table-condensed">
                                 <tbody>
                                      <!-- START OBJECTIVE-->
-            
                                     <tr>
                                         <th class="text-right col-md-4">Антропометрические данные</th>
                                         <td class="col-md-8">
     
                                         </td>
                                     </tr>
+                                    {% if 'weight' in checkup_descriptor %}
                                     <tr>
                                     <!-- example double -->
-                                        <td class="text-right">Масса</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('weight')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
-                                                <input type="text" id="weight" name="weight" ng-model="checkup.weight"
-                                                       class="form-control" autofocus valid-number maxlength="3">
+                                                <input id="weight" name="weight" ng-model="checkup.weight"
+                                                       class="form-control" autofocus valid-number valid-number-float
+                                                       ng-required="checkupDescriptor.getMandatory('weight')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('weight')"
+                                                       ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'height' in checkup_descriptor %}
                                     <tr>
                                     <!-- example double -->
-                                        <td class="text-right">Рост</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('height')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="text" id="height" name="height" ng-model="checkup.height"
-                                                       class="form-control" valid-number maxlength="3">
+                                                       class="form-control" valid-number maxlength="3"
+                                                       ng-required="checkupDescriptor.getMandatory('height')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('height')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'mrk' in checkup_descriptor %}
                                     <tr>
                                     <!-- example double -->
-                                        <td class="text-right">МРК</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mrk')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input valid-number valid-number-float id="mrk" name="mrk" ng-model="checkup.mrk"
-                                                       disabled class="form-control" >
+                                                       class="form-control"
+                                                       ng-required="checkupDescriptor.getMandatory('mrk')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('mrk')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'imt' in checkup_descriptor %}
                                     <tr><!-- example double -->
-                                        <td class="text-right">ИМТ</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('imt')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input valid-number valid-number-float id="imt" name="imt" ng-model="checkup.imt"
-                                                       disabled class="form-control" >
+                                                       class="form-control"
+                                                       ng-required="checkupDescriptor.getMandatory('imt')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('imt')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'temperature' in checkup_descriptor %}
                                     <tr><!-- example double -->
-                                        <td class="text-right">Температура тела</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('temperature')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input type="text" id="temperature" name="temperature" ng-model="checkup.temperature"
-                                                       class="form-control" ui-mask="99.9">
+                                                       class="form-control" ui-mask="99.9"
+                                                       ng-required="checkupDescriptor.getMandatory('temperature')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('temperature')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'heart_rate' in checkup_descriptor %}
                                     <tr><!-- example double -->
-                                        <td class="text-right">ЧСС</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('heart_rate')"></td>
                                         <td><div class="row">
                                             <div class="col-md-2">
                                                 <input id="heart_rate" type="text" name="heart_rate" ng-model="checkup.heart_rate"
-                                                       class="form-control" valid-number maxlength="3">
+                                                       class="form-control" valid-number maxlength="3"
+                                                       ng-required="checkupDescriptor.getMandatory('heart_rate')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('heart_rate')">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right">АД правая рука </th>
                                         <td><div class="row"
                                                  ng-class="{'has-error': (objectiveForm.ad_right_high.$invalid || objectiveForm.ad_right_low.$invalid)  && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input name="ad_right_high" ng-model="checkup.AD_right_high"
-                                                       valid-number maxlength="3"  class="form-control blood_presure"> <span>/</span>
-                                                <input name="ad_right_low" ng-model="checkup.AD_right_low" valid-number maxlength="3" class="form-control blood_presure">
+                                                       valid-number maxlength="3"  class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('AD_right_high')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('AD_right_high')"> <span>/</span>
+                                                <input name="ad_right_low" ng-model="checkup.AD_right_low" valid-number maxlength="3" class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('AD_right_low')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('AD_right_low')">
                                             </div>
                                             </div>
                                         </td>
@@ -469,85 +596,141 @@
                                                  ng-class="{'has-error': (objectiveForm.ad_left_high.$invalid || objectiveForm.ad_left_low.$invalid) && objectiveForm.submit_attempt}">
                                             <div class="col-md-4">
                                                 <input valid-number maxlength="3" name="ad_left_high" ng-model="checkup.AD_left_high"
-                                                       class="form-control blood_presure" >
+                                                       class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('AD_left_high')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('AD_left_high')">
                                                 <span>/</span>
                                                 <input valid-number maxlength="3" name="ad_left_low" ng-model="checkup.AD_left_low"
-                                                       class="form-control blood_presure" >
+                                                       class="form-control blood_presure"
+                                                       ng-required="checkupDescriptor.getMandatory('AD_left_low')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('AD_left_low')">
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% if 'skin' in checkup_descriptor %}
                                      <tr>
                                     <!-- example multiple -->
-                                        <td class="text-right">Кожа</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarSkin" ng-model="checkup.skin" required="true"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('skin')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarSkin" ng-model="checkup.skin"
+                                           ng-required="checkupDescriptor.getMandatory('skin')"
+                                           ng-disabled="checkupDescriptor.getReadOnly('skin')"></rb-select></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'mucous' in checkup_descriptor %}
                                     <tr>
                                     <!-- example multiple -->
-                                        <td class="text-right">Состояние слизистых</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarMucous" ng-model="checkup.mucous" required="true"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarMucous" ng-model="checkup.mucous"
+                                           ng-required="checkupDescriptor.getMandatory('mucous')"
+                                           ng-disabled="checkupDescriptor.getReadOnly('mucous')"></rb-select></td>
                                     </tr>
-                                    
+                                    {% endif %}
+                                     {% if 'lymph' in checkup_descriptor %}
+                                         <tr>
+                                            <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('lymph')">Выделения из половых путей</th>
+                                            <td class="col-md-8">
+                                            </td>
+                                        </tr>
+                                         {%- if 'lymph_which' in checkup_descriptor -%}
+                                            <tr>
+                                                <!-- example short_string -->
+                                                <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph_which')">
+                                                </td>
+                                                <td><input class="form-control"
+                                                     ng-required="checkupDescriptor.getMandatory('lymph_which')"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('lymph_which')"
+                                                     ng-model="checkup.lymph_which">
+                                                </td>
+                                            </tr>
+                                        {%- endif -%}
                                     <tr>
-                                        <th class="text-right">Лимфоузлы </th>
+                                        <td></td>
                                         <td><div ng-class="{'text-danger': objectiveForm.lymph.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" >
+                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
+                                                ng-required="checkupDescriptor.getMandatory('lymph')"
+                                                ng-disabled="checkupDescriptor.getReadOnly('lymph')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
-
+                                    {% endif %}
+                                    {% if 'subcutaneous_fat' in checkup_descriptor %}
                                     <tr>
-                                        <td class="text-right">Подкожно-жировая клетчатка </td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('subcutaneous_fat')"></td>
                                         <td><div class="row" ng-class="{'has-error': objectiveForm.subcutaneous_fat.$invalid && objectiveForm.submit_attempt}">
                                             <div class="col-md-6">
                                             <rb-select name="subcutaneous_fat" ref-book="rbRisarSubcutaneous_Fat" ng-model="checkup.subcutaneous_fat"
+                                                       ng-required="checkupDescriptor.getMandatory('subcutaneous_fat')"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('subcutaneous_fat')"</rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'breast' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right">Молочные железы </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('breast')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.breast.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
+                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('breast')"
+                                                 ng-required="checkupDescriptor.getMandatory('breast')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'nipples' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right">Состояние сосков </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.nipples.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
+                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('nipples')"
+                                                 ng-required="checkupDescriptor.getMandatory('nipples')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'stomach' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Живот </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.stomach.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomachGenVisit">
+                                            <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomachGenVisit"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('stomach')"
+                                                 ng-required="checkupDescriptor.getMandatory('stomach')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
-
+                                    {% endif %}
+                                    {% if 'stomach_area' in checkup_descriptor %}
+                                        <tr ng-if="isStomachAreaVisible">
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach_area')"></td>
+                                        <td>
+                                            <input ng-disabled="checkup.getReadOnly('stomach_area')"
+                                                   ng-model="checkup.stomach_area" class="form-control">
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'pilosis' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
-                                        <th class="text-right">Характер оволосения   <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pilosis')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.pilosis" /></div></div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
-                                        <th class="text-right">Примечания <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('comments')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.comments" /></div></div></td>
                                     </tr>
-                                    
+                                    {% endif %}
                                     <!-- END OBJECTIVE-->
-                                    
-                                
                                 </tbody>
                             </table>
                             </div>
@@ -561,135 +744,130 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
-                                  <!-- START GENITALS-->                                    
+                                  <!-- START GENITALS-->
+                                    {% if 'vulva_pilosis' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Характер оволосения</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_pilosis')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis" 
-                                                      ref-book="rbRisarVulvaPilosis" autofocus></rb-select>
+                                            <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis"
+                                                       ref-book="rbRisarVulvaPilosis" autofocus
+                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_pilosis')"
+                                                       ng-required="checkupDescriptor.getMandatory('vulva_pilosis')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
-                                    
+                                    {% endif %}
+                                    {% if 'groin_glands' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Региональные паховые лимфоузлы</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('groin_glands')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="groin_glands" ng-model="checkup.groin_glands"
-                                                      ref-book="rbRisarGroinGlands" ></rb-select>
+                                                       ref-book="rbRisarGroinGlands"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('groin_glands')"
+                                                       ng-required="checkupDescriptor.getMandatory('groin_glands')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vulva_skin' in checkup_descriptor %}
                                      <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Состояние кожи </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_skin')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vulva_skin" ref-book="rbRisarVulvaSkin">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vulva_skin" ref-book="rbRisarVulvaSkin"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_skin')"
+                                                       ng-required="checkupDescriptor.getMandatory('vulva_skin')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vulva_skin_adds' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_skin_adds')"></td>
                                         <td><input ng-disabled="checkup.vulva_skin | filter:{code:'other'} | count | negate" ng-model="checkup.vulva_skin_adds" class="form-control"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vulva_mucous' in checkup_descriptor %}
                                      <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Состояние слизистой </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_mucous')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="vulva_mucous" refbook-checkbox ng-model="checkup.vulva_mucous" ref-book="rbRisarMucous">
+                                            <div name="vulva_mucous" refbook-checkbox ng-model="checkup.vulva_mucous" ref-book="rbRisarMucous"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_mucous')"
+                                                       ng-required="checkupDescriptor.getMandatory('vulva_mucous')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vulva_mucous_adds' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_mucous_adds')"></td>
                                         <td><input ng-disabled="checkup.vulva_mucous | filter:{code:'other'} | count | negate" ng-model="checkup.vulva_mucous_adds" class="form-control"></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vulva_germination' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Степень развития наружных половых органов</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_germination')"></td>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
-                                            <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" ref-book="rbRisarVulvaGermination"></rb-select>
+                                            <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" ref-book="rbRisarVulvaGermination"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('vulva_germination')"
+                                                       ng-required="checkupDescriptor.getMandatory('vulva_germination')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'urethra' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Область уретры </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('urethra')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.urethra.$invalid && objectiveForm.submit_attempt}">
-                                            <rb-select name="urethra" ng-model="checkup.urethra" ref-book="rbRisarUrethra"></rb-select>
+                                            <rb-select name="urethra" ng-model="checkup.urethra" ref-book="rbRisarUrethra"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('urethra')"
+                                                       ng-required="checkupDescriptor.getMandatory('urethra')"></rb-select>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'urethra_adds' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('urethra_adds')"></td>
                                         <td><input ng-disabled="checkup.urethra.code != 'other'" ng-model="checkup.urethra_adds" class="form-control"></td>
                                     </tr>
-                                    
+                                    {% endif %}
+                                    {% if 'perianal_zona' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <th class="text-right">Перианальная область </th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('perianal_zona')"></th>
                                         <td><div ng-class="{'text-danger': objectiveForm.perianal_zona.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.perianal_zona" ref-book="rbRisarPerianalZona">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.perianal_zona" ref-book="rbRisarPerianalZona"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('perianal_zona')"
+                                                       ng-required="checkupDescriptor.getMandatory('perianal_zona')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vulva_comments' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right col-md-4">Выделения</th>
-                                        <td class="col-md-8">
-    
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                    <!-- example multiple -->
-                                        <td class="text-right">Консистенция</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.vulva_discharge_consistency"></rb-select></td>
-                                    </tr>
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4">Цвет</td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="discharge_colour" ng-model="checkup.vulva_discharge_colour" ref-book="rbRisarDischargeColour"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4">Количество</td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="discharge_quantity" ng-model="checkup.vulva_discharge_quantity" ref-book="rbRisarDischargeQuantity"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4">Запах</td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="discharge_smell" ng-model="checkup.vulva_discharge_smell" ref-book="rbRisarDischargeSmell"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                        <tr>
                                         <!-- example text -->
-                                        <th class="text-right">Дополнительная информация <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_comments')"></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.vulva_comments" /></div></div></td>
                                     </tr>
-                                    
+                                    {% endif %}
                                     <!-- END GENITALS-->
                                 </tbody>
                             </table>
@@ -703,157 +881,226 @@
                             </div>
                             <div class="box-body">
                                  <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th class="col-md-4"></th>
-                                                            <th class="col-md-8"></th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                                               <!-- START MIRRORS-->
-
-                                                        <tr>
-                                                            <!-- example select -->
-                                                            <td class="text-right col-md-4">Влагалище</td>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors"
-                                                                          ref-book="rbRisarVaginaGenVisit" autofocus></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <!-- example short_string -->
-                                                            <td class="text-right"></td>
-                                                            <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code !== 'other'" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <!-- example select -->
-                                                            <td class="text-right col-md-4">Стенки влагалища</td>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="vagina_paries_mirrors" ng-model="checkup.vagina_paries_mirrors"
-                                                                          ref-book="rbRisarVaginaParies" ></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <!-- example short_string -->
-                                                            <td class="text-right"></td>
-                                                            <td><input ng-disabled="checkup.vagina_paries_mirrors.code !== 'other'" ng-model="checkup.vagina_paries_mirrors_other" class="form-control"></td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <!-- example select -->
-                                                            <th class="text-right col-md-4">Шейка матки</th>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="cervix_uteri_mirrors" ng-model="checkup.cervix_uteri_mirrors" ref-book="rbRisarCervixUteri"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
-                                                            <!-- example select -->
-                                                            <th class="text-right col-md-4">Размеры</th>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="cervix_uteri_size_mirrors" ng-model="checkup.cervix_uteri_size_mirrors" ref-book="rbRisarCervixUteriSize"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">  
-                                                            <!-- example select -->
-                                                            <th class="text-right col-md-4">Форма</th>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="cervix_uteri_shape_mirrors" ng-model="checkup.cervix_uteri_shape_mirrors" ref-book="rbRisarCervixUteriShape"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
-                                                            <!-- example checkbox -->
-                                                            <td class="text-right">Эрозия</td>
-                                                            <td><input ng-model="checkup.ectropion_mirrors" class="checkbox" type="checkbox"></td>
-                                                        </tr>
-                                                        <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
-                                                            <!-- example checkbox -->
-                                                            <td class="text-right">Эрозированный эктропион</td>
-                                                            <td><input ng-model="checkup.anabrosis_mirrors" class="checkbox" type="checkbox"></td>
-                                                        </tr>
-                                                         <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">  
-                                                            <!-- example select -->
-                                                            <td class="text-right col-md-4">Наружный зев</td>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="uterus_external_orifice_mirrors" ng-model="checkup.uterus_external_orifice_mirrors" ref-book="rbRisarUterusExternalOrifice"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-
-                                                         <tr>
-                                                            <!-- example few_checkboxes -->
-                                                            <td class="text-right">Своды влагалища </td>
-                                                            <td><div ng-class="{'text-danger': objectiveForm.vaginal_fornix_mirrors.$invalid && objectiveForm.submit_attempt}">
-                                                                <div name="vulva_skin" refbook-checkbox ng-model="checkup.vaginal_fornix_mirrors" ref-book="rbRisarVaginalFornix">
-                                                                    [[ item.name ]]
-                                                                </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <!-- example short_string -->
-                                                            <td class="text-right"></td>
-                                                            <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <th class="text-right col-md-4">Выделения из половых путей</th>
-                                                            <td class="col-md-8">
-
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                        <!-- example multiple -->
-                                                            <td class="text-right">Консистенция</td>
-                                                            <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.discharge_consistency_mirrors"></rb-select></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <!-- example select -->
-                                                            <td class="text-right col-md-4">Цвет</td>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="discharge_colour_mirrors" ng-model="checkup.discharge_colour_mirrors" ref-book="rbRisarDischargeColour"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <!-- example select -->
-                                                            <td class="text-right col-md-4">Количество</td>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity_mirrors" ref-book="rbRisarDischargeQuantity"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <!-- example select -->
-                                                            <td class="text-right col-md-4">Запах</td>
-                                                            <td class="col-md-8"><div class="row">
-                                                                <div class="col-md-6">
-                                                                <rb-select name="discharge_smell" ng-model="checkup.discharge_smell_mirrors" ref-book="rbRisarDischargeSmell"></rb-select>
-                                                                </div>
-                                                            </div></td>
-                                                        </tr>
-                                                            <tr>
-                                                            <!-- example text -->
-                                                            <th class="text-right">Дополнительная информация <span>&nbsp;</span></th>
-                                                            <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.comments_mirrors" /></div></div></td>
-                                                        </tr>
-
-                                                        <!-- END MIRRORS-->
-                                                        </tbody>
-                                                    </table>
+                                    <thead>
+                                    <tr>
+                                        <th class="col-md-4"></th>
+                                        <th class="col-md-8"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!-- START MIRRORS-->
+                                    {% if 'vagina_mirrors_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vagina_mirrors_mirrors')"></td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="vagina_mirrors_mirrors" ng-model="checkup.vagina_mirrors_mirrors"
+                                                      ref-book="rbRisarVaginaGenVisit" autofocus
+                                                      ng-disabled="checkupDescriptor.getReadOnly('vagina_mirrors_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('vagina_mirrors_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'vagina_mirrors_adds' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_mirrors_adds')"></td>
+                                        <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code !== 'other'" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'vagina_paries_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vagina_paries_mirrors')"></td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="vagina_paries_mirrors" ng-model="checkup.vagina_paries_mirrors"
+                                                      ref-book="rbRisarVaginaParies"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('vagina_paries_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('vagina_paries_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'vagina_paries_mirrors_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_paries_mirrors_other')"></td>
+                                        <td><input ng-disabled="checkup.vagina_paries_mirrors.code !== 'other'" ng-model="checkup.vagina_paries_mirrors_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'cervix_uteri_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('cervix_uteri_mirrors')"></th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="cervix_uteri_mirrors" ng-model="checkup.cervix_uteri_mirrors" ref-book="rbRisarCervixUteri"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('cervix_uteri_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('cervix_uteri_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'cervix_uteri_size_mirrors' in checkup_descriptor %}
+                                    <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('cervix_uteri_size_mirrors')"></th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="cervix_uteri_size_mirrors" ng-model="checkup.cervix_uteri_size_mirrors" ref-book="rbRisarCervixUteriSize"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('cervix_uteri_size_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('cervix_uteri_size_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'cervix_uteri_shape_mirrors' in checkup_descriptor %}
+                                    <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">  
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('cervix_uteri_shape_mirrors')"></th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="cervix_uteri_shape_mirrors" ng-model="checkup.cervix_uteri_shape_mirrors" ref-book="rbRisarCervixUteriShape"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('cervix_uteri_shape_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('cervix_uteri_shape_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'ectropion_mirrors' in checkup_descriptor %}
+                                    <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
+                                        <!-- example checkbox -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('ectropion_mirrors')"></td>
+                                        <td><input ng-model="checkup.ectropion_mirrors" class="checkbox" type="checkbox"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('ectropion_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('ectropion_mirrors')"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'anabrosis_mirrors' in checkup_descriptor %}
+                                    <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">
+                                        <!-- example checkbox -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('anabrosis_mirrors')"></td>
+                                        <td><input ng-model="checkup.anabrosis_mirrors" class="checkbox" type="checkbox"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('anabrosis_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('anabrosis_mirrors')"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'uterus_external_orifice_mirrors' in checkup_descriptor %}
+                                     <tr ng-if="checkup.cervix_uteri_mirrors.code == 'in_place'">  
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('uterus_external_orifice_mirrors')"></td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="uterus_external_orifice_mirrors" ng-model="checkup.uterus_external_orifice_mirrors" ref-book="rbRisarUterusExternalOrifice"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('uterus_external_orifice_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('uterus_external_orifice_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'vaginal_fornix_mirrors' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vaginal_fornix_mirrors')"></td>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vaginal_fornix_mirrors.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vaginal_fornix_mirrors" ref-book="rbRisarVaginalFornix"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('vaginal_fornix_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('vaginal_fornix_mirrors')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'vaginal_fornix_adds_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vaginal_fornix_adds_mirrors')"></td>
+                                        <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'mucous_mirrors' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_mirrors')"></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="mucous_mirrors" refbook-checkbox ng-model="checkup.mucous_mirrors" ref-book="rbRisarMucous"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('mucous_mirrors')"
+                                                       ng-required="checkupDescriptor.getMandatory('mucous_mirrors')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'mucous_adds_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_adds_mirrors')"></td>
+                                        <td><input ng-disabled="checkup.mucous_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.mucous_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'discharge_consistency_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                    <!-- example multiple -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('discharge_consistency_mirrors')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.discharge_consistency_mirrors"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('discharge_consistency_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('discharge_consistency_mirrors')"></rb-select></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'discharge_colour_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('discharge_colour_mirrors')"></td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="discharge_colour_mirrors" ng-model="checkup.discharge_colour_mirrors" ref-book="rbRisarDischargeColour"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('discharge_colour_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('discharge_colour_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'discharge_quantity_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('discharge_quantity_mirrors')"></td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity_mirrors" ref-book="rbRisarDischargeQuantity"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('discharge_quantity_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('discharge_quantity_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'discharge_smell_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('discharge_smell_mirrors')"></td>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="discharge_smell" ng-model="checkup.discharge_smell_mirrors" ref-book="rbRisarDischargeSmell"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('discharge_smell_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('discharge_smell_mirrors')"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'comments_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example text -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('comments_mirrors')"></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.comments_mirrors" /></div></div></td>
+                                    </tr>
+                                    {% endif %}
+                                    <!-- END MIRRORS-->
+                                    </tbody>
+                                </table>
                             </div>
                             </div>
                         </ng-form>
@@ -866,55 +1113,53 @@
                           
                             <table class="table table-condensed">
                                 <tbody>
-                                  
                                     <!-- START BIMANUAL -->
-                                   
-
-                                    
-                                   
                                     <tr>
                                         <th class="text-right col-md-4">Матка</th>
                                         <td class="col-md-8">
     
                                         </td>
                                     </tr>
-    
-                                   
-                    
+                                    {% if 'bimanual_cervix_uteri' in checkup_descriptor %}
                                      <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Шейка матки</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('bimanual_cervix_uteri')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus></rb-select>
+                                            <rb-select name="bimanual_cervix_uteri" ng-model="checkup.bimanual_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus
+                                                       ng-disabled="checkupDescriptor.getReadOnly('bimanual_cervix_uteri')"
+                                                       ng-required="checkupDescriptor.getMandatory('bimanual_cervix_uteri')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
-
-
-                                                            
-
+                                    {% endif %}
+                                    {% if 'bimanual_cervix_consistency' in checkup_descriptor %}
                                     <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Консистенция</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('bimanual_cervix_consistency')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
                                             <rb-select name="bimanual_cervix_consistency" ng-model="checkup.bimanual_cervix_consistency" ref-book="rbRisarCervix_Consistency"
-                                            ng-disabled="checkup.bimanual_cervix_uteri.code == 'missing'"></rb-select>
+                                                       ng-disabled="checkup.bimanual_cervix_uteri.code == 'missing'"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
-                          
+                                    {% endif %}
+                                    {% if 'bimanual_uterus_body' in checkup_descriptor %}
                                     <tr>
                                         <!-- example multiple -->
-                                        <td class="text-right">Тело матки</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.bimanual_uterus_body"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_uterus_body')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.bimanual_uterus_body"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('bimanual_uterus_body')"
+                                                       ng-required="checkupDescriptor.getMandatory('bimanual_uterus_body')"></rb-select></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'bimanual_body_of_womb_size' in checkup_descriptor %}
                                      <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Размеры</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_size')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
@@ -923,91 +1168,121 @@
                                             </div>
                                         </div></td>
                                     </tr>
-                           
-                                    <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right"></td>
-                                    <td><input ng-disabled="['missing', 'not determined'].has(checkup.bimanual_uterus_body) || checkup.bimanual_body_of_womb_size.code != 'enlarged'" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
-                                    </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_body_of_womb_enlarged' in checkup_descriptor %}
+                                        <tr ng-if="is_bimanual_body_of_womb_enlarged_Visible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_enlarged')"></td>
+                                            <td><input ng-disabled="!is_bimanual_body_of_womb_enlarged_Visible" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'bimanual_body_of_womb_reduced' in checkup_descriptor %}
+                                        <tr ng-if="is_bimanual_body_of_womb_reduced_Visible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_reduced')"></td>
+                                            <td><input ng-disabled="!is_bimanual_body_of_womb_reduced_Visible" ng-model="checkup.bimanual_body_of_womb_reduced" class="form-control"></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'bimanual_uteri_position' in checkup_descriptor %}
                                     <tr>
                                         <!-- example multiple -->
-                                        <td class="text-right">Положение</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_uteri_position')"></td>
                                         <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.bimanual_uteri_position" ng-disabled="checkup.bimanual_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']"></rb-select></td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Придатки</th>
                                         <td class="col-md-8">
-    
                                         </td>
                                     </tr>
-                                                    
+                                    {% if 'bimanual_ovary_right' in checkup_descriptor %}
                                     <tr>
                                     <!-- example few_checkboxes -->
-                                    <td class="text-right">Яичники справа</td>
+                                    <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_ovary_right')"></td>
                                     <td><div >
-                                        <div name="bimanual_ovary_right" refbook-checkbox ng-model="checkup.bimanual_ovary_right" ref-book=" rbRisarOvary">
+                                        <div name="bimanual_ovary_right" refbook-checkbox ng-model="checkup.bimanual_ovary_right" ref-book=" rbRisarOvary"
+                                             ng-disabled="checkupDescriptor.getReadOnly('bimanual_ovary_right')"
+                                             ng-required="checkupDescriptor.getMandatory('bimanual_ovary_right')">
                                             [[ item.name ]]
                                         </div>
                                         </div>
                                     </td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_ovary_right_oher' in checkup_descriptor %}
                                     <tr>
                                     <!-- example short_string -->
                                     
-                                    <td class="text-right"></td>
+                                    <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_ovary_right_oher')"></td>
                                     <td><input ng-disabled="checkup.bimanual_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_ovary_right_oher" class="form-control"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_ovary_left' in checkup_descriptor %}
                                     <tr>
                                     <!-- example few_checkboxes -->
-                                    <td class="text-right">Яичники слева</td>
-                                    <td><div >
-                                        <div name="bimanual_ovary_left" refbook-checkbox ng-model="checkup.bimanual_ovary_left" ref-book=" rbRisarOvary">
-                                            [[ item.name ]]
-                                        </div>
-                                        </div>
-                                    </td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_ovary_left')"></td>
+                                        <td><div >
+                                            <div name="bimanual_ovary_left" refbook-checkbox ng-model="checkup.bimanual_ovary_left" ref-book=" rbRisarOvary"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('bimanual_ovary_left')"
+                                                 ng-required="checkupDescriptor.getMandatory('bimanual_ovary_left')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_ovary_left_oher' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_ovary_left_oher')"></td>
+                                        <td><input ng-disabled="checkup.bimanual_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_ovary_left_oher" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'bimanual_uterine_tubes_right' in checkup_descriptor %}
                                     <tr>
                                     <!-- example short_string -->
-                                    <td class="text-right"></td>
-                                    <td><input ng-disabled="checkup.bimanual_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_ovary_left_oher" class="form-control"></td>
+                                    <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_uterine_tubes_right')"></td>
+                                    <td><input ng-model="checkup.bimanual_uterine_tubes_right" class="form-control"
+                                               ng-disabled="checkupDescriptor.getReadOnly('bimanual_uterine_tubes_right')"
+                                               ng-required="checkupDescriptor.getMandatory('bimanual_uterine_tubes_right')"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_uterine_tubes_left' in checkup_descriptor %}
                                     <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right">Маточные трубы справа</td>
-                                    <td><input ng-model="checkup.bimanual_uterine_tubes_right" class="form-control"></td>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_uterine_tubes_left')"></td>
+                                        <td><input ng-model="checkup.bimanual_uterine_tubes_left" class="form-control"
+                                                   ng-disabled="checkupDescriptor.getReadOnly('bimanual_uterine_tubes_left')"
+                                                   ng-required="checkupDescriptor.getMandatory('bimanual_uterine_tubes_left')"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_vaginal_fornix' in checkup_descriptor %}
                                     <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right">Маточные трубы слева</td>
-                                    <td><input ng-model="checkup.bimanual_uterine_tubes_left" class="form-control"></td>
+                                        <!-- example few_checkboxes -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_vaginal_fornix')"></td>
+                                        <td><div >
+                                            <div name="bimanual_vaginal_fornix" refbook-checkbox ng-model="checkup.bimanual_vaginal_fornix" ref-book="rbRisarVaginalFornix"
+                                                   ng-disabled="checkupDescriptor.getReadOnly('bimanual_vaginal_fornix')"
+                                                   ng-required="checkupDescriptor.getMandatory('bimanual_vaginal_fornix')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_formix_other' in checkup_descriptor %}
                                     <tr>
-                                    <!-- example few_checkboxes -->
-                                    <td class="text-right">Своды влагалища</td>
-                                    <td><div >
-                                        <div name="bimanual_vaginal_fornix" refbook-checkbox ng-model="checkup.bimanual_vaginal_fornix" ref-book="rbRisarVaginalFornix">
-                                            [[ item.name ]]
-                                        </div>
-                                        </div>
-                                    </td>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.bimanual_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_formix_other" class="form-control"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'bimanual_comments' in checkup_descriptor %}
                                     <tr>
-                                    <!-- example text -->
-                                    <th class="text-right">Дополнительная информация   <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bimanual_comments" /></div></div></td>
+                                        <!-- example text -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_comments')"></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bimanual_comments" /></div></div></td>
                                     </tr>
-
-
-                                    <!-- END BIMANUAL -->  
+                                    {% endif %}
+                                    <!-- END BIMANUAL -->
                                 </tbody>
                             </table>
                             </div>
@@ -1021,29 +1296,30 @@
                             <div class="box-body">
                             <table class="table table-condensed">
                                 <tbody>
-                                    
                                     <!-- START RECTOVAGINAL -->
-
                                     <tr>
                                         <th class="text-right col-md-4">Матка</th>
                                         <td class="col-md-8">
                                         </td>
-                                    </tr>    
-                                   
+                                    </tr>
+                                    {% if 'rectovaginal_cervix_uteri' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Шейка матки</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_cervix_uteri')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus></rb-select>
+                                            <rb-select name="rectovaginal_cervix_uteri" ng-model="checkup.rectovaginal_cervix_uteri" ref-book="rbRisarCervixUteri" autofocus
+                                                       ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_cervix_uteri')"
+                                                       ng-required="checkupDescriptor.getMandatory('rectovaginal_cervix_uteri')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
-
+                                    {% endif %}
+                                    {% if 'rectovaginal_cervix_consistency' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4">Консистенция</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_cervix_consistency')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
@@ -1052,21 +1328,20 @@
                                             </div>
                                         </div></td>
                                     </tr>
-
-                                
-                                                            
+                                    {% endif %}
+                                    {% if 'rectovaginal_uterus_body' in checkup_descriptor %}
                                     <tr>
                                         <!-- example multiple -->
-                                        <td class="text-right">Тело матки</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body" ></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_uterus_body')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectovaginal_uterus_body"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_uterus_body')"
+                                                       ng-required="checkupDescriptor.getMandatory('rectovaginal_uterus_body')"></rb-select></td>
                                     </tr>
-
-                                
-                                                            
-
+                                    {% endif %}
+                                    {% if 'rectovaginal_body_of_womb_size' in checkup_descriptor %}
                                     <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Размеры</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_size')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
@@ -1075,114 +1350,149 @@
                                             </div>
                                         </div></td>
                                     </tr>
-
-                                
-                                                            
-                                <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right"></td>
-                                    <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
-                                </tr>
-                                                            
-                                <tr>
-                                    <!-- example multiple -->
-                                    <td class="text-right">Положение</td>
-                                    <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position" ng-disabled="checkup.rectovaginal_uterus_body| pluck:'code' | intersects:['no_body', 'not determined']"></rb-select></td>
-                                </tr>
-                                
-                                <tr>
-                                    <!-- example multiple -->
-                                    <td class="text-right">Параметрическая область широких связок матки</td>
-                                    <td>
-                                        <div>
-                                            <div name="rectovaginal_parametrium" refbook-checkbox ng-model="checkup.rectovaginal_parametrium" ref-book="rbRisarParametrium1">
-                                                [[ item.name ]]
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                             
-                                <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right"></td>
-                                    <td><input ng-disabled="checkup.rectovaginal_parametrium | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_parametrium_other" class="form-control"></td>
-                                </tr>
-
-                                <tr>
-                                    <th class="text-right col-md-4">Придатки</th>
-                                    <td class="col-md-8"></td>
-                                </tr>
-                       
-                                <tr>
-                                    <!-- example multiple -->
-                                    <td class="text-right">Яичники справа</td>
-                                    <td>
-                                        <div >
-                                            <div name="rectovaginal_ovary_right" refbook-checkbox ng-model="checkup.rectovaginal_ovary_right" ref-book="rbRisarOvary">
-                                                [[ item.name ]]
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                </tr>
-                         
-                                <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right"></td>
-                                    <td><input ng-disabled="checkup.rectovaginal_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_ovary_right_oher" class="form-control"></td>
-                                </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'rectovaginal_body_of_womb_enlarged' in checkup_descriptor %}
+                                    <tr ng-if="checkup.rectovaginal_body_of_womb_size.code == 'enlarged'">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_enlarged')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_body_of_womb_reduced' in checkup_descriptor %}
+                                    <tr ng-if="checkup.rectovaginal_body_of_womb_size.code == 'reduced'">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_reduced')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'reduced'" ng-model="checkup.rectovaginal_body_of_womb_reduced" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_uteri_position' in checkup_descriptor %}
                                     <tr>
                                         <!-- example multiple -->
-                                        <td class="text-right">Яичники слева</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_uteri_position')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectovaginal_uteri_position" ng-disabled="checkup.rectovaginal_uterus_body| pluck:'code' | intersects:['no_body', 'not determined']"></rb-select></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_parametrium' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_parametrium')"></td>
                                         <td>
-                                            <div >
-                                                <div name="rectovaginal_ovary_left" refbook-checkbox ng-model="checkup.rectovaginal_ovary_left" ref-book="rbRisarOvary">
+                                            <div>
+                                                <div name="rectovaginal_parametrium" refbook-checkbox ng-model="checkup.rectovaginal_parametrium"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_parametrium')"
+                                                     ng-required="checkupDescriptor.getMandatory('rectovaginal_parametrium')"
+                                                     ref-book="rbRisarParametrium1">
                                                     [[ item.name ]]
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
-
-                                
-                                                            
-                                <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right"></td>
-                                    <td><input ng-disabled="checkup.rectovaginal_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_ovary_left_oher" class="form-control"></td>
-                                </tr>
-                                                            
-                                <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right">Маточные трубы справа</td>
-                                    <td><input ng-model="checkup.rectovaginal_uterine_tubes_right" class="form-control"></td>
-                                </tr>
-                                                            
-                                <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right">Маточные трубы слева</td>
-                                    <td><input ng-model="checkup.rectovaginal_uterine_tubes_left" class="form-control"></td>
-                                </tr>
-                                                            
-                                <tr>
-                                    <!-- example multiple -->
-                                    <td class="text-right">Своды влагалища</td>
-                                    <td>
-                                        <div>
-                                            <div name="rectovaginal_vaginal_fornix" refbook-checkbox ng-model="checkup.rectovaginal_vaginal_fornix" ref-book="rbRisarVaginalFornix">
-                                                [[ item.name ]]
+                                    {% endif %}
+                                    {% if 'rectovaginal_parametrium_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_parametrium_other')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_parametrium | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_parametrium_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <th class="text-right col-md-4">Придатки</th>
+                                        <td class="col-md-8"></td>
+                                    </tr>
+                                    {% if 'rectovaginal_ovary_right' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_ovary_right')"></td>
+                                        <td>
+                                            <div >
+                                                <div name="rectovaginal_ovary_right" refbook-checkbox ng-model="checkup.rectovaginal_ovary_right"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_ovary_right')"
+                                                     ng-required="checkupDescriptor.getMandatory('rectovaginal_ovary_right')"
+                                                     ref-book="rbRisarOvary">
+                                                    [[ item.name ]]
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                        
-                                 <tr>
-                                    <!-- example text -->
-                                    <th class="text-right">Дополнительная информация   <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.rectovaginal_comments" /></div></div></td>
-                                </tr>
+                                        </td>
 
-                                <!-- END RECTOVAGINAL -->
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_ovary_right_oher' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_ovary_right_oher')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_ovary_right_oher" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_ovary_left' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_ovary_left')"></td>
+                                        <td>
+                                            <div >
+                                                <div name="rectovaginal_ovary_left" refbook-checkbox ng-model="checkup.rectovaginal_ovary_left"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_ovary_left')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectovaginal_ovary_left')" ref-book="rbRisarOvary">
+                                                    [[ item.name ]]
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_ovary_left_oher' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_ovary_left_oher')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_ovary_left_oher" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_uterine_tubes_right' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_uterine_tubes_right')"></td>
+                                        <td><input ng-model="checkup.rectovaginal_uterine_tubes_right" class="form-control"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_uterine_tubes_right')"
+                                                     ng-required="checkupDescriptor.getMandatory('rectovaginal_uterine_tubes_right')"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_uterine_tubes_left' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_uterine_tubes_left')"></td>
+                                        <td><input ng-model="checkup.rectovaginal_uterine_tubes_left" class="form-control"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_uterine_tubes_left')"
+                                                     ng-required="checkupDescriptor.getMandatory('rectovaginal_uterine_tubes_left')"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_vaginal_fornix' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example multiple -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_vaginal_fornix')"></td>
+                                        <td>
+                                            <div>
+                                                <div name="rectovaginal_vaginal_fornix" refbook-checkbox ng-model="checkup.rectovaginal_vaginal_fornix" ref-book="rbRisarVaginalFornix"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('rectovaginal_vaginal_fornix')"
+                                                     ng-required="checkupDescriptor.getMandatory('rectovaginal_vaginal_fornix')">
+                                                    [[ item.name ]]
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_comments' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example text -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_comments')"></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.rectovaginal_comments" /></div></div></td>
+                                    </tr>
+                                    {% endif %}
+                                    <!-- END RECTOVAGINAL -->
                                 </tbody>
                             </table>
                             </div>
@@ -1197,159 +1507,225 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <!-- START RECTAL -->
-                                
+                                    {% if 'rectal_perianal_zona' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <td class="text-right">Перианальная область</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_perianal_zona')"></td>
                                         <td><div >
-                                            <div name="rectal_perianal_zona" refbook-checkbox ng-model="checkup.rectal_perianal_zona" ref-book="rbRisarPerianalZona" autofocus>
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>                            
-                                    <tr>
-                                        <!-- example few_checkboxes -->
-                                        <td class="text-right">Прямая кишка</td>
-                                        <td><div >
-                                            <div name="rectal_rectum" refbook-checkbox ng-model="checkup.rectal_rectum" ref-book="rbRisarRectum">
+                                            <div name="rectal_perianal_zona" refbook-checkbox ng-model="checkup.rectal_perianal_zona" ref-book="rbRisarPerianalZona" autofocus
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_perianal_zona')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_perianal_zona')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
-                                    
+                                    {% endif %}
+                                    {% if 'rectal_rectum' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example few_checkboxes -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_rectum')"></td>
+                                        <td><div >
+                                            <div name="rectal_rectum" refbook-checkbox ng-model="checkup.rectal_rectum" ref-book="rbRisarRectum"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_rectum')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_rectum')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Матка</th>
                                         <td class="col-md-8">
                                         </td>
-                                    </tr>   
+                                    </tr>
+                                    {% if 'rectal_cervix_uteri' in checkup_descriptor %}
                                     <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Шейка матки</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('rectal_cervix_uteri')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select name="rectal_cervix_uteri" ng-model="checkup.rectal_cervix_uteri" ref-book="rbRisarCervixUteri"></rb-select>
+                                            <rb-select name="rectal_cervix_uteri" ng-model="checkup.rectal_cervix_uteri" ref-book="rbRisarCervixUteri"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_cervix_uteri')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_cervix_uteri')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'rectal_cervix_consistency' in checkup_descriptor %}
                                     <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Консистенция</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('rectal_cervix_consistency')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select ng-disabled="checkup.rectal_cervix_uteri.code == 'missing'" name="rectal_cervix_consistency" ng-model="checkup.rectal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
+                                            <rb-select ng-disabled="checkup.rectal_cervix_uteri.code == 'missing'" name="rectal_cervix_consistency"
+                                                       ng-model="checkup.rectal_cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
                                             </div>
                                         </div></td>
-                                    </tr>                                                            
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_uterus_body' in checkup_descriptor %}
                                     <tr>
                                         <!-- example multiple -->
-                                        <td class="text-right">Тело матки</td>
-                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectal_uterus_body"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_uterus_body')"></td>
+                                        <td><rb-select multiple="true" ref-book="rbRisarUterusBodyGenVisit" ng-model="checkup.rectal_uterus_body"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_uterus_body')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_uterus_body')"></rb-select></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'rectal_body_of_womb_size' in checkup_descriptor %}
                                     <tr>
                                     <!-- example select -->
-                                        <td class="text-right col-md-4">Размеры</td>
+                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_size')"></td>
                                         
                                         <td class="col-md-8"><div class="row" >
                                             <div class="col-md-6">
-                                            <rb-select ng-disabled="checkup.rectal_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']" name="rectal_body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
+                                            <rb-select ng-disabled="checkup.rectal_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']"
+                                                       name="rectal_body_of_womb_size" ng-model="checkup.rectal_body_of_womb_size" ref-book="rbRisarBody_Of_Womb_Size"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
-                                    <tr>
+                                    {% endif %}
+                                    {% if 'rectal_body_of_womb_enlarged' in checkup_descriptor %}
+                                    <tr ng-if="is_rectal_body_of_womb_enlarged_Visible">
                                         <!-- example short_string -->
-                                        <td class="text-right"></td>
-                                        <td><input ng-disabled="checkup.rectal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
-                                    </tr>                   
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_enlarged')"></td>
+                                        <td><input ng-disabled="!is_rectal_body_of_womb_enlarged_Visible" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_body_of_womb_reduced' in checkup_descriptor %}
+                                    <tr ng-if="is_rectal_body_of_womb_reduced_Visible">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_reduced')"></td>
+                                        <td><input ng-disabled="!is_rectal_body_of_womb_reduced_Visible" ng-model="checkup.rectal_body_of_womb_reduced" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_uteri_position' in checkup_descriptor %}
                                     <tr>
                                         <!-- example multiple -->
-                                        <td class="text-right">Положение</td>
-                                        <td><rb-select multiple="true" ng-disabled="checkup.rectal_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']" ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectal_uteri_position"></rb-select></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_uteri_position')"></td>
+                                        <td><rb-select multiple="true" ng-disabled="checkup.rectal_uterus_body | pluck:'code' | intersects:['no_body', 'not determined']"
+                                                       ref-book="rbRisarUteriPositionGenVisit" ng-model="checkup.rectal_uteri_position"></rb-select></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'rectal_parametrium' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <td class="text-right">Параметрическая область широких связок матки</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_parametrium')"></td>
                                         <td><div >
-                                            <div name="rectal_parametrium" refbook-checkbox ng-model="checkup.rectal_parametrium" ref-book="rbRisarParametrium1">
+                                            <div name="rectal_parametrium" refbook-checkbox ng-model="checkup.rectal_parametrium" ref-book="rbRisarParametrium1"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_parametrium')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_parametrium')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
-                                    </tr>                                                            
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_parametrium_other' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Другое</td>
-                                        <td><input ng-disabled="checkup.rectal_parametrium | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_parametrium_other" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_parametrium_other')"></td>
+                                        <td><input ng-disabled="checkup.rectal_parametrium | filter:{code:'other'} | count | negate"
+                                                   ng-model="checkup.rectal_parametrium_other" class="form-control"></td>
                                     </tr>
-
+                                    {% endif %}
                                     <tr>
                                         <th class="text-right col-md-4">Придатки</th>
                                         <td class="col-md-8"></td>
-                                    </tr>                  
+                                    </tr>
+                                    {% if 'rectal_ovary_right' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <td class="text-right">Яичники справа</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_ovary_right')"></td>
                                         <td><div >
-                                            <div name="rectal_ovary_right" refbook-checkbox ng-model="checkup.rectal_ovary_right" ref-book="rbRisarOvary">
+                                            <div name="rectal_ovary_right" refbook-checkbox ng-model="checkup.rectal_ovary_right" ref-book="rbRisarOvary"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_ovary_right')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_ovary_right')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
-                                    </tr>                   
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_ovary_right_oher' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_ovary_right_oher')"></td>
                                         <td><input ng-disabled="checkup.rectal_ovary_right | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_ovary_right_oher" class="form-control"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'rectal_ovary_left' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <td class="text-right">Яичники слева</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_ovary_left')"></td>
                                         <td><div >
-                                            <div name="rectal_ovary_left" refbook-checkbox ng-model="checkup.rectal_ovary_left" ref-book="rbRisarOvary">
+                                            <div name="rectal_ovary_left" refbook-checkbox ng-model="checkup.rectal_ovary_left" ref-book="rbRisarOvary"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_ovary_left')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_ovary_left')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'rectal_ovary_left_oher' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_ovary_left_oher')"></td>
                                         <td><input ng-disabled="checkup.rectal_ovary_left | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_ovary_left_oher" class="form-control"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'rectal_uterine_tubes_right' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Маточные трубы справа</td>
-                                        <td><input ng-model="checkup.rectal_uterine_tubes_right" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_uterine_tubes_right')"></td>
+                                        <td><input ng-model="checkup.rectal_uterine_tubes_right" class="form-control"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_uterine_tubes_right')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_uterine_tubes_right')"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'rectal_uterine_tubes_left' in checkup_descriptor %}
                                     <tr>
                                         <!-- example short_string -->
-                                        <td class="text-right">Маточные трубы слева</td>
-                                        <td><input ng-model="checkup.rectal_uterine_tubes_left" class="form-control"></td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_uterine_tubes_left')"></td>
+                                        <td><input ng-model="checkup.rectal_uterine_tubes_left" class="form-control"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_uterine_tubes_left')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_uterine_tubes_left')"></td>
                                     </tr>
-                                                            
+                                    {% endif %}
+                                    {% if 'rectal_vaginal_fornix' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
-                                        <td class="text-right">Своды влагалища</td>
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_vaginal_fornix')"></td>
                                         <td><div>
-                                            <div name="rectal_vaginal_fornix" refbook-checkbox ng-model="checkup.rectal_vaginal_fornix" ref-book="rbRisarVaginalFornix">
+                                            <div name="rectal_vaginal_fornix" refbook-checkbox ng-model="checkup.rectal_vaginal_fornix" ref-book="rbRisarVaginalFornix"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('rectal_vaginal_fornix')"
+                                                 ng-required="checkupDescriptor.getMandatory('rectal_vaginal_fornix')">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
                                         </td>
-                                    </tr>                       
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.rectal_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+
+                                    {% if 'rectal_comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
-                                        <th class="text-right">Дополнительная информация   <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_comments')"></td>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.rectal_comments" /></div></div></td>
                                     </tr>
-                                
+                                    {% endif %}
                                 <!-- END RECTAL -->
                                 </tbody>
                             </table>
@@ -1365,7 +1741,7 @@
                             <table class="table table-condensed">
                                 <tbody>
                                     <tr>
-                                        <th class="text-right col-md-4">Диагнозы <span>&nbsp;</span></th>
+                                        <th class="text-right col-md-4">Диагнозы</th>
                                         <td class="col-md-8">&nbsp;</td>
                                     </tr>
                                     <tr>
@@ -1384,24 +1760,30 @@
                             </table>
                                 <table class="table table-condensed">
                                 <tbody>
+                                    {% if 'encompassing_comments' in checkup_descriptor %}
                                     <tr >
-                                        <th class="text-right">Примечания <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('encompassing_comments')"></td>
                                         <td><wysiwyg ng-model="checkup.encompassing_comments" /></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'encompassing_treatment' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right">Лечение <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('encompassing_treatment')"></td>
                                         <td><wysiwyg ng-model="checkup.encompassing_treatment" /></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'treatment_recommendations' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right">Рекомендации <span>&nbsp;</span></th>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('treatment_recommendations')"></td>
                                         <td><wysiwyg ng-model="checkup.treatment_recommendations" /></td>
                                     </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                             </div>
                             </div>
                         </ng-form>
-                        {{ inspection_macros.diagnostics(9) }}
+                        {{ inspection_macros.diagnostics(9, info_msg='Требуется заполнить раздел «Заключение»: Основной диагноз.') }}
                         {{ inspection_macros.ticket_25(10) }}
                     </div>
                 </div>

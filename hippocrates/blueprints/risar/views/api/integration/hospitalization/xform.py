@@ -31,11 +31,14 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
-            ActionType.flatCode == self.flat_code,
+            # ActionType.flatCode == self.flat_code,
         )
         if self.target_obj_id:
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
         return res
+
+    def check_duplicate(self, data):
+        self.external_id = data.get('external_id')
 
     def get_data_for_diags(self, new_data):
         if not self.new:
@@ -82,6 +85,7 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             'PregnancyDuration': safe_int(data.get('pregnancy_week')),
             'DirectionDiagnosis': self.to_mkb_rb(data.get('diagnosis_in')),
             'FinalDiagnosis': self.to_mkb_rb(data.get('diagnosis_out')),
+            'Results': data.get('results', '').replace('\r\n', '<br>'),
         }
 
     def as_json(self):
@@ -98,5 +102,6 @@ class HospitalizationXForm(HospitalizationSchema, MeasuresResultsXForm):
             'pregnancy_week': an_props['PregnancyDuration'].value,
             'diagnosis_in': an_props['DirectionDiagnosis'].value,
             'diagnosis_out': an_props['FinalDiagnosis'].value,
+            'results': an_props['Results'].value if 'Results' in an_props else ''
         }
         return res

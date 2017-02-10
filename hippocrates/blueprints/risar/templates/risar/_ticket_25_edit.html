@@ -12,6 +12,7 @@
                         </div>
                     </td>
                 </tr>
+                {% if 'medical_care' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('medical_care')"></th>
                     <td class="col-md-8">
@@ -22,6 +23,8 @@
                         /></rb-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'visit_place' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('visit_place')"></th>
                     <td class="col-md-8">
@@ -32,6 +35,8 @@
                         /></rb-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'visit_reason' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('visit_reason')"></th>
                     <td class="col-md-8">
@@ -41,6 +46,8 @@
                         >[[ item.name ]]</div>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'visit_type' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('visit_type')"></th>
                     <td class="col-md-8">
@@ -53,6 +60,8 @@
                         </ui-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'finished_treatment' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('finished_treatment')"></th>
                     <td class="col-md-8">
@@ -62,6 +71,8 @@
                         >[[ item.name ]]</div>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'initial_treatment' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('initial_treatment')"></th>
                     <td class="col-md-8">
@@ -70,6 +81,8 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('initial_treatment')">[[ item.name ]]</div>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'treatment_result' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('treatment_result')"></th>
                     <td class="col-md-8">
@@ -78,6 +91,8 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('treatment_result')"></rb-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'payment' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('payment')"></th>
                     <td class="col-md-8">
@@ -86,6 +101,8 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('payment')"></rb-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'urgent' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('urgent')"></th>
                     <td class="col-md-8">
@@ -94,6 +111,8 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('urgent')">
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'prof_med_help' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('prof_med_help')"></th>
                     <td class="col-md-8">
@@ -102,6 +121,8 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('prof_med_help')"></rb-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'condit_med_help' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('condit_med_help')"></th>
                     <td class="col-md-8">
@@ -110,11 +131,26 @@
                         ng-disabled="ticket25Descriptor.getReadOnly('condit_med_help')"></rb-select>
                     </td>
                 </tr>
+                {% endif %}
+                {% if 'ache_result' in ticket_25_descriptor %}
+                <tr>
+                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('ache_result')"></th>
+                    <td class="col-md-8">
+                        <div ng-class="{'has-error': !checkup.ticket_25.ache_result}">
+                            <rb-select ref-book="rbAcheResult" ng-model="checkup.ticket_25.ache_result"
+                                        ng-required="true"
+                                        ng-required="ticket25Descriptor.getMandatory('ache_result')"
+                                        ng-disabled="ticket25Descriptor.getReadOnly('ache_result')"
+                                        limit-to="50"></rb-select>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+                {% if 'services' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('services')"></th>
                     <td></td>
                 </tr>
-
                 <tr>
                     <td colspan="2">
                         <table class="table table-condensed" inplace-table ng-model="checkup.ticket_25.services"
@@ -168,7 +204,8 @@
                         </table>
                     </td>
                 </tr>
-
+                {% endif %}
+                {% if 'operations' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('operations')"></th>
                     <td></td>
@@ -237,7 +274,8 @@
                         </table>
                     </td>
                 </tr>
-
+                {% endif %}
+                {% if 'manipulations' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('manipulations')"></th>
                     <td></td>
@@ -295,7 +333,8 @@
                         </table>
                     </td>
                 </tr>
-
+                {% endif %}
+                {% if 'temp_disability' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('temp_disability')"></th>
                     <td></td>
@@ -368,6 +407,6 @@
                         </table>
                     </td>
                 </tr>
-
+                {% endif %}
                 </tbody>
             </table>

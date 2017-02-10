@@ -24,20 +24,26 @@
                             <div class="col-sm-3 col-md-3  text-right">Дата осмотра:</div>
                             <div class="col-sm-9 col-md-9">[[checkup.beg_date|asDateTime]]</div>
                         </div>
+                        {% if 'department' in checkup_descriptor %}
                         <div class="row" ng-if="checkupDescriptor.exists('department')">
                             <div class="col-sm-6 col-md-6  text-right">[[ checkupDescriptor.getName('department') ]]:</div>
                             <div class="col-sm-6 col-md-6">[[checkup.department.name]]</div>
                         </div>
+                        {% endif %}
+                        {% if 'deliveryDate' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-3 col-md-3  text-right">Дата родов:</div>
+                            <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('deliveryDate')]]:</div>
                             <div class="col-sm-9 col-md-9">
                                 [[checkup.deliveryDate|asDate]]
                             </div>
                         </div>
+                        {% endif %}
+                        {% if 'timeAfterDelivery' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-3 col-md-3  text-right">Срок после родов, недель:</div>
+                            <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('timeAfterDelivery')]]:</div>
                             <div class="col-sm-9 col-md-9">[[checkup.timeAfterDelivery]]</div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -50,10 +56,12 @@
                             <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
+                        {% if 'state' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Общее состояние:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('state')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.state.name]]</div>
                         </div>
+                        {% endif %}
                         <div class="row">
                             <div class="col-sm-5 col-md-5 text-right">АД правая рука:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.ad_right_high]]/[[checkup.ad_right_low]]</div>
@@ -62,38 +70,54 @@
                             <div class="col-sm-5 col-md-5 text-right">АД левая рука:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.ad_left_high]]/[[checkup.ad_left_low]]</div>
                         </div>
+                        {% if 'complaints' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Жалобы:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('complaints')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.complaints" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
+                        {% endif %}
+                        {% if 'vein' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние вен:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vein')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.vein.name]]</div>
                         </div>
+                        {% endif %}
+                        {% if 'breast' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние молочных желез:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('breast')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.breast" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
+                        {% endif %}
+                        {% if 'nipples' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние сосков:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('nipples')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.nipples" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
+                        {% endif %}
+                        {% if 'lactation' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Лактация:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('lactation')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.lactation.name]]</div>
                         </div>
+                        {% endif %}
+                        {% if 'uterus' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние матки:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('uterus')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.uterus.name]]</div>
                         </div>
+                        {% endif %}
+                        {% if 'scar' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Состояние послеоперационного рубца:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('scar')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.scar.name]]</div>
                         </div>
+                        {% endif %}
+                        {% if 'secretion' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Выделения:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('secretion')]]:</div>
                             <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.secretion" >[[elem.name]][[$last ? '' : ', ']]</span></div>
                         </div>
+                        {% endif %}
                         <div class="row">
                             <div class="col-md-12">&nbsp;</div>
                         </div>
@@ -109,10 +133,12 @@
                             <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
+                        {% if 'contraception' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5 text-right">Рекомендации по контрацепции:</div>
+                            <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('contraception')]]:</div>
                             <div class="col-sm-7 col-md-7">[[checkup.contraception.name]]</div>
                         </div>
+                        {% endif %}
                         <!-- TODO: Отображение диагнозов -->
                         <div class="row">
                             <div class="col-sm-5 col-md-5  text-right">Основной диагноз:</div>
@@ -123,14 +149,18 @@
                                 </div>
                             </div>
                         </div>
+                        {% if 'treatment' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5  text-right">Лечение:</div>
+                            <div class="col-sm-5 col-md-5  text-right">[[checkupDescriptor.getName('treatment')]]:</div>
                             <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.treatment"></div>
                         </div>
+                        {% endif %}
+                        {% if 'recomendations' in checkup_descriptor %}
                         <div class="row">
-                            <div class="col-sm-5 col-md-5  text-right">Общие рекомендации:</div>
+                            <div class="col-sm-5 col-md-5  text-right">[[checkupDescriptor.getName('recomendations')]]:</div>
                             <div class="col-md-7 long-words" ng-bind-html="checkup.recomendations"></div>
                         </div>
+                        {% endif %}
                         <div class="row">
                             <div class="col-md-12">&nbsp;</div>
                         </div>

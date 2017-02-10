@@ -27,13 +27,18 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
         res = self.target_obj_class.query.join(ActionType).filter(
             self.target_obj_class.event_id == self.parent_obj_id,
             self.target_obj_class.deleted == 0,
-            ActionType.flatCode == self.flat_code,
+            # ActionType.flatCode == self.flat_code,
         )
         if self.target_obj_id:
             res = res.filter(self.target_obj_class.id == self.target_obj_id,)
         return res
 
+    def check_duplicate(self, data):
+        self.external_id = data.get('external_id')
+
     def prepare_params(self, data):
+        if data.get('lpu_code'):
+            self.organisation = self.find_org(data.get('lpu_code'))
         if data.get('doctor_code') and data.get('lpu_code'):
             self.person = self.find_doctor(data.get('doctor_code'), data.get('lpu_code'))
 
@@ -42,7 +47,7 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'Results': data.get('results', '').replace('\r\n', '<br>'),
             'RealizationDate': safe_date(data.get('realization_date')),
             'AnalysisNumber': data.get('analysis_number'),
-            'LPURealization': self.person.organisation if self.person else None,
+            'LPURealization': self.organisation,
             'Doctor': self.person,
             'Comment': data.get('comment'),
         }
@@ -64,7 +69,6 @@ class ResearchXForm(ResearchSchema, MeasuresResultsXForm):
             'results': an_props['Results'].value or '',
             'comment': an_props['Comment'].value or '',
         }
-
 
         if self.person:
             res['doctor_code'] = self.person.regionalCode

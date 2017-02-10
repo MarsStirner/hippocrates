@@ -9,6 +9,7 @@ from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.models.person import Person, PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
+from nemesis.models.enums import PerinatalRiskRate
 from nemesis.lib.user_mail import send_usermail
 from nemesis.lib.data_ctrl.utils import get_system_mail_person_id
 
@@ -25,7 +26,7 @@ class NotificationQueue(object):
             cls._q.append(evt)
 
     @classmethod
-    def start_all(cls):
+    def process_events(cls):
         while len(cls._q):
             evt = cls._q.popleft()
             try:
@@ -34,12 +35,36 @@ class NotificationQueue(object):
             except Exception, e:
                 logger.error(evt.get_err_msg(), exc_info=True)
 
+    @classmethod
+    def clear(cls):
+        cls._q.clear()
+
+    @classmethod
+    def notify_checkup_changes(cls, card, action, new_preg_cont):
+        if new_preg_cont is None:
+            return
+        cur_preg_cont_possibility = action['pregnancy_continuation'].value
+        new_preg_cont_possibility = new_preg_cont
+
+        if new_preg_cont_possibility != cur_preg_cont_possibility and not bool(new_preg_cont_possibility):
+            event = PregContInabilityEvent(card, action)
+            cls.add_events(event)
+
+    @classmethod
+    def notify_risk_rate_changes(cls, card, new_prr):
+        current_rate = card.attrs['prenatal_risk_572'].value
+        cur_prr = PerinatalRiskRate(current_rate.id) if current_rate is not None else None
+
+        if new_prr.value not in (PerinatalRiskRate.undefined[0], PerinatalRiskRate.low[0]) and (
+                cur_prr is None or cur_prr.order < new_prr.order):
+            event = RiskRateRiseEvent(card, new_prr)
+            cls.add_events(event)
+
 
 @app.teardown_request
-def process_notifications_ateor(exception):
+def clear_notifications_ateor(exception):
     # at the end of request
-    if not exception:
-        NotificationQueue.start_all()
+    NotificationQueue.clear()
 
 
 class NotificationEvent(object):

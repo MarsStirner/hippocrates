@@ -15,6 +15,11 @@ usagi = HippoCeleryUsagiClient(flask_app.wsgi_app, os.getenv('TSUKINO_USAGI_URL'
 flask_app.wsgi_app = usagi.app
 usagi()
 
+# для генерации url, которые понадобятся клиенту sirius
+config = flask_app.config
+hippo_host = config.get('HIPPO_URL').rstrip('/').lstrip('http://')
+config['SERVER_NAME'] = hippo_host
+
 
 # https://github.com/Robpol86/Flask-Large-Application-Example
 with flask_app.app_context():

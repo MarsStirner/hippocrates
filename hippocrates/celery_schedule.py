@@ -14,7 +14,14 @@ CELERYBEAT_SCHEDULE = {
     'update_card_attrs_crfs': {
         'task': 'celery_tasks.risar_tasks.update_card_attrs_cfrs',
         'schedule': crontab(minute=0, hour=0),
-    }
+    },
+}
+
+schedule_close_yesterday_checkups = {
+    'close_yesterday_checkups': {
+        'task': 'celery_tasks.risar_tasks.close_yesterday_checkups',
+        'schedule': crontab(minute=0, hour=8),
+    },
 }
 
 try:

@@ -51,7 +51,7 @@ def api_0_soc_prof_post(flat_code, action_id=None):
 
     fields = soc_prof_codes[flat_code]
     for key in fields:
-        action.propsByCode[key].value = json.get(key)
+        action.set_prop_value(key, json.get(key))
 
     db.session.add(action)
     db.session.commit()

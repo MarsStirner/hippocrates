@@ -24,43 +24,78 @@
                         <td class="text-right"><strong>Менструальная функция</strong> <span>&nbsp;</span></td>
                         <td></td>
                     </tr>
+                     {% if 'age' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">С возраста <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.age" class="form-control"></div></div></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('age')"></td>
+                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.age" class="form-control"
+                                                                          ng-required="gynAnamnesisDescriptor.getMandatory('age')"
+                                                                          ng-disabled="gynAnamnesisDescriptor.getReadOnly('age')"></div></div></td>
                     </tr>
+                     {% endif %}
+                     {% if 'duration' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Длительность <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.duration" class="form-control"></div></div></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('duration')"></td>
+                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.duration" class="form-control"
+                                                                          ng-required="gynAnamnesisDescriptor.getMandatory('duration')"
+                                                                          ng-disabled="gynAnamnesisDescriptor.getReadOnly('duration')"></div></div></td>
                     </tr>
+                    {% endif %}
+                    {% if 'period_duration' in gyn_anamnesis_descriptor  %}
                     <tr><!-- example of input Integer, String-->
-                        <td class="text-right">Продолжительность цикла <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.period_duration" class="form-control"></div></div></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('period_duration')"></td>
+                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.period_duration" class="form-control"
+                                                                          ng-required="gynAnamnesisDescriptor.getMandatory('period_duration')"
+                                                                          ng-disabled="gynAnamnesisDescriptor.getReadOnly('period_duration')"></div></div></td>
                     </tr>
+                    {% endif %}
+                    {% if 'disorder' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <!-- example of checkbox boolean-->
-                        <td class="text-right">Нарушения<span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('disorder')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"
+                                                                          ng-required="gynAnamnesisDescriptor.getMandatory('disorder')"
+                                                                          ng-disabled="gynAnamnesisDescriptor.getReadOnly('disorder')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'menstrual_character' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <!-- example of select ExtReferenceRb-->
-                        <td class="text-right">Характер менструаций<span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.menstrual_character" ref-book="rbRisarMenstruationCharacter"></rb-select></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('menstrual_character')"></td>
+                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.menstrual_character" ref-book="rbRisarMenstruationCharacter"
+                              ng-required="gynAnamnesisDescriptor.getMandatory('menstrual_character')"
+                              ng-disabled="gynAnamnesisDescriptor.getReadOnly('menstrual_character')"></rb-select></td>
                     </tr>
+                    {% endif %}
+                    {% if 'intermenstrual_spotting' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Межменструальные выделения <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.intermenstrual_spotting" class="form-control"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('intermenstrual_spotting')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.intermenstrual_spotting" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('intermenstrual_spotting')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('intermenstrual_spotting')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'menstrual_pain' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Менструальные боли <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.menstrual_pain" class="form-control"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('menstrual_pain')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.menstrual_pain" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('menstrual_pain')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('menstrual_pain')"></td>
                     </tr>
+                    {% endif %}
                 
+                    {% if 'menopause' in gyn_anamnesis_descriptor  %}
+
                     <tr>
-                        <td class="text-right"><strong>Менопауза</strong> <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('menopause')"></th>
+                        <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('menopause')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('menopause')"></td>
                     </tr>
+
+                    {% endif %}
+                    {% if 'menopause_age' in gyn_anamnesis_descriptor  %}
                     <tr>
-                    <td class="text-right">С возраста<span>&nbsp;</span></td>
+                    <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('menopause_age')"></td>
                         <td>
                             <div class="row">
                                 <div class="col-md-4">
@@ -69,99 +104,182 @@
                             </div>
                         </td>
                     </tr>
+                    {% endif %}
                      <tr>
                         <td class="text-right"><strong>Половая жизнь</strong> <span>&nbsp;</span></td>
                         <td></td>
                     </tr>
+                     {% if 'sex_life_age' in gyn_anamnesis_descriptor  %}
                     <tr>
-                     <td class="text-right">С возраста<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.sex_life_age" class="form-control"></div></div></td>
+                     <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('sex_life_age')"></td>
+                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3"
+                                                                          ng-model="anamnesis_unpregnant.sex_life_age" class="form-control"
+                                                                          ng-required="gynAnamnesisDescriptor.getMandatory('sex_life_age')"
+                                                                          ng-disabled="gynAnamnesisDescriptor.getReadOnly('sex_life_age')"></div></div></td>
                     </tr>
+                    {% endif %}
+                    {% if 'intercourse_partner_number' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Количество половых партнеров<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-4"><input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.intercourse_partner_number" class="form-control"></div></div>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('intercourse_partner_number')"></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <input type="text" valid-number maxlength="3" ng-model="anamnesis_unpregnant.intercourse_partner_number" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('intercourse_partner_number')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('intercourse_partner_number')"></div></div>
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if 'marital_status' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right"><strong>Семейное положение</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.marital_status" ref-book="rbRisarMarital_Status"></rb-select></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('marital_status')"></th>
+                        <td><rb-select ng-model="anamnesis_unpregnant.marital_status" ref-book="rbRisarMarital_Status"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('marital_status')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('marital_status')"></rb-select></td>
                     </tr>
+                    {% endif %}
                     <tr>
                         <td class="text-right"><strong>Заболевания</strong><span>&nbsp;</span></td>
                         <td></td>
                     </tr>
-                     <tr>
-                        <td class="text-right">ЗППП<span>&nbsp;</span></td>
+                    {% if 'std' in gyn_anamnesis_descriptor  %}
+                    <tr>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('std')"></td>
                         <td>
-                            <rb-select multiple="true" ref-book="rbRisarSTD" ng-model="anamnesis_unpregnant.std"></rb-select>
+                            <rb-select limit-to="50" multiple="true" ref-book="rbRisarSTD" ng-model="anamnesis_unpregnant.std"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('std')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('std')"></rb-select>
                         </td>
+                    </tr>
+                    {% endif %}
+                    {% if 'gynecopathy' in gyn_anamnesis_descriptor  %}
+                    <tr>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('gynecopathy')"></td>
+                        <td><rb-select limit-to="50" multiple="true" ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarGynecopathy"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('gynecopathy')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('gynecopathy')"></rb-select></td>
+                    </tr>
+                    {% endif %}
+                    {% if 'hepatitis' in gyn_anamnesis_descriptor  %}
+                    <tr>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('hepatitis')"></td>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.hepatitis" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('hepatitis')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('hepatitis')"></div></div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if 'tuberculosis' in gyn_anamnesis_descriptor  %}
+                    <tr>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('tuberculosis')"></td>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.tuberculosis" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('tuberculosis')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('tuberculosis')"></div></div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if 'somatic_disease' in gyn_anamnesis_descriptor  %}
+                    <tr>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('somatic_disease')"></td>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.somatic_disease" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('somatic_disease')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('somatic_disease')"></div></div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if 'hereditary' in gyn_anamnesis_descriptor  %}
+                        <tr>
+                            <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('hereditary')"></th>
+                            <td><rb-select multiple="true"
+                                           ng-model="anamnesis_unpregnant.hereditary"
+                                           ref-book="rbRisarHereditary"
+                                           ng-required="gynAnamnesisDescriptor.getMandatory('hereditary')"
+                                           ng-disabled="gynAnamnesisDescriptor.getReadOnly('hereditary')"
+                                           limit-to="50"></rb-select>
+                            </td>
+                        </tr>
+                        {%- if 'hereditary_defect' in gyn_anamnesis_descriptor -%}
+                            <tr ng-if="isHeredTextVisible">
+                                <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('hereditary_defect')"></th>
+                                <td><wysiwyg ng-model="anamnesis_unpregnant.hereditary_defect" /></td>
+                           </tr>
+                        {%- endif -%}
+                    {% endif %}
+                    {% if 'hereditary_free_input' in gyn_anamnesis_descriptor  %}
+                       <tr>
+                            <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('hereditary_free_input')"></th>
+                            <td><wysiwyg ng-model="anamnesis_unpregnant.hereditary_free_input" /></td>
+                       </tr>
+                    {% endif %}
+                    {% if 'gyn_operation' in gyn_anamnesis_descriptor  %}
 
-                    </tr>
                     <tr>
-                        <td class="text-right">Гинекологические<span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.gynecopathy" ref-book="rbRisarGynecopathy"></rb-select></td>
-                    </tr>
-                    <tr>
-                        <td class="text-right">Гепатит<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.hepatitis" class="form-control"></div></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right">Туберкулез<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.tuberculosis" class="form-control"></div></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right">Соматические<span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.somatic_disease" class="form-control"></div></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right"><strong>Наследственность</strong><span>&nbsp;</span></td>
-                        <td><rb-select multiple="true" ng-model="anamnesis_unpregnant.hereditary" ref-book="rbRisarHereditary"></rb-select></td>
-                    </tr>
-                    
-                    <tr>
-                        <td class="text-right"><strong>Оперативные вмешательства на половых органах</strong> <span>&nbsp;</span></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('gyn_operation')"></th>
                         <td><wysiwyg ng-model="anamnesis_unpregnant.gyn_operation" /></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right"><strong>Бесплодие</strong><span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility')"></th>
+                        <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('infertility')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('infertility')"></td>
                     </tr>
+
+                    {% endif %}
+                    {% if 'infertility_kind' in gyn_anamnesis_descriptor  %}
                      <tr>
-                        <td class="text-right">Вид<span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility_kind')"></td>
                         <td><rb-select ng-model="anamnesis_unpregnant.infertility_kind" ref-book="rbRisarInfertilityKind" ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
+                     {% endif %}
+                     {% if 'infertility_duration' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Длительность, лет <span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility_duration')"></td>
                         <td><input ng-model="anamnesis_unpregnant.infertility_duration" class="form-control" type="text" valid-number maxlength="3" ng-disabled="!anamnesis_unpregnant.infertility"></td>
                     </tr>
+                     {% endif %}
+                     {% if 'infertility_etiology' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Причины <span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility_etiology')"></td>
                         <td><rb-select multiple="true" ref-book="rbRisarInfertilityEtiology" ng-model="anamnesis_unpregnant.infertility_etiology"
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
+                     {% endif %}
+                     {% if 'infertility_treatment' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Лечение <span>&nbsp;</span></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility_treatment')"></td>
                         <td><rb-select multiple="true" ref-book="rbRisarInfertilityTreatment" ng-model="anamnesis_unpregnant.infertility_treatment"
                             ng-disabled="!anamnesis_unpregnant.infertility"></rb-select></td>
                     </tr>
+                     {% endif %}
+                     {% if 'epidemic' in gyn_anamnesis_descriptor  %}
                      <tr>
-                        <td class="text-right"><strong>Эпидемиологический анамнез</strong><span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-12"><input ng-model="anamnesis_unpregnant.epidemic" class="form-control"></div></div>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('epidemic')"></th>
+                        <td><div class="row"><div class="col-md-12">
+                            <input ng-model="anamnesis_unpregnant.epidemic" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('epidemic')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('epidemic')"></div></div>
                         </td>
                     </tr>
+                     {% endif %}
+                     {% if 'traumas' in gyn_anamnesis_descriptor  %}
                      <tr>
-                        <td class="text-right"><strong>Травмы</strong><span>&nbsp;</span></td>
-                         <td><input ng-model="anamnesis_unpregnant.traumas" class="form-control"></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('traumas')"></th>
+                         <td><input ng-model="anamnesis_unpregnant.traumas" class="form-control"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('traumas')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('traumas')"></td>
                     </tr>
+                     {% endif %}
+                     {% if 'operations' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right"><strong>Операции (кроме гинекологических)</strong><span>&nbsp;</span></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('operations')"></th>
                         <td>
                             <wysiwyg ng-model="anamnesis_unpregnant.operations" />
                         </td>
                     </tr>
+                     {% endif %}
                     <tr>
                         <td class="text-right"><strong>Группа крови </strong><span>&nbsp;</span></td>
                         <td>
@@ -177,34 +295,60 @@
                         <th class="text-right">Вредные привычки <span>&nbsp;</span></th>
                         <td>&nbsp;</td>
                     </tr>
+                    {% if 'alcohol' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Алкоголь <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('alcohol')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('alcohol')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('alcohol')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'smoking' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Курение <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('smoking')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('smoking')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('smoking')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'toxic' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Токсичные вещества <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('toxic')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('toxic')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('toxic')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'drugs' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right">Наркотики <span>&nbsp;</span></td>
-                        <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"></td>
+                        <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('drugs')"></td>
+                        <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('drugs')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('drugs')"></td>
                     </tr>
+                    {% endif %}
+                    {% if 'work_group' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right"><strong>Общественно-профилактическая группа</strong><span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.work_group" ref-book="rbRisarWork_Group" ></rb-select></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('work_group')"></th>
+                        <td><rb-select ng-model="anamnesis_unpregnant.work_group" ref-book="rbRisarWork_Group"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('work_group')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('work_group')"></rb-select></td>
                     </tr>
+                    {% endif %}
+                    {% if 'professional_properties' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right"><strong>Профессиональные вредности</strong> <span>&nbsp;</span></td>
-                        <td><rb-select ng-model="anamnesis_unpregnant.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('professional_properties')"></th>
+                        <td><rb-select ng-model="anamnesis_unpregnant.professional_properties" ref-book="rbRisarProfessional_Properties"
+                                   ng-required="gynAnamnesisDescriptor.getMandatory('professional_properties')"
+                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('professional_properties')"></rb-select></td>
                     </tr>
+                    {% endif %}
+                    {% if 'infertility_treatment' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <td class="text-right"><strong>Дополнительная информация</strong> <span>&nbsp;</span></td>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility_treatment')"></th>
                         <td> <wysiwyg ng-model="anamnesis_unpregnant.additional_info" /></td>
                     </tr>
+                    {% endif %}
                 </tbody>
             </table>
             </div>
@@ -221,6 +365,9 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script>
+        WebMis20.value('gyn_anamnesis_descriptor', angular.fromJson('{{gyn_anamnesis_descriptor|tojson|safe}}'));
+    </script>
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>
 {% endblock %}
