@@ -43,7 +43,7 @@ def send_to_mis(event_code, entity_code, operation_code,
     if not binded_event(event_code):
         return
     stream_id = get_stream_id()
-    logger.debug('%s send_to_mis %s' % (stream_id, event_code))
+    logger.debug('%s send_to_mis %s %s' % (stream_id, event_code, entity_code))
     obj_name, obj_id = obj
     url_params = params.copy()
     url_params.update((obj,))
