@@ -484,6 +484,9 @@ class XForm(object):
     def _represent_part(self, part, data):
         res = {}
         for k, v in part.items():
+            if k not in data:
+                # поле удалено в БД
+                continue
             if v['rb']:
                 rb_code_field = v.get('rb_code_field', 'code')
                 if v['is_vector']:
