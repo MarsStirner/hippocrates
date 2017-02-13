@@ -111,7 +111,7 @@ def close_yesterday_checkups(self):
     if cur_weekday < 5:  # раньше субботы
         for checkup in get_all_opened_checkups(today):
 
-            send_data_to_mis = validate_send_to_mis_checkup(checkup)
+            send_data_to_mis = True
             if checkup.actionType.flatCode == first_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_obs_first_get'
                 checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
@@ -145,13 +145,16 @@ def close_yesterday_checkups(self):
                     checkup.actionType.flatCode
                 )
 
+            if validate_send_to_mis_checkup(checkup):
+                checkup.endDate = today
+                db.session.add(checkup)
+                # чтобы дата закрытия попала в данные при передаче в мис
+                db.session.commit()
+            else:
+                send_data_to_mis = False
+
             if send_data_to_mis:
                 try:
-                    checkup.endDate = today
-                    db.session.add(checkup)
-                    # чтобы дата закрытия попала в данные при передаче в мис
-                    db.session.commit()
-
                     sirius.send_to_mis(
                         sirius.RisarEvents.CLOSE_CHECKUP,
                         checkup_entity_code,
