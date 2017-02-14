@@ -299,15 +299,8 @@ class ChildbirthSchema(Schema):
                             # "enum": ["kombinirovannye", "sostoronymateri", "sostoronyploda"]
                         },
                         "specialities": {
-                            "description": "Особенности операции, справочник rbRisarSpecialities",
+                            "description": "Особенности операции",
                             "type": "string",
-                            # "enum": [
-                            #     "donacalarodov",
-                            #     "ekstrennoe",
-                            #     "kogdaproizvodilas_operazia",
-                            #     "periodrodov",
-                            #     "planovoe"
-                            # ]
                         },
                         "anesthetization": {
                             "description": "Обезболивание, справочник rbRisarAnesthetization",

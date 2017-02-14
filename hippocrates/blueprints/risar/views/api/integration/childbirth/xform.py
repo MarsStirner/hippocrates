@@ -87,7 +87,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         'obstetrical_forceps': {'attr': 'obstetrical_forceps', 'default': None, 'rb': 'rbRisarObstetrical_Forceps', 'is_vector': False},
         'vacuum_extraction': {'attr': 'vacuum_extraction', 'default': None, 'rb': None, 'is_vector': False},
         'indication': {'attr': 'indication', 'default': None, 'rb': 'rbRisarIndication', 'is_vector': False},
-        'specialities': {'attr': 'specialities', 'default': None, 'rb': 'rbRisarSpecialities', 'is_vector': False},
+        'specialities': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
         'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
         'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
