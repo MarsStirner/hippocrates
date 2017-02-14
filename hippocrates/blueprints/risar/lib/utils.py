@@ -302,7 +302,8 @@ def get_last_checkup_date(event_id):
     return query[0] if query else None
 
 
-def close_open_checkups(event_id, set_date=None):
+def close_open_checkups(event_id, set_date=None, flat_codes_list=None):
+    flat_codes_list = flat_codes_list or checkup_flat_codes
     if not set_date:
         set_date = datetime.datetime.now()
     db.session.query(Action).filter(
@@ -310,7 +311,7 @@ def close_open_checkups(event_id, set_date=None):
         Action.endDate.is_(None),
         Action.deleted == 0,
         ActionType.id == Action.actionType_id,
-        ActionType.flatCode.in_(checkup_flat_codes)
+        ActionType.flatCode.in_(flat_codes_list)
     ).update({
         Action.endDate: set_date,
         Action.status: ActionStatus.finished[0],

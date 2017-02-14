@@ -316,7 +316,6 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
         }
         var query = {
             page: $scope.pager.current_page,
-            action_id_list: $scope.query.checkups.length ? _.pluck($scope.query.checkups, 'id') : undefined,
             checkups: $scope.query.checkups,
             measure_id_list: $scope.query.measure_list.length ? _.pluck($scope.query.measure_list, 'id') : undefined,
             measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,

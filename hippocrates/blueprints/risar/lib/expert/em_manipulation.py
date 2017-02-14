@@ -229,7 +229,17 @@ class EventMeasureController(BaseModelController):
     def get_measures_in_action(self, action, args=None):
         if not action.id:
             return []
-        args = get_checkup_interval(action, args)
+        if args is None:
+            args = {}
+
+        chk_interval = get_checkup_interval(action)
+        args.update({
+            'event_id': action.event_id,
+            'end_date_from': chk_interval.get('beg_date'),
+            'action_id': action.id
+        })
+        if chk_interval.get('end_date'):
+            args['beg_date_to'] = chk_interval['end_date']
         return self.get_selecter().get_measures_in_action(args)
 
     def get_measure(self, measure_id):
@@ -468,15 +478,15 @@ class EventMeasureSelecter(BaseSelecter):
                 def make_conditions(checkups_interval_list):
                     for checkup in checkups_interval_list:
                         first = or_(
-                            EventMeasure.endDateTime >= safe_datetime(checkup['end_date_from']),
+                            EventMeasure.endDateTime >= safe_datetime(checkup['beg_date']),
                             EventMeasure.endDateTime.is_(None)
                         )
                         second = func.IF(
                             EventMeasure.schemeMeasure_id.isnot(None),
-                            Action.id == checkup['action_id'],
+                            Action.id == checkup['id'],
                             True
                         )
-                        beg_date_to = safe_datetime(checkup.get('beg_date_to'))
+                        beg_date_to = safe_datetime(checkup.get('end_date'))
                         if beg_date_to:
                             third = EventMeasure.begDateTime <= beg_date_to
                             yield and_(first, second, third)

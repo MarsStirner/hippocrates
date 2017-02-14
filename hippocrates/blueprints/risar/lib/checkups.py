@@ -58,23 +58,18 @@ def can_edit_checkup(action):
     )
 
 
-def get_checkup_interval(action, args=None):
-    if args is None:
-        args = {}
+def get_checkup_interval(action):
     start_date = safe_datetime(action.begDate)
     end_date = safe_datetime(action.get_prop_value('next_date'))
     if end_date:
         end_date = end_date.replace(hour=23, minute=59, second=59)
     else:
         end_date = action.endDate
-    args.update({
-        'event_id': action.event_id,
-        'end_date_from': start_date,
-        'action_id': action.id
-    })
-    if end_date:
-        args['beg_date_to'] = end_date
-    return args
+    return {
+        'id': action.id,
+        'beg_date': start_date,
+        'end_date': end_date
+    }
 
 
 def validate_send_to_mis_checkup(checkup):
