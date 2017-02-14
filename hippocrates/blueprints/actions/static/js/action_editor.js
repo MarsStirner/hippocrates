@@ -2,7 +2,7 @@
  * Created by mmalkov on 14.07.14.
  */
 var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
-        RefBookService, MessageBox, NotificationService, WMConfig, AccountingService, PatientActionsModalService) {
+        RefBookService, MessageBox, NotificationService, WMConfig, AccountingService, PatientActionsModalService, CurrentUser) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -147,6 +147,10 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             }
             return deferred.promise;
         });
+    };
+    $scope.sign_n_save_action = function () {
+        $scope.action.person = CurrentUser.info;
+        $scope.save_action();
     };
     $scope.cancel = function () {
         $scope.action.discard().then($window.close, $window.close);
@@ -345,7 +349,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'MessageBox', 'NotificationService',
-    'WMConfig', 'AccountingService', 'PatientActionsModalService', ActionEditorCtrl]);
+    'WMConfig', 'AccountingService', 'PatientActionsModalService', 'CurrentUser', ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.

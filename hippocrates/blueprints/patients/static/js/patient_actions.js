@@ -120,12 +120,14 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 this.code = null;
                 this.flat_code = null;
                 this.gid = null;
+                this.class_code = null;
             } else if (angular.isArray(source)) {
                 this.id = source[1];
                 this.name = source[2];
                 this.code = source[3];
                 this.flat_code = source[4];
                 this.gid = source[5];
+                this.class_code = source[6];
             } else {
                 angular.extend(this, source);
             }
@@ -155,9 +157,9 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                     this.children.sort(function (x, y) {
                         var a = self.lookup[x],
                             b = self.lookup[y];
-                        if (a.beg_date > b.beg_date) {
+                        if (a.getValuedDate() < b.getValuedDate()) {
                             return 1;
-                        } else if (a.beg_date < b.beg_date) {
+                        } else if (a.getValuedDate() > b.getValuedDate()) {
                             return -1;
                         } else {
                             return a.status - b.status;
@@ -174,8 +176,10 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 this.code = null;
                 this.flat_code = null;
                 this.gid = null;
+                this.class_code = null;
             } else {
                 angular.extend(this, source);
+                this.class_code = this.action_type.action_type_class.code;
             }
             this.children = [];
             this.is_action_item = true;
@@ -184,15 +188,39 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             return new ActionTreeItem(this)
         };
         ActionTreeItem.prototype.formatData = function () {
-            return '{0|, }{(плановая дата |1|), }{2}, {3}'.formatNonEmpty(
-                $filter('asDateTime')(this.beg_date),
-                _.has(['diagnostics', 'lab'], this.action_type.action_type_class) ?
-                    $filter('asDateTime')(this.planned_end_date) : undefined,
+            return '{|0| }{(|1|), }{2}, {3}'.formatNonEmpty(
+                $filter('asDateTime')(this.getValuedDate()), $filter('asDateTime')(this.getValuedDateText()),
                 this.action_type.name, this.status.name
             );
         };
         ActionTreeItem.prototype.get_ps_resolve = function () {
             return {action_id: this.action_id};
+        };
+        ActionTreeItem.prototype.getValuedDate = function () {
+            if (this.class_code === 'lab' || this.class_code === 'diagnostics') {
+                if (this.end_date) {
+                    return this.end_date;
+                } else if (this.planned_end_date) {
+                    return this.planned_end_date;
+                } else {
+                    return this.beg_date;
+                }
+            } else {
+                return this.beg_date;
+            }
+        };
+        ActionTreeItem.prototype.getValuedDateText = function () {
+            if (this.class_code === 'lab' || this.class_code === 'diagnostics') {
+                if (this.end_date) {
+                    return 'дата выполнения';
+                } else if (this.planned_end_date) {
+                    return 'плановая дата';
+                } else {
+                    return 'дата назначения';
+                }
+            } else {
+                return '';
+            }
         };
         ActionTreeItem.prototype.sort_children = function () {};
 

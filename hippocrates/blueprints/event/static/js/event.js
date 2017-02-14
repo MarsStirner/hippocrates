@@ -166,7 +166,22 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         )[0];
         $scope.update_form_state();
         $scope.on_event_type_changed();
+
+        if(['8', 'admperm1', 'admperm2'].indexOf($scope.event.info.event_type.finance.code) !== -1) {
+            $scope.set_default_dates();
+        }
     };
+
+    $scope.set_default_dates = function () {
+        if($scope.event.is_new()) {
+            $scope.event.info.set_date = new Date();
+            $scope.event.info.set_date.setHours(1, 0, 0);
+
+            $scope.event.info.exec_date = new Date();
+            $scope.event.info.exec_date.setHours(23, 59, 59);
+        }
+    };
+
     $scope.on_event_type_changed = function () {
         clearErrors();
         $scope.update_form_state();
@@ -289,8 +304,42 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     }
 
+    $scope.$watch('event.info.set_date', function (n, o) {
+        if(n !== undefined && typeof n === 'string' && n !== o) {
+            var date = new Date(n);
+            if(typeof o === 'object') {
+                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
+            }
+
+            $scope.event.info.set_date = date
+        }
+    });
+
+    $scope.$watch('event.info.exec_date', function (n, o) {
+        if(n !== undefined && typeof n === 'string' && n !== o) {
+            var date = new Date(n);
+            if(typeof o === 'object') {
+                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
+            }
+
+            $scope.event.info.exec_date = date
+        }
+    });
+
     $scope.$on('event_loaded', function() {
-        $scope.event.info.set_date = new Date($scope.event.info.set_date);
+        if(['8', 'admperm1', 'admperm2'].indexOf($scope.event.info.event_type.finance.code) !== -1) {
+            if(!$scope.event.info.set_date) {
+                $scope.event.info.set_date = new Date();
+                $scope.event.info.set_date.setHours(1, 0, 0);
+            }
+            if(!$scope.event.info.exec_date) {
+                $scope.event.info.exec_date = new Date();
+                $scope.event.info.exec_date.setHours(23, 59, 59);
+            }
+        } else {
+            $scope.event.info.set_date = new Date($scope.event.info.set_date);
+        }
+
         var et_loading = $scope.rbEventType.initialize($scope.event.info.client);
         $q.all([et_loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
             .then(function () {
