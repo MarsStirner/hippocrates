@@ -197,25 +197,29 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             return {action_id: this.action_id};
         };
         ActionTreeItem.prototype.getValuedDate = function () {
-            if (this.end_date) {
-                return this.end_date;
-            } else if (
-                (this.class_code === 'lab' || this.class_code === 'diagnostics') && this.planned_end_date
-            ) {
-                return this.planned_end_date;
+            if (this.class_code === 'lab' || this.class_code === 'diagnostics') {
+                if (this.end_date) {
+                    return this.end_date;
+                } else if (this.planned_end_date) {
+                    return this.planned_end_date;
+                } else {
+                    return this.beg_date;
+                }
             } else {
                 return this.beg_date;
             }
         };
         ActionTreeItem.prototype.getValuedDateText = function () {
-            if (this.end_date) {
-                return 'дата выполнения';
-            } else if (
-                (this.class_code === 'lab' || this.class_code === 'diagnostics') && this.planned_end_date
-            ) {
-                return 'плановая дата';
+            if (this.class_code === 'lab' || this.class_code === 'diagnostics') {
+                if (this.end_date) {
+                    return 'дата выполнения';
+                } else if (this.planned_end_date) {
+                    return 'плановая дата';
+                } else {
+                    return 'дата назначения';
+                }
             } else {
-                return 'дата назначения';
+                return '';
             }
         };
         ActionTreeItem.prototype.sort_children = function () {};
