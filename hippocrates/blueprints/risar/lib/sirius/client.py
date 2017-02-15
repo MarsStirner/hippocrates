@@ -18,18 +18,20 @@ import logging
 
 logger = logging.getLogger('simple')
 
-events_list = None
+events_binds_map = None
 
 
-def binded_event(event_code):
-    global events_list
-    if not events_list:
+def binded_event(event_code, entity_code):
+    global events_binds_map
+    if not events_binds_map:
         result = request_events_map()
         code = result['meta']['code']
         if code != 200:
             raise Exception('Sirius binded event request error')
-        events_list = set(result['result'])
-    return event_code in events_list
+        events_binds_map = result['result']
+    event_res = event_code in events_binds_map
+    entity_res = not events_binds_map[event_code] or entity_code in events_binds_map[event_code]
+    return event_res and entity_res
 
 
 def get_stream_id():
@@ -40,7 +42,7 @@ def send_to_mis(event_code, entity_code, operation_code,
                 service_method, obj, params, is_create):
     if not app.config.get('SIRIUS_ENABLED'):
         return
-    if not binded_event(event_code):
+    if not binded_event(event_code, entity_code):
         return
     stream_id = get_stream_id()
     logger.debug('%s send_to_mis %s %s' % (stream_id, event_code, entity_code))
@@ -68,7 +70,7 @@ def update_entity_from_mis(region, entity, remote_id):
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
     if not app.config.get('SIRIUS_ENABLED'):
         return True
-    if not binded_event(event_code):
+    if not binded_event(event_code, entity):
         return
     stream_id = get_stream_id()
     request = {
@@ -90,14 +92,15 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
     from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     # нет информации по методу мис
     event_code = RisarEvents.MAKE_APPOINTMENT
+    entity_code = RisarEntityCode.SCHEDULE_TICKET
     if not app.config.get('SIRIUS_ENABLED'):
         return True
-    if not binded_event(event_code):
+    if not binded_event(event_code, entity_code):
         return True
     stream_id = get_stream_id()
     data = {
         'event': event_code,
-        'entity_code': RisarEntityCode.SCHEDULE_TICKET,
+        'entity_code': entity_code,
         'operation_code': OperationCode.DELETE if is_delete else OperationCode.CHANGE,
         'method': 'post',
         # "service_method": 'api_schedule_tickets_get',
@@ -129,7 +132,7 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
 def get_risar_id_by_mis_id(region, entity, remote_id):
     from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
-    if not binded_event(event_code):
+    if not binded_event(event_code, entity):
         return
     stream_id = get_stream_id()
     request = {
@@ -148,7 +151,7 @@ def get_risar_id_by_mis_id(region, entity, remote_id):
 def save_card_ids_match(local_id, region, entity, remote_id):
     from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     event_code = RisarEvents.ENTER_MIS_EMPLOYEE
-    if not binded_event(event_code):
+    if not binded_event(event_code, entity):
         return
     stream_id = get_stream_id()
     request = {
