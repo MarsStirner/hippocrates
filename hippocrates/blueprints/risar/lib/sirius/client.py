@@ -35,7 +35,7 @@ def binded_event(event_code, entity_code):
 
 
 def get_stream_id():
-    return 'stream_' + md5(uuid1().get_hex()).hexdigest()[:10]
+    return 'strm_' + md5(uuid1().get_hex()).hexdigest()[:10]
 
 
 def send_to_mis(event_code, entity_code, operation_code,
@@ -89,8 +89,7 @@ def check_mis_schedule_ticket(
     client_id, ticket_id, is_delete, person,
     date, beg_time, end_time, schedule_id, curr_person
 ):
-    from hippocrates.blueprints.risar.lib.sirius import OperationCode, \
-        RisarEntityCode
+    from hippocrates.blueprints.risar.lib.sirius import RisarEntityCode
     from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
     # нет информации по методу мис
     event_code = RisarEvents.MAKE_APPOINTMENT
@@ -100,11 +99,11 @@ def check_mis_schedule_ticket(
     if not binded_event(event_code, entity_code):
         return True
     stream_id = get_stream_id()
+    logger.debug('%s send_to_mis %s %s' % (stream_id, event_code, entity_code))
     data = {
         'event': event_code,
         'entity_code': entity_code,
-        'operation_code': OperationCode.DELETE if is_delete else OperationCode.CHANGE,
-        'method': 'post',
+        'method': 'delete' if is_delete else 'post',
         "request_params": {
             'doctor': person.regionalCode,
             'patient': client_id,

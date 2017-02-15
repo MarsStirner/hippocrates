@@ -142,7 +142,9 @@ def make_api_request(method, url, json_data=None, url_args=None, resend=False):
             return res_json
         try:
             j = result.json()
-            message = u'{0}: {1}'.format(j['meta']['code'], j['meta']['name'])
+            message = u'stream_id: %s %s: %s' % (
+                j['meta']['stream_id'], j['meta']['code'], j['meta']['name'],
+            )
         except Exception, e:
             # raise e
             message = u'Unknown ({0})({1})({2})'.format(unicode(result), unicode(result.text)[:300], unicode(e))
