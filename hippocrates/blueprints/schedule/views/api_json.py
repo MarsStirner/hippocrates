@@ -345,12 +345,12 @@ def api_appointment():
         client_id,
         ticket_id,
         delete,
-        schedule.person.organisation,
         schedule.person,
         schedule.date,
         ticket.begTime,
         ticket.endTime,
         schedule.id,
+        Person.query.get(current_user.get_id()),
     )
     if not res:
         return jsonify(None, 400, u'Не удалось занять талончик в РМИС')

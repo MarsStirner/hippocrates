@@ -85,8 +85,10 @@ def update_entity_from_mis(region, entity, remote_id):
     return code
 
 
-def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
-                              date, beg_time, end_time, schedule_id):
+def check_mis_schedule_ticket(
+    client_id, ticket_id, is_delete, person,
+    date, beg_time, end_time, schedule_id, curr_person
+):
     from hippocrates.blueprints.risar.lib.sirius import OperationCode, \
         RisarEntityCode
     from hippocrates.blueprints.risar.lib.sirius.events import RisarEvents
@@ -103,9 +105,7 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
         'entity_code': entity_code,
         'operation_code': OperationCode.DELETE if is_delete else OperationCode.CHANGE,
         'method': 'post',
-        # "service_method": 'api_schedule_tickets_get',
         "request_params": {
-            # 'hospital': org.regionalCode,
             'doctor': person.regionalCode,
             'patient': client_id,
         },
@@ -114,12 +114,11 @@ def check_mis_schedule_ticket(client_id, ticket_id, is_delete, org, person,
         "data": {
             "schedule_ticket_id": ticket_id,
             "schedule_id": schedule_id,
-            # "hospital": org.regionalCode,
-            # "doctor": person.regionalCode,
-            # "patient": client_id,
+            "schedule_ticket_type": '0' if beg_time else '1',
             "date": date.isoformat(),
-            "time_begin": beg_time.isoformat()[:5],
-            "time_end": end_time.isoformat()[:5],
+            "time_begin": beg_time and beg_time.isoformat()[:5],
+            "time_end": end_time and end_time.isoformat()[:5],
+            "current_person": curr_person.regionalCode,
         },
         'stream_id': stream_id,
     }
