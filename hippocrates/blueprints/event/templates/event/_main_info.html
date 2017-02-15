@@ -84,7 +84,7 @@
                 </div>
                 <div class="row marginal">
                     <div class="col-md-12" ng-if="formstate.has_commitment_letter()">
-                        <label for="event_note" class="control-label">Гарантийное письмо</label>
+                        <label for="event_note" class="control-label">[[formstate.is_oms() ? 'Комментарий' : 'Гарантийное письмо']]</label>
                         <wysiwyg ng-model="event.info.note" class="form-control" />
                     </div>
                 </div>
