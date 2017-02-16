@@ -24,6 +24,7 @@ WebMis20
         },
         print_checkup_ticket_25: '{{ url_for('.printing_checkup_ticket_25') }}', // МЕНЯ ЗАСТАВИЛИ!!!
         print_first_checkup: '{{ url_for('.printing_first_checkup') }}',
+        print_second_checkup: '{{ url_for('.printing_second_checkup') }}',
         print_jsp_epicrisis: '{{ url_for('.printing_jsp_epicrisis') }}',
         print_jsp_anamnesis: '{{ url_for('.printing_jsp_anamnesis') }}',
         api_schedule: '{{ url_for('.api_0_schedule') }}',
