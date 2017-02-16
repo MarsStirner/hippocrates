@@ -85,23 +85,41 @@ def api_0_pregnancy_checkup(event_id):
     is_ready_send_to_mis = validate_send_to_mis_checkup(action)
     if is_ready_send_to_mis:
         if flat_code == first_inspection_flat_code:
-            checkup_method_name = 'risar.api_checkup_obs_first_ticket25_get'
-            entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
+            checkup_method_name = 'risar.api_checkup_obs_first_get'
+            checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
+            ticket_method_name = 'risar.api_checkup_obs_first_ticket25_get'
+            ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
             act_id_name = 'exam_obs_id'
         elif flat_code == second_inspection_flat_code:
-            checkup_method_name = 'risar.api_checkup_obs_second_ticket25_get'
-            entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
+            checkup_method_name = 'risar.api_checkup_obs_second_get'
+            checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND
+            ticket_method_name = 'risar.api_checkup_obs_second_ticket25_get'
+            ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
             act_id_name = 'exam_obs_id'
         else:
             assert flat_code == pc_inspection_flat_code
-            checkup_method_name = 'risar.api_checkup_pc_ticket25_get'
-            entity_code = sirius.RisarEntityCode.CHECKUP_PC_TICKET
+            checkup_method_name = 'risar.api_checkup_pc_get'
+            checkup_entity_code = sirius.RisarEntityCode.CHECKUP_PC
+            ticket_method_name = 'risar.api_checkup_pc_ticket25_get'
+            ticket_entity_code = sirius.RisarEntityCode.CHECKUP_PC_TICKET
             act_id_name = 'exam_pc_id'
+
         sirius.send_to_mis(
             sirius.RisarEvents.SAVE_CHECKUP,
-            entity_code,
+            checkup_entity_code,
             sirius.OperationCode.READ_ONE,
             checkup_method_name,
+            obj=(act_id_name, action.id),
+            # obj=('external_id', action.id),
+            params={'card_id': event_id},
+            is_create=not checkup_id,
+        )
+
+        sirius.send_to_mis(
+            sirius.RisarEvents.SAVE_CHECKUP,
+            ticket_entity_code,
+            sirius.OperationCode.READ_ONE,
+            ticket_method_name,
             obj=(act_id_name, action.id),
             # obj=('external_id', action.id),
             params={'card_id': event_id},

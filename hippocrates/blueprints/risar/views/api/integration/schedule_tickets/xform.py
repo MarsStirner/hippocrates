@@ -247,6 +247,7 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
         s = st.schedule
         return {
             'schedule_ticket_id': str(sct.id),
+            'schedule_ticket_type': '0' if st.begTime else '1',
             'hospital': self.from_org_rb(s.person.organisation),
             'doctor': self.from_person_rb(s.person),
             'patient': str(sct.client_id),
