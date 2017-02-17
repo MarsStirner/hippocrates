@@ -75,6 +75,10 @@ class ScheduleTicketSchema(Schema):
                 "description": "id записи на прием",
                 "type": "string"
             },
+            "schedule_id": {
+                "description": "id расписания",
+                "type": "string"
+            },
             "hospital": {
                 "description": "ЛПУ (код ЛПУ)",
                 "type": "string"
