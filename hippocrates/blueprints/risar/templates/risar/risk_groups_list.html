@@ -18,7 +18,6 @@
                         <th class="col-md-2">Наименование</th>
                         <th class="col-md-2">Дата установления</th>
                         <th class="col-md-2">Дата изменения</th>
-                        <th class="col-md-2">Врач</th>
                         <th class="col-md-4">Причина</th>
                     </tr>
                     </thead>
@@ -27,7 +26,6 @@
                         <td ng-bind="risk.risk_group.name"></td>
                         <td ng-bind="risk.create_datetime | asDateTime"></td>
                         <td ng-bind="risk.modify_datetime | asDateTime"></td>
-                        <td ng-bind="risk.modify_person.name"></td>
                         <td simple-collapsable>
                             <div ng-bind-html="risk.risk_group.conditions | trustHtml"></div>
                         </td>
