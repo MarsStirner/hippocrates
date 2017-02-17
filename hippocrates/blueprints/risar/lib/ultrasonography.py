@@ -28,7 +28,7 @@ def get_latest_ultrasonography_values_by_code(card):
 
 
 def get_ultrasonography_edd_latest_em_result(card):
-    return dict((code, em.get_prop_value('ultrasonography_edd'))
+    return dict((code, em.get_prop_value('ultrasonography_edd') if em else None)
                 for code, em in get_latest_ultrasonography_measures(card).items())
 
 
