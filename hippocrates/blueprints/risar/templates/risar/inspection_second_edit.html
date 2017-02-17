@@ -819,42 +819,37 @@
                                                                 </td>
                                                             </tr>
                                                             <tr ng-if="isPhisher">
-                                                                <th class="text-right">Базальный ритм <span class="text-danger">*</span></th>
+                                                                <th class="text-right">Базальный ритм</th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.basal" ref-book="rbRisarBasal"
-                                                                               ng-required="isPhisher"
                                                                                ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr ng-if="isPhisher">
-                                                                <th class="text-right">Вариабельность (амплитуда) <span class="text-danger">*</span></th>
+                                                                <th class="text-right">Вариабельность (амплитуда)</th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.variability_range" ref-book="rbRisarVariabilityRange"
-                                                                               ng-required="isPhisher"
                                                                                ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr ng-if="isPhisher">
-                                                                <th class="text-right">Вариабельность (частота в минуту) <span class="text-danger">*</span></th>
+                                                                <th class="text-right">Вариабельность (частота в минуту)</th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.frequency_per_minute" ref-book="rbRisarFrequencyPerMinute"
-                                                                               ng-required="isPhisher"
                                                                                ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr ng-if="isPhisher">
-                                                                <th class="text-right">Акселерации за 30 минут <span class="text-danger">*</span></th>
+                                                                <th class="text-right">Акселерации за 30 минут</th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.acceleration" ref-book="rbRisarAcceleration"
-                                                                               ng-required="isPhisher"
                                                                                ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr ng-if="isPhisher">
-                                                                <th class="text-right">Децелерации за 30 минут <span class="text-danger">*</span></th>
+                                                                <th class="text-right">Децелерации за 30 минут</th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <rb-select ng-model="child.state.deceleration" ref-book="rbRisarDeceleration"
-                                                                               ng-required="isPhisher"
                                                                                ng-change="calcFetusFisherKtgInfo(child.state)"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr ng-if="isPhisher">
-                                                                <th class="text-right">Оценка КТГ по Фишеру </th>
+                                                                <th class="text-right">Оценка КТГ по Фишеру</th>
                                                                 <td><div class="row"><div class="col-md-8">
                                                                     <input type="text" disabled class="form-control" ng-model="child.state.fisher_ktg_points">
                                                                     <span class="help-block" ng-if="child.state.fisher_ktg_rate"
@@ -874,7 +869,6 @@
                                                                                        id="stv_evaluation"
                                                                                        valid-number valid-number-float
                                                                                        ng-model="child.state.stv_evaluation"
-                                                                                       ng-required="isStv"
                                                                                        ng-pattern="/^[0-9]{1,2}(\.[0-9]{0,1})?$/"/>
                                                                                     <span class="input-group-addon" id="addon-stv" ng-bind="stvDescription"></span>
                                                                             </div>

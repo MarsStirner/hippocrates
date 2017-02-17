@@ -339,22 +339,6 @@ def api_appointment():
     if not ticket:
         return abort(404)
 
-    # todo: запрос вынести на клиент, чтобы лишнее соединение не держать
-    schedule = ticket.schedule
-    res = sirius.check_mis_schedule_ticket(
-        client_id,
-        ticket_id,
-        delete,
-        schedule.person.organisation,
-        schedule.person,
-        schedule.date,
-        ticket.begTime,
-        ticket.endTime,
-        schedule.id,
-    )
-    if not res:
-        return jsonify(None, 400, u'Не удалось занять талончик в РМИС')
-
     client_ticket = ticket.client_ticket
     if client_ticket and client_ticket.client_id != client_id:
         return jsonify(None, 400, u'Талончик занят другим пациентом (%d)' % client_ticket.client_id)
@@ -362,23 +346,42 @@ def api_appointment():
         if not client_ticket:
             return abort(404)
         client_ticket.deleted = 1
-        db.session.commit()
-        return jsonify(None)
-    if not client_ticket:
-        client_ticket = ScheduleClientTicket()
-        client_ticket.client_id = client_id
-        client_ticket.ticket_id = ticket_id
-        client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
-        client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
-        if event_id:
-            client_ticket.event_id = event_id
-        if appointment_type_id:
-            client_ticket.appointmentType_id = appointment_type_id
-        else:
-            client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == u'amb').first()
-        db.session.add(client_ticket)
-    if 'note' in data:
-        client_ticket.note = data['note']
+    else:
+        if not client_ticket:
+            client_ticket = ScheduleClientTicket()
+            client_ticket.client_id = client_id
+            client_ticket.ticket_id = ticket_id
+            client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
+            client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
+            if event_id:
+                client_ticket.event_id = event_id
+            if appointment_type_id:
+                client_ticket.appointmentType_id = appointment_type_id
+            else:
+                client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == u'amb').first()
+            db.session.add(client_ticket)
+            db.session.flush([client_ticket])
+        if 'note' in data:
+            client_ticket.note = data['note']
+
+    # todo: запрос вынести на клиент, чтобы лишнее соединение не держать
+    schedule = ticket.schedule
+    res = sirius.check_mis_schedule_ticket(
+        client_id,
+        client_ticket.id,
+        delete,
+        schedule.person,
+        schedule.date,
+        ticket.begTime,
+        ticket.endTime,
+        schedule.id,
+        Person.query.get(current_user.get_id()),
+    )
+    if not res:
+        db.session.rollback()
+        op_text = u'освободить' if delete else u'занять'
+        return jsonify(None, 400, u'Не удалось %s талончик в РМИС' % op_text)
+
     db.session.commit()
     return jsonify(None)
 

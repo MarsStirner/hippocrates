@@ -62,8 +62,7 @@ def get_checkup_interval(action, args=None):
     if args is None:
         args = {}
     start_date = safe_datetime(action.begDate)
-    next_date_property = action.get_property('next_date')
-    end_date = safe_datetime(next_date_property.value) if next_date_property else None
+    end_date = safe_datetime(action.get_prop_value('next_date'))
     if end_date:
         end_date = end_date.replace(hour=23, minute=59, second=59)
     else:

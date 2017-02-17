@@ -111,33 +111,38 @@ def close_yesterday_checkups(self):
     if cur_weekday < 5:  # раньше субботы
         for checkup in get_all_opened_checkups(today):
 
-            send_data_to_mis = validate_send_to_mis_checkup(checkup)
+            send_data_to_mis = True
             if checkup.actionType.flatCode == first_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_obs_first_get'
                 checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST
                 ticket_method_name = 'risar.api_checkup_obs_first_ticket25_get'
                 ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_FIRST_TICKET
+                act_id_name = 'exam_obs_id'
             elif checkup.actionType.flatCode == second_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_obs_second_get'
                 checkup_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND
                 ticket_method_name = 'risar.api_checkup_obs_second_ticket25_get'
                 ticket_entity_code = sirius.RisarEntityCode.CHECKUP_OBS_SECOND_TICKET
+                act_id_name = 'exam_obs_id'
             elif checkup.actionType.flatCode == pc_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_pc_get'
                 checkup_entity_code = sirius.RisarEntityCode.CHECKUP_PC
                 ticket_method_name = 'risar.api_checkup_pc_ticket25_get'
                 ticket_entity_code = sirius.RisarEntityCode.CHECKUP_PC_TICKET
+                act_id_name = 'exam_pc_id'
             elif checkup.actionType.flatCode == puerpera_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_puerpera_get'
                 # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
                 ticket_method_name = 'risar.api_checkup_puerpera_ticket25_get'
                 # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
+                # act_id_name = '
                 send_data_to_mis = False
             elif checkup.actionType.flatCode == risar_gyn_checkup_flat_code:
                 checkup_method_name = 'risar.api_checkup_gyn_get'
                 # checkup_entity_code = sirius.RisarEntityCode.CHECKUP_
                 ticket_method_name = 'risar.api_checkup_gyn_ticket25_get'
                 # ticket_entity_code = sirius.RisarEntityCode.CHECKUP_
+                # act_id_name = '
                 send_data_to_mis = False
             else:
                 raise Exception(
@@ -145,19 +150,22 @@ def close_yesterday_checkups(self):
                     checkup.actionType.flatCode
                 )
 
+            if validate_send_to_mis_checkup(checkup):
+                checkup.endDate = today
+                db.session.add(checkup)
+                # чтобы дата закрытия попала в данные при передаче в мис
+                db.session.commit()
+            else:
+                send_data_to_mis = False
+
             if send_data_to_mis:
                 try:
-                    checkup.endDate = today
-                    db.session.add(checkup)
-                    # чтобы дата закрытия попала в данные при передаче в мис
-                    db.session.commit()
-
                     sirius.send_to_mis(
                         sirius.RisarEvents.CLOSE_CHECKUP,
                         checkup_entity_code,
                         sirius.OperationCode.READ_ONE,
                         checkup_method_name,
-                        obj=('exam_obs_id', checkup.id),
+                        obj=(act_id_name, checkup.id),
                         # obj=('external_id', action.id),
                         params={'card_id': checkup.event_id},
                         is_create=False,
@@ -167,7 +175,7 @@ def close_yesterday_checkups(self):
                         ticket_entity_code,
                         sirius.OperationCode.READ_ONE,
                         ticket_method_name,
-                        obj=('exam_obs_id', checkup.id),
+                        obj=(act_id_name, checkup.id),
                         # obj=('external_id', action.id),
                         params={'card_id': checkup.event_id},
                         is_create=False,

@@ -414,6 +414,7 @@ class EventMeasureController(BaseModelController):
         self.session.expunge_all()
 
         for em in em_list:
+            em_id = em.id
             self.session.begin_nested()  # savepoint , неявно вызовет вызовет flush
             try:
                 self.session.add(em)
@@ -425,9 +426,10 @@ class EventMeasureController(BaseModelController):
                 if isinstance(exc_info, tuple) and exc_info[0] == 1644:
                     text = exc_info[1]
                     if silent:
-                        self.session.rollback()  # rollback to savepoint
+                        # rollback to savepoint was issued during flush, but still need to rollback sqlalchemy session
+                        self.session.rollback()
                         logger.warning(u'При сохранении списка направлений направление '
-                                       u'по мероприятию с id={0} не было создано: {1}'.format(em.id, text))
+                                       u'по мероприятию с id={0} не было создано: {1}'.format(em_id, text))
                         continue
                     else:
                         raise ApiException(422, text)
