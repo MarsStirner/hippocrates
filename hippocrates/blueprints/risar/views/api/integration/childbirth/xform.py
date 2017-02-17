@@ -11,6 +11,7 @@ import logging
 from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis
 from hippocrates.blueprints.risar.lib.utils import get_action
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from hippocrates.blueprints.risar.views.api.integration.childbirth.schemas import \
@@ -310,6 +311,8 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         create_or_update_newborns(action, newborn_inspections)
 
         self.ais.close_previous()
+        if self.new:
+            EventMeasureController().close_all_unfinished_ems(action)
 
     def delete_target_obj(self):
         self.find_parent_obj(self.parent_obj_id)

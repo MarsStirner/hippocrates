@@ -13,7 +13,10 @@ from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.views.api.integration.checkup_puerpera.xform import \
     CheckupPuerperaXForm, CheckupPuerperaTicket25XForm
 from hippocrates.blueprints.risar.views.api.integration.logformat import hook
-from nemesis.lib.apiutils import api_method
+from hippocrates.blueprints.risar.views.api.integration.const import (
+    measures_save_error_code, err_measures_save_msg
+)
+from nemesis.lib.apiutils import api_method, RawApiResult
 from nemesis.lib.utils import public_endpoint
 
 
@@ -48,6 +51,17 @@ def api_checkup_puerpera_save(api_version, card_id, exam_puerpera_id=None):
     xform.update_target_obj(data)
     xform.store()
 
+    try:
+        xform.generate_measures()
+    except Exception, e:
+        action_id = xform.target_obj.id
+        logger.error(err_measures_save_msg.format(action_id), exc_info=True)
+        return RawApiResult(
+            xform.as_json(),
+            measures_save_error_code,
+            u'Осмотр сохранён, но произошла ошибка при формировании мероприятий'
+        )
+
     return xform.as_json()
 
 
@@ -58,6 +72,17 @@ def api_checkup_puerpera_delete(api_version, card_id, exam_puerpera_id):
     xform.check_params(exam_puerpera_id, card_id)
     xform.delete_target_obj()
     xform.store()
+
+    try:
+        xform.generate_measures()
+    except Exception, e:
+        action_id = exam_puerpera_id
+        logger.error(err_measures_save_msg.format(action_id), exc_info=True)
+        return RawApiResult(
+            None,
+            measures_save_error_code,
+            u'Осмотр удалён, но произошла ошибка при формировании мероприятий'
+        )
 
 
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/checkup/puerpera/<int:exam_puerpera_id>/ticket25')
