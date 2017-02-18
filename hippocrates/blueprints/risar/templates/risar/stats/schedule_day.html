@@ -1,0 +1,39 @@
+<div class="box box-info" ng-style="get_box_style()" ng-controller="ScheduleDayCtrl">
+    <div class="box-header">
+        <h3 class="box-title">
+            Расписание приёма на
+            <span style="display: inline-block; vertical-align: middle;margin-bottom: -5px; margin-top: -5px; margin-left: 5px">
+                <wm-date ng-model="search_date.date" style="width: 220px" easy-switch=true></wm-date>
+            </span>
+        </h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+
+    <div class="box-body no-padding">
+        <table class="table table-condensed">
+            <tr>
+                <th class="col-md-3"></th>
+                <th class="col-md-9"></th>
+            </tr>
+            <tbody ng-repeat="schedule in scheds">
+                <tr>
+                    <td colspan="2" bgcolor="#f5f5f5" class="bold">[[schedule.reserve_type ? schedule.reserve_type : "Резерв"]]</td>
+                </tr>
+                <tr ng-repeat="ticket in schedule.tickets">
+                    <td ng-bind="ticket.begDateTime | asTime"></td>
+                    <td>
+                        <a href="javascript:void(0);" ng-if="isEmpty(ticket)" ng-click="make_appointment(ticket)"
+                           tooltip="Нажмите, чтобы записать пациентку">Записать</a>
+                        <a ng-href="{{ url_for('.html_auto_chart') }}?ticket_id=[[ ticket.client_ticket_id ]]" ng-if="isBusy(ticket)"
+                           tooltip="Нажмите, чтобы открыть карту пациентки">[[ticket.client_fio]]</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div ng-if="scheds.length == 0" class="bold" style="margin: 10px; margin-top: 0px">
+            На выбранный день расписание ещё не создано
+        </div>
+    </div>
+</div>

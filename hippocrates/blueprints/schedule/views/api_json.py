@@ -472,3 +472,13 @@ def api_procedure_offices_get():
          924, 709, 963, 936, 934, 934, 943, 944, 1200]
     ))
     return jsonify([po for po in proc_offices])
+
+
+@module.route('/api/schedule_on_day.json', methods=['GET'])
+@api_method
+def api_schedule_on_day():
+    person_id = parse_id(request.args, 'person_id')
+    schedule_date = safe_date(request.args.get('date'))
+    if not schedule_date:
+        raise ApiException(400, u'Не передана дата')
+    return ScheduleVisualizer().get_schedule_on_date(person_id, schedule_date)
