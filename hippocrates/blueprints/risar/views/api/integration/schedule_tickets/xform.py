@@ -253,6 +253,6 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
             'doctor': self.from_person_rb(s.person),
             'patient': str(sct.client_id),
             'date': s.date,
-            'time_begin': st.begTime,
-            'time_end': st.endTime,
+            'time_begin': (st.begTime or s.begTime).isoformat()[:5],  # для внеплановых даем время интервала
+            'time_end': st.endTime and st.endTime.isoformat()[:5],
         }
