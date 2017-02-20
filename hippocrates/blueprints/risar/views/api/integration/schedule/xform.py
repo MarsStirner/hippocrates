@@ -271,6 +271,7 @@ class ScheduleFullXForm(ScheduleFullSchema, XForm):
         )
 
         if not data['schedule_tickets'] and not data['appointment_permited']:
+            # создаем слот для отображения резерва
             attendance = rbAttendanceType.cache().by_code()[u'planned']
             st = ScheduleTicket(
                 begTime=data['time_begin'], endTime=data['time_end'],

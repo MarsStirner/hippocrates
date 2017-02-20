@@ -11,6 +11,7 @@ class SystemMode(EnumBase):
     """
     normal = 1, u'Независимое приложение'
     sar_barsmis = 2, u'БАРС.МИС в Саратове'
+    tula_barsmis = 3, u'БАРС.МИС в Туле'
 
 
 class SpecificsManager(object):
@@ -62,9 +63,12 @@ class SpecificsManager(object):
         )
 
     @classmethod
-    def update_vesta_search_kwargs(cls, collection_name, kwargs):
-        extra_kwargs = safe_traverse(app.config, 'system_prefs', 'vesta_specific_search', collection_name, default={})
-        kwargs.update(extra_kwargs)
+    def show_patient_list(cls):
+        return cls._system_mode != SystemMode.tula_barsmis[0]
+
+    @classmethod
+    def show_schedule_day(cls):
+        return cls._system_mode == SystemMode.tula_barsmis[0]
 
 
 def get_sarbarsmis_url():

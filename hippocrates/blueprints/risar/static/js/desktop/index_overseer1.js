@@ -34,7 +34,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         return m.months(d-1).format('MMM');
     }
     $scope.$watch('search_date.date', function (n, o) {
-        RisarApi.schedule(n).then(function (tickets) {
+        RisarApi.schedule.get_appointments(n).then(function (tickets) {
             $scope.tickets = tickets;
         })
     });

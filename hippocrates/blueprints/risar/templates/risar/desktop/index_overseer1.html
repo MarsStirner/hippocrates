@@ -16,10 +16,14 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-                {% include "risar/stats/patient_list.html" %}
+                {% if specifics_mng.show_patient_list() %}
+                    {% include "risar/stats/patient_list.html" %}
+                {% endif %}
                 <div class ="row">
                     <div class="col-md-6">
-                        {% include "risar/stats/recent_charts.html" %}
+                        {% if specifics_mng.show_schedule_day() %}
+                            {% include "risar/stats/schedule_day.html" %}
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         {% include "risar/stats/recently_modified_charts.html" %}
@@ -27,6 +31,7 @@
                 </div>
                 <div class ="row">
                     <div class="col-md-6">
+                        {% include "risar/stats/recent_charts.html" %}
                     </div>
                     <div class="col-md-6">
                         {% include "risar/stats/urgent_errands.html" %}
@@ -55,4 +60,5 @@
     <script src="{{ url_for('.static', filename='js/stats/preg_week_distribution.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/controlled_events.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/schedule_day.js', v=app_version) }}"></script>
 {% endblock %}

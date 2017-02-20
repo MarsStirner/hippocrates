@@ -131,6 +131,7 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
         patient = self.find_client(data['patient'])
         res.update({
             'schedule_ticket_id': self.target_obj_id,
+            'schedule_id': safe_int(data.get('schedule_id')),
             'schedule_ticket_type': safe_int(data.get('schedule_ticket_type') or '0'),
             'person': person,
             'patient': patient,
@@ -144,31 +145,31 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
         rec_type = rbReceptionType.query.filter(rbReceptionType.code == 'amb').first()
 
         attendance = self._get_attendance(data)
-        s = Schedule.query.filter(
-            Schedule.person_id == data['person'].id,
-            Schedule.deleted == 0,
-            Schedule.date == data['date'],
-            Schedule.begTime <= func.cast(data['time_begin'], Time),
-            func.cast(data['time_begin'], Time) < Schedule.endTime
-        ).options(lazyload('*')).first()
-        # todo: возможно убрать, если в Тамбове создаются промежутки на тикеты
-        if not s:
-            raise ApiException(
-                NOT_FOUND_ERROR,
-                u'Не найден рабочий промежуток для врача (%s) на дату (%s) и время (%s)' %
-                (data['person'], data['date'], data['time_begin'])
-            )
-        if s:
-            st = ScheduleTicket.query.filter(
-                ScheduleTicket.schedule_id == s.id,
-                ScheduleTicket.deleted == 0,
-                ScheduleTicket.begTime == data['time_begin'],
-                ScheduleTicket.endTime == data['time_end']
+        if data['schedule_id']:
+            s = Schedule.query.get(data['schedule_id'])
+        else:
+            s = Schedule.query.filter(
+                Schedule.person_id == data['person'].id,
+                Schedule.deleted == 0,
+                Schedule.date == data['date'],
+                Schedule.begTime <= func.cast(data['time_begin'], Time),
+                func.cast(data['time_begin'], Time) < Schedule.endTime
             ).options(lazyload('*')).first()
+        if s:
+            st = None
+            # у внеплановых нет времени начала и конца в рисар
+            if attendance.code != u'extra':
+                st = ScheduleTicket.query.filter(
+                    ScheduleTicket.schedule_id == s.id,
+                    ScheduleTicket.deleted == 0,
+                    ScheduleTicket.begTime == data['time_begin'],
+                    ScheduleTicket.endTime == data['time_end']
+                ).options(lazyload('*')).first()
             if not st:
                 st = ScheduleTicket(
                     attendanceType=attendance
                 )
+                # у внеплановых нет времени начала и конца в рисар
                 if attendance.code != u'extra':
                     st.begTime = data['time_begin']
                     st.endTime = data['time_end']
@@ -182,7 +183,6 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
                     raise ApiException(ALREADY_PRESENT_ERROR,
                                        u'Уже существует запись на прием на выбранное время')
         else:
-            # todo: отключено. для какого кейса создаем раб. промежутки?
             s = Schedule(
                 person=data['person'], date=data['date'],
                 begTime=data['time_begin'], endTime=data['time_end'],
@@ -253,6 +253,6 @@ class ScheduleTicketXForm(ScheduleTicketSchema, XForm):
             'doctor': self.from_person_rb(s.person),
             'patient': str(sct.client_id),
             'date': s.date,
-            'time_begin': st.begTime,
-            'time_end': st.endTime,
+            'time_begin': (st.begTime or s.begTime).isoformat()[:5],  # для внеплановых даем время интервала
+            'time_end': st.endTime and st.endTime.isoformat()[:5],
         }
