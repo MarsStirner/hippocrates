@@ -12,7 +12,6 @@ from hippocrates.blueprints.risar.views.api.integration.epicrisis.xform import \
 from hippocrates.blueprints.risar.views.api.integration.logformat import hook
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import public_endpoint
-from nemesis.systemwide import db
 from flask import request
 
 
@@ -40,7 +39,7 @@ def api_integr_epicrisis_save(api_version, card_id):
     xform.validate(data)
     xform.check_params(card_id, data=data)
     xform.update_target_obj(data)
-    db.session.commit()
+    xform.store()
     return xform.as_json()
 
 
@@ -50,4 +49,4 @@ def api_integr_epicrisis_delete(api_version, card_id):
     xform = EpicrisisXForm(api_version)
     xform.check_params(card_id)
     xform.delete_target_obj()
-    db.session.commit()
+    xform.store()

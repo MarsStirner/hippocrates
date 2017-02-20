@@ -24,7 +24,7 @@
                             <div class="box-header with-border">
                                 <h3 class="box-title">Диагнозы</h3>
                                 <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_common"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
                                 <!-- TODO: Отображение диагнозов -->
@@ -58,7 +58,7 @@
                             <div class="box-header with-border">
                                 <h3 class="box-title">Осложнения при родах</h3>
                                 <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_third"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_birth_complexety"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
                                 {% if 'immaturity' in epicrisis_descriptor %}
@@ -157,7 +157,7 @@
                             <div class="box-header with-border">
                                 <h3 class="box-title">Операции при родах</h3>
                                 <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fifth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_birth_operation"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
                                 {% if 'caesarean_section' in epicrisis_descriptor %}
@@ -223,7 +223,7 @@
                             <div class="box-header with-border">
                                 <h3 class="box-title">Данные случая</h3>
                                 <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_common"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
                                 <div class="row">
@@ -322,7 +322,7 @@
                             <div class="box-header with-border">
                                 <h3 class="box-title">Пособия и манипуляции при родах</h3>
                                 <a class="print_link pull-right"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fourth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_help_manipulation"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
                                 {% if 'caul' in epicrisis_descriptor %}
@@ -385,14 +385,13 @@
                                 <th rowspan="2">Масса, г</th>
                                 <th rowspan="2">Длина, см</th>
                                 <th rowspan="2">Степень доношенности</th>
-                                <th colspan="3">Оценка по Апгар на минуту жизни</th>
+                                <th colspan="2">Оценка по Апгар на минуту жизни</th>
                                 <th rowspan="2">Особенности</th>
                                 <th rowspan="2"></th>
                             </tr>
                             <tr>
                                 <th>1</th>
                                 <th>5</th>
-                                <th>10</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -408,7 +407,6 @@
                                 <td ng-if="!inspection.deleted">[[inspection.maturity_rate.name]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.apgar_score_1]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.apgar_score_5]]</td>
-                                <td ng-if="!inspection.deleted">[[inspection.apgar_score_10]]</td>
                                 <td ng-if="!inspection.deleted">
                                     <div ng-if="inspection.diseases.length">Заболевания новорождённого:</div>
                                     <div ng-repeat="mkb in inspection.diseases">[[mkb.code]] - [[mkb.name]]</div>
@@ -424,7 +422,7 @@
                                 <td colspan="10">&nbsp;</td>
                                 <td>
                                     <a class="btn btn-success"
-                                       href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_sixth"><span class="glyphicon glyphicon-plus"></span> Добавить</a>
+                                       href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#birth_children"><span class="glyphicon glyphicon-plus"></span> Добавить</a>
                                 </td>
                             </tr>
                         </tbody>

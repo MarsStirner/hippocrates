@@ -70,6 +70,8 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         $scope.getCheckup('risarFirstInspection');
     };
 
+    $controller('BasePregCheckupWatchesCtrl', {$scope: $scope});
+
     $scope.init();
     reload_checkup();
 }])

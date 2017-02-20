@@ -19,6 +19,9 @@
                 {% include "risar/stats/patient_list.html" %}
                 <div class ="row">
                     <div class="col-md-6">
+                        {% include "risar/stats/schedule_day.html" %}
+                    </div>
+                    <div class="col-md-6">
                         <div class="box box-info">
                             <div class="box-header">
                                 <h3 class="box-title">Срочная госпитализация</h3>
@@ -92,6 +95,7 @@
     <script src="{{ url_for('.static', filename='js/stats/controlled_events.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/errands/modal_errand.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/active_users.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/schedule_day.js', v=app_version) }}"></script>
 {% endblock %}
 
 

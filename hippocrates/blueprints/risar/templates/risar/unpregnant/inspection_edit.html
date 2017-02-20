@@ -304,12 +304,19 @@
                                             ng-disabled="checkupDescriptor.getReadOnly('menstrual_disorders')"></rb-select></td>
                                     </tr>
                                     {% endif %}
+                                    {% if
+                                        'discharge_consistency' in checkup_descriptor or
+                                        'discharge_colour' in checkup_descriptor or
+                                        'discharge_quantity' in checkup_descriptor or
+                                        'discharge_smell' in checkup_descriptor
+                                    %}
                                     <tr>
                                         <th class="text-right col-md-4">Выделения из половых путей</th>
                                         <td class="col-md-8">
     
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     {% if 'discharge_consistency' in checkup_descriptor %}
                                      <tr>
                                     <!-- example multiple -->
@@ -459,9 +466,6 @@
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_complaints" /></div></div></td>
                                     </tr>
                                     {% endif %}
-
-                                
-      
                                 </tbody>
                             </table>
                         </div>
@@ -621,9 +625,26 @@
                                            ng-disabled="checkupDescriptor.getReadOnly('mucous')"></rb-select></td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'lymph' in checkup_descriptor %}
+                                     {% if 'lymph' in checkup_descriptor %}
+                                         <tr>
+                                            <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('lymph')">Выделения из половых путей</th>
+                                            <td class="col-md-8">
+                                            </td>
+                                        </tr>
+                                         {%- if 'lymph_which' in checkup_descriptor -%}
+                                            <tr>
+                                                <!-- example short_string -->
+                                                <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph_which')">
+                                                </td>
+                                                <td><input class="form-control"
+                                                     ng-required="checkupDescriptor.getMandatory('lymph_which')"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('lymph_which')"
+                                                     ng-model="checkup.lymph_which">
+                                                </td>
+                                            </tr>
+                                        {%- endif -%}
                                     <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('lymph')"></th>
+                                        <td></td>
                                         <td><div ng-class="{'text-danger': objectiveForm.lymph.$invalid && objectiveForm.submit_attempt}">
                                             <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph"
                                                 ng-required="checkupDescriptor.getMandatory('lymph')"
@@ -686,6 +707,15 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'stomach_area' in checkup_descriptor %}
+                                        <tr ng-if="isStomachAreaVisible">
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('stomach_area')"></td>
+                                        <td>
+                                            <input ng-disabled="checkup.getReadOnly('stomach_area')"
+                                                   ng-model="checkup.stomach_area" class="form-control">
+                                        </td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'pilosis' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
@@ -718,27 +748,13 @@
                                     {% if 'vulva_pilosis' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_pilosis')"></td>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_pilosis')"></th>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="vulva_pilosis" ng-model="checkup.vulva_pilosis"
                                                        ref-book="rbRisarVulvaPilosis" autofocus
                                                        ng-disabled="checkupDescriptor.getReadOnly('vulva_pilosis')"
                                                        ng-required="checkupDescriptor.getMandatory('vulva_pilosis')"></rb-select>
-                                            </div>
-                                        </div></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'groin_glands' in checkup_descriptor %}
-                                    <tr>
-                                        <!-- example select -->
-                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('groin_glands')"></td>
-                                        <td class="col-md-8"><div class="row">
-                                            <div class="col-md-6">
-                                            <rb-select name="groin_glands" ng-model="checkup.groin_glands"
-                                                       ref-book="rbRisarGroinGlands"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('groin_glands')"
-                                                       ng-required="checkupDescriptor.getMandatory('groin_glands')"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -762,6 +778,20 @@
                                         <!-- example short_string -->
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vulva_skin_adds')"></td>
                                         <td><input ng-disabled="checkup.vulva_skin | filter:{code:'other'} | count | negate" ng-model="checkup.vulva_skin_adds" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'groin_glands' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example select -->
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('groin_glands')"></th>
+                                        <td class="col-md-8"><div class="row">
+                                            <div class="col-md-6">
+                                            <rb-select name="groin_glands" ng-model="checkup.groin_glands"
+                                                       ref-book="rbRisarGroinGlands"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('groin_glands')"
+                                                       ng-required="checkupDescriptor.getMandatory('groin_glands')"></rb-select>
+                                            </div>
+                                        </div></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'vulva_mucous' in checkup_descriptor %}
@@ -788,7 +818,7 @@
                                     {% if 'vulva_germination' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
-                                        <td class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_germination')"></td>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('vulva_germination')"></th>
                                         <td class="col-md-8"><div class="row">
                                             <div class="col-md-6">
                                             <rb-select name="vulva_germination" ng-model="checkup.vulva_germination" ref-book="rbRisarVulvaGermination"
@@ -817,6 +847,7 @@
                                         <td><input ng-disabled="checkup.urethra.code != 'other'" ng-model="checkup.urethra_adds" class="form-control"></td>
                                     </tr>
                                     {% endif %}
+
                                     {% if 'perianal_zona' in checkup_descriptor %}
                                     <tr>
                                         <!-- example few_checkboxes -->
@@ -831,11 +862,18 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if
+                                        'vulva_discharge_consistency' in checkup_descriptor or
+                                        'vulva_discharge_colour' in checkup_descriptor or
+                                        'vulva_discharge_quantity' in checkup_descriptor or
+                                        'vulva_discharge_smell' in checkup_descriptor
+                                    %}
                                     <tr>
                                         <th class="text-right col-md-4">Выделения</th>
                                         <td class="col-md-8">
                                         </td>
                                     </tr>
+                                    {% endif %}
                                     {% if 'vulva_discharge_consistency' in checkup_descriptor %}
                                     <tr>
                                     <!-- example multiple -->
@@ -1045,11 +1083,27 @@
                                         <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
                                     </tr>
                                     {% endif %}
-                                    <tr>
-                                        <th class="text-right col-md-4">Выделения из половых путей</th>
-                                        <td class="col-md-8">
+                                    {% if 'mucous_mirrors' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_mirrors')"></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="mucous_mirrors" refbook-checkbox ng-model="checkup.mucous_mirrors" ref-book="rbRisarMucous"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('mucous_mirrors')"
+                                                       ng-required="checkupDescriptor.getMandatory('mucous_mirrors')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
                                         </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'mucous_adds_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_adds_mirrors')"></td>
+                                        <td><input ng-disabled="checkup.mucous_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.mucous_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'discharge_consistency_mirrors' in checkup_descriptor %}
                                     <tr>
                                     <!-- example multiple -->
@@ -1177,11 +1231,16 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'bimanual_body_of_womb_enlarged' in checkup_descriptor %}
-                                    <tr>
-                                    <!-- example short_string -->
-                                    <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_enlarged')"></td>
-                                    <td><input ng-disabled="['missing', 'not determined'].has(checkup.bimanual_uterus_body) || checkup.bimanual_body_of_womb_size.code != 'enlarged'" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
-                                    </tr>
+                                        <tr ng-if="is_bimanual_body_of_womb_enlarged_Visible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_enlarged')"></td>
+                                            <td><input ng-disabled="!is_bimanual_body_of_womb_enlarged_Visible" ng-model="checkup.bimanual_body_of_womb_enlarged" class="form-control"></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'bimanual_body_of_womb_reduced' in checkup_descriptor %}
+                                        <tr ng-if="is_bimanual_body_of_womb_reduced_Visible">
+                                            <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_body_of_womb_reduced')"></td>
+                                            <td><input ng-disabled="!is_bimanual_body_of_womb_reduced_Visible" ng-model="checkup.bimanual_body_of_womb_reduced" class="form-control"></td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'bimanual_uteri_position' in checkup_descriptor %}
                                     <tr>
@@ -1270,6 +1329,13 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'bimanual_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('bimanual_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.bimanual_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.bimanual_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'bimanual_comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
@@ -1347,10 +1413,17 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'rectovaginal_body_of_womb_enlarged' in checkup_descriptor %}
-                                    <tr>
+                                    <tr ng-if="checkup.rectovaginal_body_of_womb_size.code == 'enlarged'">
                                         <!-- example short_string -->
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_enlarged')"></td>
                                         <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectovaginal_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectovaginal_body_of_womb_reduced' in checkup_descriptor %}
+                                    <tr ng-if="checkup.rectovaginal_body_of_womb_size.code == 'reduced'">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_body_of_womb_reduced')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_body_of_womb_size.code != 'reduced'" ng-model="checkup.rectovaginal_body_of_womb_reduced" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'rectovaginal_uteri_position' in checkup_descriptor %}
@@ -1466,6 +1539,13 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'rectovaginal_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectovaginal_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.rectovaginal_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.rectovaginal_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'rectovaginal_comments' in checkup_descriptor %}
                                      <tr>
                                         <!-- example text -->
@@ -1571,10 +1651,17 @@
                                     </tr>
                                     {% endif %}
                                     {% if 'rectal_body_of_womb_enlarged' in checkup_descriptor %}
-                                    <tr>
+                                    <tr ng-if="is_rectal_body_of_womb_enlarged_Visible">
                                         <!-- example short_string -->
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_enlarged')"></td>
-                                        <td><input ng-disabled="checkup.rectal_body_of_womb_size.code != 'enlarged'" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                        <td><input ng-disabled="!is_rectal_body_of_womb_enlarged_Visible" ng-model="checkup.rectal_body_of_womb_enlarged" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'rectal_body_of_womb_reduced' in checkup_descriptor %}
+                                    <tr ng-if="is_rectal_body_of_womb_reduced_Visible">
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_body_of_womb_reduced')"></td>
+                                        <td><input ng-disabled="!is_rectal_body_of_womb_reduced_Visible" ng-model="checkup.rectal_body_of_womb_reduced" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'rectal_uteri_position' in checkup_descriptor %}
@@ -1685,6 +1772,14 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'rectal_formix_other' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('rectal_formix_other')"></td>
+                                        <td><input ng-disabled="checkup.rectal_vaginal_fornix | filter:{code:'other'} | count | negate" ng-model="checkup.rectal_formix_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+
                                     {% if 'rectal_comments' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->

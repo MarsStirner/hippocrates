@@ -4,8 +4,8 @@
 "use strict";
 WebMis20
 
-.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi', 'Config',
-function ($scope, $controller, $window, $location, $document, RisarApi, Config) {
+.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter', 'RisarApi', 'Config',
+function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config) {
     $controller('CheckupCtrl', {$scope: $scope});
 
     var update_auto = function () {
@@ -25,7 +25,56 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
 
     $scope.$watch('checkup.height', update_auto);
     $scope.$watch('checkup.weight', update_auto);
+    $scope.$watch('checkup.stomach', function (n, o) {
+        if ( n!==o ) {
+            
+            var selectedCodes = _.map(n, function(obj, _idx) {
+                return safe_traverse(obj, ['code']);
+            });
+            if ( $filter('intersects')(selectedCodes, ['painful', 'tense']) ) {
+                $scope.isStomachAreaVisible = true;
+            } else {
+                $scope.checkup.stomach_area = null;
+                $scope.isStomachAreaVisible = false;
+            }
+        }
+    }, true);
+    $scope.$watch('checkup.bimanual_body_of_womb_size', function (n, o) {
+        if ( n!==o ) {
+            var code = safe_traverse(n, ['code']);
+            $scope.is_bimanual_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
+            $scope.is_bimanual_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
 
+            if (!$scope.is_bimanual_body_of_womb_enlarged_Visible) { $scope.checkup.bimanual_body_of_womb_enlarged=null; }
+            if (!$scope.is_bimanual_body_of_womb_reduced_Visible) { $scope.checkup.bimanual_body_of_womb_reduced=null; }
+
+        }
+    }, true); 
+    
+    $scope.$watch('checkup.rectovaginal_body_of_womb_size', function (n, o) {
+        if ( n!==o ) {
+            var code = safe_traverse(n, ['code']);
+            $scope.is_rectovaginal_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
+            $scope.is_rectovaginal_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
+
+            if (!$scope.is_rectovaginal_body_of_womb_enlarged_Visible) { $scope.checkup.rectovaginal_body_of_womb_enlarged=null; }
+            if (!$scope.is_rectovaginal_body_of_womb_reduced_Visible) { $scope.checkup.rectovaginal_body_of_womb_reduced=null; }
+
+        }
+    }, true);
+    
+    $scope.$watch('checkup.rectal_body_of_womb_size', function (n, o) {
+        if ( n!==o ) {
+            var code = safe_traverse(n, ['code']);
+            $scope.is_rectal_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
+            $scope.is_rectal_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
+
+            if (!$scope.is_rectal_body_of_womb_enlarged_Visible) { $scope.checkup.rectal_body_of_womb_enlarged=null; }
+            if (!$scope.is_rectal_body_of_womb_reduced_Visible) { $scope.checkup.rectal_body_of_womb_reduced=null; }
+
+        }
+    }, true);
+    
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
         return $scope.checkup

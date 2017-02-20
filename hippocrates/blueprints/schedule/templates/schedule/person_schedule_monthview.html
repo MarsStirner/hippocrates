@@ -84,7 +84,7 @@
                                         <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
                                             <div class="row">
                                                 <div class="col-md-7">
-                                                    <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true) + ((sched.finance && sched.finance.name) ? ' (' + sched.finance.name + ')' :  '')"></p>
+                                                    <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true) + ((sched.reserve_type && sched.reserve_type.name) ? ' (' + sched.reserve_type.name + ')' :  '')"></p>
                                                     <p><span class="glyphicon glyphicon-time"></span>
                                                         <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
                                                     <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>

@@ -181,7 +181,11 @@
                                         {% endif %}
                                         <tr>
                                             <td colspan="2">
-                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses" diag-types="epicrisis.diagnosis_final" can-add-new="true" can-edit="! epicrisis.endDate"></wm-diagnosis-new>
+                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses"
+                                                                  diag-types="epicrisis.diagnosis_final"
+                                                                  changed-diag-types="epicrisis.diagnosis_pathanatomical"
+                                                                  can-add-new="true" can-edit="! epicrisis.endDate">
+                                                </wm-diagnosis-new>
                                             </td>
                                         </tr>
                                         {% if 'pregnancy_speciality' in epicrisis_descriptor %}
@@ -217,7 +221,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="box-body">
+                            <div class="box-body" ng-if="epicrisis.pregnancy_final.code">
                                     <table class="table table-condensed">
                                         <tbody>
                                             <tr>
@@ -265,10 +269,13 @@
                                                 <td colspan="2">
                                                     <div class="row">
                                                         <wm-diagnosis-new ng-model="epicrisis.diagnoses" can-add-new="true" can-edit="!! mother_death && ! epicrisis.endDate"
-                                                          diag-types="epicrisis.diagnosis_pathanatomical"></wm-diagnosis-new>
+                                                          diag-types="epicrisis.diagnosis_pathanatomical"
+                                                          changed-diag-types="epicrisis.diagnosis_final">
+                                                        </wm-diagnosis-new>
                                                     </div>
                                                 </td>
                                             </tr>
+                                            {% if 'control_expert_conclusion' in epicrisis_descriptor %}
                                             <tr ng-show="mother_death">
                                                 <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии"
                                                                              ng-bind-html="epicrisisDescriptor.getLabel('control_expert_conclusion')"></span></td>
@@ -277,6 +284,7 @@
                                                         <wysiwyg ng-model="epicrisis.control_expert_conclusion" contenteditable="mother_death"/>
                                                     </div></div>
                                             </tr>
+                                            {% endif %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -285,7 +293,7 @@
                         <ng-form class="tab-pane" id="birth_complexety" name="birthComplexetyForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 3. Осложнения при родах</h3>
+                                <h3 class="box-title">Шаг 2. Осложнения при родах</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -465,7 +473,7 @@
                         <ng-form class="tab-pane" id="help_manipulation" name="help_manipulationForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 4. Пособия и манипуляции при родах</h3>
+                                <h3 class="box-title">Шаг 3. Пособия и манипуляции при родах</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -565,7 +573,7 @@
                         <ng-form class="tab-pane" id="birth_operation" name="birthOperationForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 5. Операции при родах</h3>
+                                <h3 class="box-title">Шаг 4. Операции при родах</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -714,7 +722,7 @@
                         <ng-form class="tab-pane" id="birth_children" name="birthChildrenForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 6. Сведения о родившихся детях</h3>
+                                <h3 class="box-title">Шаг 5. Сведения о родившихся детях</h3>
                             </div>
                             <div class="box-body">
                                 <div class="row">
@@ -811,11 +819,11 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <th class="text-right">[[child.alive == false ? 'Время смерти' : 'Время рождения']] <span class="text-danger">*</span></th>
+                                                            <th class="text-right">[[child.alive == false ? 'Время смерти' : 'Время рождения']]</th>
                                                             <td>
                                                                 <div class="row" ng-class="{'has-error': birthChildrenForm.time_[[$index]].$invalid && birthChildrenForm.submit_attempt}">
                                                                     <div class="col-md-3">
-                                                                        <div fs-time ng-required="true"
+                                                                        <div fs-time ng-required="false"
                                                                              ng-model="child.time" name="time_[[$index]]"></div>
                                                                     </div>
                                                                 </div>
@@ -854,18 +862,6 @@
                                                                 <div class="row">
                                                                 <div class="col-md-2">
                                                                     <input name="fifth_minute" ng-model="child.apgar_score_5"
-                                                                           class="form-control" type="number"
-                                                                           min="0" max="10" valid-number/>
-                                                                </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr ng-if="child.alive">
-                                                            <td class="text-right">на 10 минуту жизни <span>&nbsp;</span></td>
-                                                            <td>
-                                                                <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <input name="tenth_minute" ng-model="child.apgar_score_10"
                                                                            class="form-control" type="number"
                                                                            min="0" max="10" valid-number/>
                                                                 </div>

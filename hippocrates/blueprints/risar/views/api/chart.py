@@ -5,6 +5,7 @@ from flask import request, abort
 from hippocrates.blueprints.risar.app import module
 from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.card import AbstractCard
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.represent.common import represent_header
 from hippocrates.blueprints.risar.lib.chart import can_control_events, take_event_control,\
     remove_event_control, can_transfer_events, transfer_to_person
@@ -107,4 +108,5 @@ def api_0_update_set_date(event_id):
 
     AbstractCard.get_for_event(event).reevaluate_card_attrs()
     db.session.commit()
+    NotificationQueue.process_events()
     return represent_header(event)

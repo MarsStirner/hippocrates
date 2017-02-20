@@ -101,7 +101,7 @@ def create_schedules(person, schedules_data, strict=True):
                 new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
                 new_sched.endTime = new_sched.endTimeAsDt.time()
                 new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
-                new_sched.finance_id = safe_traverse(sub_sched, 'finance', 'id')
+                new_sched.reserve_type_id = safe_traverse(sub_sched, 'reserve_type', 'id')
                 office_id = safe_traverse(sub_sched, 'office', 'id')
                 if not office_id and strict and \
                         safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':

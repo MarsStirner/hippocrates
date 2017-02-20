@@ -17,33 +17,70 @@
                         <div class="row">
                             <div class="col-md-6" style="padding-left: 30px; padding-right: 30px">
                                 <p>
+                                    {% if 'menstruation_start_age' in mother_anamnesis_descriptor %}
                                     Менструации с <b ng-bind-html="anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
+                                    {% endif %}
+                                    {% if 'menstruation_duration' in mother_anamnesis_descriptor %}
                                     длительность <b ng-bind-html="anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
+                                    {% endif %}
+                                    {% if 'menstruation_period' in mother_anamnesis_descriptor %}
                                     продолжительность цикла <b ng-bind-html="anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
+                                    {% endif %}
+                                    {% if 'menstruation_disorders' in mother_anamnesis_descriptor %}
                                     нарушения: <b ng-bind-html="anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>
+                                    {% endif %}
                                 </p>
+                                {% if 'menstruation_last_date' in mother_anamnesis_descriptor %}
                                 <p>
                                     Дата последней менструации <b ng-bind-html="anamnesis.mother.menstruation_last_date | asDate | underlineNoVal"></b>
                                 </p>
+                                {% endif %}
+                                {% if 'sex_life_start_age' in mother_anamnesis_descriptor %}
                                 <p>
                                     Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>
                                     Вид контрацепции: <b ng-bind-html="format_multiple(anamnesis.mother.contraception, 'name') | underlineNoVal"></b>
                                 </p>
+                                {% endif %}
+                                {% if 'fertilization_type' in mother_anamnesis_descriptor %}
                                 <p>Способ оплодотворения: <b ng-bind-html="anamnesis.mother.fertilization_type.name | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'attempt_number' in mother_anamnesis_descriptor %}
+                                <p ng-if="anamnesis.mother.attempt_number">Номер попытки: <b ng-bind="anamnesis.mother.attempt_number"></b></p>
+                                {% endif %}
+                                {% if 'intrauterine' in mother_anamnesis_descriptor %}
                                 <p>Внутриматочные вмешательства: <b>[[ anamnesis.mother.intrauterine ? 'Да' : 'Нет']]</b></p>
+                                {% endif %}
+                                {% if 'multifetation' in mother_anamnesis_descriptor %}
                                 <p>Предыдущие многоплодные беременности: <b>[[ anamnesis.mother.multifetation ? 'Да' : 'Нет']]</b></p>
+                                {% endif %}
+                                {% if 'preeclampsia' in mother_anamnesis_descriptor %}
                                 <p>Преэклампсия была у матери или сестры: <b>[[ anamnesis.mother.preeclampsia ? 'Да' : 'Нет']]</b></p>
+                                {% endif %}
+                                {% if 'marital_status' in mother_anamnesis_descriptor %}
                                 <p>Семейное положение: <b ng-bind-html="anamnesis.mother.marital_status.name | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'family_income' in mother_anamnesis_descriptor %}
                                 <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income.name | underlineNoVal"></b></p>
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
+                                {% if 'name' in father_anamnesis_descriptor %}
                                 <p>ФИО отца: <b ng-bind-html="anamnesis.father.name | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'age' in father_anamnesis_descriptor %}
                                 <p>Возраст: <b ng-bind-html="anamnesis.father.age | underlineNoVal"></b></p>
+                                {% endif %}
+                                {% if 'phone' in father_anamnesis_descriptor %}
                                 <p>Телефон отца: <b ng-bind-html="anamnesis.father.phone | underlineNoVal"></b></p>
+                                {% endif %}
                                 <p>Данные исследований отца:
                                 <ul class="list-unstyled" style="padding-left: 30px;">
+                                    {% if 'HIV' in father_anamnesis_descriptor %}
                                     <li>ВИЧ: <b ng-bind-html="anamnesis.father.HIV | danet | underlineNoVal"></b></li>
+                                    {% endif %}
+                                    {% if 'fluorography' in father_anamnesis_descriptor %}
                                     <li>Флюорография: <b ng-bind-html="anamnesis.father.fluorography | underlineNoVal"></b></li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </div>
@@ -122,7 +159,7 @@
                                 <td>Группа крови и резус-фактор</td>
                                 <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.blood_type ]]</td>
                             </tr>
-                            <tr ng-if="anamnesis.risk_groups.indexOf('07') >= 0">
+                            <tr ng-if="anamnesis.has_incompat_risk_group">
                                 <td>Группа риска</td>
                                 <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.risk_group_07 ]]</td>
                             </tr>
@@ -167,12 +204,26 @@
                             </tr>
                             {% endif %}
                             {% if 'hereditary' in mother_anamnesis_descriptor %}
-                            <tr>
-                                <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary')"></td>
-                                <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
-                                <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
-                            </tr>
+                                <tr>
+                                    <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary')"></td>
+                                    <td ng-bind="format_multiple(anamnesis.mother.hereditary, 'name')"></td>
+                                    <td ng-bind="format_multiple(anamnesis.father.hereditary, 'name')"></td>
+                                </tr>
+                                {%- if 'hereditary_defect' in mother_anamnesis_descriptor -%}
+                                    <tr ng-if="anamnesis.mother.hereditary_defect || anamnesis.father.hereditary_defect">
+                                        <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary_defect')"></td>
+                                        <td><span ng-bind-html="anamnesis.mother.hereditary_defect"></span></td>
+                                        <td><span ng-bind-html="anamnesis.father.hereditary_defect"></span></td>
+                                    </tr>
+                                {%- endif -%}
                             {% endif %}
+                            {%- if 'hereditary_free_input' in mother_anamnesis_descriptor  -%}
+                                <tr ng-if="anamnesis.mother.hereditary_free_input||anamnesis.father.hereditary_free_input">
+                                    <td ng-bind-html="motherAnamnesisDescriptor.getName('hereditary_free_input')"></td>
+                                    <td><span ng-bind-html="anamnesis.mother.hereditary_free_input"></span></td>
+                                    <td><span ng-bind-html="anamnesis.father.hereditary_free_input"></span></td>
+                                </tr>
+                            {%- endif -%}
                             <tr>
                                 <td>Вредные привычки</td>
                                 <td ng-bind="anamnesis.mother.bad_habits"></td>
@@ -266,9 +317,9 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Дата</th>
+                                <th>Год</th>
                                 <th>Вид</th>
-                                <th>Группа крови донора</th>
+                                <th></th>
                                 <th>Реакция</th>
                                 <th>&nbsp;</th>
                             </tr>
@@ -276,9 +327,9 @@
                             <tbody>
                             <tr ng-repeat="t in anamnesis.transfusions">
                                 <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
-                                <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.year"></td>
                                 <td ng-if="!t.deleted" ng-bind="t.type.name"></td>
-                                <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
+                                <td></td>
                                 <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
                                 <td ng-if="!t.deleted" class="col-md-1 nowrap">
                                     <button class="btn btn-default" ng-click="edit(t)">Изменить</button>

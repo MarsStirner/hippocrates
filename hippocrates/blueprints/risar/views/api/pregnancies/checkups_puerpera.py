@@ -43,7 +43,6 @@ def api_0_pregnancy_checkup_puerpera(event_id):
         raise ApiException(400, u'необходим flat_code')
 
     action = get_action_by_id(checkup_id, event, flat_code, True)
-    action.update_action_integrity()
 
     if not checkup_id:
         close_open_checkups_puerpera(event_id)
@@ -52,12 +51,10 @@ def api_0_pregnancy_checkup_puerpera(event_id):
     action.begDate = beg_date
     action.person = person
 
-    ticket = action.propsByCode['ticket_25'].value or get_action_by_id(None, event, gynecological_ticket_25, True)
-    ticket.update_action_integrity()
+    ticket = action.get_prop_value('ticket_25') or get_action_by_id(None, event, gynecological_ticket_25, True)
     db.session.add(ticket)
     if not ticket.id:
-        # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-        db.session.commit()
+        db.session.flush()
 
     def set_ticket(prop, value):
         if value is None:
@@ -105,7 +102,6 @@ def api_0_pregnancy_checkup_puerpera_get(checkup_id=None):
     action = get_action_by_id(checkup_id)
     if not action:
         raise ApiException(404, u'Action с id {0} не найден'.format(checkup_id))
-    action.update_action_integrity()
     return {
         'checkup': represent_pregnancy_checkup_puerpera(action),
         'access': represent_checkup_access(action)
@@ -124,7 +120,7 @@ def api_0_pregnancy_checkup_puerpera_new(event_id):
     event = Event.query.get(event_id)
     action = get_action_by_id(None, event, flat_code, True)
     ta = get_action_by_id(None, event, gynecological_ticket_25, True)
-    action['ticket_25'].value = ta
+    action.set_prop_value('ticket_25', ta)
     return {
         'checkup': represent_pregnancy_checkup_puerpera(action),
         'access': represent_checkup_access(action)
@@ -137,8 +133,6 @@ def api_0_pregnancy_checkup_puerpera_new(event_id):
 def api_0_pregnancy_checkup_puerpera_list(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
-    for action in card.checkups_puerpera:
-        action.update_action_integrity()
 
     def repr(checkup):
         return {

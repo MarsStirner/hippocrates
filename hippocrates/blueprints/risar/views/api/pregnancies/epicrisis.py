@@ -7,6 +7,7 @@ from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis, \
     represent_chart_for_epicrisis
+from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.utils import get_action, close_open_checkups
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
@@ -38,14 +39,15 @@ def api_0_chart_epicrisis(event_id):
             close_open_checkups(event_id)  # закрыть все незакрытые осмотры
             EventMeasureController().close_all_unfinished_ems(action)
         for code, value in data.iteritems():
-            if code in action.propsByCode:
-                action.propsByCode[code].value = value
+            if action.has_property(code):
+                action.set_prop_value(code, value)
         create_or_update_diagnoses(action, diagnoses)
         create_or_update_newborns(action, newborn_inspections)
 
         db.session.commit()
         card.reevaluate_card_attrs()
         db.session.commit()
+        NotificationQueue.process_events()
     return {
         'chart': represent_chart_for_epicrisis(event),
         'epicrisis': represent_pregnancy_epicrisis(event, action) if action else None

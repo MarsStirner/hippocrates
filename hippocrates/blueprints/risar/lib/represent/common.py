@@ -17,7 +17,7 @@ from nemesis.app import app
 from nemesis.lib.jsonify import DiagnosisVisualizer
 from nemesis.lib.utils import safe_int, safe_bool, safe_date, format_date
 from nemesis.models.diagnosis import Diagnostic
-from nemesis.models.enums import Gender, IntoleranceType, AllergyPower
+from nemesis.models.enums import Gender, IntoleranceType, AllergyPower, KtgInput
 from nemesis.models.exists import rbAttachType
 
 __author__ = 'viruzzz-kun'
@@ -292,7 +292,6 @@ def make_file_url(fmeta):
             u'api/0/download/{0}'.format(fmeta.uuid.hex)
         )
 
-
 def represent_fetus(fetus):
     return {
         'state': {
@@ -309,7 +308,8 @@ def represent_fetus(fetus):
             'acceleration': fetus.acceleration,
             'deceleration': fetus.deceleration,
             'heart_rate': fetus.heart_rate,
-            'ktg_input': fetus.ktg_input,
+            'ktg_input': KtgInput(fetus.ktg_input).code,
+            'stv_evaluation': fetus.stv_evaluation,
             'fisher_ktg_points': fetus.fisher_ktg_points,
             'fisher_ktg_rate': fetus.fisher_ktg_rate
         },
@@ -365,13 +365,13 @@ def represent_pregnancy(pregnancy):
             get_previous_children(pregnancy.action)
         ),
         id=pregnancy.action.id,
-        event_id=pregnancy.action['card_number'].value if 'card_number' in pregnancy.action.propsByCode else None,
+        event_id=pregnancy.action.get_prop_value('card_number'),
         external_id=get_external_id(
-            pregnancy.action['card_number'].value
-        ) if 'card_number' in pregnancy.action.propsByCode else None,
+            pregnancy.action.get_prop_value('card_number')
+        ) if pregnancy.action.has_property('card_number') else None,
         epic_delivery_date=format_date(
             safe_date(get_delivery_date_based_on_epicrisis(pregnancy))
-        ) if 'card_number' in pregnancy.action.propsByCode else None
+        ) if pregnancy.action.has_property('card_number') else None
     )
 
 def represent_anamnesis_newborn_inspection(child):
@@ -473,7 +473,6 @@ def represent_ticket_25(action):
             'manipulations': [],
             'temp_disability': [],
         }
-    action.update_action_integrity()
     return dict(
         action_as_dict(action),
         id=action.id,

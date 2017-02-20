@@ -347,7 +347,7 @@ def anemia_90(card):
     """
     measure_codes = ['0010', '0035', '0284', '0128']
     theone = _theone_measure(card, measure_codes)
-    if theone and 'hemoglobin' in theone.result_action.propsByCode:
+    if theone and theone.result_action.has_property('hemoglobin'):
         val = theone.result_action['hemoglobin'].value
         return val is not None and val <= 90
     return False
@@ -361,7 +361,7 @@ def anemia_100(card):
     """
     measure_codes = ['0010', '0035', '0284', '0128']
     theone = _theone_measure(card, measure_codes)
-    if theone and 'hemoglobin' in theone.result_action.propsByCode:
+    if theone and theone.result_action.has_property('hemoglobin'):
         val = theone.result_action['hemoglobin'].value
         return val is not None and 90 < val <= 100
     return False
@@ -375,7 +375,7 @@ def anemia_110(card):
     """
     measure_codes = ['0010', '0035', '0284', '0128']
     theone = _theone_measure(card, measure_codes)
-    if theone and 'hemoglobin' in theone.result_action.propsByCode:
+    if theone and theone.result_action.has_property('hemoglobin'):
         val = theone.result_action['hemoglobin'].value
         return val is not None and 100 < val <= 110
     return False
@@ -406,7 +406,7 @@ def lupus_anticoagulant_positive(card):
     """
     measure_codes = ['0062']
     theone = _theone_measure(card, measure_codes)
-    if theone and 'lupus_anticoagulant' in theone.result_action.propsByCode:
+    if theone and theone.result_action.has_property('lupus_anticoagulant'):
         val = theone.result_action['lupus_anticoagulant'].value
         return val == u'положительно'
     return False
@@ -420,7 +420,7 @@ def antiphospholipid_antibodies_IgG(card):
     """
     measure_codes = ['0062']
     theone = _theone_measure(card, measure_codes)
-    if theone and 'anti_phosphotide_G' in theone.result_action.propsByCode:
+    if theone and theone.result_action.has_property('anti_phosphotide_G'):
         val = theone.result_action['anti_phosphotide_G'].value
         return val is not None and val >= safe_decimal('9.99')
     return False
@@ -434,7 +434,7 @@ def antiphospholipid_antibodies_IgM(card):
     """
     measure_codes = ['0062']
     theone = _theone_measure(card, measure_codes)
-    if theone and 'anti_phosphotide_M' in theone.result_action.propsByCode:
+    if theone and theone.result_action.has_property('anti_phosphotide_M'):
         val = theone.result_action['anti_phosphotide_M'].value
         return val is not None and val >= safe_decimal('9.99')
     return False

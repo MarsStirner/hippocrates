@@ -10,6 +10,7 @@
         {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
+        <ng-form name="anamnesisFatherForm" id="anamnesisFatherForm" role="form" novalidate>
             <div class="box-body">
             <table class="table table-condensed">
                 <thead>
@@ -154,6 +155,18 @@
                                ng-required="fatherAnamnesisDescriptor.getMandatory('hereditary')"
                                ng-disabled="fatherAnamnesisDescriptor.getReadOnly('hereditary')"></rb-select></td>
                 </tr>
+                    {%- if 'hereditary_defect' in father_anamnesis_descriptor -%}
+                        <tr ng-if="isHeredTextVisible">
+                            <th class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('hereditary_defect')"></th>
+                            <td><wysiwyg ng-model="anamnesis_father.hereditary_defect" /></td>
+                        </tr>
+                    {%- endif -%}
+                {% endif %}
+                {% if 'hereditary_free_input' in father_anamnesis_descriptor %}
+                   <tr>
+                        <th class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('hereditary_free_input')"></th>
+                        <td><wysiwyg ng-model="anamnesis_father.hereditary_free_input" /></td>
+                   </tr>
                 {% endif %}
                 {% if 'current_diseases' in father_anamnesis_descriptor %}
                 <tr>
@@ -208,11 +221,11 @@
                 </tbody>
             </table>
             </div>
-
-            <div class="box-footer text-right">
-                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
-                <button class="btn btn-success" ng-click="save()">Сохранить</button>
-            </div>
+        </ng-form>
+        <div class="box-footer text-right">
+            <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
+            <button class="btn btn-success" ng-click="save()">Сохранить</button>
+        </div>
     </section>
 </div>
 {% endblock %}

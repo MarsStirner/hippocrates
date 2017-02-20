@@ -1,12 +1,12 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices, tq_types, finance) {
+var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices, tq_types, reserve_type) {
     $scope.rec_types = rec_types;
     $scope.roas = roas;
     $scope.offices = offices;
     $scope.tq_types = tq_types;
-    $scope.finance = finance;
+    $scope.reserve_type = reserve_type;
 
     $scope.selected_days = selected_days;
     $scope.model = model;
@@ -97,9 +97,10 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
         }
         $scope.times_valid = valid;
     };
-    $scope.filter_finance = function() {
+    $scope.filter_reserve_type = function() {
         return function(elem) {
-            return (elem.code == '2' || elem.code == '4' || elem.code == '6');
+            // return (elem.code == '2' || elem.code == '4' || elem.code == '6');
+            return true;
         };
     };
 };
@@ -123,7 +124,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
     $scope.rbTimeQuotingType = new RefBook('rbTimeQuotingType');
-    $scope.rbFinance = new RefBook('rbFinance');
+    $scope.rbReserveType = new RefBook('rbReserveType');
     $scope.offices = new RefBook('Office');
     $scope.editing = false;
     $scope.weekends_selectable = false;
@@ -381,8 +382,8 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                 tq_types: function () {
                     return $scope.rbTimeQuotingType.objects;
                 },
-                finance: function () {
-                    return $scope.rbFinance.objects;
+                reserve_type: function () {
+                    return $scope.rbReserveType.objects;
                 }
             }
         });
@@ -408,7 +409,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                                 endTime: moment(interval.endTime).format("HH:mm:ss"),
                                 office: interval.office,
                                 reception_type: interval.reception_type,
-                                finance: interval.finance,
+                                reserve_type: interval.reserve_type,
                                 CITO: interval.CITO,
                                 planned: interval.planned,
                                 extra: interval.extra

@@ -132,6 +132,20 @@
                     </td>
                 </tr>
                 {% endif %}
+                {% if 'ache_result' in ticket_25_descriptor %}
+                <tr>
+                    <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('ache_result')"></th>
+                    <td class="col-md-8">
+                        <div ng-class="{'has-error': !checkup.ticket_25.ache_result}">
+                            <rb-select ref-book="rbAcheResult" ng-model="checkup.ticket_25.ache_result"
+                                        ng-required="true"
+                                        ng-required="ticket25Descriptor.getMandatory('ache_result')"
+                                        ng-disabled="ticket25Descriptor.getReadOnly('ache_result')"
+                                        limit-to="50"></rb-select>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
                 {% if 'services' in ticket_25_descriptor %}
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('services')"></th>

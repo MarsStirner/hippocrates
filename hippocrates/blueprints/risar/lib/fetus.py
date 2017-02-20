@@ -8,7 +8,7 @@
 """
 from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from nemesis.systemwide import db
-from nemesis.models.enums import FisherKTGRate
+from nemesis.models.enums import FisherKTGRate, KtgInput
 from nemesis.lib.utils import safe_traverse
 
 
@@ -29,6 +29,12 @@ def create_or_update_fetuses(action, fetuses):
             for sd_key, sd_val in state_data.items():
                 if sd_key == 'id' or sd_key == 'fisher_ktg_rate':
                     continue
+                if sd_key == 'ktg_input':
+                    if not sd_val:
+                        continue
+                    # с фронденда приходят строки вида fisher, stv
+                    if isinstance(sd_val, basestring):
+                        sd_val = KtgInput.getId(sd_val)
                 setattr(fetus_state, sd_key, sd_val)
             points, rate = calc_fisher_ktg_info(state_data)
             fetus_state.fisher_ktg_points = points
@@ -37,7 +43,7 @@ def create_or_update_fetuses(action, fetuses):
 
 def calc_fisher_ktg_info(fetus_data):
     ktg_enabled = fetus_data.get('ktg_input') or False
-    if not ktg_enabled:
+    if not ktg_enabled or ktg_enabled != 'fisher':
         return None, None
 
     total_points = 0

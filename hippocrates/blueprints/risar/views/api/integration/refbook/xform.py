@@ -56,6 +56,7 @@ class RefbookXForm(RefbookSchema, XForm):
             'rbTraumaType': exists,
             'rbAcheResult': exists,
             'rbFinance': refbooks,
+            'rbReserveType': refbooks,
             'rbDispanser': exists,
             'rbConditionMedHelp': risar,
             'rbProfMedHelp': risar,

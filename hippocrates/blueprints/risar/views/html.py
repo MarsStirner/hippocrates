@@ -169,6 +169,7 @@ def html_anamnesis():
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/anamnesis_view.html', card=card,
                            mother_anamnesis_descriptor=get_props_descriptor(card.anamnesis.mother, risar_mother_anamnesis),
+                           father_anamnesis_descriptor=get_props_descriptor(card.anamnesis.father, risar_father_anamnesis),
                            prev_preg_descriptor=get_props_descriptor(None, risar_anamnesis_pregnancy))
 
 

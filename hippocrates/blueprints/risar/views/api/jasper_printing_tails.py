@@ -62,3 +62,36 @@ def printing_jsp_anamnesis():
     jasper_report.generate(file_format)
     return jasper_report.get_response_data()
 
+
+@module.route('/printing/first-checkup', methods=['POST'])
+def printing_first_checkup():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'first_checkup',
+        '/reports/Hippocrates/Risar/first_checkup',
+        params={
+            'action_id': str(data['action_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()
+
+
+@module.route('/printing/second-checkup', methods=['POST'])
+def printing_second_checkup():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'second_checkup',
+        '/reports/Hippocrates/Risar/second_checkup',
+        params={
+            'action_id': str(data['action_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()

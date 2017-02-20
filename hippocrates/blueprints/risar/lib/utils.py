@@ -4,7 +4,7 @@ import datetime
 
 import six
 from sqlalchemy import between
-from sqlalchemy.orm import lazyload, joinedload
+from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
 from hippocrates.blueprints.risar.lib.specific import get_service_table_name
@@ -12,8 +12,8 @@ from hippocrates.blueprints.risar.models.risar import ActionTypeServiceRisar
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.lib.vesta import Vesta, VestaNotFoundException
-from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from nemesis.models.enums import ActionStatus, PerinatalRiskRate
+from nemesis.models.actions import Action, ActionType, ActionPropertyType
+from nemesis.models.enums import ActionStatus
 from nemesis.models.person import Person
 from nemesis.models.event import Event
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
@@ -21,7 +21,6 @@ from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
     inspection_preg_week_code, puerpera_inspection_flat_code, pc_inspection_flat_code,\
     risar_gyn_checkup_flat_codes
-from hippocrates.blueprints.risar.lib.notification import NotificationQueue, PregContInabilityEvent, RiskRateRiseEvent
 
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
@@ -210,8 +209,8 @@ def get_action_by_id(action_id, event=None, flat_code=None, create=False):
 
 def fill_these_attrs_from_action(from_action, to_action, attr_list):
     for code in attr_list:
-        if code in from_action.propsByCode:
-            to_action.propsByCode[code].value = from_action.propsByCode[code].value
+        if to_action.has_property(code) and from_action.has_property(code):
+            to_action.set_prop_value(code, from_action.get_prop_value(code))
 
 
 def copy_attrs_from_last_action(event, flat_code, action, attr_list):
@@ -228,11 +227,9 @@ def fill_action_from_another_action(from_action, to_action, exclude_attr_list=No
     elif not isinstance(exclude_attr_list, (list, set, tuple)):
         exclude_attr_list = [exclude_attr_list]
 
-    for code in to_action.propsByCode.keys():
-        if code in from_action.propsByCode:
-            if code in exclude_attr_list:
-                continue
-            to_action.propsByCode[code].value = from_action.propsByCode[code].value
+    all_codes = set(to_action.propsByCode.keys()) & set(from_action.propsByCode.keys()) - set(exclude_attr_list)
+    for code in all_codes:
+        to_action.set_prop_value(code, from_action.get_prop_value(code))
 
 
 def copy_attrs_from_last_action_entirely(event, flat_code, action, exclude_attr_list):
@@ -259,15 +256,13 @@ def action_apt_values(action, codes):
 def set_action_apt_values(action, values, hooks=None):
     if not hooks:
         hooks = {}
-    props = action.propsByCode
     for code, value in six.iteritems(values):
-        if code not in props:
-            continue
-        prop = props[code]
-        if code in hooks:
-            hooks[code](prop, value)
-        else:
-            prop.value = value
+        if action.has_property(code, True):
+            if code in hooks:
+                prop = action.get_property(code, True)
+                hooks[code](prop, value)
+            else:
+                action.set_prop_value(code, value)
 
 
 @cache.memoize()
@@ -296,25 +291,6 @@ def get_action_type_by_flatcode(flat_code):
         ActionType.createDatetime.desc()
     ).first()
     return at
-
-def get_action_property_value(action_id, prop_type_code):
-    """
-    Получение ActionProperty по ActionPropertyType.code
-    :param action_id: Action.id
-    :type action_id: int
-    :param prop_type_code: ActionPropertyType.code
-    :type prop_type_code: str
-    :rtype: ActionProperty | None
-    :return: ActionProperty или None
-    """
-    query = ActionProperty.query.join(ActionPropertyType).filter(
-        ActionProperty.action_id == action_id,
-        ActionProperty.deleted == 0,
-        ActionPropertyType.code == prop_type_code
-    ).options(
-        lazyload('*')
-    )
-    return query.first()
 
 
 def get_last_checkup_date(event_id):
@@ -373,7 +349,7 @@ def is_event_late_first_visit(event):
     result = False
     fi = get_action(event, (first_inspection_flat_code, pc_inspection_flat_code))
     if fi:
-        preg_week = fi[inspection_preg_week_code].value
+        preg_week = fi.get_prop_value(inspection_preg_week_code)
         if preg_week is not None:
             result = preg_week >= 10
     return result
@@ -415,27 +391,6 @@ def format_action_data(json_data):
     if 'attached_files' in json_data:
         data['attached_files'] = json_data['attached_files']
     return data
-
-
-def notify_checkup_changes(card, action, new_preg_cont):
-    if new_preg_cont is None:
-        return
-    cur_preg_cont_possibility = action['pregnancy_continuation'].value
-    new_preg_cont_possibility = new_preg_cont
-
-    if new_preg_cont_possibility != cur_preg_cont_possibility and not bool(new_preg_cont_possibility):
-        event = PregContInabilityEvent(card, action)
-        NotificationQueue.add_events(event)
-
-
-def notify_risk_rate_changes(card, new_prr):
-    current_rate = card.attrs['prenatal_risk_572'].value
-    cur_prr = PerinatalRiskRate(current_rate.id) if current_rate is not None else None
-
-    if new_prr.value not in (PerinatalRiskRate.undefined[0], PerinatalRiskRate.low[0]) and (
-            cur_prr is None or cur_prr.order < new_prr.order):
-        event = RiskRateRiseEvent(card, new_prr)
-        NotificationQueue.add_events(event)
 
 
 def represent_prop_value(prop):
@@ -481,11 +436,6 @@ def action_as_dict(action, prop_filter=None):
 
 def action_as_dict_with_id(action, prop_filter=None):
     return dict(action_as_dict(action, prop_filter), id=action.id)
-
-
-def safe_action_property(action, prop_name, default=None):
-    prop = action.propsByCode.get(prop_name)
-    return prop.value if prop else default
 
 
 def get_actions_without_end_date(event_id, flat_code):
@@ -538,7 +488,6 @@ def get_apt_from_at(at, codes=None):
 
 def get_props_descriptor(action, flatcode):
     if action:
-        action.update_action_integrity()
         property_types = map(lambda x: x.type, action.properties)
     else:
         action_type = get_action_type_by_flatcode(flatcode)

@@ -69,10 +69,10 @@
                                                         </ui-select>
                                                     </div>
                                                     <div>
-                                                        <label for="finance[[$index]]" class="text-nowrap">Источник финансирования</label>
-                                                        <select class="form-control" id="finance[[$index]]" name="finance" theme="select2"
-                                                                   ng-model="interval.finance"
-                                                                   ng-options="fin as fin.name for fin in finance | filter: filter_finance() | orderBy: 'name' track by fin.id">
+                                                        <label for="reserve_type[[$index]]" class="text-nowrap">Тип резерва</label>
+                                                        <select class="form-control" id="reserve_type[[$index]]" name="reserve_type" theme="select2"
+                                                                   ng-model="interval.reserve_type"
+                                                                   ng-options="rvtp as rvtp.name for rvtp in reserve_type | filter: filter_reserve_type() | orderBy: 'name' track by rvtp.id">
                                                             <option value="">Не выбран</option>
                                                         </select>
                                                     </div>

@@ -186,6 +186,22 @@
                                                 <span ng-bind="anamnesis.general.hereditary | pluck:'name' | join:', '"></span>
                                             </div>
                                         </div>
+                                            {%- if 'hereditary_defect' in gyn_anamnesis_descriptor -%}
+                                                <div class="row" ng-if="anamnesis.general.hereditary_defect">
+                                                    <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('hereditary_defect')"></strong></div>
+                                                    <div class="col-sm-7 col-md-7 ">
+                                                        <span ng-bind-html="anamnesis.general.hereditary_defect"></span>
+                                                    </div>
+                                                </div>
+                                            {%- endif -%}
+                                        {% endif %}
+                                        {% if 'hereditary_free_input' in gyn_anamnesis_descriptor %}
+                                            <div class="row" ng-if="anamnesis.general.hereditary_free_input">
+                                                <div class="col-sm-5 col-md-5 text-right"><strong ng-bind-html="gynAnamnesisDescriptor.getName('hereditary_free_input')"></strong></div>
+                                                <div class="col-sm-7 col-md-7 ">
+                                                    <span ng-bind-html="anamnesis.general.hereditary_free_input"></span>
+                                                </div>
+                                            </div>
                                         {% endif %}
                                         {% if 'gyn_operation' in gyn_anamnesis_descriptor %}
                                         <div class="row">
@@ -384,9 +400,9 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Дата</th>
+                                <th>Год</th>
                                 <th>Вид</th>
-                                <th>Группа крови донора</th>
+                                <th></th>
                                 <th>Реакция</th>
                                 <th>&nbsp;</th>
                             </tr>
@@ -394,9 +410,9 @@
                             <tbody>
                             <tr ng-repeat="t in anamnesis.transfusions">
                                 <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
-                                <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                                <td ng-if="!t.deleted" ng-bind="t.year"></td>
                                 <td ng-if="!t.deleted" ng-bind="t.type.name"></td>
-                                <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
+                                <td></td>
                                 <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
                                 <td ng-if="!t.deleted" class="col-md-1 nowrap">
                                     <button class="btn btn-default" ng-click="edit(t)">Изменить</button>

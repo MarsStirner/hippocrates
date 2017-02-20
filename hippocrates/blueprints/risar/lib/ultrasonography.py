@@ -10,18 +10,10 @@ logger = logging.getLogger('simple')
 def emresult_realization_minus_gestation(em):
     if em:
         ra = em.result_action
-        rd = ra.propsByCode['RealizationDate'].value
-        ga = ra.propsByCode['gestational_age'].value
+        rd = ra.get_prop_value('RealizationDate')
+        ga = ra.get_prop_value('gestational_age')
         if rd and ga:
             return rd - datetime.timedelta(weeks=ga)
-
-
-def emresult_attribute(em, attrib):
-    if em:
-        try:
-            return em.result_action.propsByCode[attrib].value
-        except KeyError as e:
-            pass
 
 
 def get_latest_ultrasonography_measures(card):
@@ -36,7 +28,7 @@ def get_latest_ultrasonography_values_by_code(card):
 
 
 def get_ultrasonography_edd_latest_em_result(card):
-    return dict((code, emresult_attribute(em, 'ultrasonography_edd'))
+    return dict((code, em.get_prop_value('ultrasonography_edd') if em else None)
                 for code, em in get_latest_ultrasonography_measures(card).items())
 
 

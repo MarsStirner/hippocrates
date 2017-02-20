@@ -11,6 +11,7 @@ import logging
 from hippocrates.blueprints.risar.lib.epicrisis_children import create_or_update_newborns
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_epicrisis
 from hippocrates.blueprints.risar.lib.utils import get_action
+from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
 from hippocrates.blueprints.risar.risar_config import risar_epicrisis
 from hippocrates.blueprints.risar.views.api.integration.childbirth.schemas import \
@@ -87,7 +88,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         'obstetrical_forceps': {'attr': 'obstetrical_forceps', 'default': None, 'rb': 'rbRisarObstetrical_Forceps', 'is_vector': False},
         'vacuum_extraction': {'attr': 'vacuum_extraction', 'default': None, 'rb': None, 'is_vector': False},
         'indication': {'attr': 'indication', 'default': None, 'rb': 'rbRisarIndication', 'is_vector': False},
-        'specialities': {'attr': 'specialities', 'default': None, 'rb': 'rbRisarSpecialities', 'is_vector': False},
+        'specialities': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
         'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
         'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'regionalCode'},
@@ -304,19 +305,14 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         action.setPerson = self.person
         action.person = self.person
 
-        for code, value in data.iteritems():
-            if code in action.propsByCode:
-                prop = action[code]
-                try:
-                    action.propsByCode[code].value = value
-                except Exception, e:
-                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
-                        prop.type.name, prop.type.id))
-                    raise e
+        self.set_properties(self.target_obj, data, False)
+
         self.update_diagnoses_system(data_for_diags['diags_list'], data_for_diags['old_action_data'])
         create_or_update_newborns(action, newborn_inspections)
 
         self.ais.close_previous()
+        if self.new:
+            EventMeasureController().close_all_unfinished_ems(action)
 
     def delete_target_obj(self):
         self.find_parent_obj(self.parent_obj_id)

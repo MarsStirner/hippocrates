@@ -53,18 +53,9 @@ class AnamnesisGynXForm(AnamnesisGynSchema, XForm):
         data = self.convert_and_format(data)
 
         event = self.parent_obj = self.find_event(self.parent_obj_id)
-        anamnesis = self.target_obj = get_action(event, self.flat_code, True)
+        self.target_obj = get_action(event, self.flat_code, True)
 
-        for code, value in data.iteritems():
-            if code in anamnesis.propsByCode:
-                try:
-                    prop = anamnesis.propsByCode[code]
-                    self.check_prop_value(prop, value)
-                    prop.value = value
-                except Exception, e:
-                    logger.error(u'Ошибка сохранения свойства c типом {0}, id = {1}'.format(
-                        prop.type.name, prop.type.id), exc_info=True)
-                    raise e
+        self.set_properties(self.target_obj, data)
 
         self._changed.append(self.target_obj)
 

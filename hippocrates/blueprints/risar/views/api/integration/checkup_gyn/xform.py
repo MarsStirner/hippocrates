@@ -364,8 +364,8 @@ class CheckupGynXForm(CheckupGynSchema, GynecologyCheckupsXForm):
         self.ais.set_cur_enddate()
 
         for code, value in data.iteritems():
-            if code in action.propsByCode:
-                action.propsByCode[code].value = value
+            if action.has_property(code):
+                action.set_prop_value(code, value)
 
         self.update_diagnoses_system(data_for_diags['diags_list'], data_for_diags['old_action_data'])
 

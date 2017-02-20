@@ -59,7 +59,7 @@ class ClientXForm(ClientSchema, XForm):
             'client', 'document_required',
         )
         if is_document_required is None:
-            is_document_required = True
+            is_document_required = False
         if is_document_required and 'documents' not in data:
             raise ApiException(
                 VALIDATION_ERROR,
@@ -73,7 +73,7 @@ class ClientXForm(ClientSchema, XForm):
             doc_number = document['document_number']
             doc_numbers.append(doc_number)
             doc_sq = and_(
-                rbDocumentType.regionalCode == doc_type_code,
+                rbDocumentType.TFOMSCode == doc_type_code,
                 ClientDocument.number == doc_number,
             )
             if doc_q:
@@ -102,7 +102,7 @@ class ClientXForm(ClientSchema, XForm):
                 raise ApiException(
                     ALREADY_PRESENT_ERROR,
                     u'Уже существует пациент со следующими данными: '
-                    u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3},'
+                    u'имя - {0}, фамилия - {1}, отчество - {2}, дата рождения - {3}'
                         .format(
                         fn, ln, pn, bd
                     ),
@@ -151,9 +151,9 @@ class ClientXForm(ClientSchema, XForm):
     def _update_id_documents(self, documents):
         client = self.target_obj
         rbdt_map = dict(
-            (str(item.regionalCode), item)
+            (str(item.TFOMSCode), item)
             for item in rbDocumentType.query
-            if item.regionalCode
+            if item.TFOMSCode
         )
 
         client_documents = client.documents.all()
@@ -166,8 +166,6 @@ class ClientXForm(ClientSchema, XForm):
             doc_type_code = str(doc_data['document_type_code'])
             self._check_rb_value('rbDocumentType', doc_type_code)
             doc_type = rbdt_map.get(doc_type_code)
-            doc_issuing_auth = doc_data.get('document_issuing_authority')
-            org = doc_issuing_auth and self.find_org(doc_issuing_auth)
             if not document:
                 document = ClientDocument()
                 document.client = client
@@ -175,15 +173,15 @@ class ClientXForm(ClientSchema, XForm):
             document.serial = doc_data.get('document_series') or ''
             document.number = doc_data['document_number']
             document.date = safe_date(doc_data['document_beg_date'])
-            document.origin = org or ''
+            document.origin = doc_data.get('document_issuing_authority') or ''
             self._changed.append(document)
 
     def _update_policies(self, policies):
         client = self.target_obj
         rbpt_map = dict(
-            (str(item.regionalCode) or item.code, item)
+            (str(item.TFOMSCode) or item.code, item)
             for item in rbPolicyType.query
-            if item.regionalCode
+            if item.TFOMSCode
         )
 
         client_policies = client.policies.all()
@@ -296,18 +294,13 @@ class ClientXForm(ClientSchema, XForm):
                     note=''
                 )
                 client_soc_status.client_id = self.target_obj_id
-                db.session.add(client_soc_status)
-                if not client_soc_status.id:
-                    # Я в душе не знаю, как избежать нецелостности, и мне некогда думать
-                    db.session.commit()
 
                 work_object = ClientWork(
                     work_data['organisation'],
                     work_data.get('post', ''),
                     client
                 )
-                work_object.client = client
-                work_object.soc_status_id = client_soc_status.id
+                work_object.soc_status = client_soc_status
             work_object.shortName = work_data['organisation']
             work_object.post = work_data.get('post', '')
             self._changed.append(work_object)
@@ -359,7 +352,7 @@ class ClientXForm(ClientSchema, XForm):
         :return:
         """
         return {
-            "document_type_code": doc.documentType.regionalCode,
+            "document_type_code": doc.documentType.TFOMSCode,
             "document_series": doc.serial or Undefined,
             "document_number": doc.number,
             "document_beg_date": doc.date,
@@ -374,7 +367,7 @@ class ClientXForm(ClientSchema, XForm):
         :return:
         """
         return {
-            "insurance_document_type": doc.policyType.regionalCode,
+            "insurance_document_type": doc.policyType.TFOMSCode,
             "insurance_document_series": doc.serial or Undefined,
             "insurance_document_number": doc.number,
             "insurance_document_beg_date": doc.begDate,

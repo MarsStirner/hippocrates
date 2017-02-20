@@ -14,6 +14,7 @@
                 {% include "risar/stats/diagram_infants_death.html" %}
                 <div class ="row">
                     <div class="col-md-6">
+                        {% include "risar/stats/schedule_day.html" %}
                     </div>
                     <div class="col-md-6">
                         {% include "risar/stats/obcl_summary.html" %}
@@ -43,4 +44,5 @@
     <script src="{{ url_for('.static', filename='js/stats/active_users.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/org_curation.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/controlled_events.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/schedule_day.js', v=app_version) }}"></script>
 {% endblock %}
