@@ -24,13 +24,6 @@ var ScheduleDayCtrl = function ($scope, RisarApi, CurrentUser, WMAppointmentDial
                 $scope.refresh_data($scope.search_date.date);
             });
     };
-    $scope.get_box_style = function () {
-        var style = {'max-height': '500px'};
-        if ($scope.scheds.length != 0) {
-            style['overflow-y'] = 'auto';
-        }
-        return style
-    };
     $scope.init = function () {
     };
 
