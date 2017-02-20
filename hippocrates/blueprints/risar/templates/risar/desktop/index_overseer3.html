@@ -14,7 +14,9 @@
                 {% include "risar/stats/diagram_infants_death.html" %}
                 <div class ="row">
                     <div class="col-md-6">
-                        {% include "risar/stats/schedule_day.html" %}
+                        {% if specifics_mng.show_schedule_day() %}
+                            {% include "risar/stats/schedule_day.html" %}
+                        {% endif %}
                     </div>
                     <div class="col-md-6">
                         {% include "risar/stats/obcl_summary.html" %}
