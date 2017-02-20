@@ -11,6 +11,7 @@ class SystemMode(EnumBase):
     """
     normal = 1, u'Независимое приложение'
     sar_barsmis = 2, u'БАРС.МИС в Саратове'
+    tula_barsmis = 3, u'БАРС.МИС в Туле'
 
 
 class SpecificsManager(object):
@@ -60,6 +61,14 @@ class SpecificsManager(object):
         return safe_traverse(
             app.config, 'system_prefs', 'regional', 'close_yesterday_checkups', default=False
         )
+
+    @classmethod
+    def show_patient_list(cls):
+        return cls._system_mode != SystemMode.tula_barsmis[0]
+
+    @classmethod
+    def show_schedule_day(cls):
+        return cls._system_mode == SystemMode.tula_barsmis[0]
 
 
 def get_sarbarsmis_url():

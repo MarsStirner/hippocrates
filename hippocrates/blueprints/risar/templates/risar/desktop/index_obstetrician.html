@@ -16,11 +16,15 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-                {% include "risar/stats/patient_list.html" %}
+                {% if specifics_mng.show_patient_list() %}
+                    {% include "risar/stats/patient_list.html" %}
+                {% endif %}
                 <div class ="row">
+                    {% if specifics_mng.show_schedule_day() %}
                     <div class="col-md-6">
                         {% include "risar/stats/schedule_day.html" %}
                     </div>
+                    {% endif %}
                     <div class="col-md-6">
                         <div class="box box-info">
                             <div class="box-header">
