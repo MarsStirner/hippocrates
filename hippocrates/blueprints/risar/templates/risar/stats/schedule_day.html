@@ -26,7 +26,7 @@
                     <td>
                         <a href="javascript:void(0);" ng-if="isEmpty(ticket)" ng-click="make_appointment(ticket)"
                            tooltip="Нажмите, чтобы записать пациентку">Записать</a>
-                        <a ng-href="{{ url_for('.html_auto_chart') }}?ticket_id=[[ ticket.client_ticket_id ]]" ng-if="isBusy(ticket)"
+                        <a ng-href="{{ url_for('.html_auto_chart') }}?client_id=[[ ticket.client_id ]]" ng-if="isBusy(ticket)"
                            tooltip="Нажмите, чтобы открыть карту пациентки">[[ticket.client_fio]]</a>
                     </td>
                 </tr>
