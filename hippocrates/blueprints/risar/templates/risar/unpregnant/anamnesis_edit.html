@@ -343,9 +343,9 @@
                                    ng-disabled="gynAnamnesisDescriptor.getReadOnly('professional_properties')"></rb-select></td>
                     </tr>
                     {% endif %}
-                    {% if 'infertility_treatment' in gyn_anamnesis_descriptor  %}
+                    {% if 'additional_info' in gyn_anamnesis_descriptor  %}
                     <tr>
-                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility_treatment')"></th>
+                        <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('additional_info')"></th>
                         <td> <wysiwyg ng-model="anamnesis_unpregnant.additional_info" /></td>
                     </tr>
                     {% endif %}

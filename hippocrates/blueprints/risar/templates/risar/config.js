@@ -27,6 +27,7 @@ WebMis20
         print_second_checkup: '{{ url_for('.printing_second_checkup') }}',
         print_jsp_epicrisis: '{{ url_for('.printing_jsp_epicrisis') }}',
         print_jsp_anamnesis: '{{ url_for('.printing_jsp_anamnesis') }}',
+        print_jsp_gyn_anamnesis: '{{ url_for('.printing_jsp_gyn_anamnesis') }}',
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_schedule_on_day: '{{ url_for('schedule.api_schedule_on_day') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',

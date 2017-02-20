@@ -53,7 +53,7 @@ def printing_jsp_anamnesis():
         data.update(json.loads(request.form.get('json', {})))
     file_format = data.get('extension', 'html')
     jasper_report = JasperReport(
-        'epicrisis',
+        'anamnesis',
         '/reports/Hippocrates/Risar/anamnesis',
         params={
             'event_id': str(data['event_id'])
@@ -91,6 +91,23 @@ def printing_second_checkup():
         '/reports/Hippocrates/Risar/second_checkup',
         params={
             'action_id': str(data['action_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()
+
+
+@module.route('/printing/gyn-anamnesis', methods=['POST'])
+def printing_jsp_gyn_anamnesis():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'gyn_anamnesis',
+        '/reports/Hippocrates/Risar/anamnesis_gynecological',
+        params={
+            'event_id': str(data['event_id'])
         }
     )
     jasper_report.generate(file_format)
