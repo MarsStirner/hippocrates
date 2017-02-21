@@ -346,9 +346,11 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
     def _represent_general_info(self, data):
         res = self._represent_part(self.GENERAL_MAP, data)
 
+        hosp_medico = data.get('maternity_hosp_medico')
         lpu = data.get('LPU')
         newborn_lpu = data.get('newborn_LPU')
         res.update({
+            'maternity_hospital_doctor': hosp_medico and hosp_medico.regionalCode,
             'maternity_hospital': lpu and lpu.regionalCode,
             'curation_hospital': newborn_lpu and newborn_lpu.regionalCode,
             'delivery_time': self.safe_time_format(res.get('delivery_time'), '%H:%M'),

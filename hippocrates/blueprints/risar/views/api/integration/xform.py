@@ -475,7 +475,7 @@ class XForm(object):
             val = data.get(v['attr'], v.get('default'))
             if v['rb']:
                 rb_code_field = v.get('rb_code_field', 'regionalCode')
-                if v['is_vector']:
+                if isinstance(val, list):
                     res[k] = self.arr(self.rb, val, v['rb'], rb_code_field)
                 else:
                     res[k] = self.rb(val, v['rb'], rb_code_field)
@@ -491,7 +491,7 @@ class XForm(object):
             if v['rb']:
                 rb_code_field = v.get('rb_code_field', 'regionalCode')
                 vesta_rb_code_field = v.get('rb_code_field', 'code')  # vesta
-                if v['is_vector']:
+                if isinstance(data[k], list):
                     if isinstance(v['rb'], basestring):
                         val = map(lambda x: x[vesta_rb_code_field], data[k])
                     else:
