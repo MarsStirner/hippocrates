@@ -94,6 +94,9 @@ var GynecologicalAnamnesisCtrl = function ($scope, $controller, $location, $time
 
     };
     $scope.init();
+    $scope.print_gyn_anam = function (event_id) {
+        RisarApi.print_jsp_gyn_anamnesis({event_id: event_id, extension: 'html'});
+    };
 };
 
 var MotherFatherCtrl = function ($scope) {
