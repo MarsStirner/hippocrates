@@ -55,6 +55,7 @@ def fc_risar_settings():
                     'common_access_doctor': safe_traverse(nemesis_config, 'system_prefs', 'ui', 'extended_search',
                                                           'common_access_doctor'),
                 },
+                'app_mode': safe_traverse(nemesis_config, 'system_prefs', 'mode', default=1),
             },
         }
     }

@@ -162,8 +162,8 @@ function ($scope, $timeout, RisarApi, RefBookService, PrintingService, PrintingD
 ;
 
 
-WebMis20.controller('CheckupTicket25Ctrl', ['$scope', 'CurrentUser', 'PropsDescriptor', 'ticket_25_descriptor',
-function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
+WebMis20.controller('CheckupTicket25Ctrl', ['$scope', 'CurrentUser', 'PropsDescriptor', 'ticket_25_descriptor', 'WMConfig',
+function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor, WMConfig) {
     $scope.ticket25Descriptor = new PropsDescriptor(ticket_25_descriptor);
     $scope.get_current_user = function () {
         return { person: CurrentUser.info };
@@ -180,6 +180,12 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor) {
     };
     $scope.orgStructFilter = function (item) {
         return item.org_id === safe_traverse($scope.header, ['event', 'person', 'organisation', 'id']);
+    };
+    $scope.get_spec_params = function () {
+        var app_mode = safe_traverse(WMConfig, ['local_config', 'risar', 'app_mode']);
+        if (app_mode == 3) {
+            return {"code": "^[AB]"};
+        }
     };
     $scope.init = function (rc_step) {
         $scope.thisRcStep = rc_step;

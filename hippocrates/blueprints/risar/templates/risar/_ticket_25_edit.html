@@ -170,7 +170,7 @@
                                     <span ng-if="$table.$edited($index)">
                                         {% if specifics_mng.uses_regional_services() %}
                                         <ui-select ext-select-ref-book-search="rbService_regional" ng-model="$table.$tmp.service"
-                                            theme="select2"></ui-select>
+                                            theme="select2" spec-search-params="get_spec_params()" ></ui-select>
                                         {% else %}
                                         <ui-select ext-select-ref-book-search="SST365" ng-model="$table.$tmp.service"
                                             theme="select2"></ui-select>
