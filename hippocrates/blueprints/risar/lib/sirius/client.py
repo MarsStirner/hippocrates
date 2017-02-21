@@ -29,9 +29,11 @@ def binded_event(event_code, entity_code):
         if code != 200:
             raise Exception('Sirius binded event request error')
         events_binds_map = result['result']
-    event_res = event_code in events_binds_map
-    entity_res = not events_binds_map[event_code] or entity_code in events_binds_map[event_code]
-    return event_res and entity_res
+    res = event_code in events_binds_map and (
+        not events_binds_map[event_code] or
+        entity_code in events_binds_map[event_code]
+    )
+    return res
 
 
 def get_stream_id():
