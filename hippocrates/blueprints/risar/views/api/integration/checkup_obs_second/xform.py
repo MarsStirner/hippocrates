@@ -344,7 +344,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         for dd in diags_data:
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
             diagnosis = {
-                'MKB': dd['diagnostic']['mkb'].DiagID,
+                'MKB': dd['diagnostic']['mkb'].regionalCode,
                 'descr': dd['diagnostic']['diagnosis_description'],
             }
             if kind['is_vector']:

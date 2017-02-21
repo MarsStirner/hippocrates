@@ -72,12 +72,12 @@ class DoctorXForm(DoctorSchema, XForm):
         self.target_obj.organisation = org
         if 'speciality' in data:
             self._check_rb_value('rbSpeciality', data['speciality'])
-            self.target_obj.speciality = rbSpeciality.query.filter(rbSpeciality.code == data['speciality']).first()
+            self.target_obj.speciality = rbSpeciality.query.filter(rbSpeciality.regionalCode == data['speciality']).first()
         else:
             self.target_obj.speciality = None
         if 'post' in data:
             self._check_rb_value('rbPost', data['post'])
-            self.target_obj.post = rbPost.query.filter(rbPost.code == data['post']).first()
+            self.target_obj.post = rbPost.query.filter(rbPost.regionalCode == data['post']).first()
         else:
             self.target_obj.post = None
         if data.get('login'):  # в схеме поле не обязательное, а логин может быть проставлен в БД

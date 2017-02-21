@@ -78,7 +78,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
     def update_target_obj(self, data):
         event = None
         measure_id = Measure.query.filter(
-            Measure.code == data['measure_type_code'],
+            Measure.regionalCode == data['measure_type_code'],
             Measure.resultAt_id.isnot(None),
         ).first().id
         em_ctrl = EventMeasureController()
@@ -89,7 +89,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
                 'end_datetime': data['end_datetime'],
                 'event_id': self.parent_obj_id,
                 'measure_id': measure_id,
-                'status': {'id': self.rb_validate(rbMeasureStatus, data['status'], 'code')[0]},
+                'status': {'id': self.rb_validate(rbMeasureStatus, data['status'], 'regionalCode')[0]},
             }
         }]
         em_list = em_ctrl.save_list(event, em_data)
@@ -107,7 +107,7 @@ class MeasureListXForm(MeasureListSchema, XForm):
     def _represent_measure(self, measure):
         dc = {
             'measure_id': measure.id,
-            'measure_type_code': measure.measure.code,
+            'measure_type_code': measure.measure.regionalCode,
             'begin_datetime': safe_date(measure.begDateTime),
             'end_datetime': safe_date(measure.endDateTime),
             'status': unicode(MeasureStatus(measure.status)),

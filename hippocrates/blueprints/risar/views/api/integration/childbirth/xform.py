@@ -91,7 +91,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         'specialities': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'anesthetization': {'attr': 'anesthetization', 'default': None, 'rb': 'rbRisarAnesthetization', 'is_vector': False},
         'hysterectomy': {'attr': 'hysterectomy', 'default': None, 'rb': 'rbRisarHysterectomy', 'is_vector': False},
-        'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'operation_complication': {'attr': 'complications', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'regionalCode'},
         'embryotomy': {'attr': 'embryotomy', 'default': None, 'rb': None, 'is_vector': False},
     }
 
@@ -104,7 +104,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         'apgar_score_5': {'attr': 'apgar_score_5', 'default': None, 'rb': None, 'is_vector': False},
         'apgar_score_10': {'attr': 'apgar_score_10', 'default': None, 'rb': None, 'is_vector': False},
         'death_reasons': {'attr': 'death_reason', 'default': None, 'rb': None, 'is_vector': False},
-        'diseases': {'attr': 'diseases', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'DiagID'},
+        'diseases': {'attr': 'diseases', 'default': [], 'rb': MKB, 'is_vector': True, 'rb_code_field': 'regionalCode'},
     }
 
     DIAG_KINDS_MAP = {
@@ -346,9 +346,11 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
     def _represent_general_info(self, data):
         res = self._represent_part(self.GENERAL_MAP, data)
 
+        hosp_medico = data.get('maternity_hosp_medico')
         lpu = data.get('LPU')
         newborn_lpu = data.get('newborn_LPU')
         res.update({
+            'maternity_hospital_doctor': hosp_medico and hosp_medico.regionalCode,
             'maternity_hospital': lpu and lpu.regionalCode,
             'curation_hospital': newborn_lpu and newborn_lpu.regionalCode,
             'delivery_time': self.safe_time_format(res.get('delivery_time'), '%H:%M'),
@@ -357,7 +359,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         diags_data = data.get('diagnoses')
         for dd in diags_data:
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
+            mkb_code = dd['diagnostic']['mkb'].regionalCode
             if kind['is_vector']:
                 res.setdefault(kind['attr'], []).append(mkb_code)
             else:
@@ -375,7 +377,7 @@ class ChildbirthXForm(ChildbirthSchema, PregnancyCheckupsXForm):
         diags_data = data.get('diagnoses')
         for dd in diags_data:
             kind = self.PAT_DIAG_KINDS_MAP[dd['diagnosis_types']['pathanatomical'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
+            mkb_code = dd['diagnostic']['mkb'].regionalCode
             if kind['is_vector']:
                 res.setdefault(kind['attr'], []).append(mkb_code)
             else:

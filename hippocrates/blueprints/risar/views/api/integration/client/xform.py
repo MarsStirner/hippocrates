@@ -73,7 +73,7 @@ class ClientXForm(ClientSchema, XForm):
             doc_number = document['document_number']
             doc_numbers.append(doc_number)
             doc_sq = and_(
-                rbDocumentType.TFOMSCode == doc_type_code,
+                rbDocumentType.regionalCode == doc_type_code,
                 ClientDocument.number == doc_number,
             )
             if doc_q:
@@ -151,9 +151,9 @@ class ClientXForm(ClientSchema, XForm):
     def _update_id_documents(self, documents):
         client = self.target_obj
         rbdt_map = dict(
-            (str(item.TFOMSCode), item)
+            (str(item.regionalCode), item)
             for item in rbDocumentType.query
-            if item.TFOMSCode
+            if item.regionalCode
         )
 
         client_documents = client.documents.all()
@@ -179,9 +179,9 @@ class ClientXForm(ClientSchema, XForm):
     def _update_policies(self, policies):
         client = self.target_obj
         rbpt_map = dict(
-            (str(item.TFOMSCode) or item.code, item)
+            (str(item.regionalCode) or item.code, item)
             for item in rbPolicyType.query
-            if item.TFOMSCode
+            if item.regionalCode
         )
 
         client_policies = client.policies.all()
@@ -236,7 +236,7 @@ class ClientXForm(ClientSchema, XForm):
 
     def _update_blood(self, data_list):
         blood_types = dict(
-            (bt.code, bt)
+            (bt.regionalCode, bt)
             for bt in rbBloodType.query
         )
         client = self.target_obj
@@ -275,8 +275,8 @@ class ClientXForm(ClientSchema, XForm):
                 self._changed.append(work_object)
                 continue
             if not work_object:
-                self._check_rb_value('rbSocStatusClass', '3')
-                self._check_rb_value('rbSocStatusType', '004')
+                self._check_rb_value('rbSocStatusClass', '3', 'code')
+                self._check_rb_value('rbSocStatusType', '004', 'code')
                 socStatusClass_id = rbSocStatusClass.query.filter(
                     rbSocStatusClass.code == '3'
                 ).value(rbSocStatusClass.id)
@@ -352,7 +352,7 @@ class ClientXForm(ClientSchema, XForm):
         :return:
         """
         return {
-            "document_type_code": doc.documentType.TFOMSCode,
+            "document_type_code": doc.documentType.regionalCode,
             "document_series": doc.serial or Undefined,
             "document_number": doc.number,
             "document_beg_date": doc.date,
@@ -367,7 +367,7 @@ class ClientXForm(ClientSchema, XForm):
         :return:
         """
         return {
-            "insurance_document_type": doc.policyType.TFOMSCode,
+            "insurance_document_type": doc.policyType.regionalCode,
             "insurance_document_series": doc.serial or Undefined,
             "insurance_document_number": doc.number,
             "insurance_document_beg_date": doc.begDate,

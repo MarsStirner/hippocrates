@@ -91,7 +91,7 @@ class SpecialistsCheckupXForm(SpecialistsCheckupSchema, MeasuresResultsXForm):
             'result_action_id': self.target_obj.id,
             'measure_id': self.em.id,
             'measure_status': self.em.literal_status,
-            'measure_type_code': self.em.measure.code,
+            'measure_type_code': self.em.measure.regionalCode,
             'checkup_date': an_props['CheckupDate'].value,
             'lpu_code': self.person.organisation and self.person.organisation.regionalCode or '',
             'doctor_code': self.person.regionalCode,
