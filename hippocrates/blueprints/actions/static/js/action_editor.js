@@ -495,6 +495,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
             WMConfig.url.actions.action_save.format(this.id || ''), undefined, data
         )
             .then(function (result) {
+                self.readonly = result.ro;
                 return self.merge(result);
             }, function (result) {
                 return $q.reject(result);
