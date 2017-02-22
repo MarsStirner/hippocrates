@@ -119,5 +119,5 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
         }
     }, true);
     
-}]);
+}])
 ;
