@@ -349,6 +349,12 @@
                                     <div class="col-sm-7 col-md-7">[[checkup.vagina.name]]</div>
                                 </div>
                                 {% endif %}
+                                {% if 'secretion' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('secretion')]]:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.secretion.name]]</div>
+                                </div>
+                                {% endif %}
                                 {% if 'cervix' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix')]]:</div>
