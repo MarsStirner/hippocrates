@@ -39,15 +39,15 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="fetus" href="#fetus" data-toggle="tab">
+                                    <a aria-controls="vagina" href="#vagina" data-toggle="tab">
                                         <span class="badge">4</span>
-                                        <span>Данные плода</span>
+                                        <span>Влагалищное исследование</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="vagina" href="#vagina" data-toggle="tab">
+                                    <a aria-controls="fetus" href="#fetus" data-toggle="tab">
                                         <span class="badge">5</span>
-                                        <span>Влагалищное исследование</span>
+                                        <span>Данные плода</span>
                                     </a>
                                 </li>
                                 <li>
@@ -648,88 +648,10 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="fetus" name="fetusForm"  novalidate rc-submit rc-step box-wizard>
-                            <div class="box box-primary box-wizard">
-                            <div class="box-header">
-                                <h3 class="box-title">Шаг 4. Данные плода</h3>
-                            </div>
-                            <div class="box-body">
-                                <div class="row">
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
-                                            <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
-                                                <li ng-class="{'active': $index==0}" ng-repeat="child in checkup.fetuses | flt_not_deleted">
-                                                    <a href="#fetus[[$index+1]]" data-toggle="pill">
-                                                        Плод [[$index+1]]<button class="text-red close btn btn-small btn-default closeBtn"
-                                                                                    ng-click="delete_child(child)" type="button"
-                                                                                    ng-hide="child.id"
-                                                                                    tooltip="Удалить">
-                                                                                <span class="glyphicon glyphicon-remove"></span>
-                                                                            </button>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="tab-content">
-                                                <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted">
-                                                    <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th class="col-md-4"></th>
-                                                            <th class="col-md-8"></th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <th class="text-right">Положение <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-4">
-                                                                    <rb-select ng-model="child.state.position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-right">Позиция <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-4">
-                                                                    <rb-select ng-model="child.state.position_2" ref-book="rbRisarFetus_Position_2"></rb-select>
-                                                                </div></div></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-right">Вид плода <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-4"><rb-select ng-model="child.state.type" ref-book="rbRisarFetus_Type"></rb-select>
-                                                                </div></div></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-right">Предлежание <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-4">
-                                                                    <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-right">Сердцебиение <span>&nbsp;</span></th>
-                                                                <td>
-                                                                    <div refbook-checkbox ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat">
-                                                                        [[ item.name ]]
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>
-                                                                <td><div class="row"><div class="col-md-3">
-                                                                    <input ng-model="child.state.heart_rate" class="form-control" valid-number
-                                                                        maxlength="3"></div></div></td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                            </div>
-                            </div>
-                        </ng-form>
                         <ng-form class="tab-pane" id="vagina" name="vaginaForm" novalidate rc-submit rc-step>
                             <div class="box box-primary box-wizard">
                             <div class="box-header">
-                                <h3 class="box-title">Шаг 5. Влагалищное исследование</h3>
+                                <h3 class="box-title">Шаг 4. Влагалищное исследование</h3>
                             </div>
                             <div class="box-body">
                             <table class="table table-condensed">
@@ -1002,6 +924,84 @@
                                     {% endif %}
                                 </tbody>
                             </table>
+                            </div>
+                            </div>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="fetus" name="fetusForm"  novalidate rc-submit rc-step box-wizard>
+                            <div class="box box-primary box-wizard">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 5. Данные плода</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                                            <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
+                                                <li ng-class="{'active': $index==0}" ng-repeat="child in checkup.fetuses | flt_not_deleted">
+                                                    <a href="#fetus[[$index+1]]" data-toggle="pill">
+                                                        Плод [[$index+1]]<button class="text-red close btn btn-small btn-default closeBtn"
+                                                                                    ng-click="delete_child(child)" type="button"
+                                                                                    ng-hide="child.id"
+                                                                                    tooltip="Удалить">
+                                                                                <span class="glyphicon glyphicon-remove"></span>
+                                                                            </button>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="tab-content">
+                                                <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
+                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted">
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th class="col-md-4"></th>
+                                                            <th class="col-md-8"></th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th class="text-right">Положение <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Позиция <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.position_2" ref-book="rbRisarFetus_Position_2"></rb-select>
+                                                                </div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Вид плода <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4"><rb-select ng-model="child.state.type" ref-book="rbRisarFetus_Type"></rb-select>
+                                                                </div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Предлежание <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Сердцебиение <span>&nbsp;</span></th>
+                                                                <td>
+                                                                    <div refbook-checkbox ng-model="child.state.heartbeat" ref-book="rbRisarFetus_Heartbeat">
+                                                                        [[ item.name ]]
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">ЧСС, уд/мин <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-3">
+                                                                    <input ng-model="child.state.heart_rate" class="form-control" valid-number
+                                                                        maxlength="3"></div></div></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                             </div>
                             </div>
                         </ng-form>
