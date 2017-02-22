@@ -372,7 +372,7 @@ def api_appointment():
         delete,
         schedule.person,
         schedule.date,
-        ticket.begTime,
+        ticket.begTime or schedule.begTime,  # для внеплановых даем время интервала
         ticket.endTime,
         schedule.id,
         Person.query.get(current_user.get_id()),
