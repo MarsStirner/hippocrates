@@ -108,12 +108,13 @@ def reconnect(func):
                     sleep(sleep_timeout)
                     if sleep_timeout < 10 * 60:  # min
                         sleep_timeout += 2
-            except Exception as exc:
-                try:
-                    exc_txt = str(exc)
-                except (IndexError, UnicodeError):
-                    exc_txt = exc.__name__
-                logger.error(exc_txt)
+            # нельзя глотать, должна выйти на экран при входе из мис
+            # except Exception as exc:
+            #     try:
+            #         exc_txt = str(exc)
+            #     except (IndexError, UnicodeError):
+            #         exc_txt = exc.__name__
+            #     logger.error(exc_txt)
         return res
     return wrap
 
