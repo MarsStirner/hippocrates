@@ -115,7 +115,7 @@ def check_mis_schedule_ticket(
         "data": {
             "schedule_ticket_id": ticket_id,
             "schedule_id": schedule_id,
-            "schedule_ticket_type": '0' if beg_time else '1',
+            "schedule_ticket_type": '0' if end_time else '1',
             "date": date.isoformat(),
             "time_begin": beg_time and beg_time.isoformat()[:5],
             "time_end": end_time and end_time.isoformat()[:5],
