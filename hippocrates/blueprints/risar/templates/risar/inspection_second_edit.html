@@ -362,15 +362,6 @@
                                         </td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'secretion' in checkup_descriptor %}
-                                    <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('secretion')"></th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"
-                                                 ng-disabled="checkupDescriptor.getReadOnly('secretion')"
-                                                 ng-required="checkupDescriptor.getMandatory('secretion')"></rb-select></div></div></td>
-                                    </tr>
-                                    {% endif %}
                                     {% if 'bowel_and_bladder_habits' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('bowel_and_bladder_habits')"></th>
@@ -451,6 +442,15 @@
                                                  ng-disabled="checkupDescriptor.getReadOnly('vagina')"
                                                  ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
                                         </div></td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'secretion' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('secretion')"></th>
+                                        <td><div class="row"><div class="col-md-4">
+                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('secretion')"
+                                                 ng-required="checkupDescriptor.getMandatory('secretion')"></rb-select></div></div></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'cervix' in checkup_descriptor %}
