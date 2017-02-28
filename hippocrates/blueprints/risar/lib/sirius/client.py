@@ -29,9 +29,11 @@ def binded_event(event_code, entity_code):
         if code != 200:
             raise Exception('Sirius binded event request error')
         events_binds_map = result['result']
-    event_res = event_code in events_binds_map
-    entity_res = not events_binds_map[event_code] or entity_code in events_binds_map[event_code]
-    return event_res and entity_res
+    res = event_code in events_binds_map and (
+        not events_binds_map[event_code] or
+        entity_code in events_binds_map[event_code]
+    )
+    return res
 
 
 def get_stream_id():
@@ -113,7 +115,7 @@ def check_mis_schedule_ticket(
         "data": {
             "schedule_ticket_id": ticket_id,
             "schedule_id": schedule_id,
-            "schedule_ticket_type": '0' if beg_time else '1',
+            "schedule_ticket_type": '0' if end_time else '1',
             "date": date.isoformat(),
             "time_begin": beg_time and beg_time.isoformat()[:5],
             "time_end": end_time and end_time.isoformat()[:5],

@@ -2,15 +2,14 @@
 # TODO: Refactor me
 from datetime import datetime
 
-from hippocrates.blueprints.risar.lib import sirius
 from flask_login import current_user
-
+from hippocrates.blueprints.risar.lib import sirius
 from hippocrates.blueprints.risar.lib.card import PregnancyCard, GynecologicCard
 from hippocrates.blueprints.risar.lib.card_attrs import default_AT_Heuristic, default_ET_Heuristic
-from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
 from hippocrates.blueprints.risar.lib.chart import transfer_to_person, \
     copy_prev_pregs_on_pregcard_creating, copy_prev_pregs_on_gyncard_creating
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue
+from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, request_type_gynecological
 from nemesis.lib.apiutils import ApiException
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import get_new_event_ext_id, bail_out
@@ -159,10 +158,13 @@ class PregnancyChartCreator(ChartCreator):
         card = PregnancyCard.get_for_event(self.event)
         if self.action:
             card._card_attrs_action = self.action
-        copy_prev_pregs_on_pregcard_creating(self.event)
         card.reevaluate_card_attrs()
         db.session.commit()
         NotificationQueue.process_events()
+
+    def _fill_new_event(self):
+        super(PregnancyChartCreator, self)._fill_new_event()
+        copy_prev_pregs_on_pregcard_creating(self.event)
 
 
 class GynecologicCardCreator(ChartCreator):
@@ -191,7 +193,10 @@ class GynecologicCardCreator(ChartCreator):
         card = GynecologicCard.get_for_event(self.event)
         if self.action:
             card._card_attrs_action = self.action
-        copy_prev_pregs_on_gyncard_creating(self.event)
         card.reevaluate_card_attrs()
         db.session.commit()
         NotificationQueue.process_events()
+
+    def _fill_new_event(self):
+        super(GynecologicCardCreator, self)._fill_new_event()
+        copy_prev_pregs_on_gyncard_creating(self.event)

@@ -376,7 +376,7 @@ class CheckupsTicket25XForm(XForm):
     def _format_diags_data(self, data):
         diag_data = []
         if 'diagnosis' in data:
-            mkb2 = self.rb(data.get('reason'), MKB, 'DiagID')
+            mkb2 = self.rb(data.get('reason'), MKB, 'regionalCode')
             character = self.rb(data.get('disease_character'), rbDiseaseCharacter)
             trauma = self.rb(data.get('trauma'), rbTraumaType)
             ache_result = self.rb(data.get('disease_outcome'), rbAcheResult)
@@ -495,7 +495,7 @@ class CheckupsTicket25XForm(XForm):
             doctor_id = safe_traverse(ms, 'person', 'id')
             doctor = Person.query.get(doctor_id) if doctor_id else None
             return {
-                'medical_service': safe_traverse(ms, 'service', 'code'),
+                'medical_service': safe_traverse(ms, 'service', 'code'),  # ?
                 'medical_service_doctor': self.from_person_rb(doctor),
                 'medical_service_quantity': ms.get('amount')
             }
@@ -510,9 +510,9 @@ class CheckupsTicket25XForm(XForm):
             doctor_id = safe_traverse(oper, 'person', 'id')
             doctor = Person.query.get(doctor_id) if doctor_id else None
             return {
-                'operation_code': safe_traverse(oper, 'service', 'code'),
-                'operation_anesthesia': safe_traverse(oper, 'anesthetization', 'code'),
-                'operation_equipment': safe_traverse(oper, 'equipment', 'code'),
+                'operation_code': safe_traverse(oper, 'service', 'code'),  # ?
+                'operation_anesthesia': safe_traverse(oper, 'anesthetization', 'code'),  # vesta
+                'operation_equipment': safe_traverse(oper, 'equipment', 'code'),  # vesta
                 'operation_doctor': self.from_person_rb(doctor)
             }
         return [
@@ -525,7 +525,7 @@ class CheckupsTicket25XForm(XForm):
             doctor_id = safe_traverse(manip, 'person', 'id')
             doctor = Person.query.get(doctor_id) if doctor_id else None
             return {
-                'manipulation': safe_traverse(manip, 'service', 'code'),
+                'manipulation': safe_traverse(manip, 'service', 'code'),  # ?
                 'manipulation_doctor': self.from_person_rb(doctor),
                 'manipulation_quantity': manip.get('amount')
             }
@@ -537,8 +537,8 @@ class CheckupsTicket25XForm(XForm):
     def _repr_sick_leaves(self, action):
         def make_td_data(td):
             return {
-                'sick_leave_type': safe_traverse(td, 'type', 'code'),
-                'sick_leave_reason': safe_traverse(td, 'reason', 'code'),
+                'sick_leave_type': safe_traverse(td, 'type', 'code'),  # vesta
+                'sick_leave_reason': safe_traverse(td, 'reason', 'code'),  # vesta
                 'sick_leave_date_open': safe_date(safe_traverse(td, 'beg_date')),
                 'sick_leave_date_close': safe_date(safe_traverse(td, 'end_date')),
             }
@@ -560,9 +560,9 @@ class CheckupsTicket25XForm(XForm):
                         main_diag = diag
                         break
                 else:
-                    compl_assoc_mkbs.append(diag['diagnostic']['mkb'].DiagID)
+                    compl_assoc_mkbs.append(diag['diagnostic']['mkb'].regionalCode)
             else:
-                compl_assoc_mkbs.append(diag['diagnostic']['mkb'].DiagID)
+                compl_assoc_mkbs.append(diag['diagnostic']['mkb'].regionalCode)
 
         res = {
             'diagnosis_sop': self.or_undefined(compl_assoc_mkbs)

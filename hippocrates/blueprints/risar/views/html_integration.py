@@ -7,6 +7,7 @@
 
 """
 import datetime
+import traceback
 
 import flask
 from flask import url_for, redirect
@@ -85,6 +86,7 @@ def api_card_by_remote_id(api_version, region, entity, remote_id):
             # запись ID карты в шину
             sirius.save_card_ids_match(card_id, region, entity, remote_id)
     except Exception as exc:
+        # traceback.print_exc()
         text = exc.message
         return flask.Response(text)
 

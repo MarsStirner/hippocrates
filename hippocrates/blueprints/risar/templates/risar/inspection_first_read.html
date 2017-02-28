@@ -349,6 +349,12 @@
                                     <div class="col-sm-7 col-md-7">[[checkup.vagina.name]]</div>
                                 </div>
                                 {% endif %}
+                                {% if 'secretion' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('secretion')]]:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.secretion.name]]</div>
+                                </div>
+                                {% endif %}
                                 {% if 'cervix' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('cervix')]]:</div>
@@ -639,7 +645,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                             ng-repeat="child in checkup.fetuses | flt_not_deleted">
+                             ng-repeat="child in checkup.fetuses | flt_not_deleted"  ng-controller="CheckupFirstChildCtrl">
                             <div class="box box-primary">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">Плод [[$index+1]]</h3>
@@ -672,11 +678,33 @@
                                         <div class="col-sm-6 col-md-6 text-right">ЧСС, уд/мин:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.heart_rate]]</div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12">&nbsp;</div>
+                                    <div class="row" ng-show="isPhisher || isStv">
+                                        <div class="col-sm-6 col-md-6 text-right"><b>Данные КТГ</b></div>
+                                        <div class="col-sm-6 col-md-6"></div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12">&nbsp;</div>
+                                    <div class="row" ng-show="isPhisher">
+                                        <div class="col-sm-6 col-md-6 text-right">Базальный ритм:</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.basal.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isPhisher">
+                                        <div class="col-sm-6 col-md-6 text-right">Вариабельность (амплитуда):</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.variability_range.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isPhisher">
+                                        <div class="col-sm-6 col-md-6 text-right">Вариабельность (частота в минуту):</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.frequency_per_minute.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isPhisher">
+                                        <div class="col-sm-6 col-md-6 text-right">Акселерации за 30 минут:</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.acceleration.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isPhisher">
+                                        <div class="col-sm-6 col-md-6 text-right">Децелерации за 30 минут:</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.deceleration.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isStv">
+                                        <div class="col-sm-6 col-md-6 text-right">Оценка по STV:</div>
+                                        <div class="col-sm-6 col-md-6"><span ng-bind="child.state.stv_evaluation"></span></div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12">&nbsp;</div>

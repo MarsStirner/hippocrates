@@ -55,6 +55,20 @@ def api_childbirth_save(api_version, card_id):
     return xform.as_json()
 
 
+# @module.route('/api/integration/<int:api_version>/card/<int:card_id>/childbirth/', methods=['GET'])
+# @api_method(hook=hook)
+# def api_childbirth_get(api_version, card_id):
+#     childbirth_id = None
+#     data = request.get_json()
+#     create = request.method == 'POST'
+#     xform = ChildbirthXForm(api_version, create)
+#     xform.check_params(childbirth_id, card_id, data)
+#     xform.find_parent_obj(xform.parent_obj_id)
+#     xform.set_pcard()
+#     xform.target_obj = xform._find_target_obj_query().first()
+#     return xform.as_json()
+
+
 @module.route('/api/integration/<int:api_version>/card/<int:card_id>/childbirth/', methods=['DELETE'])
 @api_method(hook=hook)
 def api_childbirth_delete(api_version, card_id):

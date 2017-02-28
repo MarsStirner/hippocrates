@@ -325,7 +325,7 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
         diags_data = data.get('diagnoses')
         for dd in diags_data:
             kind = self.DIAG_KINDS_MAP[dd['diagnosis_types']['final'].code]
-            mkb_code = dd['diagnostic']['mkb'].DiagID
+            mkb_code = dd['diagnostic']['mkb'].regionalCode
             if kind['is_vector']:
                 res.setdefault(kind['attr'], []).append(mkb_code)
             else:

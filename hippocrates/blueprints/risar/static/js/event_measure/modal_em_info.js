@@ -89,8 +89,8 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     };
     $scope.getMeasureDateRange = function () {
         return '{0}{ - |1}'.formatNonEmpty(
-            $filter('asDateTime')($scope.event_measure.beg_datetime),
-            $filter('asDateTime')($scope.event_measure.end_datetime)
+            $filter('asDate')($scope.event_measure.beg_datetime),
+            $filter('asDate')($scope.event_measure.end_datetime)
         );
     };
     $scope.getRealizationDate = function () {

@@ -26,9 +26,7 @@ class RefbookXForm(RefbookSchema, XForm):
 
     def check_duplicate(self, data):
         code = data['code']
-        q = self.target_obj_class.query.filter(
-            self.target_obj_class.code == code,
-        )
+        q = self._find_target_obj_query()
         rb_exists = db.session.query(q.exists()).scalar()
         if rb_exists:
             raise ApiException(
@@ -41,7 +39,7 @@ class RefbookXForm(RefbookSchema, XForm):
 
     def _find_target_obj_query(self):
         query = self.target_obj_class.query.filter(
-            self.target_obj_class.code == self.item_code
+            self.target_obj_class.regionalCode == self.item_code
         )
         if hasattr(self.target_obj_class, 'deleted'):
             query = query.filter(
@@ -85,8 +83,9 @@ class RefbookXForm(RefbookSchema, XForm):
         if self.new:
             self.target_obj = self.target_obj_class()
             self._changed.append(self.target_obj)
+            self.target_obj.code = data.get('code') or ''
+            self.target_obj.regionalCode = data.get('code') or ''
 
-        self.target_obj.code = data.get('code') or ''
         self.target_obj.name = data.get('value') or ''
 
     def as_json(self):
@@ -100,7 +99,7 @@ class RefbookXForm(RefbookSchema, XForm):
 
     def rb_represent(self, target_obj):
         return {
-            'code': target_obj.code,
+            'code': target_obj.regionalCode,
             'value': target_obj.name,
         }
 
