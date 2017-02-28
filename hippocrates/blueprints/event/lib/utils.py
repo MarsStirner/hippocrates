@@ -149,6 +149,7 @@ class MovingController():
 
     def update_moving_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
+        moving.endDate = safe_datetime(moving_info['end_date'])     # status?
         moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
         moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
         moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \

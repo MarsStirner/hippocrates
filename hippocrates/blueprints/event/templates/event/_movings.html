@@ -1,7 +1,7 @@
 <div ng-controller="EventMovingsCtrl">
 <ng-form name="eventReceivedForm" role="form" toc-element="Движение пациента" toc-name="tocEventForm">
     <div class="box box-info collapsed-box">
-        <div class="box-header with-border">
+        <div class="box-header with-border" ng-class="{'bg-danger' : event.movings.length == 0 || (event.movings[event.movings.length-1].hospitalBed.value == null) }">
             <h3 class="box-title">Движение пациента</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-default btn-box-tool" ng-click="create_moving()"
@@ -26,6 +26,7 @@
                             <th>Дни</th>
                             <th>Койко-дни</th>
                             <th>Койка</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,6 +41,11 @@
                                 <button ng-if="!moving.hospitalBed.value" type="button" class="btn btn-link btn-md"
                                         ng-click="create_hospitalBed(moving)">
                                     <i class="ion ion-plus-round fa-fw"></i>Положить на койку</button>
+                                </button>
+                            </td>
+                            <td>
+                                <button type="button" ng-click="edit_moving(moving)" class="btn btn-default" aria-label="Edit">
+                                  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                 </button>
                             </td>
                         </tr>

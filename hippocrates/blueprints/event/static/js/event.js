@@ -410,6 +410,21 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
         });
     };
 
+    $scope.edit_moving = function(moving){
+        var scope = $scope.$new();
+        scope.model = angular.copy(moving);
+        $modal.open({
+            templateUrl: 'modal-create-moving.html',
+            backdrop : 'static',
+            size: 'lg',
+            scope: scope
+        }).result.then(function (result) {
+            $scope.moving_save(result).then(function (result) {
+                $scope.event.movings[ _.indexOf(_.pluck($scope.event.movings, 'id'), result['id']) ] = result;
+            });
+        });
+    };
+
     $scope.close_last_moving = function(){
         var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null;
         ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){

@@ -27,6 +27,18 @@
             </wm-time>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="out_date" class="control-label">Дата выбытия</label>
+            <wm-date id="out_date" name="out_date" ng-model="model.end_date" ng-required="true">
+            </wm-date>
+        </div>
+        <div class="col-md-4">
+            <label for="out_time" class="control-label">Время выбытия</label>
+            <wm-time id="out_time" name="out_time" ng-model="model.end_date" ng-required="true">
+            </wm-time>
+        </div>
+    </div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-success" ng-click="$close(model)">Сохранить</button>
