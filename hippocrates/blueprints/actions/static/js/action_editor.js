@@ -353,8 +353,9 @@ WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
-    var template_fields = ['set_person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
-    var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'person', 'coord_date'];
+    var template_fields = ['note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
+    var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'set_person',
+        'person', 'coord_date'];
     var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
@@ -388,6 +389,27 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     function merge_properties (self, source) {
         /* Перетягивает свойства действия */
         self.properties = source.properties.clone();
+    }
+    function merge_template_properties (self, source) {
+        /* Перетягивает свойства действия из шаблона,
+         * Если свойство не должно переноситься из шаблона, то его содержимое
+         * не меняется.
+         */
+        var new_props = source.properties.clone();
+        var templ_prop;
+        for (var i = 0; i < new_props.length; i++) {
+            templ_prop = new_props[i];
+            if (self.properties_by_id.hasOwnProperty(templ_prop.type.id)) {
+                if (templ_prop.type.not_loadable_with_template) {
+                    // all fields from current property
+                    _.extend(templ_prop, self.properties_by_id[templ_prop.type.id]);
+                } else {
+                    // all fields from template except for id
+                    templ_prop.id = self.properties_by_id[templ_prop.type.id].id;
+                }
+            }
+        }
+        self.properties = new_props;
     }
     function process_properties (self, source) {
         self.action_columns = {
@@ -467,7 +489,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     };
     Action.prototype.merge_template = function (src_action) {
         merge_template_fields(this, src_action);
-        merge_properties(this, src_action);
+        merge_template_properties(this, src_action);
         process_properties(this, src_action);
         return this;
     };
