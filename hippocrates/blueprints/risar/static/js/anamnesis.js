@@ -387,11 +387,6 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         scope.model = p;
         scope.minDate = $scope.header.client.birth_date;
         scope.maxDate = new Date();
-        scope.$watch('model.type', function(n, o) {
-            if (n !== undefined) {
-                scope.isAllergy = n.code === 'allergy' ? true : false;
-            }
-        }, true);
 
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/intolerances.html',
