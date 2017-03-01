@@ -187,7 +187,7 @@
                                 {% if 'specialities' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('specialities')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.specialities.name]]</div>
+                                    <div class="col-sm-6 col-md-6" ><span ng-bind-html="epicrisis.specialities"></span></div>
                                 </div>
                                 {% endif %}
                                 {% if 'anesthetization' in epicrisis_descriptor %}

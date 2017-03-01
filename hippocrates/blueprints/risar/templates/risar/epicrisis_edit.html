@@ -628,13 +628,9 @@
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('specialities')"></th>
                                         <td>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"
-                                                    ng-required="epicrisisDescriptor.getMandatory('specialities')"
-                                                    ng-disabled="epicrisisDescriptor.getReadOnly('specialities')"></rb-select>
-                                                </div>
-                                            </div>
+                                            <div class="row"><div class="col-md-12">
+                                                <wysiwyg ng-model="epicrisis.specialities" />
+                                            </div></div>
                                         </td>
                                     </tr>
                                     {% endif %}
@@ -671,7 +667,9 @@
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('operation_complication')"></th>
                                         <td>
                                             <div class="row">
-                                                <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
+                                                 <div class="col-md-12">
+                                                    <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
+                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
