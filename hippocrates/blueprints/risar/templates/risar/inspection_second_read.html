@@ -536,7 +536,7 @@
                         </div>
                     </div>
                     <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                         ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupSecondChildCtrl">
+                         ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupBaseChildCtrl">
                         <div class="col-md-6">
                             <div class="box box-primary">
                                 <div class="box-header with-border">
@@ -597,6 +597,15 @@
                                     <div class="row" ng-show="isPhisher">
                                         <div class="col-sm-6 col-md-6 text-right">Децелерации за 30 минут:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.deceleration.name]]</div>
+                                    </div>
+                                    <div class="row" ng-show="isPhisher">
+                                        <div class="col-sm-6 col-md-6 text-right">Оценка КТГ по Фишеру:</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <span ng-bind="child.state.fisher_ktg_points"></span>
+                                            <span ng-if="child.state.fisher_ktg_rate">
+                                                (<span  ng-bind="child.state.fisher_ktg_rate.name|lowercase"></span>)
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="row" ng-show="isStv">
                                         <div class="col-sm-6 col-md-6 text-right">Оценка по STV:</div>

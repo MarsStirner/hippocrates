@@ -751,7 +751,7 @@
                                         <div class="col-md-9">
                                             <div class="tab-content">
                                                 <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupSecondChildCtrl">
+                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupBaseChildCtrl">
                                                     <table class="table">
                                                         <thead>
                                                         <tr>
