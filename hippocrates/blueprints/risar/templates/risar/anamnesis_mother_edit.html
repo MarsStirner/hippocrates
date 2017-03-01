@@ -136,6 +136,7 @@
                                ng-required="motherAnamnesisDescriptor.getMandatory('fertilization_type')"
                                ng-disabled="motherAnamnesisDescriptor.getReadOnly('fertilization_type')"></rb-select></td>
                 </tr>
+                    {%- if 'attempt_number' in mother_anamnesis_descriptor -%}
                     <tr ng-show="isAttemptVisible">
                         <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('attempt_number')"></th>
                         <td>
@@ -148,7 +149,6 @@
                             </div>
                         </td>
                     </tr>
-                     {%- if 'attempt_number' in mother_anamnesis_descriptor -%}
                     {%- endif -%}
                 {% endif %}
                 {% if 'intrauterine' in mother_anamnesis_descriptor %}
