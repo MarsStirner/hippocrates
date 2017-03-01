@@ -43,6 +43,9 @@ WebMis20
     this.print_second_checkup = function (action_id, fmt) {
         self.file_get('POST', Config.url.print_second_checkup, {action_id: action_id, extension: fmt})
     };
+    this.print_gyn_checkup = function (action_id, fmt) {
+        self.file_get('POST', Config.url.print_gyn_checkup, {action_id: action_id, extension: fmt})
+    };
     this.schedule = {
         get_appointments: function () {
             var date = arguments[0];

@@ -355,6 +355,9 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
         $scope.canEditCheckup = function (idx) {
             return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
         };
+        $scope.print_checkup = function (checkup) {
+            RisarApi.print_gyn_checkup(checkup.id, 'pdf');
+        };
 
         var reload = function () {
             $scope.checkups = [];
