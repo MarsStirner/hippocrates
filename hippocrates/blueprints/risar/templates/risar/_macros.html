@@ -229,3 +229,35 @@
     </div>
 </div>
 {% endmacro %}
+
+{% macro radio_da_net(model) %}
+    {% set property_name = model.split('.')[-1] %}
+    <label class="normal_label">
+        <input id="{{ property_name }}_yes" name="{{ property_name }}_yes" type="radio"
+               ng-model="{{ model }}"
+               data-ng-value='true'/> Да </label>
+    <label class="normal_label">
+        <input id="{{ property_name }}_no" name="{{ property_name }}_no" type="radio"
+               ng-model="{{ model }}"
+               data-ng-value='false'/> Нет </label>
+{% endmacro %}
+
+{% macro radio_da_net(model, descriptor=None) %}
+    {% set property_name = model.split('.')[-1] %}
+    <div class="radio-inline">
+        <label>
+            <input type="radio" ng-click="{{model}} = true" ng-checked="{{model}}"
+            {%- if descriptor -%} ng-disabled="{{descriptor}}.getReadOnly('{{property_name}}')" {%- endif -%}
+            >
+            Да
+        </label>
+    </div>
+    <div class="radio-inline">
+        <label>
+            <input type="radio" ng-click="{{model}} = false" ng-checked="!{{model}}"
+              {%- if descriptor -%} ng-disabled="{{descriptor}}.getReadOnly('{{property_name}}')" {%- endif -%}
+            >
+            Нет
+        </label>
+    </div>
+{% endmacro %}

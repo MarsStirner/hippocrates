@@ -86,9 +86,7 @@
                 {% if 'HIV' in father_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('HIV')"></th>
-                    <td><input ng-model="anamnesis_father.HIV" class="checkbox" type="checkbox"
-                               ng-required="fatherAnamnesisDescriptor.getMandatory('HIV')"
-                               ng-disabled="fatherAnamnesisDescriptor.getReadOnly('HIV')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_father.HIV') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'fluorography' in father_anamnesis_descriptor %}
@@ -102,9 +100,7 @@
                 {% if 'infertility' in father_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('infertility')"></th>
-                    <td><input ng-model="anamnesis_father.infertility" class="checkbox" type="checkbox"
-                               ng-required="fatherAnamnesisDescriptor.getMandatory('infertility')"
-                               ng-disabled="fatherAnamnesisDescriptor.getReadOnly('infertility')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_father.infertility') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'infertility_type' in father_anamnesis_descriptor %}
@@ -189,33 +185,25 @@
                 {% if 'alcohol' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('alcohol')"></td>
-                    <td><input ng-model="anamnesis_father.alcohol" class="checkbox" type="checkbox"
-                               ng-required="fatherAnamnesisDescriptor.getMandatory('alcohol')"
-                               ng-disabled="fatherAnamnesisDescriptor.getReadOnly('alcohol')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_father.alcohol') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'smoking' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('smoking')"></td>
-                    <td><input ng-model="anamnesis_father.smoking" class="checkbox" type="checkbox"
-                               ng-required="fatherAnamnesisDescriptor.getMandatory('smoking')"
-                               ng-disabled="fatherAnamnesisDescriptor.getReadOnly('smoking')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_father.smoking') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'toxic' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('toxic')"></td>
-                    <td><input ng-model="anamnesis_father.toxic" class="checkbox" type="checkbox"
-                               ng-required="fatherAnamnesisDescriptor.getMandatory('toxic')"
-                               ng-disabled="fatherAnamnesisDescriptor.getReadOnly('toxic')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_father.toxic') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'drugs' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('drugs')"></td>
-                    <td><input ng-model="anamnesis_father.drugs" class="checkbox" type="checkbox"
-                               ng-required="fatherAnamnesisDescriptor.getMandatory('drugs')"
-                               ng-disabled="fatherAnamnesisDescriptor.getReadOnly('drugs')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_father.drugs') }}</td>
                 </tr>
                 {% endif %}
                 </tbody>

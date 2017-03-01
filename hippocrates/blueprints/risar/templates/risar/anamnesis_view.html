@@ -27,7 +27,7 @@
                                     продолжительность цикла <b ng-bind-html="anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
                                     {% endif %}
                                     {% if 'menstruation_disorders' in mother_anamnesis_descriptor %}
-                                    нарушения: <b ng-bind-html="anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>
+                                    нарушения: <b ng-bind-html="anamnesis.mother.menstruation_disorders | danetIfNull"></b>
                                     {% endif %}
                                 </p>
                                 {% if 'menstruation_last_date' in mother_anamnesis_descriptor %}

@@ -440,6 +440,14 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, $filter,
             }
         }
     });
+    angular.forEach(['menstruation_disorders', 'multifetation', 'infertility', 'smoking',
+                    'alcohol', 'toxic', 'drugs', 'preeclampsia', 'intrauterine', 'heart_disease'], function(v, _k) {
+        $scope.$watch('anamnesis_mother.'+v, function (n, _o) {
+            if ($scope.anamnesis_mother) {
+                $scope.anamnesis_mother[v] = n === null ? false : $scope.anamnesis_mother[v];
+            }
+        });
+    });
 
     $scope.save = function () {
         $scope.submit_attempt = true;
@@ -546,4 +554,12 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, $document, $filter,
             }
         }
     });
+    angular.forEach(['infertility', 'smoking', 'alcohol', 'toxic', 'drugs', 'HIV'], function(v, _k) {
+        $scope.$watch('anamnesis_father.'+v, function (n, _o) {
+            if ($scope.anamnesis_father) {
+                $scope.anamnesis_father[v] = n === null ? false : $scope.anamnesis_father[v];
+            }
+        });
+    });
+
 };
