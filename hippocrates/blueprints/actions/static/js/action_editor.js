@@ -353,9 +353,9 @@ WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
-    var template_fields = ['note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
+    var template_fields = [];
     var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'set_person',
-        'person', 'coord_date'];
+        'person', 'coord_date', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
     var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
@@ -396,16 +396,17 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
          * не меняется.
          */
         var new_props = source.properties.clone();
-        var templ_prop;
+        var templ_prop, cur_prop;
         for (var i = 0; i < new_props.length; i++) {
             templ_prop = new_props[i];
             if (self.properties_by_id.hasOwnProperty(templ_prop.type.id)) {
-                if (templ_prop.type.not_loadable_with_template) {
+                cur_prop = self.properties_by_id[templ_prop.type.id];
+                if (templ_prop.type.not_loadable_with_template || cur_prop.value) {
                     // all fields from current property
-                    _.extend(templ_prop, self.properties_by_id[templ_prop.type.id]);
+                    _.extend(templ_prop, cur_prop);
                 } else {
                     // all fields from template except for id
-                    templ_prop.id = self.properties_by_id[templ_prop.type.id].id;
+                    templ_prop.id = cur_prop.id;
                 }
             }
         }
