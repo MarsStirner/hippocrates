@@ -86,7 +86,7 @@
                 {% if 'HIV' in father_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('HIV')"></th>
-                    <td>{{ rimacros.radio_da_net('anamnesis_father.HIV') }}</td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_father.HIV', descriptor='fatherAnamnesisDescriptor') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'fluorography' in father_anamnesis_descriptor %}
@@ -100,7 +100,7 @@
                 {% if 'infertility' in father_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('infertility')"></th>
-                    <td>{{ rimacros.radio_da_net('anamnesis_father.infertility') }}</td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_father.infertility', descriptor='fatherAnamnesisDescriptor') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'infertility_type' in father_anamnesis_descriptor %}
@@ -185,25 +185,25 @@
                 {% if 'alcohol' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('alcohol')"></td>
-                    <td>{{ rimacros.radio_da_net('anamnesis_father.alcohol') }}</td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_father.alcohol', descriptor='fatherAnamnesisDescriptor') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'smoking' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('smoking')"></td>
-                    <td>{{ rimacros.radio_da_net('anamnesis_father.smoking') }}</td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_father.smoking', descriptor='fatherAnamnesisDescriptor') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'toxic' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('toxic')"></td>
-                    <td>{{ rimacros.radio_da_net('anamnesis_father.toxic') }}</td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_father.toxic', descriptor='fatherAnamnesisDescriptor') }}</td>
                 </tr>
                 {% endif %}
                 {% if 'drugs' in father_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="fatherAnamnesisDescriptor.getLabel('drugs')"></td>
-                    <td>{{ rimacros.radio_da_net('anamnesis_father.drugs') }}</td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_father.drugs', descriptor='fatherAnamnesisDescriptor') }}</td>
                 </tr>
                 {% endif %}
                 </tbody>
