@@ -1035,8 +1035,8 @@
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]">Перейти на форму осмотров пациентки</a>
 {#                        <button ng-show="checkup.id && rc.sampleWizard.currentIndex == 5" ng-click="print_checkup_ticket()"#}
 {#                                type="button" class="btn btn-default"><i class="glyphicon glyphicon-print"></i> Печать талона</button>#}
-                        <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps_si"
-                                         resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>
+{#                        <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps_si"#}
+{#                                         resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>#}
                         <a class="btn btn-success"
                            ng-click="save(rc.sampleWizard.currentStep.formController)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
