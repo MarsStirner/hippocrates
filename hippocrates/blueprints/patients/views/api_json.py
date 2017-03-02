@@ -267,7 +267,19 @@ def api_patient_save():
                     intlr = add_or_update_intolerance(client, intolerance)
                     db.session.add(intlr)
 
-            ss_info = client_data.get('soc_statuses')
+            works_info = client_data.get('works')
+            if works_info:
+                for w in works_info:
+                    work = add_or_update_work_soc_status(client, w)
+                    db.session.add(work)
+
+            ss_info = client_data.get('invalidities')
+            if ss_info:
+                for ss in ss_info:
+                    sstat = add_or_update_soc_status(client, ss)
+                    db.session.add(sstat)
+
+            ss_info = client_data.get('nationalities')
             if ss_info:
                 for ss in ss_info:
                     sstat = add_or_update_soc_status(client, ss)
