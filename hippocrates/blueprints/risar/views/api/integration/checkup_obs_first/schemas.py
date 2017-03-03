@@ -371,6 +371,10 @@ class CheckupObsFirstSchema(Schema):
                             "description": "Влагалище, справочник rbRisarVagina",
                             "type": "string"
                         },
+                        "secretion": {
+                            "description": "Выделения, справочник rbRisarSecretion",
+                            "type": "string"
+                        },
                         "cervix": {
                             "description": "Шейка матки, справочник rbRisarCervix",
                             "type": "array",

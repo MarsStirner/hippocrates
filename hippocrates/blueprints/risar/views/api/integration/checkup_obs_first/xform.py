@@ -90,6 +90,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
 
     VAGINAL_MAP = {
         'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
+        'secretion': {'attr': 'secretion', 'default': None, 'rb': 'rbRisarSecretion', 'is_vector': False},
         'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': True},
         'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
         'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal', 'is_vector': False},
