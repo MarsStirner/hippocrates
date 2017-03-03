@@ -107,18 +107,20 @@
                                 <tbody>
                                     <tr>
                                         <td class="text-right col-md-4">Дата <span class="text-danger">*</span></td>
-                                        <td class="col-md-2">
+                                        <td class="col-md-8">
                                             <wm-date name="osmotr_date" ng-model="checkup.beg_date" style="width: 250px" autofocus
                                                 min-date="minDate" ng-required="true"></wm-date>
                                         </td>
+                                    </tr>
+                                    <tr>
                                         <td class="text-right">Время осмотра</td>
-                                        <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
+                                        <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 250px" ></wm-time>
                                         </td>
                                     </tr>
                                     {% if 'department' in checkup_descriptor %}
                                     <tr ng-if="checkupDescriptor.exists('department')">
                                         <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
-                                        <td class="col-md-4">
+                                        <td class="col-md-8">
                                             <rb-select ref-book="OrgStructure" ng-model="checkup.department" limit-to="50"
                                                 ng-required="checkupDescriptor.getMandatory('department')"
                                                 ng-disabled="checkupDescriptor.getReadOnly('department')"
@@ -126,10 +128,6 @@
                                         </td>
                                     </tr>
                                     {% endif %}
-                                <tbody>
-                            </table>
-                            <table class="table table-condensed">
-                                <tbody>
                                     <tr>
                                         <th class="text-right col-md-4">Последняя менструация</th>
                                         <td class="col-md-8"></td>
