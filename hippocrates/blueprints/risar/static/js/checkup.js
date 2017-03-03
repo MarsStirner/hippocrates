@@ -184,7 +184,7 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor, WMConfig) 
     $scope.get_spec_params = function () {
         var app_mode = safe_traverse(WMConfig, ['local_config', 'risar', 'app_mode']);
         if (app_mode == 3) {
-            return {"code": "^[AB]"};
+            return {"code": "(B01.001.001)|(B01.001.002)|(B01.001.004)|(B01.001.005)|(B01.001.504)|(B01.001.505)|(B04.001.001)|(B04.001.002)|(B01.047.522)|(B01.047.523)|(B01.006.001)|(B01.006.002)|(В01.019.001)|(В04.031.520)"};
         }
     };
     $scope.init = function (rc_step) {
