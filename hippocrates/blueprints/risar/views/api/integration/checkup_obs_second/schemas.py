@@ -174,7 +174,7 @@ class CheckupObsSecondSchema(Schema):
                             "type": "string"
                         },
                         "bowel_and_bladder_habits": {
-                            "description": "Физиологические отправления",
+                            "description": "Физиологические отправления, справочник rbRisarBowelAndBladderFunctions",
                             "type": "string"
                         }
                     },

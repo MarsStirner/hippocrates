@@ -55,7 +55,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
         'secretion': {'attr': 'secretion', 'default': None, 'rb': 'rbRisarSecretion', 'is_vector': False},
         'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
-        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
+        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': 'rbRisarBowelAndBladderFunctions', 'is_vector': False},
     }
 
     OBSTETRIC_MAP = {

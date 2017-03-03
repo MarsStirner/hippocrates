@@ -57,7 +57,7 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
         'ad_left_low': {'attr': 'ad_left_low', 'default': None, 'rb': None, 'is_vector': False},
         'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
         'vein': {'attr': 'veins', 'default': None, 'rb': 'rbRisarVein', 'is_vector': False},
-        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
+        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': 'rbRisarBowelAndBladderFunctions', 'is_vector': False},
         'heart_rate': {'attr': 'heart_rate', 'default': None, 'rb': None, 'is_vector': False},
     }
 
