@@ -410,24 +410,48 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
         });
     };
 
-    $scope.edit_moving = function(moving){
+    $scope.change_moving = function(){
         var scope = $scope.$new();
-        scope.model = angular.copy(moving);
+        scope.model = {
+            event_id: $scope.event.event_id,
+            beg_date: new Date()
+        };
         $modal.open({
             templateUrl: 'modal-create-moving.html',
             backdrop : 'static',
             size: 'lg',
             scope: scope
         }).result.then(function (result) {
-            $scope.moving_save(result).then(function (result) {
-                $scope.event.movings[ _.indexOf(_.pluck($scope.event.movings, 'id'), result['id']) ] = result;
+            $scope.close_last_moving().then(function () {
+                $scope.moving_save(result).then(function (result) {
+                    $scope.event.movings[$scope.event.movings.length - 1] = result[0];
+                    $scope.event.movings.push(result[1]);
+                });
+            });
+        });
+    };
+
+    $scope.edit_moving = function(moving){
+        var scope = $scope.$new();
+        scope.model = angular.copy(moving);
+        $scope.org_struct_changed(scope.model).then(function(){
+            $modal.open({
+                templateUrl: 'modal-create-hospBed.html',
+                backdrop : 'static',
+                size: 'lg',
+                scope: scope
+            }).result.then(function (result) {
+                $scope.moving_save(result).then(function (result) {
+                    angular.extend(moving, result);
+                    // $scope.event.movings[ _.indexOf(_.pluck($scope.event.movings, 'id'), result['id']) ] = result;
+                });
             });
         });
     };
 
     $scope.close_last_moving = function(){
         var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null;
-        ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
+        return ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
             $scope.event.movings[$scope.event.movings.length - 1] = result;
         })
     };
@@ -443,7 +467,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
                 scope: scope
             }).result.then(function (result) {
                 $scope.moving_save(result).then(function (result) {
-                angular.extend(moving, result);
+                    angular.extend(moving, result);
                 });
             });
         })

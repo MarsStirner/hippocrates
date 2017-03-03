@@ -8,6 +8,10 @@
                         ng-disabled="(event.movings.length != 0) && (event.movings[event.movings.length-1].hospitalBed.value == null)">
                     Направить в отделение
                 </button>
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_moving()"
+                        ng-disabled="(event.movings.length != 0) && (event.movings[event.movings.length-1].hospitalBed.value == null)">
+                    Перевести в отделение
+                </button>
                 <button type="button" class="btn btn-default btn-box-tool" ng-click="close_last_moving()"
                         ng-disabled="(event.movings.length == 0) || (event.movings[event.movings.length-1].hospitalBed.value == null)">
                     Закрыть движение
