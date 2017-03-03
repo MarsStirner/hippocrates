@@ -7,7 +7,7 @@ from .utils import (
     _filter_child_abnormal_weight, _filter_child_cong_prev_preg, _filter_child_death,
     _filter_child_miscarriage, _filter_child_neuro_prev_preg, _filter_misbirth_prev_preg,
     _filter_parity_prev_preg, _filter_premature_prev_preg, _filter_prev_preg_compl,
-    _filter_prev_preg_tubal
+    _filter_prev_preg_tubal, _filter_misbirth_and_premature_prev_preg
 )
 from hippocrates.blueprints.risar.lib.utils import mkb_match as _mkb_match
 from nemesis.lib.utils import safe_bool, safe_decimal
@@ -56,10 +56,24 @@ def mother_alcohol(card):
     return False
 
 
+def mother_drugs(card):
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        return safe_bool(anamnesis.get_prop_value('drugs'))
+    return False
+
+
 def father_alcohol(card):
     anamnesis = card.anamnesis.father
     if anamnesis.id:
         return safe_bool(anamnesis['alcohol'].value)
+    return False
+
+
+def father_drugs(card):
+    anamnesis = card.anamnesis.father
+    if anamnesis.id:
+        return safe_bool(anamnesis.get_prop_value('drugs'))
     return False
 
 
@@ -75,6 +89,14 @@ def height_less_150(card):
     if fi:
         return fi.action['height'].value is not None and \
                fi.action['height'].value <= 150
+    return False
+
+
+def height_less_155(card):
+    fi = card.primary_inspection
+    if fi:
+        return fi.action['height'].value is not None and \
+               fi.action['height'].value <= 155
     return False
 
 
@@ -104,6 +126,11 @@ def parity_above_8(card):
     return 8 <= prev_pr_count
 
 
+def parity_above_4(card):
+    prev_pr_count = len(filter(_filter_parity_prev_preg, card.prev_pregs))
+    return 4 <= prev_pr_count
+
+
 def abortion_1(card):
     parity_count_gt_zero = any(itertools.ifilter(_filter_parity_prev_preg, card.prev_pregs))
     misbirth_count = len(filter(_filter_misbirth_prev_preg, card.prev_pregs))
@@ -128,6 +155,12 @@ def abortion_after_last_delivery_more_3(card):
     return parity_count_gt_zero and misbirth_count >= 3
 
 
+def abortion_first_trimester(card):
+    misbirths = filter(_filter_misbirth_prev_preg, card.prev_pregs)
+    return any(prev_pr for prev_pr in misbirths
+               if prev_pr.action['pregnancy_week'].value and prev_pr.action['pregnancy_week'].value <= 13)
+
+
 def intrauterine_operations(card):
     anamnesis = card.anamnesis.mother
     if anamnesis.id:
@@ -145,6 +178,23 @@ def premature_birth_more_2(card):
     return premature_count >= 2
 
 
+def premature_birth_second_trimester(card):
+    prematures = filter(_filter_misbirth_and_premature_prev_preg, card.prev_pregs)
+    return any(prev_pr for prev_pr in prematures
+               if prev_pr.action['pregnancy_week'].value and 14 <= prev_pr.action['pregnancy_week'].value <= 27)
+
+
+def preeclampsia_anamnesis(card):
+    return any(prev_pr for prev_pr in card.prev_pregs
+               if prev_pr.action['preeclampsia'].value)
+
+
+def miscarriage(card):
+    return any(
+        itertools.ifilter(_filter_child_miscarriage, _iter_preg_child(card.prev_pregs))
+    )
+
+
 def miscarriage_1(card):
     miscarriage_count = len(list(
         itertools.ifilter(_filter_child_miscarriage, _iter_preg_child(card.prev_pregs))
@@ -157,6 +207,12 @@ def miscarriage_more_2(card):
         itertools.ifilter(_filter_child_miscarriage, _iter_preg_child(card.prev_pregs))
     ))
     return miscarriage_count >= 2
+
+
+def child_death(card):
+    return any(itertools.ifilter(
+        _filter_child_death, _iter_preg_child(card.prev_pregs)
+    ))
 
 
 def child_death_1(card):
@@ -196,6 +252,13 @@ def abnormal_child_weight(card):
         )
     ))
     return abn_weight_gt_zero
+
+
+def infertility(card):
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        return anamnesis['infertility'].value
+    return False
 
 
 def infertility_less_4(card):
@@ -250,6 +313,34 @@ def chronic_inflammation(card):
     ))
 
 
+def chronic_inflammation_tomsk(card):
+    """
+    На форме «Диагнозы случая» есть хотя бы один диагноз с кодом МКБ из списка N71 – N77
+    """
+    return _mkb_match(card.unclosed_mkbs, needles=u'N71-N77.99')
+
+
+def birth_complications(card):
+    """
+    На на вкладке "Сведения о предыдущих беременностях" есть хотя бы одна запись со
+    значением атрибута "Осложнения после родов/абортов" из узла О85-О92
+    """
+    return any(itertools.ifilter(
+        _filter_prev_preg_compl, card.prev_pregs
+    ))
+
+
+def intrauterine_contraception(card):
+    """
+    На форме «Ввод сведений о матери» в поле «Сведения по контрацепции» выбрано значение «ВМС»
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id and '2' in anamnesis['contraception'].value_raw:
+        return True
+
+    return False
+
+
 def tubal_pregnancy(card):
     return any(itertools.ifilter(
         _filter_prev_preg_tubal, card.prev_pregs
@@ -270,6 +361,44 @@ def intracytoplasmic_sperm_injection(card):
     return False
 
 
+def assisted_reproductive_technology(card):
+    """
+    На форме «Ввод сведений о матери» значением атрибута «Способ оплодотворения»
+    выбрано любое значение, кроме "Естественный"
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        return anamnesis['fertilization_type'].value_raw and \
+               anamnesis['fertilization_type'].value_raw != '05'
+    return False
+
+
+def uterine_scar_1(card):
+    """
+    На форме "Ввод сведений о матери" в поле "Рубец на матке" выбрано значение "один"
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        # TODO:
+        return False
+        # return anamnesis['fertilization_type'].value_raw and \
+        #        anamnesis['fertilization_type'].value_raw != '05'
+    return False
+
+
+def uterine_scar_more_2(card):
+    """
+    На форме "Ввод сведений о матери" в поле "Рубец на матке" выбрано значение "два и более"
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        # TODO:
+        return False
+        # return anamnesis['fertilization_type'].value_raw and \
+        #        anamnesis['fertilization_type'].value_raw != '05'
+    return False
+
+
 def heart_disease(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'Q20.0-Q26.9, I05.0-I09.9, I34.0-I38, I42.0, O99.4')
 
@@ -286,14 +415,17 @@ def heart_disease_circulatory_embarrassment(card):
 
 
 def hypertensive_disease_1(card):
+    # todo:
     return _mkb_match(card.unclosed_mkbs, needles=u'I11-I11.99')
 
 
 def hypertensive_disease_2(card):
+    # todo:
     return _mkb_match(card.unclosed_mkbs, needles=u'I12-I12.99')
 
 
 def hypertensive_disease_3(card):
+    # todo:
     return _mkb_match(card.unclosed_mkbs, needles=u'I13-I13.99')
 
 
@@ -339,10 +471,36 @@ def obesity(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'E65-E68.99')
 
 
+def weight_deficit(card):
+    """
+    На форме «Первичный осмотр» значение атрибута «Индекс массы тела» < 18,5
+    или на форме "Диагнозы случая" присутствует хоть один диагноз из группы E40-E46.
+    """
+    inspection = card.primary_inspection
+    if inspection and inspection.action['BMI'].value is not None and \
+            inspection.action['BMI'].value < 18.5:
+        return True
+    return _mkb_match(card.unclosed_mkbs, needles=u'E40-E46.99')
+
+
+def anemia_70(card):
+    """
+    В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
+    0010, 0035, 0284, 0128 (среди нескольких взять самое актуальное) и в данном мероприятии
+    есть свойство с кодом hemoglobin и его значение меньше или равно 70 г/л
+    """
+    measure_codes = ['0010', '0035', '0284', '0128']
+    theone = _theone_measure(card, measure_codes)
+    if theone and theone.result_action.has_property('hemoglobin'):
+        val = theone.result_action['hemoglobin'].value
+        return val is not None and val <= 70
+    return False
+
+
 def anemia_90(card):
     """
     В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
-    0010, 0035, 0284, 0128 (среди некольких взять самое актуальное) и в данном мероприятии
+    0010, 0035, 0284, 0128 (среди нескольких взять самое актуальное) и в данном мероприятии
     есть свойство с кодом hemoglobin и его значение меньше или равно 90 г/л
     """
     measure_codes = ['0010', '0035', '0284', '0128']
@@ -356,7 +514,7 @@ def anemia_90(card):
 def anemia_100(card):
     """
     В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
-    0010, 0035, 0284, 0128 (среди некольких взять самое актуальное) и в данном мероприятии
+    0010, 0035, 0284, 0128 (среди нескольких взять самое актуальное) и в данном мероприятии
     есть свойство с кодом hemoglobin и его значение больше 90 г/л, но меньше или равно 100 г/л
     """
     measure_codes = ['0010', '0035', '0284', '0128']
@@ -370,7 +528,7 @@ def anemia_100(card):
 def anemia_110(card):
     """
     В мероприятиях пациентки есть любое мероприятие, у которого код среди следующих:
-    0010, 0035, 0284, 0128 (среди некольких взять самое актуальное) и в данном мероприятии
+    0010, 0035, 0284, 0128 (среди нескольких взять самое актуальное) и в данном мероприятии
     есть свойство с кодом hemoglobin и его значение больше 100 г/л, но меньше или равно 110 г/л
     """
     measure_codes = ['0010', '0035', '0284', '0128']
@@ -459,6 +617,20 @@ def recurrent_threatened_miscarriage(card):
     return 'O20.0' in inspections_by_mkb and len(inspections_by_mkb['O20.0']) >= 2
 
 
+def threatened_miscarriage(card):
+    """
+    Если у пациентки на форме "Диагнозы случая" есть диагноз с кодом МКБ «O20.0»:
+     * либо есть один и более закрытых и один открытый
+     * либо 2 и более закрытых
+    """
+    inspection_diagnoses = card.get_inspection_diagnoses()
+    inspections_by_mkb = {}
+    for action_id, mkbs in inspection_diagnoses.iteritems():
+        for mkb in mkbs:
+            inspections_by_mkb.setdefault(mkb, set()).add(action_id)
+    return 'O20.0' in inspections_by_mkb and len(inspections_by_mkb['O20.0']) >= 2
+
+
 def edema_disease(card):
     if _mkb_match(card.unclosed_mkbs, needles=u'O12.0'):
         return True
@@ -522,16 +694,48 @@ def hydramnion(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'O40-O40.99')
 
 
+def hydramnion_moderate(card):
+    # todo:
+    return False
+
+
+def hydramnion_hard(card):
+    # todo:
+    return False
+
+
 def oligohydramnios(card):
     return _mkb_match(card.unclosed_mkbs, u'O41.0')
+
+
+def oligohydramnios_moderate(card):
+    # todo:
+    return False
+
+
+def oligohydramnios_hard(card):
+    # todo:
+    return False
 
 
 def pelvic_station(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'O32.1, O33-O33.99')
 
 
+def pelvic_station_common(card):
+    return _mkb_match(card.unclosed_mkbs, u'O32.1')
+
+
 def multiple_pregnancy(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'O30-O30.99')
+
+
+def multiple_pregnancy_2(card):
+    return _mkb_match(card.unclosed_mkbs, u'O30.0')
+
+
+def multiple_pregnancy_3(card):
+    return _mkb_match(card.unclosed_mkbs, u'O30.1')
 
 
 def prolonged_pregnancy(card):
@@ -601,6 +805,17 @@ def small_gestational_age_fetus_2(card):
     return False
 
 
+def small_gestational_age_fetus_2plus(card):
+    """
+    В последнем повторном осмотре акушером-гинекологом значение атрибута
+    "Задержка роста плода" = "от 2 до 4 недель" или "более 4 недель"
+    """
+    latest_inspection = card.latest_rep_inspection
+    if latest_inspection:
+        return any(fetus.delay_code in ('03', '02') for fetus in latest_inspection.fetuses)
+    return False
+
+
 def small_gestational_age_fetus_3(card):
     """
     В последнем повторном осмотре акушером-гинекологом значение атрибута
@@ -612,8 +827,37 @@ def small_gestational_age_fetus_3(card):
     return False
 
 
+def developmental_defect(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O35-O35.99')
+
+
 def chronical_placental_insufficiency(card):
     return _mkb_match(card.unclosed_mkbs, u'O36.3')
+
+
+def central_placental_presentation(card):
+    # TODO:
+    return False
+
+
+def low_insertion_of_placenta(card):
+    # TODO:
+    return False
+
+
+def placental_perfusion_disorder_1(card):
+    # TODO:
+    return False
+
+
+def placental_perfusion_disorder_2(card):
+    # TODO:
+    return False
+
+
+def placental_perfusion_disorder_3(card):
+    # TODO:
+    return False
 
 
 def cardiotocography_more_7(card):
@@ -733,4 +977,131 @@ def chorioamnionitis(card):
     epicrisis = card.epicrisis
     if epicrisis.action.id:
         return safe_bool(epicrisis.action['chorioamnionit'].value)
+    return False
+
+
+def adnexal_affection(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'N70-N70.99')
+
+
+def cervix_uteri_length_less_25(card):
+    """
+    На форме "Первичный осмотр беременной" или "Повторный осмотр беременной" или
+    "Осмотр специалистом ПЦ" в поле "Длина шейки матки" выбрано значение "менее 25 мм"
+    """
+    return any(insp for insp in card.checkups
+               if insp.get_prop_value('cervix_length') and
+                  insp.get_prop_value('cervix_length') < 25)
+
+
+def hellp(card):
+    return _mkb_match(card.unclosed_mkbs, u'O14.2')
+
+
+def fetal(card):
+    return _mkb_match(card.unclosed_mkbs, u'O43.0')
+
+
+def pregnancy_after_corrective_surgery(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O34.6, O34.7, O34.8, O34.9')
+
+
+def pneumology(card):
+    return _mkb_match(card.unclosed_mkbs, u'O99.5')
+
+
+def respiratory_disturbance(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'J96.0, J96.1, J96.9, R09.2')
+
+
+def vegetovascular_dystonia(card):
+    # as intended
+    return False
+
+
+def thrombosis(card):
+    """
+    На форме «Диагнозы случая» или на форме "Сведения о матери" в поле "Текущие заболевания" или
+    "Перенесённые заболевания" есть хоть один незакрытый диагноз с кодом МКБ из списка.
+    """
+    mkb_list = (
+        u'I23.6, I24.0, I26-I26.99, I51.3, I63-I63.99, I67.6, I74-I74.99, I80-I80.99, '
+        u'I81-I81.99, I82-I82.99, I87.0, G08-G08.99, K75.1, O03.2, O03.7, O04.2, O04.7, '
+        u'O05.2, O05.7, O06.2, O06.7, O07.2, O07.7, O08.2, O08.7, O22.2, O22.3, O22.4, '
+        u'K64-K64.99, O22.5, O22.8, O22.9, O87.1, O87.3, O88-O88.99'
+    )
+    if _mkb_match(card.unclosed_mkbs, needles=mkb_list):
+        return True
+    anamnesis = card.anamnesis.mother
+    if anamnesis:
+        anamnesis_mkbs = [mkb.DiagID for mkb in anamnesis.get_prop_value('current_diseases', [])]
+        return _mkb_match(anamnesis_mkbs, needles=mkb_list)
+    return False
+
+
+def glomerulonephritis(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'N00-N00.99, N01-N01.99, N03-N03.99, N18-N18.99')
+
+
+def solitary_paired(card):
+    # TODO:
+    return False
+
+
+def thrombocytopenia(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'D69-D69.99')
+
+
+def nervous_disorder(card):
+    """
+    На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
+    есть хотя бы один диагноз из списка: G40, G41, G83.3, F80.3, I60-I67, R56.8
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis:
+        anamnesis_mkbs = [mkb.DiagID for mkb in (anamnesis.get_prop_value('current_diseases', []) +
+                                                 anamnesis.get_prop_value('finished_diseases', [])
+                                                 )]
+        return _mkb_match(anamnesis_mkbs,
+                          needles=u'G40-G40.99, G41-G41.99, G83.3, F80.3, I60-I67.99, R56.8')
+    return False
+
+
+def malignant_tumor(card):
+    """
+    На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
+    или в открытых диагнозах пациентки есть хотя бы один диагноз из списка кодов МКБ класса С
+    """
+    mkb_list = u'C00-C99.99'
+    if _mkb_match(card.unclosed_mkbs, needles=mkb_list):
+        return True
+    anamnesis = card.anamnesis.mother
+    if anamnesis:
+        anamnesis_mkbs = [mkb.DiagID for mkb in (anamnesis.get_prop_value('current_diseases', []) +
+                                                 anamnesis.get_prop_value('finished_diseases', [])
+                                                 )]
+        return _mkb_match(anamnesis_mkbs, needles=mkb_list)
+    return False
+
+
+def aneurysm(card):
+    """
+    На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
+    или в открытых диагнозах пациентки есть хотя бы один диагноз из списка кодов МКБ класса С
+    """
+    return _mkb_match(card.unclosed_mkbs,
+                      needles=u'I28.1, I71-I71.99, I72-I72.99, I79.0, Q27.3, I77.0, I67.1, I25.4, I25.3')
+
+
+def trauma(card):
+    """
+    На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
+    есть хотя бы один диагноз из списка кодов МКБ: S02-S0.4, S06-S09, S32-S34
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis:
+        anamnesis_mkbs = [mkb.DiagID for mkb in (anamnesis.get_prop_value('current_diseases', []) +
+                                                 anamnesis.get_prop_value('finished_diseases', [])
+                                                 )]
+        return _mkb_match(anamnesis_mkbs, needles=u'S02-S04.99, S06-S09.99, S32-S34.99')
     return False

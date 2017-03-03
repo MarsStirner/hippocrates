@@ -14,6 +14,7 @@ from hippocrates.blueprints.risar.lib.represent.partal_nursing import represent_
 from hippocrates.blueprints.risar.lib.represent.predicted_pregnancy import represent_predicted_pregnancy
 from hippocrates.blueprints.risar.lib.utils import get_action_type_by_flatcode, get_action_by_id, get_props_descriptor
 from hippocrates.blueprints.risar.lib.checkups import can_edit_checkup
+from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 from hitsl_utils.api import ApiException
 from nemesis.app import app
 from nemesis.lib.utils import safe_int
@@ -482,12 +483,21 @@ def html_radzinsky_risks():
     return render_template('risar/radzinsky_risks.html', card=card)
 
 
+@module.route('/regional_risks.html')
+def html_regional_risks():
+    event_id = safe_int(request.args.get('event_id'))
+    card = AbstractCard.get_by_id(event_id)
+    specifics = SpecificsManager()
+    if specifics.is_region_tomsk():
+        return render_template('risar/regional_tomsk_risks.html', card=card)
+    raise abort(404)
+
+
 @module.route('/soc_prof_help.html')
 def html_soc_prof_help():
     event_id = safe_int(request.args.get('event_id'))
     card = AbstractCard.get_by_id(event_id)
     return render_template('risar/soc_prof_help.html', card=card)
-
 
 
 @module.route('/nursing/<flatcode>.html')

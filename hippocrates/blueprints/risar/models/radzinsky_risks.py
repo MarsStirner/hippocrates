@@ -57,3 +57,67 @@ class RisarRadzinskyRisks_FactorsAssoc(db.Model):
     stage_id = db.Column(db.ForeignKey('rbRadzStage.id'), nullable=False)
 
     risk_factor = db.relationship('rbRadzRiskFactor')
+
+
+class RisarRegionalRiskRate(db.Model):
+    __tablename__ = 'RisarRegionalRiskRate'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    event_id = db.Column(db.ForeignKey('Event.id'), nullable=False)
+    risk_rate_id = db.Column(db.ForeignKey('rbRisarRegionalRiskRate.id'))
+
+    event = db.relationship('Event')
+    risk_rate = db.relationship('rbRisarRegionalRiskRate')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'event_id': self.event_id,
+            'risk_rate_id': self.risk_rate_id,
+            'risk_rate': self.risk_rate
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class RisarTomskRegionalRisks(db.Model):
+    __tablename__ = 'RisarTomskRegionalRisks'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.ForeignKey('Person.id'), default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), default=safe_current_user_id, onupdate=safe_current_user_id)
+    event_id = db.Column(db.ForeignKey('Event.id'), nullable=False)
+    initial_points = db.Column(db.Integer)
+    before21week_points = db.Column(db.Integer)
+    from21to30week_points = db.Column(db.Integer)
+    from31to36week_points = db.Column(db.Integer)
+
+    event = db.relationship('Event')
+    factors_assoc = db.relationship('RisarTomskRegionalRisks_FactorsAssoc', backref='risk')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'event_id': self.event_id,
+            'initial_points': self.initial_points,
+            'before21week_points': self.before21week_points,
+            'from21to30week_points': self.from21to30week_points,
+            'from31to36week_points': self.from31to36week_points,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class RisarTomskRegionalRisks_FactorsAssoc(db.Model):
+    __tablename__ = u'RisarTomskRegionalRisks_Factors'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    risk_id = db.Column(db.ForeignKey('RisarTomskRegionalRisks.id'), nullable=False)
+    risk_factor_id = db.Column(db.ForeignKey('rbRadzRiskFactor.id'), nullable=False)
+    stage_id = db.Column(db.ForeignKey('rbRegionalRiskStage.id'), nullable=False)
+
+    risk_factor = db.relationship('rbRadzRiskFactor')

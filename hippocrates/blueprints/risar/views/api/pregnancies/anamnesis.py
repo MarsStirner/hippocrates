@@ -11,7 +11,6 @@ from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregn
     represent_father_action
 from hippocrates.blueprints.risar.lib.notification import NotificationQueue
 from hippocrates.blueprints.risar.lib.utils import get_action
-from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.risar_config import risar_father_anamnesis, risar_mother_anamnesis
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import db_non_flushable
@@ -88,26 +87,3 @@ def api_0_chart_father(event_id):
         db.session.commit()
         NotificationQueue.process_events()
     return represent_father_action(action)
-
-
-@module.route('/api/0/pregnancy/chart/<int:event_id>/risks')
-@api_method
-def api_0_chart_risks(event_id):
-    return RisarRiskGroup.query.filter(RisarRiskGroup.event_id == event_id, RisarRiskGroup.deleted == 0).all()
-
-
-@module.route('/api/0/chart/<int:event_id>/radzinsky_risks')
-@api_method
-def api_0_chart_radzinsky_risks(event_id):
-    from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_event_radzinsky_risks_info
-    event = Event.query.get(event_id)
-    card = PregnancyCard.get_for_event(event)
-
-    return get_event_radzinsky_risks_info(card.radz_risk, card)
-
-
-@module.route('/api/0/rb_radzinsky_risks')
-@api_method
-def api_0_rb_radzinsky_riskfactors():
-    from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import radzinsky_risk_factors
-    return radzinsky_risk_factors()

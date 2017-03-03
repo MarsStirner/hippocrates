@@ -10,8 +10,10 @@ class SystemMode(EnumBase):
     Режим работы приложения
     """
     normal = 1, u'Независимое приложение'
-    sar_barsmis = 2, u'БАРС.МИС в Саратове'
-    tula_barsmis = 3, u'БАРС.МИС в Туле'
+    sar_barsmis = 2, u'Работа в режиме интеграции с БАРС.МИС в Саратове'
+    tula_mis = 3, u'Работа в режиме интеграции с МИС в Туле'
+    tambov_mis = 4, u'Работа в режиме интеграции с МИС в Тамбове'
+    tomsk_barsmis = 5, u'Работа в режиме интеграции с БАРС.МИС в Томске'
 
 
 class SpecificsManager(object):
@@ -24,6 +26,10 @@ class SpecificsManager(object):
         cls._system_mode = safe_traverse(
             app.config, 'system_prefs', 'mode', default=SystemMode.normal[0]
         )
+
+    @classmethod
+    def is_region_tomsk(cls):
+        return cls._system_mode == SystemMode.tomsk_barsmis[0]
 
     @classmethod
     def ext_card_url_menu_enabled(cls):
@@ -64,11 +70,21 @@ class SpecificsManager(object):
 
     @classmethod
     def show_patient_list(cls):
-        return cls._system_mode != SystemMode.tula_barsmis[0]
+        return cls._system_mode != SystemMode.tula_mis[0]
 
     @classmethod
     def show_schedule_day(cls):
-        return cls._system_mode == SystemMode.tula_barsmis[0]
+        return cls._system_mode == SystemMode.tula_mis[0]
+
+    @classmethod
+    def has_regional_risks(cls):
+        return cls.is_region_tomsk()
+
+    @classmethod
+    def get_regional_risks_menu_text(cls):
+        if cls.is_region_tomsk():
+            return u'Шкала оценки перинатальных факторов риска'
+        return u'Шкала региональных рисков'
 
 
 def get_sarbarsmis_url():

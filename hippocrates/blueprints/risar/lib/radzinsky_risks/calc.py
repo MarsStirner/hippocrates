@@ -160,7 +160,8 @@ def get_filtered_risk_factors(stage_codes=None, group_codes=None):
     return filtered
 
 
-def get_event_radzinsky_risks_info(radz_risk, card):
+def get_event_radzinsky_risks_info(card):
+    radz_risk = card.radz_risk
     event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in radz_risk.factors_assoc}
     rb_stage_factors = radzinsky_risk_factors()
     stage_points = {}
@@ -229,7 +230,9 @@ def _get_stage_calculated_points(radz_risk, stage_code):
 @cache.memoize()
 def radzinsky_risk_factors():
     query = db.session.query(rbRadzStage).join(
-        rbRadzRiskFactor_StageAssoc, rbRadzRiskFactor, rbRadzRiskFactorGroup
+        rbRadzRiskFactor_StageAssoc, rbRadzRiskFactor
+    ).join(
+        rbRadzRiskFactorGroup, rbRadzRiskFactorGroup.id == rbRadzRiskFactor.group_id
     ).options(
         joinedload(rbRadzStage.stage_factor_assoc).
         joinedload(rbRadzRiskFactor_StageAssoc.factor).

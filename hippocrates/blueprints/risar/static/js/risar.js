@@ -727,6 +727,11 @@ WebMis20
             self.file_get('POST', Config.url.api_radz_print, query);
         }
     };
+    this.regional_risks = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_regional_risks.format(event_id));
+        }
+    };
     this.soc_prof_help = {
         save: function(event_id, flat_code, data) {
             return wrapper('POST', Config.url.api_soc_prof_help.format(data.id||'', flat_code), {event_id: event_id}, data);
@@ -1055,6 +1060,32 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
             scope.get_tooltip = function () {
                 if (!scope.radzRiskRateIcon) return;
                 return scope.radzRiskRateIcon.name;
+            };
+        }
+    }
+}])
+.directive('regionalRiskRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span style="font-size: 60%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    >РШ</span>\
+',
+        scope: {
+            regionalRiskRateIcon: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.regionalRiskRateIcon) return;
+                var r = scope.regionalRiskRateIcon;
+                if (r.code === 'low') return 'label-success';
+                else if (r.code === 'medium') return 'label-warning';
+                else if (r.code === 'high') return 'label-danger';
+                return 'label-default';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.regionalRiskRateIcon) return;
+                return scope.regionalRiskRateIcon.name + ' степень риска';
             };
         }
     }

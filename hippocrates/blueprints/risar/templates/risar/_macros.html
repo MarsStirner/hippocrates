@@ -58,6 +58,9 @@
             <i pregnancy-week-icon="chart.pregnancy_week" pregnancy-start-date="chart.card_attributes.pregnancy_start_date"></i>
             <i risk-rate-icon="chart.risk_rate"></i>
             <span radz-risk-rate-icon="chart.radz_risk_rate"></span>
+            {% if specifics_mng.has_regional_risks() %}
+            <span regional-risk-rate-icon="chart.regional_risk_rate"></span>
+            {% endif %}
             <i card-fill-rate-icon="chart.card_fill_rates" event-id="header.event.id"></i>
         </span>
         <a class="text-black" href="{{ url_for('.html_card_predicted_pregnancy') }}?event_id=[[ header.event.id ]]">
@@ -113,6 +116,9 @@
             <i pregnancy-week-icon="chart.pregnancy_week" pregnancy-start-date="chart.card_attributes.pregnancy_start_date"></i>
             <i risk-rate-icon="chart.risk_rate"></i>
             <span radz-risk-rate-icon="chart.radz_risk_rate"></span>
+            {% if specifics_mng.has_regional_risks() %}
+            <span regional-risk-rate-icon="chart.regional_risk_rate"></span>
+            {% endif %}
             <i preeclampsia-susp-icon="chart.preeclampsia_susp_rate"></i>
             <i preeclampsia-confirmed-icon="chart.preeclampsia_confirmed_rate"></i>
             <i card-fill-rate-icon="chart.card_fill_rates" event-id="header.event.id"></i>
@@ -183,6 +189,9 @@
             <ul role="menu" class="dropdown-menu">
                 <li><a ng-href="{{ url_for('.html_risk_groups_list') }}?event_id={{ event_id_repl }}">Группы риска</a></li>
                 <li><a ng-href="{{ url_for('.html_radzinsky_risks') }}?event_id={{ event_id_repl }}">Шкала рисков Радзинского</a></li>
+                {% if specifics_mng.has_regional_risks() %}
+                <li><a ng-href="{{ url_for('.html_regional_risks') }}?event_id={{ event_id_repl }}">{{ specifics_mng.get_regional_risks_menu_text() }}</a></li>
+                {% endif %}
             </ul>
         </div>
         <a ng-href="{{ url_for('.html_routing') }}?event_id={{ event_id_repl }}&emergency=1" {{ navigation_btn_class_attribute(['.html_routing']) }}>Маршрутизация</a>

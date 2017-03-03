@@ -21,6 +21,7 @@ from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, ri
     puerpera_inspection_flat_code, risar_gyn_general_anamnesis_flat_code, risar_gyn_checkup_flat_codes, \
     request_type_gynecological, request_type_pregnancy, risar_epicrisis, first_inspection_flat_code,\
     second_inspection_flat_code, pc_inspection_flat_code, soc_prof_codes, pregnancy_card_apts
+from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.lib.utils import safe_bool
@@ -387,6 +388,19 @@ class PregnancyCard(AbstractCard):
         from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
         return get_radz_risk(self.event, True)
 
+    @lazy
+    def regional_risk(self):
+        if SpecificsManager.is_region_tomsk():
+            from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import \
+                get_tomsk_regional_risk
+            return get_tomsk_regional_risk(self.event, True)
+
+    @lazy
+    def regional_risk_rate(self):
+        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import \
+            get_regional_risk_rate
+        return get_regional_risk_rate(self.event, True)
+
     def reevaluate_card_attrs(self):
         """
         Пересчёт атрибутов карточки беременной
@@ -395,6 +409,7 @@ class PregnancyCard(AbstractCard):
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate,\
             reevaluate_risk_groups, reevaluate_card_fill_rate_all
         from .radzinsky_risks.calc import reevaluate_radzinsky_risks
+        from .radzinsky_risks.calc_regional_risks import reevaluate_regional_risks
 
         self.attrs.get_lock()
         with db.session.no_autoflush:
@@ -405,6 +420,7 @@ class PregnancyCard(AbstractCard):
             reevaluate_risk_groups(self)
             reevaluate_card_fill_rate_all(self)
             reevaluate_radzinsky_risks(self)
+            reevaluate_regional_risks(self)
 
     @lazy
     def unclosed_mkbs(self):

@@ -1,0 +1,100 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros with context %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+{% block main %}
+<div ng-controller="RegionalTomskRisksCtrl" ng-cloak>
+    <section class="content-header" ng-controller="RisarHeaderCtrl">
+        {{ rimacros.page_title_n('Шкала региональных рисков') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div class="row">
+        <div class="col-md-4">
+            <div class="list-group">
+                <a href="javascript:void(0);" class="list-group-item"
+                    ng-class="{'active': isStageSelected()}" ng-click="selectStage()">
+                    <span class="badge">[[ risks.general_info.final_sum_points ]]</span>
+                    Итоговые результаты
+                </a>
+                <a href="javascript:void(0);" class="list-group-item" ng-repeat="stage in rbRegionalRiskStage.objects"
+                    ng-class="{'active': isStageSelected(stage)}" ng-click="selectStage(stage)">
+                    <span class="badge">[[ risks.stage_points[stage.code].sum ]]</span>
+                    [[ stage.name ]]
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="box box-solid" ng-show="isStageSelected()" ng-class="getRiskRateHeaderClass()">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><span ng-bind="risks.general_info.risk_rate.name"></span> степень риска</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row marginal">
+                        <div class="col-sm-6 col-md-5 text-right">Итоговые результаты:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.final_sum_points"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов при постановке на учёт:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.initial_points"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов в 20 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.before21week_points"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов в 30 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.from21to30week_points"></span>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-sm-6 col-md-5 text-right">Сумма баллов в 36 недель:</div>
+                        <div class="col-sm-6 col-md-7">
+                            <span class="text-bold" ng-bind="risks.general_info.from31to36week_points"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box box-solid" ng-repeat="stage in rbRegionalRiskStage.objects" ng-show="isStageSelected(stage)">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Сумма баллов [[ risks.stage_points[stage.code].sum ]]</h3>
+                </div>
+                <div class="box-body novpadding">
+                    <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th>Факторы</th>
+                            <th width="10%" class="text-right">Баллы</th>
+                        </tr>
+                        <tr ng-repeat-start="(group_code, factors) in risks.stage_factors[stage.code]"
+                            class="text-center">
+                            <td ng-bind="rbRadzRiskFactorGroup.get_by_code(group_code).name" colspan="2"></td>
+                        </tr>
+                        <tr ng-repeat="factor in factors" ng-repeat-end
+                            ng-class="{'bg-info': factor.triggered}">
+                            <td ng-bind="factor.name"></td>
+                            <td ng-bind="factor.points" class="text-right"></td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/regional_risks.js', v=app_version) }}"></script>
+{% endblock %}

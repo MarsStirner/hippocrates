@@ -39,6 +39,32 @@ def _filter_premature_prev_preg(prev_preg):
     )
 
 
+def _filter_misbirth_and_premature_prev_preg(prev_preg):
+    """
+    На форме «Анамнез пациентки» на вкладке «Сведения о предыдущих беременностях» записи
+    со значением атрибута «Исход беременности» = "самопроизвольный выкидыш до 11 недель" или
+    "самопроизвольный выкидыш 12-21 недель" или "медицинский аборт до 12 недель или
+    "аборт по мед.показаниям" или "неуточненный выкидыш" или "преждевременные роды 22-27 недель"
+    """
+    return prev_preg.action['pregnancyResult'].value_raw in (
+        'misbirth_before_11', 'misbirth_before_12-21', 'therapeutic_abortion_before_12',
+        'therapeutic_abortion', 'unknown_miscarriage', 'premature_birth_22'
+    )
+
+
+def _filter_ectopia(prev_preg):
+    """
+    На форме «Анамнез пациентки» на вкладке «Сведения о предыдущих беременностях» записи
+    со значением атрибута «Исход беременности» = "самопроизвольный выкидыш до 11 недель" или
+    "самопроизвольный выкидыш 12-21 недель" или "медицинский аборт до 12 недель или
+    "аборт по мед.показаниям" или "неуточненный выкидыш" или "преждевременные роды 22-27 недель"
+    """
+    return prev_preg.action['pregnancyResult'].value_raw in (
+        'misbirth_before_11', 'misbirth_before_12-21', 'therapeutic_abortion_before_12',
+        'therapeutic_abortion', 'unknown_miscarriage', 'premature_birth_22'
+    )
+
+
 def _iter_preg_child(prev_pregs):
     for prev_preg in prev_pregs:
         for child in prev_preg.newborn_inspections:
@@ -106,9 +132,12 @@ def _filter_prev_preg_compl(prev_preg):
 
 def _filter_prev_preg_tubal(prev_preg):
     """
-    На форме «Анамез пациентки» на вкладке «Сведения о предыдущих беременностях» записи
+    На форме «Анамез пациентки» на вкладке «Сведения о предыдущих беременностях» есть
+    хотя бы одна запись со значением атрибута "Исход беременности" = "Внематочная беременность" или
     со значением атрибута «Патологии беременности» = какому-либо коду МКБ из узла O00.
     """
+    if prev_preg.action['pregnancyResult'].value_raw == 'ectopia':
+        return True
     mkbs = [mkb.DiagID for mkb in prev_preg.action['pregnancy_pathology'].value]
     if mkbs:
         return _mkb_match(mkbs, needles=u'O00-O00.99')
