@@ -310,7 +310,7 @@
                                     {% if 'pulse' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pulse')"></th>
-                                        <td><div ng-class="{'text-danger': somaticForm.pulse.$invalid}">
+                                        <td><div ng-class="{'text-danger': somaticForm.pulse.$invalid && somaticForm.submit_attempt}">
                                             <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse"
                                                  ng-disabled="checkupDescriptor.getReadOnly('pulse')"
                                                  ng-required="checkupDescriptor.getMandatory('pulse')">

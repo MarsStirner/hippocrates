@@ -136,7 +136,7 @@
                 <tr>
                     <th class="text-right col-md-4" ng-bind-html="ticket25Descriptor.getLabel('ache_result')"></th>
                     <td class="col-md-8">
-                        <div ng-class="{'has-error': !checkup.ticket_25.ache_result}">
+                        <div>
                             <rb-select ref-book="rbAcheResult" ng-model="checkup.ticket_25.ache_result"
                                         ng-required="true"
                                         ng-required="ticket25Descriptor.getMandatory('ache_result')"
