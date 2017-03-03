@@ -325,6 +325,40 @@ class CheckupObsFirstSchema(Schema):
                                 "description": "ЧСС плода",
                                 "type": "number",
                                 "format": "double"
+                            },
+                            "ctg_data_fisher": {
+                                "description": "Данные КТГ",
+                                "type": "object",
+                                "properties": {
+                                    "fhr": {
+                                        "description": "Базальный ритм, справочник rbRisarBasal",
+                                        "type": "string"
+                                    },
+                                    "fhr_variability_amp": {
+                                        "description": "Вариабельность (амплитуда), справочник rbRisarVariabilityRange",
+                                        "type": "string"
+                                    },
+                                    "fhr_variability_freq": {
+                                        "description": "Вариабельность (частота в минуту), справочник rbRisarFrequencyPerMinute",
+                                        "type": "string"
+                                    },
+                                    "fhr_acceleration": {
+                                        "description": "Акселерации за 30 минут, справочник rbRisarAcceleration",
+                                        "type": "string"
+                                    },
+                                    "fhr_deceleration": {
+                                        "description": "Децелерации за 30 минут, справочник rbRisarDeceleration",
+                                        "type": "string"
+                                    },
+                                    "fisher_points": {
+                                        "description": "значение оценки по Фишеру",
+                                        "type": "integer"
+                                    }
+                                }
+                            },
+                            "ctg_data_stv": {
+                                "description": "Данные оценки КТГ по STV",
+                                "type":"integer"
                             }
                         }
                     }

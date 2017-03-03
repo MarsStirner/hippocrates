@@ -247,7 +247,7 @@ class CheckupObsSecondSchema(Schema):
                                 "description": "Задержка в развитии плода, справочник rbRisarFetus_Delay",
                                 "type": "string"
                             },
-                            "ctg_data": {
+                            "ctg_data_fisher": {
                                 "description": "Данные КТГ",
                                 "type": "object",
                                 "properties": {
@@ -270,10 +270,16 @@ class CheckupObsSecondSchema(Schema):
                                     "fhr_deceleration": {
                                         "description": "Децелерации за 30 минут, справочник rbRisarDeceleration",
                                         "type": "string"
+                                    },
+                                    "fisher_points": {
+                                        "description" : "значение оценки по Фишеру",
+                                        "type": "integer"
                                     }
-                                },
-                                "required": ["fhr", "fhr_variability_amp", "fhr_variability_freq", "fhr_acceleration",
-                                             "fhr_deceleration"]
+                                }
+                            },
+                            "ctg_data_stv": {
+                                "description": "Данные оценки КТГ по STV",
+                                "type":"integer"
                             }
                         }
                     }

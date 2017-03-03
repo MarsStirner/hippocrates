@@ -74,6 +74,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
         'delay': {'attr': 'intrauterine_growth_retardation', 'default': None, 'rb': 'rbRisarFetus_Delay', 'is_vector': False},
+        'stv_evaluation': {'attr': 'ctg_data_stv', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     VAGINAL_MAP = {
@@ -106,6 +107,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'frequency_per_minute': {'attr': 'fhr_variability_freq', 'default': None, 'rb': 'rbRisarFrequencyPerMinute', 'is_vector': False},
         'acceleration': {'attr': 'fhr_acceleration', 'default': None, 'rb': 'rbRisarAcceleration', 'is_vector': False},
         'deceleration': {'attr': 'fhr_deceleration', 'default': None, 'rb': 'rbRisarDeceleration', 'is_vector': False},
+        'fisher_ktg_points': {'attr': 'fisher_points', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     REPORT_MAP = {
@@ -192,9 +194,11 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
             if db_fetus_id:
                 f_state['id'] = db_fetus_id
             self.mapping_part(self.FETUS_MAP, mis_fetus, f_state)
-            ctg_data = mis_fetus.get('ctg_data', {})
-            f_state['ktg_input'] = bool(ctg_data)
-            self.mapping_part(self.FETUS_CTG_MAP, ctg_data, f_state)
+            ctg_data_fisher = mis_fetus.get('ctg_data_fisher', {})
+            f_state['ktg_input'] = ctg_data_fisher and 1 or 0
+            self.mapping_part(self.FETUS_CTG_MAP, ctg_data_fisher, f_state)
+            ctg_data_stv = mis_fetus.get('ctg_data_stv')
+            f_state['ktg_input'] = ctg_data_stv and 2
 
             res.setdefault('fetuses', []).append({
                 'deleted': deleted,
@@ -329,9 +333,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         for fs_data in fetus_list:
             state = fs_data.get('state')
             fs = self._represent_part(self.FETUS_MAP, state)
-            if state.get('ktg_input'):
+            if state.get('ktg_input') == 1:
                 r = self._represent_part(self.FETUS_CTG_MAP, state)
-                fs['ctg_data'] = r
+                fs['ctg_data_fisher'] = r
             res.append(fs)
         return res
 
