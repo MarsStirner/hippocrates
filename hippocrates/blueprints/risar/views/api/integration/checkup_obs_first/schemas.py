@@ -197,8 +197,6 @@ class CheckupObsFirstSchema(Schema):
                         "tongue",
                         "complaints",
                         "skin",
-                        "lymph",
-                        "heart_tones",
                         "pulse",
                         "mouth",
                         "respiratory",
@@ -341,7 +339,10 @@ class CheckupObsFirstSchema(Schema):
                         },
                         "cervix": {
                             "description": "Шейка матки, справочник rbRisarCervix",
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "cervix_length": {
                             "description": "Длина шейки матки, справочник rbRisarCervix_Length",
@@ -370,9 +371,19 @@ class CheckupObsFirstSchema(Schema):
                                 "type": "string"
                             }
                         },
-                        "adnexa": {
+                        "adnexa_right": {
                             "description": "Придатки, справочник rbRisarAppendages",
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "adnexa_left": {
+                            "description": "Придатки, справочник rbRisarAppendages",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "specialities": {
                             "description": "Особенности",
