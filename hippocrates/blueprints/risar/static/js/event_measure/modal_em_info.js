@@ -14,7 +14,8 @@ var EventMeasureModalCtrl = function ($scope, $filter, $q,
     $scope.ro = true;
     $scope.appointment_action = new WMAction();
     $scope.em_result_action = new WMAction();
-    $scope.ps = new PrintingService("event_measure");
+    $scope.ps_appointment = new PrintingService("event_measure");
+    $scope.ps_result = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
         return {
             event_measure_id: event_measure.data.id
