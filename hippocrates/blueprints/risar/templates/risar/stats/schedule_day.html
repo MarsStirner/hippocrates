@@ -26,8 +26,9 @@
                     <td ng-bind="ticket.begDateTime | asTime"></td>
                     <td>
                         <span ng-if="isEmpty(ticket)">
-                            <a href="javascript:void(0);" ng-click="make_appointment(ticket)"
-                           tooltip="Нажмите, чтобы записать пациентку">Записать</a>
+                            <a ng-if="ticket.appointment_permitted" href="javascript:void(0);" ng-click="make_appointment(ticket)"
+                                tooltip="Нажмите, чтобы записать пациентку">Записать</a>
+                            <a ng-if="!ticket.appointment_permitted" href="javascript:void(0);">Запись запрещена</a>
                         </span>
                         <span ng-if="isBusy(ticket)">
                             <a ng-href="{{ url_for('.html_auto_chart') }}?client_id=[[ ticket.client_id ]]"
