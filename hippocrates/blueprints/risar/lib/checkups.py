@@ -115,7 +115,7 @@ def validate_send_to_mis_checkup(checkup):
         res = False
     elif not talon25.propsByCode['condit_med_help'].value:
         res = False
-    elif not talon25.propsByCode['disease_outcome'].value:
+    elif not talon25.propsByCode['ache_result'].value:
         res = False
     elif not talon25.propsByCode['services'].value:
         res = False
