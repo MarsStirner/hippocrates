@@ -123,6 +123,21 @@
                                         </td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'weight_b4preg' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('weight_b4preg')"></th>
+                                        <td><div class="row"
+                                                 ng-class="{'has-error': commonForm.weight_b4preg.$invalid && commonForm.submit_attempt}">
+                                            <div class="col-md-2">
+                                                <input name="weight_b4preg" ng-model="checkup.weight_b4preg" valid-number valid-number-float
+                                                       class="form-control"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('weight_b4preg')"
+                                                       ng-required="checkupDescriptor.getMandatory('weight_b4preg')" ng-pattern="/^[0-9]{1,3}(\.[0-9]{1,3})?$/">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'weight' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('weight')"></th>
@@ -136,6 +151,18 @@
                                             </div>
                                             </div>
                                         </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'physique_features' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('physique_features')"></th>
+                                        <td class="col-md-8"><div class="row" ng-class="{'has-error': commonForm.physique_features.$invalid && commonForm.submit_attempt}">
+                                            <div class="col-md-4">
+                                            <rb-select name="physique_features" ng-model="checkup.physique_features" ref-book="rbRisarConstitutionalPeculiarity"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('physique_features')"
+                                                       ng-required="checkupDescriptor.getMandatory('physique_features')"></rb-select>
+                                            </div>
+                                        </div></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'hw_ratio' in checkup_descriptor %}
@@ -212,6 +239,22 @@
                                                        class="form-control">
                                             </td>
                                         </tr>
+                                    {% endif %}
+                                    {% if 'visible_mucuous' in checkup_descriptor %}
+                                    <tr ng-if="checkupDescriptor.exists('visible_mucuous')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('visible_mucuous')"></th>
+                                        <td class="col-md-4">
+                                            <div class="row" ng-class="{'has-error': somaticForm.visible_mucuous.$invalid && somaticForm.submit_attempt}">
+                                              <div class="col-md-8">
+                                                <rb-select ref-book="rbRisarMucous" ng-model="checkup.visible_mucuous" limit-to="50"
+                                                    ng-required="checkupDescriptor.getMandatory('visible_mucuous')"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('visible_mucuous')"
+                                                    multiple="checkupDescriptor.getVector('visible_mucuous')"
+                                                ></rb-select>
+                                              </div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     {% endif %}
                                     {% if 'tongue' in checkup_descriptor %}
                                     <tr>
@@ -412,6 +455,22 @@
                                                  ng-required="checkupDescriptor.getMandatory('breathe')">
                                                 [[ item.name ]]
                                             </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'chdd' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('chdd')"></th>
+                                        <td>
+                                            <div class="row"
+                                                 ng-class="{'has-error': somaticForm.chdd.$invalid && somaticForm.submit_attempt}">
+                                                <div class="col-md-2">
+                                                    <input name="chdd" ng-model="checkup.chdd"
+                                                           class="form-control" type="number" valid-number
+                                                           ng-disabled="checkupDescriptor.getReadOnly('chdd')"
+                                                           ng-required="checkupDescriptor.getMandatory('chdd')">
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -662,15 +721,39 @@
                                         <td class="col-md-8"><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
                                     </tr>
                                     {% endif %}
-                                    {% if 'vagina' in checkup_descriptor %}
+                                    {% if 'hairs' in checkup_descriptor %}
                                     <tr>
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina')"></th>
-                                        <td><div class="row" ng-class="{'has-error': vaginaForm.vagina.$invalid && vaginaForm.submit_attempt}">
-                                            <div class="col-md-4"><rb-select name="vagina" ng-model="checkup.vagina" ref-book="rbRisarVagina"
-                                                 ng-disabled="checkupDescriptor.getReadOnly('vagina')"
-                                                 ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
-                                        </div></td>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('hairs')"></th>
+                                        <td><div class="row"><div class="col-md-4">
+                                            <rb-select ng-model="checkup.hairs" ref-book="rbRisarVulvaPilosis"
+                                                 ng-disabled="checkupDescriptor.getReadOnly('hairs')"
+                                                 ng-required="checkupDescriptor.getMandatory('hairs')"
+                                                 ></rb-select> </div>
+                                        </div>
+                                        </td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vagina' in checkup_descriptor %}
+                                        <tr>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina')"></th>
+                                            <td><div class="row" ng-class="{'has-error': vaginaForm.vagina.$invalid && vaginaForm.submit_attempt}">
+                                                <div class="col-md-4"><rb-select name="vagina" ng-model="checkup.vagina" ref-book="rbRisarVagina"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('vagina')"
+                                                     ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
+                                            </div></td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if 'vagina_mucuos' in checkup_descriptor %}
+                                        <tr>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_mucuos')"></th>
+                                            <td><div class="row"><div class="col-md-4">
+                                                <rb-select ng-model="checkup.vagina_mucuos" ref-book="rbRisarMucous"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('vagina_mucuos')"
+                                                     ng-required="checkupDescriptor.getMandatory('vagina_mucuos')"
+                                                     multiple="checkupDescriptor.getVector('vagina_mucuos')"
+                                                     limit-to="50"
+                                                     ></rb-select></div></div></td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'secretion' in checkup_descriptor %}
                                     <tr>
@@ -990,6 +1073,11 @@
                                                                 <th class="text-right">Предлежание <span>&nbsp;</span></th>
                                                                 <td><div class="row"><div class="col-md-4">
                                                                     <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Место нахождения предлежащей части <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.contigous_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Сердцебиение <span>&nbsp;</span></th>

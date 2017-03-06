@@ -41,10 +41,22 @@
                                     </div>
                                 </div>
                                 {% endif %}
+                                {% if 'weight_b4preg' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-3 col-md-3 text-right">[[checkupDescriptor.getName('weight_b4preg')]]:</div>
+                                    <div class="col-sm-9 col-md-9">[[checkup.weight_b4preg]]</div>
+                                </div>
+                                {% endif %}
                                 {% if 'weight' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-3 col-md-3  text-right">[[checkupDescriptor.getName('weight')]]:</div>
                                     <div class="col-sm-9 col-md-9">[[checkup.weight]]</div>
+                                </div>
+                                {% endif %}
+                                {% if 'physique_features' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-3 col-md-3 text-right">[[checkupDescriptor.getName('physique_features')]]:</div>
+                                    <div class="col-sm-9 col-md-9">[[checkup.physique_features.name]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'hw_ratio' in checkup_descriptor %}
@@ -132,6 +144,12 @@
                                     </div>
                                 </div>
                                 {% endif %}
+                                {% if 'visible_mucuous' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('visible_mucuous')]]:</div>
+                                    <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.visible_mucuous" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
                                 {% if 'skin' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('skin')]]:</div>
@@ -171,6 +189,18 @@
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('breathe')]]:</div>
                                     <div class="col-sm-7 col-md-7"><span ng-repeat="elem in checkup.breathe" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
+                                {% if 'chdd' in checkup_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5  text-right">[[checkupDescriptor.getName('chdd')]]:</div>
+                                        <div class="col-sm-7 col-md-7">[[checkup.chdd]]</div>
+                                    </div>
+                                {% endif %}
+                                {% if 'pregnancy_week' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5  text-right">[[checkupDescriptor.getName('pregnancy_week')]]:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.pregnancy_week]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'stomach' in checkup_descriptor %}
@@ -338,11 +368,25 @@
                                     <div class="col-sm-7 col-md-7 long-words" ng-bind-html="checkup.externalia"></div>
                                 </div>
                                 {% endif %}
+                                {% if 'hairs' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('hairs')]]:</div>
+                                    <div class="col-sm-7 col-md-7">[[checkup.hairs.name]]</div>
+                                </div>
+                                {% endif %}
                                 {% if 'vagina' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vagina')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.vagina.name]]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'vagina_mucuos' in checkup_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vagina_mucuos')]]:</div>
+                                        <div class="col-sm-7 col-md-7">
+                                            <span ng-bind="checkup.vagina_mucuos| pluck:'name' | join:', '"></span>
+                                        </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'secretion' in checkup_descriptor %}
                                 <div class="row">
@@ -666,6 +710,10 @@
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Предлежание:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.presenting_part.name]]</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">Место нахождения предлежащей части:</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.contigous_part.name]]</div>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Сердцебиение:</div>
