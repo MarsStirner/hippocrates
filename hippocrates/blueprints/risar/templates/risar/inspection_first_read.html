@@ -524,38 +524,52 @@
                                         </div>
                                     </div>
                                 </div>
+                                {% if 'pregnancy_week' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_week')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_week]]</div>
                                 </div>
+                                {% endif %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Срок по последнему УЗИ:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.calculated_pregnancy_week_by_ultrason ? checkup.calculated_pregnancy_week_by_ultrason :'Нет данных УЗИ для расчета']]</div>
                                 </div>
+                                {% if 'pregnancy_continuation' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_continuation')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation ? 'да': 'нет']]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'pregnancy_continuation_refusal' in checkup_descriptor %}
                                 <div class="row" ng-show="!pregContRefusalDisabled()">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_continuation_refusal')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation_refusal ? 'да': 'нет']]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'craft' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('craft')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.craft.name]]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'next_date' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('next_date')]]:</div>
                                     <div class="col-sm-6 col-md-6">[[checkup.next_date|asDate]]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'notes' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('notes')]]:</div>
                                     <div class="col-sm-6 col-md-6 long-words" ng-bind-html="checkup.notes"></div>
                                 </div>
+                                {% endif %}
+                                {% if 'recommendations' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('recommendations')]]:</div>
                                     <div class="col-md-6 long-words" ng-bind-html="checkup.recommendations"></div>
                                 </div>
+                                {% endif %}
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
                                 </div>
