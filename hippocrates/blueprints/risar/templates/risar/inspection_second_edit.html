@@ -236,6 +236,22 @@
                                             </td>
                                         </tr>
                                     {% endif %}
+                                    {% if 'visible_mucuous' in checkup_descriptor %}
+                                    <tr ng-if="checkupDescriptor.exists('visible_mucuous')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('visible_mucuous')"></th>
+                                        <td class="col-md-4">
+                                            <div class="row" ng-class="{'has-error': somaticForm.visible_mucuous.$invalid && somaticForm.submit_attempt}">
+                                              <div class="col-md-8">
+                                                <rb-select ref-book="rbRisarMucous" ng-model="checkup.visible_mucuous" limit-to="50"
+                                                    ng-required="checkupDescriptor.getMandatory('visible_mucuous')"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('visible_mucuous')"
+                                                    multiple="checkupDescriptor.getVector('visible_mucuous')"
+                                                ></rb-select>
+                                              </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'edema' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('edema')"></th>
@@ -332,6 +348,22 @@
                                                  ng-required="checkupDescriptor.getMandatory('breathe')">
                                                 [[ item.name ]]
                                             </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'chdd' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('chdd')"></th>
+                                        <td>
+                                            <div class="row"
+                                                 ng-class="{'has-error': somaticForm.chdd.$invalid && somaticForm.submit_attempt}">
+                                                <div class="col-md-2">
+                                                    <input name="chdd" ng-model="checkup.chdd"
+                                                           class="form-control" type="number" valid-number
+                                                           ng-disabled="checkupDescriptor.getReadOnly('chdd')"
+                                                           ng-required="checkupDescriptor.getMandatory('chdd')">
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -443,6 +475,18 @@
                                                  ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vagina_mucuos' in checkup_descriptor %}
+                                        <tr>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_mucuos')"></th>
+                                            <td><div class="row"><div class="col-md-4">
+                                                <rb-select ng-model="checkup.vagina_mucuos" ref-book="rbRisarMucous"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('vagina_mucuos')"
+                                                     ng-required="checkupDescriptor.getMandatory('vagina_mucuos')"
+                                                     multiple="checkupDescriptor.getVector('vagina_mucuos')"
+                                                     limit-to="50"
+                                                     ></rb-select></div></div></td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'secretion' in checkup_descriptor %}
                                     <tr>
@@ -780,6 +824,11 @@
                                                                 <th class="text-right">Предлежание <span>&nbsp;</span></th>
                                                                 <td><div class="row"><div class="col-md-4">
                                                                     <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Место нахождения предлежащей части <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.contigous_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Задержка в развитии <span>&nbsp;</span></th>

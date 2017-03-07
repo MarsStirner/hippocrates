@@ -101,6 +101,12 @@
                                             {%-if 'complaints_free_input' in checkup_descriptor -%}<span ng-bind-html="checkup.complaints_free_input"></span>{%- endif -%}</div>
                                     </div>
                                 {% endif %}
+                                {% if 'visible_mucuous' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('visible_mucuous')]]:</div>
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.visible_mucuous" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
                                 {% if 'edema' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('edema')]]:</div>
@@ -140,6 +146,18 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('breathe')]]:</div>
                                     <div class="col-sm-6 col-md-6"><span ng-repeat="elem in checkup.breathe" >[[elem.name]][[$last ? '' : ', ']]</span></div>
+                                </div>
+                                {% endif %}
+                                {% if 'chdd' in checkup_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('chdd')]]:</div>
+                                        <div class="col-sm-6 col-md-6">[[checkup.chdd]]</div>
+                                    </div>
+                                {% endif %}
+                                {% if 'pregnancy_week' in checkup_descriptor %}
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">[[checkupDescriptor.getName('pregnancy_week')]]:</div>
+                                    <div class="col-sm-6 col-md-6">[[checkup.pregnancy_week]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'stomach' in checkup_descriptor %}
@@ -213,6 +231,14 @@
                                     <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vagina')]]:</div>
                                     <div class="col-sm-7 col-md-7">[[checkup.vagina.name]]</div>
                                 </div>
+                                {% endif %}
+                                {% if 'vagina_mucuos' in checkup_descriptor %}
+                                    <div class="row">
+                                        <div class="col-sm-5 col-md-5 text-right">[[checkupDescriptor.getName('vagina_mucuos')]]:</div>
+                                        <div class="col-sm-7 col-md-7">
+                                            <span ng-bind="checkup.vagina_mucuos| pluck:'name' | join:', '"></span>
+                                        </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'secretion' in checkup_descriptor %}
                                 <div class="row">
@@ -542,6 +568,10 @@
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Предлежание:</div>
                                         <div class="col-sm-6 col-md-6">[[child.state.presenting_part.name]]</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">Место нахождения предлежащей части:</div>
+                                        <div class="col-sm-6 col-md-6">[[child.state.contigous_part.name]]</div>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">Задержка в развитии:</div>
