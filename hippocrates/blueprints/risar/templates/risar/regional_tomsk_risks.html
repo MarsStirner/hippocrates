@@ -82,7 +82,8 @@
                         <tr ng-repeat="factor in factors" ng-repeat-end
                             ng-class="{'bg-info': factor.triggered}">
                             <td ng-bind="factor.name"></td>
-                            <td ng-bind="factor.points" class="text-right"></td>
+                            <td ng-if="factor.modified_points" class="text-right">[[ factor.modified_points ]] *</td>
+                            <td ng-if="!factor.modified_points" ng-bind="factor.points" class="text-right"></td>
                         </tr>
                     </tbody>
                     </table>

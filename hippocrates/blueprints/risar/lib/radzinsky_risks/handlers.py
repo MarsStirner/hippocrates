@@ -7,7 +7,7 @@ from .utils import (
     _filter_child_abnormal_weight, _filter_child_cong_prev_preg, _filter_child_death,
     _filter_child_miscarriage, _filter_child_neuro_prev_preg, _filter_misbirth_prev_preg,
     _filter_parity_prev_preg, _filter_premature_prev_preg, _filter_prev_preg_compl,
-    _filter_prev_preg_tubal, _filter_misbirth_and_premature_prev_preg
+    _filter_prev_preg_tubal, _filter_misbirth_and_premature_prev_preg, _generator_abortion_first_trimester
 )
 from hippocrates.blueprints.risar.lib.utils import mkb_match as _mkb_match
 from nemesis.lib.utils import safe_bool, safe_decimal
@@ -156,9 +156,7 @@ def abortion_after_last_delivery_more_3(card):
 
 
 def abortion_first_trimester(card):
-    misbirths = filter(_filter_misbirth_prev_preg, card.prev_pregs)
-    return any(prev_pr for prev_pr in misbirths
-               if prev_pr.action['pregnancy_week'].value and prev_pr.action['pregnancy_week'].value <= 13)
+    return any(_generator_abortion_first_trimester(card))
 
 
 def intrauterine_operations(card):
@@ -411,18 +409,45 @@ def heart_disease_circulatory_embarrassment(card):
 
 
 def hypertensive_disease_1(card):
-    # todo:
-    return _mkb_match(card.unclosed_mkbs, needles=u'I11-I11.99')
+    """
+    На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ из узла:
+    I11 или I12 или  I13 или I14 или I15 или O10 или O11 и в уточняющем поле
+    (справочник rbRisarHypertensiveDiseaseStage) выбрано значение с кодом 01
+    """
+    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I14-I14.99, I15-I15.99, O10-O10.99, O11-O11.99'
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=mkbs):
+            if diag.mkb_details_code == '01':
+                return True
+    return False
 
 
 def hypertensive_disease_2(card):
-    # todo:
-    return _mkb_match(card.unclosed_mkbs, needles=u'I12-I12.99')
+    """
+    На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ из узла:
+    I11 или I12 или  I13 или I14 или I15 или O10 или O11 и в уточняющем поле
+    (справочник rbRisarHypertensiveDiseaseStage) выбрано значение с кодом 02
+    """
+    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I14-I14.99, I15-I15.99, O10-O10.99, O11-O11.99'
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=mkbs):
+            if diag.mkb_details_code == '02':
+                return True
+    return False
 
 
 def hypertensive_disease_3(card):
-    # todo:
-    return _mkb_match(card.unclosed_mkbs, needles=u'I13-I13.99')
+    """
+    На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ из узла:
+    I11 или I12 или  I13 или I14 или I15 или O10 или O11 и в уточняющем поле
+    (справочник rbRisarHypertensiveDiseaseStage) выбрано значение с кодом 03
+    """
+    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I14-I14.99, I15-I15.99, O10-O10.99, O11-O11.99'
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=mkbs):
+            if diag.mkb_details_code == '03':
+                return True
+    return False
 
 
 def varicose(card):
@@ -691,12 +716,28 @@ def hydramnion(card):
 
 
 def hydramnion_moderate(card):
-    # todo:
+    """
+    На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O40
+    и для данного диагноза в уточняющем поле выбрано значение с кодом 01
+    (справочник rbRisarHydramnionStage)
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], 'O40'):
+            if diag.mkb_details_code == '01':
+                return True
     return False
 
 
 def hydramnion_hard(card):
-    # todo:
+    """
+    На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O40
+    и для данного диагноза в уточняющем поле выбрано значение с кодом 02
+    (справочник rbRisarHydramnionStage)
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], 'O40'):
+            if diag.mkb_details_code == '02':
+                return True
     return False
 
 
@@ -705,12 +746,28 @@ def oligohydramnios(card):
 
 
 def oligohydramnios_moderate(card):
-    # todo:
+    """
+    На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O41.0
+    и для данного диагноза в уточняющем поле выбрано значение с кодом 01
+    (справочник rbRisarOligohydramnionStage)
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], 'O41.0'):
+            if diag.mkb_details_code == '01':
+                return True
     return False
 
 
 def oligohydramnios_hard(card):
-    # todo:
+    """
+    На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O41.0
+    и для данного диагноза в уточняющем поле выбрано значение с кодом 02
+    (справочник rbRisarOligohydramnionStage)
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], 'O41.0'):
+            if diag.mkb_details_code == '02':
+                return True
     return False
 
 
@@ -832,27 +889,67 @@ def chronical_placental_insufficiency(card):
 
 
 def central_placental_presentation(card):
-    # TODO:
+    """
+    На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O44.0 или O44.1
+    и для данного диагноза в уточняющем поле выбрано значение с кодом 01 или 02 или 03
+    (справочник rbRisarPlacentalPresentationStage)
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=u'O44.0, O44.1'):
+            if diag.mkb_details_code in ('01', '02', '03'):
+                return True
     return False
 
 
 def low_insertion_of_placenta(card):
-    # TODO:
+    """
+    На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O44.0 или O44.1
+    и для данного диагноза в уточняющем поле выбрано значение с кодом 04
+    (справочник rbRisarPlacentalPresentationStage)
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=u'O44.0, O44.1'):
+            if diag.mkb_details_code == '04':
+                return True
     return False
 
 
 def placental_perfusion_disorder_1(card):
-    # TODO:
+    """
+    На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ O43.8 или O43.9
+    и в уточняющем поле (справочник rbRisarPlacentalPerfusionDisorderStage)
+    выбрано значение с кодом 01
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=u'O43.8, O43.9'):
+            if diag.mkb_details_code == '01':
+                return True
     return False
 
 
 def placental_perfusion_disorder_2(card):
-    # TODO:
+    """
+    На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ O43.8 или O43.9
+    и в уточняющем поле (справочник rbRisarPlacentalPerfusionDisorderStage)
+    выбрано значение с кодом 02
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=u'O43.8, O43.9'):
+            if diag.mkb_details_code == '02':
+                return True
     return False
 
 
 def placental_perfusion_disorder_3(card):
-    # TODO:
+    """
+    На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ O43.8 или O43.9
+    и в уточняющем поле (справочник rbRisarPlacentalPerfusionDisorderStage)
+    выбрано значение с кодом 03
+    """
+    for mkb, diag in card.diags_by_mkb.iteritems():
+        if _mkb_match([mkb], needles=u'O43.8, O43.9'):
+            if diag.mkb_details_code == '03':
+                return True
     return False
 
 

@@ -28,16 +28,6 @@ def reevaluate_regional_risks(card):
         reevaluate_tomsk_regional_risks(card)
 
 
-def get_tomsk_regional_risk(event, create=False):
-    risk = db.session.query(RisarTomskRegionalRisks).filter(
-        RisarTomskRegionalRisks.event_id == event.id
-    ).first()
-    if risk is None and create:
-        risk = RisarTomskRegionalRisks(event=event, event_id=event.id)
-        db.session.add(risk)
-    return risk
-
-
 def get_regional_risk_rate(event, create=False):
     risk = db.session.query(RisarRegionalRiskRate).filter(
         RisarRegionalRiskRate.event_id == event.id
@@ -53,6 +43,21 @@ def get_current_region_risk_rate(regional_risk_rate):
         return None
     if SpecificsManager.is_region_tomsk():
         return TomskRegionalRiskRate(regional_risk_rate.risk_rate_id) if regional_risk_rate.risk_rate_id else None
+
+
+def get_regional_risk(event, create=False):
+    if SpecificsManager.is_region_tomsk():
+        return get_tomsk_regional_risk(event, create)
+
+
+def get_tomsk_regional_risk(event, create=False):
+    risk = db.session.query(RisarTomskRegionalRisks).filter(
+        RisarTomskRegionalRisks.event_id == event.id
+    ).first()
+    if risk is None and create:
+        risk = RisarTomskRegionalRisks(event=event, event_id=event.id)
+        db.session.add(risk)
+    return risk
 
 
 def reevaluate_tomsk_regional_risk_rate(card, regional_risk, regional_risk_rate):
@@ -152,14 +157,25 @@ def get_tomsk_card_stage(card):
             return TomskRegionalRiskStage.from31to36[0]
 
 
+def get_regional_factor_points_modifications(card):
+    res = {}
+    if SpecificsManager.is_region_tomsk():
+        from hippocrates.blueprints.risar.lib.radzinsky_risks.utils import count_abortion_first_trimester
+        res['abortion_first_trimester'] = lambda points: count_abortion_first_trimester(card) * points
+    return res
+
+
 def calc_regional_factor_points(card, factor_stage):
     points_sum = 0
     triggered_factors = []
     rb_slice = get_filtered_regional_risk_factors(factor_stage.code)
+    points_modifiers = get_regional_factor_points_modifications(card)
     for factor in rb_slice:
         points = factor['points']
         handler = get_handler(factor['code'])
         if handler(card):
+            if factor['code'] in points_modifiers:
+                points = points_modifiers[factor['code']](points)
             points_sum += points
             triggered_factors.append(factor['id'])
     return points_sum, triggered_factors
@@ -192,18 +208,22 @@ def get_event_tomsk_regional_risks_info(card):
     event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in regional_risk.factors_assoc}
     rb_stage_factors = regional_risk_factors()
     stage_points = {}
+    points_modifiers = get_regional_factor_points_modifications(card)
     for stage_code, groups in rb_stage_factors.iteritems():
         stage_sum = stage_maximum = 0
         for group_code, factors in groups.iteritems():
             for factor in factors:
                 k = (factor['id'], TomskRegionalRiskStage.getId(stage_code))
-                # todo: one specific factor
+                points = factor['points']
+                if factor['code'] in points_modifiers:
+                    points = points_modifiers[factor['code']](points)
+                    factor['modified_points'] = points
                 if k in event_factor_stages:
                     factor['triggered'] = True
-                    stage_sum += factor['points']
+                    stage_sum += points
                 else:
                     factor['triggered'] = False
-                stage_maximum += factor['points']
+                stage_maximum += points
         stage_points[stage_code] = {
             'maximum': stage_maximum,
             'sum': stage_sum
@@ -220,12 +240,7 @@ def get_event_tomsk_regional_risks_info(card):
     total_sum_points = 0
     for stage_code, stage_info in stage_points.items():
         max_points += stage_info['maximum']
-        stage_sum_rb = stage_info['sum']
         stage_sum_calc = _get_stage_calculated_points(regional_risk, stage_code)
-        # todo: one specific factor
-        if stage_sum_calc != stage_sum_rb:
-            logger.warning((u'В карте {0} рассчитанное значение суммы баллов по стадии {1} '
-                            u'отличается от справочного'.format(regional_risk.event_id, stage_code)))
         stage_info['sum'] = stage_sum_calc
         total_sum_points += stage_sum_calc
     general_info['maximum_points'] = max_points

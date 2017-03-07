@@ -157,3 +157,14 @@ def _theone_measure(card, measure_codes):
             if theone is None or rival.begDateTime > theone.begDateTime:
                 theone = rival
     return theone
+
+
+def _generator_abortion_first_trimester(card):
+    misbirths = filter(_filter_misbirth_prev_preg, card.prev_pregs)
+    for prev_pr in misbirths:
+        if prev_pr.action['pregnancy_week'].value and prev_pr.action['pregnancy_week'].value <= 13:
+            yield prev_pr
+
+
+def count_abortion_first_trimester(card):
+    return len(list(_generator_abortion_first_trimester(card)))

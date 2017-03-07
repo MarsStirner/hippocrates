@@ -21,7 +21,6 @@ from hippocrates.blueprints.risar.risar_config import risar_mother_anamnesis, ri
     puerpera_inspection_flat_code, risar_gyn_general_anamnesis_flat_code, risar_gyn_checkup_flat_codes, \
     request_type_gynecological, request_type_pregnancy, risar_epicrisis, first_inspection_flat_code,\
     second_inspection_flat_code, pc_inspection_flat_code, soc_prof_codes, pregnancy_card_apts
-from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 from nemesis.lib.data import create_action
 from nemesis.models.actions import Action, ActionType
 from nemesis.lib.utils import safe_bool
@@ -390,10 +389,9 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def regional_risk(self):
-        if SpecificsManager.is_region_tomsk():
-            from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import \
-                get_tomsk_regional_risk
-            return get_tomsk_regional_risk(self.event, True)
+        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import \
+            get_regional_risk
+        return get_regional_risk(self.event, True)
 
     @lazy
     def regional_risk_rate(self):
@@ -427,6 +425,15 @@ class PregnancyCard(AbstractCard):
         diagnostics = self.get_client_diagnostics(self.event.setDate, self.event.execDate)
         return set(
             d.MKB
+            for d in diagnostics
+            if d.diagnosis.endDate is None
+        )
+
+    @lazy
+    def diags_by_mkb(self):
+        diagnostics = self.get_client_diagnostics(self.event.setDate, self.event.execDate)
+        return dict(
+            (d.MKB, d)
             for d in diagnostics
             if d.diagnosis.endDate is None
         )
