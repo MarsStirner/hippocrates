@@ -270,6 +270,8 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
             RisarApi.print_first_checkup(action_id, 'pdf');
         } else if (flat_code == 'risarSecondInspection') {
             RisarApi.print_second_checkup(action_id, 'pdf');
+        } else if (flat_code == 'risarPCCheckUp') {
+            RisarApi.print_pc_checkup(action_id, 'pdf');
         } else {
             $scope.open_print_window($scope.ps_si, checkup.id)
         }

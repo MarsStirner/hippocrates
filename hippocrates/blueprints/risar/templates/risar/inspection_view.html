@@ -24,7 +24,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li ng-if="['risarFirstInspection', 'risarSecondInspection'].indexOf(checkup.flat_code) !== -1" ng-class="{disabled: !ps_fi.is_available()}">
+                                <li ng-if="['risarFirstInspection', 'risarSecondInspection', 'risarPCCheckUp'].indexOf(checkup.flat_code) !== -1" ng-class="{disabled: !ps_fi.is_available()}">
                                     <a href="#" ng-click="print_checkup(checkup)" >Печать</a></li>
                                 <li>{{ imacros.checkup_ticket_25_print_link() }}</li>
                                 <li ng-if="checkup.flat_code != 'risarPCCheckUp'" ng-class="{disabled: !canEditCheckup($index)}">
