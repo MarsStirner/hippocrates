@@ -79,6 +79,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         radz_risk: [],
         closed: $scope.closed_items[0],
         client_work_group: {},
+        fertilization_type: {},
         age_min: null,
         age_max: null,
         request_types: [],
@@ -127,6 +128,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             radz_risk: radz_risks.length ? radz_risks : undefined,
             closed: $scope.query.closed.value,
             client_workgroup: $scope.query.client_workgroup || undefined,
+            fertilization_type: $scope.query.fertilization_type || undefined,
             age_max: $scope.query.age_max || undefined,
             age_min: $scope.query.age_min || undefined,
             request_types: request_types.length ? request_types : undefined,
@@ -228,6 +230,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             radz_risk: [],
             closed: $scope.closed_items[0],
             client_work_group: {},
+            fertilization_type: {},
             age_min: null,
             age_max: null,
             request_types: [],
@@ -414,8 +417,9 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         $scope.$watchCollection('query.radz_risk', function () {
             tc.start()
         });
-        $scope.$watchCollection('query.request_types', function () {
+        $scope.$watchCollection('query.request_types', function (n, o_) {
             tc.start()
+            $scope.isPregnancy= _.pluck(n, 'code').indexOf('pregnancy')>-1;
         });
         $scope.$watchCollection('query.pathology', function () {
             tc.start()
