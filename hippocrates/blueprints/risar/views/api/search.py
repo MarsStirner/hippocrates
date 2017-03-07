@@ -371,7 +371,7 @@ def api_0_event_print():
     jasper_report = JasperReport(
         'SearchPrint',
         '/reports/Hippocrates/Risar/SearchPrint',
-        fields=('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week')
+        fields=('name', 'external_id', 'exec_person_name', 'risk', 'radz_risk', 'curators', 'week')
     )
     jasper_report.generate(file_format, data)
     return make_response(jasper_report.get_response_data())
