@@ -151,12 +151,20 @@
                      {%- if 'attempt_number' in mother_anamnesis_descriptor -%}
                     {%- endif -%}
                 {% endif %}
-                {% if 'intrauterine' in mother_anamnesis_descriptor %}
+                {% if 'intrauterine' in mother_anamnesis_descriptor %}{# Внутриматочные вмешательства #}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('intrauterine')"></th>
                     <td><input ng-model="anamnesis_mother.intrauterine" class="checkbox" type="checkbox"
                                ng-required="motherAnamnesisDescriptor.getMandatory('intrauterine')"
                                ng-disabled="motherAnamnesisDescriptor.getReadOnly('intrauterine')"></td>
+                </tr>
+                {% endif %}
+                {% if 'uterine_scar' in mother_anamnesis_descriptor %}{# Рубец на матке #}
+                <tr>
+                    <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('uterine_scar')"></td>
+                    <td><rb-select ref-book="rbRisarUterineScar" ng-model="anamnesis_mother.uterine_scar"
+                            ng-required="motherAnamnesisDescriptor.getMandatory('uterine_scar')"
+                            ng-disabled="motherAnamnesisDescriptor.getReadOnly('uterine_scar')"></rb-select></td>
                 </tr>
                 {% endif %}
                 {% if 'multifetation' in mother_anamnesis_descriptor %}
@@ -251,12 +259,20 @@
                     <td><wysiwyg ng-model="anamnesis_mother.current_diseases_text" /></td>
                 </tr>
                 {% endif %}
-                {% if 'heart_disease' in mother_anamnesis_descriptor %}
+                {% if 'heart_disease' in mother_anamnesis_descriptor %}{# Пороки сердца с нарушением кровообращения #}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('heart_disease')"></th>
                     <td><input ng-model="anamnesis_mother.heart_disease" class="checkbox" type="checkbox"
                                ng-required="motherAnamnesisDescriptor.getMandatory('heart_disease')"
                                ng-disabled="motherAnamnesisDescriptor.getReadOnly('heart_disease')"></td>
+                </tr>
+                {% endif %}
+                {% if 'solitary_paired' in mother_anamnesis_descriptor %}{# Единственная почка" #}
+                <tr>
+                    <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('solitary_paired')"></td>
+                    <td><input ng-model="anamnesis_mother.solitary_paired" class="checkbox" type="checkbox"
+                               ng-required="motherAnamnesisDescriptor.getMandatory('solitary_paired')"
+                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('solitary_paired')"></td>
                 </tr>
                 {% endif %}
                 {% if 'preeclampsia' in mother_anamnesis_descriptor %}

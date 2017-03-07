@@ -104,10 +104,19 @@
                         [[ item.name ]]
                     </div>
                 </div>
+                {% if specifics_mng.has_regional_risks() %}
+                <div class="form-group">
+                    <label>Степень риска по региональной шкале</label>
+{#                    ng-disabled="!filterForPregCardsAvailable()"#}
+                    <div fs-checkbox="" items="regional_risks_rb.objects" ng-model="query.regional_risk_rate" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+                {% endif %}
                 <div class="form-group">
                     <label>Степень риска по шкале Радзинского</label>
 {#                    ng-disabled="!filterForPregCardsAvailable()"#}
-                    <div fs-checkbox="" items="radz_risks_rb.objects" ng-model="query.radz_risk" class="nopadding">
+                    <div fs-checkbox="" items="radz_risks_rb.objects" ng-model="query.radz_risk_rate" class="nopadding">
                         [[ item.name_masc ]]
                     </div>
                 </div>

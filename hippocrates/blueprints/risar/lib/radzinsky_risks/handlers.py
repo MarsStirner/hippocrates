@@ -379,10 +379,8 @@ def uterine_scar_1(card):
     """
     anamnesis = card.anamnesis.mother
     if anamnesis.id:
-        # TODO:
-        return False
-        # return anamnesis['fertilization_type'].value_raw and \
-        #        anamnesis['fertilization_type'].value_raw != '05'
+        return anamnesis['uterine_scar'].value_raw and \
+               anamnesis['uterine_scar'].value_raw == '01'
     return False
 
 
@@ -392,10 +390,8 @@ def uterine_scar_more_2(card):
     """
     anamnesis = card.anamnesis.mother
     if anamnesis.id:
-        # TODO:
-        return False
-        # return anamnesis['fertilization_type'].value_raw and \
-        #        anamnesis['fertilization_type'].value_raw != '05'
+        return anamnesis['uterine_scar'].value_raw and \
+               anamnesis['uterine_scar'].value_raw == '02'
     return False
 
 
@@ -1044,7 +1040,12 @@ def glomerulonephritis(card):
 
 
 def solitary_paired(card):
-    # TODO:
+    """
+    На форме "Ввод сведений о матери" отмечен флажок "Единственная почка".
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        return anamnesis.get_prop_value('solitary_paired')
     return False
 
 

@@ -93,12 +93,18 @@ def search_events(paginated=True, **kwargs):
         else:
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
-    if 'radz_risk' in kwargs:
-        if isinstance(kwargs['radz_risk'], basestring):
-            radz_risk = map(int, kwargs['radz_risk'].split(','))
+    if 'radz_risk_rate' in kwargs:
+        if isinstance(kwargs['radz_risk_rate'], basestring):
+            radz_risk_rate = map(int, kwargs['radz_risk_rate'].split(','))
         else:
-            radz_risk = kwargs['radz_risk']
-        query = query.filter(radz_risk__in=radz_risk)
+            radz_risk_rate = kwargs['radz_risk_rate']
+        query = query.filter(radz_risk_rate__in=radz_risk_rate)
+    if 'regional_risk_rate' in kwargs:
+        if isinstance(kwargs['regional_risk_rate'], basestring):
+            regional_risk_rate = map(int, kwargs['regional_risk_rate'].split(','))
+        else:
+            regional_risk_rate = kwargs['regional_risk_rate']
+        query = query.filter(regional_risk_rate__in=regional_risk_rate)
     if 'pathology' in kwargs:
         pathology = kwargs['pathology']
         if isinstance(kwargs['pathology'], basestring):
@@ -309,7 +315,6 @@ def api_0_event_search():
                 'client_workgroup': get_workgroupname_by_code(row.get('client_work_code', '')),
                 'literal_age': represent_age(row.get('client_age', 0)),
                 'risk': PerinatalRiskRate(row['risk']),
-                'radz_risk': RadzinskyRiskRate(row['radz_risk']),
                 'mdate': datetime.date.fromtimestamp(row['card_modify_date'])
                     if 'card_modify_date' in row and row['card_modify_date'] else None,
                 'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,

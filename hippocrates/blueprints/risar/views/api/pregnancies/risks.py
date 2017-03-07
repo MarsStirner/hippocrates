@@ -13,6 +13,7 @@ from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 
 from nemesis.lib.apiutils import api_method
+from nemesis.lib.utils import db_non_flushable
 from nemesis.models.event import Event
 
 
@@ -24,6 +25,7 @@ def api_0_chart_risks(event_id):
 
 @module.route('/api/0/chart/<int:event_id>/radzinsky_risks')
 @api_method
+@db_non_flushable
 def api_0_chart_radzinsky_risks(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
@@ -33,12 +35,14 @@ def api_0_chart_radzinsky_risks(event_id):
 
 @module.route('/api/0/rb_radzinsky_risk_factors')
 @api_method
+@db_non_flushable
 def api_0_rb_radzinsky_riskfactors():
     return radzinsky_risk_factors()
 
 
 @module.route('/api/0/chart/<int:event_id>/regional_risks')
 @api_method
+@db_non_flushable
 def api_0_chart_regional_risks(event_id):
     event = Event.query.get(event_id)
     card = PregnancyCard.get_for_event(event)
@@ -48,6 +52,7 @@ def api_0_chart_regional_risks(event_id):
 
 @module.route('/api/0/rb_regional_risk_factors')
 @api_method
+@db_non_flushable
 def api_0_rb_regional_riskfactors():
     return regional_risk_factors()
 

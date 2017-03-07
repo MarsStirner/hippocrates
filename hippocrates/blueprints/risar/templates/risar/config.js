@@ -114,6 +114,7 @@ WebMis20
         api_gravidograma: '{{ url_for('.api_0_gravidograma') }}',
         api_stats_perinatal_risk_rate: '{{ url_for('.api_0_stats_perinatal_risk_rate') }}',
         api_stats_radz_risks: '{{ url_for('.api_0_stats_radz_risks') }}',
+        api_stats_regional_risks: '{{ url_for('.api_0_stats_regional_risks') }}',
         api_stats_obcl_get: '{{ url_for('.api_0_stats_obcl_get') }}',
         api_stats_obcl_orgs_get: '{{ url_for('.api_0_stats_obcl_orgs_get') }}{0}',
         api_stats_org_curation_get: '{{ url_for('.api_0_stats_org_curation_get') }}',

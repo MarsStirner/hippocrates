@@ -671,6 +671,11 @@ WebMis20
                 curation_level_code: curation_level_code
             });
         },
+        get_regional_risk_info: function (curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_regional_risks, {
+                curation_level_code: curation_level_code
+            });
+        },
         get_pregnancy_pathology_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code

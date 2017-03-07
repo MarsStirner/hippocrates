@@ -3,7 +3,7 @@ import datetime
 import logging
 
 from collections import defaultdict
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import contains_eager
 
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.models.radzinsky_risks import (RisarTomskRegionalRisks,
@@ -271,9 +271,9 @@ def regional_risk_factors():
     ).join(
         rbRadzRiskFactorGroup, rbRadzRiskFactor.regional_group_id == rbRadzRiskFactorGroup.id
     ).options(
-        joinedload(rbRegionalRiskStage.stage_factor_assoc).
-        joinedload(rbRadzRiskFactor_RegionalStageAssoc.factor).
-        joinedload(rbRadzRiskFactor.group)
+        contains_eager(rbRegionalRiskStage.stage_factor_assoc).
+        contains_eager(rbRadzRiskFactor_RegionalStageAssoc.factor).
+        contains_eager(rbRadzRiskFactor.regional_group)
     )
 
     grouped = defaultdict(dict)
