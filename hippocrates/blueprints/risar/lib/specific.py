@@ -82,9 +82,7 @@ class SpecificsManager(object):
 
     @classmethod
     def get_regional_risks_menu_text(cls):
-        if cls.is_region_tomsk():
-            return u'Шкала оценки перинатальных факторов риска'
-        return u'Шкала региональных рисков'
+        return u'Региональная шкала оценки рисков'
 
 
 def get_sarbarsmis_url():

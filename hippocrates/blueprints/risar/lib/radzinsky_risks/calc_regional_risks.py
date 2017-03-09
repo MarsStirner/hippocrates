@@ -66,7 +66,7 @@ def reevaluate_tomsk_regional_risk_rate(card, regional_risk, regional_risk_rate)
 
     if 0 <= final_sum < 10:
         risk_rate = TomskRegionalRiskRate.low[0]
-    elif 10 <= final_sum <= 140:
+    elif 10 <= final_sum <= 14:
         risk_rate = TomskRegionalRiskRate.medium[0]
     elif 15 <= final_sum:
         risk_rate = TomskRegionalRiskRate.high[0]
