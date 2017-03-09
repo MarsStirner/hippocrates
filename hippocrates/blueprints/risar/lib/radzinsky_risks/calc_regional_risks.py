@@ -3,6 +3,7 @@ import datetime
 import logging
 
 from collections import defaultdict
+from copy import deepcopy
 from sqlalchemy.orm import contains_eager
 
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
@@ -206,7 +207,7 @@ def get_event_regional_risks_info(card):
 def get_event_tomsk_regional_risks_info(card):
     regional_risk = card.regional_risk
     event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in regional_risk.factors_assoc}
-    rb_stage_factors = regional_risk_factors()
+    rb_stage_factors = deepcopy(regional_risk_factors())
     stage_points = {}
     points_modifiers = get_regional_factor_points_modifications(card)
     for stage_code, groups in rb_stage_factors.iteritems():

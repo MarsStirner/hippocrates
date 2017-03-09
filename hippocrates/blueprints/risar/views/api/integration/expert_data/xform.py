@@ -9,11 +9,15 @@
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.views.api.integration.expert_data.schemas import \
-    ExpertDataSchema
-from hippocrates.blueprints.risar.views.api.integration.xform import XForm
+    ExpertDataSchema, ExpertDataTomskSchema
+from hippocrates.blueprints.risar.views.api.integration.xform import XForm, VALIDATION_ERROR
+from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import get_event_tomsk_regional_risks_info
+from hippocrates.blueprints.risar.lib.specific import SpecificsManager
+from hitsl_utils.api import ApiException
 from nemesis.models.event import Event, EventType
 from nemesis.models.risar import rbPerinatalRiskRateMkbAssoc
-from nemesis.models.enums import PregnancyPathology
+from nemesis.models.enums import PregnancyPathology, TomskRegionalRiskStage
+from nemesis.lib.apiutils import ApiException
 
 
 class ExpertDataXForm(ExpertDataSchema, XForm):
@@ -33,11 +37,15 @@ class ExpertDataXForm(ExpertDataSchema, XForm):
         )
         return res
 
+    def get_card(self):
+        if not self.pcard:
+            self.pcard = PregnancyCard.get_for_event(self.target_obj)
+        return self.pcard
+
     def as_json(self):
         self.find_target_obj(self.target_obj_id)
-        event = self.target_obj
-        self.pcard = PregnancyCard.get_for_event(event)
-        action = self.pcard.attrs
+        card = self.get_card()
+        action = card.attrs
 
         res = {
             'risk_degree': self.from_rb(action['prenatal_risk_572'].value),
@@ -78,3 +86,40 @@ class ExpertDataXForm(ExpertDataSchema, XForm):
             )
         if data:
             res['risk_diagnosis'] = data
+
+
+class ExpertDataTomskXForm(ExpertDataTomskSchema, ExpertDataXForm):
+
+    def check_params(self, target_obj_id, parent_obj_id=None, data=None):
+        super(ExpertDataTomskXForm, self).check_params(target_obj_id, parent_obj_id, data)
+        if not SpecificsManager.is_region_tomsk():
+            raise ApiException(VALIDATION_ERROR, u'В данном режиме работы системы этот метод API недоступен')
+
+    def _get_regional_risks(self):
+        risks = get_event_tomsk_regional_risks_info(self.get_card())
+        general_info = risks['general_info']
+        stage_factors = risks['stage_factors']
+
+        res = []
+        for stage_id, sum_attr_name in zip(
+            (TomskRegionalRiskStage.initial[0], TomskRegionalRiskStage.before21[0],
+             TomskRegionalRiskStage.from21to30[0], TomskRegionalRiskStage.from31to36[0]),
+            ('initial_points', 'before21week_points',
+             'from21to30week_points', 'from31to36week_points')
+        ):
+            stage_code = TomskRegionalRiskStage(stage_id).code
+            stage_item = {
+                'stage': stage_code,
+                'factors': [factor_info['code']
+                            for factor_list in stage_factors[stage_code].itervalues()
+                            for factor_info in factor_list
+                            if factor_info['triggered']],
+                'sum': general_info[sum_attr_name]
+            }
+            res.append(stage_item)
+        return res
+
+    def as_json(self):
+        res = super(ExpertDataTomskXForm, self).as_json()
+        res['regional_scale_risks'] = self._get_regional_risks()
+        return res

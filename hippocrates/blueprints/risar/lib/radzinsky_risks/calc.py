@@ -3,6 +3,7 @@ import datetime
 import logging
 
 from collections import defaultdict
+from copy import deepcopy
 from sqlalchemy.orm import contains_eager
 
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
@@ -163,7 +164,7 @@ def get_filtered_risk_factors(stage_codes=None, group_codes=None):
 def get_event_radzinsky_risks_info(card):
     radz_risk = card.radz_risk
     event_factor_stages = {(assoc.risk_factor_id, assoc.stage_id) for assoc in radz_risk.factors_assoc}
-    rb_stage_factors = radzinsky_risk_factors()
+    rb_stage_factors = deepcopy(radzinsky_risk_factors())
     stage_points = {}
     for stage_code, groups in rb_stage_factors.iteritems():
         stage_sum = stage_maximum = 0
