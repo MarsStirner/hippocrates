@@ -301,9 +301,7 @@ def represent_pregnancy_checkup_shortly(action):
 
 
 def represent_pregnancy_checkup_interval(action):
-    result = get_checkup_interval(action)
-    result['beg_date'] = action.begDate
-    return result
+    return get_checkup_interval(action)
 
 
 def represent_checkup_puerpera_shortly(action):

@@ -236,6 +236,22 @@
                                             </td>
                                         </tr>
                                     {% endif %}
+                                    {% if 'visible_mucuous' in checkup_descriptor %}
+                                    <tr ng-if="checkupDescriptor.exists('visible_mucuous')">
+                                        <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('visible_mucuous')"></th>
+                                        <td class="col-md-4">
+                                            <div class="row" ng-class="{'has-error': somaticForm.visible_mucuous.$invalid && somaticForm.submit_attempt}">
+                                              <div class="col-md-8">
+                                                <rb-select ref-book="rbRisarMucous" ng-model="checkup.visible_mucuous" limit-to="50"
+                                                    ng-required="checkupDescriptor.getMandatory('visible_mucuous')"
+                                                    ng-disabled="checkupDescriptor.getReadOnly('visible_mucuous')"
+                                                    multiple="checkupDescriptor.getVector('visible_mucuous')"
+                                                ></rb-select>
+                                              </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'edema' in checkup_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('edema')"></th>
@@ -332,6 +348,22 @@
                                                  ng-required="checkupDescriptor.getMandatory('breathe')">
                                                 [[ item.name ]]
                                             </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'chdd' in checkup_descriptor %}
+                                    <tr>
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('chdd')"></th>
+                                        <td>
+                                            <div class="row"
+                                                 ng-class="{'has-error': somaticForm.chdd.$invalid && somaticForm.submit_attempt}">
+                                                <div class="col-md-2">
+                                                    <input name="chdd" ng-model="checkup.chdd"
+                                                           class="form-control" type="number" valid-number
+                                                           ng-disabled="checkupDescriptor.getReadOnly('chdd')"
+                                                           ng-required="checkupDescriptor.getMandatory('chdd')">
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -443,6 +475,18 @@
                                                  ng-required="checkupDescriptor.getMandatory('vagina')"></rb-select></div>
                                         </div></td>
                                     </tr>
+                                    {% endif %}
+                                    {% if 'vagina_mucuos' in checkup_descriptor %}
+                                        <tr>
+                                            <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_mucuos')"></th>
+                                            <td><div class="row"><div class="col-md-4">
+                                                <rb-select ng-model="checkup.vagina_mucuos" ref-book="rbRisarMucous"
+                                                     ng-disabled="checkupDescriptor.getReadOnly('vagina_mucuos')"
+                                                     ng-required="checkupDescriptor.getMandatory('vagina_mucuos')"
+                                                     multiple="checkupDescriptor.getVector('vagina_mucuos')"
+                                                     limit-to="50"
+                                                     ></rb-select></div></div></td>
+                                        </tr>
                                     {% endif %}
                                     {% if 'secretion' in checkup_descriptor %}
                                     <tr>
@@ -751,7 +795,7 @@
                                         <div class="col-md-9">
                                             <div class="tab-content">
                                                 <div ng-class="{'active': $index==0}" class="tab-pane" id="fetus[[$index+1]]"
-                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupSecondChildCtrl">
+                                                     ng-repeat="child in checkup.fetuses | flt_not_deleted" ng-controller="CheckupBaseChildCtrl">
                                                     <table class="table">
                                                         <thead>
                                                         <tr>
@@ -780,6 +824,11 @@
                                                                 <th class="text-right">Предлежание <span>&nbsp;</span></th>
                                                                 <td><div class="row"><div class="col-md-4">
                                                                     <rb-select ng-model="child.state.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th class="text-right">Место нахождения предлежащей части <span>&nbsp;</span></th>
+                                                                <td><div class="row"><div class="col-md-4">
+                                                                    <rb-select ng-model="child.state.contigous_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
                                                             </tr>
                                                             <tr>
                                                                 <th class="text-right">Задержка в развитии <span>&nbsp;</span></th>
@@ -1035,8 +1084,8 @@
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]">Перейти на форму осмотров пациентки</a>
 {#                        <button ng-show="checkup.id && rc.sampleWizard.currentIndex == 5" ng-click="print_checkup_ticket()"#}
 {#                                type="button" class="btn btn-default"><i class="glyphicon glyphicon-print"></i> Печать талона</button>#}
-                        <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps_si"
-                                         resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>
+{#                        <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps_si"#}
+{#                                         resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>#}
                         <a class="btn btn-success"
                            ng-click="save(rc.sampleWizard.currentStep.formController)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"

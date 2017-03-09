@@ -397,28 +397,22 @@
                                 {% endif %}
                                 {% if 'vulva_skin' in checkup_descriptor %}
                                 <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_skin')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_skin | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_skin') ? checkupDescriptor.getName('vulva_skin') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.vulva_skin" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.vulva_skin_adds ? '' : ', ']]</span>
+                                        {%-if 'vulva_skin_adds' in checkup_descriptor -%}<span ng-bind-html="checkup.vulva_skin_adds"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'vulva_skin_adds' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.vulva_skin_adds">
-                                        <div class="col-sm-6 col-md-6 text-right"></div>
-                                        <div class="col-sm-6 col-md-6"><span>[[checkup.vulva_skin_adds]]</span></div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'vulva_mucous' in checkup_descriptor %}
                                 <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_mucous')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vulva_mucous | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_mucous') ? checkupDescriptor.getName('vulva_mucous') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.vulva_mucous" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.vulva_mucous_adds ? '' : ', ']]</span>
+                                        {%-if 'vulva_mucous_adds' in checkup_descriptor -%}<span ng-bind-html="checkup.vulva_mucous_adds"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'vulva_mucous_adds' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.vulva_mucous_adds">
-                                        <div class="col-sm-6 col-md-6 text-right"></div>
-                                        <div class="col-sm-6 col-md-6"><span>[[checkup.vulva_mucous_adds]]</span></div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'vulva_germination' in checkup_descriptor %}
                                 <div class="row">
                                         <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vulva_germination')]]:</div>
@@ -426,16 +420,13 @@
                                 </div>
                                 {% endif %}
                                 {% if 'urethra' in checkup_descriptor %}
-                                <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('urethra')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.urethra.name"></span></div>
-                                </div>
-                                {% endif %}
-                                {% if 'urethra_adds' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.urethra_adds">
-                                        <div class="col-sm-6 col-md-6 text-right"></div>
-                                        <div class="col-sm-6 col-md-6">[[checkup.urethra_adds]]</span></div>
-                                </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('urethra') ? checkupDescriptor.getName('urethra') +':' :'']]</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <span ng-repeat="elem in [checkup.urethra]" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.urethra_adds ? '' : ', ']]</span>
+                                            {%-if 'urethra_adds' in checkup_descriptor -%}<span ng-bind-html="checkup.urethra_adds"></span>{%- endif -%}
+                                        </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'perianal_zona' in checkup_descriptor %}
                                 <div class="row">
@@ -497,28 +488,22 @@
                             </div>
                             <div class="box-body">
                                 {% if 'vagina_mirrors_mirrors' in checkup_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vagina_mirrors_mirrors')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vagina_mirrors_mirrors.name"></span></div>
-                                </div>
-                                {% endif %}
-                                {% if 'vagina_mirrors_adds' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.vagina_mirrors_adds">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.vagina_mirrors_adds]]</div>
-                                </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vagina_mirrors_mirrors') ? checkupDescriptor.getName('vagina_mirrors_mirrors') +':' :'']]</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <span ng-repeat="elem in [checkup.vagina_mirrors_mirrors]" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.vagina_mirrors_adds ? '' : ', ']]</span>
+                                            {%-if 'vagina_mirrors_adds' in checkup_descriptor -%}<span ng-bind-html="checkup.vagina_mirrors_adds"></span>{%- endif -%}
+                                        </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'vagina_paries_mirrors' in checkup_descriptor %}
-                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vagina_paries_mirrors')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vagina_paries_mirrors.name"></span></div>
-                                </div>
-                                {% endif %}
-                                {% if 'vagina_paries_mirrors_other' in checkup_descriptor %}
-                                 <div class="row" ng-show="checkup.vagina_paries_mirrors_other">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.vagina_paries_mirrors_other]]</div>
-                                </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vagina_paries_mirrors') ? checkupDescriptor.getName('vagina_paries_mirrors') +':' :'']]</div>
+                                        <div class="col-sm-6 col-md-6">
+                                            <span ng-repeat="elem in [checkup.vagina_paries_mirrors]" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.vagina_paries_mirrors_other ? '' : ', ']]</span>
+                                            {%-if 'vagina_paries_mirrors_other' in checkup_descriptor -%}<span ng-bind-html="checkup.vagina_paries_mirrors_other"></span>{%- endif -%}
+                                        </div>
+                                    </div>
                                 {% endif %}
                                 {% if 'cervix_uteri_mirrors' in checkup_descriptor %}
                                 <div class="row">
@@ -558,28 +543,22 @@
                                 {% endif %}
                                 {% if 'vaginal_fornix_mirrors' in checkup_descriptor %}
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vaginal_fornix_mirrors')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.vaginal_fornix_mirrors| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('vaginal_fornix_mirrors') ? checkupDescriptor.getName('vaginal_fornix_mirrors') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.vaginal_fornix_mirrors" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.vaginal_fornix_adds_mirrors ? '' : ', ']]</span>
+                                        {%-if 'vaginal_fornix_adds_mirrors' in checkup_descriptor -%}<span ng-bind-html="checkup.vaginal_fornix_adds_mirrors"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'vaginal_fornix_adds_mirrors' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.vaginal_fornix_adds_mirrors">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.vaginal_fornix_adds_mirrors]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'mucous_mirrors' in checkup_descriptor %}
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('mucous_mirrors')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.mucous_mirrors | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('mucous_mirrors') ? checkupDescriptor.getName('mucous_mirrors') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.mucous_mirrors" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.mucous_adds_mirrors ? '' : ', ']]</span>
+                                        {%-if 'mucous_adds_mirrors' in checkup_descriptor -%}<span ng-bind-html="checkup.mucous_adds_mirrors"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'mucous_adds_mirrors' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.mucous_adds_mirrors">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('mucous_adds_mirrors') ? checkupDescriptor.getName('mucous_adds_mirrors')+':' : '']]</div>
-                                    <div class="col-sm-6 col-md-6" ng-bind-html="checkup.mucous_adds_mirrors"></div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'discharge_consistency_mirrors' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('discharge_consistency_mirrors')]]:</div>
@@ -713,16 +692,13 @@
                                 {% endif %}
                                 {% if 'bimanual_vaginal_fornix' in checkup_descriptor %}
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('bimanual_vaginal_fornix')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_vaginal_fornix | pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('bimanual_vaginal_fornix') ? checkupDescriptor.getName('bimanual_vaginal_fornix') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.bimanual_vaginal_fornix" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.bimanual_formix_other ? '' : ', ']]</span>
+                                        {%-if 'bimanual_formix_other' in checkup_descriptor -%}<span ng-bind-html="checkup.bimanual_formix_other"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'bimanual_formix_other' in checkup_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.bimanual_formix_other"></span></div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'bimanual_comments' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('bimanual_comments')]]:</div>
@@ -792,45 +768,35 @@
                                 {% endif %}
                                 {% if 'rectovaginal_parametrium' in checkup_descriptor %}
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_parametrium')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_parametrium| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_parametrium') ? checkupDescriptor.getName('rectovaginal_parametrium') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectovaginal_parametrium" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectovaginal_parametrium_other ? '' : ', ']]</span>
+                                        {%-if 'rectovaginal_parametrium_other' in checkup_descriptor -%}<span ng-bind-html="checkup.rectovaginal_parametrium_other"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectovaginal_parametrium_other' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.rectovaginal_parametrium_other">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_parametrium_other]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right"><b>Придатки</b></div>
                                     <div class="col-sm-6 col-md-6"></div>
                                 </div>
                                 {% if 'rectovaginal_ovary_right' in checkup_descriptor %}
-
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_ovary_right')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_ovary_right| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_ovary_right') ? checkupDescriptor.getName('rectovaginal_ovary_right') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectovaginal_ovary_right" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectovaginal_ovary_right_oher ? '' : ', ']]</span>
+                                        {%-if 'rectovaginal_ovary_right_oher' in checkup_descriptor -%}<span ng-bind-html="checkup.rectovaginal_ovary_right_oher"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectovaginal_ovary_right_oher' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.rectovaginal_ovary_right_oher">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_ovary_right_oher]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'rectovaginal_ovary_left' in checkup_descriptor %}
-                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_ovary_left')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_ovary_left| pluck:'name' | join:', '"></span></div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_ovary_left') ? checkupDescriptor.getName('rectovaginal_ovary_left') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectovaginal_ovary_left" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectovaginal_ovary_left_oher ? '' : ', ']]</span>
+                                        {%-if 'rectovaginal_ovary_left_oher' in checkup_descriptor -%}<span ng-bind-html="checkup.rectovaginal_ovary_left_oher"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectovaginal_ovary_left_oher' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.rectovaginal_ovary_left_oher">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6">[[checkup.rectovaginal_ovary_left_oher]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'rectovaginal_uterine_tubes_right' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_uterine_tubes_right')]]:</div>
@@ -845,16 +811,13 @@
                                 {% endif %}
                                 {% if 'rectovaginal_vaginal_fornix' in checkup_descriptor %}
                                 <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_vaginal_fornix')]]:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_vaginal_fornix| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_vaginal_fornix') ? checkupDescriptor.getName('rectovaginal_vaginal_fornix') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectovaginal_vaginal_fornix" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectovaginal_formix_other ? '' : ', ']]</span>
+                                        {%-if 'rectovaginal_formix_other' in checkup_descriptor -%}<span ng-bind-html="checkup.rectovaginal_formix_other"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectovaginal_formix_other' in checkup_descriptor %}
-                                <div class="row">
-                                    <div class="col-sm-6 col-md-6 text-right"></div>
-                                    <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectovaginal_formix_other"></span></div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'rectovaginal_comments' in checkup_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectovaginal_comments')]]:</div>
@@ -938,44 +901,35 @@
                                 {% endif %}
                                 {% if 'rectal_parametrium' in checkup_descriptor %}
                                 <div class="row">
-                                        <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_parametrium')]]:</div>
-                                        <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_parametrium| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_parametrium') ? checkupDescriptor.getName('rectal_parametrium') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectal_parametrium" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectal_parametrium_other ? '' : ', ']]</span>
+                                        {%-if 'rectal_parametrium_other' in checkup_descriptor -%}<span ng-bind-html="checkup.rectal_parametrium_other"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectal_parametrium_other' in checkup_descriptor %}
-                                <div class="row">
-                                            <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_parametrium_other')]]:</div>
-                                            <div class="col-sm-6 col-md-6">[[checkup.rectal_parametrium_other]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right"><b>Придатки</b></div>
                                     <div class="col-sm-6 col-md-6"></div>
                                 </div>
                                 {% if 'rectal_ovary_right' in checkup_descriptor %}
                                 <div class="row">
-                                            <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_ovary_right')]]:</div>
-                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_ovary_right| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_ovary_right') ? checkupDescriptor.getName('rectal_ovary_right') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectal_ovary_right" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectal_ovary_right_oher ? '' : ', ']]</span>
+                                        {%-if 'rectal_ovary_right_oher' in checkup_descriptor -%}<span ng-bind-html="checkup.rectal_ovary_right_oher"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectal_ovary_right_oher' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.rectal_ovary_right_oher">
-                                            <div class="col-sm-6 col-md-6 text-right"></div>
-                                            <div class="col-sm-6 col-md-6">[[checkup.rectal_ovary_right_oher]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'rectal_ovary_left' in checkup_descriptor %}
                                 <div class="row">
-                                            <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_ovary_left')]]:</div>
-                                            <div class="col-sm-6 col-md-6"><span ng-bind="checkup.rectal_ovary_left| pluck:'name' | join:', '"></span></div>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_ovary_left') ? checkupDescriptor.getName('rectal_ovary_left') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectal_ovary_left" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectal_ovary_left_oher ? '' : ', ']]</span>
+                                        {%-if 'rectal_ovary_left_oher' in checkup_descriptor -%}<span ng-bind-html="checkup.rectal_ovary_left_oher"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectal_ovary_left_oher' in checkup_descriptor %}
-                                <div class="row" ng-show="checkup.rectal_ovary_left_oher">
-                                            <div class="col-sm-6 col-md-6 text-right"></div>
-                                            <div class="col-sm-6 col-md-6">[[checkup.rectal_ovary_left_oher]]</div>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'rectal_uterine_tubes_right' in checkup_descriptor %}
                                 <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_uterine_tubes_right')]]:</div>
@@ -990,16 +944,13 @@
                                 {% endif %}
                                 {% if 'rectal_vaginal_fornix' in checkup_descriptor %}
                                 <div class="row">
-                                            <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_vaginal_fornix')]]:</div>
-                                            <span class="col-sm-6 col-md-6" ng-bind="checkup.rectal_vaginal_fornix| pluck:'name' | join:', '"></span>
+                                    <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_vaginal_fornix') ? checkupDescriptor.getName('rectal_vaginal_fornix') +':' :'']]</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <span ng-repeat="elem in checkup.rectal_vaginal_fornix" ng-if="elem.code!='other'">[[elem.name]][[$last && !checkup.rectal_formix_other ? '' : ', ']]</span>
+                                        {%-if 'rectal_formix_other' in checkup_descriptor -%}<span ng-bind-html="checkup.rectal_formix_other"></span>{%- endif -%}
+                                    </div>
                                 </div>
-                                {% endif %}
-                                {% if 'rectal_formix_other' in checkup_descriptor %}
-                                <div class="row">
-                                            <div class="col-sm-6 col-md-6 text-right"></div>
-                                            <span class="col-sm-6 col-md-6" ng-bind="checkup.rectal_formix_other"></span>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                                 {% if 'rectal_comments' in checkup_descriptor %}
                                 <div class="row">
                                             <div class="col-sm-6 col-md-6 text-right">[[checkupDescriptor.getName('rectal_comments')]]:</div>

@@ -168,6 +168,11 @@ def search_events(paginated=True, **kwargs):
         work_code = client_workgroup.get('code')
         if work_code:
             query = query.match('@client_work_code %s' % escape_sphinx_query(work_code), raw=True)
+    fertilization_type = kwargs.get('fertilization_type')
+    if fertilization_type:
+        fert_type_code = fertilization_type.get('code')
+        if fert_type_code:
+            query = query.match('@fert_type_code %s' % escape_sphinx_query(fert_type_code), raw=True)
     age_min = safe_int(kwargs.get('age_min'))
     if age_min:
         query = query.filter(client_age__gte=age_min)
@@ -376,7 +381,7 @@ def api_0_event_print():
     jasper_report = JasperReport(
         'SearchPrint',
         '/reports/Hippocrates/Risar/SearchPrint',
-        fields=('name', 'external_id', 'exec_person_name', 'risk', 'curators', 'week')
+        fields=('name', 'external_id', 'exec_person_name', 'risk', 'radz_risk', 'curators', 'week')
     )
     jasper_report.generate(file_format, data)
     return make_response(jasper_report.get_response_data())

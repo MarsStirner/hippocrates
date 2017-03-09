@@ -63,6 +63,10 @@
                         [[ item.name ]]
                     </div>
                 </div>
+                <div class="form-group" ng-if="isPregnancy">
+                    <label>Способ оплодотворения</label>
+                    <rb-select ng-model="query.fertilization_type" ref-book="rbRisarFertilizationMethod" allow-clear="true"></rb-select>
+                </div>
                 <div class="form-group">
                     <label>Социальный статус</label>
                     <rb-select ng-model="query.client_workgroup" ref-book="rbRisarWork_Group" allow-clear="true"></rb-select>

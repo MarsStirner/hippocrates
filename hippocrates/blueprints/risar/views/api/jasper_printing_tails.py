@@ -97,6 +97,23 @@ def printing_second_checkup():
     return jasper_report.get_response_data()
 
 
+@module.route('/printing/gyn-checkup', methods=['POST'])
+def printing_gyn_checkup():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'gyn_checkup',
+        '/reports/Hippocrates/Risar/gyn_checkup',
+        params={
+            'action_id': str(data['action_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()
+
+
 @module.route('/printing/gyn-anamnesis', methods=['POST'])
 def printing_jsp_gyn_anamnesis():
     data = request.args.to_dict()
@@ -108,6 +125,23 @@ def printing_jsp_gyn_anamnesis():
         '/reports/Hippocrates/Risar/anamnesis_gynecological',
         params={
             'event_id': str(data['event_id'])
+        }
+    )
+    jasper_report.generate(file_format)
+    return jasper_report.get_response_data()
+
+
+@module.route('/printing/pc-checkup', methods=['POST'])
+def printing_pc_checkup():
+    data = request.args.to_dict()
+    if request.form:
+        data.update(json.loads(request.form.get('json', {})))
+    file_format = data.get('extension', 'html')
+    jasper_report = JasperReport(
+        'pc_checkup',
+        '/reports/Hippocrates/Risar/pc_checkup',
+        params={
+            'action_id': str(data['action_id'])
         }
     )
     jasper_report.generate(file_format)

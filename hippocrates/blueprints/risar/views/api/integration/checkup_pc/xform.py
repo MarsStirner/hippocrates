@@ -57,7 +57,7 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
         'ad_left_low': {'attr': 'ad_left_low', 'default': None, 'rb': None, 'is_vector': False},
         'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
         'vein': {'attr': 'veins', 'default': None, 'rb': 'rbRisarVein', 'is_vector': False},
-        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
+        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': 'rbRisarBowelAndBladderFunctions', 'is_vector': False},
         'heart_rate': {'attr': 'heart_rate', 'default': None, 'rb': None, 'is_vector': False},
     }
 
@@ -89,14 +89,15 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
 
     VAGINAL_MAP = {
         'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
-        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': False},
+        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': True},
         'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
         'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal', 'is_vector': False},
         'cervix_consistency': {'attr': 'cervix_consistency', 'default': None, 'rb': 'rbRisarCervix_Consistency', 'is_vector': False},
         'cervix_position': {'attr': 'cervix_position', 'default': None, 'rb': 'rbRisarCervix_Position', 'is_vector': False},
         'cervix_maturity': {'attr': 'cervix_maturity', 'default': None, 'rb': 'rbRisarCervix_Maturity', 'is_vector': False},
         'body_of_womb': {'attr': 'body_of_uterus', 'default': [], 'rb': 'rbRisarBody_Of_Womb', 'is_vector': True},
-        'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
+        'appendages': {'attr': 'adnexa_left', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
+        'appendages_right': {'attr': 'adnexa_right', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
         'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},

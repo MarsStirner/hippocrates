@@ -300,6 +300,7 @@ def represent_fetus(fetus):
             'position_2': fetus.position_2,
             'type': fetus.type,
             'presenting_part': fetus.presenting_part,
+            'contigous_part': fetus.contigous_part,
             'heartbeat': fetus.heartbeat,
             'delay': fetus.delay,
             'basal': fetus.basal,

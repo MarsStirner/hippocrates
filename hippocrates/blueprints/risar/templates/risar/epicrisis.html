@@ -64,7 +64,7 @@
                                 {% if 'immaturity' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('immaturity')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.immaturity ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.immaturity|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'delivery_waters' in epicrisis_descriptor %}
@@ -76,7 +76,7 @@
                                 {% if 'pre_birth_delivery_waters' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('pre_birth_delivery_waters')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.pre_birth_delivery_waters ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.pre_birth_delivery_waters|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'weakness' in epicrisis_descriptor %}
@@ -94,31 +94,31 @@
                                 {% if 'meconium_colouring' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('meconium_colouring')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.meconium_colouring ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.meconium_colouring|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'patologicsl_preliminal_period' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('patologicsl_preliminal_period')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.patologicsl_preliminal_period ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.patologicsl_preliminal_period|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'labor_anomalies' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('labor_anomalies')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.labor_anomalies ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.labor_anomalies|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'chorioamnionit' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('chorioamnionit')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.chorioamnionit ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.chorioamnionit|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'poor_blood' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('poor_blood')]]:</div>
-                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.poor_blood ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6 long-words">[[epicrisis.poor_blood|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'eclampsia' in epicrisis_descriptor %}
@@ -175,7 +175,7 @@
                                 {% if 'vacuum_extraction' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('vacuum_extraction')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.vacuum_extraction ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.vacuum_extraction|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'indication' in epicrisis_descriptor %}
@@ -187,7 +187,7 @@
                                 {% if 'specialities' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('specialities')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.specialities.name]]</div>
+                                    <div class="col-sm-6 col-md-6" ><span ng-bind-html="epicrisis.specialities"></span></div>
                                 </div>
                                 {% endif %}
                                 {% if 'anesthetization' in epicrisis_descriptor %}
@@ -212,7 +212,7 @@
                                 {% if 'embryotomy' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">[[epicrisisDescriptor.getName('embryotomy')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.embryotomy  ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.embryotomy |danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -328,13 +328,13 @@
                                 {% if 'caul' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('caul')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.caul  ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.caul |danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'calfbed' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('calfbed')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.calfbed  ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.calfbed |danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'perineotomy' in epicrisis_descriptor %}
@@ -346,7 +346,7 @@
                                 {% if 'secundines' in epicrisis_descriptor %}
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">[[epicrisisDescriptor.getName('secundines')]]:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.secundines ? 'да': '']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.secundines|danetIfNull]]</div>
                                 </div>
                                 {% endif %}
                                 {% if 'other_manipulations' in epicrisis_descriptor %}

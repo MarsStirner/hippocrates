@@ -6,9 +6,6 @@ from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, fill_these_attrs_from_action, \
     fill_action_from_another_action
 from nemesis.lib.utils import safe_datetime
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
-    rbDiagnosisTypeN, Diagnostic
-from nemesis.systemwide import db
 
 
 def copy_checkup(event, from_action):
@@ -58,42 +55,40 @@ def can_edit_checkup(action):
     )
 
 
-def get_checkup_interval(action, args=None):
-    if args is None:
-        args = {}
+def get_checkup_interval(action):
     start_date = safe_datetime(action.begDate)
     end_date = safe_datetime(action.get_prop_value('next_date'))
     if end_date:
         end_date = end_date.replace(hour=23, minute=59, second=59)
     else:
         end_date = action.endDate
-    args.update({
-        'event_id': action.event_id,
-        'end_date_from': start_date,
-        'action_id': action.id
-    })
-    if end_date:
-        args['beg_date_to'] = end_date
-    return args
+    return {
+        'id': action.id,
+        'beg_date': start_date,
+        'end_date': end_date
+    }
 
 
 def validate_send_to_mis_checkup(checkup):
+    # from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
+    #     rbDiagnosisTypeN, Diagnostic
+    # from nemesis.systemwide import db
     res = True
     talon25 = checkup.propsByCode['ticket_25'].value
-    dg_q = Action_Diagnosis.query.join(
-        rbDiagnosisKind
-    ).join(
-        rbDiagnosisTypeN
-    ).join(
-        Diagnostic, Diagnostic.action == checkup
-    ).filter(
-        Diagnostic.diagnosis_id == Action_Diagnosis.diagnosis_id,
-        Action_Diagnosis.deleted == 0,
-        Action_Diagnosis.action == checkup,
-        rbDiagnosisKind.code == 'main',
-        rbDiagnosisTypeN.code == 'final',
-        Diagnostic.rbAcheResult_id.isnot(None),
-    )
+    # dg_q = Action_Diagnosis.query.join(
+    #     rbDiagnosisKind
+    # ).join(
+    #     rbDiagnosisTypeN
+    # ).join(
+    #     Diagnostic, Diagnostic.action == checkup
+    # ).filter(
+    #     Diagnostic.diagnosis_id == Action_Diagnosis.diagnosis_id,
+    #     Action_Diagnosis.deleted == 0,
+    #     Action_Diagnosis.action == checkup,
+    #     rbDiagnosisKind.code == 'main',
+    #     rbDiagnosisTypeN.code == 'final',
+    #     Diagnostic.rbAcheResult_id.isnot(None),
+    # )
 
     if not talon25.propsByCode['medical_care'].value:
         res = False
@@ -115,8 +110,10 @@ def validate_send_to_mis_checkup(checkup):
         res = False
     elif not talon25.propsByCode['condit_med_help'].value:
         res = False
+    elif not talon25.propsByCode['ache_result'].value:
+        res = False
     elif not talon25.propsByCode['services'].value:
         res = False
-    elif not db.session.query(dg_q.exists()).scalar():
-        res = False
+    # elif not db.session.query(dg_q.exists()).scalar():
+    #     res = False
     return res

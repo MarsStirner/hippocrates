@@ -24,6 +24,12 @@ var ScheduleDayCtrl = function ($scope, RisarApi, CurrentUser, WMAppointmentDial
                 $scope.refresh_data($scope.search_date.date);
             });
     };
+    $scope.cancel_appointment = function (ticket) {
+        return WMAppointmentDialog.cancel(ticket, CurrentUser.info, ticket.client_id).result
+            .then(function() {
+                $scope.refresh_data($scope.search_date.date);
+            });
+    };
     $scope.init = function () {
     };
 

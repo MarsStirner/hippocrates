@@ -74,10 +74,16 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
 
         }
     }, true);
-    
+    $scope.parseTemperature = function (temperature) {
+        temperature = parseFloat(temperature);
+        if (!temperature) return null;
+        return temperature % 1 === 0 ? temperature / 10 : temperature;
+    };
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
-        return $scope.checkup
+        $scope.checkup.temperature = $scope.parseTemperature($scope.checkup.temperature);
+        $scope.checkup.temperature_rise = $scope.parseTemperature($scope.checkup.temperature_rise);
+        return $scope.checkup;
     };
     $scope.save = function (form_controller){
         form_controller.submit_attempt = true;

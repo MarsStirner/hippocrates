@@ -457,7 +457,7 @@ class XForm(object):
                 ).first()
                 row_id = rb.id if rb else None
                 name = getattr(rb, 'name', None) if rb else None
-                row_code = getattr(rb, 'code', None) if rb else None
+                row_code = getattr(rb, 'code', code) if rb else None
             if not row_id:
                 raise ApiException(
                     NOT_FOUND_ERROR,

@@ -107,9 +107,9 @@
                 {% if 'menstruation_disorders' in mother_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('menstruation_disorders')"></td>
-                    <td><input ng-model="anamnesis_mother.menstruation_disorders" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('menstruation_disorders')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('menstruation_disorders')"></td>
+                    <td>
+                        {{ rimacros.radio_da_net(model='anamnesis_mother.menstruation_disorders', descriptor='motherAnamnesisDescriptor') }}
+                    </td>
                 </tr>
                 {% endif %}
                 {% if 'sex_life_start_age' in mother_anamnesis_descriptor %}
@@ -136,6 +136,7 @@
                                ng-required="motherAnamnesisDescriptor.getMandatory('fertilization_type')"
                                ng-disabled="motherAnamnesisDescriptor.getReadOnly('fertilization_type')"></rb-select></td>
                 </tr>
+                    {%- if 'attempt_number' in mother_anamnesis_descriptor -%}
                     <tr ng-show="isAttemptVisible">
                         <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('attempt_number')"></th>
                         <td>
@@ -148,15 +149,12 @@
                             </div>
                         </td>
                     </tr>
-                     {%- if 'attempt_number' in mother_anamnesis_descriptor -%}
                     {%- endif -%}
                 {% endif %}
                 {% if 'intrauterine' in mother_anamnesis_descriptor %}{# Внутриматочные вмешательства #}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('intrauterine')"></th>
-                    <td><input ng-model="anamnesis_mother.intrauterine" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('intrauterine')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('intrauterine')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.intrauterine', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'uterine_scar' in mother_anamnesis_descriptor %}{# Рубец на матке #}
@@ -170,17 +168,13 @@
                 {% if 'multifetation' in mother_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('multifetation')"></th>
-                    <td><input ng-model="anamnesis_mother.multifetation" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('multifetation')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('multifetation')"></td>
+                    <td>{{ rimacros.radio_da_net('anamnesis_mother.multifetation', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'infertility' in mother_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('infertility')"></th>
-                    <td><input ng-model="anamnesis_mother.infertility" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('infertility')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('infertility')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.infertility', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'infertility_type' in mother_anamnesis_descriptor %}
@@ -262,9 +256,7 @@
                 {% if 'heart_disease' in mother_anamnesis_descriptor %}{# Пороки сердца с нарушением кровообращения #}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('heart_disease')"></th>
-                    <td><input ng-model="anamnesis_mother.heart_disease" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('heart_disease')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('heart_disease')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.heart_disease', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'solitary_paired' in mother_anamnesis_descriptor %}{# Единственная почка" #}
@@ -278,9 +270,7 @@
                 {% if 'preeclampsia' in mother_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('preeclampsia')"></th>
-                    <td><input ng-model="anamnesis_mother.preeclampsia" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('preeclampsia')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('preeclampsia')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.preeclampsia', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 <tr>
@@ -290,33 +280,25 @@
                 {% if 'alcohol' in mother_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('alcohol')"></td>
-                    <td><input ng-model="anamnesis_mother.alcohol" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('alcohol')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('alcohol')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.alcohol', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'smoking' in mother_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('smoking')"></td>
-                    <td><input ng-model="anamnesis_mother.smoking" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('smoking')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('smoking')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.smoking', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'toxic' in mother_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('toxic')"></td>
-                    <td><input ng-model="anamnesis_mother.toxic" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('toxic')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('toxic')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.toxic', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 {% if 'drugs' in mother_anamnesis_descriptor %}
                 <tr>
                     <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('drugs')"></td>
-                    <td><input ng-model="anamnesis_mother.drugs" class="checkbox" type="checkbox"
-                               ng-required="motherAnamnesisDescriptor.getMandatory('drugs')"
-                               ng-disabled="motherAnamnesisDescriptor.getReadOnly('drugs')"></td>
+                    <td>{{ rimacros.radio_da_net(model='anamnesis_mother.drugs', descriptor="motherAnamnesisDescriptor") }}</td>
                 </tr>
                 {% endif %}
                 </tbody>
