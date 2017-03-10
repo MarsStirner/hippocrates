@@ -31,7 +31,7 @@ var PatientActionsCtrl = function ($scope, $window, PatientATTreeService, RefBoo
     };
 
     $scope.$on('patientActionsOpened', function (event, args) {
-        if (!$scope.client_id) {
+        if (!$scope.client_id || $scope.client_id !== args.client_id) {
             $scope.init(args.client_id);
         }
     });
