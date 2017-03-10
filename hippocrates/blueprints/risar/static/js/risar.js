@@ -1434,7 +1434,7 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         }
     }
 }])
-.factory('PropsDescriptor', [function () {
+.factory('PropsDescriptor', ['$sce', function ($sce) {
     return function (props_descriptor) {
         return {
             exists: function (code) {
@@ -1453,9 +1453,11 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                 return this.exists(code) ? (props_descriptor[code].is_vector ? true: false) : false;
             },
             getLabel: function (code) {
-                var mandatory_text = ' <span class="text-danger">*</span>';
-                var prop_name = _.escape(this.getName(code));
-                return this.getMandatory(code) ? prop_name + mandatory_text: prop_name;
+                var red_star = ' <span class="text-danger">*</span>',
+                    prop_name = _.escape(this.getName(code)),
+                    label_text = this.getMandatory(code) ? prop_name + red_star: prop_name,
+                    template = '<span style="white-space: nowrap!important;">{0}</span>'.format(label_text);
+                return $sce.trustAsHtml(template)
             }
         };
     }
