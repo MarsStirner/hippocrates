@@ -61,7 +61,11 @@
                     <tabset>
                         <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
                         <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
-                        <tab heading="Записи ЭМК" select="openPatientActions()">{% include "patients/_patient_actions.html" %}</tab>
+                        <tab heading="Записи ЭМК" select="openPatientActions()">
+                            <div ng-controller="PatientActionsCtrl">
+                            {% include "patients/_patient_actions.html" %}
+                            </div>
+                        </tab>
                     </tabset>
                 </div>
             </div>

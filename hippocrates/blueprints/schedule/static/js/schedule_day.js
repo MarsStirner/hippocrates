@@ -85,6 +85,7 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
                 then(function() {
                     $location.hash('client_top');
                     $anchorScroll();
+                    $scope.openPatientActions();
                 });
         } else if ($scope.client) {
             var instance,
