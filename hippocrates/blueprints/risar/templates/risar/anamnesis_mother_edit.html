@@ -165,6 +165,14 @@
                             ng-disabled="motherAnamnesisDescriptor.getReadOnly('uterine_scar')"></rb-select></td>
                 </tr>
                 {% endif %}
+                {% if 'uterine_scar_location' in mother_anamnesis_descriptor %}{# Рубец на матке после операции #}
+                <tr>
+                    <td class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('uterine_scar_location')"></td>
+                    <td><rb-select ref-book="rbRisarUterineScarLocation" ng-model="anamnesis_mother.uterine_scar_location"
+                            ng-required="motherAnamnesisDescriptor.getMandatory('uterine_scar_location')"
+                            ng-disabled="motherAnamnesisDescriptor.getReadOnly('uterine_scar_location')"></rb-select></td>
+                </tr>
+                {% endif %}
                 {% if 'multifetation' in mother_anamnesis_descriptor %}
                 <tr>
                     <th class="text-right" ng-bind-html="motherAnamnesisDescriptor.getLabel('multifetation')"></th>

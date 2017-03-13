@@ -32,6 +32,10 @@ class SpecificsManager(object):
         return cls._system_mode == SystemMode.tomsk_barsmis[0]
 
     @classmethod
+    def is_region_saratov(cls):
+        return cls._system_mode == SystemMode.sar_barsmis[0]
+
+    @classmethod
     def ext_card_url_menu_enabled(cls):
         return cls._system_mode in (SystemMode.sar_barsmis[0], )
 
@@ -78,7 +82,7 @@ class SpecificsManager(object):
 
     @classmethod
     def has_regional_risks(cls):
-        return cls.is_region_tomsk()
+        return cls.is_region_tomsk() or cls.is_region_saratov()
 
     @classmethod
     def get_regional_risks_menu_text(cls):

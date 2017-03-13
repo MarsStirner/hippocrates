@@ -490,6 +490,8 @@ def html_regional_risks():
     specifics = SpecificsManager()
     if specifics.is_region_tomsk():
         return render_template('risar/regional_tomsk_risks.html', card=card)
+    if specifics.is_region_saratov():
+        return render_template('risar/regional_saratov_risks.html', card=card)
     raise abort(404)
 
 

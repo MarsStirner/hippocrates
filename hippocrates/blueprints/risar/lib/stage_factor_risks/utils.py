@@ -1,7 +1,96 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
+from sqlalchemy.orm import contains_eager
+
+from nemesis.models.risar import (rbRadzRiskFactor, rbRadzStage, rbRadzRiskFactor_StageAssoc,
+    rbRadzRiskFactorGroup, rbRegionalRiskStage, rbRadzRiskFactor_RegionalStageAssoc)
 from hippocrates.blueprints.risar.lib.utils import mkb_match as _mkb_match
-from nemesis.lib.utils import safe_bool_none
+from nemesis.lib.utils import safe_dict, safe_bool_none
+from nemesis.systemwide import db, cache
+
+
+@cache.memoize()
+def radzinsky_risk_factors():
+    query = db.session.query(rbRadzStage).join(
+        rbRadzRiskFactor_StageAssoc, rbRadzRiskFactor
+    ).join(
+        rbRadzRiskFactorGroup, rbRadzRiskFactorGroup.id == rbRadzRiskFactor.group_id
+    ).options(
+        contains_eager(rbRadzStage.stage_factor_assoc).
+        contains_eager(rbRadzRiskFactor_StageAssoc.factor).
+        contains_eager(rbRadzRiskFactor.group)
+    )
+
+    grouped = defaultdict(dict)
+    for stage in query:
+        for factor_stage in stage.stage_factor_assoc:
+            factor_info = safe_dict(factor_stage.factor)
+            factor_info.update(points=factor_stage.points)
+            grouped[stage.code].setdefault(
+                factor_stage.factor.group.code, []
+            ).append(factor_info)
+
+    return grouped
+
+
+def get_filtered_radzinsky_risk_factors(stage_codes=None, group_codes=None):
+    if stage_codes is not None and not isinstance(stage_codes, (tuple, list)):
+        stage_codes = (stage_codes, )
+    if group_codes is not None and not isinstance(group_codes, (tuple, list)):
+        group_codes = (group_codes, )
+
+    rb = radzinsky_risk_factors()
+
+    filtered = []
+    for stage_code, group in rb.iteritems():
+        if stage_codes is not None and stage_code in stage_codes or stage_codes is None:
+            for group_code, factors in group.iteritems():
+                if group_codes is not None and group_code in group_codes or group_codes is None:
+                    filtered.extend(factors)
+    return filtered
+
+
+@cache.memoize()
+def regional_risk_factors():
+    query = db.session.query(rbRegionalRiskStage).join(
+        rbRadzRiskFactor_RegionalStageAssoc, rbRadzRiskFactor
+    ).join(
+        rbRadzRiskFactorGroup, rbRadzRiskFactor.regional_group_id == rbRadzRiskFactorGroup.id
+    ).options(
+        contains_eager(rbRegionalRiskStage.stage_factor_assoc).
+        contains_eager(rbRadzRiskFactor_RegionalStageAssoc.factor).
+        contains_eager(rbRadzRiskFactor.regional_group)
+    )
+
+    grouped = defaultdict(dict)
+    for stage in query:
+        for factor_stage in stage.stage_factor_assoc:
+            factor_info = safe_dict(factor_stage.factor)
+            factor_info.update(points=factor_stage.points)
+            if factor_stage.factor.regional_group:
+                grouped[stage.code].setdefault(
+                    factor_stage.factor.regional_group.code, []
+                ).append(factor_info)
+
+    return grouped
+
+
+def get_filtered_regional_risk_factors(stage_codes=None, group_codes=None):
+    if stage_codes is not None and not isinstance(stage_codes, (tuple, list)):
+        stage_codes = (stage_codes, )
+    if group_codes is not None and not isinstance(group_codes, (tuple, list)):
+        group_codes = (group_codes, )
+
+    rb = regional_risk_factors()
+
+    filtered = []
+    for stage_code, group in rb.iteritems():
+        if stage_codes is not None and stage_code in stage_codes or stage_codes is None:
+            for group_code, factors in group.iteritems():
+                if group_codes is not None and group_code in group_codes or group_codes is None:
+                    filtered.extend(factors)
+    return filtered
 
 
 def _filter_parity_prev_preg(prev_preg):

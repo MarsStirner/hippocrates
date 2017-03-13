@@ -5,9 +5,9 @@ from flask import request, make_response
 
 from hippocrates.blueprints.reports.jasper_client import JasperReport
 from hippocrates.blueprints.risar.app import module
-from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_event_radzinsky_risks_info, \
+from hippocrates.blueprints.risar.lib.stage_factor_risks import get_event_radzinsky_risks_info, \
     radzinsky_risk_factors
-from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import get_event_regional_risks_info, \
+from hippocrates.blueprints.risar.lib.stage_factor_risks import get_event_regional_risks_info, \
     regional_risk_factors
 from hippocrates.blueprints.risar.lib.card import PregnancyCard
 from hippocrates.blueprints.risar.models.risar import RisarRiskGroup

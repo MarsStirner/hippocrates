@@ -11,7 +11,7 @@ from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
 from hippocrates.blueprints.risar.views.api.integration.expert_data.schemas import \
     ExpertDataSchema, ExpertDataTomskSchema
 from hippocrates.blueprints.risar.views.api.integration.xform import XForm, VALIDATION_ERROR
-from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import get_event_tomsk_regional_risks_info
+from hippocrates.blueprints.risar.lib.stage_factor_risks.scales import TomskRegionalRiskScale
 from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 from hitsl_utils.api import ApiException
 from nemesis.models.event import Event, EventType
@@ -96,7 +96,9 @@ class ExpertDataTomskXForm(ExpertDataTomskSchema, ExpertDataXForm):
             raise ApiException(VALIDATION_ERROR, u'В данном режиме работы системы этот метод API недоступен')
 
     def _get_regional_risks(self):
-        risks = get_event_tomsk_regional_risks_info(self.get_card())
+        card = self.get_card()
+        scale = TomskRegionalRiskScale(card, card.regional_risk, card.regional_risk_rate)
+        risks = scale.get_risks_info()
         general_info = risks['general_info']
         stage_factors = risks['stage_factors']
 

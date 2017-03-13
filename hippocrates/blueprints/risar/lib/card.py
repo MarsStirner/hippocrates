@@ -298,6 +298,16 @@ class PregnancyCard(AbstractCard):
             return get_action(self._event, risar_mother_anamnesis, True)
 
         @lazy
+        def mother_blood_type(self):
+            bh = self._event.client.blood_history.first()
+            if not bh:
+                return None
+            return {
+                'group': bh.bloodType.name.split('Rh')[0],
+                'rh': 'Rh({})'.format(bh.bloodType.name.split('Rh')[1]),
+            }
+
+        @lazy
         def father(self):
             return get_action(self._event, risar_father_anamnesis, True)
 
@@ -384,19 +394,17 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def radz_risk(self):
-        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import get_radz_risk
         return get_radz_risk(self.event, True)
 
     @lazy
     def regional_risk(self):
-        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import \
-            get_regional_risk
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import get_regional_risk
         return get_regional_risk(self.event, True)
 
     @lazy
     def regional_risk_rate(self):
-        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import \
-            get_regional_risk_rate
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import get_regional_risk_rate
         return get_regional_risk_rate(self.event, True)
 
     def reevaluate_card_attrs(self):
@@ -406,8 +414,8 @@ class PregnancyCard(AbstractCard):
         from .card_attrs import reevaluate_risk_rate, \
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate,\
             reevaluate_risk_groups, reevaluate_card_fill_rate_all
-        from .radzinsky_risks.calc import reevaluate_radzinsky_risks
-        from .radzinsky_risks.calc_regional_risks import reevaluate_regional_risks
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import reevaluate_radzinsky_risks
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import reevaluate_regional_risks
 
         self.attrs.get_lock()
         with db.session.no_autoflush:
@@ -437,6 +445,22 @@ class PregnancyCard(AbstractCard):
             for d in diagnostics
             if d.diagnosis.endDate is None
         )
+
+    @cache.cached_call
+    def get_anamnesis_mkbs(self, only_current=False, only_finished=False):
+        res = set()
+        anamnesis = self.anamnesis.mother
+        if anamnesis:
+            from_lists = [anamnesis.get_prop_value('current_diseases', []),
+                          anamnesis.get_prop_value('finished_diseases', [])]
+            if only_current:
+                del from_lists[1]
+            if only_finished:
+                del from_lists[0]
+            for mkb_list in from_lists:
+                for mkb in mkb_list:
+                    res.add(mkb.DiagID)
+        return res
 
     @cache.cached_call
     def get_inspection_diagnoses(self):

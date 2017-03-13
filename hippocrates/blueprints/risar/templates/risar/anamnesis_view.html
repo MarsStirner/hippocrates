@@ -57,6 +57,9 @@
                                 {% if 'uterine_scar' in mother_anamnesis_descriptor %}
                                 <p ng-if="anamnesis.mother.uterine_scar">Рубец на матке: <b>[[ anamnesis.mother.uterine_scar.name ]]</b></p>
                                 {% endif %}
+                                {% if 'uterine_scar_location' in mother_anamnesis_descriptor %}
+                                <p ng-if="anamnesis.mother.uterine_scar_location">Рубец на матке после операции: <b>[[ anamnesis.mother.uterine_scar_location.name ]]</b></p>
+                                {% endif %}
                                 {% if 'multifetation' in mother_anamnesis_descriptor %}
                                 <p>Предыдущие многоплодные беременности: <b>[[ anamnesis.mother.multifetation ? 'Да' : 'Нет']]</b></p>
                                 {% endif %}

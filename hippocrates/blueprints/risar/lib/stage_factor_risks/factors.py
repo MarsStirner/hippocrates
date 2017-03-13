@@ -92,6 +92,14 @@ def height_less_150(card):
     return False
 
 
+def height_less_158(card):
+    fi = card.primary_inspection
+    if fi:
+        return fi.action['height'].value is not None and \
+               fi.action['height'].value <= 158
+    return False
+
+
 def height_less_155(card):
     fi = card.primary_inspection
     if fi:
@@ -107,6 +115,15 @@ def overweight(card):
         height = fi.action['height'].value
         return weight is not None and height is not None and float(height - 100) * 1.25 < weight
     return False
+
+
+def Rh_minus(card):
+    """
+    На форме с регистрационными данными пациентки или на форме "Ввод сведений о матери"
+    отмечено значение группы крови = 0(I)Rh- или A(II)Rh- или B(III)Rh- или AB(IV)Rh-
+    """
+    blood_info = card.anamnesis.mother_blood_type
+    return blood_info is not None and blood_info['rh'] == 'Rh(-)'
 
 
 def not_married(card):
@@ -275,16 +292,13 @@ def infertility_more_5(card):
     return False
 
 
-def uterine_scar(card):
-    return _mkb_match(card.unclosed_mkbs, 'O34.2')
-
-
 def uterus_oophoron_tumor(card):
-    return _mkb_match(card.unclosed_mkbs, 'O34.1')
+    return _mkb_match(card.unclosed_mkbs | card.get_anamnesis_mkbs(), 'O34.1')
 
 
 def insuficiencia_istmicocervical(card):
-    return _mkb_match(card.unclosed_mkbs, 'O34.3')
+    return _mkb_match(card.unclosed_mkbs | card.get_anamnesis_mkbs(),
+                      needles=u'O34.3, N88-N88.99, D25-D25.99, D26-D26.99')
 
 
 def uterine_malformations(card):
@@ -371,6 +385,10 @@ def assisted_reproductive_technology(card):
     return False
 
 
+def uterine_scar(card):
+    return _mkb_match(card.unclosed_mkbs, 'O34.2')
+
+
 def uterine_scar_1(card):
     """
     На форме "Ввод сведений о матери" в поле "Рубец на матке" выбрано значение "один"
@@ -390,6 +408,30 @@ def uterine_scar_more_2(card):
     if anamnesis.id:
         return anamnesis['uterine_scar'].value_raw and \
                anamnesis['uterine_scar'].value_raw == '02'
+    return False
+
+
+def uterine_scar_lower_section(card):
+    """
+    На форме "Анамнез пациентки" в поле "Рубец на матке после операции" выбрано значение
+    с кодом lower_section
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        return anamnesis['uterine_scar_location'].value_raw and \
+               anamnesis['uterine_scar_location'].value_raw == 'lower_section'
+    return False
+
+
+def uterine_scar_corporeal(card):
+    """
+    На форме "Анамнез пациентки" в поле "Рубец на матке после операции" выбрано значение
+    с кодом corporeal
+    """
+    anamnesis = card.anamnesis.mother
+    if anamnesis.id:
+        return anamnesis['uterine_scar_location'].value_raw and \
+               anamnesis['uterine_scar_location'].value_raw == 'corporeal'
     return False
 
 
@@ -448,6 +490,10 @@ def hypertensive_disease_3(card):
             if diag.mkb_details_code == '03':
                 return True
     return False
+
+
+def gestational_hypertension(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O13-O13.99')
 
 
 def varicose(card):
@@ -573,7 +619,7 @@ def persistent_infection(card):
     return _mkb_match(
         card.unclosed_mkbs,
         needles=(u'B20.0-B24, R75-R75.99, A15-A19.9, A23.0-A23.9, B58-B58.99, '
-                 u'B18.0-B19.9, Z21-Z21.99, Z22.5, O98.0-O98.9')
+                 u'B18.0-B19.9, Z21-Z21.99, Z22.5, O98.0-O98.9, K73-K73.99')
     )
 
 
@@ -675,7 +721,7 @@ def gestosis_severe(card):
 
 
 def preeclampsia(card):
-    return _mkb_match(card.unclosed_mkbs, u'O14.9')
+    return _mkb_match(card.unclosed_mkbs, u'O14-O14.99')
 
 
 def eclampsia(card):
@@ -715,6 +761,11 @@ def hydramnion(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'O40-O40.99')
 
 
+def hydramnion_saratov(card):
+    # can be changed later
+    return hydramnion(card)
+
+
 def hydramnion_moderate(card):
     """
     На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O40
@@ -743,6 +794,11 @@ def hydramnion_hard(card):
 
 def oligohydramnios(card):
     return _mkb_match(card.unclosed_mkbs, u'O41.0')
+
+
+def oligohydramnios_saratov(card):
+    # can be changed later
+    return oligohydramnios(card)
 
 
 def oligohydramnios_moderate(card):
@@ -901,6 +957,16 @@ def central_placental_presentation(card):
     return False
 
 
+def placental_maturity_2(card):
+    # as intended
+    return False
+
+
+def placental_maturity_3(card):
+    # as intended
+    return False
+
+
 def low_insertion_of_placenta(card):
     """
     На форме «Диагнозы случая» есть незакрытый диагноз с кодом МКБ: O44.0 или O44.1
@@ -951,6 +1017,25 @@ def placental_perfusion_disorder_3(card):
             if diag.mkb_details_code == '03':
                 return True
     return False
+
+
+def placental_perfusion_disorder_1_saratov(card):
+    # can be changed later
+    return placental_perfusion_disorder_1(card)
+
+
+def placental_perfusion_disorder_2_saratov(card):
+    # can be changed later
+    return placental_perfusion_disorder_2(card)
+
+
+def placental_perfusion_disorder_3_saratov(card):
+    # can be changed later
+    return placental_perfusion_disorder_3(card)
+
+
+def placental_presentation(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'O44.0, O44.1')
 
 
 def cardiotocography_more_7(card):
@@ -1035,6 +1120,74 @@ def cardiotocography_less_4(card):
         ]
         if fetuses_ktg_points:
             return min(fetuses_ktg_points) < 4
+    return False
+
+
+def cardiotocography_between_7_and_8(card):
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов >7, но <= 8
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return 7 < min(fetuses_ktg_points) <= 8
+    return False
+
+
+def cardiotocography_between_7_and_6(card):
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов <=7, но >6
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return 6 < min(fetuses_ktg_points) <= 7
+    return False
+
+
+def cardiotocography_between_6_and_5(card):
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов <=6, но >5
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return 5 < min(fetuses_ktg_points) <= 6
+    return False
+
+
+def cardiotocography_between_5_and_4(card):
+    """
+    Если в последнем, где были введены данные КТГ, осмотре акушером-гинекологом
+    наименьшее значение атрибута "Оценка КТГ по Фишеру" среди всех плодов <=5, но >=4
+    """
+    latest_inspection = card.latest_inspection_fetus_ktg
+    if latest_inspection:
+        fetuses_ktg_points = [
+            fetus.fisher_ktg_points
+            for fetus in latest_inspection.fetuses
+            if fetus.fisher_ktg_points is not None
+        ]
+        if fetuses_ktg_points:
+            return 4 <= min(fetuses_ktg_points) <= 5
     return False
 
 

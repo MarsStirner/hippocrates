@@ -10,8 +10,8 @@ from hippocrates.blueprints.risar.lib.card_attrs import check_disease
 from hippocrates.blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
 from hippocrates.blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week, get_pregnancy_week_for_ultrasonography
-from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk_rate
-from hippocrates.blueprints.risar.lib.radzinsky_risks.calc_regional_risks import get_current_region_risk_rate
+from hippocrates.blueprints.risar.lib.stage_factor_risks import get_radz_risk_rate
+from hippocrates.blueprints.risar.lib.stage_factor_risks import get_current_region_risk_rate
 from hippocrates.blueprints.risar.lib.represent.common import represent_event, represent_action_diagnoses, represent_intolerance, represent_fetus, \
     represent_transfusion, represent_pregnancy, represent_checkup, represent_checkup_shortly, represent_measures
 from hippocrates.blueprints.risar.lib.represent.gyn import represent_ticket_25
