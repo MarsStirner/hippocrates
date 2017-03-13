@@ -799,6 +799,12 @@ WebMis20
         },
         execute: function (errand) {
             return wrapper('POST', Config.url.api_errand_execute.format(errand.id), {}, errand)
+        },
+        request_info: function(errand) {
+            return wrapper('POST', Config.url.api_errand_request_info.format(errand.id), {}, errand)
+        },
+        provide_info: function(errand) {
+            return wrapper('POST', Config.url.api_errand_provide_info.format(errand.id), {}, errand)
         }
     };
     this.ambulance = {
@@ -873,6 +879,12 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
     this.execute = function (errand) {
         errand.exec_date =  new Date();
         return RisarApi.errands.execute(errand).then(get_errands_summary);
+    };
+    this.request_info = function (errand) {
+        return RisarApi.errands.request_info(errand).then(get_errands_summary);
+    };
+    this.provide_info = function (errand) {
+        return RisarApi.errands.provide_info(errand).then(get_errands_summary);
     };
     this.delete_errand = function (errand) {
         return RisarApi.errands.del(errand).then(get_errands_summary);
