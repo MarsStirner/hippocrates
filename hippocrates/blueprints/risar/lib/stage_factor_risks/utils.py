@@ -117,6 +117,17 @@ def _filter_misbirth_prev_preg(prev_preg):
     )
 
 
+def _filter_misbirth_and_premature_prev_preg(prev_preg):
+    """
+    На форме «Анамнез пациентки» на вкладке «Сведения о предыдущих беременностях»  есть хотя бы 1 запись
+    со значением атрибута «Исход беременности» =(( "самопроизвольный выкидыш 12-21 недель" или
+    "аборт по мед.показаниям" или "неуточненный выкидыш" или "преждевременные роды 22-27 недель ")
+    """
+    return prev_preg.action['pregnancyResult'].value_raw in (
+        'misbirth_before_12-21', 'therapeutic_abortion', 'unknown_miscarriage', 'premature_birth_22-27'
+    )
+
+
 def _filter_premature_prev_preg(prev_preg):
     """
     На форме «Анамез пациентки» на вкладке «Сведения о предыдущих беременностях» записи
@@ -125,19 +136,6 @@ def _filter_premature_prev_preg(prev_preg):
     """
     return prev_preg.action['pregnancyResult'].value_raw in (
         'premature_birth_22-27', 'premature_birth_28-37'
-    )
-
-
-def _filter_misbirth_and_premature_prev_preg(prev_preg):
-    """
-    На форме «Анамнез пациентки» на вкладке «Сведения о предыдущих беременностях» записи
-    со значением атрибута «Исход беременности» = "самопроизвольный выкидыш до 11 недель" или
-    "самопроизвольный выкидыш 12-21 недель" или "медицинский аборт до 12 недель или
-    "аборт по мед.показаниям" или "неуточненный выкидыш" или "преждевременные роды 22-27 недель"
-    """
-    return prev_preg.action['pregnancyResult'].value_raw in (
-        'misbirth_before_11', 'misbirth_before_12-21', 'therapeutic_abortion_before_12',
-        'therapeutic_abortion', 'unknown_miscarriage', 'premature_birth_22'
     )
 
 
@@ -204,7 +202,7 @@ def _filter_child_abnormal_weight(child):
     в сведении о ребенке со значением атрибута Масса,г  <2500 г или >4000 г
     """
     if child.weight is not None:
-        return child.weight < 2500 or child.weight > 4000
+        return child.weight <= 2500 or child.weight >= 4000
     return False
 
 

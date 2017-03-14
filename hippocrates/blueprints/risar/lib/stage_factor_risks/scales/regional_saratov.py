@@ -122,7 +122,7 @@ class SaratovRegionalRiskScale(StageFactorRegionalRiskScale):
             risk_rate = SaratovRegionalRiskRate.medium[0]
         elif 16 <= final_sum:
             risk_rate = SaratovRegionalRiskRate.high[0]
-        self.risk.risk_rate_id = risk_rate
+        self.risk_rate.risk_rate_id = risk_rate
 
     def _get_final_sum(self):
         stages = self._get_current_stages()
@@ -167,6 +167,10 @@ class SaratovRegionalRiskScale(StageFactorRegionalRiskScale):
             }
 
         general_info = safe_dict(self.risk)
+        general_info.update({
+            'risk_rate_id': self.risk_rate.risk_rate_id,
+            'risk_rate': self.risk_rate.risk_rate
+        })
         max_points = 0
         total_sum_points = 0
         for stage_code, stage_info in stage_points.items():

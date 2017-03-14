@@ -446,17 +446,18 @@ def heart_disease_circulatory_embarrassment(card):
     """
     anamnesis = card.anamnesis.mother
     if anamnesis:
-        return safe_bool(anamnesis['heart_disease'].value)
+        if safe_bool(anamnesis['heart_disease'].value):
+            return True
     return _mkb_match(card.unclosed_mkbs, needles=u'I26-I28.99')
 
 
 def hypertensive_disease_1(card):
     """
     На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ из узла:
-    I11 или I12 или  I13 или I14 или I15 или O10 или O11 и в уточняющем поле
+    I11 или I12 или  I13 или I15 или O10 или O11 и в уточняющем поле
     (справочник rbRisarHypertensiveDiseaseStage) выбрано значение с кодом 01
     """
-    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I14-I14.99, I15-I15.99, O10-O10.99, O11-O11.99'
+    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I15-I15.99, O10-O10.99, O11-O11.99'
     for mkb, diag in card.diags_by_mkb.iteritems():
         if _mkb_match([mkb], needles=mkbs):
             if diag.mkb_details_code == '01':
@@ -467,10 +468,10 @@ def hypertensive_disease_1(card):
 def hypertensive_disease_2(card):
     """
     На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ из узла:
-    I11 или I12 или  I13 или I14 или I15 или O10 или O11 и в уточняющем поле
+    I11 или I12 или  I13 или I15 или O10 или O11 и в уточняющем поле
     (справочник rbRisarHypertensiveDiseaseStage) выбрано значение с кодом 02
     """
-    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I14-I14.99, I15-I15.99, O10-O10.99, O11-O11.99'
+    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I15-I15.99, O10-O10.99, O11-O11.99'
     for mkb, diag in card.diags_by_mkb.iteritems():
         if _mkb_match([mkb], needles=mkbs):
             if diag.mkb_details_code == '02':
@@ -481,10 +482,10 @@ def hypertensive_disease_2(card):
 def hypertensive_disease_3(card):
     """
     На форме «Диагнозы случая» есть хоть один незакрытый диагноз с кодом МКБ из узла:
-    I11 или I12 или  I13 или I14 или I15 или O10 или O11 и в уточняющем поле
+    I11 или I12 или  I13 или I15 или O10 или O11 и в уточняющем поле
     (справочник rbRisarHypertensiveDiseaseStage) выбрано значение с кодом 03
     """
-    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I14-I14.99, I15-I15.99, O10-O10.99, O11-O11.99'
+    mkbs = u'I11-I11.99, I12-I12.99, I13-I13.99, I15-I15.99, O10-O10.99, O11-O11.99'
     for mkb, diag in card.diags_by_mkb.iteritems():
         if _mkb_match([mkb], needles=mkbs):
             if diag.mkb_details_code == '03':
@@ -509,6 +510,11 @@ def renal_disease(card):
 
 
 def adrenal_disorders(card):
+    return _mkb_match(card.unclosed_mkbs,
+                      needles=u'C74.0, C74.1, C74.9, D35.0, E27.0-E27.9, Q89.1, E34.5, E25.0')
+
+
+def adrenopathy(card):
     return _mkb_match(card.unclosed_mkbs,
                       needles=u'C74.0, C74.1, C74.9, D35.0, E27.0-E27.9, Q89.1, E34.5, E25.0')
 
@@ -721,11 +727,19 @@ def gestosis_severe(card):
 
 
 def preeclampsia(card):
-    return _mkb_match(card.unclosed_mkbs, u'O14-O14.99')
+    return _mkb_match(card.unclosed_mkbs, needles=u'O14-O14.99')
+
+
+def preeclampsia_moderate(card):
+    return _mkb_match(card.unclosed_mkbs, u'O14.0')
+
+
+def preeclampsia_hard(card):
+    return _mkb_match(card.unclosed_mkbs, u'O14.1')
 
 
 def eclampsia(card):
-    return _mkb_match(card.unclosed_mkbs, u'O15.0')
+    return _mkb_match(card.unclosed_mkbs, needles=u'O15.0, O15.9')
 
 
 def renal_disease_exacerbation(card):
@@ -1236,8 +1250,8 @@ def cervix_uteri_length_less_25(card):
     "Осмотр специалистом ПЦ" в поле "Длина шейки матки" выбрано значение "менее 25 мм"
     """
     return any(insp for insp in card.checkups
-               if insp.get_prop_value('cervix_length') and
-                  insp.get_prop_value('cervix_length') < 25)
+               if insp['cervix_length'].value_raw and
+                  insp['cervix_length'].value_raw == 'cervix_uteri_length_less_25')
 
 
 def hellp(card):
@@ -1276,13 +1290,7 @@ def thrombosis(card):
         u'O05.2, O05.7, O06.2, O06.7, O07.2, O07.7, O08.2, O08.7, O22.2, O22.3, O22.4, '
         u'K64-K64.99, O22.5, O22.8, O22.9, O87.1, O87.3, O88-O88.99'
     )
-    if _mkb_match(card.unclosed_mkbs, needles=mkb_list):
-        return True
-    anamnesis = card.anamnesis.mother
-    if anamnesis:
-        anamnesis_mkbs = [mkb.DiagID for mkb in anamnesis.get_prop_value('current_diseases', [])]
-        return _mkb_match(anamnesis_mkbs, needles=mkb_list)
-    return False
+    return _mkb_match(card.unclosed_mkbs | card.get_anamnesis_mkbs(), needles=mkb_list)
 
 
 def glomerulonephritis(card):
@@ -1308,14 +1316,8 @@ def nervous_disorder(card):
     На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
     есть хотя бы один диагноз из списка: G40, G41, G83.3, F80.3, I60-I67, R56.8
     """
-    anamnesis = card.anamnesis.mother
-    if anamnesis:
-        anamnesis_mkbs = [mkb.DiagID for mkb in (anamnesis.get_prop_value('current_diseases', []) +
-                                                 anamnesis.get_prop_value('finished_diseases', [])
-                                                 )]
-        return _mkb_match(anamnesis_mkbs,
-                          needles=u'G40-G40.99, G41-G41.99, G83.3, F80.3, I60-I67.99, R56.8')
-    return False
+    return _mkb_match(card.get_anamnesis_mkbs(),
+                      needles=u'G40-G40.99, G41-G41.99, G83.3, F80.3, I60-I67.99, R56.8')
 
 
 def malignant_tumor(card):
@@ -1324,22 +1326,10 @@ def malignant_tumor(card):
     или в открытых диагнозах пациентки есть хотя бы один диагноз из списка кодов МКБ класса С
     """
     mkb_list = u'C00-C99.99'
-    if _mkb_match(card.unclosed_mkbs, needles=mkb_list):
-        return True
-    anamnesis = card.anamnesis.mother
-    if anamnesis:
-        anamnesis_mkbs = [mkb.DiagID for mkb in (anamnesis.get_prop_value('current_diseases', []) +
-                                                 anamnesis.get_prop_value('finished_diseases', [])
-                                                 )]
-        return _mkb_match(anamnesis_mkbs, needles=mkb_list)
-    return False
+    return _mkb_match(card.unclosed_mkbs | card.get_anamnesis_mkbs(), needles=mkb_list)
 
 
 def aneurysm(card):
-    """
-    На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
-    или в открытых диагнозах пациентки есть хотя бы один диагноз из списка кодов МКБ класса С
-    """
     return _mkb_match(card.unclosed_mkbs,
                       needles=u'I28.1, I71-I71.99, I72-I72.99, I79.0, Q27.3, I77.0, I67.1, I25.4, I25.3')
 
@@ -1349,10 +1339,4 @@ def trauma(card):
     На форме "Сведения о матери" в полях "Перенесенные заболевания" или "Текущие заболевания"
     есть хотя бы один диагноз из списка кодов МКБ: S02-S0.4, S06-S09, S32-S34
     """
-    anamnesis = card.anamnesis.mother
-    if anamnesis:
-        anamnesis_mkbs = [mkb.DiagID for mkb in (anamnesis.get_prop_value('current_diseases', []) +
-                                                 anamnesis.get_prop_value('finished_diseases', [])
-                                                 )]
-        return _mkb_match(anamnesis_mkbs, needles=u'S02-S04.99, S06-S09.99, S32-S34.99')
-    return False
+    return _mkb_match(card.get_anamnesis_mkbs(), needles=u'S02-S04.99, S06-S09.99, S32-S34.99')
