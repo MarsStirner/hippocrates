@@ -5,7 +5,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.risar.lib.errand import (create_errand, edit_errand, mark_errand_as_read, execute_errand,
-    notify_errand_change, cur_user_is_errand_author, delete_errand)
+                                                     notify_errand_change, cur_user_is_errand_author, delete_errand,
+                                                     request_info, provide_info)
 from hippocrates.blueprints.risar.lib.represent.errand import represent_errand, represent_errand_summary, \
     represent_errand_shortly, represent_errand_edit
 from nemesis.lib.apiutils import api_method
@@ -167,4 +168,32 @@ def api_0_errand_delete(errand_id):
     db.session.add(errand)
     db.session.commit()
     notify_errand_change(errand, 'delete')
+    return represent_errand_shortly(errand)
+
+
+@module.route('/api/0/errands/request_info/', methods=["POST"])
+@module.route('/api/0/errands/request_info/<int:errand_id>', methods=["POST"])
+@api_method
+def api_0_errand_request_info(errand_id):
+    data = request.get_json()
+    errand = Errand.query.get(errand_id)
+    errand = edit_errand(errand, data)
+    errand = request_info(errand)
+    db.session.add(errand)
+    db.session.commit()
+    notify_errand_change(errand, 'new')
+    return represent_errand_shortly(errand)
+
+
+@module.route('/api/0/errands/provide_info/', methods=["POST"])
+@module.route('/api/0/errands/provide_info/<int:errand_id>', methods=["POST"])
+@api_method
+def api_0_errand_provide_info(errand_id):
+    data = request.get_json()
+    errand = Errand.query.get(errand_id)
+    errand = edit_errand(errand, data)
+    errand = provide_info(errand)
+    db.session.add(errand)
+    db.session.commit()
+    notify_errand_change(errand, 'new')
     return represent_errand_shortly(errand)

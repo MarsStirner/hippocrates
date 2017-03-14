@@ -132,6 +132,8 @@ WebMis20
         api_errand_save: '{{ url_for('.api_0_errand_save') }}',
         api_errand_mark_as_read: '{{ url_for('.api_0_errand_mark_as_read') }}{0}',
         api_errand_execute: '{{ url_for('.api_0_errand_execute') }}{0}',
+        api_errand_request_info: '{{ url_for('.api_0_errand_request_info') }}{0}',
+        api_errand_provide_info: '{{ url_for('.api_0_errand_provide_info') }}{0}',
         api_errand_delete: '{{ url_for('.api_0_errand_delete') }}{0}',
         api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}',
         api_chart_card_fill_history: '{{ url_for('.api_0_chart_card_fill_history') }}',

@@ -109,7 +109,8 @@
                                         <span ng-class="{'label-info': errand.status.code == 'waiting',
                                                          'label-success': errand.status.code == 'executed',
                                                          'label-danger': errand.status.code == 'expired',
-                                                         'label-warning': errand.status.code == 'late_execution'}" class="label">
+                                                         'label-warning': errand.status.code == 'late_execution',
+                                                         'label-primary': errand.status.code == 'request'}" class="label">
                                             [[errand.status.name]]
                                         </span>
                                     </td>

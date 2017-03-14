@@ -809,6 +809,12 @@ WebMis20
         },
         execute: function (errand) {
             return wrapper('POST', Config.url.api_errand_execute.format(errand.id), {}, errand)
+        },
+        request_info: function(errand) {
+            return wrapper('POST', Config.url.api_errand_request_info.format(errand.id), {}, errand)
+        },
+        provide_info: function(errand) {
+            return wrapper('POST', Config.url.api_errand_provide_info.format(errand.id), {}, errand)
         }
     };
     this.ambulance = {
@@ -883,6 +889,12 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
     this.execute = function (errand) {
         errand.exec_date =  new Date();
         return RisarApi.errands.execute(errand).then(get_errands_summary);
+    };
+    this.request_info = function (errand) {
+        return RisarApi.errands.request_info(errand).then(get_errands_summary);
+    };
+    this.provide_info = function (errand) {
+        return RisarApi.errands.provide_info(errand).then(get_errands_summary);
     };
     this.delete_errand = function (errand) {
         return RisarApi.errands.del(errand).then(get_errands_summary);
@@ -1470,7 +1482,7 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         }
     }
 }])
-.factory('PropsDescriptor', [function () {
+.factory('PropsDescriptor', ['$sce', function ($sce) {
     return function (props_descriptor) {
         return {
             exists: function (code) {
@@ -1489,9 +1501,11 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                 return this.exists(code) ? (props_descriptor[code].is_vector ? true: false) : false;
             },
             getLabel: function (code) {
-                var mandatory_text = ' <span class="text-danger">*</span>';
-                var prop_name = _.escape(this.getName(code));
-                return this.getMandatory(code) ? prop_name + mandatory_text: prop_name;
+                var red_star = ' <span class="text-danger">*</span>',
+                    prop_name = _.escape(this.getName(code)),
+                    label_text = this.getMandatory(code) ? prop_name + red_star: prop_name,
+                    template = '<span style="white-space: nowrap!important;">{0}</span>'.format(label_text);
+                return $sce.trustAsHtml(template)
             }
         };
     }

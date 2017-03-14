@@ -25,7 +25,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             <span ng-class="{\'label-info\': model.status.code == \'waiting\',\
                                              \'label-success\': model.status.code == \'executed\',\
                                              \'label-danger\': model.status.code == \'expired\',\
-                                             \'label-warning\': model.status.code == \'late_execution\'}" class="label">\
+                                             \'label-warning\': model.status.code == \'late_execution\',\
+                                             \'label-primary\': model.status.code == \'request\'\}" class="label">\
                                 [[model.status.name]]\
                             </span>\
                         </div>\
@@ -180,7 +181,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-footer">\
     <button class="btn btn-success" ng-click="executeErrand()" ng-if="canExecute()" ng-disabled="createErrandForm.$invalid">Выполнить</button>\
-    <button class="btn btn-success" ng-click="saveAndClose()" ng-disabled="createErrandForm.$invalid">[[ saveButtonName ]]</button>\
+    <button class="btn btn-success" ng-click="saveAndClose()" ng-if="isSaveButtonVisible" ng-disabled="createErrandForm.$invalid">[[ saveButtonName ]]</button>\
+    <button class="btn btn-success" ng-click="requestInfo()" ng-if="canRequestInfo()">Запрос данных</button>\
+    <button class="btn btn-success" ng-click="provideInfo()" ng-if="canProvideInfo()">Отправить данные</button>\
     <button class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
 </div>');
 }]);
@@ -197,13 +200,14 @@ WebMis20.controller(
     $scope.new_files = [];
     $scope.errand_attach_type_id = null;
 
-    $scope.saveAndClose = function () {
-        $scope.save_errand().then(function () {
-            $scope.$close({
+    function cloze() {
+        $scope.$close({
                 status: 'ok',
                 errand: $scope.model
-            });
         });
+    }
+    $scope.saveAndClose = function () {
+        $scope.save_errand().then(cloze);
     };
     $scope.save_errand = function () {
         var errand;
@@ -224,6 +228,14 @@ WebMis20.controller(
     $scope.executeErrand = function () {
         UserErrand.execute($scope.model)
             .then($scope.processNewFiles).then(reload);
+    };
+    $scope.requestInfo = function () {
+        UserErrand.request_info($scope.model)
+            .then($scope.processNewFiles).then(cloze);
+    };
+    $scope.provideInfo = function () {
+        UserErrand.provide_info($scope.model)
+            .then($scope.processNewFiles).then(cloze);
     };
     $scope.uploadFiles = function (files, attach_data) {
         if (files && files.length) {
@@ -292,6 +304,15 @@ WebMis20.controller(
     };
     $scope.canExecute = function () {
         return $scope.model.id && !$scope.model.exec_date && $scope.isExecutor();
+    };
+    $scope.canRequestInfo = function () {
+        return !$scope.isNewErrand() && $scope.isExecutor() && ['executed', 'request'].indexOf(safe_traverse($scope.model, ['status', 'code'])) === -1;
+    };
+    $scope.canProvideInfo = function() {
+        return !$scope.isNewErrand() && $scope.isAuthor() && safe_traverse($scope.model, ['status', 'code']) === 'request';
+    };
+    $scope.isSaveButtonVisible = function () {
+        return safe_traverse($scope.model, ['status', 'code']) !== 'request'
     };
     $scope.executorFirstRead = function () {
         return !$scope.isNewErrand() && $scope.isExecutor() && !$scope.model.reading_date;
