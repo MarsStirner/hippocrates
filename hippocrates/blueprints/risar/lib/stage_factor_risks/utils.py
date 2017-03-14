@@ -26,7 +26,7 @@ def radzinsky_risk_factors():
     for stage in query:
         for factor_stage in stage.stage_factor_assoc:
             factor_info = safe_dict(factor_stage.factor)
-            factor_info.update(points=factor_stage.points)
+            factor_info.update(points=factor_stage.points, deleted=factor_stage.deleted)
             grouped[stage.code].setdefault(
                 factor_stage.factor.group.code, []
             ).append(factor_info)
@@ -34,7 +34,7 @@ def radzinsky_risk_factors():
     return grouped
 
 
-def get_filtered_radzinsky_risk_factors(stage_codes=None, group_codes=None):
+def get_filtered_radzinsky_risk_factors(stage_codes=None, group_codes=None, with_deleted=False):
     if stage_codes is not None and not isinstance(stage_codes, (tuple, list)):
         stage_codes = (stage_codes, )
     if group_codes is not None and not isinstance(group_codes, (tuple, list)):
@@ -47,7 +47,7 @@ def get_filtered_radzinsky_risk_factors(stage_codes=None, group_codes=None):
         if stage_codes is not None and stage_code in stage_codes or stage_codes is None:
             for group_code, factors in group.iteritems():
                 if group_codes is not None and group_code in group_codes or group_codes is None:
-                    filtered.extend(factors)
+                    filtered.extend([f for f in factors if with_deleted or f['deleted'] == 0])
     return filtered
 
 
@@ -67,7 +67,7 @@ def regional_risk_factors():
     for stage in query:
         for factor_stage in stage.stage_factor_assoc:
             factor_info = safe_dict(factor_stage.factor)
-            factor_info.update(points=factor_stage.points)
+            factor_info.update(points=factor_stage.points, deleted=factor_stage.deleted)
             if factor_stage.factor.regional_group:
                 grouped[stage.code].setdefault(
                     factor_stage.factor.regional_group.code, []
@@ -76,7 +76,7 @@ def regional_risk_factors():
     return grouped
 
 
-def get_filtered_regional_risk_factors(stage_codes=None, group_codes=None):
+def get_filtered_regional_risk_factors(stage_codes=None, group_codes=None, with_deleted=False):
     if stage_codes is not None and not isinstance(stage_codes, (tuple, list)):
         stage_codes = (stage_codes, )
     if group_codes is not None and not isinstance(group_codes, (tuple, list)):
@@ -89,7 +89,7 @@ def get_filtered_regional_risk_factors(stage_codes=None, group_codes=None):
         if stage_codes is not None and stage_code in stage_codes or stage_codes is None:
             for group_code, factors in group.iteritems():
                 if group_codes is not None and group_code in group_codes or group_codes is None:
-                    filtered.extend(factors)
+                    filtered.extend([f for f in factors if with_deleted or f['deleted'] == 0])
     return filtered
 
 

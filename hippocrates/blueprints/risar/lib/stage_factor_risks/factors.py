@@ -624,7 +624,7 @@ def myopia(card):
 def persistent_infection(card):
     return _mkb_match(
         card.unclosed_mkbs,
-        needles=(u'B20.0-B24, R75-R75.99, A15-A19.9, A23.0-A23.9, B58-B58.99, '
+        needles=(u'B20.0-B24.99, R75-R75.99, A15-A19.9, A23.0-A23.9, B58-B58.99, '
                  u'B18.0-B19.9, Z21-Z21.99, Z22.5, O98.0-O98.9, K73-K73.99')
     )
 

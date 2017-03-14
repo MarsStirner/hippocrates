@@ -156,11 +156,13 @@ class RadzinksyRiskScale(StageFactorRiskScale):
         for stage_code, groups in rb_stage_factors.iteritems():
             stage_sum = stage_maximum = 0
             for group_code, factors in groups.iteritems():
-                for factor in factors:
+                for idx, factor in enumerate(factors):
                     k = (factor['id'], RadzinskyStage.getId(stage_code))
                     if k in event_factor_stages:
                         factor['triggered'] = True
                         stage_sum += factor['points']
+                    elif factor['deleted'] != 0:
+                        del factors[idx]
                     else:
                         factor['triggered'] = False
                     stage_maximum += factor['points']

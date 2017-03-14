@@ -151,7 +151,7 @@ class TomskRegionalRiskScale(StageFactorRegionalRiskScale):
         for stage_code, groups in rb_stage_factors.iteritems():
             stage_sum = stage_maximum = 0
             for group_code, factors in groups.iteritems():
-                for factor in factors:
+                for idx, factor in enumerate(factors):
                     k = (factor['id'], TomskRegionalRiskStage.getId(stage_code))
                     points = factor['points']
                     if factor['code'] in points_modifiers:
@@ -160,6 +160,8 @@ class TomskRegionalRiskScale(StageFactorRegionalRiskScale):
                     if k in event_factor_stages:
                         factor['triggered'] = True
                         stage_sum += points
+                    elif factor['deleted'] != 0:
+                        del factors[idx]
                     else:
                         factor['triggered'] = False
                     stage_maximum += points
