@@ -119,7 +119,6 @@ angular.module('WebMis20')
                     }
                 });
             };
-
             scope.deleteService = function () {
                 var idx = scope.service.ui_attrs.idx;
                 if (scope.service.id) {
@@ -131,6 +130,16 @@ angular.module('WebMis20')
                 } else {
                     scope.event.services.splice(idx, 1);
                 }
+            };
+            scope.refreshServiceSum = function () {
+                if (!scope.service.amount) {
+                    scope.service.amount = 1;
+                }
+                var root_service = scope.event.services[scope.service.ui_attrs.root_idx];
+                AccountingService.refreshServiceSubservices(root_service)
+                    .then(function (upd_service) {
+                        angular.copy(upd_service, root_service);
+                    });
             };
             scope.isInNewInvoice = function () {
                 return scope.service.in_new_invoice;
@@ -156,8 +165,8 @@ angular.module('WebMis20')
                     scope.service.ui_attrs.level === 0;
             };
 
-            scope.amountDisabled = function () {
-                return !scope.editMode;
+            scope.amountEditable = function () {
+                return scope.editMode && !scope.service.in_invoice;
             };
             scope.btnRemoveVisible = function () {
                 return scope.editMode && scope.service.access.can_delete;
@@ -195,8 +204,11 @@ angular.module('WebMis20')
     <td ng-bind="service.serviced_entity.name"></td>\
     <td ng-bind="service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
     <td ng-show="formstate.is_paid()">[[ service.discount ? service.discount.description.short : ""]]</td>\
-    <td>\
-        <span ng-bind="service.amount"></span>\
+    <td class="text-right">\
+        <span ng-bind="service.amount" ng-if="!amountEditable()"></span>\
+        <input type="number" ng-model="service.amount" ng-if="amountEditable()"\
+            class="form-control text-right" valid-number min="1"\
+            wm-slow-change="refreshServiceSum()">\
     </td>\
     <td class="text-right" ng-show="formstate.is_paid()">\
         <span ng-bind="service.sum | moneyCut"></span> <span ng-show="isPaid(service)" class="glyphicon glyphicon-ok text-success"\

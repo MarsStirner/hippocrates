@@ -81,7 +81,12 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                         </ui-select>\
                         <span ng-if="!canEditDiscounts() && isDiscountAvailable(item)">[[ item.discount.description.short ]]</span>\
                     </td>\
-                    <td>[[ item.service.amount ]]</td>\
+                    <td>\
+                        <span ng-bind="item.amount" ng-if="!canEditAmount()"></span>\
+                        <input type="number" ng-model="item.amount" ng-if="canEditAmount()"\
+                            class="form-control text-right" valid-number min="1"\
+                            wm-slow-change="onAmountChanged(item)">\
+                    </td>\
                     <td>[[ item.sum | moneyCut ]]</td>\
                 </tr>\
                 </tbody>\
@@ -220,9 +225,15 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
         if (item.discount === undefined) {
             item.discount = null;
         }
-        $scope.applyDiscount();
+        $scope.refreshInvoiceSum();
     };
-    $scope.applyDiscount = function () {
+    $scope.onAmountChanged = function (item) {
+        if (!item.amount) {
+            item.amount = 1;
+        }
+        $scope.refreshInvoiceSum();
+    };
+    $scope.refreshInvoiceSum = function () {
         AccountingService.calc_invoice_sum($scope.invoice)
             .then(function (new_invoice) {
                 $scope.invoice = new_invoice;
@@ -259,6 +270,9 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
         }
     };
     $scope.canEditDiscounts = function () {
+        return !$scope.invoice.id && !$scope.isInvoiceClosed();
+    };
+    $scope.canEditAmount = function () {
         return !$scope.invoice.id && !$scope.isInvoiceClosed();
     };
     $scope.hasRefunds = function () {
