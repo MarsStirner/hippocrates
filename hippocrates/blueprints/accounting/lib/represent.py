@@ -356,6 +356,7 @@ class ServiceRepr(object):
             'can_edit': service.parent_service.can_edit,
             'can_delete': False
         }
+        data['in_invoice'] = service.parent_service.in_invoice
         data['serviced_entity'] = self.represent_serviced_entity(service)
         data['subservice_list'] = [
             self.represent_subservice(ss)
