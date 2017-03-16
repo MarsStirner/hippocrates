@@ -345,7 +345,7 @@ class ServiceRepr(object):
         data['serviced_entity'] = self.represent_serviced_entity(service)
         data['subservice_list'] = [
             self.represent_subservice(ss)
-            for ss in service.subservice_list
+            for ss in service.get_sorted_subservices()
         ]
         return data
 
@@ -360,7 +360,7 @@ class ServiceRepr(object):
         data['serviced_entity'] = self.represent_serviced_entity(service)
         data['subservice_list'] = [
             self.represent_subservice(ss)
-            for ss in service.subservice_list
+            for ss in service.get_sorted_subservices()
         ]
         return data
 
