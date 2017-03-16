@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 import collections
-
 import datetime
 
 import blinker as blinker
 
 import requests
 from flask import request
+from sqlalchemy import func
+from sqlalchemy.orm import joinedload
+
 from nemesis.app import app
 from nemesis.lib.settings import Settings
 from nemesis.models.event import Event
 from nemesis.models.exists import rbLaboratory, rbTest, rbLaboratory_TestAssoc, rbTestTubeType
 from nemesis.models.utils import safe_current_user_id
-from sqlalchemy import func
-from sqlalchemy.orm import joinedload
 
 from ..app import module
 from ..lib.utils import TTJVisualizer
@@ -24,6 +24,7 @@ from nemesis.models.actions import TakenTissueJournal, Action_TakenTissueJournal
     ActionProperty
 from nemesis.models.enums import TTJStatus
 from nemesis.systemwide import db
+from nemesis.lib.mq_integration.biomaterial import notify_biomaterials_changed, MQOpsBiomaterial
 
 
 @module.route('/api/get_ttj_records.json', methods=['POST'])
@@ -44,7 +45,7 @@ def api_get_ttj_records():
     result = {}
 
     query = TakenTissueJournal.query.join(
-        rbTestTubeType, Action_TakenTissueJournalAssoc, Action, Event, ActionProperty, ActionPropertyType, rbTest,
+        Event, rbTestTubeType, Action_TakenTissueJournalAssoc, Action, ActionProperty, ActionPropertyType, rbTest,
         rbLaboratory_TestAssoc, rbLaboratory
     ).filter(
         Action.deleted == 0,
@@ -90,7 +91,6 @@ def api_get_ttj_records():
         return {
             'ttj': record.TakenTissueJournal,
             'actions': {record.Action},
-            'events': {record.Event},
             'labs': {record.rbLaboratory},
             'ttt': {record.rbTestTubeType},
         }
@@ -104,7 +104,6 @@ def api_get_ttj_records():
             r = mapping[record[0]]
         r['actions'].add(record.Action)
         all_action_ids.add(record.Action.id)
-        r['events'].add(record.Event)
         r['labs'].add(record.rbLaboratory)
         r['ttt'].add(record.rbTestTubeType)
 
@@ -134,7 +133,7 @@ def api_get_ttj_records():
         for record in records:
             pays = dict((a.id, pay_data.get(a.id)) for a in record['actions'])
             ttj_records.append(
-                vis.make_ttj_record(record['ttj'], record['actions'], record['events'], pays)
+                vis.make_ttj_record(record['ttj'], record['actions'], pays)
             )
 
         result[ttj_status] = {
@@ -171,7 +170,7 @@ def api_ttj_change_status():
     status = data.get('status') or bail_out(ApiException(400, u'Invalid request. `status` must be set'))
     ids = data.get('ids') or bail_out(ApiException(400, u'Invalid request. `ids` must be non-empty list'))
     if status['code'] in ['sent_to_lab', 'fail_to_lab']:
-        raise ApiException(403, u'Только ядро умеет право устанавливать этот статус: %s' % status['code'])
+        raise ApiException(403, u'Только внешняя система имеет право устанавливать этот статус: %s' % status['code'])
     if status['code'] not in ['waiting', 'in_progress', 'finished']:
         raise ApiException(400, u'Неизвестный код: %s' % status['code'])
     rule = {TakenTissueJournal.statusCode: status['id']}
@@ -179,9 +178,10 @@ def api_ttj_change_status():
         rule[TakenTissueJournal.execPerson_id] = safe_current_user_id()
         rule[TakenTissueJournal.datetimeTaken] = datetime.datetime.now()
     TakenTissueJournal.query.filter(
-        TakenTissueJournal.statusCode < 2,  # Не менять статусы уже законченных
+        TakenTissueJournal.statusCode < TTJStatus.finished[0],  # Не менять статусы уже законченных
         TakenTissueJournal.id.in_(ids),
     ).update(rule, synchronize_session=False)
     db.session.commit()
     if status['code'] == 'finished':
         blinker.signal('Core.Notify.TakenTissueJournal').send(None, ids=ids)
+        notify_biomaterials_changed(MQOpsBiomaterial.send, ids)

@@ -5,7 +5,7 @@ __author__ = 'plakrisenko'
 
 
 class TTJVisualizer(object):
-    def make_ttj_record(self, ttj, actions, events, actions_pay_data):
+    def make_ttj_record(self, ttj, actions, actions_pay_data):
         """
         @type ttj: nemesis.models.actions.TakenTissueJournal
         @type actions: list|set
@@ -16,15 +16,13 @@ class TTJVisualizer(object):
         @return:
         """
         avis = ActionVisualizer()
-        events = list(events)
-        event = events[0] if events else None
-        externalId = event.externalId if event else None  # предполагается, что все actions из одного event
+        externalId = ttj.event.externalId if ttj.event else None
         return {
             'id': ttj.id,
             'externalId': externalId,
             'datetime_planned': ttj.datetimePlanned,
             'datetime_taken': ttj.datetimeTaken,
-            'client': ttj.client,
+            'client': ttj.event.client if ttj.event else None,
             'execPerson': ttj.execPerson,
             'tissueType': ttj.tissueType,
             'testTubeType': ttj.testTubeType,
@@ -37,5 +35,5 @@ class TTJVisualizer(object):
                 for action in actions
             ],
             'set_persons': sorted({action.setPerson for action in actions if action.setPerson}),
-            'org_str': event.current_org_structure if event else None
+            'org_str': ttj.event.current_org_structure if ttj.event else None
         }
