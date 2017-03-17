@@ -10,7 +10,7 @@ from hippocrates.blueprints.risar.lib.stage_factor_risks.utils import count_abor
 
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.models.radzinsky_risks import (RisarTomskRegionalRisks_FactorsAssoc)
-from hippocrates.blueprints.risar.lib.card import PrimaryInspection, RepeatedInspection
+from hippocrates.blueprints.risar.lib.card import PrimaryInspection, RepeatedInspection, PCInspection
 from nemesis.lib.utils import safe_dict
 from nemesis.models.enums import TomskRegionalRiskStage, TomskRegionalRiskRate
 from nemesis.systemwide import db
@@ -51,7 +51,7 @@ class TomskRegionalRiskScale(StageFactorRegionalRiskScale):
         preg_week = get_pregnancy_week(self.card.event)
         if not latest_insp or isinstance(latest_insp, PrimaryInspection):
             return [TomskRegionalRiskStage.initial[0]]
-        elif isinstance(latest_insp, RepeatedInspection):
+        elif isinstance(latest_insp, (RepeatedInspection, PCInspection)):
             if not preg_week or preg_week <= 20:
                 return [TomskRegionalRiskStage.before21[0]]
             elif 21 <= preg_week <= 30:

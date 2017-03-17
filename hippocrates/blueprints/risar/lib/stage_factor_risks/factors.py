@@ -506,7 +506,7 @@ def hypotensive_syndrome(card):
 
 
 def renal_disease(card):
-    return _mkb_match(card.unclosed_mkbs, needles=u'N00-N39.99')
+    return _mkb_match(card.get_anamnesis_mkbs(), needles=u'N00-N39.99')
 
 
 def adrenal_disorders(card):
