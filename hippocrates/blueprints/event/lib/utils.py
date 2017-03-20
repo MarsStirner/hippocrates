@@ -149,8 +149,11 @@ class MovingController():
 
     def update_moving_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
-        if 'end_date' in moving_info:
-            moving.endDate = safe_datetime(moving_info['end_date'])     # status?
+        moving.endDate = safe_datetime(moving_info.get('end_date'))
+        if moving.endDate is not None:
+            moving.status = ActionStatus.finished[0]
+        else:
+            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0] else moving.status
 
         moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
         moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None

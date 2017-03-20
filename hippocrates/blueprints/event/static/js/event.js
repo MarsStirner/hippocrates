@@ -434,7 +434,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
     $scope.edit_moving = function(moving){
         var scope = $scope.$new();
         scope.model = angular.copy(moving);
-        scope.event = angular.copy($scope.event);
+        scope.event_admission_date = $scope.event.admission_date;
         $scope.org_struct_changed(scope.model).then(function(){
             $modal.open({
                 templateUrl: 'modal-create-hospBed.html',
