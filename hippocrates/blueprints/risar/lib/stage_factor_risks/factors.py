@@ -528,6 +528,14 @@ def diabetes(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'E10.0-E14.9, O24.0-O24.4, O24.9')
 
 
+def diabetes_tomsk(card):
+    return _mkb_match(card.unclosed_mkbs, needles=u'E10.0-E14.9, O24.0, O24.1, O24.2, O24.3, O24.9')
+
+
+def gestational_diabetes(card):
+    return _mkb_match(card.unclosed_mkbs, u'O24.4')
+
+
 def thyroid_disorders(card):
     return _mkb_match(card.unclosed_mkbs, needles=u'C73, E00.0-E07.9, A18.8, O99.2')
 
