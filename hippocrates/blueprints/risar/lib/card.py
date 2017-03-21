@@ -123,8 +123,8 @@ class AbstractCard(object):
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):
         """
-        :type beg_date: datetime.date
-        :type end_date: datetime.date | NoneType
+        :type beg_date: datetime.datetime
+        :type end_date: datetime.datetime | NoneType
         :type including_closed: bool
         :param beg_date:
         :param end_date:
