@@ -677,6 +677,11 @@ WebMis20
                 curation_level_code: curation_level_code
             });
         },
+        get_regional_risk_info: function (curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_regional_risks, {
+                curation_level_code: curation_level_code
+            });
+        },
         get_pregnancy_pathology_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code
@@ -731,6 +736,11 @@ WebMis20
         },
         print: function (query) {
             self.file_get('POST', Config.url.api_radz_print, query);
+        }
+    };
+    this.regional_risks = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_regional_risks.format(event_id));
         }
     };
     this.soc_prof_help = {
@@ -1073,6 +1083,32 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
             scope.get_tooltip = function () {
                 if (!scope.radzRiskRateIcon) return;
                 return scope.radzRiskRateIcon.name;
+            };
+        }
+    }
+}])
+.directive('regionalRiskRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span style="font-size: 60%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    >РШ</span>\
+',
+        scope: {
+            regionalRiskRateIcon: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.regionalRiskRateIcon) return;
+                var r = scope.regionalRiskRateIcon;
+                if (r.code === 'low') return 'label-success';
+                else if (r.code === 'medium') return 'label-warning';
+                else if (r.code === 'high') return 'label-danger';
+                return 'label-default';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.regionalRiskRateIcon) return;
+                return scope.regionalRiskRateIcon.name + ' степень риска';
             };
         }
     }
