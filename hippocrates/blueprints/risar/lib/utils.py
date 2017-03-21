@@ -19,8 +19,7 @@ from nemesis.models.event import Event
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.systemwide import cache, db
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, first_inspection_flat_code,\
-    inspection_preg_week_code, puerpera_inspection_flat_code, pc_inspection_flat_code,\
-    risar_gyn_checkup_flat_codes
+    inspection_preg_week_code, puerpera_inspection_flat_code, risar_gyn_checkup_flat_codes
 
 
 # Пока не удаляйте эти коды МКБ. Возможно, мы сможем их использовать для автозаполнения справочников.
@@ -348,7 +347,7 @@ def risk_mkbs():
 
 def is_event_late_first_visit(event):
     result = False
-    fi = get_action(event, (first_inspection_flat_code, pc_inspection_flat_code))
+    fi = get_action(event, first_inspection_flat_code)
     if fi:
         preg_week = fi.get_prop_value(inspection_preg_week_code)
         if preg_week is not None:

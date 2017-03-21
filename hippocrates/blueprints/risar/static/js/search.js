@@ -54,6 +54,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     });
 
     $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
+    $scope.regional_risks_rb = RefBookService.get('rbRisarRegionalRiskRate');
     $scope.radz_risks_rb = RefBookService.get('rbRadzinskyRiskRate');
     $scope.pathology_rb = RefBookService.get('PregnancyPathology');
     $scope.rbRisarRiskGroup = RefBookService.get('rbRisarRiskGroup');
@@ -76,7 +77,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         bdate_from: null,
         bdate_to: null,
         risk: [],
-        radz_risk: [],
+        radz_risk_rate: [],
+        regional_risk_rate: [],
         closed: $scope.closed_items[0],
         client_work_group: {},
         fertilization_type: {},
@@ -107,7 +109,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         var areas = $scope.query.areas,
             curators = $scope.query.curators,
             risks = _.pluck($scope.query.risk, 'id'),
-            radz_risks = _.pluck($scope.query.radz_risk, 'id'),
+            radz_risk_rates = _.pluck($scope.query.radz_risk_rate, 'id'),
+            regional_risk_rates = _.pluck($scope.query.regional_risk_rate, 'id'),
             request_types = _.pluck($scope.query.request_types, 'id'),
             pathologies = _.pluck($scope.query.pathology, 'id'),
             risk_groups = _.pluck($scope.query.risk_groups, 'code'),
@@ -125,7 +128,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_from: $scope.query.bdate_from || undefined,
             bdate_to: $scope.query.bdate_to || undefined,
             risk: risks.length ? risks : undefined,
-            radz_risk: radz_risks.length ? radz_risks : undefined,
+            radz_risk_rate: radz_risk_rates.length ? radz_risk_rates : undefined,
+            regional_risk_rate: regional_risk_rates.length ? regional_risk_rates : undefined,
             closed: $scope.query.closed.value,
             client_workgroup: $scope.query.client_workgroup || undefined,
             fertilization_type: $scope.query.fertilization_type || undefined,
@@ -227,7 +231,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             bdate_from: null,
             bdate_to: null,
             risk: [],
-            radz_risk: [],
+            radz_risk_rate: [],
+            regional_risk_rate: [],
             closed: $scope.closed_items[0],
             client_work_group: {},
             fertilization_type: {},
@@ -355,8 +360,13 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             });
         }
         if (args.hasOwnProperty('radz_risk_rate')) {
-            $scope.query.radz_risk = $scope.radz_risks_rb.objects.filter(function (rr) {
+            $scope.query.radz_risk_rate = $scope.radz_risks_rb.objects.filter(function (rr) {
                 return rr.code === args.radz_risk_rate;
+            });
+        }
+        if (args.hasOwnProperty('regional_risk_rate')) {
+            $scope.query.regional_risk_rate = $scope.regional_risks_rb.objects.filter(function (rr) {
+                return rr.code === args.regional_risk_rate;
             });
         }
         if (args.hasOwnProperty('pathology_id')) {
@@ -402,7 +412,8 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     };
 
     // start
-    $q.all([areas_promise, $scope.risks_rb.loading, $scope.radz_risks_rb.loading, $scope.pathology_rb.loading,
+    $q.all([areas_promise, $scope.risks_rb.loading, $scope.radz_risks_rb.loading,
+            $scope.regional_risks_rb.loading, $scope.pathology_rb.loading,
             $scope.rbRisarRiskGroup.loading, $scope.rbMeasureType.loading]).then(function () {
         setFltDoctor();
         setFltCurators();
@@ -414,7 +425,10 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         $scope.$watchCollection('query.risk', function () {
             tc.start()
         });
-        $scope.$watchCollection('query.radz_risk', function () {
+        $scope.$watchCollection('query.radz_risk_rate', function () {
+            tc.start()
+        });
+        $scope.$watchCollection('query.regional_risk_rate', function () {
             tc.start()
         });
         $scope.$watchCollection('query.request_types', function (n, o_) {

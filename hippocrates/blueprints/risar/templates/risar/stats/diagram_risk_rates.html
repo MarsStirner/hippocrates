@@ -7,42 +7,67 @@
         </div>
     </div>
     <div class="box-body">
-        <h4 class="text-center">по приказу МЗ РФ № 572н</h4>
-        <nvd3-pie-chart
-            id="noid"
-            data="slices"
-            width="350"
-            height="370"
-            margin="{left:0,top:0,bottom:0,right:10}"
-            x="slices_x"
-            y="slices_y"
-            color="slices_c"
-            nodata="Нет данных"
-            showlegend="true"
-            showlabels="true"
-            labeltype="value"
-            donut="true"
-            donut-ratio="0.33"
-            ><svg></svg>
-        </nvd3-pie-chart>
-        <h4 class="text-center">по шкале Радзинского</h4>
-        <nvd3-pie-chart
-            id="noid2"
-            data="slices_radz"
-            width="350"
-            height="370"
-            margin="{left:0,top:0,bottom:0,right:10}"
-            x="slices_x"
-            y="slices_y"
-            color="slices_c"
-            nodata="Нет данных"
-            showlegend="true"
-            showlabels="true"
-            labeltype="value"
-            donut="true"
-            donut-ratio="0.33"
-            ><svg></svg>
-        </nvd3-pie-chart>
+        <tabset>
+        <tab heading="по приказу МЗ РФ № 572н">
+            <nvd3-pie-chart
+                id="noid"
+                data="slices"
+                width="350"
+                height="370"
+                margin="{left:0,top:0,bottom:0,right:10}"
+                x="slices_x"
+                y="slices_y"
+                color="slices_c"
+                nodata="Нет данных"
+                showlegend="true"
+                showlabels="true"
+                labeltype="value"
+                donut="true"
+                donut-ratio="0.33"
+                ><svg></svg>
+            </nvd3-pie-chart>
+        </tab>
+        {% if specifics_mng.has_regional_risks() %}
+        <tab heading="по региональной шкале">
+            <nvd3-pie-chart
+                id="noid3"
+                data="slices_regional"
+                width="350"
+                height="370"
+                margin="{left:0,top:0,bottom:0,right:10}"
+                x="slices_x"
+                y="slices_y"
+                color="slices_c"
+                nodata="Нет данных"
+                showlegend="true"
+                showlabels="true"
+                labeltype="value"
+                donut="true"
+                donut-ratio="0.33"
+                ><svg></svg>
+            </nvd3-pie-chart>
+        </tab>
+        {% endif %}
+        <tab heading="по шкале Радзинского">
+            <nvd3-pie-chart
+                id="noid2"
+                data="slices_radz"
+                width="350"
+                height="370"
+                margin="{left:0,top:0,bottom:0,right:10}"
+                x="slices_x"
+                y="slices_y"
+                color="slices_c"
+                nodata="Нет данных"
+                showlegend="true"
+                showlabels="true"
+                labeltype="value"
+                donut="true"
+                donut-ratio="0.33"
+                ><svg></svg>
+            </nvd3-pie-chart>
+        </tab>
+        </tabset>
     </div>
 </div>
 <div class="box box-danger">

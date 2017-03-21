@@ -269,6 +269,19 @@ class RepeatedInspection(object):
         return get_fetuses(self._action.id)
 
 
+class PCInspection(object):
+    def __init__(self, action):
+        self._action = action
+
+    @property
+    def action(self):
+        return self._action
+
+    @lazy
+    def fetuses(self):
+        return get_fetuses(self._action.id)
+
+
 class Epicrisis(object):
     def __init__(self, event):
         self._event = event
@@ -296,6 +309,16 @@ class PregnancyCard(AbstractCard):
         @lazy
         def mother(self):
             return get_action(self._event, risar_mother_anamnesis, True)
+
+        @lazy
+        def mother_blood_type(self):
+            bh = self._event.client.blood_history.first()
+            if not bh:
+                return None
+            return {
+                'group': bh.bloodType.name.split('Rh')[0],
+                'rh': u'Rh({})'.format(bh.bloodType.name.split('Rh')[1]),
+            }
 
         @lazy
         def father(self):
@@ -346,23 +369,27 @@ class PregnancyCard(AbstractCard):
     @lazy
     def primary_inspection(self):
         for checkup in self.checkups:
-            if checkup.actionType.flatCode in (first_inspection_flat_code, pc_inspection_flat_code):
-                 return PrimaryInspection(checkup)
+            if checkup.actionType.flatCode == first_inspection_flat_code:
+                return PrimaryInspection(checkup)
 
     @lazy
     def latest_inspection(self):
         if self.checkups:
             checkup = self.checkups[-1]
-            if checkup.actionType.flatCode in (first_inspection_flat_code, pc_inspection_flat_code):
+            if checkup.actionType.flatCode == first_inspection_flat_code:
                 return PrimaryInspection(checkup)
             elif checkup.actionType.flatCode == second_inspection_flat_code:
                 return RepeatedInspection(checkup)
+            elif checkup.actionType.flatCode == pc_inspection_flat_code:
+                return PCInspection(checkup)
 
     @lazy
     def latest_rep_inspection(self):
         for checkup in reversed(self.checkups):
             if checkup.actionType.flatCode == second_inspection_flat_code:
                 return RepeatedInspection(checkup)
+            elif checkup.actionType.flatCode == pc_inspection_flat_code:
+                return PCInspection(checkup)
 
     @lazy
     def latest_inspection_fetus_ktg(self):
@@ -370,6 +397,11 @@ class PregnancyCard(AbstractCard):
         for checkup in reversed(self.checkups):
             if checkup.actionType.flatCode == second_inspection_flat_code:
                 inspection = RepeatedInspection(checkup)
+                for fetus in inspection.fetuses:
+                    if safe_bool(fetus.ktg_input):
+                        return inspection
+            elif checkup.actionType.flatCode == pc_inspection_flat_code:
+                inspection = PCInspection(checkup)
                 for fetus in inspection.fetuses:
                     if safe_bool(fetus.ktg_input):
                         return inspection
@@ -384,8 +416,18 @@ class PregnancyCard(AbstractCard):
 
     @lazy
     def radz_risk(self):
-        from hippocrates.blueprints.risar.lib.radzinsky_risks.calc import get_radz_risk
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import get_radz_risk
         return get_radz_risk(self.event, True)
+
+    @lazy
+    def regional_risk(self):
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import get_regional_risk
+        return get_regional_risk(self.event, True)
+
+    @lazy
+    def regional_risk_rate(self):
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import get_regional_risk_rate
+        return get_regional_risk_rate(self.event, True)
 
     def reevaluate_card_attrs(self):
         """
@@ -394,7 +436,8 @@ class PregnancyCard(AbstractCard):
         from .card_attrs import reevaluate_risk_rate, \
             reevaluate_pregnacy_pathology, reevaluate_dates, reevaluate_preeclampsia_rate,\
             reevaluate_risk_groups, reevaluate_card_fill_rate_all
-        from .radzinsky_risks.calc import reevaluate_radzinsky_risks
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import reevaluate_radzinsky_risks
+        from hippocrates.blueprints.risar.lib.stage_factor_risks import reevaluate_regional_risks
 
         self.attrs.get_lock()
         with db.session.no_autoflush:
@@ -405,6 +448,7 @@ class PregnancyCard(AbstractCard):
             reevaluate_risk_groups(self)
             reevaluate_card_fill_rate_all(self)
             reevaluate_radzinsky_risks(self)
+            reevaluate_regional_risks(self)
 
     @lazy
     def unclosed_mkbs(self):
@@ -414,6 +458,31 @@ class PregnancyCard(AbstractCard):
             for d in diagnostics
             if d.diagnosis.endDate is None
         )
+
+    @lazy
+    def diags_by_mkb(self):
+        diagnostics = self.get_client_diagnostics(self.event.setDate, self.event.execDate)
+        return dict(
+            (d.MKB, d)
+            for d in diagnostics
+            if d.diagnosis.endDate is None
+        )
+
+    @cache.cached_call
+    def get_anamnesis_mkbs(self, only_current=False, only_finished=False):
+        res = set()
+        anamnesis = self.anamnesis.mother
+        if anamnesis:
+            from_lists = [anamnesis.get_prop_value('current_diseases', []),
+                          anamnesis.get_prop_value('finished_diseases', [])]
+            if only_current:
+                del from_lists[1]
+            if only_finished:
+                del from_lists[0]
+            for mkb_list in from_lists:
+                for mkb in mkb_list:
+                    res.add(mkb.DiagID)
+        return res
 
     @cache.cached_call
     def get_inspection_diagnoses(self):

@@ -2,9 +2,13 @@
 
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes, \
     pregnancy_card_attrs, risar_epicrisis, request_type_gynecological
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.models.radzinsky_risks import RisarRadzinskyRisks, \
+    RisarRegionalRiskRate
+from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.enums import PerinatalRiskRate
-from nemesis.models.risar import rbRadzinskyRiskRate
+from nemesis.models.risar import rbRadzinskyRiskRate, rbRisarRegionalRiskRate
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
@@ -69,6 +73,12 @@ class StatsController(BaseModelController):
             'cards_count': cards_count
         }
 
+    def get_radz_risks(self, person_id, curation_level):
+        return dict(self.get_selecter().get_radz_risk_counts(person_id, curation_level))
+
+    def get_regional_risks(self, person_id, curation_level):
+        return dict(self.get_selecter().get_regional_risk_counts(person_id, curation_level))
+
 
 class StatsSelecter(BaseSelecter):
 
@@ -115,8 +125,6 @@ class StatsSelecter(BaseSelecter):
         return query
 
     def get_risk_group_counts(self, person_id, curation_level=None):
-        from ..models.risar import RisarRiskGroup
-
         query = self.query_main(person_id, curation_level)
         query = RisarRiskGroup.query.join(
             query.subquery()
@@ -132,17 +140,33 @@ class StatsSelecter(BaseSelecter):
         return self.get_all()
 
     def get_radz_risk_counts(self, person_id, curation_level=None):
-        from ..models.radzinsky_risks import RisarRadzinskyRisks
-
-        query = self.query_main(person_id, curation_level)
+        events_q = self.query_main(person_id, curation_level).subquery()
         query = RisarRadzinskyRisks.query.join(
-            query.subquery(),
             rbRadzinskyRiskRate
+        ).join(
+            events_q, events_q.c.id == RisarRadzinskyRisks.event_id
         ).group_by(
             RisarRadzinskyRisks.risk_rate_id,
         ).with_entities(
             rbRadzinskyRiskRate.code,
             func.count(func.distinct(RisarRadzinskyRisks.event_id)),
+        )
+        self.query = query
+        return self.get_all()
+
+    def get_regional_risk_counts(self, person_id, curation_level=None):
+        if not SpecificsManager.has_regional_risks():
+            return []
+        events_q = self.query_main(person_id, curation_level).subquery()
+        query = RisarRegionalRiskRate.query.join(
+            rbRisarRegionalRiskRate
+        ).join(
+            events_q, events_q.c.id == RisarRegionalRiskRate.event_id
+        ).group_by(
+            RisarRegionalRiskRate.risk_rate_id,
+        ).with_entities(
+            rbRisarRegionalRiskRate.code,
+            func.count(func.distinct(RisarRegionalRiskRate.event_id)),
         )
         self.query = query
         return self.get_all()
@@ -488,16 +512,6 @@ class StatsSelecter(BaseSelecter):
 
         self.query = query
         return self.get_one()
-
-
-class RadzStatsController(BaseModelController):
-
-    @classmethod
-    def get_selecter(cls):
-        return StatsSelecter()
-
-    def get_risk_by_code(self, person_id, curation_level):
-        return dict(self.get_selecter().get_radz_risk_counts(person_id, curation_level))
 
 
 mather_death_koef_diags = (
