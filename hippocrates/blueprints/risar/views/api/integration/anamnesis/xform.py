@@ -100,6 +100,9 @@ class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
             'sex_life_start_age': safe_int(data.get('sex_life_age')),
             'fertilization_type': self.to_rb(data.get('fertilization_type')),
             'intrauterine': safe_bool_none(data.get('intrauterine_operation')),
+            'uterine_scar': self.to_rb(data.get('uterine_scar_quantity')),
+            'uterine_scar_location': self.to_rb(data.get('uterine_scar_location')),
+            'solitary_paired': safe_bool_none(data.get('solitary_paired')),
             'multifetation': safe_bool_none(data.get('multiple_fetation')),
 
             'smoking': safe_bool_none(data.get('smoking')),
@@ -129,6 +132,7 @@ class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
     @wrap_simplify
     def as_json(self):
         an_props = self.target_obj.propsByCode
+        safe_fn = self.target_obj.get_prop_value
         return {
             'education': self.or_undefined(self.from_rb(an_props['education'].value)),
             'work_group': self.or_undefined(self.from_rb(an_props['work_group'].value)),
@@ -141,6 +145,9 @@ class AnamnesisMotherXForm(AnamnesisMotherSchema, AnamnesisXForm):
             'sex_life_age': self.or_undefined(an_props['sex_life_start_age'].value),
             'fertilization_type': self.or_undefined(self.from_rb(an_props['fertilization_type'].value)),
             'intrauterine_operation': self.or_undefined(an_props['intrauterine'].value),
+            'solitary_paired': self.or_undefined(safe_fn('solitary_paired')),
+            'uterine_scar_quantity': self.or_undefined(self.from_rb(safe_fn('uterine_scar'))),
+            'uterine_scar_location': self.or_undefined(self.from_rb(safe_fn('uterine_scar_location'))),
             'multiple_fetation': self.or_undefined(an_props['multifetation'].value),
 
             'intertility': self._represent_intertility(),

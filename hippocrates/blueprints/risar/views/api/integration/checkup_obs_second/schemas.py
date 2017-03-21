@@ -33,8 +33,17 @@ class CheckupObsSecondSchema(Schema):
                             "type": "string",
                             "format": "date"
                         },
+                        "modify_date": {
+                            "description": "Дата последнего изменения данных осмотра",
+                            "type": "string",
+                            "format": "date"
+                        },
                         "hospital": {
                             "description": "ЛПУ осмотра (код)",
+                            "type": "string"
+                        },
+                        "department": {
+                            "description": "Подразделение ЛПУ осмотра (код)",
                             "type": "string"
                         },
                         "doctor": {
@@ -109,6 +118,13 @@ class CheckupObsSecondSchema(Schema):
                                 "type": "string"
                             }
                         },
+                        "mucous": {
+                            "description": "Видимые слизистые, код по справочнику rbRisarMucous",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
                         "skin": {
                             "description": "Кожа, справочник rbRisarSkin",
                             "type": "array",
@@ -150,6 +166,10 @@ class CheckupObsSecondSchema(Schema):
                             "items": {
                                 "type": "string"
                             }
+                        },
+                        "respiratory_rate": {
+                            "description": "Частота дыхательных движений",
+                            "type": "number"
                         },
                         "abdomen": {
                             "description": "Органы брюшной полости, справочник rbRisarStomach",
@@ -231,6 +251,10 @@ class CheckupObsSecondSchema(Schema):
                                 "description": "Предлежащая часть плода, справочник rbRisarPresenting_Part",
                                 "type": "string"
                             },
+                            "fetus_presenting_part": {
+                                "description": "Местонахождение предлежащей части плода, справочник rbRisarPresentingPart",
+                                "type": "string"
+                            },
                             "fetus_heartbeat": {
                                 "description": "Сердцебиение плода, справочник rbRisarFetus_Heartbeat",
                                 "type": "array",
@@ -272,14 +296,14 @@ class CheckupObsSecondSchema(Schema):
                                         "type": "string"
                                     },
                                     "fisher_points": {
-                                        "description" : "значение оценки по Фишеру",
+                                        "description": "значение оценки по Фишеру ",
                                         "type": "integer"
                                     }
                                 }
                             },
                             "ctg_data_stv": {
                                 "description": "Данные оценки КТГ по STV",
-                                "type":"integer"
+                                "type": "integer"
                             }
                         }
                     }
@@ -291,6 +315,13 @@ class CheckupObsSecondSchema(Schema):
                         "vagina": {
                             "description": "Влагалище, справочник rbRisarVagina",
                             "type": "string"
+                        },
+                        "vagina_mucous": {
+                            "description": "Слизистая влагалища, код по справочнику rbRisarMucous",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "cervix": {
                             "description": "Шейка матки, справочник rbRisarCervix",
@@ -337,8 +368,7 @@ class CheckupObsSecondSchema(Schema):
                             "description": "Придатки, справочник rbRisarAppendages",
                             "type": "array",
                             "items": {
-                                "type": "string"
-                            }
+                                "type": "string"}
                         },
                         "specialities": {
                             "description": "Особенности",
@@ -405,6 +435,10 @@ class CheckupObsSecondSchema(Schema):
                                 },
                                 "descr": {
                                     "type": "string"
+                                },
+                                "stage": {
+                                    "type": "string",
+                                    "description": "Уточнение стадии/степени заболевания, код справочника"
                                 }
                             },
                             "required": ["MKB"]
@@ -421,6 +455,10 @@ class CheckupObsSecondSchema(Schema):
                                     },
                                     "descr": {
                                         "type": "string"
+                                    },
+                                    "stage": {
+                                        "type": "string",
+                                        "description": "Уточнение стадии/степени заболевания, код справочника"
                                     }
                                 },
                                 "required": ["MKB"]
@@ -439,6 +477,10 @@ class CheckupObsSecondSchema(Schema):
                                     },
                                     "descr": {
                                         "type": "string"
+                                    },
+                                    "stage": {
+                                        "type": "string",
+                                        "description": "Уточнение стадии/степени заболевания, код справочника"
                                     }
                                 },
                                 "required": ["MKB"]

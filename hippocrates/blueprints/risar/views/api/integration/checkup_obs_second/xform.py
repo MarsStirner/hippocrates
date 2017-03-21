@@ -20,6 +20,7 @@ from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCh
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
+from nemesis.models.exists import OrgStructure
 
 
 class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
@@ -40,17 +41,20 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'blood': {'attr': 'blood_comment', 'default': None, 'rb': None, 'is_vector': False},
         'us': {'attr': 'ultrasound_comment', 'default': None, 'rb': None, 'is_vector': False},
         'other_analysis': {'attr': 'other_analyzes_comment', 'default': None, 'rb': None, 'is_vector': False},
+        'department': {'attr': 'department', 'default': None, 'rb': OrgStructure, 'is_vector': False},
     }
 
     SOMATIC_MAP = {
         'state': {'attr': 'state', 'default': None, 'rb': 'rbRisarState', 'is_vector': False},
         'complaints': {'attr': 'complaints', 'default': None, 'rb': 'rbRisarComplaints', 'is_vector': True},
+        'visible_mucuous': {'attr': 'mucous', 'default': None, 'rb': 'rbRisarMucous', 'is_vector': True},
         'skin': {'attr': 'skin', 'default': None, 'rb': 'rbRisarSkin', 'is_vector': True},
         'lymph_nodes': {'attr': 'lymph', 'default': None, 'rb': 'rbRisarLymph', 'is_vector': True},
         'breast': {'attr': 'breast', 'default': None, 'rb': 'rbRisarBreast', 'is_vector': True},
         'heart_tones': {'attr': 'heart_tones', 'default': None, 'rb': 'rbRisarHeart_Tones', 'is_vector': True},
         'nipples': {'attr': 'nipples', 'default': None, 'rb': 'rbRisarNipples', 'is_vector': True},
         'breathe': {'attr': 'respiratory', 'default': None, 'rb': 'rbRisarBreathe', 'is_vector': True},
+        'chdd': {'attr': 'respiratory_rate', 'default': None, 'rb': None, 'is_vector': False},
         'stomach': {'attr': 'abdomen', 'default': None, 'rb': 'rbRisarStomach', 'is_vector': True},
         'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
         'secretion': {'attr': 'secretion', 'default': None, 'rb': 'rbRisarSecretion', 'is_vector': False},
@@ -71,6 +75,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'position_2': {'attr': 'fetus_position', 'default': None, 'rb': 'rbRisarFetus_Position_2', 'is_vector': False},
         'type': {'attr': 'fetus_type', 'default': None, 'rb': 'rbRisarFetus_Type', 'is_vector': False},
         'presenting_part': {'attr': 'fetus_presentation', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
+        'contigous_part': {'attr': 'fetus_presenting_part', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
         'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
         'delay': {'attr': 'intrauterine_growth_retardation', 'default': None, 'rb': 'rbRisarFetus_Delay', 'is_vector': False},
@@ -79,6 +84,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
 
     VAGINAL_MAP = {
         'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
+        'vagina_mucuos': {'attr': 'vagina_mucous', 'default': None, 'rb': 'rbRisarMucous', 'is_vector': True},
         'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': True},
         'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
         'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal',
@@ -94,6 +100,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'appendages_right': {'attr': 'adnexa_right', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
+        'hairs': {'attr': 'vulva_pilosis', 'default': None, 'rb': 'rbRisarVulvaPilosis', 'is_vector': False},
         'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
         'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
         'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},

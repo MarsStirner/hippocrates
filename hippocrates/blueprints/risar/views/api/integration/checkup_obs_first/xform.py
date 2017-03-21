@@ -14,12 +14,13 @@ from hippocrates.blueprints.risar.models.fetus import RisarFetusState
 from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code
 from hippocrates.blueprints.risar.views.api.integration.checkup_obs_first.schemas import \
     CheckupObsFirstSchema
-from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCheckupsXForm
+from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCheckupsXForm, wrap_simplify
 from hippocrates.blueprints.risar.views.api.integration.checkup_ticket25_xform import CheckupsTicket25XForm, \
     CheckupsTicket25XFormSchema
-from nemesis.lib.utils import safe_datetime, safe_date
+from nemesis.lib.utils import safe_datetime, safe_date, safe_traverse
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
+from nemesis.models.exists import OrgStructure
 
 
 class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
@@ -33,6 +34,9 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'beg_date': {'attr': 'date', 'default': None, 'rb': None, 'is_vector': False},
         'height': {'attr': 'height', 'default': None, 'rb': None, 'is_vector': False},
         'weight': {'attr': 'weight', 'default': None, 'rb': None, 'is_vector': False},
+        'weight_b4preg': {'attr': 'weight_before', 'default': None, 'rb': None, 'is_vector': False},
+        'physique_features': {'attr': 'constitution', 'default': None, 'rb': 'rbRisarConstitutionalPeculiarity', 'is_vector': False},
+        'department': {'attr': 'department', 'default': None, 'rb': OrgStructure, 'is_vector': False},
     }
 
     SOMATIC_MAP = {
@@ -40,6 +44,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'subcutaneous_fat': {'attr': 'subcutaneous_fat', 'default': None, 'rb': 'rbRisarSubcutaneous_Fat', 'is_vector': False},
         'tongue': {'attr': 'tongue', 'default': None, 'rb': 'rbRisarTongue', 'is_vector': True},
         'complaints': {'attr': 'complaints', 'default': None, 'rb': 'rbRisarComplaints', 'is_vector': True},
+        'visible_mucuous': {'attr': 'mucous', 'default': None, 'rb': 'rbRisarMucous', 'is_vector': True},
         'skin': {'attr': 'skin', 'default': None, 'rb': 'rbRisarSkin', 'is_vector': True},
         'lymph': {'attr': 'lymph', 'default': None, 'rb': 'rbRisarLymph', 'is_vector': True},
         'breast': {'attr': 'breast', 'default': None, 'rb': 'rbRisarBreast', 'is_vector': True},
@@ -48,6 +53,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'nipples': {'attr': 'nipples', 'default': None, 'rb': 'rbRisarNipples', 'is_vector': True},
         'mouth': {'attr': 'mouth', 'default': None, 'rb': 'rbRisarMouth', 'is_vector': False},
         'breathe': {'attr': 'respiratory', 'default': None, 'rb': 'rbRisarBreathe', 'is_vector': True},
+        'chdd': {'attr': 'respiratory_rate', 'default': None, 'rb': None, 'is_vector': False},
         'stomach': {'attr': 'abdomen', 'default': None, 'rb': 'rbRisarStomach', 'is_vector': True},
         'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
         'urinoexcretory': {'attr': 'urinoexcretory', 'default': None, 'rb': 'rbRisarUrinoexcretory', 'is_vector': True},
@@ -83,6 +89,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'position_2': {'attr': 'fetus_position', 'default': None, 'rb': 'rbRisarFetus_Position_2', 'is_vector': False},
         'type': {'attr': 'fetus_type', 'default': None, 'rb': 'rbRisarFetus_Type', 'is_vector': False},
         'presenting_part': {'attr': 'fetus_presentation', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
+        'contigous_part': {'attr': 'fetus_presenting_part', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
         'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
         'stv_evaluation': {'attr': 'ctg_data_stv', 'default': None, 'rb': None, 'is_vector': False},
@@ -90,6 +97,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
 
     VAGINAL_MAP = {
         'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
+        'vagina_mucuos': {'attr': 'vagina_mucous', 'default': None, 'rb': 'rbRisarMucous', 'is_vector': True},
         'secretion': {'attr': 'secretion', 'default': None, 'rb': 'rbRisarSecretion', 'is_vector': False},
         'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': True},
         'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
@@ -102,6 +110,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'appendages_right': {'attr': 'adnexa_right', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
+        'hairs': {'attr': 'vulva_pilosis', 'default': None, 'rb': 'rbRisarVulvaPilosis', 'is_vector': False},
         'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
         'vagina_secretion': {'attr': 'vaginal_smear', 'default': None, 'rb': None, 'is_vector': False},
         'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},
@@ -303,6 +312,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
             RisarFetusState.action_id == self.target_obj_id
         ).delete()
 
+    @wrap_simplify
     def as_json(self):
         data = represent_pregnancy_checkup(self.target_obj)
         return {
@@ -356,6 +366,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
             diagnosis = {
                 'MKB': dd['diagnostic']['mkb'].regionalCode,
                 'descr': dd['diagnostic']['diagnosis_description'],
+                'stage': safe_traverse(dd['diagnostic']['mkb_details'], 'code'),
             }
             if kind['is_vector']:
                 res.setdefault(kind['attr'], []).append(diagnosis)

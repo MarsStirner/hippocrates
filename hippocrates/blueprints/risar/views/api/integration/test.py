@@ -138,11 +138,10 @@ if __name__ == '__main__':
 
         # delete_test_card_id(test_card_id)
 
-        # from hippocrates.blueprints.risar.views.api.integration.checkup_obs_first.test import \
-        #     test_register_edit_delete_first_checkup
-        # card_id = '278'
-        # test_register_edit_delete_first_checkup(card_id)
-
+        from hippocrates.blueprints.risar.views.api.integration.checkup_obs_first.test import \
+            test_register_edit_delete_first_checkup
+        # # # card_id = '278'
+        test_register_edit_delete_first_checkup(375, 6074)
         from hippocrates.blueprints.risar.views.api.integration.checkup_obs_second.test import \
             test_register_edit_delete_second_checkup, test_edit_ticket25
         # card_id = '72'
@@ -252,6 +251,9 @@ if __name__ == '__main__':
         # card_id = '354'
         # test_register_edit_delete_gyn_checkup(card_id)
 
+        # from hippocrates.blueprints.risar.views.api.integration.anamnesis.test import test_edit_mother_anamnesis_only, anamnesis_m_data2
+
+        # test_edit_mother_anamnesis_only(343)
         # from hippocrates.blueprints.risar.views.api.integration.anamnesis_gyn.test import \
         #     test_register_edit_delete_gyn_anamnesis
         # card_id = '354'

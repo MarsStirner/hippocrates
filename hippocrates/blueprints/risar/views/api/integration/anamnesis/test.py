@@ -58,6 +58,11 @@ def delete_prevpregnancy_anamnesis(session, card_id, prevpregnancy_id):
     result = make_api_request('delete', url, session)
     return result
 
+def test_edit_mother_anamnesis_only(card_id):
+    with make_login() as session:
+        result = edit_mother_anamnesis(session, card_id, anamnesis_m_data2)
+        from pprint import pprint
+        pprint(result)
 
 def test_register_edit_delete_mother_anamnesis(card_id):
     with make_login() as session:

@@ -11,6 +11,7 @@ from hippocrates.blueprints.risar.views.api.integration.xform import GynecologyC
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
+from nemesis.models.exists import OrgStructure
 
 
 class CheckupGynXForm(CheckupGynSchema, GynecologyCheckupsXForm):
@@ -55,6 +56,7 @@ class CheckupGynXForm(CheckupGynSchema, GynecologyCheckupsXForm):
         'breasts_induration': {'attr': 'breasts_induration', 'default': None, 'rb': None, 'is_vector': False},
         'nipples_discharge': {'attr': 'nipples_discharge', 'default': None, 'rb': None, 'is_vector': False},
         'other_complaints': {'attr': 'other_complaints', 'default': None, 'rb': None, 'is_vector': False},
+        'department': {'attr': 'department', 'default': None, 'rb': OrgStructure, 'is_vector': False},
     }
 
     OBJECTIVE_MAP = {

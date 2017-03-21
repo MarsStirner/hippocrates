@@ -20,6 +20,7 @@ from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCh
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
+from nemesis.models.exists import OrgStructure
 
 
 class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
@@ -33,6 +34,7 @@ class CheckupPCXForm(CheckupPCSchema, PregnancyCheckupsXForm):
         'beg_date': {'attr': 'date', 'default': None, 'rb': None, 'is_vector': False},
         'height': {'attr': 'height', 'default': None, 'rb': None, 'is_vector': False},
         'weight': {'attr': 'weight', 'default': None, 'rb': None, 'is_vector': False},
+        'department': {'attr': 'department', 'default': None, 'rb': OrgStructure, 'is_vector': False},
     }
 
     SOMATIC_MAP = {

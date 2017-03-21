@@ -17,6 +17,7 @@ from hippocrates.blueprints.risar.views.api.integration.xform import PregnancyCh
 from nemesis.lib.utils import safe_datetime, safe_date
 from nemesis.models.actions import ActionType, Action
 from nemesis.models.event import Event
+from nemesis.models.exists import OrgStructure
 
 
 class CheckupPuerperaXForm(CheckupPuerperaSchema, PregnancyCheckupsXForm):
@@ -46,6 +47,7 @@ class CheckupPuerperaXForm(CheckupPuerperaSchema, PregnancyCheckupsXForm):
         'contraception': {'attr': 'contraception_recommendations', 'default': None, 'rb': 'rbRisarContraception_Puerpera', 'is_vector': False},
         'treatment': {'attr': 'treatment', 'default': None, 'rb': None, 'is_vector': False},
         'recomendations': {'attr': 'recommendations', 'default': None, 'rb': None, 'is_vector': False},
+        'department': {'attr': 'department', 'default': None, 'rb': OrgStructure, 'is_vector': False},
     }
 
     DIAG_KINDS_MAP = {
