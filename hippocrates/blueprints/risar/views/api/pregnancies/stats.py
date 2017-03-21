@@ -13,7 +13,7 @@ from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.errand import represent_errand
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_chart_short
 from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
-from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags, RadzStatsController
+from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method, ApiException
@@ -249,8 +249,19 @@ def api_1_stats_pregnancy_week_diagram(person_id=None):
 def api_0_stats_radz_risks(person_id=None):
     person_id = person_id or safe_current_user_id()
     curation_level = request.args.get('curation_level_code')
-    stats_ctrl = RadzStatsController()
-    data = stats_ctrl.get_risk_by_code(person_id, curation_level)
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_radz_risks(person_id, curation_level)
+    return data
+
+
+@module.route('/api/0/stats/regional_risk_rate/')
+@module.route('/api/0/stats/regional_risk_rate/<int:person_id>')
+@api_method
+def api_0_stats_regional_risks(person_id=None):
+    person_id = person_id or safe_current_user_id()
+    curation_level = request.args.get('curation_level_code')
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_regional_risks(person_id, curation_level)
     return data
 
 
@@ -330,55 +341,50 @@ def api_0_death_stats():
     result1 = {'maternal_death': []}
     now = datetime.datetime.now()
     prev = now + datetime.timedelta(days=-now.day)
+
+    from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
     selectable = db.select(
-        (Action.id, ActionProperty_Integer.value_),
+        (RisarEpicrisis_Children.id, RisarEpicrisis_Children.alive),
         whereclause=db.and_(
-            ActionType.flatCode == 'risar_newborn_inspection',
-            ActionPropertyType.code == 'alive',
+            ActionType.flatCode == 'epicrisis',
             rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
-            ActionProperty.action_id == Action.id,
-            ActionPropertyType.id == ActionProperty.type_id,
             ActionType.id == Action.actionType_id,
-            ActionProperty_Integer.id == ActionProperty.id,
             EventType.id == Event.eventType_id,
+            RisarEpicrisis_Children.action_id == Action.id,
             rbRequestType.id == EventType.requestType_id,
             Event.deleted == 0,
             Action.deleted == 0
         ),
         from_obj=(
-            Event, EventType, rbRequestType, Client, Action, ActionType, ActionProperty, ActionPropertyType,
-            ActionProperty_Integer
-        ))
+            Event, EventType, rbRequestType, Client, Action, ActionType, RisarEpicrisis_Children
+        )).distinct()
     for (id, value) in db.session.execute(selectable):  # 0-dead, 1-alive
-        result[value].append(id)
+        if value is not None:
+            result[value].append(id)
 
     for value in result:
         result1[value] = []
         for i in range(1, 13):
             selectable1 = db.select(
-                (Action.id,),
+                (RisarEpicrisis_Children.id,),
                 whereclause=db.and_(
-                    ActionType.flatCode == 'risar_newborn_inspection',
-                    ActionPropertyType.code == 'date',
+                    ActionType.flatCode == 'epicrisis',
                     rbRequestType.code == request_type_pregnancy,
                     Action.event_id == Event.id,
-                    ActionProperty.action_id == Action.id,
-                    ActionPropertyType.id == ActionProperty.type_id,
                     ActionType.id == Action.actionType_id,
-                    ActionProperty_Date.id == ActionProperty.id,
                     EventType.id == Event.eventType_id,
                     rbRequestType.id == EventType.requestType_id,
+                    RisarEpicrisis_Children.action_id == Action.id,
                     Event.deleted == 0,
                     Action.deleted == 0,
-                    func.year(ActionProperty_Date.value) == now.strftime('%Y'),
-                    func.month(ActionProperty_Date.value) == str(i).rjust(2, '0'),
-                    Action.id.in_(result[value])
+                    func.year(RisarEpicrisis_Children.date) == now.strftime('%Y'),
+                    func.month(RisarEpicrisis_Children.date) == str(i).rjust(2, '0'),
+                    RisarEpicrisis_Children.id.in_(result[value])
                 ),
                 from_obj=(
-                    Event, EventType, rbRequestType, Client, Action, ActionType, ActionProperty, ActionPropertyType,
-                    ActionProperty_Date
-                ))
+                    Event, EventType, rbRequestType, Client, Action, ActionType, RisarEpicrisis_Children
+                )).distinct()
             result1[value].append([i, db.session.execute(selectable1).rowcount])
 
     perinatal_death_rate = get_rate_for_regions(regions, "perinatal_death")

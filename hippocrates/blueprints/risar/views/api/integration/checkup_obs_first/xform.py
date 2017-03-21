@@ -57,7 +57,7 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'ad_left_low': {'attr': 'ad_left_low', 'default': None, 'rb': None, 'is_vector': False},
         'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
         'vein': {'attr': 'veins', 'default': None, 'rb': 'rbRisarVein', 'is_vector': False},
-        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
+        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': 'rbRisarBowelAndBladderFunctions', 'is_vector': False},
         'heart_rate': {'attr': 'heart_rate', 'default': None, 'rb': None, 'is_vector': False},
     }
 
@@ -85,18 +85,21 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'presenting_part': {'attr': 'fetus_presentation', 'default': None, 'rb': 'rbRisarPresenting_Part', 'is_vector': False},
         'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
+        'stv_evaluation': {'attr': 'ctg_data_stv', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     VAGINAL_MAP = {
         'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
-        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': False},
+        'secretion': {'attr': 'secretion', 'default': None, 'rb': 'rbRisarSecretion', 'is_vector': False},
+        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': True},
         'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
         'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal', 'is_vector': False},
         'cervix_consistency': {'attr': 'cervix_consistency', 'default': None, 'rb': 'rbRisarCervix_Consistency', 'is_vector': False},
         'cervix_position': {'attr': 'cervix_position', 'default': None, 'rb': 'rbRisarCervix_Position', 'is_vector': False},
         'cervix_maturity': {'attr': 'cervix_maturity', 'default': None, 'rb': 'rbRisarCervix_Maturity', 'is_vector': False},
         'body_of_womb': {'attr': 'body_of_uterus', 'default': [], 'rb': 'rbRisarBody_Of_Womb', 'is_vector': True},
-        'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
+        'appendages': {'attr': 'adnexa_left', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
+        'appendages_right': {'attr': 'adnexa_right', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
         'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
@@ -104,6 +107,15 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         'cervical_canal_secretion': {'attr': 'cervical_canal_smear', 'default': None, 'rb': None, 'is_vector': False},
         'onco_smear': {'attr': 'onco_smear', 'default': None, 'rb': None, 'is_vector': False},
         'urethra_secretion': {'attr': 'urethra_smear', 'default': None, 'rb': None, 'is_vector': False},
+    }
+
+    FETUS_CTG_MAP = {
+        'basal': {'attr': 'fhr', 'default': None, 'rb': 'rbRisarBasal', 'is_vector': False},
+        'variability_range': {'attr': 'fhr_variability_amp', 'default': None, 'rb': 'rbRisarVariabilityRange', 'is_vector': False},
+        'frequency_per_minute': {'attr': 'fhr_variability_freq', 'default': None, 'rb': 'rbRisarFrequencyPerMinute', 'is_vector': False},
+        'acceleration': {'attr': 'fhr_acceleration', 'default': None, 'rb': 'rbRisarAcceleration', 'is_vector': False},
+        'deceleration': {'attr': 'fhr_deceleration', 'default': None, 'rb': 'rbRisarDeceleration', 'is_vector': False},
+        'fisher_ktg_points': {'attr': 'fisher_points', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     REPORT_MAP = {
@@ -187,6 +199,12 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
             if db_fetus_id:
                 f_state['id'] = db_fetus_id
             self.mapping_part(self.FETUS_MAP, fs, f_state)
+            ctg_data_fisher = fs.get('ctg_data_fisher', {})
+            f_state['ktg_input'] = ctg_data_fisher and 1 or 0
+            self.mapping_part(self.FETUS_CTG_MAP, ctg_data_fisher, f_state)
+            ctg_data_stv = fs.get('ctg_data_stv')
+            f_state['ktg_input'] = ctg_data_stv and 2
+
             res.setdefault('fetuses', []).append({
                 'deleted': deleted,
                 'state': f_state,
@@ -318,7 +336,11 @@ class CheckupObsFirstXForm(CheckupObsFirstSchema, PregnancyCheckupsXForm):
         fetus_list = data.get('fetuses', [])
         res = []
         for fs_data in fetus_list:
-            fs = self._represent_part(self.FETUS_MAP, fs_data.get('state'))
+            state = fs_data.get('state')
+            fs = self._represent_part(self.FETUS_MAP, state)
+            if state.get('ktg_input') == 1:
+                r = self._represent_part(self.FETUS_CTG_MAP, state)
+                fs['ctg_data_fisher'] = r
             res.append(fs)
         return res
 

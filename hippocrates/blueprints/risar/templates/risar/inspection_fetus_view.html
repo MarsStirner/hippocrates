@@ -30,7 +30,7 @@
         </div>
 
         <div class="box box-primary">
-        <div class="box-body" ng-repeat="fetus in checkup.fetuses">
+        <div class="box-body" ng-repeat="child in checkup.fetuses" ng-controller="CheckupBaseChildCtrl">
         <table class="table">
             <thead>
                 <tr>
@@ -41,66 +41,81 @@
             <tbody>
                 <tr>
                     <th>Положение</th>
-                    <td> [[ fetus.state.position.name ]]</td>
+                    <td> [[ child.state.position.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Позиция</th>
-                    <td> [[ fetus.state.position_2.name ]]</td>
+                    <td> [[ child.state.position_2.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Вид плода</th>
-                    <td> [[ fetus.state.type.name ]]</td>
+                    <td> [[ child.state.type.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Предлежание</th>
-                    <td> [[ fetus.state.presenting_part.name ]]</td>
+                    <td> [[ child.state.presenting_part.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Задержка в развитии</th>
-                    <td> [[ fetus.state.delay.name ]]</td>
+                    <td> [[ child.state.delay.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Сердцебиение</th>
-                    <td> <span ng-repeat="elem in fetus.state.heartbeat" >[[elem.name]][[$last ? '' : ', ']]</span></td>
+                    <td> <span ng-repeat="elem in child.state.heartbeat" >[[elem.name]][[$last ? '' : ', ']]</span></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>ЧСС, уд/мин</th>
-                    <td> [[ fetus.state.heart_rate ]]</td>
+                    <td> [[ child.state.heart_rate ]]</td>
                     <td></td>
                 </tr>
-                <tr>
+                <tr ng-show="isPhisher || isStv">
                     <th>Данные КТГ</th>
                     <td></td>
                 </tr>
-                <tr>
+                <tr ng-show="isPhisher">
                     <td><span class="small-left-margin">Базальный ритм</span></td>
-                    <td> [[ fetus.state.basal.name ]]</td>
+                    <td> [[ child.state.basal.name ]]</td>
                     <td></td>
                 </tr>
-                <tr>
+                <tr ng-show="isPhisher">
                     <td><span class="small-left-margin">Вариабельность (амплитуда)</span></td>
-                    <td> [[ fetus.state.variability_range.name ]]</td>
+                    <td> [[ child.state.variability_range.name ]]</td>
                     <td></td>
                 </tr>
-                <tr>
+                <tr ng-show="isPhisher">
                     <td><span class="small-left-margin">Вариабельность (частота в минуту)</span></td>
-                    <td> [[ fetus.state.frequency_per_minute.name ]]</td>
+                    <td> [[ child.state.frequency_per_minute.name ]]</td>
                     <td></td>
                 </tr>
-                <tr>
+                <tr ng-show="isPhisher">
                     <td><span class="small-left-margin">Акселерации за 30 минут</span></td>
-                    <td> [[ fetus.state.acceleration.name ]]</td>
+                    <td> [[ child.state.acceleration.name ]]</td>
                     <td></td>
                 </tr>
-                <tr>
+                <tr ng-show="isPhisher">
                     <td><span class="small-left-margin">Децелерации за 30 минут</span></td>
-                    <td> [[ fetus.state.deceleration.name ]]</td>
+                    <td> [[ child.state.deceleration.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr ng-show="isPhisher">
+                    <td><span class="small-left-margin">Оценка КТГ по Фишеру:</span></td>
+                    <td>
+                        <span ng-bind="child.state.fisher_ktg_points"></span>
+                        <span ng-if="child.state.fisher_ktg_rate">
+                            (<span  ng-bind="child.state.fisher_ktg_rate.name|lowercase"></span>)
+                        </span>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr ng-show="isStv">
+                    <td><span class="small-left-margin">Оценка по STV:</span></td>
+                    <td> [[ child.state.stv_evaluation ]]</td>
                     <td></td>
                 </tr>
             </tbody>
@@ -114,5 +129,6 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/checkup.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
 {% endblock %}

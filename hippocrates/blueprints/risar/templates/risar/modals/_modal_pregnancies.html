@@ -1,3 +1,4 @@
+{% import 'risar/_macros.html' as rimacros with context %}
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
     <h3 class="modal-title">Сведение о беременности</h3>
 </div>
@@ -81,7 +82,7 @@
                 <tr>
                     <th class="text-right">Преэклампсия <span>&nbsp;</span></th>
                     <td>
-                    <div class="col-md-8"><input type="checkbox" class="checkbox" ng-model="model.preeclampsia"></div>
+                    <div class="col-md-8">{{ rimacros.radio_da_net(model='model.preeclampsia') }}</div>
                     </td>
                 </tr>
                 <tr>
@@ -173,7 +174,7 @@
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
-                                                <input ng-model="child.abnormal_development" class="checkbox" type="checkbox">
+                                                {{rimacros.radio_da_net(model='child.abnormal_development')}}
                                             </div>
                                             </div>
                                         </td>
@@ -183,7 +184,7 @@
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
-                                                <input ng-model="child.neurological_disorders" class="checkbox" type="checkbox">
+                                                {{rimacros.radio_da_net(model='child.neurological_disorders')}}
                                             </div>
                                             </div>
                                         </td>

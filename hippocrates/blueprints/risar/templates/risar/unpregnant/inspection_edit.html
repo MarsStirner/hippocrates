@@ -78,17 +78,17 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
+                                    <a aria-controls="ticket" href="#ticket_25" data-toggle="tab">
                                         <span class="badge">9</span>
-                                        <span>Диагностические мероприятия</span>
-                                        <i class="fa fa-exclamation-circle text-red pull-right" style="font-size: larger"
-                                            title="[[checkup.em_error]]" ng-if="checkup.em_error"></i>
+                                        <span>Талон посещения</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="ticket" href="#ticket_25" data-toggle="tab">
+                                    <a aria-controls="diagnostic" href="#diagnostic" data-toggle="tab">
                                         <span class="badge">10</span>
-                                        <span>Талон посещения</span>
+                                        <span>Диагностические мероприятия</span>
+                                        <i class="fa fa-exclamation-circle text-red pull-right" style="font-size: larger"
+                                            title="[[checkup.em_error]]" ng-if="checkup.em_error"></i>
                                     </a>
                                 </li>
                             </ul>
@@ -107,18 +107,20 @@
                                 <tbody>
                                     <tr>
                                         <td class="text-right col-md-4">Дата <span class="text-danger">*</span></td>
-                                        <td class="col-md-2">
+                                        <td class="col-md-8">
                                             <wm-date name="osmotr_date" ng-model="checkup.beg_date" style="width: 250px" autofocus
                                                 min-date="minDate" ng-required="true"></wm-date>
                                         </td>
+                                    </tr>
+                                    <tr>
                                         <td class="text-right">Время осмотра</td>
-                                        <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 200px" ></wm-time>
+                                        <td><wm-time name="beg_time" ng-model="checkup.beg_date" style="width: 250px" ></wm-time>
                                         </td>
                                     </tr>
                                     {% if 'department' in checkup_descriptor %}
                                     <tr ng-if="checkupDescriptor.exists('department')">
                                         <th class="text-right col-md-4" ng-bind-html="checkupDescriptor.getLabel('department')"></th>
-                                        <td class="col-md-4">
+                                        <td class="col-md-8">
                                             <rb-select ref-book="OrgStructure" ng-model="checkup.department" limit-to="50"
                                                 ng-required="checkupDescriptor.getMandatory('department')"
                                                 ng-disabled="checkupDescriptor.getReadOnly('department')"
@@ -126,10 +128,6 @@
                                         </td>
                                     </tr>
                                     {% endif %}
-                                <tbody>
-                            </table>
-                            <table class="table table-condensed">
-                                <tbody>
                                     <tr>
                                         <th class="text-right col-md-4">Последняя менструация</th>
                                         <td class="col-md-8"></td>
@@ -1844,8 +1842,8 @@
                             </div>
                             </div>
                         </ng-form>
-                        {{ inspection_macros.diagnostics(9, info_msg='Требуется заполнить раздел «Заключение»: Основной диагноз.') }}
-                        {{ inspection_macros.ticket_25(10) }}
+                        {{ inspection_macros.ticket_25(9) }}
+                        {{ inspection_macros.diagnostics(10, info_msg='Требуется заполнить раздел «Заключение»: Основной диагноз.') }}
                     </div>
                 </div>
             </div>
@@ -1856,10 +1854,11 @@
                             <a class="pseudo-btn" ng-href="{{ url_for('.html_gyn_inspection') }}?event_id=[[ header.event.id ]]">Перейти на форму осмотров пациентки</a>
 {#                            <button ng-show="checkup.id && rc.sampleWizard.currentIndex == 9" ng-click="print_checkup_ticket()"#}
 {#                                type="button" class="btn btn-default"><i class="glyphicon glyphicon-print"></i> Печать талона</button>#}
-                            <ui-print-button ng-show="rc.sampleWizard.currentIndex == 7" ps="ps_fi" resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>
+{#                            <ui-print-button ng-show="rc.sampleWizard.currentIndex == 7" ps="ps_fi" resolve="ps_resolve_inspection()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>#}
                             <a class="btn btn-success"
                                ng-click="save(rc.sampleWizard.currentStep.formController)"
-                               tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]">
+                               tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                               ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">
                                 Сохранить</a>
 {#                            <a class="btn btn-primary"#}
 {#                               ng-click="skip(rc.sampleWizard.currentStep.formController)"#}

@@ -14,10 +14,9 @@
             <tbody>
                 <tr>
                     <th class="text-right">Тип <span class="text-danger">*</span></th>
-                    <td ng-if="!model.id"><div class="col-md-4" >
+                    <td><div class="col-md-4" >
                         <rb-select ref-book="IntoleranceType" ng-model="model.type" autofocus="autofocus" ng-required="true" />
                     </div></td>
-                    <td ng-if="model.id"><div class="col-md-12" ng-bind="model.type.name"></div></td>
                 </tr>
                 <tr>
                     <th class="text-right">Наименование <span class="text-danger">*</span></th>

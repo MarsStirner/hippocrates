@@ -25,12 +25,14 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
+                                <li ng-class="{disabled: !ps_fi.is_available()}">
+                                    <a href="#" ng-click="print_checkup(checkup)" >Печать</a></li>
+                                <li>{{ imacros.checkup_ticket_25_print_link() }}</li>
                                 <li ng-class="{disabled: !canEditCheckup($index)}">
                                     <a href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]"
                                         ng-if="canEditCheckup($index)">Изменить</a>
                                     <a href="javascript:void(0)" ng-if="!canEditCheckup($index)">Изменить</a>
                                 </li>
-                                <li>{{ imacros.checkup_ticket_25_print_link() }}</li>
                                 <li ng-class="{disabled: !canEditCheckup($index)}" >
                                     <a href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&fill_from=[[checkup.id]]">Копировать</a>
                                 </li>
@@ -134,5 +136,6 @@
 
 {% block modules_js %}
     {{ super() }}
+    <script src="{{ url_for('.static', filename='js/common.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
 {% endblock %}

@@ -15,19 +15,30 @@
         <table class="table table-condensed">
             <tr>
                 <th class="col-md-3"></th>
-                <th class="col-md-9"></th>
+                <th class="col-md-8"></th>
+                <th class="col-md-1"></th>
             </tr>
             <tbody ng-repeat="schedule in scheds">
                 <tr>
-                    <td colspan="2" bgcolor="#f5f5f5" class="bold">[[schedule.reserve_type ? schedule.reserve_type : "Резерв"]]</td>
+                    <td colspan="3" bgcolor="#f5f5f5" class="bold">[[schedule.reserve_type ? schedule.reserve_type : "Резерв"]]</td>
                 </tr>
                 <tr ng-repeat="ticket in schedule.tickets">
                     <td ng-bind="ticket.begDateTime | asTime"></td>
                     <td>
-                        <a href="javascript:void(0);" ng-if="isEmpty(ticket)" ng-click="make_appointment(ticket)"
-                           tooltip="Нажмите, чтобы записать пациентку">Записать</a>
-                        <a ng-href="{{ url_for('.html_auto_chart') }}?client_id=[[ ticket.client_id ]]" ng-if="isBusy(ticket)"
-                           tooltip="Нажмите, чтобы открыть карту пациентки">[[ticket.client_fio]]</a>
+                        <span ng-if="isEmpty(ticket)">
+                            <a ng-if="ticket.appointment_permitted" href="javascript:void(0);" ng-click="make_appointment(ticket)"
+                                tooltip="Нажмите, чтобы записать пациентку">Записать</a>
+                            <a ng-if="!ticket.appointment_permitted" href="javascript:void(0);">Запись запрещена</a>
+                        </span>
+                        <span ng-if="isBusy(ticket)">
+                            <a ng-href="{{ url_for('.html_auto_chart') }}?client_id=[[ ticket.client_id ]]"
+                                tooltip="Нажмите, чтобы открыть карту пациентки">[[ticket.client_fio]]</a>
+                        </span>
+                    </td>
+                    <td>
+                        <button ng-if="ticket.can_canceled" type="button" class="btn btn-xs btn-danger" ng-click="cancel_appointment(ticket)" tooltip="Отменить запись">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
                     </td>
                 </tr>
             </tbody>

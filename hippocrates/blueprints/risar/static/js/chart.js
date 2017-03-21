@@ -230,13 +230,12 @@ function ($scope, $controller, $window, RisarApi, Config, $modal) {
 
     reload_chart();
 }])
-.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
-function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
+.controller('InspectionViewCtrl', ['$scope', '$modal', '$controller', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
+function ($scope, $modal, $controller, RisarApi, PrintingService, PrintingDialog, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
     $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
-    $scope.ps = new PrintingService("risar");
-    $scope.ps.set_context("risar");
+    $controller('commonPrintCtrl', {$scope: $scope});
     $scope.ps_fi = new PrintingService("risar_inspection");
     $scope.ps_fi.set_context("risar_osm1_talon");
     $scope.ps_si = new PrintingService("risar_inspection");
@@ -270,6 +269,8 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
             RisarApi.print_first_checkup(action_id, 'pdf');
         } else if (flat_code == 'risarSecondInspection') {
             RisarApi.print_second_checkup(action_id, 'pdf');
+        } else if (flat_code == 'risarPCCheckUp') {
+            RisarApi.print_pc_checkup(action_id, 'pdf');
         } else {
             $scope.open_print_window($scope.ps_si, checkup.id)
         }
@@ -315,20 +316,14 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
             });
     };
 
-    $scope.open_print_window = function (ps, checkup_id) {
-        if (ps.is_available()) {
-            PrintingDialog.open(ps, $scope.ps_resolve(checkup_id), undefined, true);
-        }
-    };
     reload();
 }])
-.controller('InspectionGynViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
-    function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
+.controller('InspectionGynViewCtrl', ['$scope', '$modal', '$controller', 'RisarApi', 'PrintingService', 'PrintingDialog', 'RefBookService',
+    function ($scope, $modal, $controller, RisarApi, PrintingService, PrintingDialog, RefBookService) {
         var params = aux.getQueryParams(window.location.search);
         var event_id = params.event_id;
         $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
-        $scope.ps = new PrintingService("risar");
-        $scope.ps.set_context("risar");
+        $controller('commonPrintCtrl', {$scope: $scope});
         $scope.ps_fi = new PrintingService("risar_inspection");
         $scope.ps_fi.set_context("risar_osm1_talon");
         $scope.ps_si = new PrintingService("risar_inspection");
@@ -355,6 +350,9 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
         $scope.canEditCheckup = function (idx) {
             return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
         };
+        $scope.print_checkup = function (checkup) {
+            RisarApi.print_gyn_checkup(checkup.id, 'pdf');
+        };
 
         var reload = function () {
             $scope.checkups = [];
@@ -370,12 +368,6 @@ function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookServ
                         $scope.checkupsAccess.push(d.access);
                     });
                 });
-        };
-
-        $scope.open_print_window = function (ps, checkup_id) {
-            if ($scope.ps.is_available()){
-                PrintingDialog.open(ps, $scope.ps_resolve(checkup_id), undefined, true);
-            }
         };
         reload();
     }])

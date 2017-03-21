@@ -52,9 +52,7 @@
                     <tr>
                         <!-- example of checkbox boolean-->
                         <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('disorder')"></td>
-                        <td><input ng-model="anamnesis_unpregnant.disorder" class="checkbox" type="checkbox"
-                                                                          ng-required="gynAnamnesisDescriptor.getMandatory('disorder')"
-                                                                          ng-disabled="gynAnamnesisDescriptor.getReadOnly('disorder')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.disorder', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
                     {% endif %}
                     {% if 'menstrual_character' in gyn_anamnesis_descriptor  %}
@@ -84,14 +82,10 @@
                     {% endif %}
                 
                     {% if 'menopause' in gyn_anamnesis_descriptor  %}
-
                     <tr>
                         <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('menopause')"></th>
-                        <td><input ng-model="anamnesis_unpregnant.menopause" class="checkbox" type="checkbox"
-                                   ng-required="gynAnamnesisDescriptor.getMandatory('menopause')"
-                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('menopause')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.menopause', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
-
                     {% endif %}
                     {% if 'menopause_age' in gyn_anamnesis_descriptor  %}
                     <tr>
@@ -222,9 +216,7 @@
                     {% if 'infertility' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <th class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('infertility')"></th>
-                        <td><input ng-model="anamnesis_unpregnant.infertility" class="checkbox" type="checkbox"
-                                   ng-required="gynAnamnesisDescriptor.getMandatory('infertility')"
-                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('infertility')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.infertility', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
 
                     {% endif %}
@@ -298,33 +290,25 @@
                     {% if 'alcohol' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('alcohol')"></td>
-                        <td><input ng-model="anamnesis_unpregnant.alcohol" class="checkbox" type="checkbox"
-                                   ng-required="gynAnamnesisDescriptor.getMandatory('alcohol')"
-                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('alcohol')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.alcohol', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
                     {% endif %}
                     {% if 'smoking' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('smoking')"></td>
-                        <td><input ng-model="anamnesis_unpregnant.smoking" class="checkbox" type="checkbox"
-                                   ng-required="gynAnamnesisDescriptor.getMandatory('smoking')"
-                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('smoking')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.smoking', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
                     {% endif %}
                     {% if 'toxic' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('toxic')"></td>
-                        <td><input ng-model="anamnesis_unpregnant.toxic" class="checkbox" type="checkbox"
-                                   ng-required="gynAnamnesisDescriptor.getMandatory('toxic')"
-                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('toxic')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.toxic', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
                     {% endif %}
                     {% if 'drugs' in gyn_anamnesis_descriptor  %}
                     <tr>
                         <td class="text-right" ng-bind-html="gynAnamnesisDescriptor.getLabel('drugs')"></td>
-                        <td><input ng-model="anamnesis_unpregnant.drugs" class="checkbox" type="checkbox"
-                                   ng-required="gynAnamnesisDescriptor.getMandatory('drugs')"
-                                   ng-disabled="gynAnamnesisDescriptor.getReadOnly('drugs')"></td>
+                        <td>{{ rimacros.radio_da_net(model='anamnesis_unpregnant.drugs', descriptor='gynAnamnesisDescriptor') }}</td>
                     </tr>
                     {% endif %}
                     {% if 'work_group' in gyn_anamnesis_descriptor  %}

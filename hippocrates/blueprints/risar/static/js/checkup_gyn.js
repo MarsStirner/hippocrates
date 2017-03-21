@@ -41,7 +41,7 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
     }, true);
     $scope.$watch('checkup.bimanual_body_of_womb_size', function (n, o) {
         if ( n!==o ) {
-            var code = safe_traverse(n, ['code']);
+            var code = n ? safe_traverse(n, ['code']): undefined;
             $scope.is_bimanual_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
             $scope.is_bimanual_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
 
@@ -53,7 +53,7 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
     
     $scope.$watch('checkup.rectovaginal_body_of_womb_size', function (n, o) {
         if ( n!==o ) {
-            var code = safe_traverse(n, ['code']);
+            var code = n ? safe_traverse(n, ['code']): undefined;
             $scope.is_rectovaginal_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
             $scope.is_rectovaginal_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
 
@@ -65,7 +65,7 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
     
     $scope.$watch('checkup.rectal_body_of_womb_size', function (n, o) {
         if ( n!==o ) {
-            var code = safe_traverse(n, ['code']);
+            var code = n ? safe_traverse(n, ['code']): undefined;
             $scope.is_rectal_body_of_womb_enlarged_Visible = code === 'enlarged' ? true : false;
             $scope.is_rectal_body_of_womb_reduced_Visible = code === 'reduced' ? true : false;
 
@@ -74,10 +74,16 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
 
         }
     }, true);
-    
+    $scope.parseTemperature = function (temperature) {
+        temperature = parseFloat(temperature);
+        if (!temperature) return null;
+        return temperature % 1 === 0 ? temperature / 10 : temperature;
+    };
     $scope.prepareCheckup = function() {
         $scope.checkup.diagnoses_changed = $scope.DiagForm.$dirty;
-        return $scope.checkup
+        $scope.checkup.temperature = $scope.parseTemperature($scope.checkup.temperature);
+        $scope.checkup.temperature_rise = $scope.parseTemperature($scope.checkup.temperature_rise);
+        return $scope.checkup;
     };
     $scope.save = function (form_controller){
         form_controller.submit_attempt = true;

@@ -227,7 +227,7 @@
                                             <tr>
                                                 <td class="text-right bold col-md-4">Смерть матери<span>&nbsp;</span></td>
                                                 <td class="col-md-8">
-                                                    <input type="checkbox" ng-model="mother_death">
+                                                    {{ rimacros.radio_da_net(model='mother_death') }}
                                                 </td>
                                             </tr>
                                             {% if 'reason_of_death' in epicrisis_descriptor %}
@@ -301,10 +301,7 @@
                                     {% if 'immaturity' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('immaturity')"></th>
-                                        <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.immaturity"
-                                                   ng-required="epicrisisDescriptor.getMandatory('immaturity')" ng-disabled="epicrisisDescriptor.getReadOnly('immaturity')">
-                                        </td>
+                                        <td class="col-md-8">{{ rimacros.radio_da_net(model='epicrisis.immaturity', descriptor='epicrisisDescriptor') }}</td>
                                     </tr>
                                     {% endif %}
                                     {% if 'delivery_waters' in epicrisis_descriptor %}
@@ -323,10 +320,7 @@
                                     {% if 'pre_birth_delivery_waters' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('pre_birth_delivery_waters')"></th>
-                                        <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.pre_birth_delivery_waters"
-                                            ng-required="epicrisisDescriptor.getMandatory('pre_birth_delivery_waters')" ng-disabled="epicrisisDescriptor.getReadOnly('pre_birth_delivery_waters')">
-                                        </td>
+                                        <td class="col-md-8">{{ rimacros.radio_da_net(model='epicrisis.pre_birth_delivery_waters', descriptor='epicrisisDescriptor') }}</td>
                                     </tr>
                                     {% endif %}
                                     {% if 'weakness' in epicrisis_descriptor %}
@@ -359,44 +353,33 @@
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('meconium_colouring')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.meconium_colouring"
-                                            ng-required="epicrisisDescriptor.getMandatory('meconium_colouring')" ng-disabled="epicrisisDescriptor.getReadOnly('meconium_colouring')">
+                                            {{ rimacros.radio_da_net(model='epicrisis.meconium_colouring', descriptor='epicrisisDescriptor') }}
                                         </td>
                                     </tr>
                                     {% endif %}
                                     {% if 'patologicsl_preliminal_period' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('patologicsl_preliminal_period')"></th>
-                                        <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.patologicsl_preliminal_period"
-                                            ng-required="epicrisisDescriptor.getMandatory('patologicsl_preliminal_period')" ng-disabled="epicrisisDescriptor.getReadOnly('patologicsl_preliminal_period')">
-                                        </td>
+                                        <td class="col-md-8">{{ rimacros.radio_da_net(model='epicrisis.patologicsl_preliminal_period', descriptor='epicrisisDescriptor') }}</td>
                                     </tr>
                                     {% endif %}
                                     {% if 'labor_anomalies' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('labor_anomalies')"></th>
-                                        <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.labor_anomalies"
-                                            ng-required="epicrisisDescriptor.getMandatory('labor_anomalies')" ng-disabled="epicrisisDescriptor.getReadOnly('labor_anomalies')">
-                                        </td>
+                                        <td class="col-md-8">{{ rimacros.radio_da_net(model='epicrisis.labor_anomalies', descriptor='epicrisisDescriptor') }}</td>
                                     </tr>
                                     {% endif %}
                                     {% if 'chorioamnionit' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('chorioamnionit')"></th>
-                                        <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.chorioamnionit"
-                                            ng-required="epicrisisDescriptor.getMandatory('chorioamnionit')" ng-disabled="epicrisisDescriptor.getReadOnly('chorioamnionit')">
-                                        </td>
+                                        <td class="col-md-8">{{ rimacros.radio_da_net(model='epicrisis.chorioamnionit', descriptor='epicrisisDescriptor') }}</td>
                                     </tr>
                                     {% endif %}
                                     {% if 'poor_blood' in epicrisis_descriptor %}
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('poor_blood')"></th>
                                         <td class="col-md-8">
-                                            <input type="checkbox" ng-model="epicrisis.poor_blood"
-                                            ng-required="epicrisisDescriptor.getMandatory('poor_blood')" ng-disabled="epicrisisDescriptor.getReadOnly('poor_blood')">
+                                           {{ rimacros.radio_da_net(model='epicrisis.poor_blood', descriptor='epicrisisDescriptor') }}
                                         </td>
                                     </tr>
                                     {% endif %}
@@ -645,13 +628,9 @@
                                     <tr>
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('specialities')"></th>
                                         <td>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <rb-select name="state" ng-model="epicrisis.specialities" ref-book="rbRisarSpecialities"
-                                                    ng-required="epicrisisDescriptor.getMandatory('specialities')"
-                                                    ng-disabled="epicrisisDescriptor.getReadOnly('specialities')"></rb-select>
-                                                </div>
-                                            </div>
+                                            <div class="row"><div class="col-md-12">
+                                                <wysiwyg ng-model="epicrisis.specialities" />
+                                            </div></div>
                                         </td>
                                     </tr>
                                     {% endif %}
@@ -688,7 +667,9 @@
                                         <th class="text-right" ng-bind-html="epicrisisDescriptor.getLabel('operation_complication')"></th>
                                         <td>
                                             <div class="row">
-                                                <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
+                                                 <div class="col-md-12">
+                                                    <wm-mkb-multiple ng-model="epicrisis.operation_complication"></wm-mkb-multiple>
+                                                 </div>
                                             </div>
                                         </td>
                                     </tr>

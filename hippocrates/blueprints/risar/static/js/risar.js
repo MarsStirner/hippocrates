@@ -43,6 +43,12 @@ WebMis20
     this.print_second_checkup = function (action_id, fmt) {
         self.file_get('POST', Config.url.print_second_checkup, {action_id: action_id, extension: fmt})
     };
+    this.print_gyn_checkup = function (action_id, fmt) {
+        self.file_get('POST', Config.url.print_gyn_checkup, {action_id: action_id, extension: fmt})
+    };
+    this.print_pc_checkup = function (action_id, fmt) {
+        self.file_get('POST', Config.url.print_pc_checkup, {action_id: action_id, extension: fmt})
+    };
     this.schedule = {
         get_appointments: function () {
             var date = arguments[0];
@@ -671,6 +677,11 @@ WebMis20
                 curation_level_code: curation_level_code
             });
         },
+        get_regional_risk_info: function (curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_regional_risks, {
+                curation_level_code: curation_level_code
+            });
+        },
         get_pregnancy_pathology_info: function (curation_level_code) {
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code
@@ -725,6 +736,11 @@ WebMis20
         },
         print: function (query) {
             self.file_get('POST', Config.url.api_radz_print, query);
+        }
+    };
+    this.regional_risks = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_regional_risks.format(event_id));
         }
     };
     this.soc_prof_help = {
@@ -793,6 +809,12 @@ WebMis20
         },
         execute: function (errand) {
             return wrapper('POST', Config.url.api_errand_execute.format(errand.id), {}, errand)
+        },
+        request_info: function(errand) {
+            return wrapper('POST', Config.url.api_errand_request_info.format(errand.id), {}, errand)
+        },
+        provide_info: function(errand) {
+            return wrapper('POST', Config.url.api_errand_provide_info.format(errand.id), {}, errand)
         }
     };
     this.ambulance = {
@@ -867,6 +889,12 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
     this.execute = function (errand) {
         errand.exec_date =  new Date();
         return RisarApi.errands.execute(errand).then(get_errands_summary);
+    };
+    this.request_info = function (errand) {
+        return RisarApi.errands.request_info(errand).then(get_errands_summary);
+    };
+    this.provide_info = function (errand) {
+        return RisarApi.errands.provide_info(errand).then(get_errands_summary);
     };
     this.delete_errand = function (errand) {
         return RisarApi.errands.del(errand).then(get_errands_summary);
@@ -1055,6 +1083,32 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
             scope.get_tooltip = function () {
                 if (!scope.radzRiskRateIcon) return;
                 return scope.radzRiskRateIcon.name;
+            };
+        }
+    }
+}])
+.directive('regionalRiskRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span style="font-size: 60%; vertical-align: super" class="label" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    >РШ</span>\
+',
+        scope: {
+            regionalRiskRateIcon: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.regionalRiskRateIcon) return;
+                var r = scope.regionalRiskRateIcon;
+                if (r.code === 'low') return 'label-success';
+                else if (r.code === 'medium') return 'label-warning';
+                else if (r.code === 'high') return 'label-danger';
+                return 'label-default';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.regionalRiskRateIcon) return;
+                return scope.regionalRiskRateIcon.name + ' степень риска';
             };
         }
     }
@@ -1428,7 +1482,7 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         }
     }
 }])
-.factory('PropsDescriptor', [function () {
+.factory('PropsDescriptor', ['$sce', function ($sce) {
     return function (props_descriptor) {
         return {
             exists: function (code) {
@@ -1447,9 +1501,11 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                 return this.exists(code) ? (props_descriptor[code].is_vector ? true: false) : false;
             },
             getLabel: function (code) {
-                var mandatory_text = ' <span class="text-danger">*</span>';
-                var prop_name = _.escape(this.getName(code));
-                return this.getMandatory(code) ? prop_name + mandatory_text: prop_name;
+                var red_star = ' <span class="text-danger">*</span>',
+                    prop_name = _.escape(this.getName(code)),
+                    label_text = this.getMandatory(code) ? prop_name + red_star: prop_name,
+                    template = '<span style="white-space: nowrap!important;">{0}</span>'.format(label_text);
+                return $sce.trustAsHtml(template)
             }
         };
     }

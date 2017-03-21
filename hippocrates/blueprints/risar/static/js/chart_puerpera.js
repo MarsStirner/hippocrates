@@ -4,11 +4,11 @@
 
 'use strict';
 
-var InspectionPuerperaViewCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog) {
+var InspectionPuerperaViewCtrl = function ($scope, $modal, $controller, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
-    $scope.ps = new PrintingService("risar");
-    $scope.ps.set_context("risar");
+    $controller('commonPrintCtrl', {$scope: $scope});
+    
     $scope.ps_fi = new PrintingService("risar_inspection");
     $scope.ps_fi.set_context("risar_osm1_talon");
 
@@ -26,7 +26,7 @@ var InspectionPuerperaViewCtrl = function ($scope, $modal, RisarApi, PrintingSer
         var ticket_id = checkup.ticket_25.id;
         RisarApi.print_ticket_25(ticket_id, fmt);
     };
-    $scope.open_print_window = function (ps, checkup_id) {
+    $scope.open_print_wind = function (ps, checkup_id) {
         if (ps.is_available()){
             PrintingDialog.open(ps, $scope.ps_resolve(checkup_id), undefined, true);
         }
@@ -56,5 +56,5 @@ var InspectionPuerperaViewCtrl = function ($scope, $modal, RisarApi, PrintingSer
     reload();
 };
 
-WebMis20.controller('InspectionPuerperaViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
+WebMis20.controller('InspectionPuerperaViewCtrl', ['$scope', '$modal', '$controller', 'RisarApi', 'PrintingService', 'PrintingDialog',
     InspectionPuerperaViewCtrl]);

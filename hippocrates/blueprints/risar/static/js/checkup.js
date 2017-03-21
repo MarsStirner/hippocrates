@@ -184,7 +184,7 @@ function ($scope, CurrentUser, PropsDescriptor, ticket_25_descriptor, WMConfig) 
     $scope.get_spec_params = function () {
         var app_mode = safe_traverse(WMConfig, ['local_config', 'risar', 'app_mode']);
         if (app_mode == 3) {
-            return {"code": "^[AB]"};
+            return {"code": "(B01.001.001)|(B01.001.002)|(B01.001.004)|(B01.001.005)|(B01.001.504)|(B01.001.505)|(B04.001.001)|(B04.001.002)|(B01.047.522)|(B01.047.523)|(B01.006.001)|(B01.006.002)|(В01.019.001)|(В04.031.520)"};
         }
     };
     $scope.init = function (rc_step) {
@@ -277,4 +277,39 @@ WebMis20.controller('BasePregCheckupWatchesCtrl', ['$scope', '$filter', function
         }
    }, true);
 
+}])
+.controller('CheckupBaseChildCtrl', ['$scope', function ($scope) {
+    function cleanPhisher() {
+        $scope.child.state.basal = null;
+        $scope.child.state.variability_range = null;
+        $scope.child.state.frequency_per_minute = null;
+        $scope.child.state.acceleration = null;
+        $scope.child.state.deceleration = null;
+        $scope.child.state.fisher_ktg_rate = null;
+    }
+    function cleanStv() {
+        $scope.child.state.stv_evaluation = null;
+    }
+    $scope.$watch('child.state.ktg_input', function (n, o) {
+        if (n === 'fisher') {
+            $scope.isPhisher = true;
+            $scope.isStv = false;
+            cleanStv();
+        } else if (n === 'stv') {
+            $scope.isStv = true;
+            $scope.isPhisher = false;
+            cleanPhisher();
+        } else {
+          $scope.isPhisher = false;
+          $scope.isStv = false;
+        }
+    }, true);
+    $scope.$watch('child.state.stv_evaluation', function (n, o) {
+        if (n) {
+            $scope.stvDescription = n <= 4 ? 'патология' : 'норма';
+        } else {
+            $scope.stvDescription = null;
+        }
+    }, true);
+    
 }]);

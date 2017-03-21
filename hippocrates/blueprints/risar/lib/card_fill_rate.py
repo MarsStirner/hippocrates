@@ -41,7 +41,7 @@ def make_card_fill_timeline(card):
     inspections = get_action_list(event, checkup_flat_codes).order_by(Action.begDate).all()
     first_inspection = last_inspection = None
     if inspections:
-        if inspections[0].actionType.flatCode in (first_inspection_flat_code, pc_inspection_flat_code):
+        if inspections[0].actionType.flatCode == first_inspection_flat_code:
             first_inspection = inspections[0]
         last_inspection = inspections[-1]
     epicrisis = get_action(event, risar_epicrisis)
@@ -51,7 +51,7 @@ def make_card_fill_timeline(card):
 
     inspections_iter = iter(
         (inspection for inspection in inspections
-         if inspection.actionType.flatCode == second_inspection_flat_code)
+         if inspection.actionType.flatCode in (second_inspection_flat_code, pc_inspection_flat_code))
     )
 
     def get_next_repeated_inspection():

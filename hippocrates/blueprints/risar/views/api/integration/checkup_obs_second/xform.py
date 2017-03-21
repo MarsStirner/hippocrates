@@ -55,7 +55,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'liver': {'attr': 'liver', 'default': None, 'rb': 'rbRisarLiver', 'is_vector': True},
         'secretion': {'attr': 'secretion', 'default': None, 'rb': 'rbRisarSecretion', 'is_vector': False},
         'edema': {'attr': 'edema', 'default': None, 'rb': None, 'is_vector': False},
-        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': None, 'is_vector': False},
+        'bowel_and_bladder_habits': {'attr': 'bowel_and_bladder_habits', 'default': None, 'rb': 'rbRisarBowelAndBladderFunctions', 'is_vector': False},
     }
 
     OBSTETRIC_MAP = {
@@ -74,11 +74,12 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'heartbeat': {'attr': 'fetus_heartbeat', 'default': None, 'rb': 'rbRisarFetus_Heartbeat', 'is_vector': True},
         'heart_rate': {'attr': 'fetus_heart_rate', 'default': None, 'rb': None, 'is_vector': False},
         'delay': {'attr': 'intrauterine_growth_retardation', 'default': None, 'rb': 'rbRisarFetus_Delay', 'is_vector': False},
+        'stv_evaluation': {'attr': 'ctg_data_stv', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     VAGINAL_MAP = {
         'vagina': {'attr': 'vagina', 'default': None, 'rb': 'rbRisarVagina', 'is_vector': False},
-        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': False},
+        'cervix': {'attr': 'cervix', 'default': None, 'rb': 'rbRisarCervix', 'is_vector': True},
         'cervix_length': {'attr': 'cervix_length', 'default': None, 'rb': 'rbRisarCervix_Length', 'is_vector': False},
         'cervical_canal': {'attr': 'cervical_canal', 'default': None, 'rb': 'rbRisarCervical_Canal',
                            'is_vector': False},
@@ -89,7 +90,8 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'cervix_maturity': {'attr': 'cervix_maturity', 'default': None, 'rb': 'rbRisarCervix_Maturity',
                             'is_vector': False},
         'body_of_womb': {'attr': 'body_of_uterus', 'default': [], 'rb': 'rbRisarBody_Of_Womb', 'is_vector': True},
-        'appendages': {'attr': 'adnexa', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': False},
+        'appendages': {'attr': 'adnexa_left', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
+        'appendages_right': {'attr': 'adnexa_right', 'default': None, 'rb': 'rbRisarAppendages', 'is_vector': True},
         'features': {'attr': 'specialities', 'default': None, 'rb': None, 'is_vector': False},
         'externalia': {'attr': 'vulva', 'default': None, 'rb': None, 'is_vector': False},
         'parametrium': {'attr': 'parametrium', 'default': None, 'rb': 'rbRisarParametrium', 'is_vector': False},
@@ -105,6 +107,7 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         'frequency_per_minute': {'attr': 'fhr_variability_freq', 'default': None, 'rb': 'rbRisarFrequencyPerMinute', 'is_vector': False},
         'acceleration': {'attr': 'fhr_acceleration', 'default': None, 'rb': 'rbRisarAcceleration', 'is_vector': False},
         'deceleration': {'attr': 'fhr_deceleration', 'default': None, 'rb': 'rbRisarDeceleration', 'is_vector': False},
+        'fisher_ktg_points': {'attr': 'fisher_points', 'default': None, 'rb': None, 'is_vector': False},
     }
 
     REPORT_MAP = {
@@ -191,9 +194,11 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
             if db_fetus_id:
                 f_state['id'] = db_fetus_id
             self.mapping_part(self.FETUS_MAP, mis_fetus, f_state)
-            ctg_data = mis_fetus.get('ctg_data', {})
-            f_state['ktg_input'] = bool(ctg_data)
-            self.mapping_part(self.FETUS_CTG_MAP, ctg_data, f_state)
+            ctg_data_fisher = mis_fetus.get('ctg_data_fisher', {})
+            f_state['ktg_input'] = ctg_data_fisher and 1 or 0
+            self.mapping_part(self.FETUS_CTG_MAP, ctg_data_fisher, f_state)
+            ctg_data_stv = mis_fetus.get('ctg_data_stv')
+            f_state['ktg_input'] = ctg_data_stv and 2
 
             res.setdefault('fetuses', []).append({
                 'deleted': deleted,
@@ -328,9 +333,9 @@ class CheckupObsSecondXForm(CheckupObsSecondSchema, PregnancyCheckupsXForm):
         for fs_data in fetus_list:
             state = fs_data.get('state')
             fs = self._represent_part(self.FETUS_MAP, state)
-            if state.get('ktg_input'):
+            if state.get('ktg_input') == 1:
                 r = self._represent_part(self.FETUS_CTG_MAP, state)
-                fs['ctg_data'] = r
+                fs['ctg_data_fisher'] = r
             res.append(fs)
         return res
 

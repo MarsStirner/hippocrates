@@ -6,9 +6,6 @@ from hippocrates.blueprints.risar.risar_config import first_inspection_flat_code
 from hippocrates.blueprints.risar.lib.utils import get_action_by_id, fill_these_attrs_from_action, \
     fill_action_from_another_action
 from nemesis.lib.utils import safe_datetime
-from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
-    rbDiagnosisTypeN, Diagnostic
-from nemesis.systemwide import db
 
 
 def copy_checkup(event, from_action):
@@ -16,16 +13,58 @@ def copy_checkup(event, from_action):
     if flat_code in (first_inspection_flat_code, second_inspection_flat_code):
         empty_action = get_action_by_id(None, event, second_inspection_flat_code, True)
         if flat_code == first_inspection_flat_code:
-            fields_to_copy_from_prev = ['weight', 'state', 'complaints', 'ad_right_high', 'ad_left_high',
-                                        'ad_right_low', 'ad_left_low', 'skin', 'heart_tones', 'breast',
-                                        'nipples', 'breathe', 'stomach', 'liver', 'bowel_and_bladder_habits',
-                                        'abdominal', 'fundal_height', 'metra_state', 'externalia', 'vagina',
-                                        'cervix', 'cervix_length', 'cervix_position', 'cervix_maturity',
-                                        'cervix_consistency', 'cervical_canal', 'body_of_womb', 'appendages',
-                                        'parametrium', 'features', 'vagina_secretion', 'cervical_canal_secretion',
-                                        'urethra_secretion', 'onco_smear', 'pregnancy_week', 'pregnancy_continuation',
-                                        'pregnancy_continuation_refusal', 'notes',
-                                        'recommendations', 'fetus_first_movement_date', ]
+            fields_to_copy_from_prev = [
+                'abdominal',
+                'ad_left_high',
+                'ad_left_low',
+                'ad_right_high',
+                'ad_right_low',
+                'appendages',
+                'appendages_increased',
+                'appendages_right',
+                'appendages_right_increased',
+                'body_of_womb',
+                'bowel_and_bladder_habits',
+                'breast',
+                'breathe',
+                'cervical_canal',
+                'cervical_canal_secretion',
+                'cervix',
+                'cervix_consistency',
+                'cervix_free_input',
+                'cervix_length',
+                'cervix_maturity',
+                'cervix_position',
+                'chdd',
+                'complaints',
+                'edema',
+                'externalia',
+                'features',
+                'fetus_first_movement_date',
+                'fundal_height',
+                'heart_tones',
+                'liver',
+                'lymph_which',
+                'metra_state',
+                'nipples',
+                'notes',
+                'onco_smear',
+                'parametrium',
+                'pregnancy_continuation',
+                'pregnancy_continuation_refusal',
+                'pregnancy_week',
+                'recommendations',
+                'secretion',
+                'skin',
+                'state',
+                'stomach',
+                'urethra_secretion',
+                'vagina',
+                'vagina_mucuos',
+                'vagina_secretion',
+                'visible_mucuous',
+                'weight',
+            ]
             fill_these_attrs_from_action(from_action=from_action,
                                          to_action=empty_action,
                                          attr_list=fields_to_copy_from_prev)
@@ -58,42 +97,40 @@ def can_edit_checkup(action):
     )
 
 
-def get_checkup_interval(action, args=None):
-    if args is None:
-        args = {}
+def get_checkup_interval(action):
     start_date = safe_datetime(action.begDate)
     end_date = safe_datetime(action.get_prop_value('next_date'))
     if end_date:
         end_date = end_date.replace(hour=23, minute=59, second=59)
     else:
         end_date = action.endDate
-    args.update({
-        'event_id': action.event_id,
-        'end_date_from': start_date,
-        'action_id': action.id
-    })
-    if end_date:
-        args['beg_date_to'] = end_date
-    return args
+    return {
+        'id': action.id,
+        'beg_date': start_date,
+        'end_date': end_date
+    }
 
 
 def validate_send_to_mis_checkup(checkup):
+    # from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind, \
+    #     rbDiagnosisTypeN, Diagnostic
+    # from nemesis.systemwide import db
     res = True
     talon25 = checkup.propsByCode['ticket_25'].value
-    dg_q = Action_Diagnosis.query.join(
-        rbDiagnosisKind
-    ).join(
-        rbDiagnosisTypeN
-    ).join(
-        Diagnostic, Diagnostic.action == checkup
-    ).filter(
-        Diagnostic.diagnosis_id == Action_Diagnosis.diagnosis_id,
-        Action_Diagnosis.deleted == 0,
-        Action_Diagnosis.action == checkup,
-        rbDiagnosisKind.code == 'main',
-        rbDiagnosisTypeN.code == 'final',
-        Diagnostic.rbAcheResult_id.isnot(None),
-    )
+    # dg_q = Action_Diagnosis.query.join(
+    #     rbDiagnosisKind
+    # ).join(
+    #     rbDiagnosisTypeN
+    # ).join(
+    #     Diagnostic, Diagnostic.action == checkup
+    # ).filter(
+    #     Diagnostic.diagnosis_id == Action_Diagnosis.diagnosis_id,
+    #     Action_Diagnosis.deleted == 0,
+    #     Action_Diagnosis.action == checkup,
+    #     rbDiagnosisKind.code == 'main',
+    #     rbDiagnosisTypeN.code == 'final',
+    #     Diagnostic.rbAcheResult_id.isnot(None),
+    # )
 
     if not talon25.propsByCode['medical_care'].value:
         res = False
@@ -115,8 +152,10 @@ def validate_send_to_mis_checkup(checkup):
         res = False
     elif not talon25.propsByCode['condit_med_help'].value:
         res = False
+    elif not talon25.propsByCode['ache_result'].value:
+        res = False
     elif not talon25.propsByCode['services'].value:
         res = False
-    elif not db.session.query(dg_q.exists()).scalar():
-        res = False
+    # elif not db.session.query(dg_q.exists()).scalar():
+    #     res = False
     return res

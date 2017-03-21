@@ -183,7 +183,7 @@ class CheckupObsFirstSchema(Schema):
                             "type": "string"
                         },
                         "bowel_and_bladder_habits": {
-                            "description": "Физиологические отправления",
+                            "description": "Физиологические отправления, справочник rbRisarBowelAndBladderFunctions",
                             "type": "string"
                         },
                         "heart_rate": {
@@ -197,8 +197,6 @@ class CheckupObsFirstSchema(Schema):
                         "tongue",
                         "complaints",
                         "skin",
-                        "lymph",
-                        "heart_tones",
                         "pulse",
                         "mouth",
                         "respiratory",
@@ -327,6 +325,40 @@ class CheckupObsFirstSchema(Schema):
                                 "description": "ЧСС плода",
                                 "type": "number",
                                 "format": "double"
+                            },
+                            "ctg_data_fisher": {
+                                "description": "Данные КТГ",
+                                "type": "object",
+                                "properties": {
+                                    "fhr": {
+                                        "description": "Базальный ритм, справочник rbRisarBasal",
+                                        "type": "string"
+                                    },
+                                    "fhr_variability_amp": {
+                                        "description": "Вариабельность (амплитуда), справочник rbRisarVariabilityRange",
+                                        "type": "string"
+                                    },
+                                    "fhr_variability_freq": {
+                                        "description": "Вариабельность (частота в минуту), справочник rbRisarFrequencyPerMinute",
+                                        "type": "string"
+                                    },
+                                    "fhr_acceleration": {
+                                        "description": "Акселерации за 30 минут, справочник rbRisarAcceleration",
+                                        "type": "string"
+                                    },
+                                    "fhr_deceleration": {
+                                        "description": "Децелерации за 30 минут, справочник rbRisarDeceleration",
+                                        "type": "string"
+                                    },
+                                    "fisher_points": {
+                                        "description": "значение оценки по Фишеру",
+                                        "type": "integer"
+                                    }
+                                }
+                            },
+                            "ctg_data_stv": {
+                                "description": "Данные оценки КТГ по STV",
+                                "type":"integer"
                             }
                         }
                     }
@@ -339,9 +371,16 @@ class CheckupObsFirstSchema(Schema):
                             "description": "Влагалище, справочник rbRisarVagina",
                             "type": "string"
                         },
+                        "secretion": {
+                            "description": "Выделения, справочник rbRisarSecretion",
+                            "type": "string"
+                        },
                         "cervix": {
                             "description": "Шейка матки, справочник rbRisarCervix",
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "cervix_length": {
                             "description": "Длина шейки матки, справочник rbRisarCervix_Length",
@@ -370,9 +409,19 @@ class CheckupObsFirstSchema(Schema):
                                 "type": "string"
                             }
                         },
-                        "adnexa": {
+                        "adnexa_right": {
                             "description": "Придатки, справочник rbRisarAppendages",
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "adnexa_left": {
+                            "description": "Придатки, справочник rbRisarAppendages",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "specialities": {
                             "description": "Особенности",

@@ -5,6 +5,12 @@ var RiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUs
 
     $scope.slices = [];
     $scope.slices_radz = [];
+    $scope.slices_regional = [];
+    var regional_rr_colors = {
+        1: '#30D040', // low
+        2: '#f39c12', // middle
+        3: '#dd4b39' // high
+    };
     $scope.slices_x = function (d) {
         return d.key;
     };
@@ -61,14 +67,6 @@ var RiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUs
             });
         RisarApi.stats.get_radz_risk_info($scope.curation_level_code).then(function (result) {
                 $scope.slices_radz = [];
-                // if (result['undefined']) {
-                //     $scope.slices.push({
-                //         key: 'Не определена',
-                //         value: result['1'],
-                //         color: '#707070',
-                //         risk_rate: $scope.PerinatalRiskRate.get(1)
-                //     })
-                // }
                 if (result['low']) {
                     $scope.slices_radz.push({
                         key: 'Низкая',
@@ -94,21 +92,43 @@ var RiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUs
                     })
                 }
             });
+        RisarApi.stats.get_regional_risk_info($scope.curation_level_code)
+            .then(function (result) {
+                $scope.slices_regional = [];
+                var cur_rr;
+                for (var rr_code in result) {
+                    if (result.hasOwnProperty(rr_code)) {
+                        cur_rr = $scope.rbRisarRegionalRiskRate.get_by_code(rr_code);
+                        $scope.slices_regional.push({
+                            key: cur_rr.name,
+                            value: result[rr_code],
+                            color: regional_rr_colors[cur_rr.id] || 'cyan',
+                            regional_risk_rate: cur_rr
+                        });
+                    }
+                }
+            });
     };
 
     $scope.$on('elementClick.directive', function (angularEvent, event) {
         $scope.openExtendedSearchFromDiagram(event);
     });
+    var getDiagramRateName = function (diagram_point) {
+        if (diagram_point.hasOwnProperty('risk_rate')) return 'risk_rate';
+        else if (diagram_point.hasOwnProperty('radz_risk_rate')) return 'radz_risk_rate';
+        else if (diagram_point.hasOwnProperty('regional_risk_rate')) return 'regional_risk_rate';
+        return undefined;
+    };
     $scope.openExtendedSearchFromDiagram = function (event) {
-        var risk_rate =  event.point.hasOwnProperty('risk_rate') ? 'risk_rate' : 'radz_risk_rate';
-        var rr = event.point[risk_rate]
+        var risk_rate_name = getDiagramRateName(event.point);
+        var rr = event.point[risk_rate_name]
         if (rr !== undefined) {
             var mouse_button = event.pos.button;  // 0-left, 1-middle
             var args = {
                 request_type: 'pregnancy',
                 closed: false
             };
-            args[risk_rate] = rr.code;
+            args[risk_rate_name] = rr.code;
             if (!$scope.curation_level_code) {
                 args.person_id = CurrentUser.get_main_user().id;
             }
@@ -141,8 +161,12 @@ var RiskRateViewCtrl = function ($scope, $q, RisarApi, RefBookService, CurrentUs
         $scope.PregnancyPathology = RefBookService.get('PregnancyPathology');
         $scope.PerinatalRiskRate = RefBookService.get('PerinatalRiskRate');
         $scope.RadzinskyRiskRate = RefBookService.get('RadzinskyRiskRate');
+        $scope.rbRisarRegionalRiskRate = RefBookService.get('rbRisarRegionalRiskRate');
 
-        $q.all($scope.PregnancyPathology.loading, $scope.PerinatalRiskRate.loading).then($scope.refresh_data);
+        $q.all(
+            $scope.PregnancyPathology.loading, $scope.PerinatalRiskRate.loading,
+            $scope.rbRisarRegionalRiskRate.loading
+        ).then($scope.refresh_data);
     };
 
     $scope.init();

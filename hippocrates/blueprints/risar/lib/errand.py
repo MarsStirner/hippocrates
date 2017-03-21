@@ -36,10 +36,21 @@ def edit_errand(errand, data):
     errand.text = data['text']
     errand.plannedExecDate = safe_datetime(data['planned_exec_date'])
     errand.deleted = data.get('deleted', 0)
-    errand.result = data['result']
+    if 'result' in data:
+        errand.result = data['result']
     errand.communications = data.get('communications')
     if 'errand_files' in data:
         errand = edit_errand_attach_files(errand, data['errand_files'])
+    return errand
+
+
+def request_info(errand):
+    errand.status_id = ErrandStatus.request[0]
+    return errand
+
+
+def provide_info(errand):
+    errand.status_id = ErrandStatus.waiting[0]
     return errand
 
 

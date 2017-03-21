@@ -394,7 +394,7 @@ def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True
     first_inspection = None
     last_inspection = card.latest_inspection
     if last_inspection is not None and \
-            last_inspection.action.actionType.flatCode in (first_inspection_flat_code, pc_inspection_flat_code):
+            last_inspection.action.actionType.flatCode == first_inspection_flat_code:
         first_inspection = last_inspection
 
     ri_fr = CardFillRate.not_required[0]
