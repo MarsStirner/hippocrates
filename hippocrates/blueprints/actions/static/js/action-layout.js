@@ -131,7 +131,7 @@ angular.module('WebMis20')
                             switch (property.type.type_name) {
                                 case 'Constructor':
                                     inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}"\
-                                        id="[[{0}.type.id]]" al-item-focused />'.format('{0}', property.type.domain);
+                                        id="[[{0}.type.id]]" al-item-focused placeholder="Введите текст" />'.format('{0}', property.type.domain);
                                     break;
                                 case 'Text':
                                 case 'Html':
