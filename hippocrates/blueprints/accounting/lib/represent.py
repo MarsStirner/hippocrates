@@ -395,7 +395,8 @@ class ServiceRepr(object):
         assigned = []
         for ap in sorted(action.properties, key=lambda prop: prop.type.idx):
             if ap.deleted != 1 and ap.type.isAssignable:
-                assignable.append([ap.type.id, ap.type.name, ap.pl_price if ap.has_pricelist_service else None])
+                assignable.append([ap.type.id, ap.type.name, ap.pl_price if ap.has_pricelist_service else None,
+                                   ap.type.mandatory])
                 if ap.isAssigned:
                     assigned.append(ap.type.id)
         tissue_type_ids = get_at_tissue_type_ids(action.actionType_id)
