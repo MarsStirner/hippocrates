@@ -429,7 +429,29 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             var LabResDynamicsCtrl = function ($scope) {
                 $scope.date_range = [moment().subtract(3, 'years').toDate(), new Date()];
                 $scope.currentDate = new Date();
+                $scope.dates_list = [];
                 $scope.dynamics = [];
+                $scope.selectedRowIdx = undefined;
+                $scope.setSelectedRow = function (idx) {
+                    $scope.selectedRowIdx = idx;
+                };
+                $scope.isSelectedRow = function (idx) {
+                    return $scope.selectedRowIdx === idx;
+                };
+                $scope.getValueNormStyle = function (info) {
+                    var s = {};
+                    if (!info || info.value_in_norm === null) return s;
+
+                    if (info.value_in_norm < 0) {
+                        s['color'] = 'blue';
+                        s['font-weight'] = 'bold';
+                    }
+                    else if (info.value_in_norm > 0) {
+                        s['color'] = 'red';
+                        s['font-weight'] = 'bold';
+                    }
+                    return s;
+                };
                 $scope.xAxisTickFormat = function(d){
                     return moment(d).format('DD.MM.YYYY');
                 };
@@ -447,13 +469,13 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                         $scope.dates_list = data.result[0];
                         $scope.dynamics = data.result[1];
                     })
-                    };
+                };
                 $scope.$watchCollection('date_range', function (new_val, old_val) {
-                            if (angular.equals(new_val, old_val)) return;
-                            if(new_val[0] && new_val[1]){
-                                $scope.get_dynamics_data();
-                            }
-                        });
+                    if (angular.equals(new_val, old_val)) return;
+                    if(new_val[0] && new_val[1]){
+                        $scope.get_dynamics_data();
+                    }
+                });
                 $scope.get_dynamics_data();
             };
             var instance = $modal.open({
@@ -462,9 +484,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 backdrop : 'static',
                 size: 'lg'
             });
-            return instance.result.then(function() {
-
-            });
+            return instance.result;
         }
    }
 }])
@@ -495,18 +515,21 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
       </div>\
       <div class="row">\
           <div class="col-md-12"  style="overflow-x:scroll;">\
-          <table class="table table-bordered">\
+          <table class="table table-clickable">\
               <thead>\
               <th></th>\
-              <th ng-repeat="date in dates_list">\
+              <th ng-repeat="date in dates_list" class="text-center">\
                   [[ date ]]\
               </th>\
               </thead>\
               <tbody>\
-              <tr ng-repeat="item in dynamics">\
-                  <td>[[item.test_name]]</td>\
-                  <td ng-repeat="date in dates_list">\
-                  [[ item.values[date]? item.values[date] : \'-\' ]]\
+              <tr ng-repeat="item in dynamics" ng-click="setSelectedRow($index)"\
+                ng-class="{\'bg-gray\': isSelectedRow($index)}">\
+                  <td>[[item.test_name]]\
+                    <span ng-if="item.norm"><br><span class="lmargin20 text-bold">(Норма: [[item.norm]])</span></span>\
+                  </td>\
+                  <td ng-repeat="date in dates_list" class="text-center">\
+                      <span ng-style="getValueNormStyle(item.values[date])">[[ item.values[date].val ? item.values[date].val : \'-\' ]]</span>\
                   </td>\
               </tr>\
               </tbody>\

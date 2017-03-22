@@ -228,7 +228,7 @@ def api_event_lab_res_dynamics():
 
     tissue_dict = dict(tissue_query)
 
-    dynamics = collections.defaultdict(lambda: {'test_name': '', 'values': {}})
+    dynamics = collections.defaultdict(lambda: {'test_name': '', 'norm': None, 'values': {}})
     dates = set()
     result = query.join(
         Action.actionType,
@@ -241,14 +241,23 @@ def api_event_lab_res_dynamics():
     props = [prop for prop, _ in result]
     vals = get_properties_values(props)
 
-    for (prop, test) in result:
-        if prop.id in vals and tissue_dict[prop.action_id]:
-            date = tissue_dict[prop.action_id]
-            dates.add(date)
-            dynamics[test.id]['test_name'] = test.name
-            dynamics[test.id]['values'][format_datetime(date)] = vals[prop.id]
-    dates = [format_datetime(d) for d in sorted(dates, reverse=True)]
-    return dates, dynamics
+    with db.session.no_autoflush:
+        for (prop, test) in result:
+            if prop.id in vals and tissue_dict[prop.action_id]:
+                date = tissue_dict[prop.action_id]
+                dates.add(date)
+
+                dynamics[test.id]['test_name'] = test.name
+                dynamics[test.id]['norm'] = prop.type.norm
+
+                val_info = dynamics[test.id]['values'].setdefault(format_datetime(date), {})
+                val_info['val'] = vals[prop.id]
+
+                prop.set_value_container_and_value(vals[prop.id])  # for norms calculation
+                val_info['value_in_norm'] = prop.check_value_norm()
+
+        dates = [format_datetime(d) for d in sorted(dates, reverse=True)]
+        return dates, dynamics
 
 
 @module.route('/api/event_hosp_beds_get.json', methods=['GET'])
