@@ -1,0 +1,20 @@
+{%  macro date_range_selector() %}
+    <div class="row">
+        <div style="margin-left:5%!important;">
+            <ul class="list-inline">
+              <li class="pull-left">
+                  <wm-date max-date="dt.max_start_date"
+                           label="c:"
+                           ng-model="dt.start_date"
+                           style="width:260px;"></wm-date>
+              </li>
+              <li class="pull-left">
+                  <wm-date max-date="curDate"
+                           label="по:"
+                           ng-model="dt.end_date"
+                           style="width:260px;"></wm-date>
+              </li>
+            </ul>
+        </div>
+    </div>
+{%  endmacro  %}

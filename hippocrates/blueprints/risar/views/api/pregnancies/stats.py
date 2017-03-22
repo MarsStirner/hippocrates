@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import collections
 import datetime
+import time
 
 from flask import request
 from sqlalchemy import func
@@ -12,17 +13,15 @@ from hippocrates.blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, Orga
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.errand import represent_errand
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_chart_short
-from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
-from hippocrates.blueprints.risar.lib.stats import StatsController, mather_death_koef_diags
+from hippocrates.blueprints.risar.lib.stats import StatsController, DeathStatCtrl, RadzStatsController
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
+
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_int, safe_unicode
+from nemesis.lib.utils import safe_int, safe_unicode, safe_datetime, safe_date
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
     ActionProperty_Date, ActionProperty_ExtReferenceRb
-from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, \
-    Diagnosis, Diagnostic, Action_Diagnosis
 from nemesis.models.event import Event, EventType
 from nemesis.models.client import Client
 from nemesis.models.exists import rbRequestType
@@ -69,15 +68,15 @@ def api_0_stats_current_cards_overview():
             ActionType.flatCode.in_(checkup_flat_codes)
         ).order_by(Action.begDate).all()
         if checkups:
-            return True if (now - checkups[-1].begDate).days/60. > 2 else False
+            return True if (now - checkups[-1].begDate).days / 60. > 2 else False
         else:
-            return True if (now - event.setDate).days/60. > 2 else False
+            return True if (now - event.setDate).days / 60. > 2 else False
 
     person_id = safe_current_user_id()
     curation_level = request.args.get('curation_level')
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
-                                    ActionPropertyType, ActionProperty_Integer)\
+                             ActionPropertyType, ActionProperty_Integer) \
         .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
@@ -95,7 +94,9 @@ def api_0_stats_current_cards_overview():
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
-    events_undefined_risk = len(filter(lambda x: PregnancyCard.get_for_event(x).attrs['prenatal_risk_572'].value.code == 'undefined', event_list))
+    events_undefined_risk = len(
+        filter(lambda x: PregnancyCard.get_for_event(x).attrs['prenatal_risk_572'].value.code == 'undefined',
+               event_list))
     return {
         'events_all': events_all,
         'events_45': events_45,
@@ -125,7 +126,7 @@ def api_0_recent_charts():
     boundary_date = datetime.datetime.now() - datetime.timedelta(days=7)
     curation_level = request.args.get('curation_level')
 
-    query = Event.query.join(EventType, rbRequestType, Client)\
+    query = Event.query.join(EventType, rbRequestType, Client) \
         .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None),
                 Event.setDate >= boundary_date)
 
@@ -158,7 +159,7 @@ def api_0_recently_modified_charts():
 
     query = Event.query.join(EventType, rbRequestType, Client, Action, ActionType,
                              ActionProperty, ActionPropertyType,
-                             ActionProperty_Integer)\
+                             ActionProperty_Integer) \
         .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None),
                 Action.deleted == 0, ActionProperty.deleted == 0,
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
@@ -208,7 +209,7 @@ def api_0_stats_pregnancy_week_diagram(person_id=None):
     result = [[i, 0] for i in xrange(1, 41)]
     result.append(['40+', 0])
 
-    query = Event.query.join(EventType, rbRequestType)\
+    query = Event.query.join(EventType, rbRequestType) \
         .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
@@ -223,7 +224,7 @@ def api_0_stats_pregnancy_week_diagram(person_id=None):
     for event in event_list:
         pregnancy_week = get_pregnancy_week(event)
         if pregnancy_week and pregnancy_week <= 40:
-            result[pregnancy_week-1][1] += 1
+            result[pregnancy_week - 1][1] += 1
         elif pregnancy_week and pregnancy_week > 40:
             result[40][1] += 1
     return result
@@ -299,7 +300,7 @@ def api_0_stats_perinatal_risk_rate():
         Person, Event.execPerson_id == Person.id
     ).join(
         Action, Action.event_id == Event.id
-    ).join(ActionType)\
+    ).join(ActionType) \
         .join(ActionProperty).join(ActionPropertyType).outerjoin(ActionProperty_Integer)
 
     if curation_level:
@@ -321,7 +322,7 @@ def api_0_stats_perinatal_risk_rate():
         (ActionProperty_Integer.value_,),
         whereclause=db.and_(*where),
         from_obj=from_obj)
-    for (value, ) in db.session.execute(selectable):
+    for (value,) in db.session.execute(selectable):
         if value:
             result[value] += 1
         else:
@@ -332,104 +333,51 @@ def api_0_stats_perinatal_risk_rate():
 @module.route('/api/0/death_stats.json')
 @api_method
 def api_0_death_stats():
-    #перинатальная смертности и материнская смертность
+    # перинатальная смертности и материнская смертность
     regions = ['00000000000']
     regions.extend(app.config.get('RISAR_REGIONS', []))
 
-    # младеньческая смертность
-    result = {0: [], 1: []}
-    result1 = {'maternal_death': []}
-    now = datetime.datetime.now()
-    prev = now + datetime.timedelta(days=-now.day)
+    start_date, end_date = safe_datetime(safe_date(request.args.get('start_date'))), safe_datetime(
+        safe_date(request.args.get('end_date')))
+    end_date = end_date or datetime.datetime.now()
+    start_date = start_date or end_date - datetime.timedelta(days=1)
 
-    from hippocrates.blueprints.risar.models.risar import RisarEpicrisis_Children
-    selectable = db.select(
-        (RisarEpicrisis_Children.id, RisarEpicrisis_Children.alive),
-        whereclause=db.and_(
-            ActionType.flatCode == 'epicrisis',
-            rbRequestType.code == request_type_pregnancy,
-            Action.event_id == Event.id,
-            ActionType.id == Action.actionType_id,
-            EventType.id == Event.eventType_id,
-            RisarEpicrisis_Children.action_id == Action.id,
-            rbRequestType.id == EventType.requestType_id,
-            Event.deleted == 0,
-            Action.deleted == 0
-        ),
-        from_obj=(
-            Event, EventType, rbRequestType, Client, Action, ActionType, RisarEpicrisis_Children
-        )).distinct()
-    for (id, value) in db.session.execute(selectable):  # 0-dead, 1-alive
-        if value is not None:
-            result[value].append(id)
+    days = (end_date - start_date).days
+    dt_range = [(start_date + datetime.timedelta(days=x)).date() for x in range(0, days + 1)]
 
-    for value in result:
-        result1[value] = []
-        for i in range(1, 13):
-            selectable1 = db.select(
-                (RisarEpicrisis_Children.id,),
-                whereclause=db.and_(
-                    ActionType.flatCode == 'epicrisis',
-                    rbRequestType.code == request_type_pregnancy,
-                    Action.event_id == Event.id,
-                    ActionType.id == Action.actionType_id,
-                    EventType.id == Event.eventType_id,
-                    rbRequestType.id == EventType.requestType_id,
-                    RisarEpicrisis_Children.action_id == Action.id,
-                    Event.deleted == 0,
-                    Action.deleted == 0,
-                    func.year(RisarEpicrisis_Children.date) == now.strftime('%Y'),
-                    func.month(RisarEpicrisis_Children.date) == str(i).rjust(2, '0'),
-                    RisarEpicrisis_Children.id.in_(result[value])
-                ),
-                from_obj=(
-                    Event, EventType, rbRequestType, Client, Action, ActionType, RisarEpicrisis_Children
-                )).distinct()
-            result1[value].append([i, db.session.execute(selectable1).rowcount])
+    ctrl = DeathStatCtrl(start_date, end_date)
+    alive_dead_action_dict = ctrl.get_list_of_alive_dead_actions(start_date, end_date)
+    dead_children = ctrl.get_children_stat(alive_dead_action_dict, is_alive=False)
+    alive_children = ctrl.get_children_stat(alive_dead_action_dict, is_alive=True)
 
-    perinatal_death_rate = get_rate_for_regions(regions, "perinatal_death")
-    birth_rate = get_rate_for_regions(regions, "birth")
+    alive = float(sum(alive_children.values())) or 1.0
+    dead = float(sum(dead_children.values()))
 
-    #материнская смертность
-    def check_pat_diagnosis(action):
-        diagnostics = Diagnostic.query.join(Diagnosis).join(
-            Action_Diagnosis
-        ).join(rbDiagnosisKind).join(rbDiagnosisTypeN).filter(
-            Diagnostic.action == action,
-            Diagnosis.endDate.is_(None),
-            rbDiagnosisKind.code == 'main',
-            rbDiagnosisTypeN.code == 'pathanatomical',
-        ).all()
-        res = any_thing(
-            diagnostics,
-            mather_death_koef_diags,
-            lambda x: x.MKB
-        )
-        return res
+    maternal_death = ctrl.get_maternal_death(start_date, end_date)
+    maternal_death_all = float(sum(maternal_death.values()))
 
-    for i in range(1, 13):
-        actions = Action.query.join(Event, EventType, rbRequestType, Client, ActionType, ActionProperty,
-                                   ActionPropertyType, ActionProperty_Date)\
-            .filter(ActionType.flatCode == 'epicrisis',
-                    ActionPropertyType.code == 'death_date',
-                    rbRequestType.code == request_type_pregnancy,
-                    Action.event_id == Event.id,
-                    ActionProperty.action_id == Action.id,
-                    ActionPropertyType.id == ActionProperty.type_id,
-                    ActionType.id == Action.actionType_id,
-                    ActionProperty_Date.id == ActionProperty.id,
-                    EventType.id == Event.eventType_id,
-                    rbRequestType.id == EventType.requestType_id,
-                    Event.deleted == 0,
-                    Action.deleted == 0,
-                    func.year(ActionProperty_Date.value) == now.strftime('%Y'),
-                    func.month(ActionProperty_Date.value) == str(i).rjust(2, '0')
-                    ).all()
-        actions = filter(check_pat_diagnosis, actions)
-        result1['maternal_death'].append([i, len(actions)])
+    chart_maternal_death = []
+    chart_dead_children = []
+    chart_alive_children = []
 
-    maternal_death_rate = get_rate_for_regions(regions, "maternal_death")
-    return result1, perinatal_death_rate, birth_rate, maternal_death_rate
+    for i, dt in enumerate(dt_range, 1):
+        chart_maternal_death.append([i, maternal_death.get(dt, 0)])
+        chart_dead_children.append([i, dead_children.get(dt, 0)])
+        chart_alive_children.append([i, alive_children.get(dt, 0)])
+
+    return {
+        'dt_range': map(lambda idate: time.mktime(idate.timetuple()), dt_range),
+        'maternal_death': chart_maternal_death,
+        # 'maternal_death': [],
+        'maternal_death_coeff': (maternal_death_all / alive * 100000),
+        "prev_years_maternal_death": get_rate_for_regions(regions, "maternal_death"),
+        # "prev_years_maternal_death": [],
+        "prev_years_perinatal_death": get_rate_for_regions(regions, "perinatal_death"),
+        "prev_years_birth": get_rate_for_regions(regions, "birth"),
+        "infants_death_coeff": (dead / (dead + alive) * 1000),
+        "dead_children": chart_dead_children,
+        "alive_children": chart_alive_children,
+    }
 
 
 @module.route('/api/0/pregnancy_final_stats.json')
@@ -439,7 +387,7 @@ def api_0_pregnancy_final_stats():
     finished_cases = []
     result = collections.defaultdict(lambda: 0)
     selectable = db.select(
-        (Action.id, ),
+        (Action.id,),
         whereclause=db.and_(
             ActionType.flatCode == 'epicrisis',
             ActionPropertyType.code == 'delivery_date',
@@ -459,11 +407,11 @@ def api_0_pregnancy_final_stats():
             Event, EventType, rbRequestType, Client, Action, ActionType, ActionProperty, ActionPropertyType,
             ActionProperty_Date
         ))
-    for (id, ) in db.session.execute(selectable):
+    for (id,) in db.session.execute(selectable):
         finished_cases.append(id)
 
     selectable = db.select(
-        (ActionProperty_ExtReferenceRb.value_, ),
+        (ActionProperty_ExtReferenceRb.value_,),
         whereclause=db.and_(
             ActionType.flatCode == 'epicrisis',
             ActionPropertyType.code == 'pregnancy_final',
@@ -483,7 +431,7 @@ def api_0_pregnancy_final_stats():
             Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
             ActionProperty_ExtReferenceRb
         ))
-    for (value, ) in db.session.execute(selectable):
+    for (value,) in db.session.execute(selectable):
         result[value] += 1
     return result
 
@@ -520,10 +468,10 @@ def api_0_stats_pregnancy_pathology():
 def api_0_stats_urgent_errands():
     person_id = safe_current_user_id()
     errands = Errand.query.join(rbErrandStatus, Event, Client,
-                                Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer)\
+                                Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer) \
         .filter(Errand.execPerson_id == person_id, rbErrandStatus.code.in_(['waiting', 'expired']),
                 ActionType.flatCode == 'cardAttributes',
-                ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,)\
+                ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0, ) \
         .order_by(func.date(Errand.plannedExecDate)).order_by(ActionProperty_Integer.value_.desc()).limit(10).all()
     return [represent_errand(errand) for errand in errands]
 

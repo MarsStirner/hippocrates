@@ -3,16 +3,19 @@
 {#    <div class="box-body">#}
 {#    </div>#}
 {#</div>#}
-<div class="nav-tabs-custom">
+{% import 'risar/stats/_diag_macros.html' as diag_macros with context %}
+<div class="nav-tabs-custom" ng-controller="MaternalDeathStatCtrl">
     <ul class="nav nav-tabs pull-right ui-sortable-handle">
-        <li class="active"><a href="#maternal_current_year" data-toggle="tab"><b>[[ curYear ]]</b></a></li>
         <li><a href="#maternal_by_region" data-toggle="tab"><b>В регионе</b></a></li>
+        <li class="active"><a href="#maternal_current_year" data-toggle="tab"><b>Период</b></a></li>
         <li class="pull-left header">
             Коэффициент материнской смертности в [[ curYear ]] г.: <b>[[maternal_death_coeff]]</b>
         </li>
     </ul>
     <div class="tab-content no-padding">
+
         <div class="chart tab-pane active" id="maternal_current_year" style="position: relative;">
+            {{  diag_macros.date_range_selector() }}
             <nvd3-line-chart
                     data="maternal_death"
                     id="maternal_death"
@@ -21,11 +24,9 @@
                     xAxisTickFormat="xAxisTickFormat"
                     showXAxis="true"
                     showYAxis="true"
-                    tooltips="true"
+                    tooltips="false"
                     interactive="true"
-    {#                margin="{left:30,top:20,bottom:20,right:20}"#}
-                    xAxisTickValues="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
-                    tooltipcontent="toolTipContentFunction_maternal_death()"
+{#                    xAxisTickValues="x_values"#}
                     showLegend="true"
                     nodata="Нет данных"
                     ><svg></svg>

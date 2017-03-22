@@ -114,6 +114,10 @@ WebMis20
     this.death_stats = {
         get: function () {
             return wrapper('GET', Config.url.api_death_stats);
+        },
+        get_period: function (start_date, end_date) {
+            return wrapper('GET', Config.url.api_death_stats + '?' + $.param({start_date: moment(start_date).format("YYYY-MM-DD"),
+                                                                              end_date: moment(end_date).format("YYYY-MM-DD")}));
         }
     };
     this.pregnancy_final_stats = {
