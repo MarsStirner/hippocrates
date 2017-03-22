@@ -734,3 +734,14 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
             eviz.make_action(action, pay_data.get(action.id)) for action in paginate.items
         ]
     }
+
+
+@module.route('/api/0/event/<int:event_id>/movings')
+@api_method
+def api_0_event_movings_get(event_id):
+    event = Event.query.get(event_id)
+    if not event.is_stationary:
+        raise ApiException(400, u'Обращение не является стационарным')
+
+    eviz = StationaryEventVisualizer()
+    return eviz.make_movings(event)

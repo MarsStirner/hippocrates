@@ -384,10 +384,19 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService) {
 
 };
 
-var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConfig) {
+var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConfig, WebMisApi) {
     $scope.OrgStructure = RefBookService.get('OrgStructure');
     $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
 
+    $scope.refreshMovings = function () {
+        return WebMisApi.stationary.get_movings($scope.event.event_id)
+            .then(function (movings) {
+                Array.prototype.splice.apply(
+                    $scope.event.movings,
+                    [0, $scope.event.movings.length].concat(movings)
+                );
+            });
+    };
     $scope.moving_save = function (moving){
         return ApiCalls.wrapper('POST', WMConfig.url.event.moving_save, {}, moving)
     };
@@ -404,8 +413,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
             scope: scope
         }).result.then(function (result) {
             $scope.moving_save(result).then(function (result) {
-                $scope.event.movings[$scope.event.movings.length - 1] = result[0];
-                $scope.event.movings.push(result[1]);
+                $scope.refreshMovings();
             });
         });
     };
@@ -424,8 +432,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
         }).result.then(function (result) {
             $scope.close_last_moving().then(function () {
                 $scope.moving_save(result).then(function (result) {
-                    $scope.event.movings[$scope.event.movings.length - 1] = result[0];
-                    $scope.event.movings.push(result[1]);
+                    $scope.refreshMovings();
                 });
             });
         });
@@ -443,8 +450,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
                 scope: scope
             }).result.then(function (result) {
                 $scope.moving_save(result).then(function (result) {
-                    angular.extend(moving, result);
-                    // $scope.event.movings[ _.indexOf(_.pluck($scope.event.movings, 'id'), result['id']) ] = result;
+                    $scope.refreshMovings();
                 });
             });
         });
@@ -453,7 +459,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
     $scope.close_last_moving = function(){
         var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null;
         return ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
-            $scope.event.movings[$scope.event.movings.length - 1] = result;
+            $scope.refreshMovings();
         })
     };
 
@@ -468,7 +474,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
                 scope: scope
             }).result.then(function (result) {
                 $scope.moving_save(result).then(function (result) {
-                    angular.extend(moving, result);
+                    $scope.refreshMovings();
                 });
             });
         })
@@ -1012,7 +1018,8 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
     'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
-WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig', EventMovingsCtrl]);
+WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig',
+    'WebMisApi', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
