@@ -346,37 +346,29 @@ def api_0_death_stats():
     dt_range = [(start_date + datetime.timedelta(days=x)).date() for x in range(0, days + 1)]
 
     ctrl = DeathStatCtrl(start_date, end_date)
-    alive_dead_action_dict = ctrl.get_list_of_alive_dead_actions(start_date, end_date)
-    dead_children = ctrl.get_children_stat(alive_dead_action_dict, is_alive=False)
-    alive_children = ctrl.get_children_stat(alive_dead_action_dict, is_alive=True)
-
-    alive = float(sum(alive_children.values())) or 1.0
-    dead = float(sum(dead_children.values()))
-
+    dead_children = ctrl.get_children_stat(start_date, end_date, is_alive=False)
+    alive_children = ctrl.get_children_stat(start_date, end_date, is_alive=True)
     maternal_death = ctrl.get_maternal_death(start_date, end_date)
-    maternal_death_all = float(sum(maternal_death.values()))
 
-    chart_maternal_death = []
-    chart_dead_children = []
-    chart_alive_children = []
+    chart_data = {'maternal_death': [],
+                  'dead_children': [],
+                  'alive_children': []}
 
     for i, dt in enumerate(dt_range, 1):
-        chart_maternal_death.append([i, maternal_death.get(dt, 0)])
-        chart_dead_children.append([i, dead_children.get(dt, 0)])
-        chart_alive_children.append([i, alive_children.get(dt, 0)])
+        chart_data['maternal_death'].append([i, maternal_death.get(dt, 0)])
+        chart_data['dead_children'].append([i, dead_children.get(dt, 0)])
+        chart_data['alive_children'].append([i, alive_children.get(dt, 0)])
 
     return {
         'dt_range': map(lambda idate: time.mktime(idate.timetuple()), dt_range),
-        'maternal_death': chart_maternal_death,
-        # 'maternal_death': [],
-        'maternal_death_coeff': (maternal_death_all / alive * 100000),
+        'maternal_death': chart_data['maternal_death'],
+        'maternal_death_coeff': ctrl.get_maternal_coefficient(start_date, end_date),
         "prev_years_maternal_death": get_rate_for_regions(regions, "maternal_death"),
-        # "prev_years_maternal_death": [],
         "prev_years_perinatal_death": get_rate_for_regions(regions, "perinatal_death"),
         "prev_years_birth": get_rate_for_regions(regions, "birth"),
-        "infants_death_coeff": (dead / (dead + alive) * 1000),
-        "dead_children": chart_dead_children,
-        "alive_children": chart_alive_children,
+        "infants_death_coeff": ctrl.get_infant_death_coefficient(start_date, end_date),
+        "dead_children": chart_data['dead_children'],
+        "alive_children": chart_data['alive_children'],
     }
 
 

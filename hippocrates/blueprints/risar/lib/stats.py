@@ -21,7 +21,7 @@ from nemesis.models.risar import rbRadzinskyRiskRate, rbRisarRegionalRiskRate
 from nemesis.models.event import EventType, Event
 from nemesis.models.exists import rbRequestType
 from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, Diagnosis, Diagnostic, Action_Diagnosis
-from nemesis.systemwide import db
+from nemesis.systemwide import db, cache
 
 
 class StatsController(BaseModelController):
@@ -568,7 +568,9 @@ class DeathStatCtrl(object):
         self.start_date = start_date
         self.end_date = end_date
 
-    def get_list_of_alive_dead_actions(self, start_date, end_date):
+    @staticmethod
+    @cache.memoize(timeout=60)
+    def get_list_of_alive_dead_actions(start_date, end_date):
         qr = db.select(
             (RisarEpicrisis_Children.alive, group_concat(RisarEpicrisis_Children.id, ',')),
             whereclause=db.and_(
@@ -591,10 +593,11 @@ class DeathStatCtrl(object):
         ).distinct()
         return dict((k, v.split(',')) for k, v in db.session.execute(qr))
 
-    def get_children_stat(self, result, is_alive=True):
+    @staticmethod
+    @cache.memoize(timeout=60)
+    def get_children_stat(start_date, end_date, children_ids=None, is_alive=True):
         is_alive = safe_int(safe_bool(is_alive))
-        needed_ids = result.get(is_alive)
-        if result and needed_ids:
+        if children_ids:
             selectable1 = db.select(
                 (RisarEpicrisis_Children.date, func.count(RisarEpicrisis_Children.id),),
                 whereclause=db.and_(
@@ -608,7 +611,8 @@ class DeathStatCtrl(object):
                     RisarEpicrisis_Children.alive == is_alive,
                     Event.deleted == 0,
                     Action.deleted == 0,
-                    RisarEpicrisis_Children.id.in_(needed_ids)
+                    RisarEpicrisis_Children.id.in_(children_ids),
+                    between(RisarEpicrisis_Children.date, start_date, end_date)
                 ),
                 from_obj=(
                     Event, EventType, rbRequestType, Action, ActionType, RisarEpicrisis_Children
@@ -619,7 +623,9 @@ class DeathStatCtrl(object):
             return collections.OrderedDict((x, y) for x, y in db.session.execute(selectable1))
         return {}
 
-    def get_maternal_death(self, start_date, end_date):
+    @staticmethod
+    @cache.memoize(timeout=60)
+    def get_maternal_death(start_date, end_date):
         query = db.session.query(
             Action,
             ActionProperty_Date.value.label('created_ymd'),
@@ -687,3 +693,22 @@ class DeathStatCtrl(object):
             rows_for_maternal_death, key=lambda x: x.created_ymd
         )
         return collections.OrderedDict([x, len(list(y))] for x, y in grouped_by_date)
+
+    def get_amt_alive_children(self, start_date, end_date):
+        children_ids = self.get_list_of_alive_dead_actions(start_date, end_date).get(1, [])
+        alive_children = self.get_children_stat(start_date, end_date, children_ids, is_alive=True)
+        return float(sum(alive_children.values())) or 1.0
+
+    def get_amt_dead_chilren(self, start_date, end_date):
+        children_ids = self.get_list_of_alive_dead_actions(start_date, end_date).get(0, [])
+        dead_children = self.get_children_stat(start_date, end_date, children_ids, is_alive=False)
+        return float(sum(dead_children.values()))
+
+    def get_maternal_coefficient(self, start_date, end_date):
+        maternal_death_all = float(sum(self.get_maternal_death(start_date, end_date).values()))
+        return maternal_death_all / self.get_amt_alive_children(start_date, end_date) * 100000
+
+    def get_infant_death_coefficient(self, start_date, end_date):
+        dead = self.get_amt_dead_chilren(start_date, end_date)
+        alive = self.get_amt_alive_children(start_date, end_date)
+        return (dead / (dead + alive) * 1000)

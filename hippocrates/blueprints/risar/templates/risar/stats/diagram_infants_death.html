@@ -14,8 +14,8 @@
         </li>
     </ul>
     <div class="tab-content no-padding">
-        {{  diag_macros.date_range_selector() }}
         <div class="chart tab-pane active" id="current_year" style="position: relative;">
+            {{  diag_macros.date_range_selector() }}
             <nvd3-line-chart
                     data="infants_death"
                     id="infants_death"
