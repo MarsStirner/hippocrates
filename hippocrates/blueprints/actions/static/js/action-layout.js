@@ -285,7 +285,7 @@ angular.module('WebMis20')
                                     property_name,
                                     property_code,
                                     property_is_assignable,
-                                    scope.action.readonly || property.has_pricelist_service,
+                                    scope.action.readonly || property.type.mandatory || property.has_pricelist_service,
                                     inner_template.format(property_code),
                                     property.type.norm ? property.type.norm : ''
                                 );
