@@ -33,6 +33,9 @@ logger = logging.getLogger('simple')
 @api_method
 def api_search_clients():
     query_string = request.args.get('q') or bail_out(ApiException(400, u'Параметр "q" должен быть указан и содержать строку'))
+    pagination = request.args.get('pagination')
+    current_page = int(request.args.get('current_page', 1))
+    items_per_page = int(request.args.get('items_per_page', 25))
     try:
         limit = int(request.args.get('limit', 100)) or bail_out(ApiException(400, u'Параметр limit должен быть положительным'))
     except ValueError:
@@ -48,12 +51,18 @@ def api_search_clients():
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
             return []
-    clients = base_query.order_by(db.func.field(Client.id, *id_list)).all()
+    base_query = base_query.order_by(db.func.field(Client.id, *id_list))
     context = ClientVisualizer()
-    if 'short' in request.args:
-        return map(context.make_short_client_info, clients)
+    make_client_info = context.make_short_client_info if 'short' in request.args else context.make_search_client_info
+    if pagination:
+        paginate = base_query.paginate(current_page, items_per_page)
+        return {
+            'client_info': map(make_client_info, paginate.items),
+            'pages': paginate.pages,
+            'total_items': paginate.total,
+        }
     else:
-        return map(context.make_search_client_info, clients)
+        return map(make_client_info, base_query.all())
 
 
 @module.route('/api/patient.json')
