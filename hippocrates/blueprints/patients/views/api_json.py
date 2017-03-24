@@ -5,7 +5,9 @@ import logging
 import json
 import os
 
-from flask import request
+import math
+
+from flask import current_app, request
 
 from nemesis.app import app
 from nemesis.systemwide import db
@@ -33,7 +35,7 @@ logger = logging.getLogger('simple')
 @api_method
 def api_search_clients():
     query_string = request.args.get('q') or bail_out(ApiException(400, u'Параметр "q" должен быть указан и содержать строку'))
-    pagination = json.loads(request.args.get('pagination', 'false'))
+    paginated = json.loads(request.args.get('paginated', 'false'))
     current_page = int(request.args.get('current_page', 1))
     items_per_page = int(request.args.get('items_per_page', 25))
     try:
@@ -42,27 +44,31 @@ def api_search_clients():
         raise ApiException(400, u'Параметр limit должен быть числом')
 
     base_query = Client.query.outerjoin(ClientPolicy, ClientDocument, ClientContact)
-    id_list = []
 
-    if query_string:
-        result = SearchPatient.search(query_string, limit)
-        id_list = [item['id'] for item in result['result']['items']]
-        if id_list:
-            base_query = base_query.filter(Client.id.in_(id_list))
-        else:
-            return []
+    max_matches = current_app.config.get('SPHINXQL_MAX_MATCHES', 10000)
+    result = SearchPatient.search(query_string, limit, paginated, current_page, items_per_page, max_matches)
+    total = safe_int(result['result']['meta']['total_found'])
+    total = total if total <= max_matches else max_matches
+    pages = int(math.ceil(total / float(items_per_page)))
+    id_list = [item['id'] for item in result['result']['items']]
+    if id_list:
+        base_query = base_query.filter(Client.id.in_(id_list))
+    else:
+        return []
+
     base_query = base_query.order_by(db.func.field(Client.id, *id_list))
     context = ClientVisualizer()
     make_client_info = context.make_short_client_info if 'short' in request.args else context.make_search_client_info
-    if pagination:
-        paginate = base_query.paginate(current_page, items_per_page)
+    client_info = map(make_client_info, base_query.all())
+
+    if paginated:
         return {
-            'client_info': map(make_client_info, paginate.items),
-            'pages': paginate.pages,
-            'total_items': paginate.total,
+            'client_info': client_info,
+            'pages': pages,
+            'total_items': total,
         }
     else:
-        return map(make_client_info, base_query.all())
+        return client_info
 
 
 @module.route('/api/patient.json')
