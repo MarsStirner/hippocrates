@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import json
 import os
 
 from flask import request
@@ -22,7 +23,6 @@ from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, Cli
     add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
     add_or_update_work_soc_status, store_file_locally
 )
-from sqlalchemy.orm import joinedload
 
 __author__ = 'mmalkov'
 
@@ -33,7 +33,7 @@ logger = logging.getLogger('simple')
 @api_method
 def api_search_clients():
     query_string = request.args.get('q') or bail_out(ApiException(400, u'Параметр "q" должен быть указан и содержать строку'))
-    pagination = request.args.get('pagination')
+    pagination = json.loads(request.args.get('pagination', 'false'))
     current_page = int(request.args.get('current_page', 1))
     items_per_page = int(request.args.get('items_per_page', 25))
     try:
