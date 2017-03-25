@@ -5,7 +5,7 @@
 {#    </div>#}
 {#</div>#}
 {% import 'risar/stats/_diag_macros.html' as diag_macros with context %}
-<div class="nav-tabs-custom" ng-controller="PerinatalDeathStatCtrl">
+<div class="nav-tabs-custom" ng-controller="PerinatalDeathStatCtrl" ng-cloak>
     <ul class="nav nav-tabs pull-right ui-sortable-handle">
         <li><a href="#by_region" data-toggle="tab"><b>В регионе</b></a></li>
         <li class="active"><a href="#current_year" data-toggle="tab"><b>Период</b></a></li>
@@ -24,8 +24,9 @@
                     xAxisTickFormat="xAxisTickFormat"
                     showXAxis="true"
                     showYAxis="true"
-                    tooltips="true"
-    {#                interactive="true"#}
+                    tooltips="false"
+                    interactive="true"
+{#                    useInteractiveGuideline="true"#}
     {#                margin="{left:30,top:20,bottom:20,right:20}"#}
                     showLegend="true"
                     nodata="Нет данных"
@@ -46,6 +47,25 @@
                     nodata="Нет данных"
                     ><svg></svg>
             </nvd3-line-chart>
+        </div>
+        <div class="row">
+                <div class="col-md-offset-1 col-md-9">
+                    <span class="header">Выбранные карты:</span> <span class="col-md-offset-3">&nbsp;<i class="fa fa-remove text-danger" ng-click="closeChosenCards()"></i></span>
+                    <div>
+                        <ul>
+                            <li ng-repeat="card in alive_children_cards">
+                                <a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ card.event_id ]]">[[card.external_id]] [[card.patient_fio]]</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li ng-repeat="card in dead_children_cards">
+                                <a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ card.event_id ]]">[[card.external_id]] [[card.patient_fio]]</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
         </div>
     </div>
 </div>

@@ -111,12 +111,21 @@ WebMis20
             return wrapper('POST', Config.url.api_recently_modified_charts, {}, data);
         }
     };
-    this.death_stats = {
+    this.maternal_death_stats = {
         get: function () {
-            return wrapper('GET', Config.url.api_death_stats);
+            return wrapper('GET', Config.url.api_maternal_death_stats);
         },
         get_period: function (start_date, end_date) {
-            return wrapper('GET', Config.url.api_death_stats + '?' + $.param({start_date: moment(start_date).format("YYYY-MM-DD"),
+            return wrapper('GET', Config.url.api_maternal_death_stats + '?' + $.param({start_date: moment(start_date).format("YYYY-MM-DD"),
+                                                                              end_date: moment(end_date).format("YYYY-MM-DD")}));
+        }
+    };
+    this.perinatal_death_stats = {
+        get: function () {
+            return wrapper('GET', Config.url.api_perinatal_death_stats);
+        },
+        get_period: function (start_date, end_date) {
+            return wrapper('GET', Config.url.api_perinatal_death_stats + '?' + $.param({start_date: moment(start_date).format("YYYY-MM-DD"),
                                                                               end_date: moment(end_date).format("YYYY-MM-DD")}));
         }
     };
