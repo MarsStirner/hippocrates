@@ -580,35 +580,6 @@ def get_list_of_alive_dead_actions(start_date, end_date):
     return dict((k, v.split(',')) for k, v in db.session.execute(qr))
 
 
-# @cache.memoize(timeout=60)
-# def get_children_stat(start_date, end_date, children_ids=None, is_alive=True):
-#     is_alive = safe_int(safe_bool(is_alive))
-#     if children_ids:
-#         selectable1 = db.select(
-#             (RisarEpicrisis_Children.date, func.count(RisarEpicrisis_Children.id),),
-#             whereclause=db.and_(
-#                 ActionType.flatCode == 'epicrisis',
-#                 rbRequestType.code == request_type_pregnancy,
-#                 Action.event_id == Event.id,
-#                 ActionType.id == Action.actionType_id,
-#                 EventType.id == Event.eventType_id,
-#                 rbRequestType.id == EventType.requestType_id,
-#                 RisarEpicrisis_Children.action_id == Action.id,
-#                 RisarEpicrisis_Children.alive == is_alive,
-#                 Event.deleted == 0,
-#                 Action.deleted == 0,
-#                 RisarEpicrisis_Children.id.in_(children_ids),
-#                 between(RisarEpicrisis_Children.date, start_date, end_date)
-#             ),
-#             from_obj=(
-#                 Event, EventType, rbRequestType, Action, ActionType, RisarEpicrisis_Children
-#             ),
-#             group_by=(func.date(RisarEpicrisis_Children.date)),
-#             order_by=(RisarEpicrisis_Children.date)
-#         )
-#         return collections.OrderedDict((x, y) for x, y in db.session.execute(selectable1))
-#     return {}
-
 @cache.memoize(timeout=60)
 def get_children_stat(children_ids=None):
     if children_ids:
@@ -650,10 +621,10 @@ def get_children_cards_info(children_ids=None):
     ).join(
         Action,
         Event, Client, EventType, rbRequestType,
-        ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date,
+        ActionType,
     ).filter(
         RisarEpicrisis_Children.id.in_(children_ids)
-    ).group_by('children_date').order_by('children_date')
+    ).order_by('children_date')
 
     grouped_by_date = groupby(
         query.all(), key=lambda x: x.children_date

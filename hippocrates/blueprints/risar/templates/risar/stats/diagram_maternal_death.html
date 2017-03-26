@@ -47,11 +47,11 @@
             </nvd3-line-chart>
         </div>
     </div>
-    <div class="row" ng-if="selected_point_x!== undefined">
+    <div class="row" ng-if="card_info_at_this_point">
         <div class="col-md-offset-1 col-md-9">
             <span class="header">Выбранные карты:</span> <span class="col-md-offset-3">&nbsp;<i class="fa fa-remove text-danger" ng-click="closeChosenCards()"></i></span>
-            <ul>
-                <li ng-repeat="card in maternal_cards_info[selected_point_x]">
+            <ul class="list-unstyled">
+                <li ng-repeat="card in card_info_at_this_point">
                     <a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ card.event_id ]]">[[card.external_id]] [[card.patient_fio]]</a>
                 </li>
             </ul>

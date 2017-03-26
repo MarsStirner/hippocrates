@@ -389,8 +389,6 @@ def api_0_perinatal_death_stats():
 
     alive_children_cards_info = get_children_cards_info(dict_of_children_ids.get(1, {}))
     dead_children_cards_info = get_children_cards_info(dict_of_children_ids.get(0, {}))
-    from pprint import pprint
-    pprint(alive_children_cards_info)
     chart_data = {
         'dead_children': [],
         'alive_children': [],
