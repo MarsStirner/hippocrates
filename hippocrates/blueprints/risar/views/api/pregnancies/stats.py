@@ -13,7 +13,9 @@ from hippocrates.blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, Orga
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.errand import represent_errand
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_chart_short
-from hippocrates.blueprints.risar.lib.stats import StatsController, DeathStatCtrl, RadzStatsController
+from hippocrates.blueprints.risar.lib.stats import StatsController, get_infant_death_coefficient, \
+    get_maternal_coefficient, get_children_stat, get_maternal_death, \
+    get_list_of_alive_dead_actions, get_children_cards_info
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 
 from nemesis.app import app
@@ -330,53 +332,85 @@ def api_0_stats_perinatal_risk_rate():
     return result
 
 
-@module.route('/api/0/death_stats.json')
-@api_method
-def api_0_death_stats():
-    # перинатальная смертности и материнская смертность
-    regions = ['00000000000']
-    regions.extend(app.config.get('RISAR_REGIONS', []))
-
+def get_dates_and_ranges():
     start_date, end_date = safe_datetime(safe_date(request.args.get('start_date'))), safe_datetime(
         safe_date(request.args.get('end_date')))
     end_date = end_date or datetime.datetime.now()
     start_date = start_date or end_date - datetime.timedelta(days=1)
-
     days = (end_date - start_date).days
     dt_range = [(start_date + datetime.timedelta(days=x)).date() for x in range(0, days + 1)]
+    dt_range = []
+    timestamped_dt_range = []
+    for x in range(0, days + 1):
+        idate = (start_date + datetime.timedelta(days=x)).date()
+        dt_range.append(idate)
+        timestamped_dt_range.append(time.mktime(idate.timetuple()))
+    return start_date, end_date, dt_range, timestamped_dt_range
 
-    ctrl = DeathStatCtrl(start_date, end_date)
-    alive_dead_action_dict = ctrl.get_list_of_alive_dead_actions(start_date, end_date)
-    dead_children = ctrl.get_children_stat(alive_dead_action_dict, is_alive=False)
-    alive_children = ctrl.get_children_stat(alive_dead_action_dict, is_alive=True)
 
-    alive = float(sum(alive_children.values())) or 1.0
-    dead = float(sum(dead_children.values()))
+@module.route('/api/0/maternal_death_stats.json')
+@api_method
+def api_0_maternal_death_stats():
+    # перинатальная смертности и материнская смертность
+    regions = ['00000000000']
+    regions.extend(app.config.get('RISAR_REGIONS', []))
 
-    maternal_death = ctrl.get_maternal_death(start_date, end_date)
-    maternal_death_all = float(sum(maternal_death.values()))
+    start_date, end_date, dt_range, timestamped_dt_range = get_dates_and_ranges()
+    maternal_death = get_maternal_death(start_date, end_date)
 
-    chart_maternal_death = []
-    chart_dead_children = []
-    chart_alive_children = []
+    chart_data = {'maternal_death': [],
+                  'maternal_cards_info': [],
+                  }
 
     for i, dt in enumerate(dt_range, 1):
-        chart_maternal_death.append([i, maternal_death.get(dt, 0)])
-        chart_dead_children.append([i, dead_children.get(dt, 0)])
-        chart_alive_children.append([i, alive_children.get(dt, 0)])
+        chart_data['maternal_death'].append([i, maternal_death.get(dt, {}).get('length', 0)])
+        chart_data['maternal_cards_info'].append(maternal_death.get(dt, {}).get('cards', []))
 
     return {
-        'dt_range': map(lambda idate: time.mktime(idate.timetuple()), dt_range),
-        'maternal_death': chart_maternal_death,
-        # 'maternal_death': [],
-        'maternal_death_coeff': (maternal_death_all / alive * 100000),
+        'dt_range': timestamped_dt_range,
+        'maternal_death': chart_data['maternal_death'],
+        'maternal_death_coeff': get_maternal_coefficient(start_date, end_date),
+        'maternal_cards_info': chart_data['maternal_cards_info'],
         "prev_years_maternal_death": get_rate_for_regions(regions, "maternal_death"),
-        # "prev_years_maternal_death": [],
+    }
+
+@module.route('/api/0/perinatal_death_stats.json')
+@api_method
+def api_0_perinatal_death_stats():
+    # перинатальная смертности и материнская смертность
+    regions = ['00000000000']
+    regions.extend(app.config.get('RISAR_REGIONS', []))
+
+    start_date, end_date, dt_range, timestamped_dt_range = get_dates_and_ranges()
+
+    dict_of_children_ids = get_list_of_alive_dead_actions(start_date, end_date)
+    dead_children = get_children_stat(children_ids=dict_of_children_ids.get(0, []))
+    alive_children = get_children_stat(children_ids=dict_of_children_ids.get(1, []))
+
+    alive_children_cards_info = get_children_cards_info(dict_of_children_ids.get(1, {}))
+    dead_children_cards_info = get_children_cards_info(dict_of_children_ids.get(0, {}))
+    chart_data = {
+        'dead_children': [],
+        'alive_children': [],
+        'dead_children_cards_info': [],
+        'alive_children_cards_info': []
+    }
+
+    for i, dt in enumerate(dt_range, 1):
+        chart_data['dead_children'].append([i, dead_children.get(dt, 0)])
+        chart_data['alive_children'].append([i, alive_children.get(dt, 0)])
+        chart_data['dead_children_cards_info'].append(dead_children_cards_info.get(dt, []))
+        chart_data['alive_children_cards_info'].append(alive_children_cards_info.get(dt, []))
+
+    return {
+        'dt_range': timestamped_dt_range,
+        "infants_death_coeff": get_infant_death_coefficient(start_date, end_date),
+        "dead_children": chart_data['dead_children'],
+        "dead_children_cards_info": chart_data['dead_children_cards_info'],
+        "alive_children": chart_data['alive_children'],
+        "alive_children_cards_info": chart_data['alive_children_cards_info'],
         "prev_years_perinatal_death": get_rate_for_regions(regions, "perinatal_death"),
         "prev_years_birth": get_rate_for_regions(regions, "birth"),
-        "infants_death_coeff": (dead / (dead + alive) * 1000),
-        "dead_children": chart_dead_children,
-        "alive_children": chart_alive_children,
     }
 
 

@@ -13,7 +13,6 @@
         </li>
     </ul>
     <div class="tab-content no-padding">
-
         <div class="chart tab-pane active" id="maternal_current_year" style="position: relative;">
             {{  diag_macros.date_range_selector() }}
             <nvd3-line-chart
@@ -26,7 +25,7 @@
                     showYAxis="true"
                     tooltips="false"
                     interactive="true"
-{#                    xAxisTickValues="x_values"#}
+{#                    useInteractiveGuideline="true"#}
                     showLegend="true"
                     nodata="Нет данных"
                     ><svg></svg>
@@ -41,11 +40,21 @@
                     showXAxis="true"
                     showYAxis="true"
                     xAxisTickFormat="xAxisTickFormatYears"
-                    tooltips="true"
+                    tooltips="false"
                     showLegend="true"
                     nodata="Нет данных"
                     ><svg></svg>
             </nvd3-line-chart>
+        </div>
+    </div>
+    <div class="row" ng-if="card_info_at_this_point">
+        <div class="col-md-offset-1 col-md-9">
+            <span class="header">Выбранные карты:</span> <span class="col-md-offset-3">&nbsp;<i class="fa fa-remove text-danger" ng-click="closeChosenCards()"></i></span>
+            <ul class="list-unstyled">
+                <li ng-repeat="card in card_info_at_this_point">
+                    <a ng-href="{{ url_for('.html_pregnancy_chart') }}?event_id=[[ card.event_id ]]">[[card.external_id]] [[card.patient_fio]]</a>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
