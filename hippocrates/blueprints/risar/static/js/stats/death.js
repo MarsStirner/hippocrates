@@ -9,30 +9,27 @@ WebMis20.controller('BaseDeathDateStatCtrl', ['$scope', 'RisarApi', function ($s
     $scope.dt['start_date'] = moment($scope.curDate).clone().add(-6, 'd').toDate();
     $scope.dt['max_start_date'] = moment($scope.curDate).clone().add(-1, 'd').toDate();
     $scope.dt['end_date'] = moment($scope.curDate).clone().toDate();
-    $scope.check_start_date = function (momented) {
-        $scope.dt['start_date'] = momented.clone().add(-1, 'd').toDate();
-    };
-    $scope.$watch('dt.start_date', function (n, o) {
-        if (n && n !== o) {
-            var momented = moment(n);
-            if (momented.toDate() >= moment($scope.dt['end_date']).toDate()) {
-                $scope.check_start_date(momented)
-            } else {
-                $scope.refresh_gistograms_by_period();
-            }
-        }
-    });
-    $scope.$watch('dt.end_date', function (n, o) {
-        if (n && n !== o) {
-            var momented = moment(n);
-            if (momented.toDate() <= moment($scope.dt['start_date']).toDate()) {
-                $scope.check_start_date(momented);
-            } else {
-                $scope.refresh_gistograms_by_period();
-            }
-        }
-    });
 
+    $scope.$watchCollection("[dt.start_date, dt.end_date]", function (n, o) {
+        var st = moment(n[0]),
+            end =moment(n[1]);
+
+        if (st.diff(end, 'days') === 0) {
+            return
+        }
+        if (st.isBefore(end)) {
+             $scope.refresh_gistograms_by_period();
+         } else {
+             if (!end.isValid()) {
+                 end = moment($scope.curDate);
+                 $scope.dt.end_date = end.toDate();
+             }
+            if (!st.isValid() || !st.isBefore(end)) {
+                 st = end.clone().add(-1, 'd');
+                 $scope.dt.start_date = st.toDate();
+            }
+         }
+    });
 
     //all below may vary between descendant controllers
     //just override

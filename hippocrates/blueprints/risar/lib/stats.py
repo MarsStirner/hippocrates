@@ -717,25 +717,27 @@ def get_maternal_death(start_date, end_date):
     return dc
 
 
-def get_amt_alive_children(start_date, end_date):
-    children_ids = get_list_of_alive_dead_actions(start_date, end_date).get(1, [])
-    alive_children = get_children_stat(children_ids)
-    return float(sum(alive_children.values())) or 1.0
+class DeathStatCtrl(object):
+    def __init__(self, start_date, end_date):
+        self.start_date = start_date
+        self.end_date = end_date
 
+    def get_amt_alive_children(self, ):
+        children_ids = get_list_of_alive_dead_actions(self.start_date, self.end_date).get(1, [])
+        alive_children = get_children_stat(children_ids)
+        return float(sum(alive_children.values())) or 1.0
 
-def get_amt_dead_chilren(start_date, end_date):
-    children_ids = get_list_of_alive_dead_actions(start_date, end_date).get(0, [])
-    dead_children = get_children_stat(children_ids)
-    return float(sum(dead_children.values()))
+    def get_amt_dead_chilren(self, ):
+        children_ids = get_list_of_alive_dead_actions(self.start_date, self.end_date).get(0, [])
+        dead_children = get_children_stat(children_ids)
+        return float(sum(dead_children.values()))
 
+    def get_maternal_coefficient(self, ):
+        sm = map(lambda x: x.get('length'), get_maternal_death(self.start_date, self.end_date).values())
+        maternal_death_all = float(sum(sm))
+        return maternal_death_all / self.get_amt_alive_children(self.start_date, self.end_date) * 100000
 
-def get_maternal_coefficient(start_date, end_date):
-    sm = map(lambda x: x.get('length'), get_maternal_death(start_date, end_date).values())
-    maternal_death_all = float(sum(sm))
-    return maternal_death_all / get_amt_alive_children(start_date, end_date) * 100000
-
-
-def get_infant_death_coefficient(start_date, end_date):
-    dead = get_amt_dead_chilren(start_date, end_date)
-    alive = get_amt_alive_children(start_date, end_date)
-    return (dead / (dead + alive) * 1000)
+    def get_infant_death_coefficient(self, ):
+        dead = self.get_amt_dead_chilren(self.start_date, self.end_date)
+        alive = self.get_amt_alive_children(self.start_date, self.end_date)
+        return (dead / (dead + alive) * 1000)

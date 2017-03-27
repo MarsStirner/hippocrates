@@ -2,6 +2,7 @@
 import collections
 import datetime
 import time
+from itertools import groupby
 
 from flask import request
 from sqlalchemy import func
@@ -13,9 +14,8 @@ from hippocrates.blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, Orga
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.represent.errand import represent_errand
 from hippocrates.blueprints.risar.lib.represent.pregnancy import represent_pregnancy_chart_short
-from hippocrates.blueprints.risar.lib.stats import StatsController, get_infant_death_coefficient, \
-    get_maternal_coefficient, get_children_stat, get_maternal_death, \
-    get_list_of_alive_dead_actions, get_children_cards_info
+from hippocrates.blueprints.risar.lib.stats import StatsController, DeathStatCtrl, \
+    get_children_stat, get_maternal_death, get_list_of_alive_dead_actions, get_children_cards_info
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 
 from nemesis.app import app
@@ -31,32 +31,57 @@ from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
 from nemesis.models.person import Person, PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.models.utils import safe_current_user_id
-from nemesis.systemwide import db
+from nemesis.systemwide import db, cache
+
+
+@cache.memoize(60)
+def get_rate(rate_code):
+    selectable = db.select(
+        (TerritorialRate.kladr_code, TerritorialRate.year, TerritorialRate.value),
+        whereclause=db.and_(
+            #     # TerritorialRate.kladr_code == region,
+            rbRateType.id == TerritorialRate.rate_type_id,
+            rbRateType.code == rate_code
+        ),
+        from_obj=(
+            TerritorialRate, rbRateType
+        ),
+        order_by=(TerritorialRate.kladr_code, TerritorialRate.year,)
+    )
+    return dict((k, list(v)) for
+                k, v in groupby(db.session.execute(selectable), key=lambda x: x.kladr_code))
 
 
 def get_rate_for_regions(regions, rate_code):
     rate = {}
     for region in regions:
         result = []
-        selectable = db.select(
-            (TerritorialRate.year, TerritorialRate.value),
-            whereclause=db.and_(
-                TerritorialRate.kladr_code == region,
-                rbRateType.id == TerritorialRate.rate_type_id,
-                rbRateType.code == rate_code
-            ),
-            from_obj=(
-                TerritorialRate, rbRateType
-            ))
-        for (year, value) in db.session.execute(selectable):
-            result.append([year, value])
-        if result:
-            if region == '00000000000':
-                rate[u'РФ'] = result
-            else:
-                region_info = Vesta.search_kladr_locality(region, 1)[0]
-                rate[region_info.fullname] = result
+        info_for_region = get_rate(rate_code).get(region)
+        if info_for_region:
+            for row in info_for_region:
+                result.append([row.year, row.value])
+            if result:
+                if region == '00000000000':
+                    rate[u'РФ'] = result
+                else:
+                    region_info = Vesta.search_kladr_locality(region, 1)[0]
+                    rate[region_info.fullname] = result
     return rate
+
+
+def calulate_coefficient_for_last(year=None):
+    regions = ['00000000000']
+    regions.extend(app.config.get('RISAR_REGIONS', []))
+    last_year = year or datetime.datetime.now().date().year - 1
+    year_start = datetime.date(last_year, 1, 1)
+    year_end = datetime.date(last_year, 12, 31)
+    # TerritorialRate(kladr_code=, mae)
+    # d = DeathStatCtrl(year_start, year_end)
+    # d = DeatStatCtrl()
+    return {
+        'perinatal_death': get_infant_death_coefficient(year_start, year_end),
+        'maternal_death': get_maternal_coefficient(year_start, year_end),
+    }
 
 
 @module.route('/api/0/stats/current_cards_overview/')
@@ -357,7 +382,7 @@ def api_0_maternal_death_stats():
 
     start_date, end_date, dt_range, timestamped_dt_range = get_dates_and_ranges()
     maternal_death = get_maternal_death(start_date, end_date)
-
+    mds = DeathStatCtrl(start_date, end_date)
     chart_data = {'maternal_death': [],
                   'maternal_cards_info': [],
                   }
@@ -369,10 +394,11 @@ def api_0_maternal_death_stats():
     return {
         'dt_range': timestamped_dt_range,
         'maternal_death': chart_data['maternal_death'],
-        'maternal_death_coeff': get_maternal_coefficient(start_date, end_date),
+        'maternal_death_coeff': mds.get_maternal_coefficient(start_date, end_date),
         'maternal_cards_info': chart_data['maternal_cards_info'],
         "prev_years_maternal_death": get_rate_for_regions(regions, "maternal_death"),
     }
+
 
 @module.route('/api/0/perinatal_death_stats.json')
 @api_method
@@ -382,8 +408,8 @@ def api_0_perinatal_death_stats():
     regions.extend(app.config.get('RISAR_REGIONS', []))
 
     start_date, end_date, dt_range, timestamped_dt_range = get_dates_and_ranges()
-
     dict_of_children_ids = get_list_of_alive_dead_actions(start_date, end_date)
+    pds = DeathStatCtrl(start_date, end_date)
     dead_children = get_children_stat(children_ids=dict_of_children_ids.get(0, []))
     alive_children = get_children_stat(children_ids=dict_of_children_ids.get(1, []))
 
@@ -404,7 +430,7 @@ def api_0_perinatal_death_stats():
 
     return {
         'dt_range': timestamped_dt_range,
-        "infants_death_coeff": get_infant_death_coefficient(start_date, end_date),
+        "infants_death_coeff": pds.get_infant_death_coefficient(start_date, end_date),
         "dead_children": chart_data['dead_children'],
         "dead_children_cards_info": chart_data['dead_children_cards_info'],
         "alive_children": chart_data['alive_children'],
