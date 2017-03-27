@@ -2,11 +2,7 @@ WebMis20.controller('BaseDeathDateStatCtrl', ['$scope', 'RisarApi', function ($s
     $scope.refresh_gistograms_by_period = function () {
         return
     };
-    $scope.$on('elementClick.directive', function (angularEvent, event) {
-        $scope.$apply(function () {
-            $scope.selected_point_x = event.pointIndex;
-        });
-    });
+
     $scope.curDate = new Date();
     $scope.curYear = $scope.curDate.getFullYear();
     $scope.dt = {'start_date': undefined, 'end_date': undefined};
@@ -74,19 +70,15 @@ WebMis20.controller('BaseDeathDateStatCtrl', ['$scope', 'RisarApi', function ($s
 WebMis20.controller('MaternalDeathStatCtrl', ['$controller', '$scope', 'RisarApi', function ($controller, $scope, RisarApi) {
     $controller('BaseDeathDateStatCtrl', {$scope: $scope});
 
-    $scope.selected_point_x = undefined;
     $scope.closeChosenCards = function () {
         $scope.card_info_at_this_point = [];
     };
     $scope.card_info_at_this_point = [];
-    $scope.$watch('selected_point_x', function (newValue, oldValue) {
-        if (newValue) {
-            if($scope.selected_point_x) {
-               $scope.card_info_at_this_point =  $scope.maternal_cards_info[$scope.selected_point_x];
-            }
-        }
+    $scope.$on('elementClick.directive', function (angularEvent, event) {
+        $scope.$apply(function () {
+             $scope.card_info_at_this_point =  $scope.maternal_cards_info[event.pointIndex];
+        });
     });
-
 
     $scope.refresh_gistograms_by_period = function () {
         RisarApi.maternal_death_stats.get_period($scope.dt.start_date, $scope.dt.end_date).then(function (result) {
@@ -122,27 +114,25 @@ WebMis20.controller('MaternalDeathStatCtrl', ['$controller', '$scope', 'RisarApi
 
 WebMis20.controller('PerinatalDeathStatCtrl', ['$controller', '$scope', 'RisarApi', function ($controller, $scope, RisarApi) {
     $controller('BaseDeathDateStatCtrl', {$scope: $scope});
-    $scope.selected_point_x = null;
     $scope.alive_children_cards = [];
     $scope.dead_children_cards = [];
      $scope.closeChosenCards = function () {
         $scope.alive_children_cards = [];
         $scope.dead_children_cards = [];
     };
-    $scope.$watch('selected_point_x', function (newValue, oldValue) {
-        if (newValue !== oldValue) {
-            $scope.alive_children_cards = $scope.alive_children_cards_info[newValue];
-            $scope.dead_children_cards = $scope.dead_children_cards_info[newValue];
-        }
+    $scope.$on('elementClick.directive', function (angularEvent, event) {
+        $scope.$apply(function () {
+             $scope.alive_children_cards = $scope.alive_children_cards_info[event.pointIndex];
+             $scope.dead_children_cards = $scope.dead_children_cards_info[event.pointIndex];
+        });
     });
-
+   
     $scope.refresh_gistograms_by_period = function () {
         //todo: ^should be another separate url
         RisarApi.perinatal_death_stats.get_period($scope.dt.start_date, $scope.dt.end_date).then(function (result) {
             $scope.infants_prev_years = [];
             $scope.infants_death = [];
             $scope.dt_range = result["dt_range"];
-            $scope.selected_point_x = null;
             if (result) {
                 var prev_years_perinatal_death = result['prev_years_perinatal_death'],
                     prev_years_birth = result['prev_years_birth'],
