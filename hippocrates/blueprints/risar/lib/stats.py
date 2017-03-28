@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import collections
 
 from itertools import groupby
@@ -17,7 +18,7 @@ from hippocrates.blueprints.risar.lib.specific import SpecificsManager
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.models.actions import ActionType, Action, ActionProperty_Date, ActionProperty, ActionPropertyType
 from nemesis.models.enums import PerinatalRiskRate
-from nemesis.models.risar import rbRadzinskyRiskRate, rbRisarRegionalRiskRate
+from nemesis.models.risar import rbRadzinskyRiskRate, rbRisarRegionalRiskRate, rbRateType, TerritorialRate
 from nemesis.models.event import EventType, Event
 from nemesis.models.exists import rbRequestType
 from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, Diagnosis, Diagnostic, Action_Diagnosis
@@ -717,25 +718,53 @@ def get_maternal_death(start_date, end_date):
     return dc
 
 
-def get_amt_alive_children(start_date, end_date):
-    children_ids = get_list_of_alive_dead_actions(start_date, end_date).get(1, [])
-    alive_children = get_children_stat(children_ids)
-    return float(sum(alive_children.values())) or 1.0
+class DeathStatCtrl(object):
+    def __init__(self, start_date, end_date):
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def get_amt_alive_children(self, ):
+        children_ids = get_list_of_alive_dead_actions(self.start_date, self.end_date).get(1, [])
+        alive_children = get_children_stat(children_ids)
+        return float(sum(alive_children.values())) or 1.0
+
+    def get_amt_dead_chilren(self, ):
+        children_ids = get_list_of_alive_dead_actions(self.start_date, self.end_date).get(0, [])
+        dead_children = get_children_stat(children_ids)
+        return float(sum(dead_children.values()))
+
+    def get_maternal_coefficient(self, ):
+        sm = map(lambda x: x.get('length'), get_maternal_death(self.start_date, self.end_date).values())
+        maternal_death_all = float(sum(sm))
+        return maternal_death_all / self.get_amt_alive_children() * 100000
+
+    def get_infant_death_coefficient(self, ):
+        dead = self.get_amt_dead_chilren()
+        alive = self.get_amt_alive_children()
+        return (dead / (dead + alive) * 1000)
 
 
-def get_amt_dead_chilren(start_date, end_date):
-    children_ids = get_list_of_alive_dead_actions(start_date, end_date).get(0, [])
-    dead_children = get_children_stat(children_ids)
-    return float(sum(dead_children.values()))
+def calulate_death_coefficients(year=None):
+    last_year = year or datetime.datetime.now().date().year - 1
+    year_start = datetime.date(last_year, 1, 1)
+    year_end = datetime.date(last_year, 12, 31)
+    id_by_code = dict((row.code, row.id) for row in db.session.query(rbRateType).all())
+    perinatal_rate_id = id_by_code.get('perinatal_death')
+    maternal_death_rate_id = id_by_code.get('maternal_death')
+    d = DeathStatCtrl(year_start, year_end)
 
+    def set_rate_value(year, maternal_death_rate_id, value):
+        from nemesis.app import app
+        regions_in_config = app.config.get('RISAR_REGIONS', [])
+        region = regions_in_config[0] if regions_in_config else '00000000000'
+        row = db.session.query(TerritorialRate).filter_by(
+            kladr_code=region, rate_type_id=maternal_death_rate_id, year=year
+        ).order_by(TerritorialRate.id.desc()).first()
+        if not row:
+            row = TerritorialRate(kladr_code=region, rate_type_id=maternal_death_rate_id, year=year)
+            db.session.add(row)
+        row.value = value
+        db.session.commit()
 
-def get_maternal_coefficient(start_date, end_date):
-    sm = map(lambda x: x.get('length'), get_maternal_death(start_date, end_date).values())
-    maternal_death_all = float(sum(sm))
-    return maternal_death_all / get_amt_alive_children(start_date, end_date) * 100000
-
-
-def get_infant_death_coefficient(start_date, end_date):
-    dead = get_amt_dead_chilren(start_date, end_date)
-    alive = get_amt_alive_children(start_date, end_date)
-    return (dead / (dead + alive) * 1000)
+    set_rate_value(last_year, perinatal_rate_id, value=d.get_infant_death_coefficient())
+    set_rate_value(last_year, maternal_death_rate_id, value=d.get_maternal_coefficient())

@@ -195,3 +195,17 @@ def close_yesterday_checkups(self):
                     db.session.add(checkup)
                     db.session.commit()
                     raise
+
+
+@celery.task(bind=True)
+def run_coefficient_calculations(self, year):
+    from hippocrates.blueprints.risar.lib.stats import calulate_death_coefficients
+    new_task = TaskInfo()
+    new_task.start_datetime = datetime.datetime.now()
+    new_task.task_name = run_coefficient_calculations.__name__
+    new_task.celery_task_uuid = self.request.id
+    calulate_death_coefficients(year)
+    new_task.finish_datetime = datetime.datetime.now()
+    db.session.add(new_task)
+    db.session.commit()
+    return 'ok'
