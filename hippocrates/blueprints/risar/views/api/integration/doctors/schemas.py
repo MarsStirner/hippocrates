@@ -11,70 +11,70 @@ class DoctorSchema(Schema):
         "type": "object",
         "id": "doctor",
         "properties": {
-            "last_name":{
+            "last_name": {
                 "type": "string",
                 "id": "doctor/last_name",
                 "description": "Фамилия врача"
             },
-            "first_name":{
+            "first_name": {
                 "type": "string",
                 "id": "doctor/first_name",
                 "description": "Имя врача"
             },
-            "patr_name":{
+            "patr_name": {
                 "type": "string",
                 "id": "doctor/patr_name",
                 "description": "Отчество врача"
             },
-            "sex":{
+            "sex": {
                 "type": "integer",
                 "id": "doctor/sex",
                 "description": "Пол пациента: 0 - Пол не указан, 1 - Мужской, 2 - Женский"
             },
-            "birth_date":{
+            "birth_date": {
                 "type": "string",
                 "id": "doctor/birth_date",
                 "description": "Дата рождения"
             },
-            "SNILS":{
+            "SNILS": {
                 "type": "string",
                 "id": "doctor/SNILS",
                 "description": "СНИЛС врача"
             },
-            "INN":{
+            "INN": {
                 "type": "string",
                 "id": "doctor/INN",
                 "description": "ИНН врача"
             },
-            "organization":{
+            "organization": {
                 "type": "string",
                 "id": "doctor/organization",
-                "description": "ТФОМС код организации врача"
+                "description": "Идентификатор ЛПУ врача"
             },
             "department": {
                 "type": "string",
                 "description": "Идентификатор подразделения ЛПУ врача"
             },
-            "speciality":{
+            "speciality": {
                 "type": "string",
                 "id": "doctor/speciality",
                 "description": "код специальности врача, справоник rbSpeciality"
             },
-            "post":{
+            "post": {
                 "type": "string",
                 "id": "doctor/post",
                 "description": "код должности врача, справочник rbPost"
             },
-            "login":{
+            "login": {
                 "type": "string",
                 "id": "doctor/login",
                 "description": "Логин врача"
             },
-            "regional_code":{
+            "regional_code": {
                 "type": "string",
                 "id": "doctor/regional_code",
                 "description": "Региональный код врача"
             }
         },
-        "required": ["last_name", "first_name", "sex", "organization", "speciality", "post", "regional_code"]
+        "required": ["last_name", "first_name", "sex", "SNILS", "organization", "speciality", "post", "regional_code"]
     }]
