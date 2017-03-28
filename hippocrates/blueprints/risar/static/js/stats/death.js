@@ -22,11 +22,11 @@ WebMis20.controller('BaseDeathDateStatCtrl', ['$scope', 'RisarApi', function ($s
          } else {
              if (!end.isValid()) {
                  end = moment($scope.curDate);
-                 $scope.dt.end_date = end.toDate();
+                 $scope.dt.end_date = end.clone().toDate();
              }
             if (!st.isValid() || !st.isBefore(end)) {
                  st = end.clone().add(-1, 'd');
-                 $scope.dt.start_date = st.toDate();
+                 $scope.dt.start_date = st.clone().toDate();
             }
          }
     });
@@ -106,7 +106,6 @@ WebMis20.controller('MaternalDeathStatCtrl', ['$controller', '$scope', 'RisarApi
             }
         });
     };
-    $scope.refresh_gistograms_by_period();
 }]);
 
 WebMis20.controller('PerinatalDeathStatCtrl', ['$controller', '$scope', 'RisarApi', function ($controller, $scope, RisarApi) {
@@ -175,5 +174,4 @@ WebMis20.controller('PerinatalDeathStatCtrl', ['$controller', '$scope', 'RisarAp
             }
         });
     };
-    $scope.refresh_gistograms_by_period();
 }]);
