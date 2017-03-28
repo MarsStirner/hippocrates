@@ -254,6 +254,8 @@ def search_events_ambulance(**kwargs):
             query = query.filter(exec_date__neq=0)
         else:
             query = query.filter(exec_date__eq=0)
+    preg_req_type_id = rbRequestType.query.filter(rbRequestType.code == 'pregnancy').value(rbRequestType.id)
+    query = query.filter(request_type_id__eq=preg_req_type_id)
     per_page = kwargs.get('per_page', 10)
     page = kwargs.get('page', 1)
     from_ = (page - 1) * per_page
@@ -429,7 +431,7 @@ def api_0_event_search_ambulance():
                 'document_type': row['document_type'],
                 'policy': row['policy'],
             }
-            for row in result['result']['items'] if row['card_req_type'] == 'pregnancy'
+            for row in result['result']['items']
         ]
     }
 

@@ -8,20 +8,24 @@
 """
 
 obs_first_data = {
-    "external_id": "12345",
+    "external_id": "12645",
     # "exam_obs_id": "",
     "general_info": {
         "date": "2016-04-30",  # *
         "hospital": "-1",  # *
         "doctor": "22",  # *
-        "height": 120,  # *
-        "weight": 120  # *
+        "height": 140,  # *
+        "weight": 140,  # *
+        "weight_before": 140,
+        "constitution": "ectomorph",
+        "department": '111'
     },
     "somatic_status": {
         "state": "tajeloe",  # * Общ. состояние ["srednejtajesti", "tajeloe", "udovletvoritel_noe"]
         "subcutaneous_fat": "izbytocnorazvita",  # * Подкожно жир. клетчатка ["izbytocnorazvita", "nedostatocnorazvita", "umerennorazvita"]
         "tongue": ["vlajnyj"],  # * Язык ["01", "02", "03", "04", "vlajnyj"]
         "complaints": ["moving", "golovnaabol_"],  # * Жалобы ["epigastrii", "golovnaabol_", "moving", "net", "oteki", "rvota", "tosnota", "zrenie"]
+        "visible_mucuous": ["pure", "rubefaction",], # ["pure", "rubefaction", "pale", "edematous", "rash", "other", "pink", "hyperaemic"]
         "skin": [],  # * Кожа ["naliciekrovoizlianij", "naliciesypi", "obycnojokraskiivlajnosticistaa", "povysennojvlajnosti", "suhaa"]
         "lymph": [],  # * Лимфоузлы ["boleznennye", "neboleznennye", "nepal_piruutsa", "neuvelicennye", "pal_piruutsa", "uvelicennye"]
         "breast": [],  # * Молочные железы ["bezpatologiceskihizmenenij", "mestnoeuplotnenie", "nagrubanie", "pokrasnenie", "tresinysoskov"]
@@ -29,6 +33,7 @@ obs_first_data = {
         "pulse": ["defizitpul_sa"],  # * Пульс ["defizitpul_sa", "udovletvoritel_nogonapolnenia"]
         "nipples": [],  # * Состояние сосков ["norma", "tresiny", "vospalenie"]
         "mouth": "nujdaetsavsanazii",  # * Полость рта ["nujdaetsavsanazii", "sanirovana"]
+        "respiratory_rate": 140,  # частота дыхания
         "respiratory": [],  # * Органы дыхания ["dyhaniejestkoe", "dyhanievezikularnoe", "hripyotsutstvuut", "hripysuhie", "hripyvlajnye"]
         "abdomen": [],  # * Органы брюшной полости ["jivotmagkijbezboleznennyj", "jivotnaprajennyj", "jivotuvelicenzascetberemennojmatki"]
         "liver": [],  # * Печень ["nepal_piruetsa","uvelicena"]
@@ -63,7 +68,8 @@ obs_first_data = {
             "fetus_lie": "prodol_noe",  # Положение плода ["kosoe", "poperecnoe", "prodol_noe"]
             "fetus_position": "vtoraa",  # Позиция плода ["pervaa", "vtoraa"]
             "fetus_type": "perednij",  # Вид плода ["perednij", "zadnij"]
-            "fetus_presentation": "zatylocnoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
+            "fetus_presentation": "lizevoepredlejanie",  # Предлежащая часть плода ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
+            "fetus_presenting_part": "lizevoepredlejanie",  # Место нахождения предлежащей части ["cistoagodicnoepredlejanie", "golovnoepredlejanie", "lizevoepredlejanie", "lobnoepredlejanie", "nojnoepredlejanie", "perednegolovnoepredlejanie", "smesannoeagodicnoepredlejanie", "tazovoepredlejanie", "zatylocnoepredlejanie"]
             "fetus_heartbeat": ["ritmicnoe"],  # Сердцебиение плода ["asnoe", "ritmicnoe"]
             "fetus_heart_rate": 121  # ЧСС плода
         },
@@ -79,7 +85,8 @@ obs_first_data = {
     ],
     "vaginal_examination": {  # Влагалищное исследование
         "vagina": "svobodnoe",  # * Влагалище ["svobodnoe", "uzkoe"]
-        "cervix": "koniceskaacistaa",  # * Шейка матки ["koniceskaacistaa", "koniceskaaerozirovannaa", "zilindriceskaacistaa", "zilindriceskaaerozirovanaa"]
+        "vagina_mucous": ["edematous"],  # ["pure", "rubefaction", "pale", "edematous", "rash", "other", "pink", "hyperaemic"]
+        "cervix": ["koniceskaacistaa"],  # * Шейка матки ["koniceskaacistaa", "koniceskaaerozirovannaa", "zilindriceskaacistaa", "zilindriceskaaerozirovanaa"]
         # "cervix_length": None,  # Длина шейки матки ["bolee2sm", "menee1sm", "menee2smnobolee1sm"]
         # "cervical_canal": None,  # Цервикальный канал ["narujnyjzevprohodimdla1poperecnogopal_za", "narujnyjzevzakryt", "vnutrennijzevpriotkryt"]
         # "cervix_consistency": None,  # Консистенция шейки матки ["magkaa", "plotnaa", "razmagcennaa"]
@@ -89,6 +96,7 @@ obs_first_data = {
         # "adnexa": None,  # Придатки ["bezosobennostej", "uveliceny"]
         # "specialities": "",  # Особенности
         # "vulva": "",  # Наружные половые органы
+        "vulva_pilosis": "male", # ["female", "male", "mixed", "trichauxis", ]
         "parametrium": 'plotnoe',  # Околоматочное пространство
         # "vaginal_smear": False,  # Отделяемое из влагалища взято на анализ
         # "cervical_canal_smear": False,  # Отделяемое из цервикального канала взято на анализ
@@ -102,17 +110,20 @@ obs_first_data = {
         "abortion_refusal": True,  # * Отказ от прерывания
         # "working_conditions": "",  # Изменение условий труда ["osvobojdenieotnocnyhsmen", "vsmenerabotynenujdaetsa"]
         "diagnosis_osn": {      # Основной диагноз
-            "MKB": "A00",
-            "descr": "Osn descr"
+            "MKB": "I13",
+            "descr": "Osn descr",
+            "stage": "02"
           }
         ,
         "diagnosis_sop": [{     # Диагноз сопутствующий
-          "MKB": "A00.0",
-          "descr": "Sop descr"
+          "MKB": "I13",
+          "descr": "Sop descr",
+          "stage": "02"
         }],
         "diagnosis_osl": [{     # Диагноз осложнения
-          "MKB": "A00.1",
-          "descr": "Osl descr"
+          "MKB": "I13",
+          "descr": "Osl descr",
+          "stage": "02"
         }],
         # "recommendations": "",  # Рекомендации
         # "notes": "",  # Примечания

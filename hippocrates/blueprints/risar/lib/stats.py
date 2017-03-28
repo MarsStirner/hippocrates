@@ -1,20 +1,32 @@
 # -*- coding: utf-8 -*-
+import datetime
+import collections
 
+from itertools import groupby
+
+from sqlalchemy import func, and_, between
+from sqlalchemy.orm import aliased
+
+from hippocrates.blueprints.risar.lib.risk_groups.needles_haystacks import any_thing
 from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, checkup_flat_codes, \
     pregnancy_card_attrs, risar_epicrisis, request_type_gynecological
-from hippocrates.blueprints.risar.models.risar import RisarRiskGroup
+from hippocrates.blueprints.risar.models.risar import RisarRiskGroup, RisarEpicrisis_Children
 from hippocrates.blueprints.risar.models.radzinsky_risks import RisarRadzinskyRisks, \
     RisarRegionalRiskRate
 from hippocrates.blueprints.risar.lib.specific import SpecificsManager
+
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
+from nemesis.models.actions import ActionType, Action, ActionProperty_Date, ActionProperty, ActionPropertyType
 from nemesis.models.enums import PerinatalRiskRate
-from nemesis.models.risar import rbRadzinskyRiskRate, rbRisarRegionalRiskRate
-from sqlalchemy import func, and_
-from sqlalchemy.orm import aliased
+from nemesis.models.risar import rbRadzinskyRiskRate, rbRisarRegionalRiskRate, rbRateType, TerritorialRate
+from nemesis.models.event import EventType, Event
+from nemesis.models.exists import rbRequestType
+from nemesis.models.diagnosis import rbDiagnosisKind, rbDiagnosisTypeN, Diagnosis, Diagnostic, Action_Diagnosis
+from nemesis.systemwide import db, cache
+from nemesis.models.client import Client
 
 
 class StatsController(BaseModelController):
-
     @classmethod
     def get_selecter(cls):
         return StatsSelecter()
@@ -40,7 +52,7 @@ class StatsController(BaseModelController):
         distr_data = [
             [str(week_num), 0]
             for week_num in (range(1, 41) + ['40+'])
-        ]
+            ]
         sel = self.get_selecter()
         events_data = sel.get_events_preg_weeks(person_id, curation_level)
         for event_id, preg_week in events_data:
@@ -81,7 +93,6 @@ class StatsController(BaseModelController):
 
 
 class StatsSelecter(BaseSelecter):
-
     def query_main(self, person_id, curation_level):
         Person = self.model_provider.get('Person')
         PersonInEvent = aliased(Person, name='PersonInEvent')
@@ -182,14 +193,14 @@ class StatsSelecter(BaseSelecter):
         ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
 
         return self.model_provider.get_query('Event').join(
-                EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
-            ).filter(
-                Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
-                Action.deleted == 0, ActionProperty.deleted == 0,
-                ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'pregnancy_start_date'
-            ).with_entities(
-                Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
-            )
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == pregnancy_card_attrs, ActionPropertyType.code == 'pregnancy_start_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
+        )
 
     def query_epicrisis(self):
         Action = self.model_provider.get('Action')
@@ -199,14 +210,14 @@ class StatsSelecter(BaseSelecter):
         ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
 
         return self.model_provider.get_query('Action').join(
-                ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
-            ).filter(
-                Action.deleted == 0, ActionProperty.deleted == 0,
-                ActionType.flatCode == risar_epicrisis, ActionPropertyType.code == 'delivery_date'
-            ).with_entities(
-                Action.event_id.label('event_id'), Action.id.label('action_id'),
-                ActionProperty_Date.value.label('delivery_date')
-            )
+            ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == risar_epicrisis, ActionPropertyType.code == 'delivery_date'
+        ).with_entities(
+            Action.event_id.label('event_id'), Action.id.label('action_id'),
+            ActionProperty_Date.value.label('delivery_date')
+        )
 
     def get_current_cards_overview(self, person_id, curation_level=None):
         Event = self.model_provider.get('Event')
@@ -543,3 +554,217 @@ mather_death_koef_diags = (
     'M32.1', 'M33.1', 'M33.2', 'M34.0', 'M35.0', 'M35.1', 'M45', 'D69.8',
     'D68.3',
 )
+
+
+@cache.memoize(timeout=60)
+def get_list_of_alive_dead_actions(start_date, end_date):
+    qr = db.select(
+        (RisarEpicrisis_Children.alive, func.group_concat(RisarEpicrisis_Children.id.distinct())),
+        whereclause=db.and_(
+            ActionType.flatCode == 'epicrisis',
+            rbRequestType.code == request_type_pregnancy,
+            Action.event_id == Event.id,
+            ActionType.id == Action.actionType_id,
+            EventType.id == Event.eventType_id,
+            RisarEpicrisis_Children.action_id == Action.id,
+            rbRequestType.id == EventType.requestType_id,
+            Event.deleted == 0,
+            Action.deleted == 0,
+            RisarEpicrisis_Children.alive.isnot(None),
+            between(RisarEpicrisis_Children.date, start_date, end_date)
+        ),
+        from_obj=(
+            Event, EventType, rbRequestType, Action, ActionType, RisarEpicrisis_Children
+        ),
+        group_by=RisarEpicrisis_Children.alive
+    ).distinct()
+    return dict((k, v.split(',')) for k, v in db.session.execute(qr))
+
+
+@cache.memoize(timeout=60)
+def get_children_stat(children_ids=None):
+    if children_ids:
+        selectable1 = db.select(
+            (RisarEpicrisis_Children.date, func.count(RisarEpicrisis_Children.id.distinct()),),
+            whereclause=db.and_(
+                ActionType.flatCode == 'epicrisis',
+                rbRequestType.code == request_type_pregnancy,
+                Action.event_id == Event.id,
+                ActionType.id == Action.actionType_id,
+                EventType.id == Event.eventType_id,
+                rbRequestType.id == EventType.requestType_id,
+                RisarEpicrisis_Children.action_id == Action.id,
+                Event.deleted == 0,
+                Action.deleted == 0,
+                RisarEpicrisis_Children.id.in_(children_ids),
+            ),
+            from_obj=(
+                Event, EventType, rbRequestType, Action, ActionType, RisarEpicrisis_Children
+            ),
+            group_by=(func.date(RisarEpicrisis_Children.date)),
+            order_by=(RisarEpicrisis_Children.date)
+        )
+        return collections.OrderedDict((x, y) for x, y in db.session.execute(selectable1))
+    return {}
+
+
+@cache.memoize(timeout=60)
+def get_children_cards_info(children_ids=None):
+    if not children_ids:
+        return children_ids
+    query = db.session.query(
+        RisarEpicrisis_Children.id.distinct().label('id'),
+        RisarEpicrisis_Children.date.label('children_date'),
+        RisarEpicrisis_Children.action_id.label('action_id'),
+        Action.event_id.label('event_id'),
+        Event.externalId.label('external_id'),
+        func.CONCAT_WS(' ', Client.lastName, Client.firstName, Client.patrName).label('fio'),
+    ).join(
+        Action,
+        Event, Client, EventType, rbRequestType,
+        ActionType,
+    ).filter(
+        RisarEpicrisis_Children.id.in_(children_ids)
+    ).order_by('children_date')
+
+    grouped_by_date = groupby(
+        query.all(), key=lambda x: x.children_date
+    )
+
+    def make_card_info(row):
+        return {
+            'id': row.id,
+            'action_id': row.action_id,
+            'event_id': row.event_id,
+            'external_id': row.external_id,
+            'patient_fio': row.fio
+        }
+
+    return dict((idate, map(make_card_info, rows)) for idate, rows in grouped_by_date)
+
+
+@cache.memoize(timeout=60)
+def get_maternal_death(start_date, end_date):
+    query = db.session.query(
+        Action.id.label('action_id'),
+        ActionProperty_Date.value.label('created_ymd'),
+        Action.event_id.label('event_id'),
+        Event.externalId.label('external_id'),
+        func.CONCAT_WS(' ', Client.lastName, Client.firstName, Client.patrName).label('fio'),
+        func.group_concat(Diagnostic.MKB).label('diagnostic_mkbs')
+    ).join(
+        Event, Client, EventType, rbRequestType,
+        ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date,
+    ).filter(
+        ActionType.flatCode == 'epicrisis',
+        ActionPropertyType.code == 'death_date',
+        rbRequestType.code == request_type_pregnancy,
+        Action.event_id == Event.id,
+        ActionProperty.action_id == Action.id,
+        ActionPropertyType.id == ActionProperty.type_id,
+        ActionType.id == Action.actionType_id,
+        ActionProperty_Date.id == ActionProperty.id,
+        EventType.id == Event.eventType_id,
+        rbRequestType.id == EventType.requestType_id,
+        Event.deleted == 0,
+        Action.deleted == 0,
+        between(
+            ActionProperty_Date.value,
+            start_date,
+            end_date
+        )
+    ).join(
+        Diagnostic, Diagnostic.action_id == Action.id
+    ).join(
+        Diagnosis
+    ).join(
+        Action_Diagnosis
+    ).join(
+        rbDiagnosisKind
+    ).join(
+        rbDiagnosisTypeN
+    ).filter(
+        Diagnosis.endDate.is_(None),
+        rbDiagnosisKind.code == 'main',
+        rbDiagnosisTypeN.code == 'pathanatomical',
+    ).order_by(
+        'created_ymd'
+    ).group_by(Action.id)
+
+    def make_card(card_info):
+        return {
+            'action_id': card_info[0],
+            'event_id': card_info[2],
+            'external_id': card_info[3],
+            'patient_fio': card_info[4],
+        }
+
+    rows_for_maternal_death = set()
+    for row in query.all():
+        if any_thing(row.diagnostic_mkbs.split(','), mather_death_koef_diags, lambda x: x):
+            rows_for_maternal_death.add(row[:5])
+
+    grouped_by_date = groupby(
+        rows_for_maternal_death, key=lambda x: x[1]
+    )
+
+    dc = {}
+    for idate, cards_info in grouped_by_date:
+        cards_info = list(cards_info)
+        dc[idate] = {
+            'cards': map(make_card, cards_info),
+            'length': len(cards_info),
+        }
+    return dc
+
+
+class DeathStatCtrl(object):
+    def __init__(self, start_date, end_date):
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def get_amt_alive_children(self, ):
+        children_ids = get_list_of_alive_dead_actions(self.start_date, self.end_date).get(1, [])
+        alive_children = get_children_stat(children_ids)
+        return float(sum(alive_children.values())) or 1.0
+
+    def get_amt_dead_chilren(self, ):
+        children_ids = get_list_of_alive_dead_actions(self.start_date, self.end_date).get(0, [])
+        dead_children = get_children_stat(children_ids)
+        return float(sum(dead_children.values()))
+
+    def get_maternal_coefficient(self, ):
+        sm = map(lambda x: x.get('length'), get_maternal_death(self.start_date, self.end_date).values())
+        maternal_death_all = float(sum(sm))
+        return maternal_death_all / self.get_amt_alive_children() * 100000
+
+    def get_infant_death_coefficient(self, ):
+        dead = self.get_amt_dead_chilren()
+        alive = self.get_amt_alive_children()
+        return (dead / (dead + alive) * 1000)
+
+
+def calulate_death_coefficients(year=None):
+    last_year = year or datetime.datetime.now().date().year - 1
+    year_start = datetime.date(last_year, 1, 1)
+    year_end = datetime.date(last_year, 12, 31)
+    id_by_code = dict((row.code, row.id) for row in db.session.query(rbRateType).all())
+    perinatal_rate_id = id_by_code.get('perinatal_death')
+    maternal_death_rate_id = id_by_code.get('maternal_death')
+    d = DeathStatCtrl(year_start, year_end)
+
+    def set_rate_value(year, maternal_death_rate_id, value):
+        from nemesis.app import app
+        regions_in_config = app.config.get('RISAR_REGIONS', [])
+        region = regions_in_config[0] if regions_in_config else '00000000000'
+        row = db.session.query(TerritorialRate).filter_by(
+            kladr_code=region, rate_type_id=maternal_death_rate_id, year=year
+        ).order_by(TerritorialRate.id.desc()).first()
+        if not row:
+            row = TerritorialRate(kladr_code=region, rate_type_id=maternal_death_rate_id, year=year)
+            db.session.add(row)
+        row.value = value
+        db.session.commit()
+
+    set_rate_value(last_year, perinatal_rate_id, value=d.get_infant_death_coefficient())
+    set_rate_value(last_year, maternal_death_rate_id, value=d.get_maternal_coefficient())

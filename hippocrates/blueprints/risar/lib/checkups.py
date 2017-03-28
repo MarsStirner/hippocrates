@@ -132,29 +132,29 @@ def validate_send_to_mis_checkup(checkup):
     #     Diagnostic.rbAcheResult_id.isnot(None),
     # )
 
-    if not talon25.propsByCode['medical_care'].value:
+    if not talon25.get_prop_value('medical_care'):
         res = False
-    elif not talon25.propsByCode['visit_place'].value:
+    elif not talon25.get_prop_value('visit_place'):
         res = False
-    elif not talon25.propsByCode['visit_reason'].value:
+    elif not talon25.get_prop_value('visit_reason'):
         res = False
-    elif not talon25.propsByCode['visit_type'].value:
+    elif not talon25.get_prop_value('visit_type'):
         res = False
-    elif not talon25.propsByCode['finished_treatment'].value:
+    elif not talon25.get_prop_value('finished_treatment'):
         res = False
-    elif not talon25.propsByCode['initial_treatment'].value:
+    elif not talon25.get_prop_value('initial_treatment'):
         res = False
-    elif not talon25.propsByCode['treatment_result'].value:
+    elif not talon25.get_prop_value('treatment_result'):
         res = False
-    elif not talon25.propsByCode['payment'].value:
+    elif not talon25.get_prop_value('payment'):
         res = False
-    elif not talon25.propsByCode['prof_med_help'].value:
+    elif not talon25.get_prop_value('prof_med_help'):
         res = False
-    elif not talon25.propsByCode['condit_med_help'].value:
+    elif not talon25.get_prop_value('condit_med_help'):
         res = False
-    elif not talon25.propsByCode['ache_result'].value:
+    elif not talon25.get_prop_value('ache_result'):
         res = False
-    elif not talon25.propsByCode['services'].value:
+    elif not talon25.get_prop_value('services'):
         res = False
     # elif not db.session.query(dg_q.exists()).scalar():
     #     res = False

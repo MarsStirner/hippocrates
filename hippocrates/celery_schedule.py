@@ -15,6 +15,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'celery_tasks.risar_tasks.update_card_attrs_cfrs',
         'schedule': crontab(minute=0, hour=0),
     },
+    'calulate_death_coefficients': {
+        'task': 'celery_tasks.risar_tasks.calulate_death_coefficients',
+        'schedule': crontab(minute=0, hour=0, day_of_month=1, month_of_year=1),
+    },
 }
 
 schedule_close_yesterday_checkups = {
@@ -26,6 +30,7 @@ schedule_close_yesterday_checkups = {
 
 try:
     from celery_schedule_local import *
+
     print('modified schedule used')
 except ImportError:
     pass

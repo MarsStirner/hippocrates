@@ -7,191 +7,202 @@ class AnamnesisMotherSchema(Schema):
     Схемы для проверки валидности данных анамнеза матери
     """
     schema = [{
-        "$schema": "http://json-schema.org/draft-04/schema",
-        "id": "mother_anamnesis_schema",
-        "type": "object",
-        "properties": {
-            "education": {
-                "id": "mother_anamnesis_schema/education",
-                "type": "string",
-                "description": "Код значения образования"
-            },
-            "work_group": {
-                "id": "mother_anamnesis_schema/work_group",
-                "type": "string",
-                "description": "Код значения общественно-профессиональной группы"
-            },
-            "professional_properties": {
-                "id": "mother_anamnesis_schema/professional_properties",
-                "type": "string",
-                "description": "Код значения профессиональных вредностей"
-            },
-            "family_income": {
-                "id": "mother_anamnesis_schema/family_income",
-                "type": "string",
-                "description": "Код значения дохода семьи"
-            },
-            "menstruation_start_age": {
-                "id": "mother_anamnesis_schema/menstruation_start_age",
-                "type": "string",
-                "description": "Возраст женщины,когда начались менструации"
-            },
-            "menstruation_duration": {
-                "id": "mother_anamnesis_schema/menstruation_duration",
-                "type": "string",
-                "description": "Продолжительность менструаций"
-            },
-            "menstruation_period": {
-                "id": "mother_anamnesis_schema/menstruation_period",
-                "type": "string",
-                "description": "Продолжительность менструального цикла"
-            },
-            "menstrual_disorder": {
-                "id": "mother_anamnesis_schema/menstrual_disorder",
-                "type": "boolean",
-                "description": "Сведения о нарушении менструального цикла женщины"
-            },
-            "sex_life_age": {
-                "id": "mother_anamnesis__schema/sex_life_age",
-                "type": "integer",
-                "description": "Возраст начала половой жизни женщины"
-            },
-            "fertilization_type": {
-                "id": "mother_anamnesis_schema/fertilization_type",
-                "type": "string",
-                "description": "Код значения способа оплодотворения"
-            },
-            "intrauterine_operation": {
-                "id": "mother_anamnesis_schema/intrauterine_operation",
-                "type": "boolean",
-                "description": "Наличие внутриматочного вмешательства в анамнезе женщины"
-            },
-            "multiple_fetation": {
-                "id": "mother_anamnesis_schema/multiple_fetation",
-                "type": "boolean",
-                "description": "Наличие многоплодных беременностей в анамнезе матери"
-            },
-            "infertility": {
-                "id": "mother_anamnesis_schema/infertility",
-                "type": "object",
-                "description": "Блок информации о бесплодии в анамнезе женщины, если такое имело место",
-                "properties": {
-                    "infertility_occurence": {
-                        "id": "mother_anamnesis_schema/infertility/infertility_occurence",
-                        "type": "boolean",
-                        "description": "Наличие бесплодия в анамнезе женщины"
-                    },
-                    "infertility_type": {
-                        "id": "mother_anamnesis_schema/infertility/infertility_type",
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "id": "mother_anamnesis_schema",
+    "type": "object",
+    "properties": {
+        "education": {
+            "id": "mother_anamnesis_schema/education",
+            "type": "string",
+            "description": "Код значения образования"
+        },
+        "work_group": {
+            "id": "mother_anamnesis_schema/work_group",
+            "type": "string",
+            "description": "Код значения общественно-профессиональной группы"
+        },
+        "professional_properties": {
+            "id": "mother_anamnesis_schema/professional_properties",
+            "type": "string",
+            "description": "Код значения профессиональных вредностей"
+        },
+        "family_income": {
+            "id": "mother_anamnesis_schema/family_income",
+            "type": "string",
+            "description": "Код значения дохода семьи"
+        },
+        "menstruation_start_age": {
+            "id": "mother_anamnesis_schema/menstruation_start_age",
+            "type": "string",
+            "description": "Возраст женщины,когда начались менструации"
+        },
+        "menstruation_duration": {
+            "id": "mother_anamnesis_schema/menstruation_duration",
+            "type": "string",
+            "description": "Продолжительность менструаций"
+        },
+        "menstruation_period": {
+            "id": "mother_anamnesis_schema/menstruation_period",
+            "type": "string",
+            "description": "Продолжительность менструального цикла"
+        },
+        "menstrual_disorder": {
+            "id": "mother_anamnesis_schema/menstrual_disorder",
+            "type": "boolean",
+            "description": "Сведения о нарушении менструального цикла женщины"
+        },
+        "sex_life_age": {
+            "id": "mother_anamnesis__schema/sex_life_age",
+            "type": "integer",
+            "description": "Возраст начала половой жизни женщины"
+        },
+        "fertilization_type": {
+            "id": "mother_anamnesis_schema/fertilization_type",
+            "type": "string",
+            "description": "Код значения способа оплодотворения"
+        },
+        "intrauterine_operation": {
+            "id": "mother_anamnesis_schema/intrauterine_operation",
+            "type": "boolean",
+            "description": "Наличие внутриматочного вмешательства в анамнезе женщины"
+        },
+        "uterine_scar_quantity": {
+            "type": "string",
+            "description": "Количество рубцов на матке, код по справочнику rbRisarUterineScar"
+        },
+        "uterine_scar_location": {
+            "type": "string",
+            "description": "Расположение рубца на матке, код по справочнику rbRisarUterineScarLocation"
+        },
+        "solitary_paired": {
+            "type": "boolean",
+            "description": "Наличие единственной почки"
+        },
+        "multiple_fetation": {
+            "id": "mother_anamnesis_schema/multiple_fetation",
+            "type": "boolean",
+            "description": "Наличие многоплодных беременностей в анамнезе матери"
+        },
+        "infertility": {
+            "id": "mother_anamnesis_schema/infertility",
+            "type": "object",
+            "description": "Блок информации о бесплодии в анамнезе женщины, если такое имело место",
+            "properties": {
+                "infertility_occurence": {
+                    "id": "mother_anamnesis_schema/infertility/infertility_occurence",
+                    "type": "boolean",
+                    "description": "Наличие бесплодия в анамнезе женщины"
+                },
+                "infertility_type": {
+                    "id": "mother_anamnesis_schema/infertility/infertility_type",
+                    "type": "string",
+                    "description": "Код значения типа бесплодия"
+                },
+                "infetrility_duration": {
+                    "id": "mother_anamnesis_schema/infertility/infetrility_duration",
+                    "type": "integer",
+                    "description": "Длительность бесплодия, лет"
+                },
+                "infertility_treatment": {
+                    "id": "mother_anamnesis_schema/infertility/infertility_treatment",
+                    "type": "array",
+                    "description": "Сведения о методах лечения бесплодия",
+                    "items": {
                         "type": "string",
-                        "description": "Код значения типа бесплодия"
-                    },
-                    "infetrility_duration": {
-                        "id": "mother_anamnesis_schema/infertility/infetrility_duration",
-                        "type": "integer",
-                        "description": "Длительность бесплодия, лет"
-                    },
-                    "infertility_treatment": {
-                        "id": "mother_anamnesis_schema/infertility/infertility_treatment",
-                        "type": "array",
-                        "description": "Сведения о методах лечения бесплодия",
-                        "items": {
-                            "type": "string",
-                            "description": "Код значения метода лечения"
-                        }
-                    },
-                    "infertility_causes": {
-                        "id": "mother_anamnesis_schema/infertility/infertility_causes",
-                        "type": "array",
-                        "description": "Сведения о причинах бесплодия",
-                        "items": {
-                            "type": "string",
-                            "description": "Код причины бесплодия"
-                        }
+                        "description": "Код значения метода лечения"
                     }
                 },
-                "required": [
-                    "infertility_occurence",
-                    "infertility_type",
-                    "infetrility_duration",
-                    "infertility_treatment",
-                    "infertility_causes"
-                ]
-            },
-            "smoking": {
-                "id": "mother_anamnesisr_schema/smoking",
-                "type": "boolean",
-                "description": "Сведения о курении"
-            },
-            "alcohol": {
-                "id": "mother_anamnesis_schema/alcohol",
-                "type": "boolean",
-                "description": "Сведения об алкоголе"
-            },
-            "toxic": {
-                "id": "mother_anamnesis_schema/toxic",
-                "type": "boolean",
-                "description": "Сведения о токсических веществах"
-            },
-            "drugs": {
-                "id": "mother_anamnesis_schema/drugs",
-                "type": "boolean",
-                "description": "Сведения о наркотиках"
-            },
-            "contraception": {
-                "id": "mother_anamnesis_schema/contraception",
-                "type": "array",
-                "description":"Сведения о методах контрацепции",
-                "items": {
+                "infertility_causes": {
+                    "id": "mother_anamnesis_schema/infertility/infertility_causes",
+                    "type": "array",
+                    "description": "Сведения о причинах бесплодия",
+                    "items": {
                         "type": "string",
-                        "description": "Код метода контрацепции по справочнику"
+                        "description": "Код причины бесплодия"
                     }
-            },
-            "hereditary": {
-                "id": "mother_anamnesis_schema/hereditary",
-                "type": "array",
-                "description": "Сведения о наследственных заболеванияъ женщины",
-                "items": {
-                    "type": "string",
-                    "description": "Код наследственного заболевания по справочнику"
                 }
             },
-            "finished_diseases": {
-                "id": "mother_anamnesis_schema/finished_diseases",
+            "required": [
+                "infertility_occurence",
+                "infertility_type",
+                "infetrility_duration",
+                "infertility_treatment",
+                "infertility_causes"
+            ]
+        },
+        "smoking": {
+            "id": "mother_anamnesisr_schema/smoking",
+            "type": "boolean",
+            "description": "Сведения о курении"
+        },
+        "alcohol": {
+            "id": "mother_anamnesis_schema/alcohol",
+            "type": "boolean",
+            "description": "Сведения об алкоголе"
+        },
+        "toxic": {
+            "id": "mother_anamnesis_schema/toxic",
+            "type": "boolean",
+            "description": "Сведения о токсических веществах"
+        },
+        "drugs": {
+            "id": "mother_anamnesis_schema/drugs",
+            "type": "boolean",
+            "description": "Сведения о наркотиках"
+        },
+        "contraception": {
+            "id": "mother_anamnesis_schema/contraception",
+            "type": "array",
+            "description":"Сведения о методах контрацепции",
+            "items": {
+                    "type": "string",
+                    "description": "Код метода контрацепции по справочнику"
+                }
+        },
+        "hereditary": {
+            "id": "mother_anamnesis_schema/hereditary",
+            "type": "array",
+            "description": "Сведения о наследственных заболеванияъ женщины",
+            "items": {
                 "type": "string",
-                "description": "Сведения о перенесённых заболеваниях"
-            },
-            "current_diseases": {
-                "id": "mother_anamnesis_schema/current_diseases",
-                "type": "array",
-                "description": "Список текущих заболеваний женщины в виде кодов МКБ",
-                "items": {
-                        "type": "string",
-                        "description": "Код заболевания по МКБ-10",
-                        "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
-                    }
-            },
-            "last_period_date": {
-                "id": "mother_anamnesis_schema/last_period_date",
-                "type": "string",
-                "description": "Дата первого дня последней менструации"
-            },
-            "preeclampsia_mother_sister": {
-                "id": "mother_anamnesis_schema/preeclampsia_mother_sister",
-                "type": "boolean",
-                "description": "Наличие преэклампсии у матери или сестры"
-            },
-            "marital_status": {
-                "id": "mother_anamnesis_schema/marital_status",
-                "type": "string",
-                "description": "Код значения семейного положения"
+                "description": "Код наследственного заболевания по справочнику"
             }
         },
-        "required": [
-            "last_period_date",
-            "marital_status"
-        ]
-    }]
+        "finished_diseases": {
+            "id": "mother_anamnesis_schema/finished_diseases",
+            "type": "string",
+            "description": "Сведения о перенесённых заболеваниях"
+        },
+        "current_diseases": {
+            "id": "mother_anamnesis_schema/current_diseases",
+            "type": "array",
+            "description": "Список текущих заболеваний женщины в виде кодов МКБ",
+            "items": {
+                    "type": "string",
+                    "description": "Код заболевания по МКБ-10",
+                    "pattern": "^([A-Z][0-9][0-9])(\\.([0-9]{1,2})(\\.[0-9]+)?)?$"
+                }
+        },
+        "last_period_date": {
+            "id": "mother_anamnesis_schema/last_period_date",
+            "type": "string",
+            "description": "Дата первого дня последней менструации"
+        },
+        "preeclampsia_mother_sister": {
+            "id": "mother_anamnesis_schema/preeclampsia_mother_sister",
+            "type": "boolean",
+            "description": "Наличие преэклампсии у матери или сестры"
+        },
+        "marital_status": {
+            "id": "mother_anamnesis_schema/marital_status",
+            "type": "string",
+            "description": "Код значения семейного положения"
+        }
+    },
+    "required": [
+        "marital_status"
+    ]
+}]
 
 
 class AnamnesisFatherSchema(Schema):

@@ -6,7 +6,6 @@
 @date: 06.04.2016
 
 """
-
 from ..test import make_login, make_api_request
 from test_data import (obs_first_data)
 
@@ -29,8 +28,10 @@ def delete_checkup(session, card_id, checkup_id):
     return result
 
 
-def test_register_edit_delete_first_checkup(card_id):
+def test_register_edit_delete_first_checkup(card_id, checkup_id):
     with make_login() as session:
+        # edit_checkup(session, card_id, checkup_id, obs_first_data)
+        create_checkup(session, card_id, obs_first_data)
         # result = create_checkup(session, card_id, obs_first_data)
         # checkup = result['result']
         # checkup_id = checkup['exam_obs_id']

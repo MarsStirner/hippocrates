@@ -123,8 +123,8 @@ class AbstractCard(object):
     @cache.cached_call
     def get_client_diagnostics(self, beg_date, end_date=None, including_closed=False):
         """
-        :type beg_date: datetime.date
-        :type end_date: datetime.date | NoneType
+        :type beg_date: datetime.datetime
+        :type end_date: datetime.datetime | NoneType
         :type including_closed: bool
         :param beg_date:
         :param end_date:
@@ -505,8 +505,8 @@ class PregnancyCard(AbstractCard):
         action_mkb_q = db.session.query(Action).join(
             ActionType
         ).join(
-            diag_q, and_(func.date(Action.begDate) <= func.coalesce(diag_q.c.end_date, func.curdate()),
-                         func.date(func.coalesce(Action.endDate, func.curdate())) >= diag_q.c.beg_date)
+            diag_q, and_(Action.begDate <= func.coalesce(diag_q.c.end_date, func.curdate()),
+                         func.coalesce(Action.endDate, func.curdate()) >= diag_q.c.beg_date)
         ).filter(
             Action.deleted == 0,
             Action.event_id == self.event.id,

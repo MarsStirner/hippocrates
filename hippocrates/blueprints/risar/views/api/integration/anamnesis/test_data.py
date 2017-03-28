@@ -26,6 +26,7 @@ anamnesis_m_data2 = {
         "infertility_treatment": ["02", "03"],
         "infertility_causes": ["02", "03"]
     },
+    # 'uterine_scar_quantity':'01',
     "smoking": False,
     "alcohol": False,
     "toxic": True,

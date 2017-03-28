@@ -4,7 +4,7 @@
 from nemesis.systemwide import celery
 
 # tasks
-from risar_tasks import update_card_attrs_cfrs
+from risar_tasks import update_card_attrs_cfrs, run_coefficient_calculations
 
 
 @celery.task
