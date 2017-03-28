@@ -305,13 +305,10 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     }
 
     $scope.$watch('event.info.set_date', function (n, o) {
-        if(n !== undefined && typeof n === 'string' && n !== o) {
-            var date = new Date(n);
-            if(typeof o === 'object') {
-                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
-            }
-
-            $scope.event.info.set_date = date
+        // при выборе не сегодняшнего дня ставить время 08:00
+        if (n !== o && moment(n).startOf('d').diff(moment(o).startOf('d'), 'days') !== 0) {
+            var nd = moment(n).set({hour: 8, minute: 0, second: 0});
+            $scope.event.info.set_date = nd;
         }
     });
 
