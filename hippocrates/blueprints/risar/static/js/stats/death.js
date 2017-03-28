@@ -14,9 +14,6 @@ WebMis20.controller('BaseDeathDateStatCtrl', ['$scope', 'RisarApi', function ($s
         var st = moment(n[0]),
             end =moment(n[1]);
 
-        if (st.diff(end, 'days') === 0) {
-            return
-        }
         if (st.isBefore(end)) {
              $scope.refresh_gistograms_by_period();
          } else {
@@ -24,7 +21,7 @@ WebMis20.controller('BaseDeathDateStatCtrl', ['$scope', 'RisarApi', function ($s
                  end = moment($scope.curDate);
                  $scope.dt.end_date = end.clone().toDate();
              }
-            if (!st.isValid() || !st.isBefore(end)) {
+            if (!st.isValid() || !st.isBefore(end) || st.diff(end, 'days') === 0) {
                  st = end.clone().add(-1, 'd');
                  $scope.dt.start_date = st.clone().toDate();
             }
