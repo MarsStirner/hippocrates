@@ -151,3 +151,14 @@ def api_0_service_at_price_get(contract_id=None):
     at_service_data = service_ctrl.get_service_data_for_at_tree(args)
 
     return ServiceRepr().represent_services_by_at(at_service_data)
+
+
+@module.route('/api/0/service/not_in_invoice/')
+@module.route('/api/0/service/not_in_invoice/<int:event_id>')
+@api_method
+def api_0_service_not_in_invoice_get(event_id=None):
+    if not event_id:
+        raise ApiException(400, u'`event_id` required')
+    service_ctrl = ServiceController()
+    s_list = service_ctrl.get_services_not_in_invoice(event_id)
+    return ServiceRepr().represent_listed_event_services(s_list)

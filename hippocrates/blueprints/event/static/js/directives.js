@@ -149,7 +149,7 @@ angular.module('WebMis20')
                 scope.service.in_new_invoice = true;
             };
             scope.removeServiceFromInvoice = function () {
-                var idx = _.indexOf(scope.newInvoice, scope.service);
+                var idx = _.findIndex(scope.newInvoice, function (obj) { return obj.id === scope.service.id });
                 scope.newInvoice.splice(idx, 1);
                 scope.service.in_new_invoice = false;
             };

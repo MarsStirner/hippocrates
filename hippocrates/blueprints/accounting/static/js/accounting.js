@@ -263,6 +263,9 @@ WebMis20.service('AccountingService', ['$q', 'WebMisApi', function ($q, WebMisAp
     this.getServiceActionTypePrices = function (contract_id) {
         return WebMisApi.service.get_service_at_price(contract_id);
     };
+    this.get_services_not_in_invoice = function (event_id) {
+        return WebMisApi.service.get_services_not_in_invoice(event_id);
+    };
     this.get_invoice = function (invoice_id, args) {
         if (args !== undefined && args.hasOwnProperty('service_list')) {
             args.service_list = args.service_list.map(function (service) {

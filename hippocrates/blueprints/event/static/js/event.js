@@ -512,6 +512,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
         record_count: null
     };
     $scope.newInvoiceServiceList = [];
+    $scope.newInvoiceServiceMap = {};
     $scope.ps_invoice = new PrintingService("invoice");
 
     $scope.refreshServiceList = function (set_page) {
@@ -579,16 +580,29 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     };
     $scope.startEditingInvoice = function () {
         $scope.editingInvoice = true;
-        angular.forEach($scope.event.services, function (service) {
-            if (!service.in_invoice) {
-                service.in_new_invoice = true;
-                $scope.newInvoiceServiceList.push(service);
-            }
-        });
+        AccountingService.get_services_not_in_invoice($scope.event.event_id)
+            .then(function (service_list) {
+                var processed = {};
+                $scope.newInvoiceServiceMap = _.indexBy(service_list, 'id');
+                angular.forEach($scope.event.services, function (service) {
+                    if ($scope.newInvoiceServiceMap.hasOwnProperty(service.id)) {
+                        service.in_new_invoice = true;
+                        $scope.newInvoiceServiceList.push(service);
+                        processed[service.id] = service;
+                    }
+                });
+                // services from other pages
+                angular.forEach($scope.newInvoiceServiceMap, function (service, service_id) {
+                    if (!processed.hasOwnProperty(service_id)) {
+                        $scope.newInvoiceServiceList.push(service);
+                    }
+                });
+            });
     };
     $scope.cancelEditingInvoice = function () {
         $scope.editingInvoice = false;
         $scope.newInvoiceServiceList.splice(0, $scope.newInvoiceServiceList.length);
+        $scope.newInvoiceServiceMap = {};
     };
     $scope.finishEditingInvoice = function () {
         var contract_id = safe_traverse($scope.event.info, ['contract', 'id']);
