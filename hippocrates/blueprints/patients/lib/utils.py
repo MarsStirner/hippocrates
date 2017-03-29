@@ -146,7 +146,7 @@ def add_or_update_doc(client, data):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страна')
 
     region_id = safe_traverse(data, 'region', 'id')
-    if country_id == u'643' and not region_id:
+    if safe_traverse(data, 'country', 'code') == u'643' and not region_id:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Регион')
 
     if doc_id:
