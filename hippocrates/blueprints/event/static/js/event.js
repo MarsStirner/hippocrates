@@ -3,10 +3,10 @@
  */
 var EventDiagnosesCtrl = function ($scope) {
     $scope.can_view_diagnoses = function () {
-        return $scope.event.can_read_diagnoses;
+        return $scope.event.access.can_read_diagnoses;
     };
     $scope.can_open_diagnoses = function () {
-        return $scope.event.can_edit_diagnoses;
+        return $scope.event.access.can_edit_diagnoses;
     };
 };
 var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter, CurrentUser,
@@ -544,7 +544,7 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     };
 
     $scope.controlsAvailable = function () {
-        return !$scope.event.ro;
+        return $scope.event.access.invoice_all;
     };
     $scope.inEditMode = function () {
         return $scope.editing;
