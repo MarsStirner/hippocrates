@@ -33,7 +33,7 @@
                                         ng-if="canEditCheckup($index)">Изменить</a>
                                     <a href="javascript:void(0)" ng-if="!canEditCheckup($index)">Изменить</a>
                                 </li>
-                                <li ng-class="{disabled: !canEditCheckup($index)}" >
+                                <li ng-class="{disabled: !canCopyCheckup($index)}" >
                                     <a href="{{ url_for('.html_gyn_inspection_edit') }}?event_id=[[ header.event.id ]]&fill_from=[[checkup.id]]">Копировать</a>
                                 </li>
                             </ul>

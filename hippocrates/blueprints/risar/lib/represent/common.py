@@ -8,7 +8,7 @@ from hippocrates.blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from hippocrates.blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from hippocrates.blueprints.risar.lib.prev_children import get_previous_children
 from hippocrates.blueprints.risar.lib.chart import check_event_controlled
-from hippocrates.blueprints.risar.lib.checkups import can_read_checkup, can_edit_checkup
+from hippocrates.blueprints.risar.lib.checkups import can_read_checkup, can_edit_checkup, can_copy_checkup
 from hippocrates.blueprints.risar.lib.utils import action_as_dict, get_external_id
 from hippocrates.blueprints.risar.lib.anamnesis import get_delivery_date_based_on_epicrisis
 from hippocrates.blueprints.risar.risar_config import checkup_flat_codes, transfusion_apt_codes, pregnancy_apt_codes, \
@@ -443,6 +443,7 @@ def represent_checkup_access(action):
     return {
         'can_read': can_read_checkup(action),
         'can_edit': can_edit_checkup(action),
+        'can_copy': can_copy_checkup(action),
     }
 
 
