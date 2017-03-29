@@ -40,6 +40,7 @@ def fc_urls():
                 'delete_service': url_for('event.api_service_delete_service'),
                 'delete_event': url_for('event.api_delete_event'),
                 'get_events': url_for('event.api_get_events'),
+                'api_event_movings_get': url_for('event.api_0_event_movings_get', event_id=-99).replace('-99', '{0}'),
             }
         }
     }

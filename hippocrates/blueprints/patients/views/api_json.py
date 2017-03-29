@@ -2,9 +2,12 @@
 
 import datetime
 import logging
+import json
 import os
 
-from flask import request
+import math
+
+from flask import current_app, request
 
 from nemesis.app import app
 from nemesis.systemwide import db
@@ -22,7 +25,6 @@ from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, Cli
     add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
     add_or_update_work_soc_status, store_file_locally
 )
-from sqlalchemy.orm import joinedload
 
 __author__ = 'mmalkov'
 
@@ -33,27 +35,40 @@ logger = logging.getLogger('simple')
 @api_method
 def api_search_clients():
     query_string = request.args.get('q') or bail_out(ApiException(400, u'Параметр "q" должен быть указан и содержать строку'))
+    paginated = json.loads(request.args.get('paginated', 'false'))
+    current_page = int(request.args.get('current_page', 1))
+    items_per_page = int(request.args.get('items_per_page', 25))
     try:
         limit = int(request.args.get('limit', 100)) or bail_out(ApiException(400, u'Параметр limit должен быть положительным'))
     except ValueError:
         raise ApiException(400, u'Параметр limit должен быть числом')
 
     base_query = Client.query.outerjoin(ClientPolicy, ClientDocument, ClientContact)
-    id_list = []
 
-    if query_string:
-        result = SearchPatient.search(query_string, limit)
-        id_list = [item['id'] for item in result['result']['items']]
-        if id_list:
-            base_query = base_query.filter(Client.id.in_(id_list))
-        else:
-            return []
-    clients = base_query.order_by(db.func.field(Client.id, *id_list)).all()
-    context = ClientVisualizer()
-    if 'short' in request.args:
-        return map(context.make_short_client_info, clients)
+    max_matches = current_app.config.get('SPHINXQL_MAX_MATCHES', 10000)
+    result = SearchPatient.search(query_string, limit, paginated, current_page, items_per_page, max_matches)
+    total = safe_int(result['result']['meta']['total_found'])
+    total = total if total <= max_matches else max_matches
+    pages = int(math.ceil(total / float(items_per_page)))
+    id_list = [item['id'] for item in result['result']['items']]
+    if id_list:
+        base_query = base_query.filter(Client.id.in_(id_list))
     else:
-        return map(context.make_search_client_info, clients)
+        return []
+
+    base_query = base_query.order_by(db.func.field(Client.id, *id_list))
+    context = ClientVisualizer()
+    make_client_info = context.make_short_client_info if 'short' in request.args else context.make_search_client_info
+    client_info = map(make_client_info, base_query.all())
+
+    if paginated:
+        return {
+            'client_info': client_info,
+            'pages': pages,
+            'total_items': total,
+        }
+    else:
+        return client_info
 
 
 @module.route('/api/patient.json')

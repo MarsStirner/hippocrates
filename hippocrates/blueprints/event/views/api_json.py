@@ -228,7 +228,7 @@ def api_event_lab_res_dynamics():
 
     tissue_dict = dict(tissue_query)
 
-    dynamics = collections.defaultdict(lambda: {'test_name': '', 'values': {}})
+    dynamics = collections.defaultdict(lambda: {'test_name': '', 'norm': None, 'values': {}})
     dates = set()
     result = query.join(
         Action.actionType,
@@ -241,14 +241,23 @@ def api_event_lab_res_dynamics():
     props = [prop for prop, _ in result]
     vals = get_properties_values(props)
 
-    for (prop, test) in result:
-        if prop.id in vals and tissue_dict[prop.action_id]:
-            date = tissue_dict[prop.action_id]
-            dates.add(date)
-            dynamics[test.id]['test_name'] = test.name
-            dynamics[test.id]['values'][format_datetime(date)] = vals[prop.id]
-    dates = [format_datetime(d) for d in sorted(dates, reverse=True)]
-    return dates, dynamics
+    with db.session.no_autoflush:
+        for (prop, test) in result:
+            if prop.id in vals and tissue_dict[prop.action_id]:
+                date = tissue_dict[prop.action_id]
+                dates.add(date)
+
+                dynamics[test.id]['test_name'] = test.name
+                dynamics[test.id]['norm'] = prop.type.norm
+
+                val_info = dynamics[test.id]['values'].setdefault(format_datetime(date), {})
+                val_info['val'] = vals[prop.id]
+
+                prop.set_value_container_and_value(vals[prop.id])  # for norms calculation
+                val_info['value_in_norm'] = prop.check_value_norm()
+
+        dates = [format_datetime(d) for d in sorted(dates, reverse=True)]
+        return dates, dynamics
 
 
 @module.route('/api/event_hosp_beds_get.json', methods=['GET'])
@@ -734,3 +743,14 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
             eviz.make_action(action, pay_data.get(action.id)) for action in paginate.items
         ]
     }
+
+
+@module.route('/api/0/event/<int:event_id>/movings')
+@api_method
+def api_0_event_movings_get(event_id):
+    event = Event.query.get(event_id)
+    if not event.is_stationary:
+        raise ApiException(400, u'Обращение не является стационарным')
+
+    eviz = StationaryEventVisualizer()
+    return eviz.make_movings(event)

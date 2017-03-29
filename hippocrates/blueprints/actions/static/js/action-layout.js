@@ -131,7 +131,7 @@ angular.module('WebMis20')
                             switch (property.type.type_name) {
                                 case 'Constructor':
                                     inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}"\
-                                        id="[[{0}.type.id]]" al-item-focused />'.format('{0}', property.type.domain);
+                                        id="[[{0}.type.id]]" al-item-focused placeholder="Введите текст" />'.format('{0}', property.type.domain);
                                     break;
                                 case 'Text':
                                 case 'Html':
@@ -285,7 +285,7 @@ angular.module('WebMis20')
                                     property_name,
                                     property_code,
                                     property_is_assignable,
-                                    scope.action.readonly || property.has_pricelist_service,
+                                    scope.action.readonly || property.type.mandatory || property.has_pricelist_service,
                                     inner_template.format(property_code),
                                     property.type.norm ? property.type.norm : ''
                                 );

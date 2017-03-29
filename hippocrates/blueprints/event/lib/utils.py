@@ -149,6 +149,12 @@ class MovingController():
 
     def update_moving_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
+        moving.endDate = safe_datetime(moving_info.get('end_date'))
+        if moving.endDate is not None:
+            moving.status = ActionStatus.finished[0]
+        else:
+            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0] else moving.status
+
         moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
         moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
         moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
@@ -169,7 +175,7 @@ class MovingController():
 
         if not prev_action.endDate:
             prev_action.endDate = moving.begDate
-        prev_action.propsByCode['orgStructDirection'].value = moving.propsByCode['orgStructStay'].value
+        prev_action.propsByCode['orgStructTransfer'].value = moving.propsByCode['orgStructStay'].value
         db.session.add(prev_action)
         db.session.commit()
         return prev_action, moving
@@ -231,7 +237,8 @@ def update_event(event_id, event_data):
     event.contract_id = event_data['contract']['id']
     event.isPrimaryCode = event_data['is_primary']['id']
     event.order = event_data['order']['id']
-    event.orgStructure_id = event_data['org_structure']['id']
+    if event.is_policlinic:
+        event.orgStructure_id = event_data['org_structure']['id']
     event.result_id = safe_traverse(event_data, 'result', 'id')
     event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
     event.note = event_data['note']

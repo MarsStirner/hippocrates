@@ -305,13 +305,10 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     }
 
     $scope.$watch('event.info.set_date', function (n, o) {
-        if(n !== undefined && typeof n === 'string' && n !== o) {
-            var date = new Date(n);
-            if(typeof o === 'object') {
-                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
-            }
-
-            $scope.event.info.set_date = date
+        // при выборе не сегодняшнего дня ставить время 08:00
+        if (n !== o && moment(n).startOf('d').diff(moment(o).startOf('d'), 'days') !== 0) {
+            var nd = moment(n).set({hour: 8, minute: 0, second: 0});
+            $scope.event.info.set_date = nd;
         }
     });
 
@@ -384,10 +381,19 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService) {
 
 };
 
-var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConfig) {
+var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConfig, WebMisApi) {
     $scope.OrgStructure = RefBookService.get('OrgStructure');
     $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
 
+    $scope.refreshMovings = function () {
+        return WebMisApi.stationary.get_movings($scope.event.event_id)
+            .then(function (movings) {
+                Array.prototype.splice.apply(
+                    $scope.event.movings,
+                    [0, $scope.event.movings.length].concat(movings)
+                );
+            });
+    };
     $scope.moving_save = function (moving){
         return ApiCalls.wrapper('POST', WMConfig.url.event.moving_save, {}, moving)
     };
@@ -404,16 +410,53 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
             scope: scope
         }).result.then(function (result) {
             $scope.moving_save(result).then(function (result) {
-                $scope.event.movings[$scope.event.movings.length - 1] = result[0];
-                $scope.event.movings.push(result[1]);
+                $scope.refreshMovings();
+            });
+        });
+    };
+
+    $scope.change_moving = function(){
+        var scope = $scope.$new();
+        scope.model = {
+            event_id: $scope.event.event_id,
+            beg_date: new Date()
+        };
+        $modal.open({
+            templateUrl: 'modal-create-moving.html',
+            backdrop : 'static',
+            size: 'lg',
+            scope: scope
+        }).result.then(function (result) {
+            $scope.close_last_moving().then(function () {
+                $scope.moving_save(result).then(function (result) {
+                    $scope.refreshMovings();
+                });
+            });
+        });
+    };
+
+    $scope.edit_moving = function(moving){
+        var scope = $scope.$new();
+        scope.model = angular.copy(moving);
+        scope.event_admission_date = $scope.event.admission_date;
+        $scope.org_struct_changed(scope.model).then(function(){
+            $modal.open({
+                templateUrl: 'modal-create-hospBed.html',
+                backdrop : 'static',
+                size: 'lg',
+                scope: scope
+            }).result.then(function (result) {
+                $scope.moving_save(result).then(function (result) {
+                    $scope.refreshMovings();
+                });
             });
         });
     };
 
     $scope.close_last_moving = function(){
         var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null;
-        ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
-            $scope.event.movings[$scope.event.movings.length - 1] = result;
+        return ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
+            $scope.refreshMovings();
         })
     };
 
@@ -428,7 +471,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
                 scope: scope
             }).result.then(function (result) {
                 $scope.moving_save(result).then(function (result) {
-                angular.extend(moving, result);
+                    $scope.refreshMovings();
                 });
             });
         })
@@ -972,7 +1015,8 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
     'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
-WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig', EventMovingsCtrl]);
+WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig',
+    'WebMisApi', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',

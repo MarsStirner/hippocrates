@@ -27,7 +27,8 @@ def update_template_action(action, src_action):
     ])
 
     for k, v in src_action.propsByTypeId.iteritems():
-        if v.type.typeName not in NOT_COPYABLE_VALUE_TYPES:
+        if v.type.typeName not in NOT_COPYABLE_VALUE_TYPES and \
+                not v.type.notLoadableWithTemplate:
             action.setPropValue(k, v.value)
 
 

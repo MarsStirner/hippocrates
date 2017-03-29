@@ -127,16 +127,27 @@ def add_or_update_doc(client, data):
     if not doc_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип документа')
     serial = data.get('serial') or ''
+
     number = data.get('number')
     if not number:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер документа')
+
     beg_date = safe_date(data.get('beg_date'))
     if not beg_date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
     end_date = safe_date(data.get('end_date'))
+
     origin = data.get('origin')
     if not origin:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Выдан')
+
+    country_id = safe_traverse(data, 'country', 'id')
+    if not country_id:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страна')
+
+    region_id = safe_traverse(data, 'region', 'id')
+    if safe_traverse(data, 'country', 'code') == u'643' and not region_id:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Регион')
 
     if doc_id:
         doc = ClientDocument.query.get(doc_id)
@@ -147,8 +158,10 @@ def add_or_update_doc(client, data):
         doc.endDate = end_date
         doc.origin = origin
         doc.client = client
+        doc.country_id = country_id
+        doc.region_id = region_id
     else:
-        doc = ClientDocument.create(doc_type, serial, number, beg_date, end_date, origin, client)
+        doc = ClientDocument.create(doc_type, serial, number, beg_date, end_date, origin, client, country_id, region_id)
     return doc
 
 
