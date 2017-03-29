@@ -381,7 +381,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     </tr>\
     </thead>\
     <tbody>\
-    <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}">\
+    <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}" \
+        ng-style="action.status.code == \'cancelled\' ? {\'background-color\': \'pink\'} : {} ">\
         <td ng-click="open_action(action.id)">\
             <span ng-bind="action.name"></span>\
             <span ng-if="action.urgent" class="label"\
