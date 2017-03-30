@@ -394,7 +394,8 @@ def api_create_lab_direction():
         assigned = j['assigned']
         data = {
             'plannedEndDate': safe_datetime(j['planned_end_date']),
-            'isUrgent': safe_bool(j.get('urgent', False))
+            'isUrgent': safe_bool(j.get('urgent', False)),
+            'note': j.get('note')
         }
         service_data = j.get('service')
         ttj_data = j.get('ttj')
