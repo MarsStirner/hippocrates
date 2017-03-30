@@ -74,9 +74,9 @@ class ClientXForm(ClientSchema, XForm):
             doc_numbers.append(doc_number)
             doc_sq = and_(
                 rbDocumentType.regionalCode == doc_type_code,
-                ClientDocument.number == doc_number,
+                ClientDocument.number == doc_number
             )
-            if doc_q:
+            if doc_q is not None:
                 doc_q = or_(doc_q, doc_sq)
             else:
                 doc_q = doc_sq
