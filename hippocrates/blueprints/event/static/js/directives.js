@@ -149,7 +149,7 @@ angular.module('WebMis20')
                 scope.service.in_new_invoice = true;
             };
             scope.removeServiceFromInvoice = function () {
-                var idx = _.indexOf(scope.newInvoice, scope.service);
+                var idx = _.findIndex(scope.newInvoice, function (obj) { return obj.id === scope.service.id });
                 scope.newInvoice.splice(idx, 1);
                 scope.service.in_new_invoice = false;
             };
@@ -303,7 +303,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 return CurrentUser.current_role_in('admin') || (action.status.code !== 'finished' && action.can_delete);
             };
             scope.can_create_action = function () {
-                return scope.event.can_create_actions[at_class[scope.actionTypeGroup]];
+                return scope.event.access.can_create_actions[at_class[scope.actionTypeGroup]];
             };
             scope.is_planned_end_date_needed = function () {
                 var types_allowed = ['diagnostics', 'lab', 'treatments'];
@@ -381,7 +381,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     </tr>\
     </thead>\
     <tbody>\
-    <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}">\
+    <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}" \
+        ng-style="action.status.code == \'cancelled\' ? {\'background-color\': \'pink\'} : {} ">\
         <td ng-click="open_action(action.id)">\
             <span ng-bind="action.name"></span>\
             <span ng-if="action.urgent" class="label"\
