@@ -1523,4 +1523,55 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         };
     }
 }])
+.factory('ParentFormField', function () {
+    var ParentFormField = function (options) {
+        this.available = options.available;
+
+        this.isActivated = function () {
+            return this.available && options.activated ? options.activated() : true;
+        };
+    }
+    return ParentFormField;
+})
+.directive('dependentFormField', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        priority: 50000,
+        terminal: true,
+        scope: true,
+        compile: function compile (tElement, tAttrs, transclude) {
+            tElement.removeAttr('dependent-form-field');
+            return {
+                pre: function preLink(scope, iElement, iAttrs, controller) {},
+                post: function postLink(scope, iElement, iAttrs, controller) {
+                    if (iAttrs.ngDisabled) {
+                        iElement.attr('ng-disabled',
+                            '({0}) || {1}'.format(iElement.attr('ng-disabled'), '!$parentField.isActivated()')
+                        );
+                    }
+                    if (iAttrs.ngRequired) {
+                        iElement.attr('ng-required',
+                            '({0}) && {1}'.format(iElement.attr('ng-required'), '$parentField.isActivated()')
+                        );
+                    }
+
+                    $compile(iElement)(scope);
+                }
+            }
+        },
+        controller: function ($scope, $attrs, $parse) {
+            $scope.$parentField = $scope.$eval($attrs.dependentFormField);
+
+            var ngModelGet = $parse($attrs.ngModel),
+                ngModelSet = ngModelGet.assign;
+            if ($scope.$parentField.available) {
+                $scope.$watch('$parentField.isActivated()', function (n, o) {
+                    if (n !== o && !n) {
+                        ngModelSet($scope, null);
+                    }
+                });
+            }
+        }
+    }
+}])
 ;

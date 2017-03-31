@@ -4,8 +4,9 @@
 "use strict";
 WebMis20
 
-.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter', 'RisarApi', 'Config',
-function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config) {
+.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter',
+    'RisarApi', 'Config', 'ParentFormField',
+function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config, ParentFormField) {
     $controller('CheckupCtrl', {$scope: $scope});
 
     var update_auto = function () {
@@ -116,6 +117,21 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
                 });
         }
     };
+
+    $scope.parentXField = new ParentFormField({
+        available: $scope.checkupDescriptor.exists('medicament'),
+        activated: function () {
+            return $scope.checkup && Boolean($scope.checkup.medicament);
+        }
+    });
+    $scope.parentYField = new ParentFormField({
+        available: $scope.checkupDescriptor.exists('itch_character'),
+        activated: function () {
+            return $scope.checkup && $scope.checkup.itch_character.some(function (val) {
+                return val.code === 'at_night';
+            });
+        }
+    });
 
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
