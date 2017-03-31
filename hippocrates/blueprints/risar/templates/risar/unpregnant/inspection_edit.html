@@ -249,7 +249,7 @@
                                         <td><input ng-model="checkup.pain_location" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('pain_location')"
                                             ng-disabled="checkupDescriptor.getReadOnly('pain_location')"
-                                            dependent-form-field="parentXField"><pre>[[checkup.pain_location]]</pre></td>
+                                            dependent-form-field="hasComplaintsField"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'pain_how_long' in checkup_descriptor %}
@@ -258,7 +258,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pain_how_long')"></td>
                                         <td><input ng-model="checkup.pain_how_long" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('pain_how_long')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('pain_how_long')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('pain_how_long')"
+                                            dependent-form-field="hasComplaintsField"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'pain_character' in checkup_descriptor %}
@@ -267,7 +268,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pain_character')"></td>
                                         <td><rb-select multiple="true" ref-book="rbRisarPainCharacter" ng-model="checkup.pain_character"
                                             ng-required="checkupDescriptor.getMandatory('pain_character')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('pain_character')"></rb-select></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('pain_character')"
+                                            dependent-form-field="hasComplaintsField"></rb-select></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'temperature_rise' in checkup_descriptor %}
@@ -279,7 +281,8 @@
                                                 <input type="text" id="temperature_rise" name="temperature_rise" ng-model="checkup.temperature_rise"
                                                        class="form-control" ui-mask="99.9"
                                                        ng-required="checkupDescriptor.getMandatory('temperature_rise')"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('temperature_rise')">
+                                                       ng-disabled="checkupDescriptor.getReadOnly('temperature_rise')"
+                                                       dependent-form-field="hasComplaintsField">
                                             </div>
                                             </div>
                                         </td>
@@ -291,7 +294,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('shivers')"></td>
                                         <td><input ng-model="checkup.shivers" class="checkbox" type="checkbox"
                                             ng-required="checkupDescriptor.getMandatory('shivers')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('shivers')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('shivers')"
+                                            dependent-form-field="hasComplaintsField"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'menstrual_disorders' in checkup_descriptor %}
@@ -300,7 +304,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('menstrual_disorders')"></td>
                                         <td><rb-select multiple="true" ref-book="rbRisarMenstrualDisorders" ng-model="checkup.menstrual_disorders"
                                             ng-required="checkupDescriptor.getMandatory('menstrual_disorders')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('menstrual_disorders')"></rb-select></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('menstrual_disorders')"
+                                            dependent-form-field="hasComplaintsField"></rb-select></td>
                                     </tr>
                                     {% endif %}
                                     {% if
@@ -322,7 +327,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('discharge_consistency')"></td>
                                         <td><rb-select multiple="true" ref-book="rbRisarDischargeConsistency" ng-model="checkup.discharge_consistency"
                                             ng-required="checkupDescriptor.getMandatory('discharge_consistency')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('discharge_consistency')"></rb-select></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('discharge_consistency')"
+                                            dependent-form-field="hasComplaintsField"></rb-select></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'discharge_colour' in checkup_descriptor %}
@@ -333,7 +339,8 @@
                                             <div class="col-md-6">
                                             <rb-select name="discharge_colour" ng-model="checkup.discharge_colour" ref-book="rbRisarDischargeColour"
                                                 ng-required="checkupDescriptor.getMandatory('discharge_colour')"
-                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_colour')"></rb-select>
+                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_colour')"
+                                                dependent-form-field="hasComplaintsField"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -346,7 +353,8 @@
                                             <div class="col-md-6">
                                             <rb-select name="discharge_quantity" ng-model="checkup.discharge_quantity" ref-book="rbRisarDischargeQuantity"
                                                 ng-required="checkupDescriptor.getMandatory('discharge_quantity')"
-                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_quantity')"></rb-select>
+                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_quantity')"
+                                                dependent-form-field="hasComplaintsField"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -359,7 +367,8 @@
                                             <div class="col-md-6">
                                             <rb-select name="discharge_smell" ng-model="checkup.discharge_smell" ref-book="rbRisarDischargeSmell"
                                                 ng-required="checkupDescriptor.getMandatory('discharge_smell')"
-                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_smell')"></rb-select>
+                                                ng-disabled="checkupDescriptor.getReadOnly('discharge_smell')"
+                                                dependent-form-field="hasComplaintsField"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
@@ -378,9 +387,11 @@
                                             <div class="col-md-6">
                                             <rb-select multiple="true" name="itch_character" ng-model="checkup.itch_character" ref-book="rbRisarItchCharacter"
                                                 ng-required="checkupDescriptor.getMandatory('itch_character')"
-                                                ng-disabled="checkupDescriptor.getReadOnly('itch_character')"></rb-select>
+                                                ng-disabled="checkupDescriptor.getReadOnly('itch_character')"
+                                                dependent-form-field="hasComplaintsField">
+                                            </rb-select>
                                             </div>
-                                        </div><pre>[[checkup.itch_character|json]]</pre></td>
+                                        </div></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'itch_period' in checkup_descriptor %}
@@ -390,7 +401,8 @@
                                         <td><input ng-model="checkup.itch_period" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('itch_period')"
                                             ng-disabled="checkupDescriptor.getReadOnly('itch_period')"
-                                            dependent-form-field="parentYField"><pre>[[checkup.itch_period]]</pre></td>
+                                            dependent-form-field="hasComplaintsField"
+                                        ></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'pregnancy_failure' in checkup_descriptor %}
@@ -399,7 +411,9 @@
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('pregnancy_failure')"></th>
                                         <td><input ng-model="checkup.pregnancy_failure" class="checkbox" type="checkbox"
                                             ng-required="checkupDescriptor.getMandatory('pregnancy_failure')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('pregnancy_failure')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('pregnancy_failure')"
+                                            dependent-form-field="hasComplaintsField">
+                                        </td>
                                     </tr>
                                     {% endif %}
                                     {% if 'pregnancy_failure_period' in checkup_descriptor %}
@@ -412,6 +426,7 @@
                                                        name="pregnancy_failure_period"
                                                        ng-model="checkup.pregnancy_failure_period"
                                                        class="form-control" ng-disabled="!checkup.pregnancy_failure"
+                                                       dependent-form-field="hasComplaintsField"
                                                        >
                                             </div>
                                             </div>
@@ -429,7 +444,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('engorged_breasts')"></td>
                                         <td><input ng-model="checkup.engorged_breasts" class="checkbox" type="checkbox"
                                             ng-required="checkupDescriptor.getMandatory('engorged_breasts')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('engorged_breasts')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('engorged_breasts')"
+                                            dependent-form-field="hasComplaintsField"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'breasts_pain' in checkup_descriptor %}
@@ -438,7 +454,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('breasts_pain')"></td>
                                         <td><input ng-model="checkup.breasts_pain" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('breasts_pain')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('breasts_pain')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('breasts_pain')"
+                                            dependent-form-field="hasComplaintsField"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'breasts_induration' in checkup_descriptor %}
@@ -447,7 +464,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('breasts_induration')"></td>
                                         <td><input ng-model="checkup.breasts_induration" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('breasts_induration')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('breasts_induration')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('breasts_induration')"
+                                            dependent-form-field="hasComplaintsField"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'nipples_discharge' in checkup_descriptor %}
@@ -456,14 +474,22 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('nipples_discharge')"></td>
                                         <td><input ng-model="checkup.nipples_discharge" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('nipples_discharge')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('nipples_discharge')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('nipples_discharge')"
+                                            dependent-form-field="hasComplaintsField">
+                                        </td>
                                     </tr>
                                     {% endif %}
                                     {% if 'other_complaints' in checkup_descriptor %}
                                     <tr>
                                         <!-- example text -->
                                         <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('other_complaints')"></th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_complaints" /></div></div></td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <wysiwyg ng-model="checkup.other_complaints" />
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     {% endif %}
                                 </tbody>
@@ -971,6 +997,27 @@
                                         <td><input ng-disabled="checkup.vagina_mirrors_mirrors.code !== 'other'" ng-model="checkup.vagina_mirrors_adds" class="form-control"></td>
                                     </tr>
                                     {% endif %}
+                                    {% if 'mucous_mirrors' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_mirrors')"></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="mucous_mirrors" refbook-checkbox ng-model="checkup.mucous_mirrors" ref-book="rbRisarMucous"
+                                                       ng-disabled="checkupDescriptor.getReadOnly('mucous_mirrors')"
+                                                       ng-required="checkupDescriptor.getMandatory('mucous_mirrors')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'mucous_adds_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_adds_mirrors')"></td>
+                                        <td><input ng-disabled="checkup.mucous_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.mucous_adds_mirrors" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
                                     {% if 'vagina_paries_mirrors' in checkup_descriptor %}
                                     <tr>
                                         <!-- example select -->
@@ -990,6 +1037,27 @@
                                         <!-- example short_string -->
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vagina_paries_mirrors_other')"></td>
                                         <td><input ng-disabled="checkup.vagina_paries_mirrors.code !== 'other'" ng-model="checkup.vagina_paries_mirrors_other" class="form-control"></td>
+                                    </tr>
+                                    {% endif %}
+                                     {% if 'vaginal_fornix_mirrors' in checkup_descriptor %}
+                                     <tr>
+                                        <!-- example few_checkboxes -->
+                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vaginal_fornix_mirrors')"></th>
+                                        <td><div ng-class="{'text-danger': objectiveForm.vaginal_fornix_mirrors.$invalid && objectiveForm.submit_attempt}">
+                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vaginal_fornix_mirrors" ref-book="rbRisarVaginalFornix"
+                                                      ng-disabled="checkupDescriptor.getReadOnly('vaginal_fornix_mirrors')"
+                                                      ng-required="checkupDescriptor.getMandatory('vaginal_fornix_mirrors')">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if 'vaginal_fornix_adds_mirrors' in checkup_descriptor %}
+                                    <tr>
+                                        <!-- example short_string -->
+                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vaginal_fornix_adds_mirrors')"></td>
+                                        <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'cervix_uteri_mirrors' in checkup_descriptor %}
@@ -1060,48 +1128,6 @@
                                                       ng-required="checkupDescriptor.getMandatory('uterus_external_orifice_mirrors')"></rb-select>
                                             </div>
                                         </div></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'vaginal_fornix_mirrors' in checkup_descriptor %}
-                                     <tr>
-                                        <!-- example few_checkboxes -->
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('vaginal_fornix_mirrors')"></th>
-                                        <td><div ng-class="{'text-danger': objectiveForm.vaginal_fornix_mirrors.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="vulva_skin" refbook-checkbox ng-model="checkup.vaginal_fornix_mirrors" ref-book="rbRisarVaginalFornix"
-                                                      ng-disabled="checkupDescriptor.getReadOnly('vaginal_fornix_mirrors')"
-                                                      ng-required="checkupDescriptor.getMandatory('vaginal_fornix_mirrors')">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'vaginal_fornix_adds_mirrors' in checkup_descriptor %}
-                                    <tr>
-                                        <!-- example short_string -->
-                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('vaginal_fornix_adds_mirrors')"></td>
-                                        <td><input ng-disabled="checkup.vaginal_fornix_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.vaginal_fornix_adds_mirrors" class="form-control"></td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'mucous_mirrors' in checkup_descriptor %}
-                                     <tr>
-                                        <!-- example few_checkboxes -->
-                                        <th class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_mirrors')"></th>
-                                        <td><div ng-class="{'text-danger': objectiveForm.vulva_skin.$invalid && objectiveForm.submit_attempt}">
-                                            <div name="mucous_mirrors" refbook-checkbox ng-model="checkup.mucous_mirrors" ref-book="rbRisarMucous"
-                                                       ng-disabled="checkupDescriptor.getReadOnly('mucous_mirrors')"
-                                                       ng-required="checkupDescriptor.getMandatory('mucous_mirrors')">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endif %}
-                                    {% if 'mucous_adds_mirrors' in checkup_descriptor %}
-                                    <tr>
-                                        <!-- example short_string -->
-                                        <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('mucous_adds_mirrors')"></td>
-                                        <td><input ng-disabled="checkup.mucous_mirrors | filter:{code:'other'} | count | negate" ng-model="checkup.mucous_adds_mirrors" class="form-control"></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'discharge_consistency_mirrors' in checkup_descriptor %}

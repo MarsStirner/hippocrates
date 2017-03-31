@@ -117,19 +117,10 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
                 });
         }
     };
-
-    $scope.parentXField = new ParentFormField({
-        available: $scope.checkupDescriptor.exists('medicament'),
+    $scope.hasComplaintsField = new ParentFormField({
+        available: $scope.checkupDescriptor.exists('has_complaints'),
         activated: function () {
-            return $scope.checkup && Boolean($scope.checkup.medicament);
-        }
-    });
-    $scope.parentYField = new ParentFormField({
-        available: $scope.checkupDescriptor.exists('itch_character'),
-        activated: function () {
-            return $scope.checkup && $scope.checkup.itch_character.some(function (val) {
-                return val.code === 'at_night';
-            });
+            return $scope.checkup && Boolean($scope.checkup.has_complaints);
         }
     });
 
