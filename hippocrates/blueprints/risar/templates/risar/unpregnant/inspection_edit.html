@@ -248,7 +248,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('pain_location')"></td>
                                         <td><input ng-model="checkup.pain_location" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('pain_location')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('pain_location')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('pain_location')"
+                                            dependent-form-field="parentXField"><pre>[[checkup.pain_location]]</pre></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'pain_how_long' in checkup_descriptor %}
@@ -379,7 +380,7 @@
                                                 ng-required="checkupDescriptor.getMandatory('itch_character')"
                                                 ng-disabled="checkupDescriptor.getReadOnly('itch_character')"></rb-select>
                                             </div>
-                                        </div></td>
+                                        </div><pre>[[checkup.itch_character|json]]</pre></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'itch_period' in checkup_descriptor %}
@@ -388,7 +389,8 @@
                                         <td class="text-right" ng-bind-html="checkupDescriptor.getLabel('itch_period')"></td>
                                         <td><input ng-model="checkup.itch_period" class="form-control"
                                             ng-required="checkupDescriptor.getMandatory('itch_period')"
-                                            ng-disabled="checkupDescriptor.getReadOnly('itch_period')"></td>
+                                            ng-disabled="checkupDescriptor.getReadOnly('itch_period')"
+                                            dependent-form-field="parentYField"><pre>[[checkup.itch_period]]</pre></td>
                                     </tr>
                                     {% endif %}
                                     {% if 'pregnancy_failure' in checkup_descriptor %}
