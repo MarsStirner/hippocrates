@@ -113,40 +113,6 @@
                                        id="note" name="note" ng-model="socstat.note"/>
                             </div>
                         </div>
-                        <h4>Документ
-                            <small>
-                                <button type="button" class="btn btn-link" title="Заполнить документ"
-                                    ng-click="clientServices.add_soc_status_doc(socstat)"
-                                    ng-if="btnAddSsDocVisible(socstat)">
-                                    <span class="glyphicon glyphicon-pencil"></span> заполнить документ
-                                </button>
-                                <button type="button" class="btn btn-link text-danger" title="Очистить данные документа"
-                                    ng-click="clientServices.clear_soc_status_doc(socstat, ssWorkDocForm)"
-                                    ng-if="btnClearSsDocVisible(socstat)">
-                                    <span class="glyphicon glyphicon-eraser"></span> очистить данные документа
-                                </button>
-                            </small>
-                        </h4>
-                        <ng-form name="ssWorkDocForm">
-                        <wm-document id-postfix="c[[$index]]"
-                            group-code="4"
-                            model-document="socstat.self_document"
-                            edit-mode="socstat.self_document.id ? edit.activated : socstat.self_document.id !== undefined">
-                        </wm-document>
-                        </ng-form>
-                        <div ng-if="socstat.self_document.file_attach">
-                            <h5 class="attach-file-copy-heading">Копия документа</h5>
-                            <wm-client-file-attach attach-type="document"
-                                model-attach="socstat.self_document.file_attach"
-                                model-doc="socstat.self_document"
-                                on-add="add_new_file(documentInfo, policyInfo)"
-                                on-open="openFile(cfa_id, idx)">
-                            </wm-client-file-attach>
-                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])"
-                                    title="Печать копии">
-                                <span class="glyphicon glyphicon-print"></span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </ng-form>
