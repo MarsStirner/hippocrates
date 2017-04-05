@@ -893,6 +893,10 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
         $scope.restore = function (p) {
             p.deleted = 0;
         };
+
+        if (!models || models.length===0) {
+            $scope.addModel();
+        }
     };
 
     var BloodHistoryCtrl = function ($scope, $modalInstance, models) {
