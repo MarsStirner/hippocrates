@@ -103,7 +103,7 @@
                         ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
                 <span ng-if="invoice.has_refunds">, Возвратов на сумму: [[ invoice.refunds_sum ]]</span>
                 <ui-print-button ps="ps_invoice" resolve="get_ps_resolve(invoice)" lazy-load-context="invoice" fast-print="true"
-                    class="btn-sm lmargin20" unchecked="true"></ui-print-button>
+                    class="btn-sm lmargin20"></ui-print-button>
             </li>
         </ul>
     </div>
