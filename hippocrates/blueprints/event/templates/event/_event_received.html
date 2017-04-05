@@ -223,6 +223,11 @@
             <div class="panel panel-default" ng-if="event.received.action_type.diagnosis_types">
                 <div class="panel-body">
                     <h4>Диагноз</h4>
+                    <input type="text" class="form-control" autocomplete="off"
+                                   placeholder="Клиническое описание диагноза" id="directed_by" name="appointed_by"
+                                   ng-model="event.received.diag_text.value"/>
+                </div>
+                <div class="panel-body">
                     <wm-diagnosis-new ng-model="event.received.diagnoses" can-edit="true"
                                       diag-types="event.received.action_type.diagnosis_types" can-add-new="true"></wm-diagnosis-new>
                 </div>
