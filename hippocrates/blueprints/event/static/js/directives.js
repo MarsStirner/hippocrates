@@ -539,4 +539,18 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
       </div>\
 </div>')
 }])
+.directive('triggerCollapse', [function () {
+        return {
+            scope: {},
+            link: function (scope, element, attrs) {
+                 element.bind('click', function(e) {
+                     if (e.originalEvent) {
+                            scope.$apply(function () {
+                                element.querySelectorAll('[data-widget="collapse"]').click();
+                            });
+                     }
+                 });
+            }
+        }
+}])
 ;

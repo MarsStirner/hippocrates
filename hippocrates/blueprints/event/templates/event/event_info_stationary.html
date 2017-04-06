@@ -10,7 +10,7 @@
             <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
             <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
         </div>
-        <h1>
+        <h1 style="margin-top:0.2em!important;">
             {% if event and event.is_stationary %}История болезни №
             {% elif event and not event.is_stationary %}Обращение №
             {% elif not event and event.is_stationary %}Создание госпитализации
@@ -64,10 +64,10 @@
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-                        {% if event.id %}
-                        {% include "event/_services.html" %}
-                        {% endif %}
                         {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
+                            {% if event.id %}
+                            {% include "event/_services.html" %}
+                            {% endif %}
                             {% include "event/_event_received.html" %}
                         {% endif %}
                         {% if event %}
@@ -76,7 +76,7 @@
                         {% if user_utils.can_read_actions_meddoc(event) %}
                             <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                 <div class="box box-info collapsed-box">
-                                    <div class="box-header with-border">
+                                    <div class="box-header with-border" trigger-collapse>
                                         <h3 class="box-title">Медицинские документы</h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-chevron-right"></i></button>
@@ -91,7 +91,7 @@
                         {% if user_utils.can_read_actions_diagnostic(event) %}
                             <ng-form name="eventDiagActionsForm" toc-element="Инструментальные исследования">
                                 <div class="box box-info collapsed-box">
-                                    <div class="box-header with-border">
+                                    <div class="box-header with-border" trigger-collapse>
                                         <h3 class="box-title">Инструментальные исследования</h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-box-tool collapsed-box" data-widget="collapse"><i class="fa fa-chevron-right"></i></button>
@@ -106,7 +106,7 @@
                         {% if user_utils.can_read_actions_lab(event) %}
                             <ng-form name="eventLabActionsForm" toc-element="Лабораторные исследования">
                                 <div class="box box-info collapsed-box">
-                                    <div class="box-header with-border">
+                                    <div class="box-header with-border" trigger-collapse>
                                                     <h3 class="box-title">Лабораторные исследования</h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-chevron-right"></i></button>
@@ -120,8 +120,8 @@
                         {% endif %}
                         {% if user_utils.can_read_actions_treatment(event) %}
                             <ng-form name="eventCureActionsForm" toc-element="Манипуляции и операции">
-                                <div class="box box-info collapsed-box">
-                                    <div class="box-header with-border">
+                                <div class="box box-info collapsed-box" >
+                                    <div class="box-header with-border" trigger-collapse>
                                         <h3 class="box-title">Манипуляции и операции</h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-chevron-right"></i></button>
@@ -164,7 +164,7 @@
                             ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
                         </div>
                         <div class="col-md-6">
-                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default btn-block">Отмена</button>
+                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default btn-block">Выход</button>
                         </div>
                     </div>
                     {%- endif %}

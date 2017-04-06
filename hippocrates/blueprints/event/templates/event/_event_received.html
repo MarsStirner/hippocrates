@@ -1,7 +1,7 @@
 <div ng-controller="EventReceivedCtrl">
 <ng-form name="event_received_form" role="form" toc-element="Информация о госпитализации" toc-name="tocEventForm">
     <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
-        <div class="box-header with-border">
+        <div class="box-header with-border" trigger-collapse>
             <h3 class="box-title">Информация о госпитализации</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" ng-click="received_edit()" title="Редактировать" ng-if="event.received.status < 2">
