@@ -545,9 +545,11 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             link: function (scope, element, attrs) {
                  element.bind('click', function(e) {
                      if (e.originalEvent) {
-                            scope.$apply(function () {
+                         if (e.toElement.tagName != 'BUTTON') {
+                             scope.$apply(function () {
                                 element.querySelectorAll('[data-widget="collapse"]').click();
                             });
+                         }
                      }
                  });
             }
