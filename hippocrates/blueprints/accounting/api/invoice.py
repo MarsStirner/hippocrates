@@ -7,7 +7,7 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date, parse_json
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 from nemesis.lib.mq_integration.invoice import MQOpsInvoice, notify_invoice_changed
-from hippocrates.blueprints.accounting.lib.represent import InvoiceRepr
+from nemesis.lib.data_ctrl.accounting.represent import InvoiceRepr
 
 
 @module.route('/api/0/invoice/')

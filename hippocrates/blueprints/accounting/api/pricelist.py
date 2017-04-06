@@ -5,7 +5,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data_ctrl.accounting.pricelist import PriceListController
-from hippocrates.blueprints.accounting.lib.represent import PriceListRepr
+from nemesis.lib.data_ctrl.accounting.represent import PriceListRepr
 
 
 @module.route('/api/0/pricelist/list/', methods=['GET', 'POST'])

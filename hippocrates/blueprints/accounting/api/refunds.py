@@ -6,11 +6,10 @@ from sqlalchemy.orm import aliased
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.accounting import Invoice, FinanceTransaction, rbFinanceTransactionType, rbFinanceOperationType, \
     rbPayType
-from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 from nemesis.lib.mq_integration.invoice import MQOpsInvoice, notify_invoice_changed
 from nemesis.systemwide import db
 from ..app import module
-from ..lib.represent import InvoiceRepr
+from nemesis.lib.data_ctrl.accounting.represent import InvoiceRepr
 
 __author__ = 'viruzzz-kun'
 

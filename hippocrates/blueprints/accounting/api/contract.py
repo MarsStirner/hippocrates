@@ -8,7 +8,7 @@ from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
-from hippocrates.blueprints.accounting.lib.represent import ContractRepr
+from nemesis.lib.data_ctrl.accounting.represent import ContractRepr
 
 
 @module.route('/api/0/contract/')
