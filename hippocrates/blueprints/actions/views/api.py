@@ -14,12 +14,13 @@ from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action, ActionServiceException, fit_planned_end_date, int_get_atl_actions_flat
+    get_patient_location, delete_action, ActionServiceException, fit_planned_end_date, int_get_atl_actions_flat, \
+    get_new_lab_action
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out, safe_int
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out, parse_json
 from nemesis.lib.mq_integration.med_prescription import notify_action_prescriptions_changed, MQOpsMedPrescription
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
@@ -84,6 +85,18 @@ def api_action_new_get(action_type_id, event_id):
         result = v.make_action(action)
         db.session.rollback()
         return result
+
+
+@module.route('/api/action/new/lab/')
+@module.route('/api/action/new/lab/<int:action_type_id>/<int:event_id>')
+@api_method
+def api_action_new_lab_get(action_type_id, event_id):
+    with db.session.no_autoflush:
+        service_data = parse_json(request.args.get('service_data', '')) or None
+        action = get_new_lab_action(action_type_id, event_id, service_data)
+
+        vis = ActionVisualizer()
+        return vis.make_new_lab_action(action)
 
 
 @module.route('/api/action/')
@@ -391,10 +404,11 @@ def api_create_lab_direction():
 
     for j in ja['directions']:
         action_type_id = j['type_id']
-        assigned = j['assigned']
+        props_data = j['props_data']
         data = {
             'plannedEndDate': safe_datetime(j['planned_end_date']),
-            'isUrgent': safe_bool(j.get('urgent', False))
+            'isUrgent': safe_bool(j.get('urgent', False)),
+            'note': j.get('note')
         }
         service_data = j.get('service')
         ttj_data = j.get('ttj')
@@ -402,7 +416,7 @@ def api_create_lab_direction():
             action = create_new_action(
                 action_type_id,
                 event_id,
-                assigned=assigned,
+                properties=props_data,
                 data=data,
                 service_data=service_data,
                 ttj_data=ttj_data

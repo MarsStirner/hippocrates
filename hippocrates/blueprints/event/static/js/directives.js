@@ -88,7 +88,7 @@ angular.module('WebMis20')
                 var cur_service = _.deepCopy(scope.service);
                 var model = {
                     assignable: cur_service.serviced_entity.tests_data.assignable,
-                    assigned: cur_service.serviced_entity.tests_data.assigned,
+                    props_data: cur_service.serviced_entity.tests_data.props_data,
                     planned_end_date: aux.safe_date(cur_service.serviced_entity.tests_data.planned_end_date),
                     ped_disabled: cur_service.serviced_entity.tests_data.ped_disabled,
                     available_tissue_types: cur_service.serviced_entity.tests_data.available_tissue_types,
@@ -96,7 +96,7 @@ angular.module('WebMis20')
                     tissue_type_visible: cur_service.serviced_entity.tests_data.tissue_type_visible
                 };
                 ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
-                    cur_service.serviced_entity.tests_data.assigned = model.assigned;
+                    cur_service.serviced_entity.tests_data.props_data = model.props_data;
                     cur_service.serviced_entity.tests_data.planned_end_date = model.planned_end_date;
                     cur_service.serviced_entity.tests_data.selected_tissue_type = model.selected_tissue_type;
 

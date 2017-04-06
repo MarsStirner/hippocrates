@@ -5,7 +5,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
-from hippocrates.blueprints.accounting.lib.represent import ServiceRepr
+from nemesis.lib.data_ctrl.accounting.represent import ServiceRepr
 from nemesis.lib.utils import safe_int, format_money, safe_bool, parse_json
 
 
