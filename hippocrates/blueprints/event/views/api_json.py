@@ -24,7 +24,7 @@ from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
-                               parse_id, bail_out, format_datetime)
+                               parse_id, bail_out, format_datetime, db_non_flushable)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, \
     ActionProperty_HospitalBed, Action_TakenTissueJournalAssoc, TakenTissueJournal
@@ -55,6 +55,7 @@ def api_event_info():
 
 
 @module.route('/api/event_new.json', methods=['GET'])
+@db_non_flushable
 @api_method
 def api_event_new_get():
     ticket_id = safe_int(request.args.get('ticket_id'))
