@@ -55,10 +55,10 @@
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
-                        {% if event.id %}
-                        {% include "event/_services.html" %}
-                        {% endif %}
+                        {% if user_profiles_mng.has_ui_registrator_cashier() %}
+                            {% if event.id %}
+                            {% include "event/_services.html" %}
+                            {% endif %}
                         {% endif %}
                         {% if user_utils.can_read_actions_meddoc(event) %}
                             <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
