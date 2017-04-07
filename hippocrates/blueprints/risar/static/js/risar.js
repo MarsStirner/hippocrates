@@ -1554,6 +1554,11 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
                             '({0}) && {1}'.format(iElement.attr('ng-required'), '$parentField.isActivated()')
                         );
                     }
+                    if (iAttrs.contenteditable) {
+                        iElement.attr('contenteditable',
+                            '({0}) && {1}'.format(iElement.attr('contenteditable'), '$parentField.isActivated()')
+                        );
+                    }
 
                     $compile(iElement)(scope);
                 }
@@ -1561,7 +1566,6 @@ function ($scope, RisarApi, CurrentUser, RefBookService, ErrandModalService, Cha
         },
         controller: function ($scope, $attrs, $parse) {
             $scope.$parentField = $scope.$eval($attrs.dependentFormField);
-
             var ngModelGet = $parse($attrs.ngModel),
                 ngModelSet = ngModelGet.assign;
             if ($scope.$parentField.available) {
