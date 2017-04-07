@@ -937,7 +937,7 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
                     _.map(models, function (model) {
                         if (model.deleted) {
                             if (model.id) {
-                                RisarApi.anamnesis.intolerances.delete(model.id, field)
+                                RisarApi.anamnesis.intolerances.delete(model.id, intolerance_map[field].code)
                             }
                         } else {
                             return RisarApi.anamnesis.intolerances.save($scope.event.info.client_id, model)
