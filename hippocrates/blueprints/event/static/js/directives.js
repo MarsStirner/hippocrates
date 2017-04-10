@@ -93,7 +93,8 @@ angular.module('WebMis20')
                     ped_disabled: cur_service.serviced_entity.tests_data.ped_disabled,
                     available_tissue_types: cur_service.serviced_entity.tests_data.available_tissue_types,
                     selected_tissue_type: cur_service.serviced_entity.tests_data.selected_tissue_type,
-                    tissue_type_visible: cur_service.serviced_entity.tests_data.tissue_type_visible
+                    tissue_type_visible: cur_service.serviced_entity.tests_data.tissue_type_visible,
+                    type_id: cur_service.serviced_entity.at_id
                 };
                 ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
                     cur_service.serviced_entity.tests_data.props_data = model.props_data;

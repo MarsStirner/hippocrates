@@ -34,6 +34,7 @@ def fc_urls():
                 'rls_search': url_for('actions.api_search_rls'),
                 'action_delete': uf_placeholders('actions.api_delete_action', ['action_id']),
                 'atl_get_flat': url_for('actions.api_atl_get_flat'),
+                'apt_groups_get': uf_placeholders('actions.api_apt_groups_get', ['action_type_id']),
                 'action_html': url_for('actions.html_action'),
                 'create_lab_direction': url_for('actions.api_create_lab_direction'),
                 'get_action_ped': url_for('actions.api_get_action_ped'),

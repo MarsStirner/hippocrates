@@ -15,7 +15,7 @@ from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location, delete_action, ActionServiceException, fit_planned_end_date, int_get_atl_actions_flat, \
-    get_new_lab_action
+    get_new_lab_action, int_get_apt_groups
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
@@ -390,6 +390,13 @@ def api_atl_get_flat(at_class, event_type_id=None):
         raise ApiException(404, u'Класс типа действия должен быть 0, 1, 2, или 3. Получен %s' % at_class)
     result = map(tuple, int_get_atl_flat(at_class, event_type_id).values())
     return result
+
+
+@module.route('/api/apt-groups/<int:action_type_id>')
+@api_method
+def api_apt_groups_get(action_type_id):
+    groups = int_get_apt_groups()
+    return groups.get(action_type_id)
 
 
 @module.route('/api/create-lab-direction.json', methods=['POST'])
