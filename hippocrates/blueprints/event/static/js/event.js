@@ -10,13 +10,14 @@ var EventDiagnosesCtrl = function ($scope) {
     };
 };
 var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter, CurrentUser,
-                                  AccountingService, ContractModalService, WMConfig, WMWindowSync) {
+                                  AccountingService, ContractModalService, WMConfig, WMWindowSync, WMEventFormState) {
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.rbFinance = RefBookService.get('rbFinance');
     $scope.rbEventType = new EventType();
     $scope.OrgStructure = RefBookService.get('OrgStructure');
     $scope.rbResult = RefBookService.get('rbResult');
     $scope.rbAcheResult = RefBookService.get('rbAcheResult');
+    $scope.formstate = WMEventFormState;
 
     $scope.request_type = {};
     $scope.finance = {};
@@ -77,6 +78,10 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     };
     $scope.isContractDraftLabelVisible = function () {
         return $scope.isContractDraft();
+    };
+    $scope.setEventFormState = function () {
+        // Тип обращения - "Круглосуточный стационар"
+        return $scope.formstate.set_state(safe_traverse($scope, ['request_type', 'selected', 'code']));
     };
 
     $scope.createContract = function () {
@@ -158,6 +163,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         )[0];
         $scope.update_form_state();
         $scope.on_finance_changed();
+        $scope.setEventFormState();
     };
     $scope.on_finance_changed = function () {
         $scope.event.info.event_type = $scope.rbEventType.get_filtered_by_rtf(
@@ -233,6 +239,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.request_type.selected = et ?
             angular.extend({}, et.request_type) :
             $scope.rbRequestType.get_by_code('policlinic');
+        $scope.setEventFormState();
         $scope.finance.selected = et ? angular.extend({}, et.finance) : undefined;
     }
     function refreshAvailableContracts() {
@@ -355,14 +362,15 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
 };
 
 
-var EventReceivedCtrl = function($scope, $modal, RefBookService) {
+var EventReceivedCtrl = function($scope, $modal, RefBookService, WMEventFormState) {
     $scope.OrgStructure = RefBookService.get('OrgStructure');
     $scope.rbHospitalisationGoal = RefBookService.get('rbHospitalisationGoal');
     $scope.rbHospitalisationOrder = RefBookService.get('rbHospitalisationOrder');
+    $scope.formstate = WMEventFormState;
 
     $scope.received_edit = function(){
         var scope = $scope.$new();
-        scope.model = angular.copy($scope.event.received)
+        scope.model = angular.copy($scope.event.received);
         $modal.open({
             templateUrl: 'modal-received.html',
             backdrop : 'static',
@@ -885,6 +893,10 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
         $scope.restore = function (p) {
             p.deleted = 0;
         };
+
+        if (!models || models.length===0) {
+            $scope.addModel();
+        }
     };
 
     var BloodHistoryCtrl = function ($scope, $modalInstance, models) {
@@ -925,7 +937,7 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
                     _.map(models, function (model) {
                         if (model.deleted) {
                             if (model.id) {
-                                RisarApi.anamnesis.intolerances.delete(model.id, field)
+                                RisarApi.anamnesis.intolerances.delete(model.id, intolerance_map[field].code)
                             }
                         } else {
                             return RisarApi.anamnesis.intolerances.save($scope.event.info.client_id, model)
@@ -1027,8 +1039,9 @@ var EventQuotingCtrl = function ($scope, RefBookService) {
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
-    'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
-WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
+    'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', 'WMEventFormState',
+    EventMainInfoCtrl]);
+WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', 'WMEventFormState', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig',
     'WebMisApi', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',

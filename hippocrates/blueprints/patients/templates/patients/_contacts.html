@@ -1,37 +1,5 @@
 <ng-form name="contactsForm" toc-element="Связи и контакты">
     <h4>Контактная информация и родственники</h4>
-    <ng-form name="_relations" toc-element="Связи">
-        <div ng-repeat="relation in client.relations | flt_not_deleted">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Связи с другими пациентами</h3>
-                    <div class="box-tools pull-right">
-                        <button ng-show="contact.id" type="button" class="btn btn-box-tool" title="Редактировать"
-                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
-                        <button type="button" class="btn btn-box-tool" title="Удалить" ng-click="clientServices.delete_relation(client, relation)">
-                            <span class="glyphicon glyphicon-trash text-danger"></span>
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body">
-                    <alert type="danger" ng-if="!client.info.sex">Для добавления родственной связи укажите пол пациента</alert>
-                    <ng-form name="contactForm">
-                        <wm-client-relation id-postfix="[[$index]]"
-                            model-relation="relation"
-                            model-client="client.info"
-                            edit-mode="contact.id ? edit.activated : true">
-                        </wm-client-relation>
-                    </ng-form>
-                </div>
-            </div>
-        </div>
-        <div class="panel marginal">
-            <button type="button" ng-click="clientServices.add_relation(client)" class="btn btn-link btn-lg btn-block">
-                <i class="ion ion-plus-round fa-fw"></i>Добавить связь
-            </button>
-        </div>
-    </ng-form>
-
     <ng-form name="_contacts" toc-element="Контакты">
         <div ng-repeat="contact in client.contacts | flt_not_deleted">
             <div class="box box-info">

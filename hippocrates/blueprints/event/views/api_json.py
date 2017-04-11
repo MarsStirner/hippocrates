@@ -9,10 +9,11 @@ from sqlalchemy import desc, func, and_, or_
 from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.event.app import module
-from hippocrates.blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
-                                        save_executives, EventSaveController, MovingController, received_close)
+from hippocrates.blueprints.event.lib.utils import (save_event, received_save, client_quota_save,
+                                                    save_executives, EventSaveController, MovingController,
+                                                    received_close)
 from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
-from flask import request, abort
+from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
@@ -20,17 +21,17 @@ from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _g
     get_properties_values)
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
-from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
+from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
-                               parse_id, bail_out, format_datetime)
+                               parse_id, bail_out, format_datetime, db_non_flushable)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
-from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed, \
-    Action_TakenTissueJournalAssoc, TakenTissueJournal
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, \
+    ActionProperty_HospitalBed, Action_TakenTissueJournalAssoc, TakenTissueJournal
 from nemesis.models.client import Client
 from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
-from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB, rbTest
+from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, rbTest
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from nemesis.lib.mq_integration.event import MQOpsEvent, notify_event_changed, notify_moving_changed
@@ -54,6 +55,7 @@ def api_event_info():
 
 
 @module.route('/api/event_new.json', methods=['GET'])
+@db_non_flushable
 @api_method
 def api_event_new_get():
     ticket_id = safe_int(request.args.get('ticket_id'))

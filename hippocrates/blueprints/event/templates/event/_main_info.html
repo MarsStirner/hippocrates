@@ -115,7 +115,9 @@
                 <div class="row marginal">
                     <div class="col-md-3"
                          ng-class="{'has-error': event_maininfo_form.set_date.$invalid && editing.submit_attempt}">
-                        <label for="set_date" class="control-label">Дата начала</label>
+                        <label for="set_date" class="control-label">
+                            [[formstate.is_hospital() ? "Дата госпитализации" : "Дата начала"]]
+                        </label>
                         <wm-date id="set_date" name="set_date" ng-model="event.info.set_date" ng-required="true"
                                  ng-disabled="widget_disabled('set_date')" ng-change="on_set_date_changed()"
                                  popup-position="top-left">
@@ -123,19 +125,25 @@
                     </div>
                     <div class="col-md-3"
                          ng-class="{'has-error': event_maininfo_form.set_time.$invalid && editing.submit_attempt}">
-                        <label for="set_time" class="control-label">Время начала</label>
+                        <label for="set_time" class="control-label">
+                            [[formstate.is_hospital() ? "Время госпитализации" : "Время начала"]]
+                        </label>
                         <wm-time id="set_time" name="set_time" ng-model="event.info.set_date" ng-required="true"
                                  ng-disabled="widget_disabled('set_date')">
                         </wm-time>
                     </div>
                     <div class="col-md-3">
-                        <label for="exec_date">Дата выполнения</label>
+                        <label for="exec_date">
+                            [[formstate.is_hospital() ? "Дата выписки" : "Дата выполнения"]]
+                        </label>
                         <wm-date id="exec_date" name="exec_date" ng-model="event.info.exec_date"
                                  ng-disabled="widget_disabled('exec_date')" popup-position="top-left">
                         </wm-date>
                     </div>
                     <div class="col-md-3">
-                        <label for="exec_time">Время выполнения</label>
+                        <label for="exec_time">
+                            [[formstate.is_hospital() ? "Время выписки" : "Время выполнения"]]
+                        </label>
                         <wm-time id="exec_time" name="exec_time" ng-model="event.info.exec_date"
                                  ng-disabled="widget_disabled('exec_date')">
                         </wm-time>

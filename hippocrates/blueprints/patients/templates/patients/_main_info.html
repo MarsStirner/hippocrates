@@ -8,19 +8,19 @@
                 <div class="form-group col-md-3"
                      ng-class="{'has-error': mainInfoForm.lastname.$invalid && (mainInfoForm.lastname.$dirty || editing.submit_attempt)}">
                     <label for="lastname" class="control-label">Фамилия <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
-                           id="lastname" name="lastname" ng-model="client.info.last_name" ng-required="true"/>
+                    <input type="text" class="form-control"  autocomplete="off" placeholder="Фамилия"
+                           id="lastname" name="lastname" ng-model="client.info.last_name" ng-required="true" capitalize-first/>
                 </div>
                 <div class="form-group col-md-3"
                      ng-class="{'has-error': mainInfoForm.firstname.$invalid && (mainInfoForm.firstname.$dirty || editing.submit_attempt)}">
                     <label for="lastname" class="control-label">Имя <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
-                            id="firstname" name="firstname" ng-model="client.info.first_name" ng-required="true"/>
+                            id="firstname" name="firstname" ng-model="client.info.first_name" ng-required="true" capitalize-first/>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="patronymic">Отчество</label>
                     <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
-                           id="patronymic" name="patronymic" ng-model="client.info.patr_name"/>
+                           id="patronymic" name="patronymic" ng-model="client.info.patr_name" capitalize-first/>
                 </div>
                 <div class="form-group col-md-offset-1 col-md-2"
                      ng-class="{'has-error': mainInfoForm.gender.$invalid && (mainInfoForm.gender.$dirty || editing.submit_attempt)}">

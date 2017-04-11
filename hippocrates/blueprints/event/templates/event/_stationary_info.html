@@ -29,7 +29,7 @@
                         <div class="col-md-4 text-bold">
                             Медикаментозная непереносимость
                         </div>
-                        <div class="col-md-7" ng-bind="event.intolerances | pluck:'name' | join:', '">
+                        <div class="col-md-7" ng-bind="event.intolerances | pluck:'name' | join:', '| noIfEmpty">
                         </div>
                         <div class="col-md-1">
                             <button type="button" class="btn btn-sm btn-default" title="Изменить"
@@ -42,7 +42,7 @@
                         <div class="col-md-4 text-bold">
                             Аллергия
                         </div>
-                        <div class="col-md-7" ng-bind="event.allergies | pluck:'name' | join:', '">
+                        <div class="col-md-7" ng-bind="event.allergies | pluck:'name' | join:', ' | noIfEmpty">
                         </div>
                         <div class="col-md-1">
                             <button type="button" class="btn btn-sm btn-default" title="Изменить"

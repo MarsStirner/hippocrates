@@ -6,7 +6,7 @@ from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int
 from nemesis.lib.data_ctrl.accounting.contract import ContingentController
-from hippocrates.blueprints.accounting.lib.represent import ContingentRepr
+from nemesis.lib.data_ctrl.accounting.represent import ContingentRepr
 
 
 @module.route('/api/0/contract/contingent')
