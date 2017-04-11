@@ -696,8 +696,8 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     });
 };
 
-var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService,
-        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig, PatientActionsModalService) {
+var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, $timeout, PrintingService,
+        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig, PatientActionsModalService, localStorageService) {
     $scope.aux = aux;
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -724,6 +724,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 if (!$scope.event.is_new()) {
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
                 }
+                if (window.sessionStorage.getItem('AboutToCreate')) {
+                    window.sessionStorage.removeItem('AboutToCreate');
+                    notifyTabs();
+                }
 
                 $scope.$watch(function () {
                     return [safe_traverse($scope.event, ['info', 'event_type', 'request_type']),
@@ -741,6 +745,23 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 }, true);
             });
     };
+    function notifyTabs() {
+        var modalsToUpdate = localStorageService.get('modalClientToUpdate') || {};
+        modalsToUpdate[$scope.event.info.client_id] = +new Date();
+        localStorageService.set('modalClientToUpdate', modalsToUpdate);
+        $timeout(function() {
+            var modalsToUpdate = localStorageService.get('modalClientToUpdate') || {};
+                for (var property in modalsToUpdate) {
+                        if (modalsToUpdate.hasOwnProperty(property)) {
+                            var diffInSeconds = Math.abs((+new Date() - modalsToUpdate[property])/1000);
+                            if (property == $scope.event.info.client_id || diffInSeconds >= 60) {
+                                delete modalsToUpdate[property]
+                            }
+                        }
+                }
+               localStorageService.set('modalClientToUpdate', modalsToUpdate);
+        }, 5000);
+    }
 
     $scope.save_event = function () {
         $scope.editing.submit_attempt = true;
@@ -757,6 +778,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                             $window.open(WMConfig.url.event.html.event_info + '?event_id=' + result.event_id, '_self');
                         });
                     } else {
+                        window.sessionStorage.setItem('AboutToCreate', true);
                         $window.open(WMConfig.url.event.html.event_info + '?event_id=' + result.event_id, '_self');
                     }
                 } else {
@@ -769,6 +791,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     } else {
                         $scope.event.reload().then(function () {
                             $scope.$broadcast('event_loaded');
+                            notifyTabs();
                         });
                     }
                 }
@@ -790,6 +813,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             $scope.eventServices.delete_event(
                 $scope.event
             ).then(function () {
+                 notifyTabs();
                 if (window.opener) {
                     window.opener.focus();
                     window.close();
@@ -808,6 +832,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             .then(function (response) {
                 MessageBox.info('Данные сохранены', response.data.meta.name)
                 .then(function () {
+                    notifyTabs();
                     $scope.eventForm.$setPristine();
                     $window.location.reload(true);
                 });
@@ -1046,9 +1071,9 @@ WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', '
     'WebMisApi', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', '$timeout', 
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', 'WMConfig',
-    'PatientActionsModalService', EventInfoCtrl]);
+    'PatientActionsModalService', 'localStorageService', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$filter', '$controller', '$modal', '$http', '$q',
     'RisarApi', 'ApiCalls', 'WMStationaryEvent', 'WMConfig', StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);
