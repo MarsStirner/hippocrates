@@ -1,13 +1,13 @@
 # -*- encoding: utf-8 -*-
 
 from flask import render_template, request, session
-from jinja2 import TemplateNotFound
-from nemesis.lib.html_utils import UIException
+from flask_login import current_user
 
-from nemesis.models.client import Client
 from hippocrates.blueprints.patients.app import module
 from nemesis.lib.utils import breadcrumb, parse_id, roles_require, bail_out
 from nemesis.lib.user import UserProfileManager
+from nemesis.lib.html_utils import UIException
+from nemesis.models.client import Client
 
 # noinspection PyUnresolvedReferences
 from . import api_html, api_json
@@ -63,4 +63,12 @@ def patient_info_full():
 @module.route('/patient_actions_modal/<int:client_id>')
 def patient_actions_modal(client_id):
     client = Client.query.get_or_404(client_id)
-    return render_template('patients/_modal_patient_actions.html', client=client)
+    return render_template('patients/modal_patient_actions.html', client=client)
+
+
+@module.route('/patient_search_modal/<int:client_id>')
+def patient_search_modal(client_id):
+    client = Client.query.get_or_404(client_id)
+    if current_user.role_in(UserProfileManager.nurse_admission):
+        return render_template('patients/modal_patient_search_nurse.html', client=client)
+    return render_template('patients/modal_patient_search.html', client=client)

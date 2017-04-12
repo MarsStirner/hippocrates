@@ -386,15 +386,14 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 return tree;
             });
     }
-}])
-;
+}]);
 
 
-WebMis20.service('PatientActionsModalService', ['$modal', function ($modal) {
+WebMis20.service('PatientActionsModalService', ['$modal', 'WMConfig', function ($modal, WMConfig) {
     return {
         open: function (client_id) {
             return $modal.open({
-                templateUrl: '/patients/patient_actions_modal/' + client_id,
+                templateUrl: WMConfig.url.patients.patient_actions_modal.format(client_id),
                 controller: PatientActionsCtrl,
                 size: 'lg',
                 windowClass: 'modal-scrollable',
@@ -407,5 +406,4 @@ WebMis20.service('PatientActionsModalService', ['$modal', function ($modal) {
             }).result;
         }
     }
-}])
-;
+}]);

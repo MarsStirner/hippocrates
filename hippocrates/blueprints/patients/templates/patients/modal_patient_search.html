@@ -1,0 +1,28 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <h4 class="modal-title">[[client.info.full_name]]</h4>
+</div>
+<div class="modal-body modal-scrollable">
+    <div ui-alert-list="alerts"></div>
+    <tabset>
+        <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+        <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+        <tab heading="Записи ЭМК" select="openPatientActions()">
+            <div ng-controller="PatientActionsCtrl">
+            {% include "patients/_patient_actions.html" %}
+            </div>
+        </tab>
+    </tabset>
+</div>
+<div class="modal-footer">
+    <div class="pull-right"><button type="button" class="btn btn-default" ng-click="$dismiss('cancel')">Закрыть</button></div>
+    <div class="text-left">
+        <button class="btn btn-primary" ng-click="new_appointment(client.client_id)">Записать на приём</button>
+        <button class="btn btn-primary" ng-click="new_event(client.client_id)"
+                ng-if="client.appointments.length == 0 || CurrentUser.current_role_in('clinicDoctor')">Создать обращение</button>
+        <button class="btn btn-primary" ng-click="modal_create_event()"
+                ng-if="client.appointments.length > 0 && !CurrentUser.current_role_in('clinicDoctor')">Создать обращение</button>
+        <button class="btn btn-primary" ng-click="open_client(client.client_id)">Редактировать данные пациента</button>
+        <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
+    </div>
+</div>
