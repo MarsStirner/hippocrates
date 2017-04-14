@@ -4,8 +4,9 @@
 "use strict";
 WebMis20
 
-.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter', 'RisarApi', 'Config',
-function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config) {
+.controller('CheckupGynEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', '$filter',
+    'RisarApi', 'Config', 'ParentFormField',
+function ($scope, $controller, $window, $location, $document, $filter, RisarApi, Config, ParentFormField) {
     $controller('CheckupCtrl', {$scope: $scope});
 
     var update_auto = function () {
@@ -93,7 +94,8 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
                     if ($scope.checkup.id){
                         $scope.setCheckupData(data);
                     } else {
-                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.checkup.id, '_self');
+                        var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
+                        $window.open(Config.url.gyn.inpection_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.checkup.id+ '#/'+tab_name, '_self');
                     }
                 });
         }
@@ -115,6 +117,12 @@ function ($scope, $controller, $window, $location, $document, $filter, RisarApi,
                 });
         }
     };
+    $scope.hasComplaintsField = new ParentFormField({
+        available: $scope.checkupDescriptor.exists('has_complaints'),
+        activated: function () {
+            return $scope.checkup && Boolean($scope.checkup.has_complaints);
+        }
+    });
 
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;

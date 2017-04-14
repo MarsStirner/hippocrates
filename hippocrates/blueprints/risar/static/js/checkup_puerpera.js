@@ -16,7 +16,8 @@ function ($scope, $controller, $window, $location, $document, RisarApi, Config) 
                     if ($scope.checkup.id) {
                         $scope.setCheckupData(data);
                     } else {
-                        $window.open(Config.url.inspection_puerpera_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.checkup.id, '_self');
+                        var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
+                        $window.open(Config.url.inspection_puerpera_edit_html + '?event_id=' + $scope.header.event.id + '&checkup_id=' + data.checkup.id + '#/'+tab_name, '_self');
                     }
                 });
         }

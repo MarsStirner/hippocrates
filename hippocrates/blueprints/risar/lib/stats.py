@@ -558,6 +558,7 @@ mather_death_koef_diags = (
 
 @cache.memoize(timeout=60)
 def get_list_of_alive_dead_actions(start_date, end_date):
+    db.session.execute('SET SESSION group_concat_max_len = 1000000;')
     qr = db.select(
         (RisarEpicrisis_Children.alive, func.group_concat(RisarEpicrisis_Children.id.distinct())),
         whereclause=db.and_(
@@ -758,7 +759,7 @@ def calulate_death_coefficients(year=None):
         regions_in_config = app.config.get('RISAR_REGIONS', [])
         region = regions_in_config[0] if regions_in_config else '00000000000'
         row = db.session.query(TerritorialRate).filter_by(
-            kladr_code=region, rate_type_id=maternal_death_rate_id, year=year
+            kladr_code=region, rate_type_id=maternal_death_rate_id, year=year, deleted=0
         ).order_by(TerritorialRate.id.desc()).first()
         if not row:
             row = TerritorialRate(kladr_code=region, rate_type_id=maternal_death_rate_id, year=year)

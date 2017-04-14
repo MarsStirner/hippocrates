@@ -262,6 +262,9 @@ function ($scope, $modal, $controller, RisarApi, PrintingService, PrintingDialog
     $scope.canEditCheckup = function (idx) {
         return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
     };
+    $scope.canCopyCheckup = function (idx) {
+        return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_copy;
+    };
     $scope.print_checkup = function (checkup) {
         var action_id = checkup.id;
         var flat_code = checkup.flat_code;
@@ -349,6 +352,9 @@ function ($scope, $modal, $controller, RisarApi, PrintingService, PrintingDialog
         };
         $scope.canEditCheckup = function (idx) {
             return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_edit;
+        };
+        $scope.canCopyCheckup = function (idx) {
+            return $scope.checkupsAccess.length && $scope.checkupsAccess[idx].can_copy;
         };
         $scope.print_checkup = function (checkup) {
             RisarApi.print_gyn_checkup(checkup.id, 'pdf');

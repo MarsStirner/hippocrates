@@ -2,17 +2,17 @@
     <div class="box-header">
         <h3 class="box-title">Изменения по картам</h3>
         <span class="badge label-info" style="margin-right: 5px;">[[ pager_recently_modified_charts.record_count ]]</span>
+        <div class="box-tools pull-right"><button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button></div>
+    </div>
+
+    <div class="box-body no-padding">
         <div class="box-tools pull-right">
             <pagination class="pagination pagination-sm no-margin" ng-model="pager_recently_modified_charts.current_page" total-items="pager_recently_modified_charts.record_count"
                         items-per-page="itemsPerPage" style="vertical-align: middle;" ng-show="pager_recently_modified_charts.pages > 1"
                         previous-text="&lsaquo;" next-text="&rsaquo;"
                         max-size="pager_recently_modified_charts.max_pages" ng-change="onRecentlyModifiedPageChanged()">
             </pagination>
-            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
         </div>
-    </div>
-
-    <div class="box-body no-padding">
         <table class="table">
             <tbody>
             <tr>

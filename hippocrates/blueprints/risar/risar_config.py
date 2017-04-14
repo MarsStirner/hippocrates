@@ -116,6 +116,7 @@ gyn_checkup_simple_codes = [
     'encompassing_treatment',
     'engorged_breasts',
     'groin_glands',
+    'has_complaints',
     'heart_rate',
     'height',
     'imt',
