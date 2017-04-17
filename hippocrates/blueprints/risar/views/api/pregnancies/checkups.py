@@ -52,12 +52,12 @@ def api_0_pregnancy_checkup(event_id):
     if not flat_code:
         raise ApiException(400, u'необходим flat_code')
 
+    if not checkup_id:
+        close_open_checkups(event_id)
+
     action = get_action_by_id(checkup_id, event, flat_code, True)
 
     NotificationQueue.notify_checkup_changes(card, action, data.get('pregnancy_continuation'))
-
-    if not checkup_id:
-        close_open_checkups(event_id)
 
     action.begDate = beg_date
     action.person = person
