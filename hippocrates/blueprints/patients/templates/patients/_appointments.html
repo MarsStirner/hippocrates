@@ -20,13 +20,13 @@
         <td>[[ record.note ]]</td>
         <td width="1%">
             {% if user_profiles_mng.has_ui_registrator() %}
-                <button ng-if="!record.event_id" ng-click="new_event(client.info.id, record.id)" class="btn btn-sm btn-success" title="Создать обращение">
-                    <span class="glyphicon glyphicon-plus"></span>
-                </button>
+            <button ng-if="!record.event_id" ng-click="newEvent(record.id)" class="btn btn-sm btn-success" title="Создать обращение">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
             {% endif %}
-                <button ng-if="record.event_id" ng-click="open_event(record.event_id)" class="btn btn-sm btn-info" title="Перейти к обращению">
-                    <span class="glyphicon glyphicon-list-alt"></span>
-                </button>
+            <button ng-if="record.event_id" ng-click="openEvent(record.event_id)" class="btn btn-sm btn-info" title="Перейти к обращению">
+                <span class="glyphicon glyphicon-list-alt"></span>
+            </button>
         </td>
         <td width="1%">
             <ui-print-button ps="ps_home" class="btn-sm" resolve="ps_home_resolve(record.id)" ng-if="record.receptionType.code == 'home'"></ui-print-button>

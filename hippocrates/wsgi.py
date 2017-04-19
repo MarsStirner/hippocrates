@@ -23,7 +23,7 @@ def general_menu():
     ), dict(
         link='patients.search',
         title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut() or
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_adm_nurse() or
                  UserProfileManager.has_ui_doctor()),
         icon='fa fa-search'
     ), dict(

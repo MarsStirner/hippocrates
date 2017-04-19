@@ -130,7 +130,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
                         });
                 });
         })
-        
     };
     $scope.openContractListUi = function () {
         WMWindowSync.openTab(WMConfig.url.accounting.html_contract_list, refreshAvailableContracts);

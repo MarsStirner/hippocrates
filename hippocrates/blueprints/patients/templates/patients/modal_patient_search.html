@@ -5,7 +5,18 @@
 <div class="modal-body modal-scrollable">
     <div ui-alert-list="alerts"></div>
     <tabset>
+        {% if user_profiles_mng.has_ui_registrator() %}
         <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+        {% endif %}
+        {% if user_profiles_mng.has_ui_adm_nurse() %}
+        <tab heading="Текущая госпитализация">
+            <div ng-if="!client.current_hosp">
+                <h3 class="marginal">Госпитализация ещё не создана</h3>
+                <button type="button" class="btn btn-primary btn-lg"
+                    ng-click="createHospitalisation()">Создать госпитализацию</button>
+            </div>
+        </tab>
+        {% endif %}
         <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
         <tab heading="Записи ЭМК" select="openPatientActions()">
             <div ng-controller="PatientActionsCtrl">
@@ -17,12 +28,14 @@
 <div class="modal-footer">
     <div class="pull-right"><button type="button" class="btn btn-default" ng-click="$dismiss('cancel')">Закрыть</button></div>
     <div class="text-left">
-        <button class="btn btn-primary" ng-click="new_appointment(client.client_id)">Записать на приём</button>
-        <button class="btn btn-primary" ng-click="new_event(client.client_id)"
-                ng-if="client.appointments.length == 0 || CurrentUser.current_role_in('clinicDoctor')">Создать обращение</button>
-        <button class="btn btn-primary" ng-click="modal_create_event()"
-                ng-if="client.appointments.length > 0 && !CurrentUser.current_role_in('clinicDoctor')">Создать обращение</button>
-        <button class="btn btn-primary" ng-click="open_client(client.client_id)">Редактировать данные пациента</button>
+        {% if user_profiles_mng.has_ui_registrator() %}
+        <button class="btn btn-primary" ng-click="newAppointment()">Записать на приём</button>
+        <button class="btn btn-primary" ng-click="newEventChecked()">Создать обращение</button>
+        <button class="btn btn-primary" ng-click="openClient()">Редактировать данные пациента</button>
+        {% endif %}
+        {% if user_profiles_mng.has_ui_adm_nurse() %}
+        <button class="btn btn-primary" ng-click="openClientModal()">Редактировать данные пациента</button>
+        {% endif %}
         <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
     </div>
 </div>

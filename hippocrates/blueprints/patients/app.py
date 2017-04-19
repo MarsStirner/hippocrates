@@ -23,7 +23,7 @@ def fc_urls():
                 'client_html': url_for('patients.patient'),
                 'client_info_full': url_for('patients.patient_info_full'),
                 'patient_actions_modal': uf_placeholders('patients.patient_actions_modal', ['client_id']),
-                'patient_search_modal': uf_placeholders('patients.patient_search_modal', ['client_id']),
+                'patient_search_modal': url_for('patients.patient_search_modal'),
 
                 'client_get': url_for('patients.api_patient_get'),
                 'client_save': url_for('patients.api_patient_save'),

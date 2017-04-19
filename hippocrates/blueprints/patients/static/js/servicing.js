@@ -1,9 +1,11 @@
 'use strict';
 
-WebMis20.service('PatientModalService', ['$modal', '$templateCache', 'WMConfig', function ($modal, $templateCache, WMConfig) {
+WebMis20.service('PatientModalService', ['$modal', '$templateCache', 'WMConfig',
+        function ($modal, $templateCache, WMConfig) {
     return {
         openSearchItem: function (wmclient) {
-            var tUrl = WMConfig.url.patients.patient_search_modal.format(wmclient.info.id);
+            var tUrl = WMConfig.url.patients.patient_search_modal + '?client_id=' +
+                wmclient.info.id;
             //$templateCache.remove();
             var instance = $modal.open({
                 templateUrl: tUrl,
@@ -51,8 +53,6 @@ var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
         $scope.updateUrlArgs({q: args.query});
     });
     $scope.updateUrlArgs = function (args) {
-        //var path = $location.path() + '?q=' + args.query;
-        //$location.url(path).replace();
         args = angular.extend({}, $location.search(), args);
         $location.search(args).replace();
     };

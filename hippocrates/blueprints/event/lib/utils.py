@@ -365,3 +365,4 @@ def save_executives(event_id):
     except Exception, e:
         db.rollback()
         raise EventSaveException(u'Ошибка закрытия обращения')
+

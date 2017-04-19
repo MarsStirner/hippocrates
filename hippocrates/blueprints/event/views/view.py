@@ -72,3 +72,8 @@ def request_type_kind_choose():
 def get_events():
     return render_template('event/events.html')
 
+
+@module.route('/modal_edit_hosp.html')
+def modal_edit_hosp():
+    return render_template('event/modal_edit_hosp.html')
+

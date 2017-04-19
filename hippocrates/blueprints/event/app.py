@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, url_for
+from hippocrates.version import version as app_version
 from nemesis.lib.frontend import frontend_config
 from .config import MODULE_NAME, RUS_NAME
 
@@ -24,8 +25,10 @@ def fc_urls():
                     'event_info': url_for('event.html_event_info'),
                     'new_event': url_for('event.new_event'),
                     'request_type_kind': url_for('event.request_type_kind_choose'),
+                    'modal_edit_hosp': url_for('event.modal_edit_hosp')
                 },
                 'event_get': url_for('event.api_event_info'),
+                'event_hosp_get': url_for('event.api_0_event_hosp_get'),
                 'event_new': url_for('event.api_event_new_get'),
                 'event_save': url_for('event.api_event_save'),
                 'event_close': url_for('event.api_event_close'),

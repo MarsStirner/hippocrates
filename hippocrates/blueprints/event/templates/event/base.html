@@ -16,12 +16,13 @@
 
 {% block modules_js -%}
 {{ super() }}
-<script src="{{ url_for('accounting.static', filename='js/accounting.js', v=app_version) }}"></script>
-<script src="{{ url_for('accounting.static', filename='js/modal_contract.js', v=app_version) }}"></script>
-<script src="{{ url_for('accounting.static', filename='js/modal_client.js', v=app_version) }}"></script>
+<script src="{{ url_for('.static', filename='js/event_common.js', v=app_version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/client-directives.js', v=nemesis_version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/kladr-directives.js', v=nemesis_version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/client/client-services.js', v=nemesis_version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/file-editor.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('accounting.static', filename='js/accounting.js', v=app_version) }}"></script>
+<script src="{{ url_for('accounting.static', filename='js/modal_contract.js', v=app_version) }}"></script>
+<script src="{{ url_for('accounting.static', filename='js/modal_client.js', v=app_version) }}"></script>
 <script src="{{ url_for('accounting.static', filename='js/modal_invoice.js', v=app_version) }}"></script>
 {%- endblock %}
