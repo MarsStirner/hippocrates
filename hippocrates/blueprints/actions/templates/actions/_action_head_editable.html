@@ -42,7 +42,11 @@
             <div class="form-group">
                 <label for="set_person" class="col-md-1 control-label">Назначил</label>
                 <div class="col-md-6">
-                    <wm-person-select id="set_person" name="set_person" ng-model="action.set_person" theme="bootstrap"
+                    <wm-person-select id="set_person"
+                                      {%- if not user_utils.can_change_set_person -%}
+                                      ng-disabled="true"
+                                      {%-endif-%}
+                                      name="set_person" ng-model="action.set_person" theme="bootstrap"
                         placeholder="Введите ФИО врача или специальность"></wm-person-select>
                 </div>
             </div>
