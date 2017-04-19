@@ -1,0 +1,15 @@
+{% extends 'hippo_base.html' %}
+
+{%- block content %}
+    {% block main %}{% endblock %}
+{% endblock -%}
+
+{% block modules_css %}
+{{ super() }}
+{#<link href="{{ url_for('.static', filename='css/style.css') }}" media="screen" rel="stylesheet">#}
+{#<link href="{{ url_for('.static', filename='css/print.css') }}" media="print" rel="stylesheet">#}
+{% endblock %}
+
+{% block modules_js -%}
+{{ super() }}
+{%- endblock %}

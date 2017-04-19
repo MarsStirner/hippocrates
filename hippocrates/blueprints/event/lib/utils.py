@@ -135,17 +135,11 @@ class MovingController():
         """
         получить предыдущее движение или послупление
         """
-        movings = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                   Action.deleted == 0,
-                                                                   ActionType.flatCode == 'moving').order_by(Action.begDate).all()
-        if movings:
-            action = movings[-1]
-        else:
-            action = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                      Action.deleted == 0,
-                                                                      ActionType.flatCode == 'received'
-                                                                      ).first()
-        return action
+        return db.session.query(Action).join(ActionType)\
+            .filter(Action.event_id == event_id,
+                    Action.deleted == 0,
+                    ActionType.flatCode.in_(['moving', 'received']))\
+            .order_by(Action.begDate.desc()).first()
 
     def update_moving_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
