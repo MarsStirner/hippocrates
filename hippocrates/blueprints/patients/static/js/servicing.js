@@ -9,7 +9,8 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
         $modalInstance.close(true);
     };
 };
-var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, PrintingService, WMWindowSync, client, WMConfig) {
+var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, $window,
+                                PrintingService, WMWindowSync, client, WMConfig, localStorageService) {
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.alerts = [];
@@ -57,7 +58,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
             query += '&ticket_id=' + ticket_id;
         }
         var url = WMConfig.url.event.html.request_type_kind + query;
-        WMWindowSync.openTab(url, $scope.reload_client);
+        $window.open(url);
     };
 
     $scope.new_appointment = function(client_id) {
@@ -67,7 +68,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
 
     $scope.open_event = function(event_id) {
         var url = WMConfig.url.event.html.event_info + '?event_id=' + event_id;
-        WMWindowSync.openTab(url, $scope.reload_client);
+        $window.open(url);
     };
 
     $scope.open_client = function (client_id) {
@@ -93,7 +94,9 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
         WMWindowSync.openTab(url, $scope.reload_client);
     };
     $scope.reload_client = function () {
-        $scope.client.reload('for_servicing');
+        if ($scope.client) {
+            $scope.client.reload('for_servicing');
+        }
     };
     $scope.openPatientActions = function () {
         $scope.$broadcast('patientActionsOpened', {client_id: $scope.client_id});
@@ -101,6 +104,13 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
 
     $scope.$on('printing_error', function (event, error) {
         $scope.alerts.push(error);
+    });
+
+    $scope.$on('LocalStorageModule.notification.changed', function() {
+        var modalClientToUpdate = localStorageService.get('modalClientToUpdate') || {};
+        if(modalClientToUpdate.hasOwnProperty($scope.client.info.id)) {
+            $scope.reload_client();
+        }
     });
 
     $modalInstance.result.then(function () {
@@ -149,6 +159,6 @@ var ClientSearch = function ($scope, WMClient, $modal, CurrentUser) {
     };
 };
 WebMis20.controller('ClientSearch', ['$scope', 'WMClient', '$modal', 'CurrentUser', ClientSearch]);
-WebMis20.controller('ClientModalCtrl', ['$scope', '$modalInstance', '$filter', '$modal', 'PrintingService',
-    'WMWindowSync', 'client', 'WMConfig', ClientModalCtrl]);
+WebMis20.controller('ClientModalCtrl', ['$scope', '$modalInstance', '$filter', '$modal', '$window', 'PrintingService',
+    'WMWindowSync', 'client', 'WMConfig', 'localStorageService', ClientModalCtrl]);
 
