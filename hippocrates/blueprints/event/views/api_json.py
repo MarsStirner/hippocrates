@@ -143,7 +143,7 @@ def api_event_save():
 
     if request_type_kind == 'stationary':
         received_data = all_data['received']
-        quota_data = all_data['vmp_quoting']
+        quota_data = all_data.get('vmp_quoting')
         received_save(event_id, received_data)
         if quota_data:
             client_quota_save(event, quota_data)
