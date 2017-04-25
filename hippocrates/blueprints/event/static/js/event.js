@@ -177,12 +177,23 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             $scope.set_default_dates();
         }
     };
+    $scope.$watchCollection('[event.info.set_date, event.info.exec_date]', function (n, o) {
+        if (n && n!= o) {
+            var st = moment(n[0]), end = moment(n[1]);
+            if (st.isValid() && end.isValid()) {
+                if (!st.isBefore(end)) {
+                    if ($scope.event.info) {
+                        $scope.event.info.exec_date = st.clone().toDate().setHours(23, 59, 59);
+                    }
+                }
+            }
+        }
+    });
 
     $scope.set_default_dates = function () {
         if($scope.event.is_new()) {
             $scope.event.info.set_date = new Date();
             $scope.event.info.set_date.setHours(1, 0, 0);
-
             $scope.event.info.exec_date = new Date();
             $scope.event.info.exec_date.setHours(23, 59, 59);
         }
