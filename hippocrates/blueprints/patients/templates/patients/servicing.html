@@ -10,8 +10,9 @@
         <div ng-controller="ClientSearch" class="ng-cloak box box-success">
             <div class="box-header"></div>
             <div class="box-body">
-                <wm-search-client client-id="client.client_id" query="query" allow-register
-                    on-select="set_patient_id(selected_client)"></wm-search-client>
+                <wm-search-client client-id="client_id" query="query" allow-register
+                    on-select="setSelectedPatient(selected_client)"
+                    get-search-api="getClientSearchApi(api)"></wm-search-client>
             </div>
         </div>
     </section>
@@ -20,10 +21,18 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script type="text/ng-template" id="modal-createEvent.html">{% include "patients/_modal_create_event.html" %}</script>
-    <script type="text/ng-template" id="modal-client.html">{% include "patients/_modal_client.html" %}</script>
-    <script type="text/ng-template" id="modal-client-cut.html">{% include "patients/_modal_client_cut.html" %}</script>
     <script type="text/javascript" src="{{ url_for('.static', filename='js/servicing.js', v=app_version) }}"></script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/modal_patient_search.js', v=app_version) }}"></script>
     <script type="text/javascript" src="{{ url_for('.static', filename='js/patient_actions.js', v=app_version) }}"></script>
     <script type="text/javascript" src="{{ url_for('event.static', filename='js/directives.js', v=app_version) }}"></script>
+    <script src="{{ url_for('event.static', filename='js/event_common.js', v=app_version) }}"></script>
+    <script src="{{ url_for('event.static', filename='js/modal_edit_hosp.js', v=app_version) }}"></script>
+    <script src="{{ url_for('accounting.static', filename='js/accounting.js', v=app_version) }}"></script>
+    <script src="{{ url_for('accounting.static', filename='js/modal_contract.js', v=app_version) }}"></script>
+    <script src="{{ url_for('patients.static', filename='js/modal_client.js', v=app_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/directives/client-directives.js', v=nemesis_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/directives/kladr-directives.js', v=nemesis_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/client/client-services.js', v=nemesis_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/file-editor.js', v=nemesis_version) }}"></script>
 {% endblock %}

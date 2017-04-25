@@ -20,11 +20,12 @@ from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DI
 from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
     get_properties_values)
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
+from nemesis.lib.event.utils import get_current_hospitalisation
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
-                               parse_id, bail_out, format_datetime, db_non_flushable)
+from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz,
+    safe_int, safe_bool, parse_id, bail_out, format_datetime, db_non_flushable)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, \
     ActionProperty_HospitalBed, Action_TakenTissueJournalAssoc, TakenTissueJournal
@@ -73,16 +74,40 @@ def api_event_new_get():
     return v.make_new_event(event)
 
 
+@module.route('/api/0/event/hosp/')
+@module.route('/api/0/event/hosp/<int:event_id>')
+@db_non_flushable
+@api_method
+def api_0_event_hosp_get(event_id=None):
+    args = request.args.to_dict()
+    get_new = safe_bool(args.get('new', False))
+    client_id = safe_int(args.get('client_id'))
+
+    if get_new:
+        event_builder = StationaryEventBuilder(client_id, None)
+        event_construction_director = EventConstructionDirector()
+        event_construction_director.set_builder(event_builder)
+        event = event_construction_director.construct()
+    elif event_id:
+        event = Event.query.get(event_id)
+        if not event:
+            raise ApiException(404, u'Не найдена госпитализация с id = {0}' \
+                .format(event_id))
+    else:
+        event = get_current_hospitalisation(client_id)
+        if not event:
+            raise ApiException(404, u'Не найдена госпитализация для пациента с id = {0}' \
+                .format(client_id))
+
+    v = StationaryEventVisualizer()
+    return v.make_admission_event_info(event, get_new)
+
+
 @module.route('/api/event_stationary_opened.json', methods=['GET'])
 @api_method
 def api_event_stationary_open_get():
     client_id = int(request.args['client_id'])
-    events = Event.query.join(EventType, rbRequestType).filter(
-        Event.client_id == client_id,
-        Event.execDate.is_(None),
-        Event.deleted == 0,
-        rbRequestType.code.in_(STATIONARY_EVENT_CODES)
-    ).order_by(Event.setDate.desc())
+    events =  get_current_hospitalisation(client_id, one=False)
     v = EventVisualizer()
     return map(v.make_short_event, events)
 
@@ -124,7 +149,7 @@ def api_event_save():
 
     if request_type_kind == 'stationary':
         received_data = all_data['received']
-        quota_data = all_data['vmp_quoting']
+        quota_data = all_data.get('vmp_quoting')
         received_save(event_id, received_data)
         if quota_data:
             client_quota_save(event, quota_data)

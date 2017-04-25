@@ -230,7 +230,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var ContractModalCtrl = function ($scope, $filter, AccountingService, AccountingClientModal, WMConfig, contract, client) {
+var ContractModalCtrl = function ($scope, $filter, AccountingService, PatientModalService,
+        WMConfig, contract, client) {
     $scope.contract = contract;
     $scope.client = client;
     $scope.ca_params = {
@@ -302,10 +303,11 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
         $scope.contract.payer.id = null;
     };
     $scope.addNewClient = function () {
-        AccountingClientModal.open().then(function (client_id) {
-            AccountingService.get_client(client_id).then(function (client) {
-                $scope.contract.payer.client = client;
-            });
+        PatientModalService.openNewClient()
+            .then(function (client_id) {
+                AccountingService.get_client(client_id).then(function (client) {
+                    $scope.contract.payer.client = client;
+                });
         });
     };
     $scope.$watch('contract.payer.ca_type_code', function (newVal, oldVal) {
@@ -473,4 +475,4 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, Accounting
 };
 
 
-WebMis20.controller('ContractModalCtrl', ['$scope', '$filter', 'AccountingService', 'WMConfig', ContractModalCtrl]);
+WebMis20.controller('ContractModalCtrl', ['$scope', '$filter', 'PatientModalService', 'WMConfig', ContractModalCtrl]);

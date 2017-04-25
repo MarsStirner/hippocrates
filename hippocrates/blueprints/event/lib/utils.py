@@ -46,8 +46,9 @@ class EventSaveController():
         # для всех request type
         event_data = all_data['event']
         event.setPerson_id = current_user.get_main_user().id
-        event.client_id = event_data['client_id']
-        event.client = Client.query.get(event_data['client_id'])
+        client_id = safe_traverse(event_data, 'client', 'id') or event_data['client_id']
+        event.client_id = client_id
+        event.client = Client.query.get(client_id)
         event.org_id = event_data['organisation']['id']
         event.payStatus = 0
         event = self.update_base_info(event, event_data)
@@ -83,8 +84,8 @@ class EventSaveController():
                 event.contract = contract
             else:
                 self.update_contract(contract_id, event.client_id)
-        event.note = event_data['note']
-        event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
+        event.note = event_data.get('note')
+        event.orgStructure_id = safe_traverse(event_data, 'org_structure', 'id')
         event.result_id = safe_traverse(event_data, 'result', 'id')
         event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
         return event
@@ -204,9 +205,9 @@ def create_new_event(event_data):
     event.isPrimaryCode = event_data['is_primary']['id']
     event.order = event_data['order']['id']
     event.org_id = event_data['organisation']['id']
-    event.orgStructure_id = event_data['org_structure']['id']
+    event.orgStructure_id = safe_traverse(event_data, 'org_structure', 'id')
     event.payStatus = 0
-    event.note = event_data['note']
+    event.note = event_data.get('note')
     event.uuid = uuid.uuid4()
 
     error_msg = {}
@@ -365,3 +366,4 @@ def save_executives(event_id):
     except Exception, e:
         db.rollback()
         raise EventSaveException(u'Ошибка закрытия обращения')
+

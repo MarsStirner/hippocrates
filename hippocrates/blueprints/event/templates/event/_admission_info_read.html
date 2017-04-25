@@ -1,0 +1,113 @@
+<div class="row">
+<div class="col-md-12">
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th class="col-md-4"></th>
+                <th class="col-md-8"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th class="text-right">Номер ИБ</th>
+                <td>[[ event.info.external_id ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Дата поступления</th>
+                <td>[[ event.info.set_date | asDateTime ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Тип обращения, источник финансирования</th>
+                <td>[[ event.info.event_type.request_type.name ]],
+                    [[ event.info.event_type.finance.name ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Договор</th>
+                <td>[[ event.info.contract.description.full ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Лечащий врач</th>
+                <td>[[ event.info.exec_person.full_name ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Порядок госпитализации</th>
+                <td>[[ event.received.hosp_order.value.name ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Первичность</th>
+                <td>[[ event.info.is_primary.name ]]</td>
+            </tr>
+
+            <tr>
+                <th class="text-right">Кем направлен</th>
+                <td>[[ event.received.appointed_by.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Направивший врач</th>
+                <td>[[ event.received.appointment_doctor.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Дата направления</th>
+                <td>[[ event.received.appointment_date.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">№ направления</th>
+                <td>[[ event.received.appointment_number.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Кем доставлен</th>
+                <td>[[ event.received.delivered_by.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Отделение поступления</th>
+                <td>[[ event.received.orgStructStay.value.name ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">№ наряда СП</th>
+                <td>[[ event.received.ambulance_number.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Вид транспортировки</th>
+                <td>[[ event.received.transp_type.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Диагноз направившего учреждения</th>
+                <td>
+                    <div>
+                        Основной:
+                        <span ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'main'">
+                            [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
+                        </span>
+                    </div>
+                    <div ng-if="event.received.diagnoses | collapse_diagnoses:'complication' | count">
+                        Осложнения:
+                        <div ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'complication'">
+                            [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
+                        </div>
+                    </div>
+                    <div ng-if="event.received.diagnoses | collapse_diagnoses:'associated' | count">
+                        Сопутствующие:
+                        <div ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'associated'">
+                            [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th class="text-right">В состоянии опьянения</th>
+                <td>[[ event.received.intoxication.value ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Травма</th>
+                <td>[[ event.received.trauma.value.name ]]</td>
+            </tr>
+            <tr>
+                <th class="text-right">Доставлен от начала заболевания\травмы через</th>
+                <td>[[ event.received.delivered_after.value ]]</td>
+            </tr>
+            <tr>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>

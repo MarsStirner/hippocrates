@@ -13,6 +13,7 @@ from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs, bail_out
+from nemesis.lib.event.utils import get_client_events
 from hippocrates.blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
@@ -102,9 +103,10 @@ def api_patient_events_get():
     client_id = parse_id(request.args, 'client_id')
     vsl = ClientVisualizer()
     client = Client.query.get(client_id) or bail_out(ApiException(404, u'Пациент не найден'))
+    events = get_client_events(client)
     return {
         'info': client,
-        'events': vsl.make_events(client)
+        'events': vsl.make_events(client, events)
     }
 
 
