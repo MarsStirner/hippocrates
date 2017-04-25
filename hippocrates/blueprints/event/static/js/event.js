@@ -177,18 +177,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             $scope.set_default_dates();
         }
     };
-    $scope.$watchCollection('[event.info.set_date, event.info.exec_date]', function (n, o) {
-        if (n && n!= o) {
-            var st = moment(n[0]), end = moment(n[1]);
-            if (st.isValid() && end.isValid()) {
-                if (!st.isBefore(end)) {
-                    if ($scope.event.info) {
-                        $scope.event.info.exec_date = st.clone().toDate().setHours(23, 59, 59);
-                    }
-                }
-            }
-        }
-    });
 
     $scope.set_default_dates = function () {
         if($scope.event.is_new()) {
@@ -322,23 +310,36 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     }
 
-    $scope.$watch('event.info.set_date', function (n, o) {
-        // при выборе не сегодняшнего дня ставить время 08:00
-        if (n !== o && moment(n).startOf('d').diff(moment(o).startOf('d'), 'days') !== 0) {
-            var nd = moment(n).set({hour: 8, minute: 0, second: 0});
-            $scope.event.info.set_date = nd;
-        }
-    });
+    $scope.$watchCollection('[event.info.set_date, event.info.exec_date]', function (n, o) {
+        if (!angular.equals(n, o)) {
+            var old_st = moment(o[0]),
+                st = moment(n[0]),
+                end = moment(n[1]);
 
-    $scope.$watch('event.info.exec_date', function (n, o) {
-        if(n !== undefined && typeof n === 'string' && n !== o) {
-            var date = new Date(n);
-            if(typeof o === 'object') {
-                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
+            // Если в предыдущем значении было время, то установить его в переменную.
+            if (typeof n[0] === 'string' && typeof o[0] === 'object' ) {
+                st.set({hour: o[0].getHours(),
+                        minute: o[0].getMinutes(),
+                        second: o[0].getSeconds()});
+            }
+            if (typeof n[1] === 'string' && typeof o[1] === 'object' ) {
+                end.set({hour: o[1].getHours(),
+                        minute: o[1].getMinutes(),
+                        second: o[1].getSeconds()});
+            }
+            // при выборе не сегодняшнего дня ставить время 08:00
+            var notToday = st.clone().startOf('d').diff(old_st.startOf('d'), 'days') !== 0;
+            if (notToday) {
+                st = st.set({hour: 8, minute: 0, second: 0});
+            }
+            if (end.isBefore(st)) {
+                end = st.clone().endOf('d');
             }
 
-            $scope.event.info.exec_date = date
+            if (st.isValid()) { $scope.event.info.set_date = st.toDate(); }
+            if (end.isValid()) { $scope.event.info.exec_date = end.toDate(); }
         }
+
     });
 
     $scope.$on('event_loaded', function() {
