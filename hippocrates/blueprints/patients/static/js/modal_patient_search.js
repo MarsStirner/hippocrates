@@ -89,7 +89,9 @@ var ClientSearchModalCtrl = function ($scope, $filter, $window, PrintingService,
     $scope.createHospitalisation = function () {
         EventModalService.openNewHospitalisation($scope.client_id)
             .then(function (edited_hosp) {
-                $scope.reload_client();
+                $scope.reload_client().then(function () {
+                    $scope.event = $scope.client.current_hosp;
+                });
             });
     };
     $scope.editHospitalisation = function () {
@@ -103,7 +105,7 @@ var ClientSearchModalCtrl = function ($scope, $filter, $window, PrintingService,
         return $scope.client.current_hosp;
     };
     $scope.reload_client = function () {
-        $scope.client.reload('for_servicing');
+        return $scope.client.reload('for_servicing');
     };
     $scope.openPatientActions = function () {
         $scope.$broadcast('patientActionsOpened', {client_id: $scope.client_id});
