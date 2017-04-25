@@ -1,6 +1,6 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
     <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
-    <h4 class="modal-title">[[client.info.full_name]]</h4>
+    <h4 class="modal-title">[[client.info.full_name]] [[ client.info.last_name ]]</h4>
 </div>
 <div class="modal-body modal-scrollable">
     <div ui-alert-list="alerts"></div>
@@ -10,10 +10,13 @@
         {% endif %}
         {% if user_profiles_mng.has_ui_adm_nurse() %}
         <tab heading="Текущая госпитализация">
-            <div ng-if="!client.current_hosp">
+            <div ng-if="!curHospAvailable()">
                 <h3 class="marginal">Госпитализация ещё не создана</h3>
                 <button type="button" class="btn btn-primary btn-lg"
                     ng-click="createHospitalisation()">Создать госпитализацию</button>
+            </div>
+            <div ng-if="curHospAvailable()">
+                {% include "event/_admission_info_read.html" %}
             </div>
         </tab>
         {% endif %}
@@ -34,8 +37,10 @@
         <button class="btn btn-primary" ng-click="openClient()">Редактировать данные пациента</button>
         {% endif %}
         {% if user_profiles_mng.has_ui_adm_nurse() %}
+        <button class="btn btn-primary" ng-if="curHospAvailable()" ng-click="editHospitalisation()">
+            Редактировать данные госпитализации</button>
         <button class="btn btn-primary" ng-click="openClientModal()">Редактировать данные пациента</button>
         {% endif %}
-        <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
+        <ui-print-button ps="ps" resolve="ps_resolve()" lazy-load-context="token"></ui-print-button>
     </div>
 </div>

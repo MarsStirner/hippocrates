@@ -1,30 +1,5 @@
 'use strict';
 
-WebMis20.service('PatientModalService', ['$modal', '$templateCache', 'WMConfig',
-        function ($modal, $templateCache, WMConfig) {
-    return {
-        openSearchItem: function (wmclient) {
-            var tUrl = WMConfig.url.patients.patient_search_modal + '?client_id=' +
-                wmclient.info.id;
-            //$templateCache.remove();
-            var instance = $modal.open({
-                templateUrl: tUrl,
-                controller: ClientSearchModalCtrl,
-                backdrop: 'static',
-                size: 'lg',
-                windowClass: 'modal-scrollable',
-                resolve: {
-                    client: function () {
-                        return wmclient;
-                    }
-                }
-            });
-            return instance.result;
-        }
-    }
-}]);
-
-
 var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);

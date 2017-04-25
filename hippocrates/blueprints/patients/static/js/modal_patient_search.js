@@ -1,9 +1,11 @@
 'use strict';
 
 var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
-        WMWindowSync, WMConfig, MessageBox, CurrentUser, EventModalService, client) {
+        WMWindowSync, WMConfig, MessageBox, CurrentUser, EventModalService,
+        PatientModalService, client) {
     $scope.client = client;
     $scope.client_id = client.client_id;
+    $scope.event = client.current_hosp;
     $scope.alerts = [];
 
     $scope.ps = new PrintingService('registry');
@@ -26,9 +28,6 @@ var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
             ticket_id: client_ticket_id
         }
     };
-    $scope.ps_amb.set_context('orderAmb');
-    $scope.ps_home.set_context('orderHome');
-    $scope.ps.set_context('token');
 
     $scope.formatAppointmentDate = function (appointment) {
         return '{0}{ (|1|)}'.formatNonEmpty(
@@ -81,13 +80,27 @@ var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
         WMWindowSync.openTab(url, $scope.reload_client);
     };
     $scope.openClientModal = function () {
-
+        var copy = $scope.client.clone();
+        PatientModalService.openClient(copy, true)
+            .then(function (edited_client) {
+                $scope.reload_client();
+            });
     };
     $scope.createHospitalisation = function () {
         EventModalService.openNewHospitalisation($scope.client_id)
-            .then(function () {
-
+            .then(function (edited_hosp) {
+                $scope.reload_client();
             });
+    };
+    $scope.editHospitalisation = function () {
+        var hosp = $scope.client.current_hosp.clone();
+        EventModalService.openEditHospitalisation(hosp)
+            .then(function (edited_hosp) {
+                $scope.reload_client();
+            });
+    };
+    $scope.curHospAvailable = function () {
+        return $scope.client.current_hosp;
     };
     $scope.reload_client = function () {
         $scope.client.reload('for_servicing');
@@ -104,4 +117,4 @@ var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
 
 WebMis20.controller('ClientSearchModalCtrl', ['$scope', '$filter', 'PrintingService',
     'WMWindowSync', 'WMConfig', 'MessageBox', 'CurrentUser', 'EventModalService',
-    ClientSearchModalCtrl]);
+    'PatientModalService', ClientSearchModalCtrl]);

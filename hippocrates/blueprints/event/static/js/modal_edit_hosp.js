@@ -1,19 +1,18 @@
 'use strict';
 
-var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMConfig,
+var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
         CurrentUser, RefBookService, EventType, AccountingService, ContractModalService,
-        WMWindowSync, WMEventFormState, WebMisApi, event) {
-    $scope.model = event;
-    $scope.create_mode = !$scope.model.event.id;
+        WMWindowSync, WMEventFormState, WMEventService, wmevent) {
+    $scope.event = wmevent;
+    $scope.create_mode = !$scope.event.event_id;
     $scope.alerts = [];
 
-    $scope.ps = new PrintingService('registry');
+    $scope.ps = new PrintingService('event');
     $scope.ps_resolve = function () {
         return {
-            client_id: $scope.client_id
+            event_id: $scope.event.event_id
         }
     };
-    $scope.ps.set_context('token');
 
     $scope.$on('printing_error', function (event, error) {
         $scope.alerts.push(error);
@@ -34,8 +33,7 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
         list: []
     };
     $scope.editing = {
-        submit_attempt: false,
-        contract_edited: false
+        submit_attempt: false
     };
 
     var only_create_widgets = ['request_type', 'finance', 'contract', 'event_type', 'set_date'];
@@ -60,7 +58,7 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
         $scope.on_finance_changed();
     };
     $scope.on_finance_changed = function () {
-        $scope.model.event.event_type = $scope.rbEventType.get_filtered_by_rtf(
+        $scope.event.info.event_type = $scope.rbEventType.get_filtered_by_rtf(
             $scope.request_type.selected.id,
             $scope.finance.selected.id
         )[0];
@@ -77,8 +75,8 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
     };
     $scope.update_form_state = function () {
         $scope.formstate.set_state(
-            $scope.model.event.event_type.request_type,
-            $scope.model.event.event_type.finance,
+            $scope.event.info.event_type.request_type,
+            $scope.event.info.event_type.finance,
             $scope.create_mode
         );
     };
@@ -86,7 +84,7 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
         return $scope.available_contracts.list.length === 0;
     };
     $scope.isContractDraft = function () {
-        return !!safe_traverse($scope.model, ['event', 'contract', 'draft']);
+        return !!safe_traverse($scope.event, ['info', 'contract', 'draft']);
     };
     $scope.isContractListEmptyLabelVisible = function () {
         return $scope.create_mode && $scope.isContractListEmpty();
@@ -94,10 +92,9 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
     $scope.isContractDraftLabelVisible = function () {
         return $scope.isContractDraft();
     };
-    // TODO: contracts
     $scope.createContract = function () {
-        var client_id = safe_traverse($scope.model.event, ['client', 'id']),
-            finance_id = safe_traverse($scope.model.event, ['event_type', 'finance', 'id']),
+        var client_id = safe_traverse($scope.event, ['info', 'client', 'info', 'id']),
+            finance_id = safe_traverse($scope.event, ['info', 'event_type', 'finance', 'id']),
             client = $scope.event.info.client;
         AccountingService.get_contract(undefined, {
             finance_id: finance_id,
@@ -158,16 +155,16 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
         return _.filter(list, function (item) { return item && !!item.draft }).length > 0;
     }
     function set_rt_finance_choices() {
-        var et = safe_traverse($scope.model.event, ['event_type']);
+        var et = safe_traverse($scope.event, ['info', 'event_type']);
         $scope.request_type.selected = et ?
             angular.extend({}, et.request_type) :
             $scope.rbRequestType.get_by_code('hospital');
         $scope.finance.selected = et ? angular.extend({}, et.finance) : undefined;
     }
     function refreshAvailableContracts() {
-        var client_id = $scope.model.event.client.id,
-            finance_id = safe_traverse($scope.model.event, ['event_type', 'finance', 'id']),
-            set_date = aux.format_date($scope.model.event.set_date);
+        var client_id = $scope.event.info.client.info.id,
+            finance_id = safe_traverse($scope.event, ['info', 'event_type', 'finance', 'id']),
+            set_date = aux.format_date($scope.event.info.set_date);
         return AccountingService.get_available_contracts(client_id, finance_id, set_date)
             .then(function (contract_list) {
                 $scope.available_contracts.list = contract_list;
@@ -179,8 +176,8 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
                         draft: 1
                     }).then(function (result) {
                         contract_list.push(result);
-                        if (!safe_traverse($scope.model.event, ['contract'])) {
-                            $scope.model.event.contract = result;
+                        if (!safe_traverse($scope.event, ['info', 'contract'])) {
+                            $scope.event.info.contract = result;
                         }
                     })
                 }
@@ -188,61 +185,76 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
     }
     function set_contract(contract_id) {
         if (!contract_id) {
-            $scope.model.event.contract = !$scope.isContractListEmpty() ?
+            $scope.event.info.contract = !$scope.isContractListEmpty() ?
                 $scope.available_contracts.list[0] :
                 null;
         } else {
             var idx = _.findIndex($scope.available_contracts.list, function (con) {
                 return con.id === contract_id;
             });
-            $scope.model.event.contract = $scope.available_contracts.list[idx];
+            $scope.event.info.contract = $scope.available_contracts.list[idx];
         }
     }
 
-    $scope.$watch('model.event.set_date', function (n, o) {
+    $scope.$watch('event.info.set_date', function (n, o) {
         // при выборе не сегодняшнего дня ставить время 08:00
         if (n !== o && moment(n).startOf('d').diff(moment(o).startOf('d'), 'days') !== 0) {
             var nd = moment(n).set({hour: 8, minute: 0, second: 0});
-            $scope.model.event.set_date = nd;
+            $scope.event.info.set_date = nd;
         }
     });
 
     $scope.recalcBodyArea = function() {
-        var w = safe_traverse($scope.model, ['received', 'weight', 'value']),
-            h = safe_traverse($scope.model, ['received', 'height', 'value']);
+        var w = safe_traverse($scope.event, ['received', 'weight', 'value']),
+            h = safe_traverse($scope.event, ['received', 'height', 'value']);
         if (w && h) {
-            $scope.model.received.body_area = Math.sqrt(w * h / 3600).toFixed(2);
+            $scope.event.received.body_area = Math.sqrt(w * h / 3600).toFixed(2);
         } else {
-            $scope.model.received.body_area = null;
+            $scope.event.received.body_area = null;
         }
     };
     $scope.saveEvent = function (hospForm) {
+        var deferred = $q.defer();
         $scope.editing.submit_attempt = true;
         if (hospForm.$valid) {
-            WebMisApi.event.save({
-                event: $scope.model.event,
-                received: $scope.model.received,
-                request_type_kind: 'stationary'
-            }).then(function (result) {
+            WMEventService.save_hosp($scope.event).then(function (result) {
                 hospForm.$setPristine();
-                $scope.create_mode = false;
-                $scope.editing.contract_edited = false;
+                $scope.refreshEvent(result.id)
+                    .then(function () {
+                        deferred.resolve($scope.event);
+                    });
             });
         } else {
-            var formelm = $('#HospForm').find('.ng-invalid:not(ng-form):first');
-            $document.scrollToElement(formelm, 100, 1500);
+            deferred.reject();
         }
+        return deferred.promise;
+    };
+    $scope.saveAndClose = function (hospForm) {
+        $scope.saveEvent(hospForm).then(function (event) {
+            $scope.$close($scope.event);
+        });
+    };
+    $scope.refreshEvent = function (event_id) {
+        return WMEventService.refresh_hosp($scope.event, event_id)
+            .then(function (hosp_event) {
+                $scope.create_mode = false;
+                $scope.recalcBodyArea();
+            });
+    };
+    $scope.getEventPrintContext = function () {
+        return !$scope.create_mode ? $scope.event.info.event_type.print_context : null;
     };
 
     $scope.init = function() {
-        $scope.model.event.set_date = new Date($scope.model.event.set_date);
+        $scope.event.info.set_date = new Date($scope.event.info.set_date);
+        $scope.recalcBodyArea();
 
-        var et_loading = $scope.rbEventType.initialize($scope.model.event.client);
+        var et_loading = $scope.rbEventType.initialize($scope.event.info.client.info);
         $q.all([et_loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
             .then(function () {
                 if ($scope.create_mode) {
-                    $scope.model.event.event_type = $scope.rbEventType.get_available_et(
-                        $scope.model.event.event_type);
+                    $scope.event.info.event_type = $scope.rbEventType.get_available_et(
+                        $scope.event.info.event_type);
                 }
                 set_rt_finance_choices();
                 $scope.on_event_type_changed();
@@ -253,7 +265,7 @@ var EventHospModalCtrl = function ($scope, $q, $document, PrintingService, WMCon
 };
 
 
-WebMis20.controller('EventHospModalCtrl', ['$scope', '$q', '$document', 'PrintingService',
+WebMis20.controller('EventHospModalCtrl', ['$scope', '$q', 'PrintingService',
     'WMConfig', 'CurrentUser', 'RefBookService', 'EventType', 'AccountingService',
-    'ContractModalService', 'WMWindowSync', 'WMEventFormState', 'WebMisApi',
+    'ContractModalService', 'WMWindowSync', 'WMEventFormState', 'WMEventService',
     EventHospModalCtrl]);

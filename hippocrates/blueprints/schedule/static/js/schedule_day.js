@@ -106,7 +106,6 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $location, $anchorScroll
         }
     };
     $scope.ps_amb = new PrintingService('preliminary_records');
-    $scope.ps_amb.set_context('orderAmb');
     $scope.ps_amb_resolve = function (client_ticket_id) {
         return {
             client_id: $scope.client.client_id,
@@ -114,7 +113,6 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $location, $anchorScroll
         }
     };
     $scope.ps_home = new PrintingService('preliminary_records');
-    $scope.ps_home.set_context('orderHome');
     $scope.ps_home_resolve = function (client_ticket_id) {
         return {
             client_id: $scope.client.client_id,

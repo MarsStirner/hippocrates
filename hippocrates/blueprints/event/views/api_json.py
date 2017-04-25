@@ -88,10 +88,16 @@ def api_0_event_hosp_get(event_id=None):
         event_construction_director = EventConstructionDirector()
         event_construction_director.set_builder(event_builder)
         event = event_construction_director.construct()
+    elif event_id:
+        event = Event.query.get(event_id)
+        if not event:
+            raise ApiException(404, u'Не найдена госпитализация с id = {0}' \
+                .format(event_id))
     else:
         event = get_current_hospitalisation(client_id)
         if not event:
-            raise ApiException(404, u'Не найдена госпитализация с id = {0}')
+            raise ApiException(404, u'Не найдена госпитализация для пациента с id = {0}' \
+                .format(client_id))
 
     v = StationaryEventVisualizer()
     return v.make_admission_event_info(event, get_new)
