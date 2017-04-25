@@ -1,8 +1,8 @@
 'use strict';
 
-var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
+var ClientSearchModalCtrl = function ($scope, $filter, $window, PrintingService,
         WMWindowSync, WMConfig, MessageBox, CurrentUser, EventModalService,
-        PatientModalService, client) {
+        PatientModalService, localStorageService, client) {
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.event = client.current_hosp;
@@ -44,7 +44,7 @@ var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
         if (ticket_id) {
             url += '&ticket_id=' + ticket_id;
         }
-        WMWindowSync.openTab(url, $scope.reload_client);
+        $window.open(url);
     };
     $scope.newEventChecked = function(ticket_id) {
         if ($scope.client.appointments.length > 0 &&
@@ -72,7 +72,7 @@ var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
 
     $scope.openEvent = function(event_id) {
         var url = WMConfig.url.event.html.event_info + '?event_id=' + event_id;
-        WMWindowSync.openTab(url, $scope.reload_client);
+        $window.open(url);
     };
 
     $scope.openClient = function () {
@@ -109,12 +109,19 @@ var ClientSearchModalCtrl = function ($scope, $filter, PrintingService,
         $scope.$broadcast('patientActionsOpened', {client_id: $scope.client_id});
     };
 
+    $scope.$on('LocalStorageModule.notification.changed', function() {
+        var modalClientToUpdate = localStorageService.get('modalClientToUpdate') || {};
+        if (modalClientToUpdate.hasOwnProperty($scope.client.info.id)) {
+            $scope.reload_client();
+        }
+    });
     $scope.$on('printing_error', function (event, error) {
         $scope.alerts.push(error);
     });
 };
 
 
-WebMis20.controller('ClientSearchModalCtrl', ['$scope', '$filter', 'PrintingService',
-    'WMWindowSync', 'WMConfig', 'MessageBox', 'CurrentUser', 'EventModalService',
-    'PatientModalService', ClientSearchModalCtrl]);
+WebMis20.controller('ClientSearchModalCtrl', ['$scope', '$filter', '$window',
+    'PrintingService', 'WMWindowSync', 'WMConfig', 'MessageBox', 'CurrentUser',
+    'EventModalService', 'PatientModalService', 'localStorageService',
+    ClientSearchModalCtrl]);
