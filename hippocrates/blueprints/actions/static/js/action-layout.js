@@ -269,7 +269,13 @@ angular.module('WebMis20')
                                 template = '<div><label>{0}:</label> {1}</div>'.format(property_name, inner_template.format(property_code))
                             } else {
                                 template =
-                                    '<div class="form-group"><wm-checkbox select-all="sas" ng-hide="{3}" on-checked="layout_tools.onCheckboxSelected({2})" key="{2}">{0}</wm-checkbox><div ng-show="sas.selected({2})">{1}</div></div>'.format(
+                                    '<div class="form-group">\
+                                    <wm-checkbox select-all="sas" \
+                                                    ng-hide="{3}" \
+                                                    initially-checked="{3}" \
+                                                    on-checked="layout_tools.onCheckboxSelected({2})"\
+                                                    key="{2}">{0}</wm-checkbox>\
+                                    <div ng-show="sas.selected({2})">{1}</div></div>'.format(
                                         property_name,
                                         inner_template.format(property_code),
                                         property.type.id,
@@ -308,6 +314,7 @@ angular.module('WebMis20')
                         if (!property || !property.value) {
                             sas.select(tag.id, false);
                         }
+
                         return template;
 
                     case 'vgroup':
