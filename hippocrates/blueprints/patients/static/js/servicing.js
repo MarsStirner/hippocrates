@@ -1,6 +1,6 @@
 'use strict';
 
-var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
+var ClientSearch = function ($scope, $rootScope, $location, WMClient, PatientModalService) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.query = $scope.params.q || '';
@@ -18,6 +18,7 @@ var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
                 return PatientModalService.openSearchItem($scope.client)
                     .finally(function () {
                         $scope.client = null;
+                        angular.element('#search').select();
                     });
             });
     };
@@ -50,4 +51,4 @@ var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
     }
 };
 
-WebMis20.controller('ClientSearch', ['$scope', '$location', 'WMClient', 'PatientModalService', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', '$rootScope', '$location', 'WMClient', 'PatientModalService', ClientSearch]);
