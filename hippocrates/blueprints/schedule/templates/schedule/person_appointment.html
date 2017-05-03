@@ -74,8 +74,9 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <person-tree checkboxed="true" locked-persons="data_selected" user-selected="user_selected"></person-tree>
-{#                {{ person_tree.html(checkbox=True) }}#}
+                {# <person-tree checkboxed="true" locked-persons="data_selected" user-selected="user_selected"></person-tree> #}
+                <ui-select ext-select-person-w-scheds multiple="true" close-on-select="false"
+                    ng-model="selected.doctors"></ui-select>
             </div>
         </div>
 {#        <pre>[[schedule|json]]</pre>#}

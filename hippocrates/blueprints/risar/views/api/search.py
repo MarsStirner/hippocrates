@@ -371,7 +371,7 @@ def api_0_event_print():
             'external_id': row['external_id'],
             'exec_person_name': row['person_name'],
             'risk': PerinatalRiskRate(row['risk']).name,
-            'radz_risk': RadzinskyRiskRate(row['radz_risk']).name,
+            'radz_risk': RadzinskyRiskRate(row['radz_risk_rate']).name,
             'curators': get_org_curators(safe_int(row['org_id']), '2'),
             'week': ((
                 (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -

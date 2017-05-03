@@ -45,10 +45,10 @@ def api_0_gyn_checkup(event_id):
     if diagnoses_changed:
         validate_diagnoses(diagnoses)
 
-    action = get_action_by_id(checkup_id, event, risar_gyn_checkup_flat_code, True)
-
     if not checkup_id:
         close_open_checkups(event_id, flat_codes_list=[risar_gyn_checkup_flat_code])
+
+    action = get_action_by_id(checkup_id, event, risar_gyn_checkup_flat_code, True)
 
     action.begDate = beg_date
     action.person = person

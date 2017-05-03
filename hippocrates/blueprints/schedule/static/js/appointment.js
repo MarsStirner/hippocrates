@@ -1,14 +1,15 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog, PersonTreeUpdater, CurrentUser) {
+var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog,
+        PersonTreeUpdater, CurrentUser) {
     $scope.modal = {};
     $scope.max_tickets = [];
     $scope.person_schedules = [];
     $scope.user_schedules = [];
     $scope.total_schedules = [];
 
-    $scope.user_selected = [CurrentUser.info.id];
+    $scope.selected = { doctors: [CurrentUser.info] };
     $scope.data_selected = [];
     $scope.foldedArray = [];
 
@@ -16,8 +17,14 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.client_id = parseInt($scope.params.client_id);
     var person_id = parseInt($scope.params.person_id);
-    if(person_id) {
-        $scope.user_selected.push(person_id);
+    if (person_id && person_id !== CurrentUser.info.id) {
+        $http.get(url_api_search_persons, {
+            params: {person_id: person_id}
+        }).success(function (data) {
+            if (data.result && data.result.length) {
+                $scope.selected.doctors.push(data.result[0]);
+            }
+        });
     }
     $scope.par_start_date = moment($scope.params.start_date).toDate();
     var curDate = $scope.par_start_date || new Date();
@@ -77,6 +84,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
         $scope.reception_type = code;
     };
 
+
     $scope.loadData = function () {
         $http.get(
             url_schedule_api_schedule, {
@@ -84,7 +92,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
                     client_id: $scope.client_id,
                     start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
                     related: true,
-                    person_ids: '[' + $scope.user_selected.join() + ']'
+                    person_ids: '[' + _.pluck($scope.selected.doctors, 'id').join() + ']'
                 }
             }
         ).success(function (data) {
@@ -167,8 +175,11 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
         return !$scope.schedule_is_empty(schedule) && schedule.grouped[$scope.reception_type].max_tickets > 0;
     };
 
-    $scope.$watch('user_selected', function (new_value, old_value) {
-        var new_ids = new_value.filter(aux.func_not_in(old_value + $scope.data_selected));
+    $scope.$watch('selected.doctors', function (new_value, old_value) {
+        var new_val_ids = _.pluck(new_value, 'id'),
+            old_val_ids = _.pluck(old_value, 'id');
+
+        var new_ids = new_val_ids.filter(aux.func_not_in(old_val_ids + $scope.data_selected));
         if (new_ids.length) {
             $http.get(url_schedule_api_schedule, {
                 params: {
@@ -177,11 +188,11 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
                     start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
                 }
             }).success(function (data) {
-                $scope.user_schedules.push(data.result['schedules'][0]);
+                $scope.user_schedules.push(data.result.schedules[0]);
                 $scope.refreshSchedules();
-            })
+            });
         } else {
-            var del_ids = old_value.filter(aux.func_not_in(new_value));
+            var del_ids = old_val_ids.filter(aux.func_not_in(new_val_ids));
             if (del_ids.length) {
                 var del_id = del_ids[0];
                 $scope.user_schedules = $scope.user_schedules.filter(function (sched_group) {
@@ -194,4 +205,5 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
 
     $scope.monthChanged();
 };
-WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', 'PersonTreeUpdater', 'CurrentUser', PersonAppointmentCtrl]);
+WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog',
+    'PersonTreeUpdater', 'CurrentUser', PersonAppointmentCtrl]);
