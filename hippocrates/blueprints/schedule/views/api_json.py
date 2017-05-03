@@ -224,63 +224,45 @@ def api_search_persons():
         1: 'only_org_persons'
     }
     try:
-        query_string = request.args['q']
+        person_id = safe_int(request.args.get('person_id'))
+        query_string = request.args['q'] if not person_id else ''
         pkind = safe_int(request.args.get('person_kind'))
         pkind = personKind.get(pkind)
         org_id = safe_int(request.args.get('org_id'))
     except (KeyError, ValueError):
         return abort(404)
-    try:
-        result = SearchPerson.search(query_string, org_id=org_id)
+    result = SearchPerson.search(query_string, org_id=org_id, person_id=person_id)
 
-        def cat(item):
-            return {
-                'id': item['id'],
-                'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
-                'full_name': u'%s %s %s (%s)' % (
-                    item['lastname'], item['firstname'], item['patrname'], item['speciality']),
-                'short_name': u'%s%s%s' % (
-                    initialize_name(item['lastname'], item['firstname'], item['patrname']),
-                    u', ' if item['speciality'] else u'',
-                    item['speciality']),
-                'speciality': {
-                    'id': item['speciality_id'],
-                    'code': item['speciality_code'],
-                    'name': item['speciality']
-                } if item['speciality_id'] else None,
-                'org_structure': {
-                    'id': item['orgstructure_id'],
-                    'code': item['orgstructure_code'],
-                    'name': item['orgstructure']
-                } if item['orgstructure_id'] else None,
+    def cat(item):
+        return {
+            'id': item['id'],
+            'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
+            'full_name': u'%s %s %s (%s)' % (
+                item['lastname'], item['firstname'], item['patrname'], item['speciality']),
+            'short_name': u'%s%s%s' % (
+                initialize_name(item['lastname'], item['firstname'], item['patrname']),
+                u', ' if item['speciality'] else u'',
+                item['speciality']),
+            'speciality': {
+                'id': item['speciality_id'],
+                'code': item['speciality_code'],
+                'name': item['speciality']
+            } if item['speciality_id'] else None,
+            'org_structure': {
+                'id': item['orgstructure_id'],
+                'code': item['orgstructure_code'],
+                'name': item['orgstructure']
+            } if item['orgstructure_id'] else None,
 
-                'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
-            }
-        if pkind == 'only_doctors':
-            result = filter(lambda item: item['orgstructure_id'] and item['speciality_id'], result['result']['items'])
-        elif pkind == 'only_org_persons':
-            result = filter(lambda item: item['org_id'], result['result']['items'])
-        data = map(cat, result)
-    except Exception, e:
-        logger.critical(u'Ошибка в сервисе поиска сотрудника через sphinx: %s' % e, exc_info=True)
-        query_string = query_string.split()
-        data = vrbPersonWithSpeciality.query.filter(
-            *[vrbPersonWithSpeciality.name.like(u'%%%s%%' % q) for q in query_string]
-        ).filter(
-            vrbPersonWithSpeciality.deleted == 0
-        ).order_by(
-            vrbPersonWithSpeciality.name
-        )
-        if pkind == 'only_doctors':
-            data.filter(
-                vrbPersonWithSpeciality.speciality_id != None,
-                vrbPersonWithSpeciality.orgStructure_id != None
-            )
-        elif pkind == 'only_org_persons':
-            data.filter(
-                vrbPersonWithSpeciality.org_id != None
-            )
-        data = data.all()
+            'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
+        }
+    if pkind == 'only_doctors':
+        result = filter(lambda item: item['orgstructure_id'] and item['speciality_id'], result['result']['items'])
+    elif pkind == 'only_org_persons':
+        result = filter(lambda item: item['org_id'], result['result']['items'])
+    else:
+        result = result['result']['items']
+    data = map(cat, result)
     return jsonify(data)
 
 
