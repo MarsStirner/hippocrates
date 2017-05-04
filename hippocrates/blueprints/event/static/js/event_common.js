@@ -51,10 +51,11 @@ WebMis20.service('WMEventService', ['WebMisApi', 'WMAdmissionEvent',
     };
     this.save_hosp = function (wmevent) {
         var data = {
-            event: wmevent.info,
+            event: _.deepCopy(wmevent.info),
             received: wmevent.received,
             request_type_kind: wmevent.request_type_kind
-        }
+        };
+
         data.event.client = data.event.client.info;
         return WebMisApi.event.save(data);
     };
