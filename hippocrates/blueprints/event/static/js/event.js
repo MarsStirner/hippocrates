@@ -405,7 +405,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
     $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
 
     $scope.refreshMovings = function () {
-        return WebMisApi.stationary.get_movings($scope.event.event_id)
+        return WebMisApi.event.get_movings($scope.event.event_id)
             .then(function (movings) {
                 Array.prototype.splice.apply(
                     $scope.event.movings,

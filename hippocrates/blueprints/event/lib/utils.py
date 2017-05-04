@@ -9,7 +9,7 @@ from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from nemesis.models.utils import safe_current_user_id
 from sqlalchemy import func
 
-from nemesis.lib.data import create_new_action, update_action, create_action, get_action
+from nemesis.lib.data import create_action, get_action, get_action_by_id
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
@@ -20,8 +20,11 @@ from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_e
 from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
 from nemesis.models.enums import ActionStatus
 from nemesis.models.schedule import ScheduleClientTicket
-from nemesis.lib.const import STATIONARY_RECEIVED_CODE
+from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, \
+    STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_ORG_STRUCT_RECEIVED_CODE, \
+    STATIONARY_ORG_STRUCT_TRANSFER_CODE
 from nemesis.systemwide import db
+
 
 logger = logging.getLogger('simple')
 
@@ -132,22 +135,6 @@ class MovingController():
     def __init__(self):
         pass
 
-    def get_prev_action(self, event_id):
-        """
-        получить предыдущее движение или послупление
-        """
-        movings = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                   Action.deleted == 0,
-                                                                   ActionType.flatCode == 'moving').order_by(Action.begDate).all()
-        if movings:
-            action = movings[-1]
-        else:
-            action = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                      Action.deleted == 0,
-                                                                      ActionType.flatCode == 'received'
-                                                                      ).first()
-        return action
-
     def update_moving_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
         moving.endDate = safe_datetime(moving_info.get('end_date'))
@@ -161,25 +148,46 @@ class MovingController():
         moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
             moving_info.get('hospitalBedProfile') else None
         moving.propsByCode['patronage'].value = moving_info['patronage']['value'] if moving_info.get('patronage') else None
-        db.session.add(moving)
-        db.session.commit()
-        return moving
 
-    def create_moving(self, event_id, moving_info):
-        event = Event.query.get(event_id)
-        action_type = ActionType.query.filter(ActionType.flatCode == u'moving').first()
 
-        moving = create_action(action_type.id, event)
-        prev_action = self.get_prev_action(moving_info.get('event_id'))
-        moving.propsByCode['orgStructReceived'].value = prev_action['orgStructStay'].value
         moving = self.update_moving_data(moving, moving_info)
 
         if not prev_action.endDate:
             prev_action.endDate = moving.begDate
         prev_action.propsByCode['orgStructTransfer'].value = moving.propsByCode['orgStructStay'].value
-        db.session.add(prev_action)
+
+
+
+        db.session.add(moving)
         db.session.commit()
-        return prev_action, moving
+        return moving
+
+    def get_moving(self, action_id):
+        return get_action_by_id(action_id)
+
+    def create_moving(self, event, moving_info):
+        moving = get_action_by_id(None, event, STATIONARY_MOVING_CODE, True)
+
+        beg_date = datetime.datetime.now()
+        stay_os = from_os = None
+        if 'received_id' in moving_info:
+            received = get_action_by_id(moving_info['received_id'])
+            from_os = received[STATIONARY_ORG_STRUCT_STAY_CODE].value
+            stay_os = received[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
+            if received.endDate:
+                beg_date = received.endDate + datetime.timedelta(seconds=1)
+        elif 'latest_moving_id' in moving_info:
+            prev_moving = get_action_by_id(moving_info['latest_moving_id'])
+            from_os = prev_moving[STATIONARY_ORG_STRUCT_STAY_CODE].value
+            stay_os = prev_moving[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
+            if prev_moving.endDate:
+                beg_date = prev_moving.endDate + datetime.timedelta(seconds=1)
+
+        moving[STATIONARY_ORG_STRUCT_RECEIVED_CODE].value = from_os
+        moving[STATIONARY_ORG_STRUCT_STAY_CODE].value = stay_os
+        moving.begDate = beg_date
+
+        return moving
 
     def close_moving(self, moving):
         moving.endDate = datetime.datetime.now()

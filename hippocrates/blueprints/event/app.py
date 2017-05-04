@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, url_for
 from hippocrates.version import version as app_version
-from nemesis.lib.frontend import frontend_config
+from nemesis.lib.frontend import frontend_config, uf_placeholders
 from .config import MODULE_NAME, RUS_NAME
 
 module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_folder='static')
@@ -33,7 +33,7 @@ def fc_urls():
                 'event_save': url_for('event.api_event_save'),
                 'event_close': url_for('event.api_event_close'),
                 'event_actions': url_for('event.api_event_actions'),
-                'moving_save': url_for('event.api_moving_save'),
+                'moving_save': uf_placeholders('event.api_moving_save', ['event_id']),
                 'moving_close': url_for('event.api_event_moving_close'),
                 'hosp_beds': url_for('event.api_hosp_beds_get'),
                 'lab_res_dynamics': url_for('event.api_event_lab_res_dynamics'),
@@ -43,7 +43,9 @@ def fc_urls():
                 'delete_service': url_for('event.api_service_delete_service'),
                 'delete_event': url_for('event.api_delete_event'),
                 'get_events': url_for('event.api_get_events'),
-                'api_event_movings_get': url_for('event.api_0_event_movings_get', event_id=-99).replace('-99', '{0}'),
+                'api_event_movings_get': uf_placeholders('event.api_0_event_movings_get', ['event_id']),
+                'api_event_moving_get': uf_placeholders('event.api_0_event_moving_get',
+                                                        ['event_id', 'action_id'])
             }
         }
     }
