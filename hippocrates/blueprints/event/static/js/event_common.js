@@ -147,4 +147,16 @@ WebMis20.service('WMEventService', ['WebMisApi', 'WMAdmissionEvent',
     this.get_moving = function (event_id, moving_id) {
         return WebMisApi.event.get_moving(event_id, moving_id);
     };
+    this.save_moving = function (moving) {
+        var moving_id = moving.id,
+            event_id = moving.event_id;
+        return WebMisApi.event.save_moving(event_id, moving_id, moving);
+    };
+    this.get_available_hosp_beds = function (org_struct_id, selected_hb_id) {
+        var args = {
+            org_str_id : org_struct_id,
+            hb_id: selected_hb_id
+        };
+        return WebMisApi.event.get_available_hosp_beds(args);
+    };
 }]);

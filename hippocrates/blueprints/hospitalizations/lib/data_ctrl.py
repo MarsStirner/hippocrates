@@ -215,6 +215,12 @@ class HospitalizationSelector(BaseSelecter):
             base_query = base_query.add_columns(
                 OrgStructure_HospitalBed.name.label('hosp_bed_name')
             )
+        if args.get('order_by_move_date', False):
+            base_query = base_query.order_by(
+                func.IF(q_latest_movings.c.event_id.isnot(None),
+                        q_latest_movings.c.begDate,
+                        ReceivedAction.begDate).desc()
+            )
 
         return base_query
 
@@ -231,7 +237,8 @@ class HospitalizationSelector(BaseSelecter):
             'end_dt': end_dt,
             'with_move_date': True,
             'with_org_struct': True,
-            'with_hosp_bed': True
+            'with_hosp_bed': True,
+            'order_by_move_date': True
         }
         if 'org_struct_id' in kwargs:
             args['org_struct_id'] = safe_int(kwargs['org_struct_id'])

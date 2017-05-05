@@ -722,6 +722,7 @@ def api_0_event_movings_get(event_id):
 
 @module.route('/api/0/event/<int:event_id>/moving/')
 @module.route('/api/0/event/<int:event_id>/moving/<int:action_id>')
+@db_non_flushable
 @api_method
 def api_0_event_moving_get(event_id, action_id=None):
     args = request.args.to_dict()
@@ -741,17 +742,17 @@ def api_0_event_moving_get(event_id, action_id=None):
     return eviz.make_moving_info(moving)
 
 
-@module.route('/api/0/event/<int:event_id>/moving', methods=['POST'])
+@module.route('/api/0/event/<int:event_id>/moving/', methods=['POST'])
 @module.route('/api/0/event/<int:event_id>/moving/<int:action_id>', methods=['PUT'])
 @api_method
 def api_moving_save(event_id, action_id=None):
-    vis = StationaryEventVisualizer()
-    mov_ctrl = MovingController()
-    data = request.json
+    data = request.get_json()
     event_id = data.get('event_id')
-    event = Event.query.get(event_id)
-    if not event:
-        raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
+    event = Event.query.get_or_404(event_id)
+    if not event.is_stationary:
+        raise ApiException(400, u'Обращение не является стационарным')
+
+    mov_ctrl = MovingController()
     moving_id = data.get('id')
     create_mode = not moving_id
     if moving_id:
@@ -759,16 +760,20 @@ def api_moving_save(event_id, action_id=None):
         if not moving:
             raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
         moving = mov_ctrl.update_moving_data(moving, data)
-        result = vis.make_moving_info(moving)
     else:
-        result = mov_ctrl.create_moving(event_id, data)
-        moving = result[1]
-        result = map(vis.make_moving_info, result)
-    received_close(event)
+        moving = mov_ctrl.create_moving(event, data)
+        moving = mov_ctrl.update_moving_data(moving, data)
+
+    # TODO: update prev moving and received
+    # received_close(event)
+
+    db.session.commit()
 
     if not create_mode:
         notify_moving_changed(MQOpsEvent.moving, moving)
 
+    vis = StationaryEventVisualizer()
+    result = vis.make_moving_info(moving)
     return result
 
 

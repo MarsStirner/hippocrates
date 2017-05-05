@@ -33,7 +33,7 @@ def fc_urls():
                 'event_save': url_for('event.api_event_save'),
                 'event_close': url_for('event.api_event_close'),
                 'event_actions': url_for('event.api_event_actions'),
-                'moving_save': uf_placeholders('event.api_moving_save', ['event_id']),
+                'moving_save': uf_placeholders('event.api_moving_save', ['event_id', 'action_id']),
                 'moving_close': url_for('event.api_event_moving_close'),
                 'hosp_beds': url_for('event.api_hosp_beds_get'),
                 'lab_res_dynamics': url_for('event.api_event_lab_res_dynamics'),

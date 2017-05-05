@@ -58,16 +58,21 @@ var CurrentHospsCtrl = function ($scope, $interval, HospitalizationsService,
     $scope.firstMovingMissing = function (hosp) {
         return !safe_traverse(hosp, ['moving', 'id']);
     };
+    var updateHospRecordMoving = function (hosp, moving) {
+        hosp.moving.id = moving.id;
+        hosp.org_struct_name = moving.orgStructStay.value.name;
+        hosp.hosp_bed_name = moving.hospitalBed.value.name;
+    };
     $scope.createFirstMoving = function (hosp) {
         EventModalService.openMakeMoving(hosp.id, hosp.received.id, true)
-            .then(function () {
-
+            .then(function (upd_moving) {
+                updateHospRecordMoving(hosp, upd_moving);
             });
     };
     $scope.editMoving = function (hosp) {
         EventModalService.openEditMoving(hosp.id, hosp.moving.id)
-            .then(function () {
-
+            .then(function (upd_moving) {
+                updateHospRecordMoving(hosp, upd_moving);
             });
     };
 //    $scope.count_all_records = function () {

@@ -141,26 +141,24 @@ class MovingController():
         if moving.endDate is not None:
             moving.status = ActionStatus.finished[0]
         else:
-            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0] else moving.status
+            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0]\
+                else moving.status
 
         moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
-        moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
-        moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
-            moving_info.get('hospitalBedProfile') else None
-        moving.propsByCode['patronage'].value = moving_info['patronage']['value'] if moving_info.get('patronage') else None
+        moving.propsByCode['patronage'].value = safe_traverse(moving_info, 'patronage', 'value')
+        if 'hospitalBed' in moving_info:
+            moving.propsByCode['hospitalBed'].value = safe_traverse(moving_info, 'hospitalBed', 'value')
+        if 'hospitalBedProfile' in moving_info:
+            moving.propsByCode['hospitalBedProfile'].value = safe_traverse(
+                moving_info, 'hospitalBedProfile', 'value')
 
+        return moving
 
-        moving = self.update_moving_data(moving, moving_info)
-
+    def update_prev_moving(self, prev_action):
+        # TODO
         if not prev_action.endDate:
             prev_action.endDate = moving.begDate
         prev_action.propsByCode['orgStructTransfer'].value = moving.propsByCode['orgStructStay'].value
-
-
-
-        db.session.add(moving)
-        db.session.commit()
-        return moving
 
     def get_moving(self, action_id):
         return get_action_by_id(action_id)
@@ -314,7 +312,6 @@ def received_close(event):
         received.modifyDatetime = datetime.datetime.now()
         received.endDate = datetime.datetime.now()
         received.status = 2
-        db.session.commit()
 
 
 def client_quota_save(event, quota_data):
