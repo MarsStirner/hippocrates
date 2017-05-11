@@ -1,6 +1,6 @@
 'use strict';
 
-var ClientSearch = function ($scope, $rootScope, $location, WMClient, PatientModalService) {
+var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.query = $scope.params.q || '';
@@ -51,4 +51,4 @@ var ClientSearch = function ($scope, $rootScope, $location, WMClient, PatientMod
     }
 };
 
-WebMis20.controller('ClientSearch', ['$scope', '$rootScope', '$location', 'WMClient', 'PatientModalService', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', '$location', 'WMClient', 'PatientModalService', ClientSearch]);
