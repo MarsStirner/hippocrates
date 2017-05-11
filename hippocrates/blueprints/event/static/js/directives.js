@@ -365,6 +365,18 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.isRefunded = function (action) {
                 return scope.action_has_payment(action) && action.payment.pay_status.code === 'refunded';
             };
+            scope.getTissueInfo = function(action) {
+                var tissueInfo = action.tissue_info;
+                if (tissueInfo) {
+                    if (tissueInfo.length) {
+                        var name = safe_traverse(tissueInfo[0].tissueType, ['name']);
+                        if (name) {
+                            return "({0})".format(name.toLowerCase())
+                        }
+                    }
+                }
+                return '';
+            };
             scope.reset_sorting();
             scope.reload();
         },
@@ -393,6 +405,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 ng-show="isPaid(action)" class="glyphicon glyphicon-ok text-success" title="[[action.payment.pay_status.name]]"></span><span\
                 ng-show="isNotPaid(action)" class="glyphicon glyphicon-remove text-danger" title="[[action.payment.pay_status.name]]"></span><span\
                 ng-show="isRefunded(action)" class="glyphicon glyphicon-ok text-danger" title="[[action.payment.pay_status.name]]"></span>\
+             <span ng-if="actionTypeGroup === \'lab\'">[[getTissueInfo(action)]]</span>\
         </td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
         <td ng-if="is_planned_end_date_needed()" ng-click="open_action(action.id)"><b>[[ action.plannedEndDate | asDate ]]</b></td>\

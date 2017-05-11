@@ -108,9 +108,6 @@ def api_action_get(action_id):
             joinedload(Action.actionType),
             joinedload(Action.event),
             joinedload(Action.person),
-            joinedload(Action.properties),
-            joinedload(Action.medication_prescriptions),
-            joinedload(Action.diagnoses),
         ).filter(Action.id == action_id).first() or bail_out(ApiException(404, u'Документ не найден'))
         v = ActionVisualizer()
         if is_template_action(action):

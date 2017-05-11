@@ -763,12 +763,24 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
     action_id_list = [action.id for action in paginate.items]
     s_ctrl = ServiceController()
     pay_data = s_ctrl.get_actions_pay_info(action_id_list)
+    items = []
+    if at_group == 'lab':
+        def get_tissue_data(action_id_list):
+            qr = Action.query.options(
+                joinedload(Action.tissues),
+                joinedload('tissues.tissueType')
+            ).filter(
+                Action.id.in_(action_id_list)
+            )
+            return dict((row.id, row.tissues) for row in qr.all())
+        tissue_data = get_tissue_data(action_id_list)
+        items = [eviz.make_lab_action(action, tissue_data, pay_data.get(action.id)) for action in paginate.items]
+    else:
+        items = [eviz.make_action(action, pay_data.get(action.id), ) for action in paginate.items]
     return {
         'pages': paginate.pages,
         'total': paginate.total,
-        'items': [
-            eviz.make_action(action, pay_data.get(action.id)) for action in paginate.items
-        ]
+        'items': items
     }
 
 

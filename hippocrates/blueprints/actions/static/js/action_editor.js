@@ -28,11 +28,18 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
     //}
     //_set_tracking(true);
     // Здесь она типа заканчивается
+    function initializeTissue(action) {
+        var tissues = action.tissues,
+            tissuesLength = tissues.length,
+            tissueName = tissuesLength ? safe_traverse(tissues[tissuesLength-1], ['tissueType', 'name']): '';
+        $scope['tissueName'] =  tissueName ? "({0})".format(tissueName.toLowerCase()): tissueName;
+    }
 
     $scope.init = function () {
         if (params.action_id) {
             WMAction.get(params.action_id).then(function (action) {
                 $scope.action = action;
+                initializeTissue(action);
                 update_print_templates(action.action_type.context_name);
                 process_printing();
                 return action;
@@ -57,6 +64,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                 params.action_type_id
             ).then(function (action) {
                 $scope.action = action;
+                initializeTissue(action);
                 update_print_templates(action.action_type.context_name);
 
                 if (params.price_list_item_id && params.service_kind_id) {
@@ -356,7 +364,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     var template_fields = [];
     var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'set_person',
         'person', 'coord_date', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(excluded_template_fields, template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service', 'tissues'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
