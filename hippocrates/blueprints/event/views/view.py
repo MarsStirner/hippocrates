@@ -43,15 +43,13 @@ def get_event_form(**kwargs):
     event = kwargs.get('event', None)
     if (UserProfileManager.has_ui_registrator() or
         UserProfileManager.has_ui_doctor() or
-        UserProfileManager.has_ui_cashier() or
-        UserProfileManager.has_ui_adm_nurse()
+        UserProfileManager.has_ui_cashier()
     ):
         if (event and event.is_stationary) or requestType_kind == 'stationary':
             if event is None:
                 check_stationary_permissions(kwargs['client_id'])
             return render_template('event/event_info_stationary.html', **kwargs)
-        elif (event and event.is_policlinic) or requestType_kind == 'policlinic' and \
-                not UserProfileManager.has_ui_adm_nurse():
+        elif (event and event.is_policlinic) or requestType_kind == 'policlinic':
             return render_template('event/event_info_policlinic.html', **kwargs)
     raise UIException(403, u'Для данной роли запрещён доступ к обращениям')
 
