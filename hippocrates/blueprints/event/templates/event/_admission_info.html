@@ -18,14 +18,17 @@
         </ui-select>
     </div>
     <div class="col-md-4"
-         ng-class="{'has-error': HospForm.org_structure.$invalid && editing.submit_attempt}">
-        <label for="org_structure" class="control-label">Отделение поступления</label>
-        <ui-select id="org_structure" name="org_structure" theme="select2"
-                   ng-model="event.received.orgStructStay.value" ng-required="true" no-undefined-value>
-            <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
-            <ui-select-choices repeat="os in OrgStructure.objects |
-                filter: {show: 1, hasHospitalBeds: formstate.is_hospital() ? 1 : ''} | filter: $select.search">
-                <div ng-bind-html="os.name | highlight: $select.search"></div>
+         {# ng-if="rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id).length > 1" #}
+         ng-class="{'has-error': HospForm.event_type.$invalid && editing.submit_attempt}">
+        <label for="event_type">Тип события</label>
+        <ui-select id="event_type" name="event_type" theme="select2"
+                   ng-model="event.info.event_type" ng-required="true" ng-change="on_event_type_changed()"
+                   ng-disabled="widget_disabled('event_type')">
+            <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="et in rbEventType.objects
+                     | event_type_filter: rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
+                     | filter: $select.search ">
+                <div ng-bind-html="et.name | highlight: $select.search"></div>
             </ui-select-choices>
         </ui-select>
     </div>
@@ -77,19 +80,29 @@
         </div>
     </div>
 </div>
-<div class="row marginal" ng-if="rbEventType.get_filtered_by_rtf(
-    request_type.selected.id, finance.selected.id).length > 1">
-    <div class="col-md-4"
-         ng-class="{'has-error': HospForm.event_type.$invalid && editing.submit_attempt}">
-        <label for="event_type">Тип события</label>
-        <ui-select id="event_type" name="event_type" theme="select2"
-                   ng-model="event.info.event_type" ng-required="true" ng-change="on_event_type_changed()"
-                   ng-disabled="widget_disabled('event_type')">
-            <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
-            <ui-select-choices repeat="et in rbEventType.objects
-                     | event_type_filter: rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
-                     | filter: $select.search ">
-                <div ng-bind-html="et.name | highlight: $select.search"></div>
+
+<div class="row marginal">
+    <div class="col-md-6"
+         ng-class="{'has-error': HospForm.org_structure.$invalid && editing.submit_attempt}">
+        <label for="org_structure" class="control-label">Отделение поступления</label>
+        <ui-select id="org_structure" name="org_structure" theme="select2"
+                   ng-model="event.received.orgStructStay.value" ng-required="true" no-undefined-value>
+            <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="os in OrgStructure.objects |
+                filter: {show: 1, hasHospitalBeds: formstate.is_hospital() ? 1 : ''} | filter: $select.search">
+                <div ng-bind-html="os.name | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="col-md-6"
+         ng-class="{'has-error': HospForm.os_transfer.$invalid && editing.submit_attempt}">
+        <label for="os_transfer" class="control-label">Куда направлен</label>
+        <ui-select id="os_transfer" name="os_transfer" theme="select2"
+                   ng-model="event.received.orgStructTransfer.value" ng-required="true" no-undefined-value>
+            <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="os in OrgStructure.objects |
+                filter: {show: 1, hasHospitalBeds: formstate.is_hospital() ? 1 : ''} | filter: $select.search">
+                <div ng-bind-html="os.name | highlight: $select.search"></div>
             </ui-select-choices>
         </ui-select>
     </div>

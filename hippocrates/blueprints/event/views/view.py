@@ -25,7 +25,6 @@ def html_event_info():
         requestType_kind = 'stationary' if event.is_stationary else 'policlinic'
     except (KeyError, ValueError):
         raise UIException(500, u'Неизвестная ошибка')
-
     return get_event_form(event=event, requestType_kind=requestType_kind, client_id=event.client_id)
 
 
@@ -42,9 +41,8 @@ def get_event_form(**kwargs):
     requestType_kind = kwargs.get('requestType_kind', None)
     event = kwargs.get('event', None)
     if (UserProfileManager.has_ui_registrator() or
-        UserProfileManager.has_ui_doctor() or
-        UserProfileManager.has_ui_cashier()
-    ):
+            UserProfileManager.has_ui_doctor() or
+            UserProfileManager.has_ui_cashier()):
         if (event and event.is_stationary) or requestType_kind == 'stationary':
             if event is None:
                 check_stationary_permissions(kwargs['client_id'])
@@ -68,4 +66,9 @@ def get_events():
 @module.route('/modal_edit_hosp.html')
 def modal_edit_hosp():
     return render_template('event/modal_edit_hosp.html')
+
+
+@module.route('/modal_hosp_info.html')
+def modal_hosp_info():
+    return render_template('event/modal_hosp_info.html')
 
