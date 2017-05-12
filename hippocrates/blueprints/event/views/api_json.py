@@ -16,6 +16,7 @@ from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.action.utils import get_tissues
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
     get_properties_values)
@@ -765,15 +766,7 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
     pay_data = s_ctrl.get_actions_pay_info(action_id_list)
     items = []
     if at_group == 'lab':
-        def get_tissue_data(action_id_list):
-            qr = Action.query.options(
-                joinedload(Action.tissues),
-                joinedload('tissues.tissueType')
-            ).filter(
-                Action.id.in_(action_id_list)
-            )
-            return dict((row.id, row.tissues) for row in qr.all())
-        tissue_data = get_tissue_data(action_id_list)
+        tissue_data = get_tissues(action_id_list)
         items = [eviz.make_lab_action(action, tissue_data, pay_data.get(action.id)) for action in paginate.items]
     else:
         items = [eviz.make_action(action, pay_data.get(action.id), ) for action in paginate.items]

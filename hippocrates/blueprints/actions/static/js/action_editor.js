@@ -28,18 +28,18 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
     //}
     //_set_tracking(true);
     // Здесь она типа заканчивается
-    function initializeTissue(action) {
-        var tissues = action.tissues,
-            tissuesLength = tissues.length,
-            tissueName = tissuesLength ? safe_traverse(tissues[tissuesLength-1], ['tissueType', 'name']): '';
-        $scope['tissueName'] =  tissueName ? "({0})".format(tissueName.toLowerCase()): tissueName;
-    }
+    $scope.getTissueName = function (action) {
+        try {
+            return '({0})'.format(safe_traverse(action.tissues[0], ['tissueType', 'name']).toLowerCase());
+        } catch (e) {
+            return ''
+        }
+    };
 
     $scope.init = function () {
         if (params.action_id) {
             WMAction.get(params.action_id).then(function (action) {
                 $scope.action = action;
-                initializeTissue(action);
                 update_print_templates(action.action_type.context_name);
                 process_printing();
                 return action;
@@ -64,7 +64,6 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                 params.action_type_id
             ).then(function (action) {
                 $scope.action = action;
-                initializeTissue(action);
                 update_print_templates(action.action_type.context_name);
 
                 if (params.price_list_item_id && params.service_kind_id) {

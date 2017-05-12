@@ -365,17 +365,12 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.isRefunded = function (action) {
                 return scope.action_has_payment(action) && action.payment.pay_status.code === 'refunded';
             };
-            scope.getTissueInfo = function(action) {
-                var tissueInfo = action.tissue_info;
-                if (tissueInfo) {
-                    if (tissueInfo.length) {
-                        var name = safe_traverse(tissueInfo[0].tissueType, ['name']);
-                        if (name) {
-                            return "({0})".format(name.toLowerCase())
-                        }
-                    }
+            scope.getTissueName = function (action) {
+                try {
+                    return '({0})'.format(safe_traverse(action.tissues[0], ['tissueType', 'name']).toLowerCase());
+                } catch (e) {
+                    return ''
                 }
-                return '';
             };
             scope.reset_sorting();
             scope.reload();
@@ -400,12 +395,12 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             <span ng-bind="action.name"></span>\
             <span ng-if="action.urgent" class="label"\
                   ng-class="{\'label-danger\': action.status.id < 2, \'label-default\': action.status.id >= 2}">Срочно</span>\
+            <span class="text-muted lmargin20" ng-if="actionTypeGroup === \'lab\'" style="color:#EB7D3D!important;"></br>[[getTissueName(action)]]</span>\
             <span ng-show="action_has_payment(action)" class="text-muted lmargin20"><br>\
             <span>Стоимость: [[ action.payment.sum ]] руб. </span><span\
                 ng-show="isPaid(action)" class="glyphicon glyphicon-ok text-success" title="[[action.payment.pay_status.name]]"></span><span\
                 ng-show="isNotPaid(action)" class="glyphicon glyphicon-remove text-danger" title="[[action.payment.pay_status.name]]"></span><span\
                 ng-show="isRefunded(action)" class="glyphicon glyphicon-ok text-danger" title="[[action.payment.pay_status.name]]"></span>\
-             <span ng-if="actionTypeGroup === \'lab\'">[[getTissueInfo(action)]]</span>\
         </td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
         <td ng-if="is_planned_end_date_needed()" ng-click="open_action(action.id)"><b>[[ action.plannedEndDate | asDate ]]</b></td>\
