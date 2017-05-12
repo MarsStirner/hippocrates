@@ -32,7 +32,8 @@ class HospitalizationController(BaseModelController):
                     'age': hosp.Event.client.age
                 },
                 'moving': {
-                    'id': hosp.moving_id
+                    'id': hosp.moving_id,
+                    'end_date': hosp.moving_end_date
                 },
                 'received': {
                     'id': hosp.received_id
@@ -73,6 +74,7 @@ class HospitalizationSelector(BaseSelecter):
         ReceivedOrgStruct = aliased(OrgStructure, name='ReceivedOrgStruct')
 
         with_move_date = args.get('with_move_date', False)
+        with_moving_end_date = args.get('with_moving_end_date', False)
         with_org_struct = args.get('with_org_struct', False) or 'org_struct_id' in args
         with_hosp_bed = args.get('with_hosp_bed', False)
 
@@ -89,36 +91,15 @@ class HospitalizationSelector(BaseSelecter):
 #         if 'execPersonId' in kwargs:
 #             base_query = base_query.filter(Event.execPerson_id == kwargs['execPersonId'])
 
-        # самая поздняя дата движения для каждого обращения пациента
-        q_action_begdates = self.session.query(Action).join(
-            Event, EventType, rbRequestType, ActionType,
+        q_latest_moving = self.session.query(Action.id.label('action_id')).join(
+            ActionType
         ).filter(
-            Event.deleted == 0, Action.deleted == 0, Event.execDate.is_(None),
-            rbRequestType.code.in_(STATIONARY_EVENT_CODES),
-            ActionType.flatCode == STATIONARY_MOVING_CODE
-        ).with_entities(
-            func.max(Action.begDate).label('max_beg_date'), Event.id.label('event_id')
-        ).group_by(
-            Event.id
-        ).subquery('MaxActionBegDates')
-
-        # самое позднее движение (включая уже и дату и id, если даты совпадают)
-        # для каждого обращения пациента
-        q_latest_movings_ids = self.session.query(Action).join(
-            q_action_begdates, and_(q_action_begdates.c.max_beg_date == Action.begDate,
-                                    q_action_begdates.c.event_id == Action.event_id)
-        ).with_entities(
-            func.max(Action.id).label('action_id'), Action.event_id.label('event_id')
-        ).group_by(
-            Action.event_id
-        ).subquery('EventLatestMovings')
-
-        q_latest_movings = self.session.query(MovingAction) \
-            .join(q_latest_movings_ids, MovingAction.id == q_latest_movings_ids.c.action_id) \
-            .with_entities(
-                MovingAction.id.label('action_id'), MovingAction.event_id.label('event_id'),
-                MovingAction.begDate.label('begDate'), MovingAction.endDate.label('endDate')) \
-            .subquery('q_latest_movings')
+            Action.event_id == Event.id,
+            ActionType.flatCode == STATIONARY_MOVING_CODE,
+            Action.deleted == 0
+        ).order_by(
+            Action.begDate.desc()
+        ).limit(1)
 
         q_received = self.session.query(Action.id.label('action_id')).join(
             ActionType
@@ -131,17 +112,17 @@ class HospitalizationSelector(BaseSelecter):
         ).limit(1)
 
         base_query = base_query.outerjoin(
-            q_latest_movings, Event.id == q_latest_movings.c.event_id
+            MovingAction, MovingAction.id == q_latest_moving
         ).outerjoin(
             ReceivedAction, ReceivedAction.id == q_received
         ).filter(
-            or_(q_latest_movings.c.event_id.isnot(None),
+            or_(MovingAction.id.isnot(None),
                 ReceivedAction.id.isnot(None)),
-            func.IF(q_latest_movings.c.event_id.isnot(None),
+            func.IF(MovingAction.id.isnot(None),
                     # движение попадает во временной интервал
-                    and_(q_latest_movings.c.begDate <= args['end_dt'],
-                         or_(q_latest_movings.c.endDate.is_(None),
-                             args['start_dt'] <= q_latest_movings.c.endDate)
+                    and_(MovingAction.begDate <= args['end_dt'],
+                         or_(MovingAction.endDate.is_(None),
+                             args['start_dt'] <= MovingAction.endDate)
                          ),
                     # поступление попадает во временной интервал
                     and_(ReceivedAction.begDate <= args['end_dt'],
@@ -155,7 +136,7 @@ class HospitalizationSelector(BaseSelecter):
                 .join(ActionPropertyType)\
                 .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
                         ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
-                        ActionProperty.action_id == q_latest_movings.c.action_id)\
+                        ActionProperty.action_id == MovingAction.id)\
                 .limit(1)
             q_os_transfer_sq = self.session.query(ActionProperty.id)\
                 .join(ActionPropertyType)\
@@ -176,7 +157,7 @@ class HospitalizationSelector(BaseSelecter):
             if 'org_struct_id' in args:
                 flt_os = safe_int(args['org_struct_id'])
                 base_query = base_query.filter(
-                    func.IF(q_latest_movings.c.event_id.isnot(None),
+                    func.IF(MovingAction.id.isnot(None),
                             MovingOrgStruct.id == flt_os,
                             ReceivedOrgStruct.id == flt_os)
                 )
@@ -185,7 +166,7 @@ class HospitalizationSelector(BaseSelecter):
                 .join(ActionPropertyType)\
                 .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
                         ActionPropertyType.code == STATIONARY_HOSP_BED_CODE,
-                        ActionProperty.action_id == q_latest_movings.c.action_id)\
+                        ActionProperty.action_id == MovingAction.id)\
                 .limit(1)
             base_query = base_query.outerjoin(
                 ActionProperty_HospitalBed, ActionProperty_HospitalBed.id == q_hosp_bed_sq
@@ -196,18 +177,22 @@ class HospitalizationSelector(BaseSelecter):
 
         base_query = base_query.with_entities(
             Event,
-            q_latest_movings.c.action_id.label('moving_id'),
+            MovingAction.id.label('moving_id'),
             ReceivedAction.id.label('received_id')
         )
         if with_move_date:
             base_query = base_query.add_columns(
-                func.IF(q_latest_movings.c.event_id.isnot(None),
-                        q_latest_movings.c.begDate,
+                func.IF(MovingAction.id.isnot(None),
+                        MovingAction.begDate,
                         ReceivedAction.begDate).label('move_date')
+            )
+        if with_moving_end_date:
+            base_query = base_query.add_columns(
+                MovingAction.endDate.label('moving_end_date')
             )
         if with_org_struct:
             base_query = base_query.add_columns(
-                func.IF(q_latest_movings.c.event_id.isnot(None),
+                func.IF(MovingAction.id.isnot(None),
                         MovingOrgStruct.name,
                         ReceivedOrgStruct.name).label('os_name')
             )
@@ -217,8 +202,8 @@ class HospitalizationSelector(BaseSelecter):
             )
         if args.get('order_by_move_date', False):
             base_query = base_query.order_by(
-                func.IF(q_latest_movings.c.event_id.isnot(None),
-                        q_latest_movings.c.begDate,
+                func.IF(MovingAction.id.isnot(None),
+                        MovingAction.begDate,
                         ReceivedAction.begDate).desc()
             )
 
@@ -236,6 +221,7 @@ class HospitalizationSelector(BaseSelecter):
             'start_dt': start_dt,
             'end_dt': end_dt,
             'with_move_date': True,
+            'with_moving_end_date': True,
             'with_org_struct': True,
             'with_hosp_bed': True,
             'order_by_move_date': True

@@ -1,0 +1,26 @@
+<div>
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>Отделение</th>
+                <th>Поступление</th>
+                <th>Выбытие</th>
+                <th>Дни</th>
+                <th>Койко-дни</th>
+                <th>Койка</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="moving in event.movings">
+                <td ng-bind="moving.orgStructStay.value.name"></td>
+                <td>[[moving.beg_date | asDateTime]]</td>
+                <td>[[moving.end_date | asDateTime]]</td>
+                <td></td>
+                <td>[[moving.hb_days]]</td>
+                <td>
+                    <span ng-if="moving.hospitalBed.value">[[moving.hospitalBed.value.code]]</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

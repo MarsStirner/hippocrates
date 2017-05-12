@@ -1,9 +1,7 @@
 # -*- encoding: utf-8 -*-
 
-from flask import request, render_template, abort, redirect
-from flask_login import current_user
+from flask import request, render_template
 
-from nemesis.app import app
 from nemesis.lib.html_utils import UIException
 from ..app import module
 from nemesis.lib.utils import breadcrumb, bail_out, parse_id
@@ -26,16 +24,6 @@ def html_event_info():
         requestType_kind = 'stationary' if event.is_stationary else 'policlinic'
     except (KeyError, ValueError):
         raise UIException(500, u'Неизвестная ошибка')
-    # if event.is_stationary:
-    #     wm10url = app.config['WEBMIS10_URL'].rstrip('/')
-    #     if not wm10url:
-    #         return abort(404)
-    #     new_url = (u'%s/appeals/%s/?token=%s&role=%s'
-    #                % (wm10url,
-    #                   event_id,
-    #                   request.cookies.get(app.config['CASTIEL_AUTH_TOKEN']),
-    #                   current_user.current_role))
-    #     return redirect(new_url)
     return get_event_form(event=event, requestType_kind=requestType_kind, client_id=event.client_id)
 
 
@@ -52,9 +40,8 @@ def get_event_form(**kwargs):
     requestType_kind = kwargs.get('requestType_kind', None)
     event = kwargs.get('event', None)
     if (UserProfileManager.has_ui_registrator() or
-        UserProfileManager.has_ui_doctor() or
-        UserProfileManager.has_ui_cashier()
-    ):
+            UserProfileManager.has_ui_doctor() or
+            UserProfileManager.has_ui_cashier()):
         if (event and event.is_stationary) or requestType_kind == 'stationary':
             return render_template('event/event_info_stationary.html', **kwargs)
         elif (event and event.is_policlinic) or requestType_kind == 'policlinic':
@@ -76,4 +63,9 @@ def get_events():
 @module.route('/modal_edit_hosp.html')
 def modal_edit_hosp():
     return render_template('event/modal_edit_hosp.html')
+
+
+@module.route('/modal_hosp_info.html')
+def modal_hosp_info():
+    return render_template('event/modal_hosp_info.html')
 

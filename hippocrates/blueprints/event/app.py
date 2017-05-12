@@ -25,7 +25,9 @@ def fc_urls():
                     'event_info': url_for('event.html_event_info'),
                     'new_event': url_for('event.new_event'),
                     'request_type_kind': url_for('event.request_type_kind_choose'),
-                    'modal_edit_hosp': url_for('event.modal_edit_hosp')
+                    'modal_edit_hosp': url_for('event.modal_edit_hosp'),
+                    'modal_hosp_info': url_for('event.modal_hosp_info')
+
                 },
                 'event_get': url_for('event.api_event_info'),
                 'event_hosp_get': url_for('event.api_0_event_hosp_get'),
@@ -34,7 +36,6 @@ def fc_urls():
                 'event_close': url_for('event.api_event_close'),
                 'event_actions': url_for('event.api_event_actions'),
                 'moving_save': uf_placeholders('event.api_moving_save', ['event_id', 'action_id']),
-                'moving_close': url_for('event.api_event_moving_close'),
                 'hosp_beds': url_for('event.api_hosp_beds_get'),
                 'lab_res_dynamics': url_for('event.api_event_lab_res_dynamics'),
                 'blood_history': url_for('event.api_blood_history_save'),

@@ -8,17 +8,7 @@
                 </div>
             </div>
             <div class="box-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <input type="text" class="form-control" autocomplete="off"
-                               tooltip="Клиническое описание диагноза" id="directed_by" name="appointed_by"
-                               ng-model="event.received.diag_text.value" readonly="true"/>
-                    </div>
-                </div>
-            </div>
-            <div class="box-body">
-                <wm-diagnosis-new ng-model="event.diagnoses_all" can-edit="false"
-                                  diag_types="event.info.diagnosis_types" can-add-new="false"></wm-diagnosis-new>
+                {% include 'event/_diagnoses_read.html' %}
             </div>
         </div>
     </ng-form>

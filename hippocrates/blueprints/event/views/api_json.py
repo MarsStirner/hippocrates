@@ -764,10 +764,10 @@ def api_moving_save(event_id, action_id=None):
         moving = mov_ctrl.create_moving(event, data)
         moving = mov_ctrl.update_moving_data(moving, data)
 
+    db.session.commit()
+
     # TODO: update prev moving and received
     # received_close(event)
-
-    db.session.commit()
 
     if not create_mode:
         notify_moving_changed(MQOpsEvent.moving, moving)
@@ -777,28 +777,12 @@ def api_moving_save(event_id, action_id=None):
     return result
 
 
-@module.route('/api/event_moving_close.json', methods=['POST'])
-@api_method
-def api_event_moving_close():
-    vis = StationaryEventVisualizer()
-    mov_ctrl = MovingController()
-    moving_info = request.json
-    moving_id = moving_info['id']
-    if not moving_id:
-        raise ApiException(404, u'Не передан параметр moving_id')
-    moving = Action.query.get(moving_id)
-    if not moving:
-        raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
-    moving = mov_ctrl.close_moving(moving)
-    return vis.make_moving_info(moving)
-
-
 @module.route('/api/event_hosp_beds_get.json', methods=['GET'])
 @api_method
 def api_hosp_beds_get():
     vis = StationaryEventVisualizer()
-    org_str_id = request.args.get('org_str_id')
-    hb_id = request.args.get('hb_id')
+    org_str_id = safe_int(request.args.get('org_str_id'))
+    hb_id = safe_int(request.args.get('hb_id'))
     ap_hosp_beds = ActionProperty.query.join(
         ActionPropertyType, Action, ActionType, Event,
         ActionProperty_HospitalBed, OrgStructure_HospitalBed
