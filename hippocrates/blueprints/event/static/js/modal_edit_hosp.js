@@ -6,6 +6,7 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
     $scope.event = wmevent;
     $scope.create_mode = !$scope.event.event_id;
     $scope.alerts = [];
+    $scope.formErrors = {};
 
     $scope.ps = new PrintingService('event');
     $scope.ps_resolve = function () {
@@ -67,7 +68,9 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
 
     };
     $scope.on_event_type_changed = function () {
+        clearErrors();
         $scope.update_form_state();
+        $scope.update_policies();
         $scope.update_contract();
     };
     $scope.on_set_date_changed = function () {
@@ -79,6 +82,13 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
             $scope.event.info.event_type.finance,
             $scope.create_mode
         );
+    };
+    $scope.update_policies = function () {
+        if ($scope.formstate.is_oms() && $scope.create_mode) {
+            refreshAvailableOmsPolicy();
+        } else if ($scope.formstate.is_dms()) {
+            refreshAvailableDmsPolicy();
+        }
     };
     $scope.isContractListEmpty = function () {
         return $scope.available_contracts.list.length === 0;
@@ -195,12 +205,56 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
             $scope.event.info.contract = $scope.available_contracts.list[idx];
         }
     }
+    function clearErrors() {
+        for (var key in $scope.formErrors){
+            if ($scope.formErrors.hasOwnProperty(key)){
+                delete $scope.formErrors[key];
+            }
+        }
+    }
+    function setError(field, message) {
+        $scope.formErrors[field] = message;
+    }
+    function refreshAvailableOmsPolicy() {
+        var policy = $scope.event.info.client.compulsory_policy;
+        if (!policy) {
+            setError('policy_oms', 'У пациента не указан полис ОМС');
+            return;
+        } else {
+            if (!policy.beg_date || moment(policy.beg_date).startOf('d').isAfter($scope.event.info.set_date)) {
+                setError('policy_oms', 'Дата начала действия полиса ОМС не установлена или превышает дату создания обращения');
+                return;
+            }
+            if (moment($scope.event.info.set_date).isAfter(moment(policy.end_date).endOf('d'))) {
+                setError('policy_oms', 'Дата создания обращения превышает дату окончания действия полиса ОМС');
+                return;
+            }
+        }
+        return policy;
+    }
+    function refreshAvailableDmsPolicy() {
+        var policies = $scope.event.info.client.voluntary_policies;
+        if (!policies.length) {
+            setError('policy_dms', 'У пациента не указан действующий полис ДМС');
+            return;
+        } else {
+            policies = policies.filter(function (policy) {
+                return !(!policy.beg_date || moment(policy.beg_date).startOf('d').isAfter($scope.event.info.set_date)) &&
+                    !(!policy.end_date || moment($scope.event.info.set_date).isAfter(moment(policy.end_date).endOf('d')));
+            });
+            if (!policies.length) {
+                setError('policy_dms', 'У пациента нет ни одного валидного полиса ДМС');
+                return;
+            }
+        }
+        return policies;
+    }
 
     $scope.$watch('event.info.set_date', function (n, o) {
         // при выборе не сегодняшнего дня ставить время 08:00
         if (n !== o && moment(n).startOf('d').diff(moment(o).startOf('d'), 'days') !== 0) {
             var nd = moment(n).set({hour: 8, minute: 0, second: 0});
-            $scope.event.info.set_date = nd;
+            $scope.event.info.set_date = nd.toDate();
         }
     });
 
@@ -213,10 +267,13 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
             $scope.event.received.body_area = null;
         }
     };
+    $scope.hasFormErrors = function () {
+        return !_.isEmpty($scope.formErrors);
+    };
     $scope.saveEvent = function (hospForm) {
         var deferred = $q.defer();
         $scope.editing.submit_attempt = true;
-        if (hospForm.$valid) {
+        if (!$scope.hasFormErrors() && hospForm.$valid) {
             WMEventService.save_hosp($scope.event).then(function (result) {
                 hospForm.$setPristine();
                 $scope.refreshEvent(result.id)

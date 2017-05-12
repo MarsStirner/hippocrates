@@ -42,7 +42,7 @@
                 <th class="text-right">Кем направлен</th>
                 <td>[[ event.received.appointed_by.value ]]</td>
             </tr>
-            <tr>
+            {#<tr>
                 <th class="text-right">Направивший врач</th>
                 <td>[[ event.received.appointment_doctor.value ]]</td>
             </tr>
@@ -54,7 +54,7 @@
                 <th class="text-right">№ направления</th>
                 <td>[[ event.received.appointment_number.value ]]</td>
             </tr>
-            <tr>
+            <tr>#}
                 <th class="text-right">Кем доставлен</th>
                 <td>[[ event.received.delivered_by.value ]]</td>
             </tr>
@@ -76,7 +76,8 @@
             </tr>
             <tr>
                 <th class="text-right">Диагноз направившего учреждения</th>
-                <td>
+                <td>[[ event.received.diag_text.value ]]</td>
+                {#<td>
                     <div>
                         Основной:
                         <span ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'main'">
@@ -95,7 +96,7 @@
                             [[ diag.diagnostic.mkb.code ]] - [[ diag.diagnostic.mkb.name ]]
                         </div>
                     </div>
-                </td>
+                </td>#}
             </tr>
             <tr>
                 <th class="text-right">В состоянии опьянения</th>

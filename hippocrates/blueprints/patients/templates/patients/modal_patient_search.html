@@ -1,6 +1,23 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
     <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
-    <h4 class="modal-title">[[client.info.full_name]] [[ client.info.last_name ]]</h4>
+    <div class="row">
+        <div class="col-md-7">
+            <h4 class="modal-title">[[client.info.full_name]]</h4>
+        </div>
+        <div class="col-md-4">
+            <div class="pull-right">
+            {% if user_profiles_mng.has_ui_registrator() %}
+            <button class="btn btn-sm btn-primary" ng-click="newAppointment()" title="Записать на приём">
+                <span class="glyphicon glyphicon-tag"></span></button>
+            <button class="btn btn-sm btn-primary" ng-click="newEventChecked()" title="Создать обращение">
+                <span class="glyphicon glyphicon-plus"></span></button>
+            <button class="btn btn-sm btn-primary" ng-click="openClient()" title="Редактировать данные пациента">
+                <span class="glyphicon glyphicon-pencil"></span></button>
+            {% endif %}
+            <ui-print-button ps="ps" class="btn-sm" resolve="ps_resolve()" lazy-load-context="token"></ui-print-button>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="modal-body modal-scrollable">
     <div ui-alert-list="alerts"></div>
