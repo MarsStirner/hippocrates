@@ -24,7 +24,7 @@ def general_menu():
         link='patients.search',
         title=u'Поиск пациентов',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_adm_nurse() or
-                 UserProfileManager.has_ui_doctor()),
+                 UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_station_nurse()),
         icon='fa fa-search'
     ), dict(
         link='schedule.person_schedule_monthview',
@@ -57,15 +57,20 @@ def general_menu():
         visible=UserProfileManager.has_ui_cashier(),
         icon='fa fa-calculator'
     ), dict(
-        link='anareports.index_html',
-        title=u'Аналитические отчёты',
-        visible=True,
-        icon='fa fa-bar-chart'
+        link='hospitalizations.html_current_hosps',
+        title=u'Госпитализации',
+        visible=UserProfileManager.has_ui_station_nurse(),
+        icon='fa fa-h-square'
     ), dict(
         link='biomaterials.index_html',
         title=u'Биоматериалы',
         visible=UserProfileManager.has_ui_nurse(),
         icon='fa fa-eyedropper'
+    ), dict(
+        link='anareports.index_html',
+        title=u'Аналитические отчёты',
+        visible=True,
+        icon='fa fa-bar-chart'
     )]
     return dict(main_menu=menu_items)
 
