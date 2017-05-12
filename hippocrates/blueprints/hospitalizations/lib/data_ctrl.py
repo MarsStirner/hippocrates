@@ -4,6 +4,7 @@ import datetime
 from sqlalchemy import or_, and_, func
 from sqlalchemy.orm import aliased, contains_eager, joinedload
 
+from nemesis.lib.apiutils import ApiException
 from nemesis.lib.utils import safe_datetime, safe_int
 from nemesis.lib.const import STATIONARY_EVENT_CODES, STATIONARY_MOVING_CODE, \
     STATIONARY_RECEIVED_CODE, STATIONARY_ORG_STRUCT_STAY_CODE, \
@@ -248,10 +249,16 @@ class HospitalizationSelector(BaseSelecter):
             with_org_struct = args.get('with_org_struct', False) or 'org_struct_id' in args
             with_hosp_bed = args.get('with_hosp_bed', False)
 
+            beg_date = args.get('start_dt')
+            end_date = args.get('end_dt')
+
+            if beg_date is None or end_date is None:
+                raise ApiException(400, u'Отсутствует одна из дат')
+
             base_query = self.session.query(Event).join(
                 Client, EventType, rbRequestType
             ).filter(
-                Event.deleted == 0, Event.execDate.is_(None),
+                Event.deleted == 0,
                 rbRequestType.code.in_(STATIONARY_EVENT_CODES),
             )
             #         if 'externalId' in kwargs:
@@ -265,9 +272,11 @@ class HospitalizationSelector(BaseSelecter):
             q_action_begdates = self.session.query(Action).join(
                 Event, EventType, rbRequestType, ActionType,
             ).filter(
-                Event.deleted == 0, Action.deleted == 0, Event.execDate.is_(None),
+                Event.deleted == 0, Action.deleted == 0,
                 rbRequestType.code.in_(STATIONARY_EVENT_CODES),
-                ActionType.flatCode == STATIONARY_MOVING_CODE
+                ActionType.flatCode == STATIONARY_MOVING_CODE,
+                Action.begDate >= beg_date,
+                Action.endDate <= end_date
             ).with_entities(
                 func.max(Action.begDate).label('max_beg_date'), Event.id.label('event_id')
             ).group_by(
@@ -288,8 +297,8 @@ class HospitalizationSelector(BaseSelecter):
             q_latest_movings = self.session.query(MovingAction) \
                 .join(q_latest_movings_ids, MovingAction.id == q_latest_movings_ids.c.action_id) \
                 .with_entities(
-                MovingAction.id.label('action_id'), MovingAction.event_id.label('event_id'),
-                MovingAction.begDate.label('begDate'), MovingAction.endDate.label('endDate')) \
+                    MovingAction.id.label('action_id'), MovingAction.event_id.label('event_id'),
+                    MovingAction.begDate.label('begDate'), MovingAction.endDate.label('endDate')) \
                 .subquery('q_latest_movings')
 
             q_received = self.session.query(Action.id.label('action_id')).join(
@@ -297,7 +306,9 @@ class HospitalizationSelector(BaseSelecter):
             ).filter(
                 Action.event_id == Event.id,
                 ActionType.flatCode == STATIONARY_RECEIVED_CODE,
-                Action.deleted == 0
+                Action.deleted == 0,
+                Action.begDate >= beg_date,
+                Action.endDate <= end_date
             ).order_by(
                 Action.begDate.desc()
             ).limit(1)
@@ -309,84 +320,86 @@ class HospitalizationSelector(BaseSelecter):
             ).filter(
                 or_(q_latest_movings.c.event_id.isnot(None),
                     ReceivedAction.id.isnot(None)),
-                func.IF(q_latest_movings.c.event_id.isnot(None),
-                        # движение попадает во временной интервал
-                        and_(q_latest_movings.c.begDate <= args['end_dt'],
-                             or_(q_latest_movings.c.endDate.is_(None),
-                                 args['start_dt'] <= q_latest_movings.c.endDate)
-                             ),
-                        # поступление попадает во временной интервал
-                        and_(ReceivedAction.begDate <= args['end_dt'],
-                             or_(ReceivedAction.endDate.is_(None),
-                                 args['start_dt'] <= ReceivedAction.endDate)
-                             )
-                        )
+                # func.IF(q_latest_movings.c.event_id.isnot(None),
+                #         # движение попадает во временной интервал
+                #         and_(q_latest_movings.c.begDate <= args['end_dt'],
+                #              or_(q_latest_movings.c.endDate.is_(None),
+                #                  args['start_dt'] <= q_latest_movings.c.endDate)
+                #              ),
+                #         # поступление попадает во временной интервал
+                #         and_(ReceivedAction.begDate <= args['end_dt'],
+                #              or_(ReceivedAction.endDate.is_(None),
+                #                  args['start_dt'] <= ReceivedAction.endDate)
+                #              )
+                #         )
             )
-            if with_org_struct:
-                q_os_stay_sq = self.session.query(ActionProperty.id) \
-                    .join(ActionPropertyType) \
-                    .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                            ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
-                            ActionProperty.action_id == q_latest_movings.c.action_id) \
-                    .limit(1)
-                q_os_transfer_sq = self.session.query(ActionProperty.id) \
-                    .join(ActionPropertyType) \
-                    .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                            ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE,
-                            ActionProperty.action_id == ReceivedAction.id) \
-                    .limit(1)
-                base_query = base_query.outerjoin(
-                    AP_OS_Moving, AP_OS_Moving.id == q_os_stay_sq
-                ).outerjoin(
-                    MovingOrgStruct, MovingOrgStruct.id == AP_OS_Moving.value_
-                ).outerjoin(
-                    AP_OS_Received, AP_OS_Received.id == q_os_transfer_sq
-                ).outerjoin(
-                    ReceivedOrgStruct, ReceivedOrgStruct.id == AP_OS_Received.value_
-                )
+            # if with_org_struct:
+            q_os_stay_sq = self.session.query(ActionProperty.id) \
+                .join(ActionPropertyType) \
+                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
+                        ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+                        ActionProperty.action_id == q_latest_movings.c.action_id) \
+                .limit(1)
+            q_os_transfer_sq = self.session.query(ActionProperty.id) \
+                .join(ActionPropertyType) \
+                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
+                        ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE,
+                        ActionProperty.action_id == ReceivedAction.id) \
+                .limit(1)
+            base_query = base_query.outerjoin(
+                AP_OS_Moving, AP_OS_Moving.id == q_os_stay_sq
+            ).outerjoin(
+                MovingOrgStruct, MovingOrgStruct.id == AP_OS_Moving.value_
+            ).outerjoin(
+                AP_OS_Received, AP_OS_Received.id == q_os_transfer_sq
+            ).outerjoin(
+                ReceivedOrgStruct, ReceivedOrgStruct.id == AP_OS_Received.value_
+            ).filter(
 
-                if 'org_struct_id' in args:
-                    flt_os = safe_int(args['org_struct_id'])
-                    base_query = base_query.filter(
-                        func.IF(q_latest_movings.c.event_id.isnot(None),
-                                MovingOrgStruct.id == flt_os,
-                                ReceivedOrgStruct.id == flt_os)
-                    )
-            if with_hosp_bed:
-                q_hosp_bed_sq = self.session.query(ActionProperty.id.label('ap_id')) \
-                    .join(ActionPropertyType) \
-                    .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                            ActionPropertyType.code == STATIONARY_HOSP_BED_CODE,
-                            ActionProperty.action_id == q_latest_movings.c.action_id) \
-                    .limit(1)
-                base_query = base_query.outerjoin(
-                    ActionProperty_HospitalBed, ActionProperty_HospitalBed.id == q_hosp_bed_sq
-                ).outerjoin(
-                    OrgStructure_HospitalBed,
-                    OrgStructure_HospitalBed.id == ActionProperty_HospitalBed.value_
+            )
+
+            if 'org_struct_id' in args:
+                flt_os = safe_int(args['org_struct_id'])
+                base_query = base_query.filter(
+                    func.IF(q_latest_movings.c.event_id.isnot(None),
+                            MovingOrgStruct.id == flt_os,
+                            ReceivedOrgStruct.id == flt_os)
                 )
+            # if with_hosp_bed:
+            q_hosp_bed_sq = self.session.query(ActionProperty.id.label('ap_id')) \
+                .join(ActionPropertyType) \
+                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
+                        ActionPropertyType.code == STATIONARY_HOSP_BED_CODE,
+                        ActionProperty.action_id == q_latest_movings.c.action_id) \
+                .limit(1)
+            base_query = base_query.outerjoin(
+                ActionProperty_HospitalBed, ActionProperty_HospitalBed.id == q_hosp_bed_sq
+            ).outerjoin(
+                OrgStructure_HospitalBed,
+                OrgStructure_HospitalBed.id == ActionProperty_HospitalBed.value_
+            )
 
             base_query = base_query.with_entities(
                 Event,
                 q_latest_movings.c.action_id.label('moving_id'),
                 ReceivedAction.id.label('received_id')
             )
-            if with_move_date:
-                base_query = base_query.add_columns(
-                    func.IF(q_latest_movings.c.event_id.isnot(None),
-                            q_latest_movings.c.begDate,
-                            ReceivedAction.begDate).label('move_date')
-                )
-            if with_org_struct:
-                base_query = base_query.add_columns(
-                    func.IF(q_latest_movings.c.event_id.isnot(None),
-                            MovingOrgStruct.name,
-                            ReceivedOrgStruct.name).label('os_name')
-                )
-            if with_hosp_bed:
-                base_query = base_query.add_columns(
-                    OrgStructure_HospitalBed.name.label('hosp_bed_name')
-                )
+            # if with_move_date:
+            #     base_query = base_query.add_columns(
+            #         func.IF(q_latest_movings.c.event_id.isnot(None),
+            #                 q_latest_movings.c.begDate,
+            #                 ReceivedAction.begDate).label('move_date')
+            #     )
+            # if with_org_struct:
+            base_query = base_query.add_columns(
+                func.IF(q_latest_movings.c.event_id.isnot(None),
+                        MovingOrgStruct.name,
+                        ReceivedOrgStruct.name).label('os_name')
+            )
+            # if with_hosp_bed:
+            base_query = base_query.add_columns(
+                OrgStructure_HospitalBed.name.label('hosp_bed_name')
+            )
             if args.get('order_by_move_date', False):
                 base_query = base_query.order_by(
                     func.IF(q_latest_movings.c.event_id.isnot(None),
@@ -400,9 +413,11 @@ class HospitalizationSelector(BaseSelecter):
         Event = self.model_provider.get('Event')
 
         for_date = safe_datetime(kwargs.get('for_date')) or datetime.datetime.now()
-        start_dt = for_date.replace(hour=8, minute=0, second=0, microsecond=0)
-        end_dt = start_dt + datetime.timedelta(days=1)
-        end_dt = end_dt.replace(hour=7, minute=59, second=59, microsecond=0)
+        start_dt = for_date or for_date.replace(hour=8, minute=0, second=0, microsecond=0)
+        end_dt = safe_datetime(kwargs.get('end_dt'))
+        if not end_dt:
+            end_dt = start_dt + datetime.timedelta(days=1)
+            end_dt = end_dt.replace(hour=7, minute=59, second=59, microsecond=0)
 
         args = {
             'start_dt': start_dt,
