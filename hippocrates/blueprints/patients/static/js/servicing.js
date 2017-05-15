@@ -18,6 +18,7 @@ var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
                 return PatientModalService.openSearchItem($scope.client)
                     .finally(function () {
                         $scope.client = null;
+                        angular.element('#search').select();
                     });
             });
     };

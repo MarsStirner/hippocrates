@@ -175,6 +175,88 @@ WebMis20
                 </div>\
             </ng-form>\
         </ng-form>\
+        <ng-form name="_policies">\
+        <h4>Медицинские полисы</h4>\
+        <div class="box box-primary">\
+            <div ng-repeat="cpol in client.compulsory_policies | flt_not_deleted">\
+                <ng-form name="cpolForm">\
+                    <div class="box-header with-border">\
+                        <h3 class="box-title">Полис ОМС</h3>\
+                        <div class="box-tools pull-right">\
+                            <button type="button" ng-show="cpol.id" class="btn btn-box-tool" title="Редактировать"\
+                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>\
+                            <button type="button" class="btn btn-box-tool" title="Удалить"\
+                                    ng-click="clientServices.delete_cpolicy(client, cpol)">\
+                                <span class="glyphicon glyphicon-trash text-danger"></span></button>\
+                        </div>\
+                    </div>\
+                    <div class="box-body">\
+                        <wm-policy p-type="0" id-postfix="c[[$index]]"\
+                            model-policy="cpol"\
+                            edit-mode="cpol.id ? edit.activated : true">\
+                        </wm-policy>\
+                        <div ng-if="cpol.file_attach">\
+                            <h5>Копия документа</h5>\
+                            <wm-client-file-attach attach-type="policy"\
+                                model-attach="cpol.file_attach"\
+                                model-doc="cpol"\
+                                on-add="add_new_file(documentInfo, policyInfo)"\
+                                on-open="openFile(cfa_id, idx)">\
+                            </wm-client-file-attach>\
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([cpol.file_attach])"\
+                                ng-if="btnPrintAttachesVisible(cpol.file_attach)" title="Печать копии">\
+                                <span class="glyphicon glyphicon-print"></span>\
+                            </button>\
+                        </div>\
+                    </div>\
+                </ng-form>\
+            </div>\
+            <div class="box-footer">\
+                <button type="button" class="btn btn-lg btn-link btn-block"\
+                    ng-click="clientServices.add_new_cpolicy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новый ОМС</button>\
+            </div>\
+        </div>\
+        <h4>Полисы ДМС</h4>\
+        <div ng-repeat="vpol in client.voluntary_policies | flt_not_deleted">\
+            <ng-form name="vpolForm">\
+                <div class="box box-info">\
+                    <div class="box-header with-border">\
+                        <h3 class="box-title">Полис ДМС</h3>\
+                        <div class="box-tools pull-right">\
+                            <button type="button" ng-show="vpol.id" class="btn btn-box-tool" title="Редактировать"\
+                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>\
+                            <button type="button" class="btn btn-box-tool" title="Удалить"\
+                                    ng-click="clientServices.delete_vpolicy(client, vpol)">\
+                                <span class="glyphicon glyphicon-trash text-danger"></span></button>\
+                        </div>\
+                    </div>\
+                    <div class="box-body">\
+                        <wm-policy p-type="1" id-postfix="v[[$index]]"\
+                            model-policy="vpol"\
+                            edit-mode="vpol.id ? edit.activated : true">\
+                        </wm-policy>\
+                        <div ng-if="vpol.file_attach">\
+                            <h5>Копия документа</h5>\
+                            <wm-client-file-attach attach-type="policy"\
+                                model-attach="vpol.file_attach"\
+                                model-doc="vpol"\
+                                on-add="add_new_file(documentInfo, policyInfo)"\
+                                on-open="openFile(cfa_id, idx)">\
+                            </wm-client-file-attach>\
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([vpol.file_attach])"\
+                                ng-if="btnPrintAttachesVisible(vpol.file_attach)" title="Печать копии">\
+                                <span class="glyphicon glyphicon-print"></span>\
+                            </button>\
+                        </div>\
+                    </div>\
+                </div>\
+            </ng-form>\
+        </div>\
+        <div class="panel">\
+            <button type="button" class="btn btn-lg btn-link btn-block"\
+                ng-click="clientServices.add_new_vpolicy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новый ДМС</button>\
+        </div>\
+        </ng-form>\
         <ng-form name="_works">\
             <h4>Занятость</h4>\
             <ng-form name="_works">\

@@ -17,12 +17,14 @@ from nemesis.models.client import Client
 from nemesis.lib.apiutils import ApiException
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id
-from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
+from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, \
+    VMPQuotaDetails, VMPCoupon
 from nemesis.models.enums import ActionStatus
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, \
     STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_ORG_STRUCT_RECEIVED_CODE, \
-    STATIONARY_ORG_STRUCT_TRANSFER_CODE
+    STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
+    STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE
 from nemesis.systemwide import db
 
 
@@ -141,15 +143,18 @@ class MovingController():
         if moving.endDate is not None:
             moving.status = ActionStatus.finished[0]
         else:
-            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0]\
+            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0] \
                 else moving.status
 
-        moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
-        moving.propsByCode['patronage'].value = safe_traverse(moving_info, 'patronage', 'value')
+        moving[STATIONARY_ORG_STRUCT_STAY_CODE].value = moving_info['orgStructStay']['value']
+        moving[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value = moving_info['orgStructTransfer']['value']
+        moving[STATIONARY_PATRONAGE_CODE].value = safe_traverse(
+            moving_info, 'patronage', 'value')
         if 'hospitalBed' in moving_info:
-            moving.propsByCode['hospitalBed'].value = safe_traverse(moving_info, 'hospitalBed', 'value')
+            moving[STATIONARY_HOSP_BED_CODE].value = safe_traverse(
+                moving_info, 'hospitalBed', 'value')
         if 'hospitalBedProfile' in moving_info:
-            moving.propsByCode['hospitalBedProfile'].value = safe_traverse(
+            moving[STATIONARY_HOSP_BED_PROFILE_CODE].value = safe_traverse(
                 moving_info, 'hospitalBedProfile', 'value')
 
         return moving
@@ -185,13 +190,6 @@ class MovingController():
         moving[STATIONARY_ORG_STRUCT_STAY_CODE].value = stay_os
         moving.begDate = beg_date
 
-        return moving
-
-    def close_moving(self, moving):
-        moving.endDate = datetime.datetime.now()
-        moving.status = ActionStatus.finished[0]
-        db.session.add(moving)
-        db.session.commit()
         return moving
 
 

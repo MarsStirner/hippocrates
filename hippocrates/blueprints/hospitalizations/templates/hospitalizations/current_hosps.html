@@ -32,16 +32,6 @@
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Госпитализации</h3>
-                <div class="box-tools pull-right">
-                    <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm"
-                            ng-model="static_filter.client__full_name" placeholder="ФИО пациента">
-                    </div>
-                    <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm"
-                            ng-model="static_filter.set_persons__name" placeholder="ФИО врача">
-                    </div>
-                </div>
             </div>
             <div class="box-body">
                 <table class="table table-condensed">
@@ -73,13 +63,32 @@
                         <td>[[ hosp.exec_person.short_name ]]</td>
                         <td>
                             <a href="javascript:void(0);" ng-click="createFirstMoving(hosp)"
-                                ng-if="firstMovingMissing(hosp)">Положить на койку (новый)</a>
+                                ng-if="firstMovingMissing(hosp)">Положить на койку (нов.)</a>
                             <a href="javascript:void(0);" ng-click="editMoving(hosp)"
                                 ng-if="!firstMovingMissing(hosp) && !isHospBedSelected(hosp)">Положить на койку</a>
                             <span ng-if="isHospBedSelected(hosp)">[[ hosp.hosp_bed_name ]]</span>
                         </td>
                         <td>
-
+                            <div class="btn-group pull-right">
+                                <button type="button" class="btn btn-default"
+                                    ng-click="viewEventInfo(hosp)">Просмотр</button>
+                                <button type="button" class="btn btn-default dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li ng-if="isHospBedSelected(hosp)">
+                                        <a href="javascript:void(0);" ng-click="makeMovingTransfer(hosp)">
+                                            Перевести в отделение</a></li>
+                                    <li ng-if="!isHospBedSelected(hosp)" class="disabled">
+                                        <a href="javascript:void(0);">Перевести в отделение</a></li>
+                                    <li ng-if="!movingClosed(hosp) && isHospBedSelected(hosp)">
+                                        <a href="javascript:void(0);" ng-click="makeMovingTransfer(hosp, true)">
+                                            Закрыть движение</a></li>
+                                    <li ng-if="movingClosed(hosp) || !isHospBedSelected(hosp)" class="disabled">
+                                        <a href="javascript:void(0);">Закрыть движение</a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -92,31 +101,6 @@
                 </pagination>
             </div>
         </div>
-        {# <div class="box box-info" style="font-size: 1.5em;">
-            <div class="box-header with-border">
-                <h3 class="box-title">Пробирки</h3>
-            </div>
-            <div class="box-body">
-                <div class="row">
-                    <div class="col-md-5">
-                        <table class="table table-condensed">
-                            <thead>
-                                <tr>
-                                    <th class="col-md-11">Тип контейнера</th>
-                                    <th class="col-md-1">Количество</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="record in current_result.tubes">
-                                    <td>[[ record.name ]]</td>
-                                    <td>[[ record.count ]] шт.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>#}
     </section>
 </div>
 {% endblock %}

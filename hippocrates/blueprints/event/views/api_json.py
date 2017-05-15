@@ -16,6 +16,7 @@ from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.action.utils import get_tissues
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
     get_properties_values)
@@ -700,12 +701,16 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
     action_id_list = [action.id for action in paginate.items]
     s_ctrl = ServiceController()
     pay_data = s_ctrl.get_actions_pay_info(action_id_list)
+    items = []
+    if at_group == 'lab':
+        tissue_data = get_tissues(action_id_list)
+        items = [eviz.make_lab_action(action, tissue_data, pay_data.get(action.id)) for action in paginate.items]
+    else:
+        items = [eviz.make_action(action, pay_data.get(action.id), ) for action in paginate.items]
     return {
         'pages': paginate.pages,
         'total': paginate.total,
-        'items': [
-            eviz.make_action(action, pay_data.get(action.id)) for action in paginate.items
-        ]
+        'items': items
     }
 
 
@@ -764,10 +769,10 @@ def api_moving_save(event_id, action_id=None):
         moving = mov_ctrl.create_moving(event, data)
         moving = mov_ctrl.update_moving_data(moving, data)
 
+    db.session.commit()
+
     # TODO: update prev moving and received
     # received_close(event)
-
-    db.session.commit()
 
     if not create_mode:
         notify_moving_changed(MQOpsEvent.moving, moving)
@@ -777,28 +782,12 @@ def api_moving_save(event_id, action_id=None):
     return result
 
 
-@module.route('/api/event_moving_close.json', methods=['POST'])
-@api_method
-def api_event_moving_close():
-    vis = StationaryEventVisualizer()
-    mov_ctrl = MovingController()
-    moving_info = request.json
-    moving_id = moving_info['id']
-    if not moving_id:
-        raise ApiException(404, u'Не передан параметр moving_id')
-    moving = Action.query.get(moving_id)
-    if not moving:
-        raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
-    moving = mov_ctrl.close_moving(moving)
-    return vis.make_moving_info(moving)
-
-
 @module.route('/api/event_hosp_beds_get.json', methods=['GET'])
 @api_method
 def api_hosp_beds_get():
     vis = StationaryEventVisualizer()
-    org_str_id = request.args.get('org_str_id')
-    hb_id = request.args.get('hb_id')
+    org_str_id = safe_int(request.args.get('org_str_id'))
+    hb_id = safe_int(request.args.get('hb_id'))
     ap_hosp_beds = ActionProperty.query.join(
         ActionPropertyType, Action, ActionType, Event,
         ActionProperty_HospitalBed, OrgStructure_HospitalBed
