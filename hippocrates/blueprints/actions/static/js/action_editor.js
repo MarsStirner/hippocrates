@@ -582,7 +582,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     };
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
-        return prop ? prop.type.is_assignable : false;
+        return prop ? prop.is_assigned  || prop.type.is_assignable : false;
     };
     Action.prototype._get_entity_changes = function(entity) {
         var dirty_elements = this[entity].filter(function(el) {
