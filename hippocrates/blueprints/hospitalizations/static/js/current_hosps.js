@@ -13,7 +13,8 @@ var CurrentHospsCtrl = function ($scope, HospitalizationsService, EventModalServ
     };
     $scope.staticFilter = {
         client_full_name: '',
-        set_person_name: ''
+        set_person_name: '',
+        external_id: ''
     };
     $scope.pager = {
         current_page: 1,
@@ -29,20 +30,24 @@ var CurrentHospsCtrl = function ($scope, HospitalizationsService, EventModalServ
 
     $scope.quickFilterActive = function () {
         return $scope.staticFilter.client_full_name ||
-            $scope.staticFilter.set_person_name;
+            $scope.staticFilter.set_person_name ||
+            $scope.staticFilter.external_id;
     };
     var quickFilterRecords = function (records) {
         if (!$scope.quickFilterActive()) {
             return records;
         }
         var flt_cfn = $scope.staticFilter.client_full_name.toLowerCase(),
-            flt_spn = $scope.staticFilter.set_person_name.toLowerCase();
+            flt_spn = $scope.staticFilter.set_person_name.toLowerCase(),
+            flt_eid = $scope.staticFilter.external_id.toLowerCase();
 
         return _.filter(records, function(value){
             return (
                 !flt_cfn || value.client.full_name.toLowerCase().indexOf(flt_cfn) !== -1
             ) && (
                 !flt_spn || value.exec_person.short_name.toLowerCase().indexOf(flt_spn) !== -1
+            ) && (
+                !flt_eid || value.external_id.toLowerCase().indexOf(flt_eid) !== -1
             );
         });
     };
@@ -147,6 +152,9 @@ var CurrentHospsCtrl = function ($scope, HospitalizationsService, EventModalServ
         return {
             event_id_list: $scope.getVisibleSelectedRecords()
         };
+    };
+    $scope.canFilterOrgStruct = function () {
+        return CurrentUser.current_role_in('admin');
     };
 
     var watch_with_reload = function (n, o) {

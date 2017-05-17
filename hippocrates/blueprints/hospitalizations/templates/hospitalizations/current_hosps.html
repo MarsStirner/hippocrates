@@ -5,14 +5,27 @@
 {% block main %}
 <div ng-controller="CurrentHospsCtrl" class="ng-cloak">
     <section class="content-header">
-        <div class="wm-page-header-button-box">
-            <ui-print-button ps="ps_elist" lazy-load-context="hosp_list"
-                resolve="ps_elist_resolve()"></ui-print-button>
+        <h1>Текущие госпитализации <span>с <span class="label label-default" style="font-weight: bold;">
+            [[ date_range.start | asDateTime ]]</span> по <span class="label label-default" style="font-weight: bold;">
+            [[ date_range.end | asDateTime ]]</span></span>
+        </h1>
+        <div class="breadcrumb novpadding">
+            <div class="row">
+            <div class="col-md-offset-8 col-md-3">
+                <wm-custom-dropdown id="filter-org-struct" ng-disabled="!canFilterOrgStruct()">
+                    <wm-org-structure-tree ng-model="filter.org_struct"
+                        nodes-selectable="true"></wm-org-structure-tree>
+                </wm-custom-dropdown>
+            </div>
+            <div class="col-md-1">
+                <ui-print-button ps="ps_elist" lazy-load-context="hosp_list" class="pull-right"
+                    resolve="ps_elist_resolve()"></ui-print-button>
+            </div>
+            </div>
         </div>
-        <h1>Текущие госпитализации</h1>
     </section>
     <section class="content">
-        <div class="row marginal">
+        {#        <div class="row marginal">
             <div class="col-md-4 col-sm-5">
                 <label for="cur_dt">Дата и время</label>
                 <p id="cur_dt" class="form-control-static">
@@ -29,18 +42,22 @@
                         nodes-selectable="true"></wm-org-structure-tree>
                 </wm-custom-dropdown>
             </div>
-        </div>
+        </div>#}
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Госпитализации</h3>
-                <div class="box-tools pull-right">
-                    <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm" ng-model="staticFilter.client_full_name"
+                <div class="box-tools">
+                    <div class="has-feedback" style="display: inline-block; margin-right: 20px">
+                        <input type="text" class="form-control" ng-model="staticFilter.client_full_name"
                             placeholder="ФИО пациента">
                     </div>
-                    <div class="has-feedback" style="display: inline-block;">
-                        <input type="text" class="form-control input-sm" ng-model="staticFilter.set_person_name"
+                    <div class="has-feedback" style="display: inline-block; margin-right: 20px">
+                        <input type="text" class="form-control" ng-model="staticFilter.set_person_name"
                             placeholder="ФИО врача">
+                    </div>
+                    <div class="has-feedback" style="display: inline-block; margin-right: 20px">
+                        <input type="text" class="form-control" ng-model="staticFilter.external_id"
+                            placeholder="Номер ИБ">
                     </div>
                 </div>
             </div>
@@ -56,14 +73,15 @@
                             </span>
                         </th>
                         <th width="1%">№</th>
-                        <th width="7%">Дата и время</th>
-                        <th width="7%">№ ИБ</th>
-                        <th width="20%">ФИО</th>
-                        <th width="10%">Дата рожд.</th>
-                        <th width="15%">Отделение</th>
+                        <th width="10%">Палата/койка</th>
+                        <th width="15%" ng-if="canFilterOrgStruct()">Отделение</th>
+                        <th width="20%">ФИО пациента</th>
+                        <th width="10%">Возраст</th>
+                        <th width="10%">№ ИБ</th>
                         <th width="15%">Лечащий врач</th>
-                        <th width="7%">Палата</th>
-                        <th width="10%">Койка</th>
+                        <th width="10%">Койко-дни</th>
+                        <th width="5%">Диагноз</th>
+                        <th width="10%">Диета</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -72,23 +90,22 @@
                         <td><wm-checkbox select-all="selectedRecords" key="hosp.id"></wm-checkbox></td>
                         <td>[[ $index + 1 ]]</td>
                         <td>
-                            [[ hosp.move_date | asDateTime ]]
-                        </td>
-                        <td>[[ hosp.external_id ]]</td>
-                        <td>
-                            [[ hosp.client.full_name ]]
-                        </td>
-                        <td>[[ hosp.client.birth_date | asDate ]] ([[ hosp.client.age ]])</td>
-                        <td>[[ hosp.org_struct_name ]]</td>
-                        <td>[[ hosp.exec_person.short_name ]]</td>
-                        <td></td>
-                        <td>
                             <a href="javascript:void(0);" ng-click="createFirstMoving(hosp)"
                                 ng-if="firstMovingMissing(hosp)">Положить на койку (нов.)</a>
                             <a href="javascript:void(0);" ng-click="editMoving(hosp)"
                                 ng-if="!firstMovingMissing(hosp) && !isHospBedSelected(hosp)">Положить на койку</a>
                             <span ng-if="isHospBedSelected(hosp)">[[ hosp.hosp_bed_name ]]</span>
                         </td>
+                        <td ng-if="canFilterOrgStruct()">[[ hosp.org_struct_name ]]</td>
+                        <td>
+                            [[ hosp.client.full_name ]]
+                        </td>
+                        <td>[[ hosp.client.birth_date | asDate ]] ([[ hosp.client.age ]])</td>
+                        <td>[[ hosp.external_id ]]</td>
+                        <td>[[ hosp.exec_person.short_name ]]</td>
+                        <td></td>
+                        <td></td>
+                        <td>Не назначена</td>
                         <td>
                             <div class="btn-group pull-right" style="display: flex">
                                 <button type="button" class="btn btn-default"
