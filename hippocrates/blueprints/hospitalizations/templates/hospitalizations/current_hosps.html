@@ -5,14 +5,15 @@
 {% block main %}
 <div ng-controller="CurrentHospsCtrl" class="ng-cloak">
     <section class="content-header">
-        {#<div class="wm-page-header-button-box">
-            <ui-print-button ps="ps_bm" resolve="ps_resolve()"></ui-print-button>
-        </div>#}
+        <div class="wm-page-header-button-box">
+            <ui-print-button ps="ps_elist" lazy-load-context="hosp_list"
+                resolve="ps_elist_resolve()"></ui-print-button>
+        </div>
         <h1>Текущие госпитализации</h1>
     </section>
     <section class="content">
         <div class="row marginal">
-            <div class="col-md-3">
+            <div class="col-md-4 col-sm-5">
                 <label for="cur_dt">Дата и время</label>
                 <p id="cur_dt" class="form-control-static">
                     с <span class="label label-default" style="font-weight: bold; font-size: larger">
@@ -21,7 +22,7 @@
                         [[ date_range.end | asDateTime ]]</span>
                 </p>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 col-sm-5">
                 <label for="filter-org-struct">Отделение</label>
                 <wm-custom-dropdown id="filter-org-struct" ng-disabled="filter.barCode">
                     <wm-org-structure-tree ng-model="filter.org_struct"
@@ -32,11 +33,28 @@
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Госпитализации</h3>
+                <div class="box-tools pull-right">
+                    <div class="has-feedback" style="display: inline-block;">
+                        <input type="text" class="form-control input-sm" ng-model="staticFilter.client_full_name"
+                            placeholder="ФИО пациента">
+                    </div>
+                    <div class="has-feedback" style="display: inline-block;">
+                        <input type="text" class="form-control input-sm" ng-model="staticFilter.set_person_name"
+                            placeholder="ФИО врача">
+                    </div>
+                </div>
             </div>
             <div class="box-body">
                 <table class="table table-condensed">
                 <thead>
                     <tr>
+                        <th>
+                            <span class="styled">
+                                <input type="checkbox" id="selectAll1" ng-checked="visibleRecordsAllSelected()"
+                                    ng-click="toggleAllVisibleRecords()">
+                                <label for="selectAll1"></label>
+                            </span>
+                        </th>
                         <th width="1%">№</th>
                         <th width="7%">Дата и время</th>
                         <th width="7%">№ ИБ</th>
@@ -44,13 +62,15 @@
                         <th width="10%">Дата рожд.</th>
                         <th width="15%">Отделение</th>
                         <th width="15%">Лечащий врач</th>
-                        <th width="15%">Койка</th>
+                        <th width="7%">Палата</th>
+                        <th width="10%">Койка</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="hosp in hosp_list">
-                        <td>[[ $index + 1 ]] <a ng-href="[['{{ url_for('event.html_event_info') }}' + '?event_id=' + hosp.id]]">-^</a></td>
+                        <td><wm-checkbox select-all="selectedRecords" key="hosp.id"></wm-checkbox></td>
+                        <td>[[ $index + 1 ]]</td>
                         <td>
                             [[ hosp.move_date | asDateTime ]]
                         </td>
@@ -61,6 +81,7 @@
                         <td>[[ hosp.client.birth_date | asDate ]] ([[ hosp.client.age ]])</td>
                         <td>[[ hosp.org_struct_name ]]</td>
                         <td>[[ hosp.exec_person.short_name ]]</td>
+                        <td></td>
                         <td>
                             <a href="javascript:void(0);" ng-click="createFirstMoving(hosp)"
                                 ng-if="firstMovingMissing(hosp)">Положить на койку (нов.)</a>
@@ -69,7 +90,7 @@
                             <span ng-if="isHospBedSelected(hosp)">[[ hosp.hosp_bed_name ]]</span>
                         </td>
                         <td>
-                            <div class="btn-group pull-right">
+                            <div class="btn-group pull-right" style="display: flex">
                                 <button type="button" class="btn btn-default"
                                     ng-click="viewEventInfo(hosp)">Просмотр</button>
                                 <button type="button" class="btn btn-default dropdown-toggle"
@@ -87,6 +108,11 @@
                                             Закрыть движение</a></li>
                                     <li ng-if="movingClosed(hosp) || !isHospBedSelected(hosp)" class="disabled">
                                         <a href="javascript:void(0);">Закрыть движение</a></li>
+                                    {% if user_profiles_mng.has_ui_admin() %}
+                                    <li>
+                                        <a ng-href="[['{{ url_for('event.html_event_info') }}' + '?event_id=' + hosp.id]]">Отрыть ИБ</a>
+                                    </li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </td>
