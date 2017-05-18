@@ -441,6 +441,9 @@ def api_patient_coupon_parse():
     file_content = coupon_file.get('binary_b64')
     head, content = file_content.split(',')
     coupon = VMPCoupon.from_xlsx(content)
+    # todo: just for develop
+    coupon.quotaType = QuotaType.query.filter_by(id=51).first()
+    db.session.add(coupon)
     if not coupon.quotaType:
         raise ApiException(422, u'Не найдено подходящей квоты по коду "{0}" и дате {1}'.format(
             coupon.parsed.get('quota_type_code'), format_date(coupon.parsed.get('quota_date'))
