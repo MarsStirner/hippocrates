@@ -18,4 +18,8 @@ def api_0_current_hosps_get():
 
     ctrl = HospitalizationController()
     hosps_data = ctrl.get_current_hosps(**args)
-    return hosps_data
+    hosps_stats = ctrl.get_hosp_stats(**args)
+    return {
+        'data': hosps_data,
+        'stats': hosps_stats
+    }

@@ -7,7 +7,9 @@ from sqlalchemy.orm import aliased, contains_eager, joinedload
 from nemesis.lib.utils import safe_datetime, safe_int
 from nemesis.lib.const import STATIONARY_EVENT_CODES, STATIONARY_MOVING_CODE, \
     STATIONARY_RECEIVED_CODE, STATIONARY_ORG_STRUCT_STAY_CODE, \
-    STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE
+    STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
+    STATIONARY_LEAVED_CODE
+from nemesis.models.enums import HospStateStatus
 from nemesis.lib.data_ctrl.base import BaseSelecter, BaseModelController
 
 
@@ -49,6 +51,16 @@ class HospitalizationController(BaseModelController):
             'total_pages': hosps_data.pages
         }
 
+    def get_hosp_stats(self, **args):
+        sel = HospitalizationSelector()
+        stats = sel.get_hosps_stats(**args)
+        return {
+            'count_current': stats.count_current,
+            'count_received': stats.count_received,
+            'count_transferred': stats.count_transferred,
+            'count_leaved': stats.count_leaved,
+        }
+
 
 class HospitalizationSelector(BaseSelecter):
 
@@ -60,10 +72,23 @@ class HospitalizationSelector(BaseSelecter):
         self.BaseEvent = self.model_provider.get('Event')
         self.MovingAction = aliased(Action, name='LatestMovingAction')
         self.ReceivedAction = aliased(Action, name='ReceivedAction')
+        self.LeavedAction = aliased(Action, name='LeavedAction')
         self.LocationOSfromMoving = aliased(OrgStructure, name='LocationOrgStructFromMoving')
         self.LocationOSfromReceived = aliased(OrgStructure, name='LocationOrgStructFromReceived')
         self.MovingOSHB = aliased(OrgStructure_HospitalBed, name='MovingHospitalBed')
+        self.MovingOrgStructTransfer = aliased(OrgStructure, name='MovingOrgStructTransfer')
+        self.q_movings_transfered_through = None
 
+        self.start_dt = None
+        self.end_dt = None
+        self.hosp_status = None
+        self.flt_org_struct_id = None
+        self.history = None
+        self._latest_location_joined = False
+        self._location_os_joined = False
+        self._leaved_joined = False
+        self._moving_os_transfer_joined = False
+        self._moving_transfer_through_joined = False
         super(HospitalizationSelector, self).__init__(query)
 
     def set_base_query(self):
@@ -77,8 +102,197 @@ class HospitalizationSelector(BaseSelecter):
             self.BaseEvent.deleted == 0, self.BaseEvent.execDate.is_(None),
             rbRequestType.code.in_(STATIONARY_EVENT_CODES),
         )
+        self._latest_location_joined = False
+        self._location_os_joined = False
+        self._leaved_joined = False
+        self._moving_os_transfer_joined = False
+        self.q_movings_transfered_through = None
+        self._moving_transfer_through_joined = False
 
-    def _query_hosps_by_latest_location(self, flt_start_dt, flt_end_dt, history=False):
+    def get_latest_hosps(self, **kwargs):
+        for_date = safe_datetime(kwargs.get('for_date')) or datetime.datetime.now()
+
+        self.start_dt = for_date.replace(hour=8, minute=0, second=0, microsecond=0)
+        end_dt = self.start_dt + datetime.timedelta(days=1)
+        self.end_dt = end_dt.replace(hour=7, minute=59, second=59, microsecond=0)
+
+        self.history = kwargs.get('history') or False
+        self.hosp_status = kwargs.get('hosp_status')
+        self.flt_org_struct_id = safe_int(kwargs.get('org_struct_id'))
+
+        self._filter_by_latest_location()
+        self._filter_by_status()
+        self._join_location_org_structure()
+        self._join_hosp_bed()
+
+        self.query = self.query.with_entities(
+            self.BaseEvent,
+            self.MovingAction.id.label('moving_id'),
+            self.ReceivedAction.id.label('received_id'),
+            func.IF(self.MovingAction.id.isnot(None),
+                    self.MovingAction.begDate,
+                    self.ReceivedAction.begDate).label('move_date'),
+            self.MovingAction.endDate.label('moving_end_date'),
+            func.IF(self.MovingAction.id.isnot(None),
+                    self.LocationOSfromMoving.name,
+                    self.LocationOSfromReceived.name).label('os_name'),
+            self.MovingOSHB.name.label('hosp_bed_name'),
+        )
+        self.query = self.query.order_by(
+            func.IF(self.MovingAction.id.isnot(None),
+                    self.MovingAction.begDate,
+                    self.ReceivedAction.begDate).desc()
+        )
+
+        self.query = self.query.options(
+            contains_eager(self.BaseEvent.client),
+            joinedload(self.BaseEvent.execPerson)
+        )
+        return self.get_paginated(kwargs)
+
+    def get_hosps_stats(self, **kwargs):
+        for_date = safe_datetime(kwargs.get('for_date')) or datetime.datetime.now()
+
+        self.start_dt = for_date.replace(hour=8, minute=0, second=0, microsecond=0)
+        end_dt = self.start_dt + datetime.timedelta(days=1)
+        self.end_dt = end_dt.replace(hour=7, minute=59, second=59, microsecond=0)
+
+        self.history = kwargs.get('history') or False
+        self.hosp_status = kwargs.get('hosp_status')
+        self.flt_org_struct_id = safe_int(kwargs.get('org_struct_id'))
+
+        self._join_latest_location()
+        self._join_location_org_structure()
+        self._join_moving_os_transfer()
+        self._join_movings_transfered_through()
+        self._join_leaved()
+
+        self.query = self.query.with_entities(
+            # кол-во текущих
+            func.SUM(
+                func.IF(func.IF(self.MovingAction.id.isnot(None),
+                                and_(self.MovingAction.begDate <= self.end_dt,
+                                     or_(self.MovingAction.endDate.is_(None),
+                                         self.start_dt <= self.MovingAction.endDate),
+                                     self.LocationOSfromMoving.id == self.flt_org_struct_id
+                                     ),
+                                and_(self.ReceivedAction.begDate <= self.end_dt,
+                                     or_(self.ReceivedAction.endDate.is_(None),
+                                         self.start_dt <= self.ReceivedAction.endDate),
+                                     self.LocationOSfromReceived.id == self.flt_org_struct_id
+                                     )),
+                        1, 0)
+            ).label('count_current'),
+            # кол-во поступивших
+            func.SUM(
+                func.IF(func.IF(self.MovingAction.id.isnot(None),
+                                and_(self.MovingAction.begDate <= self.end_dt,
+                                     self.start_dt <= self.MovingAction.begDate,
+                                     or_(self.MovingAction.endDate.is_(None),
+                                         self.start_dt <= self.MovingAction.endDate)
+                                     ),
+                                and_(self.ReceivedAction.begDate <= self.end_dt,
+                                     self.end_dt <= self.ReceivedAction.begDate,
+                                     or_(self.ReceivedAction.endDate.is_(None),
+                                         self.start_dt <= self.ReceivedAction.endDate)
+                                     )
+                                ),
+                        1, 0)
+            ).label('count_received'),
+            # кол-во переведенных
+            func.SUM(
+                func.IF(self.q_movings_transfered_through.c.event_id.isnot(None),
+                        1, 0)
+            ).label('count_transferred'),
+            # кол-во выписанных
+            func.SUM(
+                func.IF(and_(self.LeavedAction.id.isnot(None),
+                             self.MovingOrgStructTransfer.id.is_(None),
+                             self.MovingAction.begDate <= self.end_dt,
+                             self.MovingAction.endDate >= self.start_dt,
+                             self.MovingAction.endDate <= self.end_dt),
+                        1, 0)
+            ).label('count_leaved')
+        )
+
+        return self.get_one()
+
+    def _filter_by_latest_location(self):
+        self._join_latest_location()
+        if not self.history:
+            self.query = self.query.filter(
+                func.IF(self.MovingAction.id.isnot(None),
+                        # движение попадает во временной интервал
+                        and_(self.MovingAction.begDate <= self.end_dt,
+                             or_(self.MovingAction.endDate.is_(None),
+                                 self.start_dt <= self.MovingAction.endDate)
+                             ),
+                        # поступление попадает во временной интервал
+                        and_(self.ReceivedAction.begDate <= self.end_dt,
+                             or_(self.ReceivedAction.endDate.is_(None),
+                                 self.start_dt <= self.ReceivedAction.endDate)
+                             )
+                        )
+            )
+
+    def _filter_by_status(self):
+        if self.hosp_status == HospStateStatus.transferred[0]:
+            # Переведенные - Action.endDate между beg_date и end_date, а поле "Переведен в отделение"
+            # не пустое, отделение пребывания равно текущему отделению пользователя;
+            # todo: невозможно получить переведенных пациентов при данном подходе, так как у последнего движения поле
+            # todo: "Переведен в отделение" будет всегда пустым
+            self._join_movings_transfered_through()
+            self.query = self.query.filter(
+                self.q_movings_transfered_through.c.event_id.isnot(None)
+            )
+        else:
+            self.query = self.query.filter(
+                or_(self.MovingAction.id.isnot(None),
+                    self.ReceivedAction.id.isnot(None)),
+            )
+            self._filter_by_location_os()
+
+            # Текущие - Action.endDate для движения пусто или больше end_date,
+            # отделение пребывания равно текущему отделению пользователя. Плюс отображаем пациентов, у которых есть
+            # поступление в это отделение, но их еще не разместили на койке (в таком случае, у этих пациентов в столбце
+            # "Койка" будет отображаться гиперссылка "Положить на койку").
+            if self.hosp_status == HospStateStatus.current[0]:
+                self.query = self.query.filter(
+                    func.IF(self.MovingAction.id.isnot(None),
+                            or_(self.MovingAction.endDate.is_(None),
+                                self.MovingAction.endDate >= self.end_date),
+                            or_(self.ReceivedAction.endDate.is_(None),
+                                self.ReceivedAction.endDate >= self.end_date)
+                            )
+                )
+            # Поступившие - Action.begDate для движения более или равно beg_date, а endDate любая, отделение
+            # пребывания равно текущему отделению пользователя;
+            elif self.hosp_status == HospStateStatus.received[0]:
+                self.query = self.query.filter(
+                    func.IF(self.MovingAction.id.isnot(None),
+                            and_(self.MovingAction.begDate >= self.beg_date,
+                                 self.MovingAction.begDate <= self.end_date),
+                            and_(self.ReceivedAction.begDate >= self.beg_date,
+                                 self.ReceivedAction.begDate <= self.end_date),
+                            )
+                )
+            # Выписанные - Action.endDate между beg_date и end_date, а поле "Переведен в отделение" пусто. Присутствует
+            # "Выписной эпикриз" - но необязательно для того, чтобы считать пациента убывшим из отделения.
+            elif self.hosp_status == HospStateStatus.leaved[0]:
+                self._join_leaved()
+                self._join_moving_os_transfer()
+
+                self.query = self.query.filter(
+                    self.LeavedAction.id.isnot(None),
+                    self.MovingOrgStructTransfer.id.is_(None),
+                    and_(self.MovingAction.endDate >= self.start_dt,
+                         self.MovingAction.endDate <= self.end_dt)
+                )
+
+    def _join_latest_location(self):
+        if self._latest_location_joined:
+            return
+
         Action = self.model_provider.get('Action')
         ActionType = self.model_provider.get('ActionType')
 
@@ -91,12 +305,12 @@ class HospitalizationSelector(BaseSelecter):
         ).order_by(
             Action.begDate.desc()
         ).limit(1)
-        if history:
+        if self.history:
             # движение попадает во временной интервал
             q_latest_moving = q_latest_moving.filter(
-                Action.begDate <= flt_end_dt,
+                Action.begDate <= self.end_dt,
                 or_(Action.endDate.is_(None),
-                    Action.endDate >= flt_start_dt)
+                    Action.endDate >= self.start_dt)
             )
 
         q_received = self.session.query(Action.id.label('action_id')).join(
@@ -108,39 +322,25 @@ class HospitalizationSelector(BaseSelecter):
         ).order_by(
             Action.begDate.desc()
         ).limit(1)
-        if history:
+        if self.history:
             # поступление попадает во временной интервал
             q_latest_moving = q_latest_moving.filter(
-                Action.begDate <= flt_end_dt,
+                Action.begDate <= self.end_dt,
                 or_(Action.endDate.is_(None),
-                    Action.endDate >= flt_start_dt)
+                    Action.endDate >= self.start_dt)
             )
 
         self.query = self.query.outerjoin(
             self.MovingAction, self.MovingAction.id == q_latest_moving
         ).outerjoin(
             self.ReceivedAction, self.ReceivedAction.id == q_received
-        ).filter(
-            or_(self.MovingAction.id.isnot(None),
-                self.ReceivedAction.id.isnot(None)),
         )
-        if not history:
-            self.query = self.query.filter(
-                func.IF(self.MovingAction.id.isnot(None),
-                        # движение попадает во временной интервал
-                        and_(self.MovingAction.begDate <= flt_end_dt,
-                             or_(self.MovingAction.endDate.is_(None),
-                                 flt_start_dt <= self.MovingAction.endDate)
-                             ),
-                        # поступление попадает во временной интервал
-                        and_(self.ReceivedAction.begDate <= flt_end_dt,
-                             or_(self.ReceivedAction.endDate.is_(None),
-                                 flt_start_dt <= self.ReceivedAction.endDate)
-                             )
-                        )
-            )
+        self._latest_location_joined = True
 
-    def _join_location_org_structure(self, org_struct_id=None):
+    def _join_location_org_structure(self):
+        if self._location_os_joined:
+            return
+
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
         ActionProperty_OrgStructure = self.model_provider.get('ActionProperty_OrgStructure')
@@ -169,12 +369,15 @@ class HospitalizationSelector(BaseSelecter):
         ).outerjoin(
             self.LocationOSfromReceived, self.LocationOSfromReceived.id == AP_OS_Received.value_
         )
+        self._location_os_joined = True
 
-        if org_struct_id is not None:
+    def _filter_by_location_os(self):
+        if self.flt_org_struct_id is not None:
+            self._join_location_org_structure()
             self.query = self.query.filter(
                 func.IF(self.MovingAction.id.isnot(None),
-                        self.LocationOSfromMoving.id == org_struct_id,
-                        self.LocationOSfromReceived.id == org_struct_id)
+                        self.LocationOSfromMoving.id == self.flt_org_struct_id,
+                        self.LocationOSfromReceived.id == self.flt_org_struct_id)
             )
 
     def _join_hosp_bed(self):
@@ -195,256 +398,107 @@ class HospitalizationSelector(BaseSelecter):
             self.MovingOSHB, self.MovingOSHB.id == ActionProperty_HospitalBed.value_
         )
 
-    def query_hosps_filter(self, **args):
-        Event = self.model_provider.get('Event')
+    def _join_leaved(self):
+        # todo: history
+        if self._leaved_joined:
+            return
+
         Action = self.model_provider.get('Action')
-        EventType = self.model_provider.get('EventType')
-        rbRequestType = self.model_provider.get('rbRequestType')
         ActionType = self.model_provider.get('ActionType')
-        Client = self.model_provider.get('Client')
+
+        q_leaved = self.session.query(Action.id.label('action_id')).join(
+            ActionType
+        ).filter(
+            Action.event_id == self.BaseEvent.id,
+            ActionType.flatCode == STATIONARY_LEAVED_CODE,
+            Action.deleted == 0
+        ).order_by(
+            Action.begDate.desc()
+        ).limit(1)
+
+        self.query = self.query.outerjoin(
+            self.LeavedAction, self.LeavedAction.id == q_leaved
+        )
+        self._leaved_joined = True
+
+    def _join_moving_os_transfer(self):
+        if self._moving_os_transfer_joined:
+            return
+
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
         ActionProperty_OrgStructure = self.model_provider.get('ActionProperty_OrgStructure')
-        ActionProperty_HospitalBed = self.model_provider.get('ActionProperty_HospitalBed')
-        OrgStructure_HospitalBed = self.model_provider.get('OrgStructure_HospitalBed')
-        OrgStructure = self.model_provider.get('OrgStructure')
-
-        MovingAction = aliased(Action, name='MovingAction')
-        ReceivedAction = aliased(Action, name='ReceivedAction')
-        LeavedAction = aliased(Action, name='LeavedAction')
-        AP_OS_Moving_Stay = aliased(ActionProperty_OrgStructure, name='AP_OS_Moving_Stay')
         AP_OS_Moving_Transfer = aliased(ActionProperty_OrgStructure, name='AP_OS_Moving_Transfer')
-        AP_OS_Received_Transfer = aliased(ActionProperty_OrgStructure, name='AP_OS_Received_Transfer')
-        MovingOrgStructStay = aliased(OrgStructure, name='MovingOrgStructStay')
-        MovingOrgStructTransfer = aliased(OrgStructure, name='MovingOrgStructTransfer')
-        ReceivedOrgStructTransfer = aliased(OrgStructure, name='ReceivedOrgStructTransfer')
 
-        with_move_date = args.get('with_move_date', False)
-        with_moving_end_date = args.get('with_moving_end_date', False)
-        with_org_struct = args.get('with_org_struct', False) or 'org_struct_id' in args
-        with_hosp_bed = args.get('with_hosp_bed', False)
+        q_os_moving_transfer_sq = self.session.query(ActionProperty.id) \
+            .join(ActionPropertyType) \
+            .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
+                    ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE,
+                    ActionProperty.action_id == self.MovingAction.id) \
+            .limit(1)
 
-        patients_state = args.get('patients_state', False)
-
-        beg_date = args.get('start_dt')
-        end_date = args.get('end_dt')
-
-        if with_org_struct:
-            q_os_moving_stay_sq = self.session.query(ActionProperty.id) \
-                .join(ActionPropertyType) \
-                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                        ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
-                        ActionProperty.action_id == MovingAction.id) \
-                .limit(1)
-            q_os_moving_transfer_sq = self.session.query(ActionProperty.id) \
-                .join(ActionPropertyType) \
-                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                        ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE,
-                        ActionProperty.action_id == MovingAction.id) \
-                .limit(1)
-            q_os_received_transfer_sq = self.session.query(ActionProperty.id) \
-                .join(ActionPropertyType) \
-                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                        ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE,
-                        ActionProperty.action_id == ReceivedAction.id) \
-                .limit(1)
-
-            base_query = base_query.outerjoin(
-                AP_OS_Moving_Stay, AP_OS_Moving_Stay.id == q_os_moving_stay_sq
-            ).outerjoin(
-                MovingOrgStructStay, MovingOrgStructStay.id == AP_OS_Moving_Stay.value_
-            ).outerjoin(
-                AP_OS_Moving_Transfer, AP_OS_Moving_Transfer.id == q_os_moving_transfer_sq
-            ).outerjoin(
-                MovingOrgStructTransfer, MovingOrgStructTransfer.id == AP_OS_Moving_Transfer.value_
-            ).outerjoin(
-                AP_OS_Received_Transfer, AP_OS_Received_Transfer.id == q_os_received_transfer_sq
-            ).outerjoin(
-                ReceivedOrgStructTransfer, ReceivedOrgStructTransfer.id == AP_OS_Received_Transfer.value_
-            )
-
-            if 'org_struct_id' in args:
-                flt_os = safe_int(args['org_struct_id'])
-                base_query = base_query.filter(
-                    func.IF(MovingAction.id.isnot(None),
-                            MovingOrgStructStay.id == flt_os,
-                            ReceivedOrgStructTransfer.id == flt_os)
-                )
-
-        if with_hosp_bed:
-            q_hosp_bed_sq = self.session.query(ActionProperty.id.label('ap_id'))\
-                .join(ActionPropertyType)\
-                .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
-                        ActionPropertyType.code == STATIONARY_HOSP_BED_CODE,
-                        ActionProperty.action_id == MovingAction.id)\
-                .limit(1)
-            base_query = base_query.outerjoin(
-                ActionProperty_HospitalBed, ActionProperty_HospitalBed.id == q_hosp_bed_sq
-            ).outerjoin(
-                OrgStructure_HospitalBed,
-                OrgStructure_HospitalBed.id == ActionProperty_HospitalBed.value_
-            )
-
-        base_query = base_query.with_entities(
-            Event,
-            MovingAction.id.label('moving_id'),
-            ReceivedAction.id.label('received_id')
+        self.query = self.query.outerjoin(
+            AP_OS_Moving_Transfer, AP_OS_Moving_Transfer.id == q_os_moving_transfer_sq
+        ).outerjoin(
+            self.MovingOrgStructTransfer, self.MovingOrgStructTransfer.id == AP_OS_Moving_Transfer.value_
         )
-        if with_move_date:
-            base_query = base_query.add_columns(
-                func.IF(MovingAction.id.isnot(None),
-                        MovingAction.begDate,
-                        ReceivedAction.begDate).label('move_date')
-            )
-        if with_moving_end_date:
-            base_query = base_query.add_columns(
-                MovingAction.endDate.label('moving_end_date')
-            )
-        if with_org_struct:
-            base_query = base_query.add_columns(
-                func.IF(MovingAction.id.isnot(None),
-                        MovingOrgStructStay.name,
-                        ReceivedOrgStructTransfer.name).label('os_name')
-            )
-        if with_hosp_bed:
-            base_query = base_query.add_columns(
-                OrgStructure_HospitalBed.name.label('hosp_bed_name')
-            )
-        if args.get('order_by_move_date', False):
-            base_query = base_query.order_by(
-                func.IF(MovingAction.id.isnot(None),
-                        MovingAction.begDate,
-                        ReceivedAction.begDate).desc()
-            )
+        self._moving_os_transfer_joined = True
 
-        # Текущие - Action.endDate для движения пусто или больше end_date,
-        # отделение пребывания равно текущему отделению пользователя. Плюс отображаем пациентов, у которых есть
-        # поступление в это отделение, но их еще не разместили на койке (в таком случае, у этих пациентов в столбце
-        # "Койка" будет отображаться гиперссылка "Положить на койку").
-        if patients_state == 'current':
-            base_query = base_query.filter(
-                func.IF(MovingAction.id.isnot(None),
-                        or_(MovingAction.endDate.is_(None),
-                            MovingAction.endDate >= end_date),
-                        or_(ReceivedAction.endDate.is_(None),
-                            ReceivedAction.endDate >= end_date)
-                        )
-            )
-        # Поступившие - Action.begDate для движения более или равно beg_date, а endDate любая, отделение
-        # пребывания равно текущему отделению пользователя;
-        elif patients_state == 'received':
-            base_query = base_query.filter(
-                func.IF(MovingAction.id.isnot(None),
-                        and_(MovingAction.begDate >= beg_date,
-                             MovingAction.begDate <= end_date),
-                        and_(ReceivedAction.begDate >= beg_date,
-                             ReceivedAction.begDate <= end_date),
-                        )
-            )
-        # Переведенные - Action.endDate между beg_date и end_date, а поле "Переведен в отделение"
-        # не пустое, отделение пребывания равно текущему отделению пользователя;
-        # todo: невозможно получить переведенных пациентов при данном подходе, так как у последнего движения поле
-        # todo: "Переведен в отделение" будет всегда пустым
-        elif patients_state == 'transferred':
-            base_query = base_query.filter(
-                MovingAction.endDate >= beg_date,
-                MovingAction.endDate <= end_date,
-                MovingOrgStructTransfer.id.isnot(None)
-            )
-        # Выписанные - Action.endDate между beg_date и end_date, а поле "Переведен в отделение" пусто. Присутствует
-        # "Выписной эпикриз" - но необязательно для того, чтобы считать пациента убывшим из отделения.
-        elif patients_state == 'leaved':
-            q_leaved = self.session.query(Action.id.label('action_id')).join(
-                ActionType
-            ).filter(
-                Action.event_id == Event.id,
-                ActionType.flatCode == STATIONARY_LEAVED_CODE,
-                Action.deleted == 0
-            ).order_by(
-                Action.begDate.desc()
-            ).limit(1)
+    def _join_movings_transfered_through(self):
+        if self._moving_transfer_through_joined:
+            return
 
-            base_query = base_query.join(
-                LeavedAction, LeavedAction.id == q_leaved
-            ).filter(
-                func.IF(MovingAction.id.isnot(None),
-                        and_(MovingAction.endDate >= beg_date,
-                             MovingAction.endDate <= end_date),
-                        and_(ReceivedAction.endDate >= beg_date,
-                             ReceivedAction.endDate <= end_date),
-                        )
-            )
-
-        return base_query
-
-    def get_latest_hosps(self, **kwargs):
-        for_date = safe_datetime(kwargs.get('for_date')) or datetime.datetime.now()
-        start_dt = for_date.replace(hour=8, minute=0, second=0, microsecond=0)
-        end_dt = start_dt + datetime.timedelta(days=1)
-        end_dt = end_dt.replace(hour=7, minute=59, second=59, microsecond=0)
-
-        flt_org_struct_id = safe_int(kwargs.get('org_struct_id'))
-
-        self._query_hosps_by_latest_location(start_dt, end_dt)
-        self._join_location_org_structure(flt_org_struct_id)
-        self._join_hosp_bed()
-
-        self.query = self.query.with_entities(
-            self.BaseEvent,
-            self.MovingAction.id.label('moving_id'),
-            self.ReceivedAction.id.label('received_id'),
-            func.IF(self.MovingAction.id.isnot(None),
-                    self.MovingAction.begDate,
-                    self.ReceivedAction.begDate).label('move_date'),
-            self.MovingAction.endDate.label('moving_end_date'),
-            func.IF(self.MovingAction.id.isnot(None),
-                    self.LocationOSfromMoving.name,
-                    self.LocationOSfromReceived.name).label('os_name'),
-            self.MovingOSHB.name.label('hosp_bed_name'),
-        )
-        self.query = self.query.order_by(
-            func.IF(self.MovingAction.id.isnot(None),
-                    self.MovingAction.begDate,
-                    self.ReceivedAction.begDate).desc()
-        )
-
-        self.query = self.query.options(
-            contains_eager(self.BaseEvent.client),
-            joinedload(self.BaseEvent.execPerson)
-        )
-        return self.get_paginated(kwargs)
-
-    def get_latest_hosps1(self, **kwargs):
+        Action = self.model_provider.get('Action')
+        ActionThrough = aliased(Action, name='ActionThrough')
+        ActionType = self.model_provider.get('ActionType')
         Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_OrgStructure = self.model_provider.get('ActionProperty_OrgStructure')
 
-        for_date = safe_datetime(kwargs.get('for_date')) or datetime.datetime.now()
-        start_dt = for_date or for_date.replace(hour=8, minute=0, second=0, microsecond=0)
-        end_dt = safe_datetime(kwargs.get('end_dt'))
-        if not end_dt:
-            end_dt = start_dt + datetime.timedelta(days=1)
-            end_dt = end_dt.replace(hour=7, minute=59, second=59, microsecond=0)
+        AP_OS_Moving_Transfer = aliased(ActionProperty_OrgStructure, name='AP_OS_Moving_TransferThr')
+        AP_OS_Moving_Stay = aliased(ActionProperty_OrgStructure, name='AP_OS_Moving_StayThr')
 
-        args = {
-            'start_dt': start_dt,
-            'end_dt': end_dt,
-            'with_move_date': True,
-            'with_moving_end_date': True,
-            'with_org_struct': True,
-            'with_hosp_bed': True,
-            'order_by_move_date': True
-        }
-        if 'org_struct_id' in kwargs:
-            args['org_struct_id'] = safe_int(kwargs['org_struct_id'])
-        if 'patients_state' in kwargs:
-            args['patients_state'] = kwargs['patients_state']
+        q_os_moving_stay_sq = self.session.query(ActionProperty.id) \
+            .join(ActionPropertyType) \
+            .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
+                    ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+                    ActionProperty.action_id == ActionThrough.id)
+        if self.flt_org_struct_id is not None:
+            q_os_moving_stay_sq = q_os_moving_stay_sq.filter(
+                ActionProperty_OrgStructure.value_ == self.flt_org_struct_id)
+        q_os_moving_stay_sq = q_os_moving_stay_sq.limit(1)
 
-        if 'filter' in kwargs:
-            query = self.query_hosps_filter(**args)
-        else:
-            query = self.query_hosps_by_latest_location(**args)
+        q_os_moving_transfer_sq = self.session.query(ActionProperty.id) \
+            .join(ActionPropertyType) \
+            .filter(ActionProperty.deleted == 0, ActionPropertyType.deleted == 0,
+                    ActionPropertyType.code == STATIONARY_ORG_STRUCT_TRANSFER_CODE,
+                    ActionProperty.action_id == ActionThrough.id,
+                    ActionProperty_OrgStructure.value_.isnot(None)) \
+            .limit(1)
 
-        self.query = query.options(
-            contains_eager(Event.client),
-            joinedload(Event.execPerson)
+        q_movings = self.session.query(ActionThrough).join(
+            Event, EventType, rbRequestType, ActionType
+        ).join(
+            AP_OS_Moving_Stay, AP_OS_Moving_Stay.id == q_os_moving_stay_sq
+        ).join(
+            AP_OS_Moving_Transfer, AP_OS_Moving_Transfer.id == q_os_moving_transfer_sq
+        ).filter(
+            Event.deleted == 0, Event.execDate.is_(None),
+            rbRequestType.code.in_(STATIONARY_EVENT_CODES),
+            ActionType.flatCode == STATIONARY_MOVING_CODE,
+            ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+            ActionThrough.endDate >= self.start_dt, ActionThrough.endDate <= self.end_dt
+        ).group_by(
+            Event.id
+        ).with_entities(
+            Event.id.label('event_id'), (func.count(ActionThrough.id) > 0).label('was_transfered_through')
+        ).subquery('TransferedThroughMovingsSQ')
+        self.q_movings_transfered_through = q_movings
+
+        self.query = self.query.outerjoin(
+            q_movings, q_movings.c.event_id == self.BaseEvent.id
         )
-        return self.get_paginated(kwargs)
+        self._moving_transfer_through_joined = True

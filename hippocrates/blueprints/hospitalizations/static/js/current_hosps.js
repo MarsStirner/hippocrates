@@ -77,7 +77,9 @@ var CurrentHospsCtrl = function ($scope, HospitalizationsService, EventModalServ
             org_struct_id: safe_traverse($scope.filter, ['org_struct', 'id']) || undefined
         };
         return HospitalizationsService.get_current_hosps(args)
-            .then(function (paged_data) {
+            .then(function (result) {
+                var paged_data = result.data,
+                    stats_data = result.stats;
                 $scope.pager.record_count = paged_data.count;
                 $scope.pager.pages = paged_data.total_pages;
                 setHospListData(paged_data.items);
