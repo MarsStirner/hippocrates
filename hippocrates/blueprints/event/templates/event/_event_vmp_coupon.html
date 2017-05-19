@@ -9,9 +9,9 @@
             </div>
             <div class="box-body">
                 <div class="row vmargin10">
-                    <div class="col-md-6">
-                        <label>Диагноз</label>
-                        <ui-select ext-select-mkb ng-model="event.vmp_quoting.mkb"></ui-select>
+                    <div class="panel" ng-controller="VmpCtrl">
+                        <button type="button" class="btn btn-lg btn-link btn-block"
+                                ng-click="addVmpCoupon(event.client)"><i class="ion ion-plus-round fa-fw"></i>Добавить талон ВМП</button>
                     </div>
                     <div class="col-md-6">
                         <label>Талон ВМП</label>
@@ -20,6 +20,12 @@
                                 ng-model="event.vmp_quoting.coupon">
                             </ui-select>
 {#                        <rb-select ng-model="event.vmp_quoting.coupon"></rb-select>#}
+                    </div>
+                </div>
+                <div class="row vmargin10">
+                    <div class="col-md-6">
+                            <label>Диагноз</label>
+                            <ui-select ext-select-mkb ng-model="event.vmp_quoting.mkb"></ui-select>
                     </div>
                 </div>
                 <div class="row vmargin10">
