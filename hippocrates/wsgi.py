@@ -57,7 +57,7 @@ def general_menu():
         visible=UserProfileManager.has_ui_cashier(),
         icon='fa fa-calculator'
     ), dict(
-        link='hospitalizations.html_current_hosps',
+        link='hospitalizations.html_search_hosps',
         title=u'Госпитализации',
         visible=UserProfileManager.has_ui_station_nurse(),
         icon='fa fa-h-square'

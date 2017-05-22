@@ -25,7 +25,10 @@ WebMis20.service('HospitalizationsModalService', ['$modal', '$templateCache', 'W
 
 
 WebMis20.service('HospitalizationsService', ['WebMisApi', function (WebMisApi) {
-    this.get_current_hosps = function (args) {
-        return WebMisApi.hospitalizations.get_current(args);
+    this.get_hosp_list = function (args) {
+        return WebMisApi.hospitalizations.get_list(args);
+    };
+    this.get_hosps_stats = function (args) {
+        return WebMisApi.hospitalizations.get_stats(args);
     };
 }]);
