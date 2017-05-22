@@ -68,7 +68,7 @@ WebMis20.service('VmpApi', ['$http', 'WMConfig', function ($http, WMConfig) {
                     })
         },
         parse_xlsx: function(coupon_file) {
-             return $http.post(WMConfig.url.patients.coupon_parse, {
+            return $http.post(WMConfig.url.patients.coupon_parse, {
                         coupon: coupon_file
                     })
         }
@@ -100,8 +100,8 @@ WebMis20.service('VmpModalService', ['$modal', function ($modal) {
     }
 }]);
 
-WebMis20.controller('VmpCtrl', ['$http', '$scope', 'MessageBox', 'WMConfig', 'WMClientServices', 'VmpModalService', 'VmpApi',
-    function ($http, $scope, MessageBox, WMConfig, WMClientServices, VmpModalService, VmpApi) {
+WebMis20.controller('VmpCtrl', ['$http', '$rootScope', '$scope', 'MessageBox', 'WMConfig', 'WMClientServices', 'VmpModalService', 'VmpApi',
+    function ($http, $rootScope, $scope, MessageBox, WMConfig, WMClientServices, VmpModalService, VmpApi) {
         $scope.deleteCoupon = function (client, coupon) {
             VmpApi.del(coupon).success(function () {
                 WMClientServices.delete_record(client, 'vmp_coupons', coupon)
@@ -120,12 +120,19 @@ WebMis20.controller('VmpCtrl', ['$http', '$scope', 'MessageBox', 'WMConfig', 'WM
             };
             VmpModalService.open(client, coupon).then(function(result) {
                 VmpApi.save(client, result[0], result[1]).success(function(data) {
-                    client.vmp_coupons.push(data.result);
+                    var coupon = data.result;
+                    $rootScope.$broadcast('new_vmp_saved', coupon);
                 }).error(function (data) {
                     return MessageBox.error('Ошибка', 'Произошла ошибка добавления талона')
                 });
             });
         };
+        $scope.$on('new_vmp_saved', function(coupon) {
+           if (angular.isDefined(coupon)) {
+                if (angular.isDefined(client.vmp_coupons)){ client.vmp_coupons.push(coupon); }
+
+           };
+        });
         $scope.removeVmpCoupon = function(client, coupon) {
             MessageBox.question(
                 'Удаление талона ВМП',
@@ -143,11 +150,6 @@ WebMis20.controller('VmpModalCtrl', ['$scope', 'VmpApi', 'WMConfig', 'client', '
     $scope.reloadCoupon = function(data) {
         $scope.coupon = data.result;
         $scope.wrong_client = client.client_id != $scope.coupon.client.id;
-        $scope.nonunique = client.vmp_coupons.filter(function (coupon){
-            return coupon.number == $scope.coupon.number
-        }).length > 0;
-        $scope.nonunique = false;
-        // todo: remove^
     };
     $scope.parse_xlsx = function() {
         VmpApi.parse_xlsx($scope.coupon_file).success($scope.reloadCoupon);

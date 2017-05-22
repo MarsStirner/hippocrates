@@ -8,10 +8,11 @@
                 </div>
             </div>
             <div class="box-body">
+{#                {% include "patients/_client_vmp_coupons.html" %}#}
                 <div class="row vmargin10">
                     <div class="panel" ng-controller="VmpCtrl">
                         <button type="button" class="btn btn-lg btn-link btn-block"
-                                ng-click="addVmpCoupon(event.client)"><i class="ion ion-plus-round fa-fw"></i>Добавить талон ВМП</button>
+                                ng-click="addVmpCoupon(event.info.client)"><i class="ion ion-plus-round fa-fw"></i>Добавить талон ВМП</button>
                     </div>
                     <div class="col-md-6">
                         <label>Талон ВМП</label>
