@@ -193,9 +193,13 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <h3 class="box-title">Потребители услуг (Контингент)</h3>\
             </div>\
             <div class="box-body">\
+                <input type="text" class="form-control marginal" ng-model="fltContingentName"\
+                    placeholder="Поиск по имени (отображается не более 20 записей)">\
                 <ul class="list-group">\
-                    <li ng-repeat="cont in contract.contingent_list | flt_not_deleted" class="list-group-item">\
-                        <span><a ng-href="[[getClientInfoUrl(cont.client.id)]]" target="_blank">[[ cont.client.full_name ]], [[ cont.client.birth_date | asDate ]]</a></span>\
+                    <li ng-repeat="cont in contract.contingent_list | flt_not_deleted |filter:fltContingentName | limitTo:20"\
+                            class="list-group-item">\
+                        <span><a ng-href="[[getClientInfoUrl(cont.client.id)]]" target="_blank">\
+                            [[ cont.client.full_name ]], [[ cont.client.birth_date | asDate ]]</a></span>\
                         <span class="fa fa-remove text-danger cursor-pointer pull-right"\
                             ng-click="removeContingent($index)" title="Удалить"></span>\
                     </li>\

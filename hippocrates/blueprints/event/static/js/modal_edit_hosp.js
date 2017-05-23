@@ -106,48 +106,41 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
         var client_id = safe_traverse($scope.event, ['info', 'client', 'info', 'id']),
             finance_id = safe_traverse($scope.event, ['info', 'event_type', 'finance', 'id']),
             client = $scope.event.info.client;
-        AccountingService.get_contract(undefined, {
+        return ContractModalService.openNew({
             finance_id: finance_id,
             client_id: client_id,
             payer_client_id: client_id,
-            generate_number: true
+            generate_number: true,
+            wmclient: client
         })
-            .then(function (contract) {
-                return ContractModalService.openEdit(contract, client);
-            })
             .then(function (result) {
                 var contract = result.contract;
                 refreshAvailableContracts()
                     .then(function () {
-                        set_contract(contract.id)
+                        set_contract(contract.id);
                     });
             });
     };
     $scope.editContract = function (idx) {
         if (!$scope.event.info.contract) return;
-        var contract = _.deepCopy($scope.event.info.contract);
-        ContractModalService.openEdit(contract)
+        ContractModalService.openEdit($scope.event.info.contract.id)
             .then(function (result) {
                 var upd_contract = result.contract;
                 refreshAvailableContracts()
                     .then(function () {
-                        set_contract(upd_contract.id)
+                        set_contract(upd_contract.id);
                     });
             });
     };
     $scope.createContractFromDraft = function () {
         if (!safe_traverse($scope, ['event', 'info', 'contract', 'draft'])) return;
-        AccountingService.get_contract($scope.event.info.contract.id, {
-            undraft: true
-        }).then(function (contract) {
-            ContractModalService.openEdit(contract)
-                .then(function (result) {
-                    refreshAvailableContracts()
-                        .then(function () {
-                            set_contract(result.contract.id)
-                        });
-                });
-        })
+        ContractModalService.openEdit($scope.event.info.contract.id, { undraft: true })
+            .then(function (result) {
+                refreshAvailableContracts()
+                    .then(function () {
+                        set_contract(result.contract.id);
+                    });
+            });
     };
     $scope.openContractListUi = function () {
         WMWindowSync.openTab(WMConfig.url.accounting.html_contract_list, refreshAvailableContracts);

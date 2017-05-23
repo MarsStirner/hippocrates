@@ -1,24 +1,48 @@
 'use strict';
 
-WebMis20.service('ContractModalService', ['$modal', function ($modal) {
-    return {
-        openEdit: function (contract, client) {
-            var instance = $modal.open({
-                templateUrl: '/WebMis20/modal/accounting/contract_edit.html',
-                controller: ContractModalCtrl,
-                backdrop: 'static',
-                size: 'lg',
-                windowClass: 'modal-scrollable',
-                resolve: {
-                    contract: function () {
-                        return contract
-                    },
-                    client: function () {
-                        return client
-                    }
+WebMis20.service('ContractModalService', ['$modal', 'AccountingService',
+        function ($modal, AccountingService) {
+    var _openContractModal = function (contract, client) {
+        var instance = $modal.open({
+            templateUrl: '/WebMis20/modal/accounting/contract_edit.html',
+            controller: ContractModalCtrl,
+            backdrop: 'static',
+            size: 'lg',
+            windowClass: 'modal-scrollable',
+            resolve: {
+                contract: function () {
+                    return contract;
+                },
+                client: function () {
+                    return client;
                 }
-            });
-            return instance.result;
+            }
+        });
+        return instance.result;
+    };
+
+    return {
+        openEdit: function (contract_id, args) {
+            var client;
+            if (args && args.hasOwnProperty('wmclient')) {
+                client = args.wmclient;
+                delete args.wmclient;
+            }
+            return AccountingService.get_contract(contract_id, args)
+                .then(function (contract) {
+                    return _openContractModal(contract, client);
+                });
+        },
+        openNew: function (args) {
+            var client;
+            if (args && args.hasOwnProperty('wmclient')) {
+                client = args.wmclient;
+                delete args.wmclient;
+            }
+            return AccountingService.get_contract(undefined, args)
+                .then(function (contract) {
+                    return _openContractModal(contract, client);
+                });
         }
     }
 }]);
