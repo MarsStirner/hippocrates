@@ -8,23 +8,26 @@ from flask_login import current_user
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from nemesis.models.utils import safe_current_user_id
 from sqlalchemy import func
+from sqlalchemy.orm import aliased
 
 from nemesis.lib.data import create_action, get_action, get_action_by_id
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
-from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
+from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis, \
+    ActionProperty, ActionPropertyType, ActionProperty_OrgStructure
 from nemesis.models.client import Client
 from nemesis.lib.apiutils import ApiException
-from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
-from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id
-from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, \
-    VMPQuotaDetails, VMPCoupon
-from nemesis.models.enums import ActionStatus
+from nemesis.models.event import Event, EventType, Visit, Event_Persons
+from nemesis.lib.utils import safe_traverse, safe_datetime, get_new_event_ext_id
+from nemesis.models.exists import Person, OrgStructure, ClientQuoting, MKB, \
+    VMPQuotaDetails, VMPCoupon, rbRequestType
+from nemesis.models.enums import ActionStatus, OrgStructType
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, \
     STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_ORG_STRUCT_RECEIVED_CODE, \
     STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
-    STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE
+    STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE, \
+    DAY_HOSPITAL_CODE
 from nemesis.systemwide import db
 
 
@@ -191,6 +194,81 @@ class MovingController():
         moving.begDate = beg_date
 
         return moving
+
+
+def get_hb_days_for_moving_list(moving_ids):
+    """Рассчитать длительность нахождения пациента в отделениях по движениям.
+
+    Длительность рассчитывается как разница между датой начала и датой окончания
+    экшена движения. Длительность нахождения в реанимационном отделении добавляется к
+    длительности предыдущего движения.
+    """
+    if not moving_ids:
+        return {}
+
+    NextMoving = aliased(Action, name='NextMoving')
+    NextResusMoving = aliased(Action, name='NextResusMoving')
+
+    q_next_moving = db.session.query(NextMoving.id).join(
+        ActionType, ActionProperty, ActionPropertyType
+    ).outerjoin(
+        ActionProperty_OrgStructure
+    ).outerjoin(
+        OrgStructure
+    ).filter(
+        ActionType.flatCode == STATIONARY_MOVING_CODE,
+        ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+        Action.deleted == 0, ActionProperty.deleted == 0,
+        ActionPropertyType.deleted == 0,
+        NextMoving.event_id == Action.event_id,
+        NextMoving.begDate >= Action.id,
+        NextMoving.id > Action.id,
+        OrgStructure.type != OrgStructType.resuscitation[0]
+    ).order_by(Action.begDate).limit(1).subquery()
+
+    q_next_resus_moving = db.session.query(NextResusMoving.id).join(
+        ActionType, ActionProperty, ActionPropertyType
+    ).join(
+        ActionProperty_OrgStructure, OrgStructure
+    ).filter(
+        ActionType.flatCode == STATIONARY_MOVING_CODE,
+        ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+        Action.deleted == 0, ActionProperty.deleted == 0,
+        ActionPropertyType.deleted == 0,
+        NextResusMoving.event_id == Action.event_id,
+        NextResusMoving.begDate >= Action.id, NextResusMoving.begDate <= NextMoving.begDate,
+        NextResusMoving.id > Action.id, NextResusMoving.id < NextMoving.id,
+        OrgStructure.type == OrgStructType.resuscitation[0]
+    ).order_by(Action.begDate.desc()).limit(1).subquery()
+
+    query = db.session.query(Action).join(
+        Event, EventType, rbRequestType
+    ).outerjoin(
+        NextMoving, NextMoving.id == q_next_moving
+    ).outerjoin(
+        NextResusMoving, NextResusMoving.id == q_next_resus_moving
+    ).filter(
+        Action.id.in_(moving_ids)
+    ).with_entities(
+        Action.event_id.label('event_id'), Action.id.label('moving_id'),
+        (func.datediff(
+            func.coalesce(
+                func.IF(NextResusMoving.id.isnot(None),
+                        NextResusMoving.endDate,
+                        Action.endDate),
+                func.curdate()
+            ),
+            Action.begDate
+        ) + func.IF(rbRequestType.code.in_(DAY_HOSPITAL_CODE), 1, 0)
+        ).label('hb_days')
+    )
+    res = {}
+    for item in query:
+        res[item.event_id] = {
+            'moving_id': item.moving_id,
+            'hb_days': item.hb_days
+        }
+    return res
 
 
 def create_new_event(event_data):
