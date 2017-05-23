@@ -1,10 +1,10 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
-    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
     <div class="row">
-        <div class="col-md-7">
+        <div class="col-md-8">
             <h4 class="modal-title">[[client.info.full_name]]</h4>
         </div>
         <div class="col-md-4">
+            <button type="button" class="close lmargin20" ng-click="$dismiss('cancel')">&times;</button>
             <div class="pull-right">
             {% if user_profiles_mng.has_ui_registrator() %}
             <button class="btn btn-sm btn-primary" ng-click="newAppointment()" title="Записать на приём">
