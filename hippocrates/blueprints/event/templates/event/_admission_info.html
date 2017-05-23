@@ -101,7 +101,7 @@
     </div>
     <div class="col-md-6"
          ng-class="{'has-error': HospForm.os_transfer.$invalid}">
-        <label for="os_transfer" class="control-label">Куда направлен</label>
+        <label for="os_transfer" class="control-label">Направлен в отделение</label>
         <ui-select id="os_transfer" name="os_transfer" theme="select2"
                    ng-model="event.received.orgStructTransfer.value" ng-required="true" no-undefined-value>
             <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
