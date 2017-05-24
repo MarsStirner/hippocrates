@@ -393,7 +393,12 @@ def received_close(event):
 def client_quota_save(event, quota_data):
     quota_id = quota_data.get('id')
     coupon_id = safe_traverse(quota_data, 'coupon', 'id')
+    coupon_beg_date = safe_traverse(quota_data, 'coupon', 'beg_date')
+    coupon_end_date = safe_traverse(quota_data, 'coupon', 'end_date')
     coupon = VMPCoupon.query.get(coupon_id) if coupon_id else None
+    if coupon:
+        coupon.begDate = safe_datetime(coupon_beg_date)
+        coupon.endDate = safe_datetime(coupon_end_date)
     with db.session.no_autoflush:
         if quota_id:
             quota = ClientQuoting.query.get(quota_id)

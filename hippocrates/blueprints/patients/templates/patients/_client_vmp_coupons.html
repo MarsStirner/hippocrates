@@ -1,4 +1,4 @@
-<ng-form name="_vmp_coupons_form" toc-element="Талоны ВМП">
+<ng-form name="_vmp_coupons_form" toc-element="Талоны ВМП" ng-controller="VmpCtrl">
     <div class="box box-primary">
         <div class="box-header with-border">
             <h3 class="box-title">Талоны ВМП</h3>
@@ -23,7 +23,7 @@
                     <td>[[ coupon.date | asDate ]]</td>
                     <td>[[ coupon.event ]]</td>
                     <td>
-                        <button class="btn btn-primary" ng-click="clientServices.removeVmpCoupon(client, coupon)" ng-if="!coupon.event"><i class="fa fa-trash"></i></button>
+                        <button class="btn btn-primary" ng-click="removeVmpCoupon(client, coupon)" ng-if="!coupon.event"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
                 </tbody>

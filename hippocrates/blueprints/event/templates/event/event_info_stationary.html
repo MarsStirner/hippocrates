@@ -1,6 +1,7 @@
 {% extends "event/base.html" %}
 
 {% block main %}
+
 <div ng-controller="StationaryEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
@@ -25,6 +26,11 @@
                 [[ event.info.client.info.full_name ]]
             </a>
             {% else %}[[ event.info.client.info.full_name ]]{% endif %}
+            {%- if event and event.is_stationary -%}
+                <span ng-if="event.vmp_quoting.coupon.beg_date" style="display:block;color:red;">
+                    <b>Талон действителен до [[ event.vmp_quoting.coupon.end_date | date : "dd.MM.yyyy" ]]</b>
+                </span>
+            {%- endif -%}
         </h1>
         </section>
         <section class="content">
@@ -58,9 +64,9 @@
                                 </div>
                             {% endif %}
                         </ng-form>
-                        {% if event and event.is_stationary and (event.is_vmp or event.is_oms or event.is_vmp_from_oms) %}
+{#                        {% if event and event.is_stationary and (event.is_vmp or event.is_oms or event.is_vmp_from_oms) %}#}
                             {% include "event/_event_vmp_coupon.html" %}
-                        {% endif %}
+{#                        {% endif %}#}
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}

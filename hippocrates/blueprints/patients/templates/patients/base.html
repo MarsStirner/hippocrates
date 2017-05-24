@@ -13,4 +13,5 @@
 {% block modules_js -%}
 {{ super() }}
 <script src="{{ url_for('patients.static', filename='js/client_common.js', v=app_version) }}"></script>
+<script src="{{ url_for('patients.static', filename='js/vmp_coupon.js', v=app_version) }}"></script>
 {%- endblock %}

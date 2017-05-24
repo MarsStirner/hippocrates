@@ -976,11 +976,20 @@ var EventQuotingCtrl = function ($scope, RefBookService) {
     $scope.$watch(function () {
         return safe_traverse($scope.event, ['vmp_quoting', 'coupon']);
     }, function (n, o) {
+        if (n) {
+            if (!safe_traverse(n, ['beg_date'])) {
+                n.beg_date = $scope.event.info.set_date;
+            }
+            if (!safe_traverse(n, ['end_date'])) {
+                var amountOfDays = safe_traverse(n, ['quota_type', 'amount_of_days']);
+                n.end_date = moment(n.beg_date).clone().add(amountOfDays, 'days').toDate();
+            }
+        }
         if (n !== o) {
-            if(!$scope.event.vmp_quoting.mkb){
+            if (!$scope.event.vmp_quoting.mkb) {
                 $scope.event.vmp_quoting.mkb = $scope.event.vmp_quoting.coupon.mkb;
             }
-            if(!$scope.event.vmp_quoting.quota_type){
+            if (!$scope.event.vmp_quoting.quota_type) {
                 $scope.event.vmp_quoting.quota_type = $scope.event.vmp_quoting.coupon.quota_type;
             }
         }

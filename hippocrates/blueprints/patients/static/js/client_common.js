@@ -51,4 +51,3 @@ WebMis20.service('PatientModalService', ['$modal', '$templateCache', 'WMConfig',
         }
     }
 }]);
-
