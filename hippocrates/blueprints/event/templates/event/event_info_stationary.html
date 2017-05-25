@@ -64,9 +64,9 @@
                                 </div>
                             {% endif %}
                         </ng-form>
-{#                        {% if event and event.is_stationary and (event.is_vmp or event.is_oms or event.is_vmp_from_oms) %}#}
+                        {% if event and event.is_stationary and (event.is_vmp or event.is_oms or event.is_vmp_from_oms) %}
                             {% include "event/_event_vmp_coupon.html" %}
-{#                        {% endif %}#}
+                        {% endif %}
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
