@@ -4,9 +4,9 @@
             <div class="box-header with-border" trigger-collapse>
                 <h3 class="box-title">Талон ВМП</h3>
                 <div class="box-tools pull-right" ng-controller="VmpCtrl">
-                    <button type="button" class="btn btn-default btn-box-tool" ng-click="addVmpCoupon(event.info.client)">
-                        Загрузить талон
-                    </button>
+                    <button ng-if="!event.vmp_quoting.coupon"
+                            type="button" class="btn btn-default btn-box-tool"
+                            ng-click="addVmpCoupon(event.info.client)"> Загрузить талон </button>
                     <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-chevron-right"></i></button>
                 </div>
             </div>

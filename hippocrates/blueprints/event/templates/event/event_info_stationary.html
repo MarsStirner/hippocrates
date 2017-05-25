@@ -27,8 +27,8 @@
             </a>
             {% else %}[[ event.info.client.info.full_name ]]{% endif %}
             {%- if event and event.is_stationary -%}
-                <span ng-if="event.vmp_quoting.coupon.beg_date" style="display:block;color:red;">
-                    <b>Талон действителен до [[ event.vmp_quoting.coupon.end_date | date : "dd.MM.yyyy" ]]</b>
+                <span ng-if="event.vmp_quoting.coupon.end_date" style="display:block;color:red;">
+                    <b>Талон действителен до [[ event.vmp_quoting.coupon.end_date | asDate]]</b>
                 </span>
             {%- endif -%}
         </h1>

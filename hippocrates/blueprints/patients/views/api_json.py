@@ -431,6 +431,7 @@ def api_patient_get_vmpcoupons():
     client_id = request.args['client_id']
     coupon_list = VMPCoupon.query.filter(
         VMPCoupon.client_id == client_id,
+        VMPCoupon.clientQuoting == None,
         VMPCoupon.deleted == 0
     ).all()
     return coupon_list

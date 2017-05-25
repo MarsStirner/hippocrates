@@ -43,15 +43,15 @@ WebMis20.controller('VmpCtrl', ['$http', '$rootScope', '$scope', 'MessageBox', '
             };
             VmpModalService.open(client, coupon).then(function(result) {
                 WebMisApi.vmp.save(client, result[0], result[1]).then(function(coupon) {
-                    $rootScope.$broadcast('new_vmp_saved', coupon);
+                    $rootScope.$broadcast('new_vmp_saved', {coupon: coupon});
                 }, function (data) {
                     return MessageBox.error('Ошибка', 'Произошла ошибка добавления талона')
                 });
             });
         };
-        $scope.$on('new_vmp_saved', function(coupon) {
-           if (angular.isDefined($scope.client) && angular.isDefined(coupon)) {
-                if (angular.isDefined($scope.client.vmp_coupons)){ client.vmp_coupons.push(coupon); }
+        $scope.$on('new_vmp_saved', function(event, data) {
+           if (angular.isDefined($scope.client) && angular.isDefined(data.coupon)) {
+                if (angular.isDefined($scope.client.vmp_coupons)){ $scope.client.vmp_coupons.push(data.coupon); }
            };
         });
         $scope.removeVmpCoupon = function(client, coupon) {

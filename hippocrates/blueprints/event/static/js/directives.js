@@ -304,7 +304,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 return CurrentUser.current_role_in('admin') || (action.status.code !== 'finished' && action.can_delete);
             };
             scope.can_create_action = function () {
-                return scope.event.access.can_create_actions[at_class[scope.actionTypeGroup]];
+                return scope.event.can_create_actions(scope.actionTypeGroup);
             };
             scope.is_planned_end_date_needed = function () {
                 var types_allowed = ['diagnostics', 'lab', 'treatments'];
