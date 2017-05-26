@@ -10,8 +10,7 @@ from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.event.app import module
 from hippocrates.blueprints.event.lib.utils import (save_event, received_save, client_quota_save,
-                                                    save_executives, EventSaveController, MovingController,
-                                                    received_close)
+                                                    save_executives, EventSaveController, MovingController)
 from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
@@ -771,8 +770,8 @@ def api_moving_save(event_id, action_id=None):
 
     db.session.commit()
 
-    # TODO: update prev moving and received
-    # received_close(event)
+    mov_ctrl.update_prev_moving_or_received(moving)
+    db.session.commit()
 
     if not create_mode:
         notify_moving_changed(MQOpsEvent.moving, moving)

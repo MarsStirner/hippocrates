@@ -59,7 +59,7 @@ def general_menu():
     ), dict(
         link='hospitalizations.html_search_hosps',
         title=u'Госпитализации',
-        visible=UserProfileManager.has_ui_station_nurse(),
+        visible=(UserProfileManager.has_ui_station_nurse() or UserProfileManager.has_ui_otd_doctor()),
         icon='fa fa-h-square'
     ), dict(
         link='biomaterials.index_html',

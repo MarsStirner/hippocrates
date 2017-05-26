@@ -6,11 +6,10 @@ import uuid
 
 from flask_login import current_user
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
-from nemesis.models.utils import safe_current_user_id
-from sqlalchemy import func
-from sqlalchemy.orm import aliased
+from sqlalchemy import func, and_, or_
+from sqlalchemy.orm import aliased, joinedload
 
-from nemesis.lib.data import create_action, get_action, get_action_by_id
+from nemesis.lib.data import create_action, get_action_by_id
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis, \
@@ -162,14 +161,33 @@ class MovingController():
 
         return moving
 
-    def update_prev_moving(self, prev_action):
-        # TODO
-        if not prev_action.endDate:
-            prev_action.endDate = moving.begDate
-        prev_action.propsByCode['orgStructTransfer'].value = moving.propsByCode['orgStructStay'].value
+    def update_prev_moving_or_received(self, cur_moving):
+        prev = self.get_prev_moving_or_received(cur_moving)
+        if prev:
+            if not prev.endDate:
+                prev.endDate = cur_moving.begDate
+            if prev.status != ActionStatus.finished[0]:
+                prev.status = ActionStatus.finished[0]
+
+            prev.propsByCode[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value = cur_moving.\
+                propsByCode[STATIONARY_ORG_STRUCT_STAY_CODE].value
 
     def get_moving(self, action_id):
         return get_action_by_id(action_id)
+
+    def get_prev_moving_or_received(self, moving):
+        result = db.session.query(Action).join(ActionType).filter(
+            Action.deleted == 0,
+            Action.event_id == moving.event_id,
+            ActionType.flatCode.in_([STATIONARY_MOVING_CODE, STATIONARY_RECEIVED_CODE]),
+            or_(Action.begDate < moving.begDate,
+                and_(Action.begDate == moving.begDate,
+                     Action.id < moving.id if moving.id else True)
+                ),
+            Action.id != moving.id
+        ).order_by(Action.begDate.desc()).limit(1).options(joinedload(Action.actionType)).first()
+
+        return result
 
     def create_moving(self, event, moving_info):
         moving = get_action_by_id(None, event, STATIONARY_MOVING_CODE, True)
@@ -188,6 +206,12 @@ class MovingController():
             stay_os = prev_moving[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
             if prev_moving.endDate:
                 beg_date = prev_moving.endDate + datetime.timedelta(seconds=1)
+        else:
+            prev = self.get_prev_moving_or_received(moving)
+            from_os = prev[STATIONARY_ORG_STRUCT_STAY_CODE].value
+            stay_os = prev[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
+            if prev.endDate:
+                beg_date = prev.endDate + datetime.timedelta(seconds=1)
 
         moving[STATIONARY_ORG_STRUCT_RECEIVED_CODE].value = from_os
         moving[STATIONARY_ORG_STRUCT_STAY_CODE].value = stay_os
@@ -379,15 +403,6 @@ def received_save(event_id, received_data):
         create_or_update_diagnoses(received, diagnoses_data)
     db.session.add(received)
     db.session.commit()
-
-
-def received_close(event):
-    received = get_action(event, STATIONARY_RECEIVED_CODE)
-    if received and received.status < 2:
-        received.modifyPerson = safe_current_user_id()
-        received.modifyDatetime = datetime.datetime.now()
-        received.endDate = datetime.datetime.now()
-        received.status = 2
 
 
 def client_quota_save(event, quota_data):
