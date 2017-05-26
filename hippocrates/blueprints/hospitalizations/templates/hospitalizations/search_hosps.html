@@ -123,8 +123,13 @@
                         <td>Не назначена</td>
                         <td>
                             <div class="btn-group pull-right" style="display: flex">
+                                {% if user_profiles_mng.has_ui_station_nurse() %}
                                 <button type="button" class="btn btn-default"
                                     ng-click="viewEventInfo(hosp)">Просмотр</button>
+                                {% elif user_profiles_mng.has_ui_doctor() %}
+                                <a ng-href="[['{{ url_for('event.html_event_info') }}' + '?event_id=' + hosp.id]]"
+                                    target="_blank" class="btn btn-default">Просмотр</a>
+                                {% endif %}
                                 <button type="button" class="btn btn-default dropdown-toggle"
                                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="caret"></span>
