@@ -3,6 +3,9 @@
 import datetime
 
 from celery.utils.log import get_task_logger
+
+from hippocrates.blueprints.risar.lib.specific import SystemMode
+from nemesis.app import app
 from nemesis.models.actions import Action, ActionType
 
 from hippocrates.blueprints.risar.lib import sirius
@@ -17,7 +20,7 @@ from hippocrates.blueprints.risar.risar_config import request_type_pregnancy, \
     puerpera_inspection_flat_code, risar_gyn_checkup_flat_codes, \
     risar_gyn_checkup_flat_code
 from nemesis.lib.apiutils import json_dumps
-from nemesis.lib.utils import safe_dict
+from nemesis.lib.utils import safe_dict, safe_traverse
 from nemesis.models.celery_tasks import TaskInfo
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
@@ -97,11 +100,11 @@ def update_card_attrs_cfrs(self):
 
 @celery.task(bind=True)
 def close_yesterday_checkups(self):
-    def get_all_opened_checkups(today):
+    def get_all_opened_checkups(day):
         return Action.query.join(ActionType).filter(
             Action.deleted == 0,
-            Action.begDate < today.date(),
-            Action.begDate > (today.date() - datetime.timedelta(days=60)),
+            Action.begDate < day.date(),
+            Action.begDate > (day.date() - datetime.timedelta(days=60)),
             Action.endDate.is_(None),
             ActionType.flatCode.in_(inspections_span_flatcodes + risar_gyn_checkup_flat_codes),
         ).all()
@@ -109,8 +112,13 @@ def close_yesterday_checkups(self):
     today = datetime.datetime.today()
     cur_weekday = today.weekday()
     if cur_weekday < 5:  # раньше субботы
-        for checkup in get_all_opened_checkups(today):
+        app_mode = safe_traverse(app.config, 'system_prefs', 'mode', default=SystemMode.normal[0])
+        if app_mode == SystemMode.tula_mis[0]:
+            opened_checkups = get_all_opened_checkups(today - datetime.timedelta(days=1))
+        else:
+            opened_checkups = get_all_opened_checkups(today)
 
+        for checkup in opened_checkups:
             send_data_to_mis = True
             if checkup.actionType.flatCode == first_inspection_flat_code:
                 checkup_method_name = 'risar.api_checkup_obs_first_get'
