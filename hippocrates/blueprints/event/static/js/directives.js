@@ -528,7 +528,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
           <table class="table table-clickable">\
               <thead>\
               <th></th>\
-              <th ng-repeat="date in dates_list" class="text-center">\
+              <th ng-repeat="date in dates_list track by $index" class="text-center">\
                   [[ date ]]\
               </th>\
               </thead>\
@@ -538,7 +538,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                   <td>[[item.test_name]]\
                     <span ng-if="item.norm"><br><span class="lmargin20 text-bold">(Норма: [[item.norm]])</span></span>\
                   </td>\
-                  <td ng-repeat="date in dates_list" class="text-center">\
+                  <td ng-repeat="date in dates_list track by $index" class="text-center">\
                       <span ng-style="getValueNormStyle(item.values[date])">[[ item.values[date].val ? item.values[date].val : \'-\' ]]</span>\
                   </td>\
               </tr>\
