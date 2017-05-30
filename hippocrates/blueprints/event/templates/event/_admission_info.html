@@ -1,0 +1,223 @@
+<ng-form name="HospForm" id="HospForm">
+<div class="marginal" id="mainInfoErrorBlock">
+    <div ng-repeat="(field, error_msg) in formErrors">
+        <span class="text-danger" ng-show="error_msg">* [[ error_msg ]]</span>
+    </div>
+</div>
+<div class="row marginal">
+    <div class="col-md-4">
+        <label for="set_date" class="control-label">Дата и время госпитализации</label>
+        <wm-datetime-as id="set_date" name="set_date" ng-model="event.info.set_date"
+            ng-change="on_set_date_changed()" ng-required="true"></wm-datetime-as>
+    </div>
+    <div class="col-md-4">
+        <label for="request_type">Тип обращения</label>
+        <ui-select id="request_type" name="request_type" theme="select2"
+                   ng-model="request_type.selected" ng-change="on_request_type_changed()"
+                   ng-disabled="widget_disabled('request_type')">
+            <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="rt in rbRequestType.objects | filter: filter_rb_request_type()
+                    | filter: $select.search">
+                <div ng-bind-html="rt.name | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="col-md-4"
+         {# ng-if="rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id).length > 1" #}
+         ng-class="{'has-error': HospForm.event_type.$invalid}">
+        <label for="event_type">Тип события</label>
+        <ui-select id="event_type" name="event_type" theme="select2"
+                   ng-model="event.info.event_type" ng-required="true" ng-change="on_event_type_changed()"
+                   ng-disabled="widget_disabled('event_type')">
+            <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="et in rbEventType.objects
+                     | event_type_filter: rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
+                     | filter: $select.search ">
+                <div ng-bind-html="et.name | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+
+<div class="row marginal">
+    <div class="col-md-4">
+        <label for="finance">Источник финансирования</label>
+        <ui-select id="finance" name="finance" theme="select2"
+                   ng-model="finance.selected" ng-change="on_finance_changed()"
+                   ng-disabled="widget_disabled('finance')">
+            <ui-select-match placeholder="Источник финансирования">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="f in rbFinance.objects
+                             | event_type_filter: rbEventType.get_finances_by_rt(request_type.selected.id)
+                             | filter: $select.search">
+                <div ng-bind-html="f.name | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="col-md-8"
+         ng-class="{'has-error': HospForm.contract.$invalid}">
+        <label for="contract">Договор</label>
+        <div class="row">
+        <div class="col-md-10">
+            <ui-select ext-select-contract-event contract-list="available_contracts.list"
+                id="contract" name="contract" theme="select2"
+                ng-model="event.info.contract" ng-required="true"
+                ng-disabled="widget_disabled('contract')">
+            </ui-select>
+            <span class="text-warning" ng-show="isContractListEmptyLabelVisible()">Не найдено подходящего договора</span>
+            <span class="text-danger" ng-show="isContractDraftLabelVisible()">Договор не заключен</span>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-group pull-right">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false"
+                    ng-disabled="!isContractDraft() && (widget_disabled('contract'))">
+                    <span class="fa fa-reorder"></span> <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right">
+                    <li><a href="javascript:void(0)" ng-click="createContractFromDraft()"
+                           ng-hide="!isContractDraft() || !event.info.contract.id">Заключить договор</a></li>
+                    <li><a href="javascript:void(0)" ng-click="editContract()"
+                           ng-hide="!event.info.contract || isContractDraft()">Редактировать</a></li>
+                    <li><a href="javascript:void(0)" ng-click="createContract()">Создать новый договор</a></li>
+                </ul>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<div class="row marginal">
+    <div class="col-md-6"
+         ng-class="{'has-error': HospForm.org_structure.$invalid}">
+        <label for="org_structure" class="control-label">Отделение поступления</label>
+        <ui-select id="org_structure" name="org_structure" theme="select2"
+                   ng-model="event.received.orgStructStay.value" ng-required="true" no-undefined-value>
+            <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="os in OrgStructure.objects |
+                filter: {show: 1, hasHospitalBeds: formstate.is_hospital() ? 1 : ''} | filter: $select.search">
+                <div ng-bind-html="os.name | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="col-md-6"
+         ng-class="{'has-error': HospForm.os_transfer.$invalid}">
+        <label for="os_transfer" class="control-label">Направлен в отделение</label>
+        <ui-select id="os_transfer" name="os_transfer" theme="select2"
+                   ng-model="event.received.orgStructTransfer.value" ng-required="true" no-undefined-value>
+            <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+            <ui-select-choices repeat="os in OrgStructure.objects |
+                filter: {show: 1, hasHospitalBeds: formstate.is_hospital() ? 1 : ''} | filter: $select.search">
+                <div ng-bind-html="os.name | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+
+<div class="row marginal">
+    <div class="col-md-12">
+        <label for="appointed_by">Кем направлен</label>
+        <input type="text" class="form-control" autocomplete="off"
+               id="appointed_by" name="appointed_by" ng-model="event.received.appointed_by.value"/>
+    </div>
+</div>
+
+<div class="row marginal">
+    <div class="col-md-12">
+        <label for="appointed_by">Диагноз</label>
+        <input type="text" class="form-control" autocomplete="off"
+           placeholder="Клиническое описание диагноза" id="directed_by" name="appointed_by"
+           ng-model="event.received.diag_text.value"/>
+    </div>
+</div>
+
+<div class="row marginal">
+    <div class="col-md-3"
+         ng-class="{'has-error': HospForm.hosp_order.$invalid}">
+        <label for="hosp_order" class="control-label">Порядок госпитализации</label>
+        <rb-select id="hosp_order" name="hosp_order" ng-model="event.received.hosp_order.value"
+                   ref-book="rbHospitalisationOrder" ng-required="true" no-undefined-value></rb-select>
+    </div>
+    <div class="col-md-3"
+         ng-class="{'has-error': HospForm.primary.$invalid}">
+        <label for="primary" class="control-label">Первичность</label>
+        <rb-select id="primary" name="primary" ng-model="event.info.is_primary"
+                   ref-book="EventPrimary" ng-required="true" no-undefined-value></rb-select>
+    </div>
+    <div class="form-group col-md-3">
+        <label for="delivered_by">Кем доставлен</label>
+        <ui-select ng-model="event.received.delivered_by.value" theme="select2" class="form-control"
+                autocomplete="off" id="delivered_by" name="delivered_by" no-undefined-value>
+            <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+            <ui-select-choices repeat="item in event.received.delivered_by.type.domain_obj.values
+                    | filter: $select.search">
+                <span ng-bind-html="item | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="form-group col-md-3">
+        <label for="ambulance_number">№ наряда СП</label>
+        <input type="text" class="form-control" autocomplete="off" id="ambulance_number"
+            name="ambulance_number" ng-model="event.received.ambulance_number.value"/>
+    </div>
+</div>
+
+<div class="row marginal">
+    <div class="form-group" ng-class="formstate.is_hospital() ? 'col-md-4' : 'col-md-5'">
+        <label for="delivered_after">Доставлен от начала заболевания\травмы через</label>
+        <ui-select ng-model="event.received.delivered_after.value" theme="select2" class="form-control"
+                autocomplete="off" id="delivered_after" name="delivered_after" no-undefined-value>
+            <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+            <ui-select-choices repeat="item in event.received.delivered_after.type.domain_obj.values
+                    | filter: $select.search">
+                <span ng-bind-html="item | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div ng-class="{'col-md-2': formstate.is_hospital(), 'col-md-3': !formstate.is_hospital(),
+                    'has-error': HospForm.transp_type.$invalid}">
+        <label for="transp_type" class="control-label">Вид транспортировки</label>
+        <ui-select id="transp_type" name="transp_type" theme="select2"
+                   ng-model="event.received.transp_type.value" ng-required="true" no-undefined-value>
+            <ui-select-match placeholder="Вид транспортировки">[[$select.selected]]</ui-select-match>
+            <ui-select-choices repeat="val in event.received.transp_type.type.domain_obj.values">
+                <div ng-bind-html="val | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="form-group" ng-class="formstate.is_hospital() ? 'col-md-3' : 'col-md-4'">
+        <label for="intoxication">Доставлен в состоянии опьянения</label>
+        <ui-select ng-model="event.received.intoxication.value" theme="select2" class="form-control"
+                autocomplete="off" id="intoxication" name="intoxication" no-undefined-value>
+            <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+            <ui-select-choices repeat="item in event.received.intoxication.type.domain_obj.values
+                    | filter: $select.search">
+                <span ng-bind-html="item | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div ng-if="formstate.is_hospital()" class="col-md-3">
+        <label for="hosp_order" class="control-label">Травма</label>
+        <rb-select ng-model="event.received.trauma.value" ref-book="rbTraumaType"
+            allow-clear="true" no-undefined-value></rb-select>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-3">
+        <label for="directed_by">Рост (см)</label>
+        <input type="text" class="form-control" autocomplete="off" valid-number valid-number-float
+               id="directed_by" name="appointed_by" ng-model="event.received.height.value"
+               ng-change="recalcBodyArea()"/>
+    </div>
+    <div class="form-group col-md-3">
+        <label for="direction_number">Вес при поступлении (кг)</label>
+        <input type="text" class="form-control" autocomplete="off" valid-number valid-number-float
+               id="direction_number" name="appointment_doctor" ng-model="event.received.weight.value"
+               ng-change="recalcBodyArea()"/>
+    </div>
+    <div class="form-group col-md-3">
+        <label for="body_area">Площадь тела м<sup>2</sup></label>
+        <input type="text" class="form-control" autocomplete="off" valid-number valid-number-float
+               id="body_area" name="body_area" ng-model="event.received.body_area" ng-disabled="true"/>
+    </div>
+</div>
+</ng-form>

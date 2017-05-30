@@ -10,21 +10,22 @@ from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.event.app import module
 from hippocrates.blueprints.event.lib.utils import (save_event, received_save, client_quota_save,
-                                                    save_executives, EventSaveController, MovingController,
-                                                    received_close)
+                                                    save_executives, EventSaveController, MovingController)
 from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.action.utils import get_tissues
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
     get_properties_values)
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
+from nemesis.lib.event.utils import get_current_hospitalisation
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int,
-                               parse_id, bail_out, format_datetime, db_non_flushable)
+from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz,
+    safe_int, safe_bool, parse_id, bail_out, format_datetime, db_non_flushable)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, \
     ActionProperty_HospitalBed, Action_TakenTissueJournalAssoc, TakenTissueJournal
@@ -73,16 +74,42 @@ def api_event_new_get():
     return v.make_new_event(event)
 
 
+@module.route('/api/0/event/hosp/')
+@module.route('/api/0/event/hosp/<int:event_id>')
+@db_non_flushable
+@api_method
+def api_0_event_hosp_get(event_id=None):
+    args = request.args.to_dict()
+    get_new = safe_bool(args.get('new', False))
+    client_id = safe_int(args.get('client_id'))
+
+    if get_new:
+        event_builder = StationaryEventBuilder(client_id, None)
+        event_construction_director = EventConstructionDirector()
+        event_construction_director.set_builder(event_builder)
+        event = event_construction_director.construct()
+    elif event_id:
+        event = Event.query.get(event_id)
+        if not event:
+            raise ApiException(404,
+                               u'Не найдена госпитализация с id = {0}'
+                               .format(event_id))
+    else:
+        event = get_current_hospitalisation(client_id)
+        if not event:
+            raise ApiException(404,
+                               u'Не найдена госпитализация для пациента с id = {0}'
+                               .format(client_id))
+
+    v = StationaryEventVisualizer()
+    return v.make_admission_event_info(event, get_new)
+
+
 @module.route('/api/event_stationary_opened.json', methods=['GET'])
 @api_method
 def api_event_stationary_open_get():
     client_id = int(request.args['client_id'])
-    events = Event.query.join(EventType, rbRequestType).filter(
-        Event.client_id == client_id,
-        Event.execDate.is_(None),
-        Event.deleted == 0,
-        rbRequestType.code.in_(STATIONARY_EVENT_CODES)
-    ).order_by(Event.setDate.desc())
+    events = get_current_hospitalisation(client_id, one=False)
     v = EventVisualizer()
     return map(v.make_short_event, events)
 
@@ -124,7 +151,7 @@ def api_event_save():
 
     if request_type_kind == 'stationary':
         received_data = all_data['received']
-        quota_data = all_data['vmp_quoting']
+        quota_data = all_data.get('vmp_quoting')
         received_save(event_id, received_data)
         if quota_data:
             client_quota_save(event, quota_data)
@@ -133,52 +160,6 @@ def api_event_save():
         notify_event_changed(MQOpsEvent.create, event)
 
     return result
-
-
-@module.route('/api/event_moving_save.json', methods=['POST'])
-@api_method
-def api_moving_save():
-    vis = StationaryEventVisualizer()
-    mov_ctrl = MovingController()
-    data = request.json
-    event_id = data.get('event_id')
-    event = Event.query.get(event_id)
-    if not event:
-        raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
-    moving_id = data.get('id')
-    create_mode = not moving_id
-    if moving_id:
-        moving = Action.query.get(moving_id)
-        if not moving:
-            raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
-        moving = mov_ctrl.update_moving_data(moving, data)
-        result = vis.make_moving_info(moving)
-    else:
-        result = mov_ctrl.create_moving(event_id, data)
-        moving = result[1]
-        result = map(vis.make_moving_info, result)
-    received_close(event)
-
-    if not create_mode:
-        notify_moving_changed(MQOpsEvent.moving, moving)
-
-    return result
-
-
-@module.route('/api/event_moving_close.json', methods=['POST'])
-@api_method
-def api_event_moving_close():
-    vis = StationaryEventVisualizer()
-    mov_ctrl = MovingController()
-    moving_info = request.json
-    moving_id = moving_info['id']
-    if not moving_id:
-        raise ApiException(404, u'Не передан параметр moving_id')
-    moving = Action.query.get(moving_id)
-    if not moving:
-        raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
-    moving = mov_ctrl.close_moving(moving)
-    return vis.make_moving_info(moving)
 
 
 @module.route('/api/event_lab-res-dynamics.json', methods=['GET'])
@@ -260,25 +241,6 @@ def api_event_lab_res_dynamics():
 
         dates = [format_datetime(d) for d in sorted(dates, reverse=True)]
         return dates, dynamics
-
-
-@module.route('/api/event_hosp_beds_get.json', methods=['GET'])
-@api_method
-def api_hosp_beds_get():
-    vis = StationaryEventVisualizer()
-    org_str_id = request.args.get('org_str_id')
-    hb_id = request.args.get('hb_id')
-    ap_hosp_beds = ActionProperty.query.join(ActionPropertyType, Action, ActionType, Event,
-                                             ActionProperty_HospitalBed, OrgStructure_HospitalBed)\
-        .filter(ActionProperty.deleted == 0, ActionPropertyType.code == 'hospitalBed', Action.deleted == 0,
-                Event.deleted == 0, ActionType.flatCode == 'moving',
-                db.or_(Action.endDate.is_(None), Action.endDate >= datetime.datetime.now()), OrgStructure_HospitalBed.master_id == org_str_id).all()
-    occupied_hb = [ap.value for ap in ap_hosp_beds]
-    all_hb = OrgStructure_HospitalBed.query.filter(OrgStructure_HospitalBed.master_id == org_str_id).all()
-    for hb in all_hb:
-        hb.occupied = True if hb in occupied_hb else False
-        hb.chosen = True if (hb_id and hb.id == hb_id) else False
-    return map(vis.make_hosp_bed, all_hb)
 
 
 @module.route('/api/blood_history_save.json', methods=['POST'])
@@ -738,21 +700,109 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
     action_id_list = [action.id for action in paginate.items]
     s_ctrl = ServiceController()
     pay_data = s_ctrl.get_actions_pay_info(action_id_list)
+    items = []
+    if at_group == 'lab':
+        tissue_data = get_tissues(action_id_list)
+        items = [eviz.make_lab_action(action, tissue_data, pay_data.get(action.id)) for action in paginate.items]
+    else:
+        items = [eviz.make_action(action, pay_data.get(action.id), ) for action in paginate.items]
     return {
         'pages': paginate.pages,
         'total': paginate.total,
-        'items': [
-            eviz.make_action(action, pay_data.get(action.id)) for action in paginate.items
-        ]
+        'items': items
     }
 
 
 @module.route('/api/0/event/<int:event_id>/movings')
 @api_method
 def api_0_event_movings_get(event_id):
-    event = Event.query.get(event_id)
+    event = Event.query.get_or_404(event_id)
     if not event.is_stationary:
         raise ApiException(400, u'Обращение не является стационарным')
 
     eviz = StationaryEventVisualizer()
     return eviz.make_movings(event)
+
+
+@module.route('/api/0/event/<int:event_id>/moving/')
+@module.route('/api/0/event/<int:event_id>/moving/<int:action_id>')
+@db_non_flushable
+@api_method
+def api_0_event_moving_get(event_id, action_id=None):
+    args = request.args.to_dict()
+    get_new = safe_bool(args.get('new', False))
+
+    event = Event.query.get_or_404(event_id)
+    if not event.is_stationary:
+        raise ApiException(400, u'Обращение не является стационарным')
+
+    mov_ctrl = MovingController()
+    if get_new:
+        moving = mov_ctrl.create_moving(event, args)
+    else:
+        moving = mov_ctrl.get_moving(action_id)
+
+    eviz = StationaryEventVisualizer()
+    return eviz.make_moving_info(moving)
+
+
+@module.route('/api/0/event/<int:event_id>/moving/', methods=['POST'])
+@module.route('/api/0/event/<int:event_id>/moving/<int:action_id>', methods=['PUT'])
+@api_method
+def api_moving_save(event_id, action_id=None):
+    data = request.get_json()
+    event_id = data.get('event_id')
+    event = Event.query.get_or_404(event_id)
+    if not event.is_stationary:
+        raise ApiException(400, u'Обращение не является стационарным')
+
+    mov_ctrl = MovingController()
+    moving_id = data.get('id')
+    create_mode = not moving_id
+    if moving_id:
+        moving = mov_ctrl.get_moving(moving_id)
+        if not moving:
+            raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+        moving = mov_ctrl.update_moving_data(moving, data)
+    else:
+        moving = mov_ctrl.create_moving(event, data)
+        moving = mov_ctrl.update_moving_data(moving, data)
+
+    db.session.commit()
+
+    mov_ctrl.update_prev_moving_or_received(moving)
+    db.session.commit()
+
+    if not create_mode:
+        notify_moving_changed(MQOpsEvent.moving, moving)
+
+    vis = StationaryEventVisualizer()
+    result = vis.make_moving_info(moving)
+    return result
+
+
+@module.route('/api/event_hosp_beds_get.json', methods=['GET'])
+@api_method
+def api_hosp_beds_get():
+    vis = StationaryEventVisualizer()
+    org_str_id = safe_int(request.args.get('org_str_id'))
+    hb_id = safe_int(request.args.get('hb_id'))
+    ap_hosp_beds = ActionProperty.query.join(
+        ActionPropertyType, Action, ActionType, Event,
+        ActionProperty_HospitalBed, OrgStructure_HospitalBed
+    ).filter(
+        ActionProperty.deleted == 0, ActionPropertyType.code == 'hospitalBed',
+        Action.deleted == 0, Event.deleted == 0, ActionType.flatCode == 'moving',
+        db.or_(Action.endDate.is_(None),
+               Action.endDate >= datetime.datetime.now()),
+        OrgStructure_HospitalBed.master_id == org_str_id
+    ).all()
+    occupied_hb = [ap.value for ap in ap_hosp_beds]
+    all_hb = OrgStructure_HospitalBed.query.filter(
+        OrgStructure_HospitalBed.master_id == org_str_id
+    ).all()
+    for hb in all_hb:
+        hb.occupied = hb in occupied_hb
+        hb.chosen = (hb_id and hb.id == hb_id)
+    return map(vis.make_hosp_bed, all_hb)
+

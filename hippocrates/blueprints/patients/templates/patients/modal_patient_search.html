@@ -1,0 +1,63 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="modal-title">[[client.info.full_name]]</h4>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="close lmargin20" ng-click="$dismiss('cancel')">&times;</button>
+            <div class="pull-right">
+            {% if user_profiles_mng.has_ui_registrator() %}
+            <button class="btn btn-sm btn-primary" ng-click="newAppointment()" title="Записать на приём">
+                <span class="glyphicon glyphicon-tag"></span></button>
+            <button class="btn btn-sm btn-primary" ng-click="newEventChecked()" title="Создать обращение">
+                <span class="glyphicon glyphicon-plus"></span></button>
+            <button class="btn btn-sm btn-primary" ng-click="openClient()" title="Редактировать данные пациента">
+                <span class="glyphicon glyphicon-pencil"></span></button>
+            {% endif %}
+            <ui-print-button ps="ps" class="btn-sm" resolve="ps_resolve()" lazy-load-context="token"></ui-print-button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-body modal-scrollable">
+    <div ui-alert-list="alerts"></div>
+    <tabset>
+        {% if user_profiles_mng.has_ui_registrator() %}
+        <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+        {% endif %}
+        {% if user_profiles_mng.has_ui_adm_nurse() %}
+        <tab heading="Текущая госпитализация">
+            <div ng-if="!curHospAvailable()">
+                <h3 class="marginal">Госпитализация ещё не создана</h3>
+                <button type="button" class="btn btn-primary btn-lg"
+                    ng-click="createHospitalisation()">Создать госпитализацию</button>
+            </div>
+            <div ng-if="curHospAvailable()">
+                {% include "event/_admission_info_read.html" %}
+            </div>
+        </tab>
+        {% endif %}
+        <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+        <tab heading="Записи ЭМК" select="openPatientActions()">
+            <div ng-controller="PatientActionsCtrl">
+            {% include "patients/_patient_actions.html" %}
+            </div>
+        </tab>
+    </tabset>
+</div>
+<div class="modal-footer">
+    <div class="pull-right"><button type="button" class="btn btn-default" ng-click="$dismiss('cancel')">Закрыть</button></div>
+    <div class="text-left">
+        {% if user_profiles_mng.has_ui_registrator() %}
+        <button class="btn btn-primary" ng-click="newAppointment()">Записать на приём</button>
+        <button class="btn btn-primary" ng-click="newEventChecked()">Создать обращение</button>
+        <button class="btn btn-primary" ng-click="openClient()">Редактировать данные пациента</button>
+        {% endif %}
+        {% if user_profiles_mng.has_ui_adm_nurse() %}
+        <button class="btn btn-primary" ng-if="curHospAvailable()" ng-click="editHospitalisation()">
+            Редактировать данные госпитализации</button>
+        <button class="btn btn-primary" ng-click="openClientModal()">Редактировать данные пациента</button>
+        {% endif %}
+        <ui-print-button ps="ps" resolve="ps_resolve()" lazy-load-context="token"></ui-print-button>
+    </div>
+</div>

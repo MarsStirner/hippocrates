@@ -1,5 +1,5 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
-    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <button type="button" class="close" ng-click="$dismiss()">&times;</button>
     <h4 class="modal-title">Поступление</h4>
 </div>
 <div class="modal-body modal-scrollable">
@@ -80,6 +80,19 @@
                     <label for="ambulance_number">№ наряда СП</label>
                     <input type="text" class="form-control" autocomplete="off"
                            id="ambulance_number" name="ambulance_number" ng-model="model.ambulance_number.value"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-5"
+                     ng-class="{'has-error': event_maininfo_form.os_transfer.$invalid && editing.submit_attempt}">
+                    <label for="delivered_by">Куда направлен</label>
+                    <ui-select id="os_transfer" name="os_transfer" theme="select2"
+                               ng-model="model.orgStructTransfer.value" ng-required="true" no-undefined-value>
+                        <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                        <ui-select-choices repeat="os in OrgStructure.objects | filter: {show: 1} | filter: $select.search">
+                            <div ng-bind-html="os.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
                 </div>
             </div>
         </div>

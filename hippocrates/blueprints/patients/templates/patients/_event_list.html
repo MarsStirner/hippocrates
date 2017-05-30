@@ -1,7 +1,7 @@
 <table class="table table-condensed table-hover table-clickable novmargin">
     <thead>
     <tr>
-        <th>Номер АК</th>
+        <th>Номер обращения</th>
         <th>Дата начала</th>
         <th>Дата окончания</th>
         <th>Тип события</th>
@@ -11,7 +11,8 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="event in client.events" ng-class="{'danger': event.contract.draft}" ng-click="open_event(event.id)" style="cursor: pointer">
+    <tr ng-repeat="event in client.events" ng-class="{'danger': event.contract.draft}"
+            ng-click="openEvent(event.id)" style="cursor: pointer">
         <td>[[ event.externalId ]]</td>
         <td>[[ event.setDate | asDate ]]</td>
         <td>[[ event.execDate | asDate ]]</td>

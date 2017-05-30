@@ -41,20 +41,14 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
         AccountingService.get_contract_list(args).then(setContractListData);
     };
     $scope.create = function () {
-        AccountingService.get_contract(undefined, {
-            generate_number: true
-        })
-            .then(function (contract) {
-                return ContractModalService.openEdit(contract);
-            })
+        return ContractModalService.openNew({ generate_number: true })
             .then(function (result) {
                 var contract = result.contract;
                 $scope.contract_list.push(contract);
             });
     };
     $scope.editContract = function (idx) {
-        var contract = _.deepCopy($scope.contract_list[idx]);
-        ContractModalService.openEdit(contract)
+        ContractModalService.openEdit($scope.contract_list[idx].id)
             .then(function (result) {
                 var upd_contract = result.contract;
                 $scope.contract_list.splice(idx, 1, upd_contract);

@@ -5,9 +5,6 @@ var EventDiagnosesCtrl = function ($scope) {
     $scope.can_view_diagnoses = function () {
         return $scope.event.access.can_read_diagnoses;
     };
-    $scope.can_open_diagnoses = function () {
-        return $scope.event.access.can_edit_diagnoses;
-    };
 };
 var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter, CurrentUser,
                                   AccountingService, ContractModalService, WMConfig, WMWindowSync, WMEventFormState) {
@@ -88,49 +85,41 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         var client_id = safe_traverse($scope.event.info, ['client_id']),
             finance_id = safe_traverse($scope.event.info, ['event_type', 'finance', 'id']),
             client = $scope.event.info.client;
-        AccountingService.get_contract(undefined, {
+        return ContractModalService.openNew({
             finance_id: finance_id,
             client_id: client_id,
             payer_client_id: client_id,
-            generate_number: true
+            generate_number: true,
+            wmclient: client
         })
-            .then(function (contract) {
-                return ContractModalService.openEdit(contract, client);
-            })
             .then(function (result) {
                 var contract = result.contract;
                 refreshAvailableContracts()
                     .then(function () {
-                        set_contract(contract.id)
+                        set_contract(contract.id);
                     });
             });
     };
     $scope.editContract = function (idx) {
         if (!$scope.event.info.contract) return;
-        var contract = _.deepCopy($scope.event.info.contract);
-        ContractModalService.openEdit(contract)
+        ContractModalService.openEdit($scope.event.info.contract.id)
             .then(function (result) {
                 var upd_contract = result.contract;
                 refreshAvailableContracts()
                     .then(function () {
-                        set_contract(upd_contract.id)
+                        set_contract(upd_contract.id);
                     });
             });
     };
     $scope.createContractFromDraft = function () {
         if (!safe_traverse($scope, ['event', 'info', 'contract', 'draft'])) return;
-        AccountingService.get_contract($scope.event.info.contract.id, {
-            undraft: true
-        }).then(function (contract) {
-            ContractModalService.openEdit(contract)
-                .then(function (result) {
-                    refreshAvailableContracts()
-                        .then(function () {
-                            set_contract(result.contract.id)
-                        });
-                });
-        })
-        
+        ContractModalService.openEdit($scope.event.info.contract.id, { undraft: true })
+            .then(function (result) {
+                refreshAvailableContracts()
+                    .then(function () {
+                        set_contract(result.contract.id);
+                    });
+            });
     };
     $scope.openContractListUi = function () {
         WMWindowSync.openTab(WMConfig.url.accounting.html_contract_list, refreshAvailableContracts);
@@ -143,7 +132,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             } else if (request_type_kind == 'stationary'){
                 return elem.relevant && (['clinic', 'hospital', 'stationary'].indexOf(elem.code)>=0);
             } else {
-                return elem.relevant
+                return elem.relevant;
             }
 
         };
@@ -182,7 +171,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         if($scope.event.is_new()) {
             $scope.event.info.set_date = new Date();
             $scope.event.info.set_date.setHours(1, 0, 0);
-
             $scope.event.info.exec_date = new Date();
             $scope.event.info.exec_date.setHours(23, 59, 59);
         }
@@ -260,7 +248,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
                         if (!safe_traverse($scope, ['event', 'info', 'contract'])) {
                             $scope.event.info.contract = result;
                         }
-                    })
+                    });
                 }
             });
     }
@@ -311,23 +299,36 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     }
 
-    $scope.$watch('event.info.set_date', function (n, o) {
-        // при выборе не сегодняшнего дня ставить время 08:00
-        if (n !== o && moment(n).startOf('d').diff(moment(o).startOf('d'), 'days') !== 0) {
-            var nd = moment(n).set({hour: 8, minute: 0, second: 0});
-            $scope.event.info.set_date = nd;
-        }
-    });
+    $scope.$watchCollection('[event.info.set_date, event.info.exec_date]', function (n, o) {
+        if (!angular.equals(n, o)) {
+            var old_st = moment(o[0]),
+                st = moment(n[0]),
+                end = moment(n[1]);
 
-    $scope.$watch('event.info.exec_date', function (n, o) {
-        if(n !== undefined && typeof n === 'string' && n !== o) {
-            var date = new Date(n);
-            if(typeof o === 'object') {
-                date.setHours(o.getHours(),o.getMinutes(),o.getSeconds())
+            // Если в предыдущем значении было время, то установить его в переменную.
+            if (typeof n[0] === 'string' && typeof o[0] === 'object' ) {
+                st.set({hour: o[0].getHours(),
+                        minute: o[0].getMinutes(),
+                        second: o[0].getSeconds()});
+            }
+            if (typeof n[1] === 'string' && typeof o[1] === 'object' ) {
+                end.set({hour: o[1].getHours(),
+                        minute: o[1].getMinutes(),
+                        second: o[1].getSeconds()});
+            }
+            // при выборе не сегодняшнего дня ставить время 08:00
+            var notToday = st.clone().startOf('d').diff(old_st.startOf('d'), 'days') !== 0;
+            if (notToday) {
+                st = st.set({hour: 8, minute: 0, second: 0});
+            }
+            if (end.isBefore(st)) {
+                end = st.clone().endOf('d');
             }
 
-            $scope.event.info.exec_date = date
+            if (st.isValid()) { $scope.event.info.set_date = st.toDate(); }
+            if (end.isValid()) { $scope.event.info.exec_date = end.toDate(); }
         }
+
     });
 
     $scope.$on('event_loaded', function() {
@@ -385,16 +386,12 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService, WMEventFormStat
         }).result.then(function (rslt) {
             $scope.event.received = rslt;
         });
-    }
-
+    };
 };
 
-var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConfig, WebMisApi) {
-    $scope.OrgStructure = RefBookService.get('OrgStructure');
-    $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
-
+var EventMovingsCtrl = function ($scope, $modal, EventModalService, WMEventService) {
     $scope.refreshMovings = function () {
-        return WebMisApi.stationary.get_movings($scope.event.event_id)
+        return WMEventService.get_movings($scope.event.event_id)
             .then(function (movings) {
                 Array.prototype.splice.apply(
                     $scope.event.movings,
@@ -402,108 +399,36 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls, WMConf
                 );
             });
     };
-    $scope.moving_save = function (moving){
-        return ApiCalls.wrapper('POST', WMConfig.url.event.moving_save, {}, moving)
+    $scope.firstMovingCreated = function () {
+        return $scope.event.movings && $scope.event.movings.length !== 0;
     };
-    $scope.create_moving = function(){
-        var scope = $scope.$new();
-        scope.model = {
-            event_id: $scope.event.event_id,
-            beg_date: new Date()
-        };
-        $modal.open({
-            templateUrl: 'modal-create-moving.html',
-            backdrop : 'static',
-            size: 'lg',
-            scope: scope
-        }).result.then(function (result) {
-            $scope.moving_save(result).then(function (result) {
+    $scope.latestMovingHbSelected = function () {
+        return $scope.event.movings && $scope.event.movings.length !== 0 &&
+            $scope.event.movings[$scope.event.movings.length - 1].hospitalBed.value !== null;
+    };
+    $scope.latestMovingClosed = function () {
+        return $scope.event.movings && $scope.event.movings.length !== 0 &&
+            $scope.event.movings[$scope.event.movings.length - 1].end_date !== null;
+    };
+    $scope.createFirstMoving = function () {
+        EventModalService.openMakeMoving($scope.event.event_id, $scope.event.received.id, true)
+            .then(function (upd_moving) {
                 $scope.refreshMovings();
             });
-        });
     };
-
-    $scope.change_moving = function(){
-        var scope = $scope.$new();
-        scope.model = {
-            event_id: $scope.event.event_id,
-            beg_date: new Date()
-        };
-        $modal.open({
-            templateUrl: 'modal-create-moving.html',
-            backdrop : 'static',
-            size: 'lg',
-            scope: scope
-        }).result.then(function (result) {
-            $scope.close_last_moving().then(function () {
-                $scope.moving_save(result).then(function (result) {
-                    $scope.refreshMovings();
-                });
+    $scope.editMoving = function (moving) {
+        EventModalService.openEditMoving($scope.event.event_id, moving.id)
+            .then(function (upd_moving) {
+                $scope.refreshMovings();
             });
-        });
     };
-
-    $scope.edit_moving = function(moving){
-        var scope = $scope.$new();
-        scope.model = angular.copy(moving);
-        scope.event_admission_date = $scope.event.admission_date;
-        $scope.org_struct_changed(scope.model).then(function(){
-            $modal.open({
-                templateUrl: 'modal-create-hospBed.html',
-                backdrop : 'static',
-                size: 'lg',
-                scope: scope
-            }).result.then(function (result) {
-                $scope.moving_save(result).then(function (result) {
-                    $scope.refreshMovings();
-                });
+    $scope.makeMovingTransfer = function (is_final) {
+        var moving = $scope.event.movings[$scope.event.movings.length - 1];
+        EventModalService.openMakeTransfer($scope.event.event_id, moving.id, is_final)
+            .then(function (movings) {
+                $scope.refreshMovings();
             });
-        });
     };
-
-    $scope.close_last_moving = function(){
-        var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null;
-        return ApiCalls.wrapper('POST', WMConfig.url.event.moving_close, {}, moving).then(function(result){
-            $scope.refreshMovings();
-        })
-    };
-
-    $scope.create_hospitalBed = function(moving){
-        var scope = $scope.$new();
-        scope.model = angular.copy(moving);
-        $scope.org_struct_changed(scope.model).then(function(){
-            $modal.open({
-                templateUrl: 'modal-create-hospBed.html',
-                backdrop : 'static',
-                size: 'lg',
-                scope: scope
-            }).result.then(function (result) {
-                $scope.moving_save(result).then(function (result) {
-                    $scope.refreshMovings();
-                });
-            });
-        })
-    };
-
-    $scope.org_struct_changed = function(model){
-        var hb_id = model.HospitalBed ? model.HospitalBed.id : null;
-        return ApiCalls.wrapper('GET', WMConfig.url.event.hosp_beds, {
-            org_str_id : model.orgStructStay.value.id,
-            hb_id: hb_id
-        }).then(function (result) {
-            model.hosp_beds = result;
-            model.hospitalBedProfile.value = null;
-        })
-    };
-
-    $scope.choose_hb = function(moving, hb){
-        moving.hosp_beds.map(function(hbed){
-            hbed.chosen = false;
-        });
-        moving.hospitalBed.value = hb;
-        moving.hospitalBedProfile.value = hb.profile;
-        hb.chosen = true;
-    }
 };
 
 var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService, InvoiceModalService, PrintingService) {
@@ -1051,11 +976,20 @@ var EventQuotingCtrl = function ($scope, RefBookService) {
     $scope.$watch(function () {
         return safe_traverse($scope.event, ['vmp_quoting', 'coupon']);
     }, function (n, o) {
+        if (n) {
+            if (!safe_traverse(n, ['beg_date'])) {
+                n.beg_date = $scope.event.info.set_date;
+            }
+            if (!safe_traverse(n, ['end_date'])) {
+                var amountOfDays = safe_traverse(n, ['quota_type', 'amount_of_days']);
+                n.end_date = moment(n.beg_date).clone().add(amountOfDays, 'days').toDate();
+            }
+        }
         if (n !== o) {
-            if(!$scope.event.vmp_quoting.mkb){
+            if (!$scope.event.vmp_quoting.mkb) {
                 $scope.event.vmp_quoting.mkb = $scope.event.vmp_quoting.coupon.mkb;
             }
-            if(!$scope.event.vmp_quoting.quota_type){
+            if (!$scope.event.vmp_quoting.quota_type) {
                 $scope.event.vmp_quoting.quota_type = $scope.event.vmp_quoting.coupon.quota_type;
             }
         }
@@ -1066,9 +1000,10 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
     'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', 'WMEventFormState',
     EventMainInfoCtrl]);
-WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', 'WMEventFormState', EventReceivedCtrl]);
-WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', 'WMConfig',
-    'WebMisApi', EventMovingsCtrl]);
+WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', 'WMEventFormState',
+    EventReceivedCtrl]);
+WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'EventModalService', 'WMEventService',
+    EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', '$timeout', 

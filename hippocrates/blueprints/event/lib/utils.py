@@ -6,22 +6,29 @@ import uuid
 
 from flask_login import current_user
 from nemesis.lib.data_ctrl.accounting.contract import ContractController
-from nemesis.models.utils import safe_current_user_id
-from sqlalchemy import func
+from sqlalchemy import func, and_, or_
+from sqlalchemy.orm import aliased, joinedload
 
-from nemesis.lib.data import create_new_action, update_action, create_action, get_action
+from nemesis.lib.data import create_action, get_action_by_id
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
-from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
+from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis, \
+    ActionProperty, ActionPropertyType, ActionProperty_OrgStructure
 from nemesis.models.client import Client
 from nemesis.lib.apiutils import ApiException
-from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
-from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id
-from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
-from nemesis.models.enums import ActionStatus
+from nemesis.models.event import Event, EventType, Visit, Event_Persons
+from nemesis.lib.utils import safe_traverse, safe_datetime, get_new_event_ext_id
+from nemesis.models.exists import Person, OrgStructure, ClientQuoting, MKB, \
+    VMPQuotaDetails, VMPCoupon, rbRequestType
+from nemesis.models.enums import ActionStatus, OrgStructType
 from nemesis.models.schedule import ScheduleClientTicket
-from nemesis.lib.const import STATIONARY_RECEIVED_CODE
+from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, \
+    STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_ORG_STRUCT_RECEIVED_CODE, \
+    STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
+    STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE, \
+    DAY_HOSPITAL_CODE
 from nemesis.systemwide import db
+
 
 logger = logging.getLogger('simple')
 
@@ -46,8 +53,9 @@ class EventSaveController():
         # для всех request type
         event_data = all_data['event']
         event.setPerson_id = current_user.get_main_user().id
-        event.client_id = event_data['client_id']
-        event.client = Client.query.get(event_data['client_id'])
+        client_id = safe_traverse(event_data, 'client', 'id') or event_data['client_id']
+        event.client_id = client_id
+        event.client = Client.query.get(client_id)
         event.org_id = event_data['organisation']['id']
         event.payStatus = 0
         event = self.update_base_info(event, event_data)
@@ -83,8 +91,8 @@ class EventSaveController():
                 event.contract = contract
             else:
                 self.update_contract(contract_id, event.client_id)
-        event.note = event_data['note']
-        event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
+        event.note = event_data.get('note')
+        event.orgStructure_id = safe_traverse(event_data, 'org_structure', 'id')
         event.result_id = safe_traverse(event_data, 'result', 'id')
         event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
         return event
@@ -131,61 +139,160 @@ class MovingController():
     def __init__(self):
         pass
 
-    def get_prev_action(self, event_id):
-        """
-        получить предыдущее движение или послупление
-        """
-        movings = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                   Action.deleted == 0,
-                                                                   ActionType.flatCode == 'moving').order_by(Action.begDate).all()
-        if movings:
-            action = movings[-1]
-        else:
-            action = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                      Action.deleted == 0,
-                                                                      ActionType.flatCode == 'received'
-                                                                      ).first()
-        return action
-
     def update_moving_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
         moving.endDate = safe_datetime(moving_info.get('end_date'))
         if moving.endDate is not None:
             moving.status = ActionStatus.finished[0]
         else:
-            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0] else moving.status
+            moving.status = ActionStatus.started[0] if moving.status == ActionStatus.finished[0] \
+                else moving.status
 
-        moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
-        moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
-        moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
-            moving_info.get('hospitalBedProfile') else None
-        moving.propsByCode['patronage'].value = moving_info['patronage']['value'] if moving_info.get('patronage') else None
-        db.session.add(moving)
-        db.session.commit()
+        moving[STATIONARY_ORG_STRUCT_STAY_CODE].value = moving_info['orgStructStay']['value']
+        moving[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value = moving_info['orgStructTransfer']['value']
+        moving[STATIONARY_PATRONAGE_CODE].value = safe_traverse(
+            moving_info, 'patronage', 'value')
+        if 'hospitalBed' in moving_info:
+            moving[STATIONARY_HOSP_BED_CODE].value = safe_traverse(
+                moving_info, 'hospitalBed', 'value')
+        if 'hospitalBedProfile' in moving_info:
+            moving[STATIONARY_HOSP_BED_PROFILE_CODE].value = safe_traverse(
+                moving_info, 'hospitalBedProfile', 'value')
+
         return moving
 
-    def create_moving(self, event_id, moving_info):
-        event = Event.query.get(event_id)
-        action_type = ActionType.query.filter(ActionType.flatCode == u'moving').first()
+    def update_prev_moving_or_received(self, cur_moving):
+        prev = self.get_prev_moving_or_received(cur_moving)
+        if prev:
+            if not prev.endDate:
+                prev.endDate = cur_moving.begDate
+            if prev.status != ActionStatus.finished[0]:
+                prev.status = ActionStatus.finished[0]
 
-        moving = create_action(action_type.id, event)
-        prev_action = self.get_prev_action(moving_info.get('event_id'))
-        moving.propsByCode['orgStructReceived'].value = prev_action['orgStructStay'].value
-        moving = self.update_moving_data(moving, moving_info)
+            prev.propsByCode[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value = cur_moving.\
+                propsByCode[STATIONARY_ORG_STRUCT_STAY_CODE].value
 
-        if not prev_action.endDate:
-            prev_action.endDate = moving.begDate
-        prev_action.propsByCode['orgStructTransfer'].value = moving.propsByCode['orgStructStay'].value
-        db.session.add(prev_action)
-        db.session.commit()
-        return prev_action, moving
+    def get_moving(self, action_id):
+        return get_action_by_id(action_id)
 
-    def close_moving(self, moving):
-        moving.endDate = datetime.datetime.now()
-        moving.status = ActionStatus.finished[0]
-        db.session.add(moving)
-        db.session.commit()
+    def get_prev_moving_or_received(self, moving):
+        result = db.session.query(Action).join(ActionType).filter(
+            Action.deleted == 0,
+            Action.event_id == moving.event_id,
+            ActionType.flatCode.in_([STATIONARY_MOVING_CODE, STATIONARY_RECEIVED_CODE]),
+            or_(Action.begDate < moving.begDate,
+                and_(Action.begDate == moving.begDate,
+                     Action.id < moving.id if moving.id else True)
+                ),
+            Action.id != moving.id
+        ).order_by(Action.begDate.desc()).limit(1).options(joinedload(Action.actionType)).first()
+
+        return result
+
+    def create_moving(self, event, moving_info):
+        moving = get_action_by_id(None, event, STATIONARY_MOVING_CODE, True)
+
+        beg_date = datetime.datetime.now()
+        stay_os = from_os = None
+        if 'received_id' in moving_info:
+            received = get_action_by_id(moving_info['received_id'])
+            from_os = received[STATIONARY_ORG_STRUCT_STAY_CODE].value
+            stay_os = received[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
+            if received.endDate:
+                beg_date = received.endDate + datetime.timedelta(seconds=1)
+        elif 'latest_moving_id' in moving_info:
+            prev_moving = get_action_by_id(moving_info['latest_moving_id'])
+            from_os = prev_moving[STATIONARY_ORG_STRUCT_STAY_CODE].value
+            stay_os = prev_moving[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
+            if prev_moving.endDate:
+                beg_date = prev_moving.endDate + datetime.timedelta(seconds=1)
+        else:
+            prev = self.get_prev_moving_or_received(moving)
+            from_os = prev[STATIONARY_ORG_STRUCT_STAY_CODE].value
+            stay_os = prev[STATIONARY_ORG_STRUCT_TRANSFER_CODE].value
+            if prev.endDate:
+                beg_date = prev.endDate + datetime.timedelta(seconds=1)
+
+        moving[STATIONARY_ORG_STRUCT_RECEIVED_CODE].value = from_os
+        moving[STATIONARY_ORG_STRUCT_STAY_CODE].value = stay_os
+        moving.begDate = beg_date
+
         return moving
+
+
+def get_hb_days_for_moving_list(moving_ids):
+    """Рассчитать длительность нахождения пациента в отделениях по движениям.
+
+    Длительность рассчитывается как разница между датой начала и датой окончания
+    экшена движения. Длительность нахождения в реанимационном отделении добавляется к
+    длительности предыдущего движения.
+    """
+    if not moving_ids:
+        return {}
+
+    NextMoving = aliased(Action, name='NextMoving')
+    NextResusMoving = aliased(Action, name='NextResusMoving')
+
+    q_next_moving = db.session.query(NextMoving.id).join(
+        ActionType, ActionProperty, ActionPropertyType
+    ).outerjoin(
+        ActionProperty_OrgStructure
+    ).outerjoin(
+        OrgStructure
+    ).filter(
+        ActionType.flatCode == STATIONARY_MOVING_CODE,
+        ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+        Action.deleted == 0, ActionProperty.deleted == 0,
+        ActionPropertyType.deleted == 0,
+        NextMoving.event_id == Action.event_id,
+        NextMoving.begDate >= Action.id,
+        NextMoving.id > Action.id,
+        OrgStructure.type != OrgStructType.resuscitation[0]
+    ).order_by(Action.begDate).limit(1).subquery()
+
+    q_next_resus_moving = db.session.query(NextResusMoving.id).join(
+        ActionType, ActionProperty, ActionPropertyType
+    ).join(
+        ActionProperty_OrgStructure, OrgStructure
+    ).filter(
+        ActionType.flatCode == STATIONARY_MOVING_CODE,
+        ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE,
+        Action.deleted == 0, ActionProperty.deleted == 0,
+        ActionPropertyType.deleted == 0,
+        NextResusMoving.event_id == Action.event_id,
+        NextResusMoving.begDate >= Action.id, NextResusMoving.begDate <= NextMoving.begDate,
+        NextResusMoving.id > Action.id, NextResusMoving.id < NextMoving.id,
+        OrgStructure.type == OrgStructType.resuscitation[0]
+    ).order_by(Action.begDate.desc()).limit(1).subquery()
+
+    query = db.session.query(Action).join(
+        Event, EventType, rbRequestType
+    ).outerjoin(
+        NextMoving, NextMoving.id == q_next_moving
+    ).outerjoin(
+        NextResusMoving, NextResusMoving.id == q_next_resus_moving
+    ).filter(
+        Action.id.in_(moving_ids)
+    ).with_entities(
+        Action.event_id.label('event_id'), Action.id.label('moving_id'),
+        (func.datediff(
+            func.coalesce(
+                func.IF(NextResusMoving.id.isnot(None),
+                        NextResusMoving.endDate,
+                        Action.endDate),
+                func.curdate()
+            ),
+            Action.begDate
+        ) + func.IF(rbRequestType.code.in_(DAY_HOSPITAL_CODE), 1, 0)
+        ).label('hb_days')
+    )
+    res = {}
+    for item in query:
+        res[item.event_id] = {
+            'moving_id': item.moving_id,
+            'hb_days': item.hb_days
+        }
+    return res
 
 
 def create_new_event(event_data):
@@ -204,9 +311,9 @@ def create_new_event(event_data):
     event.isPrimaryCode = event_data['is_primary']['id']
     event.order = event_data['order']['id']
     event.org_id = event_data['organisation']['id']
-    event.orgStructure_id = event_data['org_structure']['id']
+    event.orgStructure_id = safe_traverse(event_data, 'org_structure', 'id')
     event.payStatus = 0
-    event.note = event_data['note']
+    event.note = event_data.get('note')
     event.uuid = uuid.uuid4()
 
     error_msg = {}
@@ -298,20 +405,15 @@ def received_save(event_id, received_data):
     db.session.commit()
 
 
-def received_close(event):
-    received = get_action(event, STATIONARY_RECEIVED_CODE)
-    if received and received.status < 2:
-        received.modifyPerson = safe_current_user_id()
-        received.modifyDatetime = datetime.datetime.now()
-        received.endDate = datetime.datetime.now()
-        received.status = 2
-        db.session.commit()
-
-
 def client_quota_save(event, quota_data):
     quota_id = quota_data.get('id')
     coupon_id = safe_traverse(quota_data, 'coupon', 'id')
+    coupon_beg_date = safe_traverse(quota_data, 'coupon', 'beg_date')
+    coupon_end_date = safe_traverse(quota_data, 'coupon', 'end_date')
     coupon = VMPCoupon.query.get(coupon_id) if coupon_id else None
+    if coupon:
+        coupon.begDate = safe_datetime(coupon_beg_date)
+        coupon.endDate = safe_datetime(coupon_end_date)
     with db.session.no_autoflush:
         if quota_id:
             quota = ClientQuoting.query.get(quota_id)
@@ -365,3 +467,4 @@ def save_executives(event_id):
     except Exception, e:
         db.rollback()
         raise EventSaveException(u'Ошибка закрытия обращения')
+

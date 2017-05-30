@@ -8,7 +8,11 @@
 </section>
 <section class="content">
     <div class="alert alert-danger">
-        <div>{{ message }}</div>
+        <div>{{ message }}
+        {% for item in href_data %}
+            <br/><a href="{{ item.href }}">{{ item.text }}</a>
+        {% endfor %}
+        </div>
     </div>
     {%- with messages = get_flashed_messages() -%}
         {%- for f_message in messages -%}

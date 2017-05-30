@@ -1,5 +1,6 @@
-var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $anchorScroll, WMClient,
-        PrintingService, WMAppointmentDialog, WMProcedureOffices, CurrentUser, WMConfig) {
+var ScheduleDayCtrl = function ($scope, $http, $filter, $location, $anchorScroll, WMClient,
+        PrintingService, WMAppointmentDialog, WMProcedureOffices, CurrentUser, WMConfig,
+        WMWindowSync) {
     $scope.client_id = null;
     $scope.client = null;
     $scope.person = {};
@@ -105,7 +106,6 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
         }
     };
     $scope.ps_amb = new PrintingService('preliminary_records');
-    $scope.ps_amb.set_context('orderAmb');
     $scope.ps_amb_resolve = function (client_ticket_id) {
         return {
             client_id: $scope.client.client_id,
@@ -113,7 +113,6 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
         }
     };
     $scope.ps_home = new PrintingService('preliminary_records');
-    $scope.ps_home.set_context('orderHome');
     $scope.ps_home_resolve = function (client_ticket_id) {
         return {
             client_id: $scope.client.client_id,
@@ -121,20 +120,22 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
         }
     };
 
-    $scope.new_event = function(client_id, ticket_id) {
-        var query = '?client_id=' + client_id;
-        if (ticket_id){
-            query += '&ticket_id=' + ticket_id;
+    $scope.newEvent = function(ticket_id) {
+        var url = WMConfig.url.event.html.request_type_kind + '?client_id=' + $scope.client.info.id;
+        if (ticket_id) {
+            url += '&ticket_id=' + ticket_id;
         }
-        $scope.child_window = window.open(WMConfig.url.event.html.request_type_kind + query, '_blank');
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
-    $scope.open_event = function(event_id) {
-        $scope.child_window = window.open(WMConfig.url.event.html.event_info + '?event_id=' + event_id, '_blank');
+    $scope.openEvent = function(event_id) {
+        var url = WMConfig.url.event.html.event_info + '?event_id=' + event_id;
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
-    $scope.new_appointment = function(client_id) {
-        $scope.child_window = window.open(WMConfig.url.schedule.html.appointment + '?client_id=' + client_id, '_blank');
+    $scope.newAppointment = function() {
+        var url = WMConfig.url.schedule.html.appointment + '?client_id=' + $scope.client.info.id;
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
     $scope.get_full_schedule_url = function () {
@@ -150,26 +151,7 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
     $scope.openPatientActions = function () {
         $scope.$broadcast('patientActionsOpened', {client_id: $scope.client.client_id});
     };
-
-    var interval;
-    $scope.clearInterval = function() {
-        $interval.cancel(interval);
-        interval = undefined;
-    };
-
-    $scope.$watch('child_window.document', function (n, o) {
-        if (n && n!=o) {
-            $scope.clearInterval();
-            interval = $interval(function () {
-                if ($scope.child_window.closed) {
-                    $scope.client.reload('for_servicing');
-                    $scope.loadData();
-                    $scope.clearInterval();
-                    $scope.child_window = {};
-                }
-            }, 500);
-        }
-    });
 };
-WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$filter', '$interval', '$location', '$anchorScroll',
-    'WMClient', 'PrintingService', 'WMAppointmentDialog', 'WMProcedureOffices', 'CurrentUser', 'WMConfig', ScheduleDayCtrl]);
+WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$filter', '$location', '$anchorScroll',
+    'WMClient', 'PrintingService', 'WMAppointmentDialog', 'WMProcedureOffices', 'CurrentUser',
+    'WMConfig', 'WMWindowSync', ScheduleDayCtrl]);

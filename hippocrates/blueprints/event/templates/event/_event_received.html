@@ -1,8 +1,8 @@
 <div ng-controller="EventReceivedCtrl">
-<ng-form name="event_received_form" role="form" toc-element="Информация о госпитализации" toc-name="tocEventForm">
+<ng-form name="event_received_form" role="form" toc-element="Информация о поступлении" toc-name="tocEventForm">
     <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
         <div class="box-header with-border" trigger-collapse>
-            <h3 class="box-title">Информация о госпитализации</h3>
+            <h3 class="box-title">Информация о поступлении</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" ng-click="received_edit()" title="Редактировать" ng-if="event.received.status < 2">
                     <span class="glyphicon glyphicon-pencil text-primary"></span>
@@ -45,6 +45,10 @@
                         <tr>
                             <th class="text-right">Отделение поступления</th>
                             <td>[[ event.received.orgStructStay.value.name ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Куда направлен</th>
+                            <td>[[ event.received.orgStructTransfer.value.name ]]</td>
                         </tr>
                         <tr>
                             <th class="text-right">№ наряда СП</th>
@@ -171,6 +175,20 @@
                                    id="ambulance_number" name="ambulance_number" ng-model="event.received.ambulance_number.value"/>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-5"
+                             ng-class="{'has-error': event_received_form.os_transfer.$invalid && editing.submit_attempt}">
+                            <label for="os_transfer" class="control-label">Куда направлен</label>
+                            <ui-select id="os_transfer" name="os_transfer" theme="select2"
+                                       ng-model="event.received.orgStructTransfer.value" ng-required="true" no-undefined-value>
+                                <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="os in OrgStructure.objects |
+                                    filter: {show: 1, hasHospitalBeds: formstate.is_hospital() ? 1 : ''} | filter: $select.search">
+                                    <div ng-bind-html="os.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="panel panel-default">
@@ -224,7 +242,7 @@
                 </div>
                 <div class="panel-body">
                     <wm-diagnosis-new ng-model="event.received.diagnoses" can-edit="true"
-                                      diag-types="event.received.action_type.diagnosis_types" can-add-new="true"></wm-diagnosis-new>
+                          diag-types="event.received.action_type.diagnosis_types" can-add-new="true"></wm-diagnosis-new>
                 </div>
             </div>
             <div class="panel panel-default" ng-if="!formstate.is_hospital()">

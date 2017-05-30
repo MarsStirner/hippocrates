@@ -28,6 +28,13 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
     //}
     //_set_tracking(true);
     // Здесь она типа заканчивается
+    $scope.getTissueName = function (action) {
+        try {
+            return '({0})'.format(safe_traverse(action.tissues[0], ['tissueType', 'name']).toLowerCase());
+        } catch (e) {
+            return ''
+        }
+    };
 
     $scope.init = function () {
         if (params.action_id) {
@@ -356,7 +363,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     var template_fields = [];
     var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'set_person',
         'person', 'coord_date', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(excluded_template_fields, template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service', 'tissues'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -575,7 +582,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     };
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
-        return prop ? prop.type.is_assignable : false;
+        return prop ? prop.is_assigned || prop.type.is_assignable : false;
     };
     Action.prototype._get_entity_changes = function(entity) {
         var dirty_elements = this[entity].filter(function(el) {

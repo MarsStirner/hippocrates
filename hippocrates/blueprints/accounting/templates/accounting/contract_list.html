@@ -95,7 +95,6 @@
                     <th>Дата окончания</th>
                     <th width="25%">Заказчик (Плательщик)</th>
                     <th width="25%">Исполнитель (Получатель)</th>
-                    <th>Контингент<br>(Кол-во)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,7 +107,6 @@
                         <td>[[ contract.end_date | asDate ]]</td>
                         <td>[[ contract.payer.full_descr ]]</td>
                         <td>[[ contract.recipient.full_descr ]]</td>
-                        <td>[[ contract.contingent_list.length ]]</td>
                         <td class="nowrap" width="1%">
                             <i class="fa fa-edit text-primary cursor-pointer" title="Редактировать"
                                 ng-if="canEdit(item)" ng-click="editContract($index)"></i>

@@ -161,6 +161,15 @@ angular.module('WebMis20.controllers').
                 }
             };
 
+            $scope.btnPrintAttachesVisible = function (obj) {
+                if (_.isArray(obj)) {
+                    return obj.some(function (o) {
+                        return Boolean(o.file_document);
+                    });
+                } else {
+                    return Boolean(obj.file_document);
+                }
+            };
             $scope.printFilesAttach = function (fa_list) {
                 function make_documents(fa_list) {
                     var deferred = $q.defer();
@@ -175,22 +184,24 @@ angular.module('WebMis20.controllers').
                     var pages = [],
                         promises = [];
                     angular.forEach(fa_list, function (fa) {
-                        angular.forEach(fa.file_document.files, function (fileMeta) {
-                            var promise;
-                            pages.push(new Image());
-                            var idx = pages.length - 1;
-                            promise = $http.get(WMConfig.url.patients.file_attach.get, {
-                                params: {
-                                    file_meta_id: fileMeta.id
-                                }
-                            }).success(function (data) {
-                                pages[idx].src = "data:{0};base64,".format(data.result.mime) + data.result.data;
-                            }).error(function () {
-                                pages[idx] = document.createElement('p');
-                                pages[idx].innerHTML = 'Ошибка загрузки {0} страницы документа'.format(idx);
+                        if (fa.file_document) {
+                            angular.forEach(fa.file_document.files, function (fileMeta) {
+                                var promise;
+                                pages.push(new Image());
+                                var idx = pages.length - 1;
+                                promise = $http.get(WMConfig.url.patients.file_attach.get, {
+                                    params: {
+                                        file_meta_id: fileMeta.id
+                                    }
+                                }).success(function (data) {
+                                    pages[idx].src = "data:{0};base64,".format(data.result.mime) + data.result.data;
+                                }).error(function () {
+                                    pages[idx] = document.createElement('p');
+                                    pages[idx].innerHTML = 'Ошибка загрузки {0} страницы документа'.format(idx);
+                                });
+                                promises.push(promise);
                             });
-                            promises.push(promise);
-                        });
+                        }
                     });
 
                     $q.all(promises).then(function composeDocument() {
@@ -220,13 +231,6 @@ angular.module('WebMis20.controllers').
                 });
             };
 
-            $scope.addVmpCoupon= function(client){
-                $scope.clientServices.addVmpCoupon(client)
-            }
-
-            $scope.removeVmpCoupon= function(client){
-                $scope.clientServices.removeVmpCoupon(client)
-            }
 
             $scope.reloadClient();
         }

@@ -1,0 +1,20 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <h4 class="modal-title">Госпитализация - [[event.info.client.info.full_name]]
+        [[ event.info.client.info.birth_date | asDate ]] ([[ event.info.client.info.age]])</h4>
+</div>
+<div class="modal-body modal-scrollable">
+    <div ui-alert-list="alerts"></div>
+    {% include 'event/_admission_info.html' %}
+</div>
+<div class="modal-footer">
+    <div class="pull-right">
+        <button type="button" class="btn btn-default" ng-click="$dismiss()">Закрыть</button>
+        <button class="btn btn-primary" ng-click="saveAndClose(HospForm)">
+            [[ create_mode ? 'Создать госпитализацию' : 'Сохранить' ]]</button>
+    </div>
+    <div class="text-left">
+        <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!create_mode"
+            lazy-load-context="[[ getEventPrintContext() ]]"></ui-print-button>
+    </div>
+</div>

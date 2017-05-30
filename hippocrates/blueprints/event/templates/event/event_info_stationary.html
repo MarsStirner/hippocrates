@@ -1,6 +1,7 @@
 {% extends "event/base.html" %}
 
 {% block main %}
+
 <div ng-controller="StationaryEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
@@ -25,6 +26,11 @@
                 [[ event.info.client.info.full_name ]]
             </a>
             {% else %}[[ event.info.client.info.full_name ]]{% endif %}
+            {%- if event and event.is_stationary -%}
+                <span ng-if="event.vmp_quoting.coupon.end_date" style="display:block;color:red;">
+                    <b>Талон действителен до [[ event.vmp_quoting.coupon.end_date | asDate]]</b>
+                </span>
+            {%- endif -%}
         </h1>
         </section>
         <section class="content">
@@ -207,12 +213,8 @@
     <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
     <script src="{{ url_for('risar.config_js', v=app_version) }}"></script>
     <script src="{{ url_for('risar.static', filename='js/risar.js', v=app_version) }}"></script>
-    <script src="{{ url_for('accounting.static', filename='js/accounting.js', v=app_version) }}"></script>
-    <script src="{{ url_for('accounting.static', filename='js/modal_cashbook.js', v=app_version) }}"></script>
     <script type="text/javascript" src="{{ url_for('patients.static', filename='js/patient_actions.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="modal-received.html">{% include 'event/_modal_received.html' %}</script>
-    <script type="text/ng-template" id="modal-create-moving.html">{% include 'event/_modal_create_moving.html' %}</script>
-    <script type="text/ng-template" id="modal-create-hospBed.html">{% include 'event/_modal_create_hospBed.html' %}</script>
     <script type="text/ng-template" id="modal-intolerances.html">{% include 'event/_modal_intolerances.html' %}</script>
     <script type="text/ng-template" id="modal-blood-history.html">{% include 'event/_modal_blood_history.html' %}</script>
 {% endblock %}

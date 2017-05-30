@@ -1,18 +1,17 @@
 <div ng-controller="EventQuotingCtrl">
     <ng-form name="eventCouponsForm" role="form" toc-element="Талоны ВМП" toc-name="tocCouponsForm">
         <div class="box box-info  collapsed-box">
-            <div class="box-header with-border">
+            <div class="box-header with-border" trigger-collapse>
                 <h3 class="box-title">Талон ВМП</h3>
-                <div class="box-tools pull-right">
+                <div class="box-tools pull-right" ng-controller="VmpCtrl">
+                    <button ng-if="!event.vmp_quoting.coupon"
+                            type="button" class="btn btn-default btn-box-tool"
+                            ng-click="addVmpCoupon(event.info.client)"> Загрузить талон </button>
                     <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-chevron-right"></i></button>
                 </div>
             </div>
             <div class="box-body">
                 <div class="row vmargin10">
-                    <div class="col-md-6">
-                        <label>Диагноз</label>
-                        <ui-select ext-select-mkb ng-model="event.vmp_quoting.mkb"></ui-select>
-                    </div>
                     <div class="col-md-6">
                         <label>Талон ВМП</label>
                             <ui-select ext-select-vmp-coupon contract-list="available_contracts.list"
@@ -20,6 +19,28 @@
                                 ng-model="event.vmp_quoting.coupon">
                             </ui-select>
 {#                        <rb-select ng-model="event.vmp_quoting.coupon"></rb-select>#}
+                    </div>
+                    <div class="form-group col-md-3">
+                            <label for="beg_date" class="control-label">Действителен с</label>
+                            <wm-date id="beg_date"
+                                     name="beg_date"
+                                     ng-model="event.vmp_quoting.coupon.beg_date"
+                                    {%- if not  user_utils.can_change_vmp_coupon -%}ng-disabled="true"{%- endif -%}
+                            />
+                    </div>
+                    <div class="form-group col-md-3">
+                            <label for="end_date" class="control-label">Действителен по</label>
+                            <wm-date id="end_date"
+                                     name="end_date"
+                                     ng-model="event.vmp_quoting.coupon.end_date"
+                                     {%- if not user_utils.can_change_vmp_coupon -%}ng-disabled="true"{%- endif -%}
+                            />
+                    </div>
+                </div>
+                <div class="row vmargin10">
+                    <div class="col-md-6">
+                            <label>Диагноз</label>
+                            <ui-select ext-select-mkb ng-model="event.vmp_quoting.mkb"></ui-select>
                     </div>
                 </div>
                 <div class="row vmargin10">

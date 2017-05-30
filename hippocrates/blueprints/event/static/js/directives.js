@@ -304,7 +304,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 return CurrentUser.current_role_in('admin') || (action.status.code !== 'finished' && action.can_delete);
             };
             scope.can_create_action = function () {
-                return scope.event.access.can_create_actions[at_class[scope.actionTypeGroup]];
+                return scope.event.can_create_actions(scope.actionTypeGroup);
             };
             scope.is_planned_end_date_needed = function () {
                 var types_allowed = ['diagnostics', 'lab', 'treatments'];
@@ -365,6 +365,13 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.isRefunded = function (action) {
                 return scope.action_has_payment(action) && action.payment.pay_status.code === 'refunded';
             };
+            scope.getTissueName = function (action) {
+                try {
+                    return '({0})'.format(safe_traverse(action.tissues[0], ['tissueType', 'name']).toLowerCase());
+                } catch (e) {
+                    return ''
+                }
+            };
             scope.reset_sorting();
             scope.reload();
         },
@@ -388,6 +395,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             <span ng-bind="action.name"></span>\
             <span ng-if="action.urgent" class="label"\
                   ng-class="{\'label-danger\': action.status.id < 2, \'label-default\': action.status.id >= 2}">Срочно</span>\
+            <span class="text-muted lmargin20" ng-if="actionTypeGroup === \'lab\'" style="color:#EB7D3D!important;"></br>[[getTissueName(action)]]</span>\
             <span ng-show="action_has_payment(action)" class="text-muted lmargin20"><br>\
             <span>Стоимость: [[ action.payment.sum ]] руб. </span><span\
                 ng-show="isPaid(action)" class="glyphicon glyphicon-ok text-success" title="[[action.payment.pay_status.name]]"></span><span\
@@ -520,7 +528,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
           <table class="table table-clickable">\
               <thead>\
               <th></th>\
-              <th ng-repeat="date in dates_list" class="text-center">\
+              <th ng-repeat="date in dates_list track by $index" class="text-center">\
                   [[ date ]]\
               </th>\
               </thead>\
@@ -530,7 +538,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                   <td>[[item.test_name]]\
                     <span ng-if="item.norm"><br><span class="lmargin20 text-bold">(Норма: [[item.norm]])</span></span>\
                   </td>\
-                  <td ng-repeat="date in dates_list" class="text-center">\
+                  <td ng-repeat="date in dates_list track by $index" class="text-center">\
                       <span ng-style="getValueNormStyle(item.values[date])">[[ item.values[date].val ? item.values[date].val : \'-\' ]]</span>\
                   </td>\
               </tr>\

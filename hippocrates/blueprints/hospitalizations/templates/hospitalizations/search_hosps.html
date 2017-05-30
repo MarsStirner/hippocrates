@@ -1,0 +1,173 @@
+{% extends 'hospitalizations/base.html' %}
+
+{% block title %}&gt; {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="CurrentHospsCtrl" class="ng-cloak">
+    <section class="content-header">
+        <h1>Список госпитализаций <a href="javascript:void(0);" class="btn-link"
+            ng-click="toggleHistoryView()">[[ isCurDayView() ? 'на текущие сутки' : 'на выбранную дату' ]]</a>
+        </h1>
+        <div class="breadcrumb novpadding">
+            <ui-print-button ps="ps_elist" lazy-load-context="hosp_list" class="pull-right"
+                resolve="ps_elist_resolve()"></ui-print-button>
+        </div>
+    </section>
+    <section class="content">
+        <div class="box box-info">
+        <div class="box-body">
+            <div class="col-md-6">
+                <p>Состояло на <span>[[date_range.start | asDateTime]]</span>: <b ng-bind="hosps_stats.count_current_prev_day"></b>, 
+                   Состоит на <span>[[date_range.end | asDateTime]]</span>: <b ng-bind="hosps_stats.count_current"></b>
+                </p>
+            </div>
+            <div class="col-md-6">
+                <p><span class="nowrap">Поступило: <b>[[hosps_stats.count_received]]</b></span>, 
+                   <span class="nowrap">Переведено: <b>[[hosps_stats.count_transferred]]</b></span>, 
+                   <span class="nowrap">Выписано: <b>[[hosps_stats.count_leaved]]</b></span>
+                </p>
+            </div>
+            <div class="col-md-12">
+                <p>Количество пациентов у врача: <span ng-bind-html="hospsByDoctorText"></span></p>
+            </div>
+        </div>
+        </div>
+        <div class="row marginal">
+            <div class="col-md-3">
+                <label for="start_dt">Дата и время начала</label>
+                <wm-datetime-as ng-model="date_range.start" ng-disabled="isCurDayView()"></wm-datetime-as>
+            </div>
+            <div class="col-md-3">
+                <label for="end_dt">Дата и время окончания</label>
+                <wm-datetime-as ng-model="date_range.end" ng-disabled="isCurDayView()"></wm-datetime-as>
+            </div>
+            <div class="col-md-3">
+                <label for="filter-org-struct">Отделение</label>
+                <wm-custom-dropdown id="filter-org-struct" ng-disabled="!canChangeOrgStruct()">
+                    <wm-org-structure-tree ng-model="filter.org_struct"
+                        nodes-selectable="true"></wm-org-structure-tree>
+                </wm-custom-dropdown>
+            </div>
+            <div class="col-md-3">
+                <label for="filter-hosp_status">Статус</label>
+                <rb-select ref-book="HospStateStatus" id="filter-hosp_status"
+                    ng-model="filter.hosp_status" allow-clear="true"></rb-select>
+            </div>
+        </div>
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Госпитализации</h3>
+                <div class="box-tools">
+                    <div class="has-feedback" style="display: inline-block; margin-right: 20px">
+                        <input type="text" class="form-control" ng-model="staticFilter.client_full_name"
+                            placeholder="ФИО пациента">
+                    </div>
+                    <div class="has-feedback" style="display: inline-block; margin-right: 20px">
+                        <input type="text" class="form-control" ng-model="staticFilter.set_person_name"
+                            placeholder="ФИО врача">
+                    </div>
+                    <div class="has-feedback" style="display: inline-block; margin-right: 20px">
+                        <input type="text" class="form-control" ng-model="staticFilter.external_id"
+                            placeholder="Номер ИБ">
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>
+                            <span class="styled">
+                                <input type="checkbox" id="selectAll1" ng-checked="visibleRecordsAllSelected()"
+                                    ng-click="toggleAllVisibleRecords()">
+                                <label for="selectAll1"></label>
+                            </span>
+                        </th>
+                        <th width="1%">№</th>
+                        <th width="10%">Палата/койка</th>
+                        <th width="10%" ng-if="canChangeOrgStruct()">Отделение</th>
+                        <th width="20%">ФИО пациента</th>
+                        <th width="10%">Возраст</th>
+                        <th width="10%">№ ИБ</th>
+                        <th width="15%">Лечащий врач</th>
+                        <th width="10%">Койко-дни</th>
+                        <th width="10%">Диагноз</th>
+                        <th width="10%">Диета</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="hosp in hosp_list">
+                        <td><wm-checkbox select-all="selectedRecords" key="hosp.id"></wm-checkbox></td>
+                        <td>[[ $index + 1 ]]</td>
+                        <td>
+                            <a href="javascript:void(0);" ng-click="createFirstMoving(hosp)"
+                                ng-if="firstMovingMissing(hosp) && controlsAvailable()">Положить на койку (нов.)</a>
+                            <a href="javascript:void(0);" ng-click="editMoving(hosp)"
+                                ng-if="!firstMovingMissing(hosp) && !isHospBedSelected(hosp) && controlsAvailable()">Положить на койку</a>
+                            <span ng-if="isHospBedSelected(hosp)">[[ hosp.hosp_bed_name ]]</span>
+                        </td>
+                        <td ng-if="canChangeOrgStruct()">[[ hosp.org_struct_name ]]</td>
+                        <td>
+                            [[ hosp.client.full_name ]]
+                        </td>
+                        <td>[[ hosp.client.birth_date | asDate ]] ([[ hosp.client.age ]])</td>
+                        <td>[[ hosp.external_id ]]</td>
+                        <td>[[ hosp.exec_person.short_name ]]</td>
+                        <td>[[ getHbDaysText(hosp) ]]</td>
+                        <td>
+                            <span ng-repeat="item in hosp.diagnoses">
+                                <span class="bottom_dashed" title="[[ item[1] ]]" ng-bind="item[0]"></span><span ng-if="!$last">, </span>
+                            </span>
+                        </td>
+                        <td>Не назначена</td>
+                        <td>
+                            <div class="btn-group pull-right" style="display: flex">
+                                {% if user_profiles_mng.has_ui_station_nurse() %}
+                                <button type="button" class="btn btn-default"
+                                    ng-click="viewEventInfo(hosp)">Просмотр</button>
+                                {% elif user_profiles_mng.has_ui_doctor() %}
+                                <a ng-href="[['{{ url_for('event.html_event_info') }}' + '?event_id=' + hosp.id]]"
+                                    target="_blank" class="btn btn-default">Просмотр</a>
+                                {% endif %}
+                                <button type="button" class="btn btn-default dropdown-toggle"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li ng-if="isHospBedSelected(hosp) && controlsAvailable()">
+                                        <a href="javascript:void(0);" ng-click="makeMovingTransfer(hosp)">
+                                            Перевести в отделение</a></li>
+                                    <li ng-if="!isHospBedSelected(hosp) || !controlsAvailable()" class="disabled">
+                                        <a href="javascript:void(0);">Перевести в отделение</a></li>
+                                    <li ng-if="!movingClosed(hosp) && isHospBedSelected(hosp) && controlsAvailable()">
+                                        <a href="javascript:void(0);" ng-click="makeMovingTransfer(hosp, true)">
+                                            Закрыть движение</a></li>
+                                    <li ng-if="movingClosed(hosp) || !isHospBedSelected(hosp) || !controlsAvailable()" class="disabled">
+                                        <a href="javascript:void(0);">Закрыть движение</a></li>
+                                    {% if user_profiles_mng.has_ui_admin() %}
+                                    <li>
+                                        <a ng-href="[['{{ url_for('event.html_event_info') }}' + '?event_id=' + hosp.id]]">Отрыть ИБ</a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
+            <div class="box-footer clearfix">
+                <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
+                    max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true"
+                    class="pagination pagination-sm no-margin">
+                </pagination>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/search_hosps.js', v=app_version) }}"></script>
+{% endblock %}

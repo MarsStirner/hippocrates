@@ -137,6 +137,7 @@
                             [[formstate.is_hospital() ? "Дата выписки" : "Дата выполнения"]]
                         </label>
                         <wm-date id="exec_date" name="exec_date" ng-model="event.info.exec_date"
+                                 min-date="event.info.set_date"
                                  ng-disabled="widget_disabled('exec_date')" popup-position="top-left">
                         </wm-date>
                     </div>
