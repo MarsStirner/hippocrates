@@ -100,7 +100,7 @@ def close_yesterday_checkups(self):
     """Закрывает осмотры <= 2-х рабочих дней"""
     def get_all_opened_checkups(today):
         delta = 4 if today.weekday() in [0, 1] else 2
-        close_day = today - delta
+        close_day = today - datetime.timedelta(days=delta)
         return Action.query.join(ActionType).filter(
             Action.deleted == 0,
             Action.begDate <= close_day.date(),
