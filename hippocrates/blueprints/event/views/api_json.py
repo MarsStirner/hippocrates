@@ -10,7 +10,8 @@ from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.event.app import module
 from hippocrates.blueprints.event.lib.utils import (save_event, received_save, client_quota_save,
-                                                    save_executives, EventSaveController, MovingController)
+                                                    save_executives, EventSaveController, MovingController,
+                                                    can_perform_close_event)
 from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
@@ -282,6 +283,8 @@ def api_event_close():
     error_msg = {}
     if not UserUtils.can_close_event(event, error_msg):
         raise ApiException(403, u'Невозможно закрыть обращение: %s.' % error_msg['message'])
+    if not can_perform_close_event(event):
+        raise ApiException(403, u'Необходимо добавить "Выписной эпикриз"')
 
     if not event_data['exec_date']:
         event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()

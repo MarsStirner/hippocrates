@@ -26,7 +26,7 @@ from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, 
     STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_ORG_STRUCT_RECEIVED_CODE, \
     STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
     STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE, \
-    DAY_HOSPITAL_CODE
+    DAY_HOSPITAL_CODE, STATIONARY_LEAVED_CODE
 from nemesis.systemwide import db
 
 
@@ -468,3 +468,8 @@ def save_executives(event_id):
         db.rollback()
         raise EventSaveException(u'Ошибка закрытия обращения')
 
+
+def can_perform_close_event(event):
+    return db.session.query(Action).join(ActionType, Event)\
+               .filter(Event.id == event.id, Action.deleted == 0, ActionType.flatCode == STATIONARY_LEAVED_CODE)\
+               .first() is not None
