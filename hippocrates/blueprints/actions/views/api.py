@@ -259,6 +259,7 @@ def prepare_action_data(action_desc):
 
     data['prescriptions'] = action_desc.get('prescriptions')
     data['properties'] = action_desc.get('properties')
+    data['attached_files'] = action_desc.get('attached_files')
     return data
 
 

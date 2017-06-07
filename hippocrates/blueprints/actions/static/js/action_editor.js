@@ -17,17 +17,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
     $scope.action = new WMAction();
     $scope.locker_person = null;
 
-    // Здесь начинается хрень
-    //var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
-    //    on_user_activity = _.throttle(_autosave, 10000);
-    //function _autosave () {
-    //    $scope.action.autosave();
-    //}
-    //function _set_tracking(on) {
-    //    $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
-    //}
-    //_set_tracking(true);
-    // Здесь она типа заканчивается
+    
+    
     $scope.getTissueName = function (action) {
         try {
             return '({0})'.format(safe_traverse(action.tissues[0], ['tissueType', 'name']).toLowerCase());
@@ -118,7 +109,11 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
         var was_new = $scope.action.is_new();
         return $scope.check_can_save_action()
         .then(function () {
-            if (was_new && need_to_print) { $window.sessionStorage.setItem('open_action_print_dlg', true) }
+            if (was_new) {
+                if (need_to_print) {$window.sessionStorage.setItem('open_action_print_dlg', true);}
+            } else {
+                $scope.$broadcast('before_action_saved', {action: $scope.action});
+            }
             return $scope.action.save()
                 .then(function (action) {
                     if (was_new) {
@@ -183,7 +178,6 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             deferred.resolve();
             return deferred.promise;
         }
-
         var deferred = $q.defer();
         if ($scope.action.readonly) {
             deferred.reject({
@@ -363,7 +357,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     var template_fields = [];
     var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'set_person',
         'person', 'coord_date', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service', 'tissues'].concat(excluded_template_fields, template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service', 'tissues', 'attached_files'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -583,6 +577,9 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
         return prop ? prop.is_assigned || prop.type.is_assignable : false;
+    };
+    Action.prototype.can_have_attaches = function () {
+        return !this.is_new() && this.action_type && this.action_type.can_have_attaches ?  true : false;
     };
     Action.prototype._get_entity_changes = function(entity) {
         var dirty_elements = this[entity].filter(function(el) {

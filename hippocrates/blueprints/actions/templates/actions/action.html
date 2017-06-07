@@ -47,6 +47,14 @@
                     <wm-action-layout action="action"></wm-action-layout>
                 </div>
             </div>
+            <div class="box box-info" ng-show="!action.is_new() && action.can_have_attaches()">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Прикрепить файлы</h3>
+                </div>
+                <div class="box-body">
+                   {% include "actions/file_uploader.html" %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
