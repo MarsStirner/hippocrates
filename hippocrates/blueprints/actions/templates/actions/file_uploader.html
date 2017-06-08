@@ -1,4 +1,4 @@
-<div class="row" ng-controller="FileUploadCtrl">
+<div class="row">
     <div class="col-md-8">
         <table class="table table-condensed" ng-show="filesTableVisible()">
             <thead>
@@ -37,7 +37,7 @@
         <h4><button type="button" class="btn btn-link lmargin20"
                          ngf-select="addNewFiles($files)" ngf-multiple="true"
                          ngf-max-size="max_file_size" ngf-pattern="files_pattern"
-    {#                     ng-show="canAddFile()"#}
+{#                         ng-show="canAddFile()"#}
                         >Добавить файл</button>
         </h4>
         <p class="text-info">
