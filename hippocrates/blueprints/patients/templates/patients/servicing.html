@@ -11,6 +11,9 @@
             <div class="box-header"></div>
             <div class="box-body">
                 <wm-search-client client-id="client_id" query="query" allow-register
+                    {% if user_profiles_mng.has_ui_adm_nurse_ex() %}
+                    custom-register custom-register-callback="openRegisterPatient()"
+                    {% endif %}
                     on-select="setSelectedPatient(selected_client)"
                     get-search-api="getClientSearchApi(api)"></wm-search-client>
             </div>

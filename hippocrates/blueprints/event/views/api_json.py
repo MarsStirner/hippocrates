@@ -259,16 +259,16 @@ def api_blood_history_save():
 
 def update_executives(event):
     last_executive = Event_Persons.query.filter(Event_Persons.event_id == event.id).order_by(desc(Event_Persons.begDate)).first()
-    if not last_executive or last_executive.person_id != event.execPerson_id:
+    if event.execPerson and (not last_executive or last_executive.person_id != event.execPerson_id):
         executives = Event_Persons()
         executives.person = event.execPerson
         executives.event = event
         executives.begDate = event.setDate
         db.session.add(executives)
-        if last_executive:
-            last_executive.endDate = event.setDate
-            db.session.add(last_executive)
-        db.session.commit()
+    if last_executive:
+        last_executive.endDate = event.setDate
+        db.session.add(last_executive)
+    db.session.commit()
 
 
 @module.route('/api/event_close.json', methods=['POST'])

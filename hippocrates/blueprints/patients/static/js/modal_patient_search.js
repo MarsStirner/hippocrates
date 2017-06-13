@@ -28,6 +28,9 @@ var ClientSearchModalCtrl = function ($scope, $filter, $window, PrintingService,
             ticket_id: client_ticket_id
         }
     };
+    $scope.getPsContext = function () {
+        return CurrentUser.current_role_in('admNurse') ? 'f003' : 'token';
+    };
 
     $scope.formatAppointmentDate = function (appointment) {
         return '{0}{ (|1|)}'.formatNonEmpty(
