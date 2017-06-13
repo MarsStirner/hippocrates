@@ -68,10 +68,14 @@ class MeasureListXForm(MeasureListSchema, XForm):
             'measure_status_id_list': em_status_all - em_cancelled_all
         }
         if 'date_begin' in kwargs:
-            kwargs['end_date_from'] = kwargs['date_begin']
+            # em.endDateTime >= date_begin
+            flt['end_date_from'] = kwargs['date_begin']
         if 'date_end' in kwargs:
+            # em.begDateTime <= date_end
             flt['beg_date_to'] = kwargs['date_end']
         em_ctrl = EventMeasureController()
+        # Если заданы date_begin и date_end, то будут выбраны все мероприятия, которые попадают в этот диапазон
+        # полностью или частично.
         data = em_ctrl.get_measures_in_event(None, flt)
         return data
 
