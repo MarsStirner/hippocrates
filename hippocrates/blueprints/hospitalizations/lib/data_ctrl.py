@@ -34,7 +34,7 @@ class HospitalizationController(BaseModelController):
                 'external_id': hosp.Event.externalId,
                 'exec_person': {
                     'id': hosp.Event.execPerson_id,
-                    'short_name': hosp.Event.execPerson.shortNameText
+                    'short_name': hosp.Event.execPerson.shortNameText if hosp.Event.execPerson else ''
                 },
                 'client': {
                     'id': hosp.Event.client.id,

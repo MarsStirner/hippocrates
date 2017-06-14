@@ -531,7 +531,8 @@ def int_get_orgstructure(org_id, with_deleted=False, with_hidden=False):
         query = query.filter(OrgStructure.show == 1)
     return [{
         'id': t.id,
-        'name': t.name,
+        'name': t.shortName,
+        'full_name': t.name,
         'code': t.code,
         'parent_id': t.parent_id,
     } for t in query]
