@@ -25,7 +25,7 @@ WebMis20.service('PatientModalService', ['$modal', '$templateCache', 'WMConfig',
                 });
             } else {
                 return _openClientModal(wmclient);
-            };
+            }
         },
         openNewClient: function () {
             var wmclient = new WMClient('new');

@@ -305,6 +305,7 @@ var EventHospModalCtrl = function ($scope, $q, PrintingService, WMConfig,
                 if ($scope.create_mode) {
                     $scope.event.info.event_type = $scope.rbEventType.get_available_et(
                         $scope.event.info.event_type);
+                    $scope.event.info.exec_person = null;
                 }
                 set_rt_finance_choices();
                 $scope.on_event_type_changed();

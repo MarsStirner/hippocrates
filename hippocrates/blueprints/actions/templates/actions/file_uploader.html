@@ -1,0 +1,48 @@
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-condensed" ng-show="filesTableVisible()">
+            <thead>
+                <tr>
+                    <th>Наименование</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="attach in action.attached_files">
+                    <td><input type="text" class="form-control" ng-model="attach.file_meta.name" ng-required="true"
+                        ng-disabled="!canEditFileInfo(attach)"></td>
+                    <td>
+                        <a ng-href="[[attach.file_meta.url]]" target="_blank" class="btn btn-sm btn-primary" title="Скачать"
+                            ng-disabled="!canDownloadFile(attach)">
+                            <i class="fa fa-download"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger" ng-click=removeFile($index)
+                            title="Удалить" ng-if="canDeleteFile(attach)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-repeat="file in new_files">
+                    <td><input type="text" class="form-control" ng-model="file.name" ng-required="true"
+                        ng-disabled="!canEditFileInfo(file)"></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" ng-click=removeNewFile($index)
+                            title="Удалить" ng-if="!file.id">
+                            <i class="fa fa-remove"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h4><button type="button" class="btn btn-link lmargin20"
+                         ngf-select="addNewFiles($files)" ngf-multiple="true"
+                         ngf-max-size="max_file_size" ngf-pattern="files_pattern"
+{#                         ng-show="canAddFile()"#}
+                        >Добавить файл</button>
+        </h4>
+        <p class="text-info">
+            Разрешена загрузка файлов размером до [[max_file_size]]
+            <span ng-if="files_pattern"> с расширением [[files_pattern]]</span>
+        </p>
+    </div>
+</div>

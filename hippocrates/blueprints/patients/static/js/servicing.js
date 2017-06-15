@@ -32,6 +32,16 @@ var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
         args = angular.extend({}, $location.search(), args);
         $location.search(args).replace();
     };
+    $scope.openRegisterPatient = function () {
+        return PatientModalService.openNewClient()
+            .then(function (client_id) {
+                $scope.clientSearchApi.setQuery(client_id);
+                $scope.updateUrlArgs({q: client_id});
+                $scope.setSelectedPatient({
+                    info: { id: client_id }
+                });
+            });
+    };
 
     // set initial query text
     if ($scope.query) {
@@ -51,4 +61,5 @@ var ClientSearch = function ($scope, $location, WMClient, PatientModalService) {
     }
 };
 
-WebMis20.controller('ClientSearch', ['$scope', '$location', 'WMClient', 'PatientModalService', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', '$location', 'WMClient', 'PatientModalService',
+    ClientSearch]);

@@ -14,7 +14,7 @@
             <button class="btn btn-sm btn-primary" ng-click="openClient()" title="Редактировать данные пациента">
                 <span class="glyphicon glyphicon-pencil"></span></button>
             {% endif %}
-            <ui-print-button ps="ps" class="btn-sm" resolve="ps_resolve()" lazy-load-context="token"></ui-print-button>
+            <ui-print-button ps="ps" class="btn-sm" resolve="ps_resolve()" lazy-load-context="[[getPsContext()]]"></ui-print-button>
             </div>
         </div>
     </div>
@@ -58,6 +58,6 @@
             Редактировать данные госпитализации</button>
         <button class="btn btn-primary" ng-click="openClientModal()">Редактировать данные пациента</button>
         {% endif %}
-        <ui-print-button ps="ps" resolve="ps_resolve()" lazy-load-context="token"></ui-print-button>
+        <ui-print-button ps="ps" resolve="ps_resolve()" lazy-load-context="[[getPsContext()]]"></ui-print-button>
     </div>
 </div>

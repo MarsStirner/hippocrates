@@ -1,8 +1,9 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
-        RefBookService, MessageBox, NotificationService, WMConfig, AccountingService, PatientActionsModalService, CurrentUser) {
+var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService,
+                                 PrintingDialog, RefBookService, MessageBox, NotificationService, WMConfig,
+                                 AccountingService, PatientActionsModalService, CurrentUser, Upload) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -12,22 +13,10 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisTypeN');
-
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
 
-    // Здесь начинается хрень
-    //var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
-    //    on_user_activity = _.throttle(_autosave, 10000);
-    //function _autosave () {
-    //    $scope.action.autosave();
-    //}
-    //function _set_tracking(on) {
-    //    $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
-    //}
-    //_set_tracking(true);
-    // Здесь она типа заканчивается
     $scope.getTissueName = function (action) {
         try {
             return '({0})'.format(safe_traverse(action.tissues[0], ['tissueType', 'name']).toLowerCase());
@@ -80,6 +69,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                 }
             });
         }
+        $scope.action_attach_type_id = fat.get_by_code('action').id;
     };
 
     function update_print_templates (context_name) {
@@ -118,26 +108,34 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
         var was_new = $scope.action.is_new();
         return $scope.check_can_save_action()
         .then(function () {
-            if (was_new && need_to_print) { $window.sessionStorage.setItem('open_action_print_dlg', true) }
-            return $scope.action.save()
-                .then(function (action) {
-                    if (was_new) {
-                        $window.open(WMConfig.url.actions.action_html + '?action_id=' + action.id, '_self');
-                    } else {
+            var promise;
+            if (was_new) {
+                if (need_to_print) {$window.sessionStorage.setItem('open_action_print_dlg', true);}
+                promise = $q.when();
+            } else {
+                promise = $scope.processNewFiles($scope.action);
+            }
+            return promise.then(function() {
+                $scope.action.save()
+                    .then(function (action) {
+                        if (was_new) {
+                            $window.open(WMConfig.url.actions.action_html + '?action_id=' + action.id, '_self');
+                        } else {
+                            NotificationService.notify(
+                                200,
+                                'Успешно сохранено',
+                                'success',
+                                5000
+                            );
+                        }
+                    }, function (result) {
                         NotificationService.notify(
-                            200,
-                            'Успешно сохранено',
-                            'success',
-                            5000
+                            500,
+                            'Ошибка сохранения, свяжитесь с администратором',
+                            'danger'
                         );
-                    }
-                }, function (result) {
-                    NotificationService.notify(
-                        500,
-                        'Ошибка сохранения, свяжитесь с администратором',
-                        'danger'
-                    );
-                });
+                    });
+            });
         }, function (result) {
             var deferred = $q.defer();
             if (need_to_print) {
@@ -183,7 +181,6 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             deferred.resolve();
             return deferred.promise;
         }
-
         var deferred = $q.defer();
         if ($scope.action.readonly) {
             deferred.reject({
@@ -253,8 +250,120 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
             $scope.action.merge_template(action);
         })
     };
+    //start files
+    $scope.new_files = [];
+    $scope.max_file_size = WMConfig.local_config.files_upload.max_file_size;
+    $scope.files_pattern = WMConfig.local_config.files_upload.pattern;
+    $scope.action_attach_type_id = null;
 
-    $q.all([$scope.ActionStatus.loading, $scope.rbDiagnosisType.loading]).then($scope.init);
+    function reformatUploadedFiles(file_data) {
+        return _.map(file_data, function(responseObj) {
+            var file_info = safe_traverse(responseObj, ['data', 'result', 'files', 0]);
+            if (file_info) {
+                var attach = file_info.attach;
+                delete file_info.attach;
+                return {
+                    id: attach && attach.id,
+                    file_meta: file_info
+                };
+            }
+        });
+    }
+
+    $scope.processNewFiles = function (action) {
+        var attach_data = make_attach_data(action);
+        var upload_promises = _.map($scope.new_files, function (f) { return $scope.uploadFiles([f], attach_data) });
+        return $q.all(upload_promises)
+            .then(function (data) {
+                var fileDatas = reformatUploadedFiles(data);
+                $scope.new_files = [];
+                $scope.action.attached_files = $scope.action.attached_files.concat(fileDatas);
+            });
+    };
+
+    $scope.uploadFiles = function (files, attach_data) {
+
+        if (files && files.length) {
+            return Upload.upload({
+                url: WMConfig.url.devourer.upload,
+                data: {
+                    files: _.pluck(files, 'file'),
+                    info: Upload.json({
+                        attach_data: attach_data,
+                        files_info: _.map(files, function (f) { return _.pick(f, 'name') })
+                    })
+                },
+                arrayKey: '',
+                withCredentials: true
+            }).then(function(data) {
+                return data;
+            }, function (result) {
+                return MessageBox.error(
+                    'Ошибка сохранения файла',
+                    'Не удалось сохранить прикреплённый файл. Свяжитесь с администратором.'
+                );
+            });
+        }
+        var defer = $q.defer();
+        defer.resolve('no files to upload');
+        return defer.promise;
+    };
+
+    var make_attach_data = function (action) {
+            return {
+                attach_type: $scope.action_attach_type_id,
+                action_id: action.id,
+                set_person_id: CurrentUser.id
+            }
+    };
+    var make_file = function (file_obj) {
+        return {
+            file: file_obj,
+            name: null
+        };
+    };
+    $scope.addNewFiles = function (files) {
+        _.map(files, function (file) {
+            var nf = make_file(file);
+            $scope.setFileName(nf);
+            $scope.new_files.push(nf);
+        });
+    };
+    $scope.removeNewFile = function (idx) {
+        $scope.new_files.splice(idx, 1);
+    };
+    $scope.removeFile = function (idx) {
+        $scope.action.attached_files.splice(idx, 1);
+    };
+    $scope.setFileName = function (file) {
+        if (file.file) {
+            var orig_name = file.file.name,
+                ext_idx = orig_name.lastIndexOf('.');
+            if (ext_idx !== -1) {
+                orig_name = orig_name.substring(0, ext_idx);
+            }
+            file.name = orig_name;
+        }
+    };
+    $scope.canAddFile = function () {
+        return $scope.action.attached_files && !$scope.action.ro;
+    };
+    $scope.filesTableVisible = function () {
+        return $scope.action.attached_files && $scope.action.attached_files.length > 0 ||
+            $scope.new_files.length > 0;
+    };
+    $scope.canEditFileInfo = function (file_attach) {
+        return !file_attach.id || !$scope.action.ro || CurrentUser.current_role_in('admin');
+    };
+    $scope.canDownloadFile = function (attach) {
+        return true;
+    };
+    $scope.canDeleteFile = function (attach) {
+        return !$scope.action.ro || CurrentUser.current_role_in('admin');
+    };
+    var fat = RefBookService.get('FileAttachType');
+    //end files
+    $q.all([$scope.ActionStatus.loading, $scope.rbDiagnosisType.loading, fat.loading]).then($scope.init);
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
     $scope.model = {
@@ -356,14 +465,14 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'MessageBox', 'NotificationService',
-    'WMConfig', 'AccountingService', 'PatientActionsModalService', 'CurrentUser', ActionEditorCtrl]);
+    'WMConfig', 'AccountingService', 'PatientActionsModalService', 'CurrentUser', 'Upload',  ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', function ($q, ApiCalls, EzekielLock, WMConfig) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = [];
     var excluded_template_fields = ['status', 'direction_date', 'beg_date', 'end_date', 'planned_end_date', 'set_person',
         'person', 'coord_date', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service', 'tissues'].concat(excluded_template_fields, template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service', 'tissues', 'attached_files'].concat(excluded_template_fields, template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -583,6 +692,9 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', 'WMConfig', funct
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
         return prop ? prop.is_assigned || prop.type.is_assignable : false;
+    };
+    Action.prototype.can_have_attaches = function () {
+        return !this.is_new() && this.action_type && this.action_type.can_have_attaches ?  true : false;
     };
     Action.prototype._get_entity_changes = function(entity) {
         var dirty_elements = this[entity].filter(function(el) {

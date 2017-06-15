@@ -176,24 +176,25 @@
                         </div>
                     </div>
                     {%- endif %}
-                    {% if user_utils.can_close_event(event) %}
+                    {% if event.is_pre_closed %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="close_event()" class="btn btn-block btn-info">{{ 'Закрыть ИБ' if event.eventType.isLong else 'Закрыть обращение'}}</button>
+                            <button type="button" class="btn btn-block btn-gray disabled">{{ 'ИБ закрыта' if event.eventType.isLong else 'Обращение закрыто'}}</button>
                         </div>
                     </div>
-                    {%- endif %}
-                    {% if event.is_closed %}
-                    <div class="row vmargin10">
-                        <div class="col-md-12">
-                            <button type="button" class="btn btn-block btn-gray disabled">Обращение закрыто</button>
-                        </div>
-                    </div>
+                    {% else %}
+                         {%- if user_utils.can_close_event(event) -%}
+                            <div class="row vmargin10">
+                                <div class="col-md-12">
+                                    <button type="button" ng-click="close_event()" class="btn btn-block btn-info">{{ 'Закрыть ИБ' if event.eventType.isLong else 'Закрыть обращение'}}</button>
+                                </div>
+                            </div>
+                        {%- endif -%}
                     {%- endif %}
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block">Удалить обращение</button>
+                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block">{{ 'Удалить ИБ' if event.eventType.isLong else 'Удалить обращение'}}</button>
                         </div>
                     </div>
                     {% endif %}
