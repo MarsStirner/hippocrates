@@ -8,6 +8,17 @@ var ClientSearchModalCtrl = function ($scope, $filter, $window, PrintingService,
     $scope.event = client.current_hosp;
     $scope.alerts = [];
 
+    $scope.tabs = {
+        'appointments': 'Предварительные записи',
+        'admission': 'Текущая госпитализация',
+        'events': 'Обращения',
+        'patient_actions': 'Записи ЭМК'
+    };
+    $scope.currentTab = CurrentUser.current_role_in('admNurse') ? 'admission' : 'appointments';
+    $scope.setCurrentTab = function (tab) {
+        $scope.currentTab = tab;
+    };
+
     $scope.ps = new PrintingService('registry');
     $scope.ps_resolve = function () {
         return {
@@ -28,8 +39,17 @@ var ClientSearchModalCtrl = function ($scope, $filter, $window, PrintingService,
             ticket_id: client_ticket_id
         }
     };
-    $scope.getPsContext = function () {
-        return CurrentUser.current_role_in('admNurse') ? 'f003' : 'token';
+    $scope.ps_hosp_received = new PrintingService('action');
+    $scope.ps_hosp_received_resolve = function () {
+        return {
+            action_id: safe_traverse($scope.client, ['current_hosp', 'received', 'id'])
+        }
+    };
+    $scope.btnPrintClientVisible = function () {
+        return $scope.currentTab !== 'admission';
+    };
+    $scope.btnPrintEventVisible = function () {
+        return $scope.currentTab === 'admission';
     };
 
     $scope.formatAppointmentDate = function (appointment) {
