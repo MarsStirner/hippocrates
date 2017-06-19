@@ -14,7 +14,10 @@
             <button class="btn btn-sm btn-primary" ng-click="openClient()" title="Редактировать данные пациента">
                 <span class="glyphicon glyphicon-pencil"></span></button>
             {% endif %}
-            <ui-print-button ps="ps" class="btn-sm" resolve="ps_resolve()" lazy-load-context="[[getPsContext()]]"></ui-print-button>
+            <ui-print-button ps="ps" class="btn-sm" ng-if="btnPrintClientVisible()" resolve="ps_resolve()"
+                lazy-load-context="token"></ui-print-button>
+            <ui-print-button ps="ps_hosp_received" class="btn-sm" ng-if="btnPrintEventVisible()"
+                resolve="ps_hosp_received_resolve()" lazy-load-context="f003"></ui-print-button>
             </div>
         </div>
     </div>
@@ -23,10 +26,10 @@
     <div ui-alert-list="alerts"></div>
     <tabset>
         {% if user_profiles_mng.has_ui_registrator() %}
-        <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+        <tab heading="[[tabs.appointments]]" ng-click="setCurrentTab('appointments')">{% include "patients/_appointments.html" %}</tab>
         {% endif %}
         {% if user_profiles_mng.has_ui_adm_nurse() %}
-        <tab heading="Текущая госпитализация">
+        <tab heading="[[tabs.admission]]" ng-click="setCurrentTab('admission')">
             <div ng-if="!curHospAvailable()">
                 <h3 class="marginal">Госпитализация ещё не создана</h3>
                 <button type="button" class="btn btn-primary btn-lg"
@@ -37,8 +40,8 @@
             </div>
         </tab>
         {% endif %}
-        <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
-        <tab heading="Записи ЭМК" select="openPatientActions()">
+        <tab heading="[[tabs.events]]" ng-click="setCurrentTab('events')">{% include "patients/_event_list.html" %}</tab>
+        <tab heading="[[tabs.patient_actions]]" ng-click="setCurrentTab('patient_actions')" select="openPatientActions()">
             <div ng-controller="PatientActionsCtrl">
             {% include "patients/_patient_actions.html" %}
             </div>
@@ -58,6 +61,9 @@
             Редактировать данные госпитализации</button>
         <button class="btn btn-primary" ng-click="openClientModal()">Редактировать данные пациента</button>
         {% endif %}
-        <ui-print-button ps="ps" resolve="ps_resolve()" lazy-load-context="[[getPsContext()]]"></ui-print-button>
+        <ui-print-button ps="ps" class="btn-sm" ng-if="btnPrintClientVisible()" resolve="ps_resolve()"
+            lazy-load-context="token"></ui-print-button>
+        <ui-print-button ps="ps_hosp_received" class="btn-sm" ng-if="btnPrintEventVisible()"
+            resolve="ps_hosp_received_resolve()" lazy-load-context="f003"></ui-print-button>
     </div>
 </div>
