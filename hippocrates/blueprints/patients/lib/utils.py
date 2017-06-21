@@ -9,15 +9,16 @@ import uuid
 
 from nemesis.app import app
 from nemesis.lib.apiutils import ApiException
+from nemesis.models.person import Person
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, safe_traverse, encode_file_name
+from nemesis.lib.utils import safe_date, safe_traverse, encode_file_name, get_new_amb_card_ext_id
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
 from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument, ClientWork,
-   ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
-   ClientRelation, Address, ClientFileAttach
-)
+                                   ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
+                                   ClientRelation, Address, ClientFileAttach,
+                                   ClientAttach, AmbulanceCard)
 from nemesis.models.enums import AddressType
-from nemesis.models.exists import rbSocStatusClass, FileMeta, FileGroupDocument
+from nemesis.models.exists import rbSocStatusClass, FileMeta, FileGroupDocument, rbAttachType
 
 logger = logging.getLogger('simple')
 
@@ -675,3 +676,74 @@ def delete_client_file_attach_and_relations(cfa_id):
         ClientPolicy.cfa_id: None
     })
     db.session.commit()
+
+
+
+class ClientAttachCtrl(object):
+    @staticmethod
+    def get_or_create_client_attach(client_id, data):
+        ca_id = data.get('id')
+        amb_card_id = data.get('amb_card_id')
+        is_new = ca_id is None
+        if not is_new:
+            attach = ClientAttach.query.filter(ClientAttach.id == ca_id).scalar()
+        else:
+            if amb_card_id is None:
+                _, amb_card = ClientAttachCtrl.get_or_create_amb_card(client_id)
+                amb_card_id = amb_card.id
+            attach = ClientAttachCtrl.create_client_attach(client_id, amb_card_id)
+        if not attach:
+            raise ApiException(404, u'ClientAttach с id {0} не найден'.format(ca_id))
+        return is_new, attach
+
+    @staticmethod
+    def get_or_create_amb_card(client_id):
+        was_created = False
+        amb_card = AmbulanceCard.query.filter_by(client_id=client_id, deleted=0).scalar()
+        if not amb_card:
+            amb_card = AmbulanceCard(client_id=client_id)
+            amb_card.generatedId = get_new_amb_card_ext_id(client_id)
+            db.session.add(amb_card)
+            db.session.commit()
+            was_created = True
+        return was_created, amb_card
+
+    @staticmethod
+    def set_end_date_for_previous_attach(attach):
+        prev = attach.previous_without_end_date
+        if prev:
+            new_end_date = safe_date(attach.begDate) - datetime.timedelta(days=1)
+            prev.endDate = new_end_date if safe_date(prev.begDate) <= new_end_date else prev.begDate
+
+    @staticmethod
+    def fill_client_attach(attach, data):
+        person_id = safe_traverse(data, 'person', 'id')
+        person = Person.query.filter(Person.id == person_id).first()
+        if not person:
+            raise ApiException(404, u'Для прикрепления нужен врач'.format(data.get('id')))
+        attach.orgStructure_id = person.orgStructure_id
+        attach.LPU_id = person.org_id
+        attach.begDate = safe_date(data.get('begDate'))
+        attach.endDate = safe_date(data.get('endDate'))
+        attach.person_id = person_id
+
+    @staticmethod
+    def create_client_attach(client_id, amb_card_id=None):
+        attach = ClientAttach()
+        attach.begDate = datetime.datetime.now()
+        attach.attachType_id = rbAttachType.query.filter(rbAttachType.code == 'amb_card').first().id
+        attach.client_id = client_id
+        if amb_card_id:
+            attach.amb_card_id = amb_card_id
+        db.session.add(attach)
+        return attach
+
+    @staticmethod
+    def delete_client_attach(data):
+        client_attach_data = data.get('client_attach')
+        cattach_id = client_attach_data.get('id')
+        client_attach = ClientAttach.query.filter_by(id=cattach_id).one()
+        if not client_attach:
+            raise ApiException(404, u'Не найдена запись ClientAttach с id = {0}'.format(cattach_id))
+        client_attach.deleted = 1
+        db.session.commit()
