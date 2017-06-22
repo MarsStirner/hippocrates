@@ -1,0 +1,16 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <h4 class="modal-title">Записи ЭМК – {{ client.nameText }} {{ client.birthDate.strftime('%d.%m.%Y') }} ({{ client.age }})</h4>
+</div>
+<div class="modal-body">
+    {% include 'actions/_actions_with_values.html' %}
+</div>
+<div class="pull-right" style="margin-right: 30px">
+    <span ng-repeat="template in get_templates()">
+        <ui-print-button ps="ps" class="btn btn-default" render-only="true"  after-print="pasteText(result)"
+                         template-code="[[template.code]]" lazy-load-context="[[get_context()]]" fast-print="true" resolve="ps_resolve()">
+            [[$parent.template.button_name]]
+        </ui-print-button>
+    </span>
+    <button type="button" class="btn btn-default" ng-click="$dismiss('cancel')">Закрыть</button>
+</div>

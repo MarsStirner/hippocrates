@@ -123,6 +123,20 @@ def api_action_get(action_id):
         return v.make_action(action)
 
 
+@module.route('/api/action_properties/')
+@module.route('/api/action_properties/<int:action_id>', methods=['GET'])
+@api_method
+def api_action_properties_get(action_id):
+    with db.session.no_autoflush:
+        action = Action.query.options(
+            joinedload(Action.actionType),
+            joinedload(Action.event),
+            joinedload(Action.person),
+        ).filter(Action.id == action_id).first() or bail_out(ApiException(404, u'Документ не найден'))
+        v = ActionVisualizer()
+        return v.make_action_properties(action)
+
+
 @module.route('/api/action/query/previous', methods=['GET'])
 @api_method
 def api_find_previous():
@@ -659,7 +673,13 @@ def api_patient_actions(client_id=None):
         Event.client_id == client_id,
         Event.deleted == 0,
         Action.deleted == 0
-    ).order_by(Action.begDate, Action.status).options(
+    )
+
+    at_class = request.args.getlist('at_class')
+    if at_class:
+        patient_actions = patient_actions.join(ActionType).filter(ActionType.class_.in_(at_class))
+
+    patient_actions = patient_actions.order_by(Action.begDate, Action.status).options(
         joinedload(Action.actionType, innerjoin=True).joinedload('diagnosis_types')
     )
 
