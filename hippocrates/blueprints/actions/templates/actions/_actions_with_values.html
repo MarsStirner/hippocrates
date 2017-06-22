@@ -1,0 +1,46 @@
+<div class="row marginal tmargin20">
+<div class="col-md-12">
+    <input class="form-control" type="text" ng-model="cond.query" wm-slow-change="set_filter(true)" placeholder="Фильтр по названию, коду" />
+</div>
+</div>
+<div class="ui-treeview">
+    <ul ng-repeat="class_item_node in filtered_tree.children">
+        <li sf-treepeat="node in children of class_item_node">
+            <div ng-if="node.is_at_class_item">
+                <a class="node" ng-click="tree.toggle_expanded(node)">
+                    <div class="tree-label expanded" ng-if="!node.children.length">&nbsp;</div>
+                    <div ng-if="node.children.length" class="tree-label" ng-class="{'collapsed': !tree.is_expanded(node),
+                        'expanded': tree.is_expanded(node)}">&nbsp;</div>
+                    <span class="text-bold" style="font-size: larger">[[ node.name ]]</span>
+                </a>
+            </div>
+
+            <a ng-if="node.is_at_item && node.children.length" ng-click="tree.toggle_expanded(node)"
+                class="node">
+                <div class="tree-label" ng-class="{'collapsed': !tree.is_expanded(node),
+                    'expanded': tree.is_expanded(node)}">&nbsp;</div>
+                [ [[node.code]] ] [[ node.name ]]
+            </a>
+
+            <a ng-if="node.is_action_item" class="node" ng-click="refreshActionProperties(node)">
+                <div class="tree-label" ng-class="{'collapsed': !tree.is_expanded(node),
+                    'expanded': tree.is_expanded(node)}">&nbsp;</div>
+                <span ng-bind="node.formatData()" style="font-style: italic; text-decoration: underline"></span>
+            </a>
+
+            <div ng-if="node.is_ap_item">
+                <div class="checkbox" style="margin-top: 0; margin-bottom: 0">
+                    <div class="tree-label leaf">&nbsp;</div>
+                    <label>
+                        <input type="checkbox" ng-model="node.isSelected" >
+                        <span ng-bind-html="node.formatData()"></span>
+                    </label>
+                </div>
+            </div>
+
+            <ul ng-if="node.children.length && tree.is_expanded(node)">
+                <li sf-treecurse></li>
+            </ul>
+        </li>
+    </ul>
+</div>
