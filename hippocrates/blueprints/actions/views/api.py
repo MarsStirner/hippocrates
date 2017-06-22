@@ -134,7 +134,7 @@ def api_action_properties_get(action_id):
             joinedload(Action.person),
         ).filter(Action.id == action_id).first() or bail_out(ApiException(404, u'Документ не найден'))
         v = ActionVisualizer()
-        return v.make_action_properties(action)
+        return v.make_tree_action_properties(action)
 
 
 @module.route('/api/action/query/previous', methods=['GET'])

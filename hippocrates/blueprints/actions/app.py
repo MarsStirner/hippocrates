@@ -23,6 +23,7 @@ def fc_urls():
             'actions': {
                 'html': {
                     'action': url_for('actions.html_action'),
+                    'actions_with_values_modal': uf_placeholders('actions.actions_with_values_modal', ['client_id']),
                 },
                 'action_get': uf_placeholders('actions.api_action_get', ['action_id']),
                 'action_properties_get': uf_placeholders('actions.api_action_properties_get', ['action_id']),
@@ -42,7 +43,6 @@ def fc_urls():
                 'search_actions': url_for('actions.api_search_actions'),
                 'patient_actions': url_for('actions.api_patient_actions'),
                 'actions_with_values': uf_placeholders('actions.api_patient_actions', ['client_id']),
-                'actions_with_values_modal': uf_placeholders('actions.actions_with_values_modal', ['client_id']),
             }
         }
     }

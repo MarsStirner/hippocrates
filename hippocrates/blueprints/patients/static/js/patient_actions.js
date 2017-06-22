@@ -317,10 +317,11 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 self.toggle_group_expanded(node, true);
             });
         };
-        self.get_selected_data = function (node) {
+        self.get_selected_ap_tree_items = function (node) {
+            /* Виберет все отмеченные APTreeItem дерева */
             var actions_dict = {};
             var traverse = function (item) {
-                if (item.hasOwnProperty('isSelected') && item.hasOwnProperty('id')) {
+                if (item instanceof APTreeItem && item.isSelected && item.hasOwnProperty('id')) {
                     if (!actions_dict.hasOwnProperty(item.action_id)) {
                         actions_dict[item.action_id] = [];
                     }
