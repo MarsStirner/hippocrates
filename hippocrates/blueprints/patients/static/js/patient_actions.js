@@ -279,7 +279,7 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             return new APTreeItem(this)
         };
         APTreeItem.prototype.formatData = function () {
-            return '<b>{0}:</b> {1} {2}'.formatNonEmpty(this.type.name, this.value_str, this.unit && this.unit.code);
+            return '<b>{0}:</b> {1} {2}'.formatNonEmpty(this.type.name, this.value_str, safe_traverse(this, ['type', 'unit', 'code']));
         };
         APTreeItem.prototype.toggleParentSelection = function () {
             this.parent.isSelected = this.parent.children.every(function (child) {
