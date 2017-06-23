@@ -22,17 +22,19 @@
                 [ [[node.code]] ] [[ node.name ]]
             </a>
 
-            <a ng-if="node.is_action_item" class="node" ng-click="refreshActionProperties(node)">
+            <div ng-if="node.is_action_item" class="node">
                 <div class="tree-label" ng-class="{'collapsed': !tree.is_expanded(node),
                     'expanded': tree.is_expanded(node)}">&nbsp;</div>
-                <span ng-bind="node.formatData()" style="font-style: italic; text-decoration: underline"></span>
-            </a>
+                <input type="checkbox" ng-model="node.isSelected" ng-click="toggleSelection(node)">
+                <span ng-click="refreshActionProperties(node)" ng-bind="node.formatData()" style="cursor: pointer;
+                font-style: italic; text-decoration: underline"></span>
+            </div>
 
             <div ng-if="node.is_ap_item">
                 <div class="checkbox" style="margin-top: 0; margin-bottom: 0">
                     <div class="tree-label leaf">&nbsp;</div>
                     <label>
-                        <input type="checkbox" ng-model="node.isSelected" >
+                        <input type="checkbox" ng-model="node.isSelected" ng-change="node.toggleParentSelection()">
                         <span ng-bind-html="node.formatData()"></span>
                     </label>
                 </div>

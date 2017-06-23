@@ -177,7 +177,9 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 this.flat_code = null;
                 this.gid = null;
                 this.class_code = null;
+                this.isSelected = null;
             } else {
+                this.isSelected = false;
                 angular.extend(this, source);
                 this.class_code = this.action_type.action_type_class.code;
             }
@@ -228,13 +230,27 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             if (!this.chilren_loaded) {
                 var self = this;
                 this.children = [];
-                WebMisApi.action.get_action_properties(this.action_id).then(function (data) {
+                return WebMisApi.action.get_action_properties(this.action_id).then(function (data) {
                     angular.forEach(data.properties, function (item) {
+                        item.parent = self;
                         self.children.push(new APTreeItem(item));
                     });
                     self.chilren_loaded = true;
                 });
             }
+
+            return $q.when();
+        };
+        ActionTreeItem.prototype.setChildrenSelection = function(isSelected) {
+            var self = this;
+            self.children.forEach(function (child) {
+                child.isSelected = isSelected;
+            });
+        };
+        ActionTreeItem.prototype.toggleSelection = function() {
+            var self = this;
+            self.isSelected = !self.isSelected;
+            self.setChildrenSelection(self.isSelected);
         };
 
         var APTreeItem = function (source) {
@@ -251,6 +267,7 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 this.value_str = null;
                 this.unit = null;
                 this.isSelected = null;
+                this.parent = null;
             } else {
                 angular.extend(this, source);
                 this.isSelected = this.is_assigned;
@@ -263,6 +280,11 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
         };
         APTreeItem.prototype.formatData = function () {
             return '<b>{0}:</b> {1} {2}'.formatNonEmpty(this.type.name, this.value_str, this.unit && this.unit.code);
+        };
+        APTreeItem.prototype.toggleParentSelection = function () {
+            this.parent.isSelected = this.parent.children.every(function (child) {
+                return child.isSelected;
+            });
         };
         APTreeItem.prototype.sort_children = function () {};
 
@@ -318,7 +340,7 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             });
         };
         self.get_selected_ap_tree_items = function (node) {
-            /* Виберет все отмеченные APTreeItem дерева */
+            /* Выберет все отмеченные APTreeItem дерева */
             var actions_dict = {};
             var traverse = function (item) {
                 if (item instanceof APTreeItem && item.isSelected && item.hasOwnProperty('id')) {
