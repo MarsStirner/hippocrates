@@ -12,7 +12,7 @@ var PatientEventsCtrl = function ($scope, $http, WMConfig) {
             $scope.client = data.result;
         })
     };
-    $scope.open_event = function(event_id) {
+    $scope.openEvent = function(event_id) {
          window.open(WMConfig.url.event.html.event_info + '?event_id=' + event_id, '_blank');
     };
     $scope.initialize();

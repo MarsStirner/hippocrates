@@ -137,7 +137,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
 
         };
     };
-    $scope.filter_results = function(event_purpose) {
+    $scope.filter_rb_result = function (event_purpose) {
         return function(elem) {
             return elem.eventPurpose_id == event_purpose;
         };
@@ -622,7 +622,8 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, $timeout, PrintingService,
-        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig, PatientActionsModalService, localStorageService) {
+        $filter, $modal, WMEventServices, WMEventFormState, MessageBox, WMConfig, PatientActionsModalService,
+        localStorageService, WMEventService) {
     $scope.aux = aux;
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -651,7 +652,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 }
                 if (window.sessionStorage.getItem('AboutToCreate')) {
                     window.sessionStorage.removeItem('AboutToCreate');
-                    notifyTabs();
+                    $scope.notifyTabs();
                 }
 
                 $scope.$watch(function () {
@@ -670,7 +671,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 }, true);
             });
     };
-    function notifyTabs() {
+    $scope.notifyTabs = function () {
         var modalsToUpdate = localStorageService.get('modalClientToUpdate') || {};
         modalsToUpdate[$scope.event.info.client_id] = +new Date();
         localStorageService.set('modalClientToUpdate', modalsToUpdate);
@@ -716,7 +717,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     } else {
                         $scope.event.reload().then(function () {
                             $scope.$broadcast('event_loaded');
-                            notifyTabs();
+                            $scope.notifyTabs();
                         });
                     }
                 }
@@ -738,7 +739,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             $scope.eventServices.delete_event(
                 $scope.event
             ).then(function () {
-                 notifyTabs();
+                 $scope.notifyTabs();
                 if (window.opener) {
                     window.opener.focus();
                     window.close();
@@ -751,22 +752,12 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     };
 
     $scope.close_event = function() {
-        $scope.eventServices.check_can_close_event($scope.event)
-        .then(function () {
-            $scope.eventServices.close_event($scope.event)
-            .then(function (response) {
-                MessageBox.info('Данные сохранены', response.data.meta.name)
-                .then(function () {
-                    notifyTabs();
-                    $scope.eventForm.$setPristine();
-                    $window.location.reload(true);
-                });
-            }, function () {
-                alert('Ошибка закрытия обращения');
+        return WMEventService.close_event($scope.event)
+            .then(function (data) {
+                $scope.notifyTabs();
+                $scope.eventForm.$setPristine();
+                $window.location.reload(true);
             });
-        }, function () {
-            alert('Ошибка закрытия обращения');
-        });
     };
 
     $scope.cancel_editing = function(){
@@ -793,7 +784,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
 };
-var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, $q, RisarApi, ApiCalls, WMStationaryEvent, WMConfig) {
+var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, $q, $window,
+        RisarApi, ApiCalls, WMStationaryEvent, WMConfig, WebMisApi, EventModalService) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
@@ -956,6 +948,15 @@ var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $h
         })
     };
 
+    $scope.close_event = function () {
+        return EventModalService.openCloseHosp($scope.event)
+            .then(function () {
+                $scope.notifyTabs();
+                $scope.eventForm.$setPristine();
+                $window.location.reload(true);
+            });
+    };
+
     $scope.initialize();
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
@@ -1008,7 +1009,8 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'A
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', '$timeout', 
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', 'WMConfig',
-    'PatientActionsModalService', 'localStorageService', EventInfoCtrl]);
+    'PatientActionsModalService', 'localStorageService', 'WMEventService', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$filter', '$controller', '$modal', '$http', '$q',
-    'RisarApi', 'ApiCalls', 'WMStationaryEvent', 'WMConfig', StationaryEventInfoCtrl]);
+    '$window', 'RisarApi', 'ApiCalls', 'WMStationaryEvent', 'WMConfig', 'WebMisApi', 'EventModalService',
+    StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);

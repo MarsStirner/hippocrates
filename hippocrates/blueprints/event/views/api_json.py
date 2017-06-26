@@ -10,7 +10,8 @@ from sqlalchemy.orm import joinedload
 
 from hippocrates.blueprints.event.app import module
 from hippocrates.blueprints.event.lib.utils import (save_event, received_save, client_quota_save,
-                                                    save_executives, EventSaveController, MovingController)
+    update_executives, EventSaveController, MovingController, EventCloseController,
+    EventCloseErrorException, EventCloseWarningException)
 from hippocrates.blueprints.patients.lib.utils import add_or_update_blood_type
 from flask import request
 from nemesis.lib.agesex import recordAcceptableEx
@@ -24,7 +25,7 @@ from nemesis.lib.event.utils import get_current_hospitalisation
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz,
+from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime,
     safe_int, safe_bool, parse_id, bail_out, format_datetime, db_non_flushable)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, \
@@ -147,7 +148,11 @@ def api_event_save():
 
     result['id'] = int(event)
 
-    update_executives(event)
+    if event_id:
+        update_executives(event)
+    else:
+        update_executives(event, new_beg_date=event.setDate)
+    db.session.commit()
 
     if request_type_kind == 'stationary':
         received_data = all_data['received']
@@ -257,40 +262,74 @@ def api_blood_history_save():
     return vis.make_blood_history(bt)
 
 
-def update_executives(event):
-    last_executive = Event_Persons.query.filter(Event_Persons.event_id == event.id).order_by(desc(Event_Persons.begDate)).first()
-    if event.execPerson and (not last_executive or last_executive.person_id != event.execPerson_id):
-        executives = Event_Persons()
-        executives.person = event.execPerson
-        executives.event = event
-        executives.begDate = event.setDate
-        db.session.add(executives)
-    if last_executive:
-        last_executive.endDate = event.setDate
-        db.session.add(last_executive)
-    db.session.commit()
-
-
-@module.route('/api/event_close.json', methods=['POST'])
+@module.route('/api/0/event/hosp_close/<int:event_id>')
+@db_non_flushable
 @api_method
-def api_event_close():
-    all_data = request.json
-    event_data = all_data['event']
-    event_id = event_data['id']
-    event = Event.query.get(event_id)
+def api_0_event_hosp_close_get(event_id):
+    ignore_warnings = safe_bool(request.args.get('ignore_warnings')) or False
 
-    error_msg = {}
-    if not UserUtils.can_close_event(event, error_msg):
-        raise ApiException(403, u'Невозможно закрыть обращение: %s.' % error_msg['message'])
+    event = Event.query.get_or_404(event_id)
+    ctrl = EventCloseController()
+    try:
+        ctrl.check_can_close(event, final_step=False, ignore_warnings=ignore_warnings)
+    except EventCloseErrorException, e:
+        logger.error(u'Ошибка при закрытии обращения', exc_info=True)
+        raise ApiException(403, e.message)
+    except EventCloseWarningException, e:
+        logger.warning(u'Предупреждение при закрытии обращения', exc_info=True)
+        raise ApiException(403, u'Предупреждения при закрытии', warning_msg=e.message)
 
-    if not event_data['exec_date']:
-        event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
-    save_event(event_id, all_data)
-    save_executives(event_id)
+    v = StationaryEventVisualizer()
+    return v.make_hosp_for_close(event)
+
+
+@module.route('/api/0/event/hosp_close/<int:event_id>', methods=['POST'])
+@db_non_flushable
+@api_method
+def api_0_event_hosp_close_save(event_id):
+    data = request.get_json()
+    ignore_warnings = safe_bool(request.args.get('ignore_warnings')) or False
+
+    event = Event.query.get_or_404(event_id)
+    ctrl = EventCloseController()
+    try:
+        ctrl.perform_close_hosp(event, data, ignore_warnings)
+    except EventCloseErrorException, e:
+        logger.error(u'Ошибка при закрытии обращения', exc_info=True)
+        raise ApiException(403, e.message)
+    except EventCloseWarningException, e:
+        logger.warning(u'Предупреждение при закрытии обращения', exc_info=True)
+        raise ApiException(403, u'Предупреждения при закрытии', warning_msg=e.message)
+    db.session.commit()
 
     notify_event_changed(MQOpsEvent.close, event)
 
-    return {'result_name': u'Обращение закрыто'}
+    v = StationaryEventVisualizer()
+    return v.make_hosp_for_close(event)
+
+
+@module.route('/api/0/event/close/<int:event_id>', methods=['POST'])
+@api_method
+def api_0_event_close(event_id):
+    data = request.get_json()
+    ignore_warnings = safe_bool(request.args.get('ignore_warnings')) or False
+
+    event = Event.query.get_or_404(event_id)
+    ctrl = EventCloseController()
+    try:
+        ctrl.perform_close_event(event, data, ignore_warnings)
+    except EventCloseErrorException, e:
+        logger.error(u'Ошибка при закрытии обращения', exc_info=True)
+        raise ApiException(403, e.message)
+    except EventCloseWarningException, e:
+        logger.warning(u'Предупреждение при закрытии обращения', exc_info=True)
+        raise ApiException(403, u'Предупреждения при закрытии', warning_msg=e.message)
+    db.session.commit()
+
+    notify_event_changed(MQOpsEvent.close, event)
+
+    v = EventVisualizer()
+    return v.make_event_info_for_current_role(event)
 
 
 @module.route('/api/diagnosis.json', methods=['POST'])

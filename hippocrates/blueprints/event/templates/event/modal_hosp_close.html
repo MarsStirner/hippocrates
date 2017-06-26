@@ -1,0 +1,184 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <h4 class="modal-title">Закрытие истории болезни №[[event.info.external_id]] - [[event.info.client.info.full_name]]
+        [[ event.info.client.info.birth_date | asDate ]] ([[ event.info.client.info.age]])</h4>
+</div>
+<div class="modal-body modal-scrollable">
+    <div ui-alert-list="alerts"></div>
+
+    <ng-form name="HospCloseForm">
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Основная информация</h3>
+        </div>
+        <div class="box-body">
+            <ng-form name="MainInfoForm">
+                <div class="row marginal">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': MainInfoForm.exec_date.$invalid}">
+                        <label for="exec_date" class="control-label">Дата и время выписки</label>
+                        <wm-datetime-as id="exec_date" name="exec_date" ng-model="event.info.exec_date"
+                            ng-required="true"></wm-datetime-as>
+                    </div>
+                    <div class="col-md-4"
+                         ng-class="{'has-error': MainInfoForm.ache_result.$invalid}">
+                        <label for="ache_result">Исход госпитализации</label>
+                        <rb-select id="ache_result" name="ache_result" ref-book="rbAcheResult"
+                            ng-model="event.info.ache_result" ng-required="true"
+                            custom-filter="filter_rb_result(event.info.event_type.purpose.id)"></rb-select>
+                    </div>
+                    <div class="col-md-4"
+                         ng-class="{'has-error': MainInfoForm.result.$invalid}">
+                        <label for="result">Результат госпитализации</label>
+                        <rb-select id="result" name="result" ref-book="rbResult"
+                            ng-model="event.info.result" ng-required="true"
+                            custom-filter="filter_rb_result(event.info.event_type.purpose.id)"></rb-select>
+                    </div>
+                </div>
+
+                <div class="row marginal">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': MainInfoForm.finance.$invalid}">
+                        <label for="finance">Вид оплаты</label>
+                        <rb-select id="finance" ref-book="rbFinance" ng-model="event.info.event_type.finance"
+                            ng-required="true" ng-disabled="true"></rb-select>
+                    </div>
+                    <div class="col-md-8"
+                         ng-class="{'has-error': MainInfoForm.contract.$invalid}">
+                        <label for="contract">Договор</label>
+                        <div class="row">
+                        <div class="col-md-10">
+                            <ui-select ext-select-contract-event contract-list="available_contracts.list"
+                                id="contract" name="contract" theme="select2"
+                                ng-model="event.info.contract" ng-required="true" ng-disabled="true">
+                            </ui-select>
+                            <span class="text-danger" ng-show="isContractDraftLabelVisible()">Договор не заключен</span>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="btn-group pull-right">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false"
+                                    ng-disabled="true">
+                                    <span class="fa fa-reorder"></span> <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu pull-right">
+                                    <li><a href="javascript:void(0)" ng-click="createContractFromDraft()"
+                                           ng-hide="!isContractDraft() || !event.info.contract.id">Заключить договор</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="editContract()"
+                                           ng-hide="!event.info.contract || isContractDraft()">Редактировать</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="createContract()">Создать новый договор</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row marginal">
+                    <div class="col-md-4">
+                        <label for="vmp_quota_code">Основной код ВМП</label>
+                        <input type="text" id="vmp_quota_code" class="form-control"
+                            ng-model="event.vmp_quoting.quota_type.code" ng-disabled="true">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="vmp_additional_code">Дополнительный код ВМП</label>
+                        <input type="text" id="finance" class="form-control" ng-disabled="true">
+                    </div>
+                </div>
+            </ng-form>
+        </div>
+    </div>
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Движение пациента</h3>
+        </div>
+        <div class="box-body">
+            {% include "event/_movings_read.html" %}
+        </div>
+    </div>
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Диагнозы</h3>
+        </div>
+        <div class="box-body">
+            {% include "event/_diagnoses_read.html" %}
+        </div>
+    </div>
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Протоколы операций</h3>
+        </div>
+        <div class="box-body">
+            
+        </div>
+    </div>
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Обследован</h3>
+        </div>
+        <div class="box-body">
+            <div class="row marginal">
+                <div class="col-md-4">
+                    <label for="leaved_rw">RW</label>
+                    <ui-select ng-model="event.leaved.rw.value" theme="select2" class="form-control" autocomplete="off"
+                            id="leaved_rw" ng-disabled="!leavedAvailable()">
+                        <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                        <ui-select-choices repeat="item in event.leaved.rw.domain.values | filter: $select.search">
+                            <span ng-bind-html="item | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+                <div class="col-md-4">
+                    <label for="leaved_aids">AIDS</label>
+                    <ui-select ng-model="event.leaved.aids.value" theme="select2" class="form-control" autocomplete="off"
+                            id="leaved_aids" ng-disabled="!leavedAvailable()">
+                        <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                        <ui-select-choices repeat="item in event.leaved.aids.domain.values | filter: $select.search">
+                            <span ng-bind-html="item | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Основная причина смерти</h3>
+        </div>
+        <div class="box-body">
+            
+        </div>
+    </div>
+
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Примечания</h3>
+        </div>
+        <div class="box-body">
+            <div class="row marginal">
+                <div class="col-md-12">
+                    <wysiwyg ng-model="event.stat_card.note" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </ng-form>
+</div>
+<div class="modal-footer">
+    <div class="pull-right">
+        <button type="button" class="btn btn-default" ng-click="$dismiss()">Закрыть</button>
+        <button type="button" class="btn btn-primary" ng-click="saveAndClose()"
+            ng-disabled="HospCloseForm.$invalid">Сохранить</button>
+    </div>
+    <div class="text-left">
+        <ui-print-button ps="ps" resolve="ps_resolve()"
+            lazy-load-context="[[ getEventPrintContext() ]]"></ui-print-button>
+    </div>
+</div>

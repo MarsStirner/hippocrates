@@ -1,7 +1,8 @@
 'use strict';
 
 WebMis20.service('EventModalService', ['$modal', '$templateCache', '$q', 'WMConfig',
-        'WMEventService', function ($modal, $templateCache, $q, WMConfig, WMEventService) {
+        'WMEventService', function ($modal, $templateCache, $q, WMConfig,
+        WMEventService) {
 
     var _openHospInfoModal = function (hosp_event) {
         var tUrl = WMConfig.url.event.html.modal_hosp_info;
@@ -52,6 +53,22 @@ WebMis20.service('EventModalService', ['$modal', '$templateCache', '$q', 'WMConf
                 },
                 options: function () {
                     return options;
+                }
+            }
+        });
+        return instance.result;
+    };
+    var _openCloseHospModal = function (wmevent) {
+        var tUrl = WMConfig.url.event.html.modal_hosp_close;
+        var instance = $modal.open({
+            templateUrl: tUrl,
+            controller: HospCloseModalCtrl,
+            backdrop: 'static',
+            size: 'lg',
+            windowClass: 'modal-scrollable',
+            resolve: {
+                wmevent: function () {
+                    return wmevent;
                 }
             }
         });
@@ -130,13 +147,20 @@ WebMis20.service('EventModalService', ['$modal', '$templateCache', '$q', 'WMConf
                         next_moving = movings[1];
                     return _openMovingTransferModal(current_moving, next_moving, options);
                 });
+        },
+        openCloseHosp: function (event) {
+            return WMEventService.get_hosp_to_close(event)
+                .then(function (event_to_close) {
+                    return _openCloseHospModal(event_to_close);
+                });
         }
     }
 }]);
 
 
 WebMis20.service('WMEventService', ['WebMisApi', 'WMAdmissionEvent', 'WMStationaryEvent',
-        function (WebMisApi, WMAdmissionEvent, WMStationaryEvent) {
+        'WMHospCloseEvent', 'MessageBox', function (WebMisApi, WMAdmissionEvent, WMStationaryEvent,
+        WMHospCloseEvent, MessageBox) {
     this.get_new_hosp = function (client_id) {
         return WebMisApi.event.get_new_hosp(client_id)
             .then(function (data) {
@@ -202,5 +226,60 @@ WebMis20.service('WMEventService', ['WebMisApi', 'WMAdmissionEvent', 'WMStationa
             hb_id: selected_hb_id
         };
         return WebMisApi.event.get_available_hosp_beds(args);
+    };
+    this.get_hosp_to_close = function (event, ignore_warnings) {
+        var self = this,
+            event_id = event.info.id;
+        return WebMisApi.event.get_hosp_to_close(event_id, {ignore_warnings: ignore_warnings}, true)
+            .then(function (data) {
+                var event_to_close = new WMHospCloseEvent();
+                event_to_close.init_from_obj({result: data});
+                return event_to_close;
+            }, function (meta) {
+                if (meta.warning_msg) {
+                    return MessageBox.question('Предупреждение', meta.warning_msg)
+                        .then(function () {
+                            return self.get_hosp_to_close(event, true);
+                        });
+                } else {
+                    return MessageBox.error('Ошибка',
+                        meta.code === 500 ? 'Внутренняя ошибка сервера' : meta.name);
+                }
+            });
+    };
+    this.save_hosp_to_close = function (event) {
+        var self = this,
+            event_id = event.info.id,
+            event_data = {
+                event: event.info,
+                stat_card: event.stat_card,
+                leaved: event.leaved
+            };
+        return WebMisApi.event.save_hosp_to_close(event_id, event_data, {ignore_warnings: true}, true)
+            .then(function (data) {
+                return data;
+            }, function (meta) {
+                return MessageBox.error('Ошибка',
+                    meta.code === 500 ? 'Внутренняя ошибка сервера' : meta.name);
+            });
+    };
+    this.close_event = function (event, ignore_warnings) {
+        var self = this,
+            event_id = event.info.id,
+            event_data = event.info;
+        return WebMisApi.event.close(event_id, event_data, {ignore_warnings: ignore_warnings}, true)
+            .then(function (data) {
+                return data;
+            }, function (meta) {
+                if (meta.warning_msg) {
+                    return MessageBox.question('Предупреждение', meta.warning_msg)
+                        .then(function () {
+                            return self.close_event(event, true);
+                        });
+                } else {
+                    return MessageBox.error('Ошибка',
+                        meta.code === 500 ? 'Внутренняя ошибка сервера' : meta.name);
+                }
+            });
     };
 }]);

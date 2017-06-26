@@ -157,7 +157,7 @@
                                    ng-model="event.info.result" ng-disabled="widget_disabled('result')">
                             <ui-select-match placeholder="Не указан">[[$select.selected.name]]</ui-select-match>
                             <ui-select-choices repeat="rbr in rbResult.objects | filter: $select.search |
-                                filter: filter_results(event.info.event_type.purpose.id)">
+                                filter: filter_rb_result(event.info.event_type.purpose.id)">
                                 <div ng-bind-html="rbr.name | highlight: $select.search"></div>
                             </ui-select-choices>
                         </ui-select>
@@ -168,7 +168,7 @@
                                    ng-model="event.info.ache_result" ng-disabled="widget_disabled('ache_result')">
                             <ui-select-match placeholder="Не указан">[[$select.selected.name]]</ui-select-match>
                             <ui-select-choices repeat="rbar in rbAcheResult.objects | filter: $select.search |
-                                filter: filter_results(event.info.event_type.purpose.id)">
+                                filter: filter_rb_result(event.info.event_type.purpose.id)">
                                 <div ng-bind-html="rbar.name | highlight: $select.search"></div>
                             </ui-select-choices>
                         </ui-select>
