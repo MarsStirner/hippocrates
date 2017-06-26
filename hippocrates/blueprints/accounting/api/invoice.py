@@ -23,12 +23,12 @@ def api_0_invoice_get(invoice_id=None):
     get_new = safe_bool(args.get('new', False))
     repr_type = args.get('repr_type')
     contract_id = safe_int(args.get('contract_id'))
-    if not contract_id:
-        raise ApiException(400, u'`contract_id` required')
 
     invoice_ctrl = InvoiceController()
     with invoice_ctrl.session.no_autoflush:
         if get_new:
+            if not contract_id:
+                raise ApiException(400, u'`contract_id` required')
             invoice_ctrl.check_can_create_invoice(contract_id)
             invoice = invoice_ctrl.get_new_invoice(args)
         elif invoice_id:
