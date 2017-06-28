@@ -12,7 +12,7 @@ from flask import current_app, request
 from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs, bail_out
+from nemesis.lib.utils import parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs, bail_out, db_non_flushable
 from nemesis.lib.event.utils import get_client_events
 from hippocrates.blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
@@ -21,11 +21,11 @@ from nemesis.models.client import Client, ClientFileAttach, ClientDocument, Clie
 from nemesis.models.exists import FileMeta, FileGroupDocument, VMPCoupon, MKB, QuotaType
 from nemesis.lib.utils import safe_date, format_date
 from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
-    add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
-    add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
-    add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
-    add_or_update_work_soc_status, store_file_locally
-)
+                                                       add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
+                                                       add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
+                                                       add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
+                                                       add_or_update_work_soc_status, store_file_locally,
+                                                       ClientAttachCtrl)
 
 __author__ = 'mmalkov'
 
@@ -490,3 +490,40 @@ def api_patient_coupon_delete():
         raise ApiException(404, u'Не найдена запись VMPCoupon с id = {0}'.format(coupon_id))
     coupon.deleted = 1
     db.session.commit()
+
+
+@module.route('/api/patient_client_attaches_get.json', methods=['GET'])
+@api_method
+def api_patient_client_attaches_get():
+    client_id = request.args.get('client_id')
+    if not client_id:
+        raise ApiException(404, u'укажите id клиента')
+    if request.method == 'GET':
+        client = Client.query.filter_by(id=client_id).scalar()
+        if not client:
+            raise ApiException(404, u'нет клиента с id: {0}'.format(client_id))
+        amb_card = client.amb_card
+    return {'amb_card': amb_card,
+            'client_attaches': sorted(amb_card.client_attaches, key=lambda x: x.begDate) if amb_card else []}
+
+
+@module.route('/api/patient_client_attach_save.json', methods=['POST'])
+@db_non_flushable
+@api_method
+def api_patient_client_attach_save():
+    data = request.get_json()
+    client_id = data.get('client_id')
+    client_attach_data = data.get('client_attach')
+    _, attach = ClientAttachCtrl.get_or_create_client_attach(client_id, client_attach_data)
+    ClientAttachCtrl.fill_client_attach(attach, client_attach_data)
+    ClientAttachCtrl.set_end_date_for_previous_attach(attach)
+    db.session.commit()
+    return attach
+
+
+@module.route('/api/patient_client_attach_delete.json', methods=['POST'])
+@api_method
+def api_patient_client_attach_delete():
+    data = request.json
+    ClientAttachCtrl.delete_client_attach(data)
+

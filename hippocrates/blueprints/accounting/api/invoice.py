@@ -8,6 +8,7 @@ from nemesis.lib.utils import safe_bool, safe_int, safe_date, parse_json
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 from nemesis.lib.mq_integration.invoice import MQOpsInvoice, notify_invoice_changed
 from nemesis.lib.data_ctrl.accounting.represent import InvoiceRepr
+from nemesis.lib.user import UserUtils
 
 
 @module.route('/api/0/invoice/')
@@ -21,10 +22,14 @@ def api_0_invoice_get(invoice_id=None):
         args.update(request.json)
     get_new = safe_bool(args.get('new', False))
     repr_type = args.get('repr_type')
+    contract_id = safe_int(args.get('contract_id'))
 
     invoice_ctrl = InvoiceController()
     with invoice_ctrl.session.no_autoflush:
         if get_new:
+            if not contract_id:
+                raise ApiException(400, u'`contract_id` required')
+            invoice_ctrl.check_can_create_invoice(contract_id)
             invoice = invoice_ctrl.get_new_invoice(args)
         elif invoice_id:
             invoice = invoice_ctrl.get_invoice(invoice_id)

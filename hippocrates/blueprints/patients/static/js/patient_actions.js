@@ -177,11 +177,14 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
                 this.flat_code = null;
                 this.gid = null;
                 this.class_code = null;
+                this.isSelected = null;
             } else {
+                this.isSelected = false;
                 angular.extend(this, source);
                 this.class_code = this.action_type.action_type_class.code;
             }
             this.children = [];
+            this.chilren_loaded = false;
             this.is_action_item = true;
         };
         ActionTreeItem.prototype.clone = function () {
@@ -223,6 +226,67 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             }
         };
         ActionTreeItem.prototype.sort_children = function () {};
+        ActionTreeItem.prototype.load_children = function () {
+            if (!this.chilren_loaded) {
+                var self = this;
+                this.children = [];
+                return WebMisApi.action.get_action_properties(this.action_id).then(function (data) {
+                    angular.forEach(data.properties, function (item) {
+                        item.parent = self;
+                        self.children.push(new APTreeItem(item));
+                    });
+                    self.chilren_loaded = true;
+                });
+            }
+
+            return $q.when();
+        };
+        ActionTreeItem.prototype.setChildrenSelection = function(isSelected) {
+            var self = this;
+            self.children.forEach(function (child) {
+                child.isSelected = isSelected;
+            });
+        };
+        ActionTreeItem.prototype.toggleSelection = function() {
+            var self = this;
+            self.isSelected = !self.isSelected;
+            self.setChildrenSelection(self.isSelected);
+        };
+
+        var APTreeItem = function (source) {
+            if (!source) {
+                this.id = null;
+                this.action_id = null;
+                this.type = {
+                    id: null,
+                    idx: null,
+                    code: null,
+                    name: null
+                };
+                this.is_assigned = null;
+                this.value_str = null;
+                this.unit = null;
+                this.isSelected = null;
+                this.parent = null;
+            } else {
+                angular.extend(this, source);
+                this.isSelected = this.is_assigned;
+            }
+            this.children = [];
+            this.is_ap_item = true;
+        };
+        APTreeItem.prototype.clone = function () {
+            return new APTreeItem(this)
+        };
+        APTreeItem.prototype.formatData = function () {
+            return '<b>{0}:</b> {1} {2}'.formatNonEmpty(this.type.name, this.value_str, safe_traverse(this, ['type', 'unit', 'code']));
+        };
+        APTreeItem.prototype.toggleParentSelection = function () {
+            this.parent.isSelected = this.parent.children.every(function (child) {
+                return child.isSelected;
+            });
+        };
+        APTreeItem.prototype.sort_children = function () {};
 
         self.lookup = {};
         self.set_data = function (data) {
@@ -258,7 +322,7 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             self.expanded[node.id] = enabled;
         };
         self.is_expanded = function (node) {
-            return Boolean(self.expanded[node.id]) || node.is_action_item;
+            return Boolean(self.expanded[node.id]) || (node.is_action_item && node.children_loaded && !node.children.length);
         };
         self.toggle_group_expanded = function (node, enabled) {
             var enabled = enabled !== undefined ? enabled : !self.is_group_expanded(node);
@@ -274,6 +338,23 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
             flt_tree.children.forEach(function (node) {
                 self.toggle_group_expanded(node, true);
             });
+        };
+        self.get_selected_ap_tree_items = function (node) {
+            /* Выберет все отмеченные APTreeItem дерева */
+            var actions_dict = {};
+            var traverse = function (item) {
+                if (item instanceof APTreeItem && item.isSelected && item.hasOwnProperty('id')) {
+                    if (!actions_dict.hasOwnProperty(item.action_id)) {
+                        actions_dict[item.action_id] = [];
+                    }
+                    actions_dict[item.action_id].push(item.id);
+                }
+                if (item.hasOwnProperty('children')) {
+                    item.children.forEach(traverse);
+                }
+            };
+            traverse(node);
+            return actions_dict;
         };
 
         function at_class_acceptable(item) {
@@ -350,6 +431,49 @@ WebMis20.service('PatientATTreeService', ['$q', '$filter', 'WebMisApi', 'RefBook
         var ActionTypeClass = RefBookService.get('ActionTypeClass');
 
         return $q.all([ActionTypeClass.loading, WebMisApi.action.get_patient_actions(client_id)])
+            .then(function (result) {
+                var data = result[1];
+
+                // extend flat trees with class_code items
+                angular.forEach(ActionTypeClass.objects, function (item) {
+                    var ni = _.deepCopy(item);
+                    item.node_type = 'at_class_node';
+                    item.class_id = item.id;
+                    item.id = item.code;
+                    item.gid = null;
+                    all_items.push(item);
+                });
+                // modify at flat trees
+                angular.forEach(data.flat_trees, function (item) {
+                    item.unshift('at_node'); // 0 - type
+                    if (!item[5]) {
+                        // gid = class_code for root nodes
+                        item[5] = item[6]
+                    }
+
+                    all_items.push(item);
+                });
+                // extend flat trees with actions as items
+                angular.forEach(data.patient_actions, function (action) {
+                    action.action_id = action.id;
+                    action.id = 'a_' + action.id;
+                    action.gid = action.action_type.id;
+                    action.node_type = 'action_node';
+                    all_items.push(action)
+                });
+
+                tree.set_data(all_items);
+
+                return tree;
+            });
+    };
+    this.get_with_values = function (client_id, at_class) {
+        var tree = new Tree(),
+            all_items = [];
+        var ActionTypeClass = RefBookService.get('ActionTypeClass');
+
+        return $q.all([ActionTypeClass.loading, WebMisApi.action.get_patient_actions_with_values(client_id,
+            {'at_class': at_class})])
             .then(function (result) {
                 var data = result[1];
 

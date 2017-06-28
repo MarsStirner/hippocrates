@@ -136,7 +136,8 @@ angular.module('WebMis20')
                                 case 'Text':
                                 case 'Html':
                                 case 'Жалобы':
-                                    inner_template = '<wysiwyg ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused/>';
+                                    inner_template = '<wysiwyg ng-model="{0}.value" id="[[{0}.type.id]]" ' +
+                                        'client-id="{1}" user-options="{0}.type.domain_obj" al-item-focused/>'.format('{0}', scope.action.client.id);
                                     break;
                                 case 'Date':
                                     inner_template = '<wm-date ng-model="{0}.value" id="[[{0}.type.id]]" al-item-focused></wm-date>';

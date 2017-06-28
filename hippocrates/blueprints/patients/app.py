@@ -33,6 +33,11 @@ def fc_urls():
                 'coupon_parse': url_for('patients.api_patient_coupon_parse'),
                 'coupon_save': url_for('patients.api_patient_coupon_save'),
                 'coupon_delete': url_for('patients.api_patient_coupon_delete'),
+                'client_attach': {
+                    'get': url_for('patients.api_patient_client_attaches_get'),
+                    'del': url_for('patients.api_patient_client_attach_delete'),
+                    'save': url_for('patients.api_patient_client_attach_save')
+                },
                 'file_attach': {
                     'get': url_for("patients.api_patient_file_attach"),
                     'save': url_for("patients.api_patient_file_attach_save"),
