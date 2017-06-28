@@ -113,7 +113,80 @@
             <h3 class="box-title">Протоколы операций</h3>
         </div>
         <div class="box-body">
-            
+            <div ng-repeat="protocol in event.surgeries" class="marginal">
+            <table class="table table-bordered">
+                <tr>
+                    <td rowspan="3" width="25%" style="vertical-align: middle">
+                        [[ protocol.name ]] от [[ protocol.beg_date | asDateTime ]]</td>
+                    <td width="15%" style="vertical-align: middle">Операция 1</td>
+                    <td width="60%">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Дата</label>
+                                <wm-date ng-model="protocol.date_start" ng-disabled="!protocol.date_start"></wm-date>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Время</label>
+                                <div fs-time ng-model="protocol.time_start" ng-disabled="!protocol.time_start"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Анестезия</label>
+                                <ui-select ng-model="protocol.operations.op1.anesthesia.value" theme="select2"
+                                        class="form-control" autocomplete="off" non-empty-editable>
+                                    <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                                    <ui-select-choices repeat="item in protocol.operations.op1.anesthesia.domain.values | filter: $select.search">
+                                        <span ng-bind-html="item | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Наименование операции</label>
+                                <rb-select ref-book="rbOperationType" ng-model="protocol.operations.op1.operation_type.value"
+                                    ng-disabled="false"></rb-select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Трансплант.</label>
+                                <ui-select ng-model="protocol.operations.op1.transplant.value" theme="select2"
+                                        class="form-control" autocomplete="off" ng-disabled="false">
+                                    <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                                    <ui-select-choices repeat="item in protocol.operations.op1.transplant.domain.values | filter: $select.search">
+                                        <span ng-bind-html="item | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Использ. спец. аппаратуры</label>
+                                <ui-select ng-model="protocol.operations.op1.spec_equipment_use.value" theme="select2"
+                                        class="form-control" autocomplete="off" ng-disabled="false">
+                                    <ui-select-match allow-clear="true">[[ $select.selected ]]</ui-select-match>
+                                    <ui-select-choices repeat="item in protocol.operations.op1.spec_equipment_use.domain.values | filter: $select.search">
+                                        <span ng-bind-html="item | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td width="15%" style="vertical-align: middle">Операция 2</td>
+                    <td width="60%">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td width="15%" style="vertical-align: middle">Операция 2</td>
+                    <td width="60%">
+                    </td>
+                </tr>
+            </table>
+            </div>
         </div>
     </div>
 
@@ -152,7 +225,14 @@
             <h3 class="box-title">Основная причина смерти</h3>
         </div>
         <div class="box-body">
-            
+            <div class="row marginal">
+                <div class="col-md-12">
+                    <wysiwyg ng-model="event.death_epicrisis.main_rod.value" class="form-control"
+                        ng-if="deathEpicrisisAvailable()" />
+                    <textarea ng-model="event.death_epicrisis.main_rod.value" class="form-control"
+                        ng-disabled="true" ng-if="!deathEpicrisisAvailable()"></textarea>
+                </div>
+            </div>
         </div>
     </div>
 

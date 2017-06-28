@@ -27,7 +27,7 @@ from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, 
     STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
     STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE, \
     DAY_HOSPITAL_CODE, STATIONARY_STATCARD_CODE, LeavedProps, \
-    STATIONARY_LEAVED_CODE
+    STATIONARY_LEAVED_CODE, DEATH_EPICRISIS_CODE, DeathEpicrisisProps
 from nemesis.systemwide import db
 
 
@@ -523,4 +523,9 @@ class EventCloseController(object):
             leaved[LeavedProps.rw].value = safe_traverse(leaved_data, 'rw', 'value')
             leaved[LeavedProps.aids].value = safe_traverse(leaved_data, 'aids', 'value')
         # save death epicr
+        de_data = data['death_epicrisis']
+        death_epicrisis = get_action(event, DEATH_EPICRISIS_CODE)
+        if death_epicrisis:
+            death_epicrisis[DeathEpicrisisProps.main_rod].value = safe_traverse(
+                de_data, 'main_rod', 'value')
 

@@ -253,7 +253,9 @@ WebMis20.service('WMEventService', ['WebMisApi', 'WMAdmissionEvent', 'WMStationa
             event_data = {
                 event: event.info,
                 stat_card: event.stat_card,
-                leaved: event.leaved
+                surgeries: event.surgeries,
+                leaved: event.leaved,
+                death_epicrisis: event.death_epicrisis
             };
         return WebMisApi.event.save_hosp_to_close(event_id, event_data, {ignore_warnings: true}, true)
             .then(function (data) {
