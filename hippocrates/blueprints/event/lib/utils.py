@@ -27,7 +27,8 @@ from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, 
     STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
     STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE, \
     DAY_HOSPITAL_CODE, STATIONARY_STATCARD_CODE, LeavedProps, \
-    STATIONARY_LEAVED_CODE, DEATH_EPICRISIS_CODE, DeathEpicrisisProps
+    STATIONARY_LEAVED_CODE, DEATH_EPICRISIS_CODE, DeathEpicrisisProps, \
+    SurgicalReportProps
 from nemesis.systemwide import db
 
 
@@ -514,7 +515,45 @@ class EventCloseController(object):
         stat_card = get_action(event, STATIONARY_STATCARD_CODE, create=True)
         stat_card.note = stat_card_data.get('note') or ''
         db.session.add(stat_card)
+
         # save surgeries
+        def set_surgical_protocol_prop(action, code, value):
+            if action.has_property(code):
+                action.set_prop_value(code, value)
+
+        surgeries_data = data['surgeries']
+        for report in surgeries_data:
+            action_id = report['id']
+            action = get_action_by_id(action_id)
+            set_surgical_protocol_prop(action, SurgicalReportProps.date_start, report['date_start'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.time_start, report['time_start'])
+
+            set_surgical_protocol_prop(action, SurgicalReportProps.operation1,
+                report['operations']['op1']['operation_type']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.anesthesia1,
+                report['operations']['op1']['anesthesia']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.transplant1,
+                report['operations']['op1']['transplant']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.spec_equipment_use1,
+                report['operations']['op1']['spec_equipment_use']['value'])
+
+            set_surgical_protocol_prop(action, SurgicalReportProps.operation2,
+                report['operations']['op2']['operation_type']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.anesthesia2,
+                report['operations']['op2']['anesthesia']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.transplant2,
+                report['operations']['op2']['transplant']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.spec_equipment_use2,
+                report['operations']['op2']['spec_equipment_use']['value'])
+
+            set_surgical_protocol_prop(action, SurgicalReportProps.operation3,
+                report['operations']['op3']['operation_type']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.anesthesia3,
+                report['operations']['op3']['anesthesia']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.transplant3,
+                report['operations']['op3']['transplant']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.spec_equipment_use3,
+                report['operations']['op3']['spec_equipment_use']['value'])
 
         # save leaved
         leaved_data = data['leaved']
@@ -522,6 +561,7 @@ class EventCloseController(object):
         if leaved:
             leaved[LeavedProps.rw].value = safe_traverse(leaved_data, 'rw', 'value')
             leaved[LeavedProps.aids].value = safe_traverse(leaved_data, 'aids', 'value')
+
         # save death epicr
         de_data = data['death_epicrisis']
         death_epicrisis = get_action(event, DEATH_EPICRISIS_CODE)
