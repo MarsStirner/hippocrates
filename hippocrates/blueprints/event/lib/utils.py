@@ -9,7 +9,7 @@ from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from sqlalchemy import func, and_, or_
 from sqlalchemy.orm import aliased, joinedload
 
-from nemesis.lib.data import create_action, get_action_by_id
+from nemesis.lib.data import create_action, get_action_by_id, get_action
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis, \
@@ -19,14 +19,16 @@ from nemesis.lib.apiutils import ApiException
 from nemesis.models.event import Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_traverse, safe_datetime, get_new_event_ext_id
 from nemesis.models.exists import Person, OrgStructure, ClientQuoting, MKB, \
-    VMPQuotaDetails, VMPCoupon, rbRequestType
+    VMPQuotaDetails, VMPCoupon, rbRequestType, rbResult, rbAcheResult
 from nemesis.models.enums import ActionStatus, OrgStructType
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.lib.const import STATIONARY_RECEIVED_CODE, STATIONARY_MOVING_CODE, \
     STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_ORG_STRUCT_RECEIVED_CODE, \
     STATIONARY_ORG_STRUCT_TRANSFER_CODE, STATIONARY_HOSP_BED_CODE, \
     STATIONARY_HOSP_BED_PROFILE_CODE, STATIONARY_PATRONAGE_CODE, \
-    DAY_HOSPITAL_CODE
+    DAY_HOSPITAL_CODE, STATIONARY_STATCARD_CODE, LeavedProps, \
+    STATIONARY_LEAVED_CODE, DEATH_EPICRISIS_CODE, DeathEpicrisisProps, \
+    SurgicalReportProps
 from nemesis.systemwide import db
 
 
@@ -447,24 +449,123 @@ def client_quota_save(event, quota_data):
         db.session.commit()
 
 
-def save_executives(event_id):
-    event = Event.query.get(event_id)
-    if not event or not event.execDate:
-        return
-    try:
-        last_executive = db.session.query(
-            func.max(Event_Persons.id)
-        ).filter(
-            Event_Persons.event_id == event.id
-        ).first()
-        if last_executive:
-            db.session.query(Event_Persons).filter(
-                Event_Persons.id == last_executive[0]
-            ).update({
-                Event_Persons.endDate: event.execDate
-            }, synchronize_session=False)
-            db.session.commit()
-    except Exception, e:
-        db.rollback()
-        raise EventSaveException(u'Ошибка закрытия обращения')
+def update_executives(event, new_beg_date=None, latest_end_date=None):
+    if new_beg_date is None:
+        new_beg_date = datetime.datetime.now()
+    if latest_end_date is None:
+        latest_end_date = datetime.datetime.now()
+
+    last_executive = Event_Persons.query.filter(
+        Event_Persons.event_id == event.id
+    ).order_by(Event_Persons.begDate.desc()).first()
+    if event.execPerson and (not last_executive or last_executive.person_id != event.execPerson_id):
+        executives = Event_Persons()
+        executives.person = event.execPerson
+        executives.event = event
+        executives.begDate = new_beg_date
+        db.session.add(executives)
+    if last_executive:
+        last_executive.endDate = latest_end_date
+        db.session.add(last_executive)
+
+
+class EventCloseWarningException(Exception): pass
+
+
+class EventCloseErrorException(Exception): pass
+
+
+class EventCloseController(object):
+
+    def check_can_close(self, event, final_step=True, ignore_warnings=False):
+        out_data = {}
+        ok = UserUtils.can_perform_close_event(event, final_step=final_step, out_msg=out_data)
+        if not ok:
+            raise EventCloseErrorException(out_data['message'])
+        elif 'warnings_message' in out_data and not ignore_warnings:
+            raise EventCloseWarningException(out_data['warnings_message'])
+
+    def perform_close_event(self, event, data, ignore_warnings=False):
+        self._save_event_data(event, data)
+        self._update_executives(event)
+        self.check_can_close(event, ignore_warnings=ignore_warnings)
+
+    def perform_close_hosp(self, event, data, ignore_warnings=False):
+        self._save_event_data(event, data['event'])
+        self._update_executives(event)
+        self._save_hosp_additional_data(event, data)
+        self.check_can_close(event, ignore_warnings=ignore_warnings)
+
+    def _save_event_data(self, event, data):
+        # event.execDate = safe_datetime(data.get('exec_date'))
+        result_id = safe_traverse(data, 'result', 'id')
+        result = rbResult.query.get(result_id) if result_id else None
+        event.result = result
+        ache_result_id = safe_traverse(data, 'ache_result', 'id')
+        ache_result = rbAcheResult.query.get(ache_result_id) if ache_result_id else None
+        event.rbAcheResult = ache_result
+        return event
+
+    def _update_executives(self, event):
+        update_executives(event, latest_end_date=event.execDate)
+
+    def _save_hosp_additional_data(self, event, data):
+        # save stat card
+        stat_card_data = data['stat_card']
+        stat_card = get_action(event, STATIONARY_STATCARD_CODE, create=True)
+        stat_card.note = stat_card_data.get('note') or ''
+        db.session.add(stat_card)
+
+        # save surgeries
+        def set_surgical_protocol_prop(action, code, value):
+            if action.has_property(code):
+                action.set_prop_value(code, value)
+
+        surgeries_data = data['surgeries']
+        for report in surgeries_data:
+            action_id = report['id']
+            action = get_action_by_id(action_id)
+            set_surgical_protocol_prop(action, SurgicalReportProps.date_start, report['date_start'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.time_start, report['time_start'])
+
+            set_surgical_protocol_prop(action, SurgicalReportProps.operation1,
+                report['operations']['op1']['operation_type']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.anesthesia1,
+                report['operations']['op1']['anesthesia']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.transplant1,
+                report['operations']['op1']['transplant']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.spec_equipment_use1,
+                report['operations']['op1']['spec_equipment_use']['value'])
+
+            set_surgical_protocol_prop(action, SurgicalReportProps.operation2,
+                report['operations']['op2']['operation_type']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.anesthesia2,
+                report['operations']['op2']['anesthesia']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.transplant2,
+                report['operations']['op2']['transplant']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.spec_equipment_use2,
+                report['operations']['op2']['spec_equipment_use']['value'])
+
+            set_surgical_protocol_prop(action, SurgicalReportProps.operation3,
+                report['operations']['op3']['operation_type']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.anesthesia3,
+                report['operations']['op3']['anesthesia']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.transplant3,
+                report['operations']['op3']['transplant']['value'])
+            set_surgical_protocol_prop(action, SurgicalReportProps.spec_equipment_use3,
+                report['operations']['op3']['spec_equipment_use']['value'])
+
+        # save leaved
+        leaved_data = data['leaved']
+        leaved = get_action(event, STATIONARY_LEAVED_CODE)
+        if leaved:
+            leaved[LeavedProps.rw].value = safe_traverse(leaved_data, 'rw', 'value')
+            leaved[LeavedProps.aids].value = safe_traverse(leaved_data, 'aids', 'value')
+
+        # save death epicr
+        de_data = data['death_epicrisis']
+        death_epicrisis = get_action(event, DEATH_EPICRISIS_CODE)
+        if death_epicrisis:
+            death_epicrisis[DeathEpicrisisProps.main_rod].value = safe_traverse(
+                de_data, 'main_rod', 'value')
 

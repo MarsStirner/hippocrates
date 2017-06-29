@@ -72,3 +72,7 @@ def modal_edit_hosp():
 def modal_hosp_info():
     return render_template('event/modal_hosp_info.html')
 
+
+@module.route('/modal_hosp_close.html')
+def modal_hosp_close():
+    return render_template('event/modal_hosp_close.html')

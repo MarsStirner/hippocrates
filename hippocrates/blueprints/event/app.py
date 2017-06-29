@@ -26,14 +26,13 @@ def fc_urls():
                     'new_event': url_for('event.new_event'),
                     'request_type_kind': url_for('event.request_type_kind_choose'),
                     'modal_edit_hosp': url_for('event.modal_edit_hosp'),
-                    'modal_hosp_info': url_for('event.modal_hosp_info')
-
+                    'modal_hosp_info': url_for('event.modal_hosp_info'),
+                    'modal_hosp_close': url_for('event.modal_hosp_close')
                 },
                 'event_get': url_for('event.api_event_info'),
                 'event_hosp_get': url_for('event.api_0_event_hosp_get'),
                 'event_new': url_for('event.api_event_new_get'),
                 'event_save': url_for('event.api_event_save'),
-                'event_close': url_for('event.api_event_close'),
                 'event_actions': url_for('event.api_event_actions'),
                 'moving_save': uf_placeholders('event.api_moving_save', ['event_id', 'action_id']),
                 'hosp_beds': url_for('event.api_hosp_beds_get'),
@@ -46,7 +45,12 @@ def fc_urls():
                 'get_events': url_for('event.api_get_events'),
                 'api_event_movings_get': uf_placeholders('event.api_0_event_movings_get', ['event_id']),
                 'api_event_moving_get': uf_placeholders('event.api_0_event_moving_get',
-                                                        ['event_id', 'action_id'])
+                                                        ['event_id', 'action_id']),
+                'api_event_hosp_close_get': uf_placeholders('event.api_0_event_hosp_close_get',
+                                                            ['event_id']),
+                'api_event_hosp_close_save': uf_placeholders('event.api_0_event_hosp_close_save',
+                                                             ['event_id']),
+                'api_event_close': uf_placeholders('event.api_0_event_close', ['event_id']),
             }
         }
     }
