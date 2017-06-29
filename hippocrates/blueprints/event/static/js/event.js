@@ -318,7 +318,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             }
             // при выборе не сегодняшнего дня ставить время 08:00
             var notToday = st.clone().startOf('d').diff(old_st.startOf('d'), 'days') !== 0;
-            if (notToday) {
+            if ($scope.create_mode && notToday) {
                 st = st.set({hour: 8, minute: 0, second: 0});
             }
             if (end.isBefore(st)) {
