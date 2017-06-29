@@ -26,7 +26,8 @@ from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import (safe_traverse, safe_date, safe_datetime,
-    safe_int, safe_bool, parse_id, bail_out, format_datetime, db_non_flushable)
+    safe_int, safe_bool, parse_id, bail_out, format_datetime, db_non_flushable,
+    is_sqla_table_joined)
 from nemesis.models.accounting import Service, Contract, Invoice, InvoiceItem
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, \
     ActionProperty_HospitalBed, Action_TakenTissueJournalAssoc, TakenTissueJournal
@@ -580,7 +581,9 @@ def api_get_events():
     if 'request_type_id' in flt:
         base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
     if 'finance_id' in flt:
-        base_query = base_query.join(EventType).filter(EventType.finance_id == flt['finance_id'])
+        if not is_sqla_table_joined(base_query, EventType):
+            base_query = base_query.join(EventType)
+        base_query = base_query.filter(EventType.finance_id == flt['finance_id'])
     if 'speciality_id' in flt:
         base_query = base_query.outerjoin(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
     if 'exec_person_id' in flt:
@@ -649,7 +652,9 @@ def api_get_events():
                 ext_id_order_2 = desc(ext_id_order_2)
             base_query = base_query.order_by(ext_id_order_1, ext_id_order_2)
         elif col_name == 'type_name':
-            base_query = base_query.join(EventType).order_by(EventType.name.desc() if desc_order else EventType.name)
+            if not is_sqla_table_joined(base_query, EventType):
+                base_query = base_query.join(EventType)
+            base_query = base_query.order_by(EventType.name.desc() if desc_order else EventType.name)
         elif col_name == 'beg_date':
             base_query = base_query.order_by(Event.setDate.desc() if desc_order else Event.setDate)
         elif col_name == 'end_date':

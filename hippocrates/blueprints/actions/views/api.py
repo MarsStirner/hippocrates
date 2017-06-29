@@ -20,7 +20,8 @@ from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out, parse_json
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, safe_bool, bail_out, \
+    parse_json, is_sqla_table_joined
 from nemesis.lib.mq_integration.med_prescription import notify_action_prescriptions_changed, MQOpsMedPrescription
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
@@ -619,16 +620,10 @@ def api_search_actions():
 
     order_options = flt.get('sorting_params')
     if order_options:
-        def is_joined(q, model_class):
-            for mapper in q._join_entities:
-                if mapper.class_ == model_class or mapper.entity == model_class:
-                    return True
-            return False
-
         desc_order = order_options['order'] == 'DESC'
         col_name = order_options['column_name']
         if col_name == 'at_name':
-            if not is_joined(base_query, ActionType):
+            if not is_sqla_table_joined(base_query, ActionType):
                 base_query = base_query.join(ActionType)
             base_query = base_query.order_by(ActionType.name.desc() if desc_order else ActionType.name)
         elif col_name == 'beg_date':
@@ -638,11 +633,11 @@ def api_search_actions():
         elif col_name == 'ped':
             base_query = base_query.order_by(Action.plannedEndDate.desc() if desc_order else Action.plannedEndDate)
         elif col_name == 'set_person_short_name':
-            if not is_joined(base_query, PersonSet):
+            if not is_sqla_table_joined(base_query, PersonSet):
                 base_query = base_query.outerjoin(PersonSet, Action.setPerson_id == PersonSet.id)
             base_query = base_query.order_by(PersonSet.lastName.desc() if desc_order else PersonSet.lastName)
         elif col_name == 'person_short_name':
-            if not is_joined(base_query, PersonExec):
+            if not is_sqla_table_joined(base_query, PersonExec):
                 base_query = base_query.outerjoin(PersonExec, Action.person_id == PersonExec.id)
             base_query = base_query.order_by(PersonExec.lastName.desc() if desc_order else PersonExec.lastName)
     else:
