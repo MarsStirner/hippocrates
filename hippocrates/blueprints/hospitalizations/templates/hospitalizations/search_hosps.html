@@ -32,14 +32,16 @@
             </div>
         </div>
         </div>
-        <div class="row marginal">
+        <div class="row">
             <div class="col-md-3">
                 <label for="start_dt">Дата и время начала</label>
-                <wm-datetime-as ng-model="date_range.start" ng-disabled="isCurDayView()"></wm-datetime-as>
+                <wm-datetime-as ng-model="date_range.start" ng-disabled="isCurDayView()"
+                    max-date="curDate"></wm-datetime-as>
             </div>
             <div class="col-md-3">
                 <label for="end_dt">Дата и время окончания</label>
-                <wm-datetime-as ng-model="date_range.end" ng-disabled="isCurDayView()"></wm-datetime-as>
+                <wm-datetime-as ng-model="date_range.end" ng-disabled="isCurDayView()"
+                    max-date="tomorrowDate" min-date="date_range.start"></wm-datetime-as>
             </div>
             <div class="col-md-3">
                 <label for="filter-org-struct">Отделение</label>
@@ -52,6 +54,22 @@
                 <label for="filter-hosp_status">Статус</label>
                 <rb-select ref-book="HospStateStatus" id="filter-hosp_status"
                     ng-model="filter.hosp_status" allow-clear="true"></rb-select>
+            </div>
+        </div>
+        <div class="row marginal">
+            <div class="col-md-3">
+                <label for="filter-client">ФИО пациента</label>
+                <ui-select id="filter-client" ng-model="filter.client" ext-select-client-search theme="select2"
+                    allow-clear="true" placeholder="Поиск пациента">
+                </ui-select>
+            </div>
+            <div class="col-md-3">
+                <label for="filter-exec-person">ФИО врача</label>
+                <wm-person-select id="filter-set-person" ng-model="filter.exec_person"></wm-person-select>
+            </div>
+            <div class="col-md-3">
+                <label for="filter-external-id">№ ИБ</label>
+                <input type="text" class="form-control" ng-model="filter.external_id">
             </div>
         </div>
         <div class="box box-info">

@@ -69,9 +69,9 @@ class HospitalizationController(BaseModelController):
                                              statuses=[HospStateStatus.current[0]], **kwargs)
         stats3 = sel.get_hosps_by_doctor_counts(start_dt, end_dt, history, **kwargs)
         by_doctors = dict(
-            (person.id,
+            (person.id if person else None,
              {
-                 'person_name': person.shortNameText,
+                 'person_name': person.shortNameText if person else u'Лечащий врач не назначен',
                  'events_count': cnt or 0
              })
             for person, cnt in stats3
@@ -107,6 +107,9 @@ class HospitalizationSelector(BaseSelecter):
         self.end_dt = None
         self.hosp_status = None
         self.flt_org_struct_id = None
+        self.flt_client_id = None
+        self.flt_exec_person_id = None
+        self.flt_external_id = None
         self.history = None
         self._latest_location_joined = False
         self._location_os_joined = False
@@ -126,6 +129,14 @@ class HospitalizationSelector(BaseSelecter):
             self.BaseEvent.deleted == 0, self.BaseEvent.execDate.is_(None),
             rbRequestType.code.in_(STATIONARY_EVENT_CODES),
         )
+        if self.flt_client_id is not None:
+            self.query = self.query.filter(Client.id == self.flt_client_id)
+        if self.flt_exec_person_id is not None:
+            self.query = self.query.filter(self.BaseEvent.execPerson_id == self.flt_exec_person_id)
+        if self.flt_external_id is not None:
+            self.query = self.query.filter(
+                self.BaseEvent.externalId.like(u'%{0}%'.format(self.flt_external_id))
+            )
         self._latest_location_joined = False
         self._location_os_joined = False
         self._leaved_joined = False
@@ -139,6 +150,9 @@ class HospitalizationSelector(BaseSelecter):
         self.history = history
         self.hosp_status = safe_int(kwargs.get('hosp_status'))
         self.flt_org_struct_id = safe_int(kwargs.get('org_struct_id'))
+        self.flt_client_id = safe_int(kwargs.get('client_id'))
+        self.flt_exec_person_id = safe_int(kwargs.get('exec_person_id'))
+        self.flt_external_id = kwargs.get('external_id')
 
         self.set_base_query()
         self._filter_by_latest_location()
@@ -177,6 +191,9 @@ class HospitalizationSelector(BaseSelecter):
         self.history = history
         self.hosp_status = safe_int(kwargs.get('hosp_status'))
         self.flt_org_struct_id = safe_int(kwargs.get('org_struct_id'))
+        self.flt_client_id = safe_int(kwargs.get('client_id'))
+        self.flt_exec_person_id = safe_int(kwargs.get('exec_person_id'))
+        self.flt_external_id = kwargs.get('external_id')
 
         statuses = set(kwargs.get('statuses') or HospStateStatus.get_values())
 
@@ -277,7 +294,7 @@ class HospitalizationSelector(BaseSelecter):
 
         Person = self.model_provider.get('Person')
 
-        self.query = self.query.join(
+        self.query = self.query.outerjoin(
             Person, self.BaseEvent.execPerson_id == Person.id
         ).group_by(
             self.BaseEvent.execPerson_id

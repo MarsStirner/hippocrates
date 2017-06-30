@@ -2,16 +2,20 @@
 
 var CurrentHospsCtrl = function ($scope, $filter, HospitalizationsService, EventModalService,
         SelectAll, PrintingService, CurrentUser, TimeoutCallback) {
-    var curDate = moment();
+    $scope.curDate = moment();
+    $scope.tomorrowDate = $scope.curDate.clone().add(1, 'd');
     $scope.date_range = {
         current_day: true,
-        date: aux.format_date(curDate),
-        start: curDate.set({hour: 8, minute: 0, second: 0}).toDate(),
-        end: curDate.clone().add('d', 1).toDate()
+        date: aux.format_date($scope.curDate),
+        start: null,
+        end: null
     };
     $scope.filter = {
-        org_struct: CurrentUser.info.org_structure,
-        hosp_status: null
+        org_struct: null,
+        hosp_status: null,
+        client_id: null,
+        exec_person_id: null,
+        external_id: null
     };
     $scope.staticFilter = {
         client_full_name: '',
@@ -32,11 +36,39 @@ var CurrentHospsCtrl = function ($scope, $filter, HospitalizationsService, Event
     $scope.ps_elist = new PrintingService('event_list');
     $scope.selectedRecords = new SelectAll([]);
 
+    $scope.setDefaultPeriodStart = function () {
+        $scope.date_range.start = $scope.curDate.clone()
+            .set({hour: 8, minute: 0, second: 0}).toDate();
+    };
+    $scope.setDefaultPeriodEnd = function () {
+        $scope.date_range.end = $scope.tomorrowDate.clone()
+            .set({hour: 8, minute: 0, second: 0}).toDate();
+    };
+    $scope.setPeriodEndAfterStart = function () {
+         $scope.date_range.end = moment($scope.date_range.start).add(1, 'd')
+            .set({hour: 8, minute: 0, second: 0}).toDate();
+    };
+    $scope.setPeriodStartBeforeEnd = function () {
+         $scope.date_range.start = moment($scope.date_range.end).add(-1, 'd')
+            .set({hour: 8, minute: 0, second: 0}).toDate();
+    };
+    $scope.setDefaultFilter = function () {
+        var cur_os = CurrentUser.current_role_in('admNurse') ?
+            CurrentUser.info.org_structure : null;
+
+        $scope.filter = {
+            org_struct: cur_os,
+            hosp_status: null,
+            client_id: null,
+            exec_person_id: null,
+            external_id: null
+        };
+    };
     $scope.toggleHistoryView = function () {
         $scope.date_range.current_day = !$scope.date_range.current_day;
         if ($scope.date_range.current_day) {
-            $scope.date_range.start = curDate.clone().set({hour: 8, minute: 0, second: 0}).toDate();
-            $scope.date_range.end = curDate.clone().add('d', 1).toDate();
+            $scope.setDefaultPeriodStart();
+            $scope.setDefaultPeriodEnd();
         }
     };
     $scope.isCurDayView = function () {
@@ -95,7 +127,9 @@ var CurrentHospsCtrl = function ($scope, $filter, HospitalizationsService, Event
             start_dt: $scope.isHistoryView() ? $scope.date_range.start : undefined,
             end_dt: $scope.isHistoryView() ? $scope.date_range.end : undefined,
             org_struct_id: safe_traverse($scope.filter, ['org_struct', 'id']) || undefined,
-            hosp_status: safe_traverse($scope.filter, ['hosp_status', 'id']) || undefined,
+            client_id: safe_traverse($scope.filter, ['client', 'id']) || undefined,
+            exec_person_id: safe_traverse($scope.filter, ['exec_person', 'id']) || undefined,
+            external_id: $scope.filter.external_id || undefined,
             history: $scope.isHistoryView()
         };
         return HospitalizationsService.get_hosp_list(args)
@@ -112,6 +146,9 @@ var CurrentHospsCtrl = function ($scope, $filter, HospitalizationsService, Event
             end_dt: $scope.isHistoryView() ? $scope.date_range.end : undefined,
             org_struct_id: safe_traverse($scope.filter, ['org_struct', 'id']) || undefined,
             hosp_status: safe_traverse($scope.filter, ['hosp_status', 'id']) || undefined,
+            client_id: safe_traverse($scope.filter, ['client', 'id']) || undefined,
+            exec_person_id: safe_traverse($scope.filter, ['exec_person', 'id']) || undefined,
+            external_id: $scope.filter.external_id || undefined,
             history: $scope.isHistoryView()
         };
         return HospitalizationsService.get_hosps_stats(args)
@@ -233,8 +270,35 @@ var CurrentHospsCtrl = function ($scope, $filter, HospitalizationsService, Event
     $scope.$watch('date_range.end', watch_with_reload);
     $scope.$watch('filter.org_struct', watch_with_reload);
     $scope.$watch('filter.hosp_status', watch_with_reload);
+    $scope.$watch('filter.client', watch_with_reload);
+    $scope.$watch('filter.exec_person', watch_with_reload);
+    $scope.$watch('filter.external_id', watch_with_reload);
     $scope.$watch('staticFilter', watch_without_reload, true);
 
+    $scope.$watchCollection("[date_range.start, date_range.end]", function (n, o) {
+        var st = moment(n[0]),
+            end = moment(n[1]);
+
+        if (!st.isBefore(end)) {
+            if (!end.isValid()) {
+                if (st.isValid()) {
+                    $scope.setPeriodEndAfterStart();
+                } else {
+                    $scope.setDefaultPeriodEnd();
+                }
+            }
+            if (!st.isValid()) {
+                $scope.setPeriodStartBeforeEnd();
+            }
+            if (!st.isBefore(end)) {
+                $scope.setPeriodEndAfterStart();
+            }
+         }
+    });
+
+    $scope.setDefaultPeriodStart();
+    $scope.setDefaultPeriodEnd();
+    $scope.setDefaultFilter();
     tc.start();
 };
 
