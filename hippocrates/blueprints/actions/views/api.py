@@ -13,9 +13,10 @@ from ..app import module
 from hippocrates.blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
+from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, \
+    int_get_atl_flat, \
     get_patient_location, delete_action, ActionServiceException, fit_planned_end_date, int_get_atl_actions_flat, \
-    get_new_lab_action, int_get_apt_groups
+    get_new_direction_action, int_get_apt_groups
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
@@ -30,12 +31,9 @@ from nemesis.models.rls import rlsNomen, rlsTradeName
 from nemesis.models.enums import ActionStatus
 from nemesis.systemwide import db
 
-
 __author__ = 'viruzzz-kun'
 
-
 logger = logging.getLogger('simple')
-
 
 prescriptionFlatCodes = (
     u'prescription',
@@ -87,16 +85,15 @@ def api_action_new_get(action_type_id, event_id):
         return result
 
 
-@module.route('/api/action/new/lab/')
-@module.route('/api/action/new/lab/<int:action_type_id>/<int:event_id>')
+@module.route('/api/action/new/direction/')
+@module.route('/api/action/new/direction/<int:action_type_id>/<int:event_id>')
 @api_method
-def api_action_new_lab_get(action_type_id, event_id):
+def api_action_new_direction_get(action_type_id, event_id):
     with db.session.no_autoflush:
         service_data = parse_json(request.args.get('service_data', '')) or None
-        action = get_new_lab_action(action_type_id, event_id, service_data)
-
+        action = get_new_direction_action(action_type_id, event_id, service_data)
         vis = ActionVisualizer()
-        return vis.make_new_lab_action(action)
+        return vis.make_new_direction_action(action)
 
 
 @module.route('/api/action/')
@@ -161,7 +158,8 @@ def api_find_previous():
         from nemesis.models.client import Client
         client = Client.query.get(client_id)
         action_type = ActionType.query.get(at_id)
-        raise ApiException(404, u'У пациента "%s" других действий типа "%s" не найдено' % (client.nameText, action_type.name))
+        raise ApiException(404, u'У пациента "%s" других действий типа "%s" не найдено' % (
+            client.nameText, action_type.name))
     return ActionVisualizer().make_action_wo_sensitive_props(prev)
 
 
@@ -318,7 +316,7 @@ def api_action_post(action_id=None):
             raise ApiException(403, (
                 u'У пользовател нет прав на создание действия с ActionType id = %s '
                 u'для обращения с event id = %s') % (at_id, event_id)
-            )
+                               )
         if set_person_id:
             subscriptions.append(set_person_id)
         if person_id:
@@ -330,7 +328,8 @@ def api_action_post(action_id=None):
         try:
             properties_desc = data.pop('properties')
             service_data = action_desc.get('service')
-            action = create_new_action(at_id, event_id, properties=properties_desc, data=data, service_data=service_data)
+            action = create_new_action(at_id, event_id, properties=properties_desc, data=data,
+                                       service_data=service_data)
         except ActionServiceException, e:
             logger.error(unicode(e), exc_info=True)
             raise ApiException(500, u'Ошибка в настройках услуг и прайс-листов')
@@ -414,38 +413,74 @@ def api_apt_groups_get(action_type_id):
 @module.route('/api/create-lab-direction.json', methods=['POST'])
 @api_method
 def api_create_lab_direction():
-    ja = request.get_json()
-    event_id = ja['event_id']
-    event = Event.query.get(event_id)
-    org_structure = get_patient_location(event)
-    if not org_structure:
-        raise ApiException(422, u'Пациент не привязан ни к одному из отделений')
-
-    for j in ja['directions']:
-        action_type_id = j['type_id']
-        props_data = j['props_data']
-        data = {
-            'plannedEndDate': safe_datetime(j['planned_end_date']),
-            'isUrgent': safe_bool(j.get('urgent', False)),
-            'note': j.get('note')
-        }
-        service_data = j.get('service')
-        ttj_data = j.get('ttj')
-        try:
-            action = create_new_action(
-                action_type_id,
-                event_id,
-                properties=props_data,
-                data=data,
-                service_data=service_data,
-                ttj_data=ttj_data
-            )
-        except Exception, e:
-            logger.exception(e.message)
-            raise ApiException(500, e.message)
-        db.session.add(action)
-
+    DirectionCtrl.create_lab()
     db.session.commit()
+
+
+@module.route('/api/create-treatment-direction.json', methods=['POST'])
+@api_method
+def api_create_treatment_direction():
+    DirectionCtrl.create_treatment()
+    db.session.commit()
+
+
+@module.route('/api/create-diagnostic-direction.json', methods=['POST'])
+@api_method
+def api_create_diagnostic_direction():
+    DirectionCtrl.create_diagnostic()
+    db.session.commit()
+
+
+class DirectionCtrl(object):
+
+    @staticmethod
+    def get_event_id_and_data():
+        data = request.get_json()
+        event_id = data['event_id']
+        event = Event.query.get(event_id)
+        org_structure = get_patient_location(event)
+        if not org_structure:
+            raise ApiException(422, u'Пациент не привязан ни к одному из отделений')
+        return event_id, data
+
+    @staticmethod
+    def create_generic_direction(with_ttj=False):
+        event_id, data = DirectionCtrl.get_event_id_and_data()
+        for j in data['directions']:
+            action_type_id = j['type_id']
+            props_data = j['props_data']
+            data = {
+                'plannedEndDate': safe_datetime(j['planned_end_date']),
+                'isUrgent': safe_bool(j.get('urgent', False)),
+                'note': j.get('note')
+            }
+            service_data = j.get('service')
+            ttj_data = j.get('ttj')
+            try:
+                action = create_new_action(
+                    action_type_id,
+                    event_id,
+                    properties=props_data,
+                    data=data,
+                    service_data=service_data,
+                    ttj_data=ttj_data if with_ttj else None
+                )
+            except Exception, e:
+                logger.exception(e.message)
+                raise ApiException(500, e.message)
+            db.session.add(action)
+
+    @classmethod
+    def create_lab(cls):
+        DirectionCtrl.create_generic_direction(with_ttj=True)
+
+    @classmethod
+    def create_treatment(cls):
+        DirectionCtrl.create_generic_direction(with_ttj=False)
+
+    @classmethod
+    def create_diagnostic(cls):
+        DirectionCtrl.create_generic_direction(with_ttj=False)
 
 
 @module.route('/api/templates/<type_id>', methods=['GET'])
@@ -464,7 +499,7 @@ def api_action_template_list(type_id):
             db.or_(
                 ActionTemplate.speciality_id == speciality_id,
                 ActionTemplate.speciality_id.is_(None))
-            ),
+        ),
         db.or_(
             Action.actionType_id == type_id,
             ActionTemplate.action_id.is_(None)),
@@ -657,7 +692,7 @@ def api_search_actions():
         'items': [
             context.make_searched_action(action)
             for action in paginate.items
-        ]
+            ]
     }
 
 

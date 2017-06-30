@@ -548,16 +548,17 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
       </div>\
 </div>')
 }])
-.directive('triggerCollapse', [function () {
+.directive('triggerCollapse', ['$timeout', function ($timeout) {
         return {
             scope: {},
             link: function (scope, element, attrs) {
                  element.bind('click', function(e) {
                      if (e.originalEvent) {
                          if (e.toElement.tagName != 'BUTTON') {
-                             scope.$apply(function () {
-                                element.querySelectorAll('[data-widget="collapse"]').click();
-                            });
+                             $timeout(function() {
+                                    element.querySelectorAll('[data-widget="collapse"]').click();
+                             });
+
                          }
                      }
                  });
