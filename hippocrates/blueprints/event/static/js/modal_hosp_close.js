@@ -4,7 +4,7 @@ var HospCloseModalCtrl = function ($scope, RefBookService, WMEventService, Print
         wmevent) {
     $scope.event = wmevent;
 
-    $scope.ps = new PrintingService('event');
+    $scope.ps = new PrintingService('action');
     $scope.OrgStructure = RefBookService.get('OrgStructure');
 
     $scope.filter_rb_result = function (event_purpose) {

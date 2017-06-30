@@ -497,7 +497,7 @@ class EventCloseController(object):
         self.check_can_close(event, ignore_warnings=ignore_warnings)
 
     def _save_event_data(self, event, data):
-        # event.execDate = safe_datetime(data.get('exec_date'))
+        event.execDate = safe_datetime(data.get('exec_date'))
         result_id = safe_traverse(data, 'result', 'id')
         result = rbResult.query.get(result_id) if result_id else None
         event.result = result
