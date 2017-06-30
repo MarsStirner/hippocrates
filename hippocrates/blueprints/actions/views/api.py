@@ -15,7 +15,7 @@ from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location, delete_action, ActionServiceException, fit_planned_end_date, int_get_atl_actions_flat, \
-    get_new_lab_action, int_get_apt_groups
+    get_new_direction_action, int_get_apt_groups
 from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
@@ -88,16 +88,16 @@ def api_action_new_get(action_type_id, event_id):
         return result
 
 
-@module.route('/api/action/new/lab/')
-@module.route('/api/action/new/lab/<int:action_type_id>/<int:event_id>')
+@module.route('/api/action/new/direction/')
+@module.route('/api/action/new/direction/<int:action_type_id>/<int:event_id>')
 @api_method
-def api_action_new_lab_get(action_type_id, event_id):
+def api_action_new_direction_get(action_type_id, event_id):
     with db.session.no_autoflush:
         service_data = parse_json(request.args.get('service_data', '')) or None
-        action = get_new_lab_action(action_type_id, event_id, service_data)
+        action = get_new_direction_action(action_type_id, event_id, service_data)
 
         vis = ActionVisualizer()
-        return vis.make_new_lab_action(action)
+        return vis.make_new_direction_action(action)
 
 
 @module.route('/api/action/')
@@ -412,9 +412,9 @@ def api_apt_groups_get(action_type_id):
     return groups.get(action_type_id)
 
 
-@module.route('/api/create-lab-direction.json', methods=['POST'])
+@module.route('/api/0/create-directions', methods=['POST'])
 @api_method
-def api_create_lab_direction():
+def api_create_directions():
     ja = request.get_json()
     event_id = ja['event_id']
     event = Event.query.get(event_id)
